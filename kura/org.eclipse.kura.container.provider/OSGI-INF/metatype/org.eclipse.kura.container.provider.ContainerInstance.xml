@@ -74,7 +74,7 @@
             default="500" />
 
         <AD id="container.ports.internal" name="Internal Ports"
-            description="A comma-separated list of ports. Note, the number of internal ports must be equal to the number of external ports. A port internet protocol can also be specified with a colon and text after the port number. Example: 80, 443:udp, 8080:tcp." 
+            description="A comma-separated list of ports. If no protocol is specified tcp will be used. Note, the number of internal ports must be equal to the number of external ports. A port internet protocol can also be specified with a colon and text after the port number. Example: 80, 443:udp, 8080:tcp." 
             type="String" cardinality="1" required="false"
             default="80:tcp" />
 

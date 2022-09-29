@@ -15,6 +15,7 @@ package org.eclipse.kura.container.orchestration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -102,7 +103,11 @@ public class ContainerInstanceDescriptor {
      * @since 2.5
      */
     public List<Integer> getContainerPortsExternal() {
-        return ContainerPort.continerPortsListExternal(this.containerPorts);
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getExternalPort());
+        }
+        return portList;
     }
 
     /**
@@ -111,7 +116,11 @@ public class ContainerInstanceDescriptor {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return ContainerPort.continerPortsListInternal(this.containerPorts);
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getInternalPort());
+        }
+        return portList;
     }
 
     @Override

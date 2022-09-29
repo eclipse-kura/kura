@@ -94,7 +94,11 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsExternal() {
-        return ContainerPort.continerPortsListExternal(this.containerPorts);
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getExternalPort());
+        }
+        return portList;
     }
 
     /**
@@ -103,7 +107,11 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return ContainerPort.continerPortsListInternal(this.containerPorts);
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getInternalPort());
+        }
+        return portList;
     }
 
     /**

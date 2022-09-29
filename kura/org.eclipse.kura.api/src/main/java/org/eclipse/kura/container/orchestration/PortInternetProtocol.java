@@ -14,6 +14,8 @@ package org.eclipse.kura.container.orchestration;
 
 /**
  * 
+ * This is an enum containing all supported internet protocols that can be run at a port in a container.
+ * 
  * @author eurotech
  * @since 2.5
  *

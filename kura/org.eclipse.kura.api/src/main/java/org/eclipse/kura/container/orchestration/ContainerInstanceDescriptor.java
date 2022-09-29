@@ -97,10 +97,19 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * Returns the list of external ports that will be mapped to the given container
+     * Returns the list of {@link ContainerPort}.
      *
      * @return
      * @since 2.5
+     */
+    public List<ContainerPort> getContainerPorts() {
+        return this.containerPorts;
+    }
+
+    /**
+     * Returns the list of external ports that will be mapped to the given container
+     *
+     * @return
      */
     public List<Integer> getContainerPortsExternal() {
         List<Integer> portList = new LinkedList<>();

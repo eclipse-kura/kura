@@ -29,6 +29,25 @@ following steps:
     sudo apt upgrade
     ```
 
+    !!! tip
+        **Optional**: Since version 5.3.0 Kura also supports [Eclipse Temurin&trade;](https://adoptium.net/en-GB/) as an alternative JVM. To install it you need to perform these additional steps:
+
+        ```bash
+        sudo apt-get install -y wget apt-transport-https gnupg
+        ```
+        ```bash
+        sudo wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add -
+        ```
+        ```bash
+        sudo echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list
+        ```
+        ```bash
+        sudo apt-get update
+        ```
+        ```bash
+        sudo apt-get install temurin-8-jdk
+        ```
+
 4. Download the Kura package with:
 
     ```

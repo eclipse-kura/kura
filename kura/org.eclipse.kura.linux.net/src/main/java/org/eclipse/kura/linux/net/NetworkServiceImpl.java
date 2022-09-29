@@ -54,7 +54,6 @@ import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
-import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -755,7 +754,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             throws KuraException {
         List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<>();
         if (isUp) {
-            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
             NetInterfaceAddressImpl netInterfaceAddress = new NetInterfaceAddressImpl();
             try {
                 LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
@@ -770,8 +768,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
                         if (gatewayAddress.isPresent()) {
                             netInterfaceAddress.setGateway(gatewayAddress.get());
-                        } else {
-                            netInterfaceAddress.setGateway(conInfo.getGateway());
                         }
                         netInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
                         netInterfaceAddresses.add(netInterfaceAddress);
@@ -788,7 +784,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             throws KuraException {
         List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<>();
         if (isUp) {
-            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
             WifiInterfaceAddressImpl wifiInterfaceAddress = new WifiInterfaceAddressImpl();
             wifiInterfaceAddresses.add(wifiInterfaceAddress);
             try {
@@ -802,8 +797,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
                     if (gatewayAddress.isPresent()) {
                         wifiInterfaceAddress.setGateway(gatewayAddress.get());
-                    } else {
-                        wifiInterfaceAddress.setGateway(conInfo.getGateway());
                     }
                     wifiInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
 

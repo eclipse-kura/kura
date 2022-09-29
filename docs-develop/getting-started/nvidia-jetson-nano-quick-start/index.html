@@ -2714,36 +2714,50 @@ following steps:</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo apt upgrade
 </code></pre></div></p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><strong>Optional</strong>: Since version 5.3.0 Kura also supports <a href="https://adoptium.net/en-GB/">Eclipse Temurin&trade;</a> as an alternative JVM. To install it you need to perform these additional steps:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo apt-get install -y wget apt-transport-https gnupg
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public <span class="p">|</span> sudo apt-key add -
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo <span class="nb">echo</span> <span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk -F<span class="o">=</span> <span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span> /etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span> <span class="p">|</span> sudo tee /etc/apt/sources.list.d/adoptium.list
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo apt-get update
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo apt-get install temurin-8-jdk
+</code></pre></div></p>
+</div>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
 </code></pre></div>
 <p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.2.0).</p>
 </li>
 <li>
 <p>Install Kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt install ./kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install ./kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
 </code></pre></div>
 <p>All the required dependencies will be downloaded and installed.</p>
 </li>
 <li>
 <p>Reboot the NVIDIA Jetson Nano&trade; with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
 <p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>admin
 </code></pre></div>
 <p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>admin
 </code></pre></div>
 </li>
 </ol>

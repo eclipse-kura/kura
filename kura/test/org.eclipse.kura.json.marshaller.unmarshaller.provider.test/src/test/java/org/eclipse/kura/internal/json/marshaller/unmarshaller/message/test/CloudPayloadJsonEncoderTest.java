@@ -201,6 +201,28 @@ public class CloudPayloadJsonEncoderTest {
     }
 
     @Test
+    public void shouldEncodeEmptyPosition() {
+        KuraPayload payload = new KuraPayload();
+        KuraPosition position = new KuraPosition();
+
+        payload.setPosition(position);
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertNull(decodedPayload.getPosition().getAltitude());
+        assertNull(decodedPayload.getPosition().getHeading());
+        assertNull(decodedPayload.getPosition().getLatitude());
+        assertNull(decodedPayload.getPosition().getLongitude());
+        assertNull(decodedPayload.getPosition().getPrecision());
+        assertNull(decodedPayload.getPosition().getSpeed());
+    }
+
+    @Test
     public void testToJsonKuraPayloadOnlyTimestamp() {
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());

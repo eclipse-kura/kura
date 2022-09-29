@@ -147,7 +147,9 @@ public class CloudPayloadJsonEncoder {
     }
 
     private static void encodePositionDouble(final JsonObject object, final String metric, final Double value) {
-        encodeDoubleProperty(object, metric, value, "discarding non finite double metric: position.{}={}");
+        if (value != null) {
+            encodeDoubleProperty(object, metric, value, "discarding non finite double metric: position.{}={}");
+        }
     }
 
     private static void encodeTimestamp(KuraPayload kuraPayload, JsonObject json) {

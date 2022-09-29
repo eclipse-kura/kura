@@ -80,7 +80,7 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the list of mapped ports that will be mapped to the given container
+     * Returns a list of {@link ContainerPort} mapped to the container.
      *
      * @return
      */

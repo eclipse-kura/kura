@@ -97,7 +97,7 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * Returns the list of {@link ContainerPort}.
+     * Returns a list of {@link ContainerPort} mapped to the container.
      *
      * @return
      * @since 2.5

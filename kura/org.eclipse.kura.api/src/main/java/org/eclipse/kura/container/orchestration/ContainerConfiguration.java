@@ -83,6 +83,7 @@ public class ContainerConfiguration {
      * Returns a list of {@link ContainerPort} mapped to the container.
      *
      * @return
+     * @since 2.5
      */
     public List<ContainerPort> getContainerPorts() {
         return this.containerPorts;

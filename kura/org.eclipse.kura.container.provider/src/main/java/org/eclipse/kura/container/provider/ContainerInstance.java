@@ -58,15 +58,20 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     }
 
     public void updated(Map<String, Object> properties) {
-        ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-        if (newProps.isEnabled()) {
-            this.containerOrchestrationService.registerListener(this);
-        } else {
-            this.containerOrchestrationService.unregisterListener(this);
+        try {
+            ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
+            if (newProps.isEnabled()) {
+                this.containerOrchestrationService.registerListener(this);
+            } else {
+                this.containerOrchestrationService.unregisterListener(this);
+            }
+
+            updateState(s -> s.onConfigurationUpdated(newProps));
+        } catch (KuraException e) {
+            logger.error("Failed to create container.");
+            logger.error("Error: ", e);
         }
-
-        updateState(s -> s.onConfigurationUpdated(newProps));
     }
 
     public void deactivate() {

@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
@@ -94,7 +96,7 @@ public class ContainerInstanceOptions {
     private final Optional<Float> containerCpus;
     private final Optional<String> containerGpus;
 
-    public ContainerInstanceOptions(final Map<String, Object> properties) {
+    public ContainerInstanceOptions(final Map<String, Object> properties) throws KuraException {
         if (isNull(properties)) {
             throw new IllegalArgumentException("Properties cannot be null!");
         }
@@ -361,13 +363,19 @@ public class ContainerInstanceOptions {
                 .build();
     }
 
-    private List<Integer> parsePortString(String ports) {
+    private List<Integer> parsePortString(String ports) throws KuraException {
         List<Integer> tempArray = new ArrayList<>();
         if (!ports.isEmpty()) {
             String[] tempString = ports.trim().replace(" ", "").split(",");
 
             for (String element : tempString) {
-                tempArray.add(Integer.parseInt(element.trim().replace("-", "").split(":")[0]));
+                try {
+
+                    tempArray.add(Integer.parseInt(element.trim().replace("-", "").split(":")[0]));
+                } catch (Exception e) {
+                    throw new KuraException(KuraErrorCode.BAD_REQUEST,
+                            "Failed to parse port string. Please Check syntax.");
+                }
             }
         }
 

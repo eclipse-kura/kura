@@ -60,7 +60,7 @@
             cardinality="0"
             required="false"
             default=""
-            description="Comma-separated list of allosed ciphers. If not specifed, all Java VM ciphers will be allowed."/>
+            description="Comma-separated list of allowed ciphers. If not specifed, all Java VM ciphers will be allowed."/>
         
          <AD id="ssl.revocation.check.enabled"
             name="Revocation Check Enabled"

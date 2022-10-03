@@ -13,6 +13,8 @@
 
 package org.eclipse.kura.container.provider;
 
+import static java.util.Objects.isNull;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -59,6 +61,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     }
 
     public void updated(Map<String, Object> properties) {
+
+        if (isNull(properties)) {
+            throw new IllegalArgumentException("Properties cannot be null!");
+        }
 
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);

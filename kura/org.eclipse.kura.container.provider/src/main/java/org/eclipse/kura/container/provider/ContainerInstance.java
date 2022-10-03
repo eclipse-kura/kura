@@ -71,7 +71,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             updateState(s -> s.onConfigurationUpdated(newProps));
         } catch (Exception e) {
-            logger.error("Failed to create container instance. Please check syntax of container: {}.",
+            logger.error("Failed to create container instance. Please check configuration of container: {}.",
                     properties.get(ConfigurationService.KURA_SERVICE_PID));
             updateState(State::onDisabled);
         }

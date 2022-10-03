@@ -23,6 +23,7 @@ import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -59,14 +60,21 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public void updated(Map<String, Object> properties) {
 
-        ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
+        try {
+            ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-        if (newProps.isEnabled()) {
-            this.containerOrchestrationService.registerListener(this);
-        } else {
-            this.containerOrchestrationService.unregisterListener(this);
+            if (newProps.isEnabled()) {
+                this.containerOrchestrationService.registerListener(this);
+            } else {
+                this.containerOrchestrationService.unregisterListener(this);
+            }
+
+            updateState(s -> s.onConfigurationUpdated(newProps));
+        } catch (Exception e) {
+            logger.error("Failed to create container instance. Please check syntax of container: {}.",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID));
+            updateState(State::onDisabled);
         }
-        updateState(s -> s.onConfigurationUpdated(newProps));
 
     }
 

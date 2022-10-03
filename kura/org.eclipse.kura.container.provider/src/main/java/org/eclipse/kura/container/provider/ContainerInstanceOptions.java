@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -368,14 +367,7 @@ public class ContainerInstanceOptions {
             String[] tempString = ports.trim().replace(" ", "").split(",");
 
             for (String element : tempString) {
-                try {
-
-                    tempArray.add(Integer.parseInt(element.trim().replace("-", "").split(":")[0]));
-                } catch (Exception e) {
-                    Logger.getGlobal().info(
-                            "Container Orchestratior: Failed to parse port string. Please Check syntax.  Killing Container.");
-                    this.enabled = false;
-                }
+                tempArray.add(Integer.parseInt(element.trim().replace("-", "").split(":")[0]));
             }
         }
 

@@ -64,7 +64,12 @@ Usage of tags (-t argument) is not necessary for the build, but is required if y
 
 It is also possible to build directly from the root of this repo, by specifying the Dockerfile position with the -f command; this however would cause an increase of approx. 200MB in the final image size, due to the copy of the context directory in a previous layer during the boot process, and it will not be possible to remove it, due to Docker's UnionFS limitations.
 
-You can re-build the image from a specific Git commit. For this you need to pass in the build argument `KURA_COMMIT`.
+You can re-build the image from a specific Git commit or using a different repository or a different branch. For this you need to pass in the build argument `KURA_COMMIT`, `GIT_REPO`, `GIT_BRANCH`.
+
+For example:
+```shell
+docker build --build-arg GIT_REPO=https://github.com/custom-repo/kura.git --build-arg GIT_BRANCH=custom-branch --build-arg KURA_COMMIT=custom-commit-number -t kura_alpine .
+```
  
 ## Running in OpenShift
 

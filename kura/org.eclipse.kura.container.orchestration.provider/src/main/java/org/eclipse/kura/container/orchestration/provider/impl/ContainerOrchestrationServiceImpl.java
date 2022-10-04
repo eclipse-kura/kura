@@ -56,6 +56,7 @@ import com.github.dockerjava.api.model.DeviceRequest;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.InternetProtocol;
 import com.github.dockerjava.api.model.LogConfig;
 import com.github.dockerjava.api.model.LogConfig.LoggingType;
 import com.github.dockerjava.api.model.Ports;
@@ -458,7 +459,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             configuration = containerVolumeMangamentHandler(containerDescription, configuration);
 
             configuration = containerDevicesHandler(containerDescription, configuration);
-            
+
             if (containerDescription.getRestartOnFailure()) {
                 configuration = configuration.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
             }
@@ -607,13 +608,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             List<ExposedPort> exposedPortsList = new LinkedList<>();
             Ports portbindings = new Ports();
 
-            for (int index = 0; index < containerDescription.getContainerPortsInternal().size(); index++) {
+            for (org.eclipse.kura.container.orchestration.ContainerPort port : containerDescription
+                    .getContainerPorts()) {
 
-                ExposedPort tempExposedPort = new ExposedPort(
-                        containerDescription.getContainerPortsInternal().get(index));
+                InternetProtocol ipPro;
+
+                switch (port.getInternetProtocol()) {
+                case UDP:
+                    ipPro = InternetProtocol.UDP;
+                    break;
+                case SCTP:
+                    ipPro = InternetProtocol.SCTP;
+                    break;
+                default:
+                    ipPro = InternetProtocol.TCP;
+                    break;
+                }
+
+                ExposedPort tempExposedPort = new ExposedPort(port.getInternalPort(), ipPro);
                 exposedPortsList.add(tempExposedPort);
-                portbindings.bind(tempExposedPort,
-                        Binding.bindPort(containerDescription.getContainerPortsExternal().get(index)));
+                portbindings.bind(tempExposedPort, Binding.bindPort(port.getExternalPort()));
             }
 
             commandBuilder.withPortBindings(portbindings);

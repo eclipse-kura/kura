@@ -14,6 +14,8 @@
 package org.eclipse.kura.container.orchestration;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,8 +35,7 @@ public class ContainerInstanceDescriptor {
     private String containerImage;
     private String containerImageTag;
     private String containerID;
-    private List<Integer> containerPortsExternal;
-    private List<Integer> containerPortsInternal;
+    private List<ContainerPort> containerPorts = new ArrayList<>();
     private ContainerState containerState = ContainerState.STOPPING;
     private boolean isFrameworkManaged;
 
@@ -96,12 +97,26 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
+     * Returns a list of {@link ContainerPort} mapped to the container.
+     *
+     * @return
+     * @since 2.5
+     */
+    public List<ContainerPort> getContainerPorts() {
+        return this.containerPorts;
+    }
+
+    /**
      * Returns the list of external ports that will be mapped to the given container
      *
      * @return
      */
     public List<Integer> getContainerPortsExternal() {
-        return this.containerPortsExternal;
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getExternalPort());
+        }
+        return portList;
     }
 
     /**
@@ -110,13 +125,17 @@ public class ContainerInstanceDescriptor {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return this.containerPortsInternal;
+        List<Integer> portList = new LinkedList<>();
+        for (ContainerPort port : this.containerPorts) {
+            portList.add(port.getInternalPort());
+        }
+        return portList;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.containerID, this.containerImage, this.containerImageTag, this.containerName,
-                this.containerPortsExternal, this.containerPortsInternal, this.containerState, this.isFrameworkManaged);
+                this.containerPorts, this.containerState, this.isFrameworkManaged);
     }
 
     @Override
@@ -132,8 +151,7 @@ public class ContainerInstanceDescriptor {
                 && Objects.equals(this.containerImage, other.containerImage)
                 && Objects.equals(this.containerImageTag, other.containerImageTag)
                 && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
-                && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
+                && Objects.equals(this.containerPorts, other.containerPorts)
                 && this.containerState == other.containerState && this.isFrameworkManaged == other.isFrameworkManaged;
     }
 
@@ -154,6 +172,7 @@ public class ContainerInstanceDescriptor {
         private String containerId = "";
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
+        private List<ContainerPort> containerPorts = new ArrayList<>();
         private ContainerState containerState = ContainerState.STOPPING;
         private boolean isFrameworkManaged;
 
@@ -182,11 +201,35 @@ public class ContainerInstanceDescriptor {
             return this;
         }
 
+        /**
+         * 
+         * Set a list of container ports, to express which ports to expose and what protocol to use.
+         * 
+         * @since 2.5
+         */
+        public ContainerInstanceDescriptorBuilder setContainerPorts(List<ContainerPort> containerPorts) {
+            this.containerPorts = containerPorts;
+            return this;
+        }
+
+        /**
+         * Accepts a list<Integer> of ports to be exposed. Assumes all ports are TCP. To use other Internet protocols
+         * please see the {@link setContainerPorts} method. Ensure that the number of elements in this list is the same
+         * as the number of elements set with {@link setInternalPorts}.
+         * 
+         */
         public ContainerInstanceDescriptorBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
+        /**
+         * Accepts a list<Integer> of ports to be open internally within the container. Assumes all ports are TCP. To
+         * use other Internet protocols please see the {@link setContainerPorts} method.
+         * Ensure that the number of elements in this list is the same as the
+         * number of elements set with {@link setExternalPorts}.
+         * 
+         */
         public ContainerInstanceDescriptorBuilder setInternalPorts(List<Integer> containerPortsInternal) {
             this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;
@@ -200,12 +243,20 @@ public class ContainerInstanceDescriptor {
         public ContainerInstanceDescriptor build() {
             ContainerInstanceDescriptor containerDescriptor = new ContainerInstanceDescriptor();
 
+            if (this.containerPorts.isEmpty()) {
+                Iterator<Integer> extPort = this.containerPortsExternal.iterator();
+                Iterator<Integer> intPort = this.containerPortsInternal.iterator();
+
+                while (extPort.hasNext() && intPort.hasNext()) {
+                    this.containerPorts.add(new ContainerPort(intPort.next(), extPort.next()));
+                }
+            }
+
             containerDescriptor.containerName = this.containerName;
             containerDescriptor.containerImage = this.containerImage;
             containerDescriptor.containerImageTag = this.containerImageTag;
             containerDescriptor.containerID = this.containerId;
-            containerDescriptor.containerPortsExternal = this.containerPortsExternal;
-            containerDescriptor.containerPortsInternal = this.containerPortsInternal;
+            containerDescriptor.containerPorts = this.containerPorts;
             containerDescriptor.containerState = this.containerState;
             containerDescriptor.isFrameworkManaged = this.isFrameworkManaged;
 

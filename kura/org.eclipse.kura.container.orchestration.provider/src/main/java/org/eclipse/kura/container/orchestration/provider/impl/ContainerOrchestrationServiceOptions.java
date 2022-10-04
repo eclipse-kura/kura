@@ -24,7 +24,7 @@ public class ContainerOrchestrationServiceOptions {
     private static final Property<Boolean> IS_ENABLED = new Property<>("enabled", false);
     private static final Property<String> DOCKER_HOST_URL = new Property<>("container.engine.host",
             "unix:///var/run/docker.sock");
-    
+
     private final boolean enabled;
     private final String hostUrl;
 
@@ -36,7 +36,7 @@ public class ContainerOrchestrationServiceOptions {
 
         this.enabled = IS_ENABLED.get(properties);
         this.hostUrl = DOCKER_HOST_URL.get(properties);
-        
+
     }
 
     public boolean isEnabled() {

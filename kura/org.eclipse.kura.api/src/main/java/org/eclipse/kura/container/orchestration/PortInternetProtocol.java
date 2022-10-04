@@ -13,14 +13,15 @@
 package org.eclipse.kura.container.orchestration;
 
 /**
- * Enum representing the possible container states as tracked by the orchestrator
+ * 
+ * This is an enum containing all supported internet protocols that can be run at a port in a container.
+ * 
+ * @since 2.5
  *
- * @since 2.3
  */
-public enum ContainerState {
-    STARTING,
-    INSTALLED,
-    ACTIVE,
-    FAILED,
-    STOPPING;
+public enum PortInternetProtocol {
+    TCP,
+    UDP,
+    SCTP
+
 }

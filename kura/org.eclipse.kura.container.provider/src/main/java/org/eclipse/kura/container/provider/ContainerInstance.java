@@ -13,6 +13,8 @@
 
 package org.eclipse.kura.container.provider;
 
+import static java.util.Objects.isNull;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -58,15 +61,27 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     }
 
     public void updated(Map<String, Object> properties) {
-        ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-        if (newProps.isEnabled()) {
-            this.containerOrchestrationService.registerListener(this);
-        } else {
-            this.containerOrchestrationService.unregisterListener(this);
+        if (isNull(properties)) {
+            throw new IllegalArgumentException("Properties cannot be null!");
         }
 
-        updateState(s -> s.onConfigurationUpdated(newProps));
+        try {
+            ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
+
+            if (newProps.isEnabled()) {
+                this.containerOrchestrationService.registerListener(this);
+            } else {
+                this.containerOrchestrationService.unregisterListener(this);
+            }
+
+            updateState(s -> s.onConfigurationUpdated(newProps));
+        } catch (Exception e) {
+            logger.error("Failed to create container instance. Please check configuration of container: {}.",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID));
+            updateState(State::onDisabled);
+        }
+
     }
 
     public void deactivate() {
@@ -298,7 +313,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } catch (Exception e) {
                 logger.error("Error stopping microservice {}", this.options.getContainerName(), e);
             }
-            
+
             try {
                 ContainerInstance.this.containerOrchestrationService.deleteContainer(this.containerId);
             } catch (Exception e) {

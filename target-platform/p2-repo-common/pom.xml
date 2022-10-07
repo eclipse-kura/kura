@@ -611,6 +611,11 @@
                                     <artifactId>HikariCP</artifactId>
                                     <version>${hikaricp.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.quartz-scheduler</groupId>
+                                    <artifactId>quartz</artifactId>
+                                    <version>${quartz.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -722,6 +727,7 @@
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
                                 <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/HikariCP_${hikaricp.version}.jar"/>
+                                <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

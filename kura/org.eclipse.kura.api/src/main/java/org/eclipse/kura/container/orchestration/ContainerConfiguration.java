@@ -90,7 +90,11 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the list of external ports that will be mapped to the given container
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
+     * 
+     *             Returns the list of external ports that will be mapped to the
+     *             given container.
      *
      * @return
      */
@@ -103,7 +107,11 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the list of internal ports that will be mapped to the given container
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
+     * 
+     *             Returns the list of internal ports that will be mapped to the
+     *             given container
      *
      * @return
      */
@@ -237,7 +245,8 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns a List<String> of container entry points. An empty list can be returned if no entrypoints are specified.
+     * Returns a List<String> of container entry points. An empty list can be
+     * returned if no entrypoints are specified.
      *
      * @return
      * @since 2.4
@@ -360,7 +369,8 @@ public class ContainerConfiguration {
         }
 
         /**
-         * Set a list of {@link ContainerPort}, to express which ports to expose and what protocol to use.
+         * Set a list of {@link ContainerPort}, to express which ports to expose and
+         * what protocol to use.
          * 
          * @since 2.5
          */
@@ -370,9 +380,14 @@ public class ContainerConfiguration {
         }
 
         /**
-         * Accepts a list<Integer> of ports to be exposed. Assumes all ports are TCP. To use other Internet protocols
-         * please see the {@link setContainerPorts} method. Ensure that the number of elements in this list is the same
-         * as the number of elements set with {@link setInternalPorts}.
+         * @deprecated please use {@link setContainerPorts} as it allows for network
+         *             protocol to be specified in a port mapping.
+         * 
+         *             Accepts a list<Integer> of ports to be exposed. Assumes all ports
+         *             are TCP. To use other Internet protocols
+         *             please see the {@link setContainerPorts} method. Ensure that the
+         *             number of elements in this list is the same
+         *             as the number of elements set with {@link setInternalPorts}.
          * 
          */
         public ContainerConfigurationBuilder setExternalPorts(List<Integer> containerPortsExternal) {
@@ -381,10 +396,16 @@ public class ContainerConfiguration {
         }
 
         /**
-         * Accepts a list<Integer> of ports to be open internally within the container. Assumes all ports are TCP. To
-         * use other Internet protocols please see the {@link setContainerPorts} method.
-         * Ensure that the number of elements in this list is the same as the
-         * number of elements set with {@link setExternalPorts}.
+         * @deprecated please use {@link setContainerPorts} as it allows for network
+         *             protocol to be specified in a port mapping.
+         * 
+         *             Accepts a list<Integer> of ports to be open internally within the
+         *             container. Assumes all ports are TCP. To
+         *             use other Internet protocols please see the
+         *             {@link setContainerPorts} method.
+         *             Ensure that the number of elements in this list is the same as
+         *             the
+         *             number of elements set with {@link setExternalPorts}.
          * 
          */
         public ContainerConfigurationBuilder setInternalPorts(List<Integer> containerPortsInternal) {

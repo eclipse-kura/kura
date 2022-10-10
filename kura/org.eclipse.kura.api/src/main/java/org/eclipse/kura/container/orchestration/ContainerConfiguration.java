@@ -90,14 +90,15 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @deprecated please use {@link getContainerPorts} as it includes the network
-     *             protocol with the port mapping.
-     * 
-     *             Returns the list of external ports that will be mapped to the
-     *             given container.
+     * Returns the list of external ports that will be mapped to the
+     * given container.
      *
      * @return
+     *
+     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
      */
+    @Deprecated
     public List<Integer> getContainerPortsExternal() {
         List<Integer> portList = new LinkedList<>();
         for (ContainerPort port : this.containerPorts) {
@@ -107,14 +108,15 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @deprecated please use {@link getContainerPorts} as it includes the network
-     *             protocol with the port mapping.
-     * 
-     *             Returns the list of internal ports that will be mapped to the
-     *             given container
+     * Returns the list of internal ports that will be mapped to the
+     * given container
      *
      * @return
+     *
+     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
      */
+    @Deprecated
     public List<Integer> getContainerPortsInternal() {
         List<Integer> portList = new LinkedList<>();
         for (ContainerPort port : this.containerPorts) {
@@ -257,7 +259,7 @@ public class ContainerConfiguration {
 
     /**
      * Returns boolean which determines if container will restart on failure
-     * 
+     *
      * @return
      * @since 2.4
      */
@@ -317,7 +319,7 @@ public class ContainerConfiguration {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ContainerConfiguration other = (ContainerConfiguration) obj;
@@ -371,7 +373,7 @@ public class ContainerConfiguration {
         /**
          * Set a list of {@link ContainerPort}, to express which ports to expose and
          * what protocol to use.
-         * 
+         *
          * @since 2.5
          */
         public ContainerConfigurationBuilder setContainerPorts(List<ContainerPort> containerPorts) {
@@ -380,34 +382,34 @@ public class ContainerConfiguration {
         }
 
         /**
-         * @deprecated please use {@link setContainerPorts} as it allows for network
+         * Accepts a list<Integer> of ports to be exposed. Assumes all ports
+         * are TCP. To use other Internet protocols
+         * please see the {@link setContainerPorts} method. Ensure that the
+         * number of elements in this list is the same
+         * as the number of elements set with {@link setInternalPorts}.
+         *
+         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for network
          *             protocol to be specified in a port mapping.
-         * 
-         *             Accepts a list<Integer> of ports to be exposed. Assumes all ports
-         *             are TCP. To use other Internet protocols
-         *             please see the {@link setContainerPorts} method. Ensure that the
-         *             number of elements in this list is the same
-         *             as the number of elements set with {@link setInternalPorts}.
-         * 
          */
+        @Deprecated
         public ContainerConfigurationBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
         /**
-         * @deprecated please use {@link setContainerPorts} as it allows for network
+         * Accepts a list<Integer> of ports to be open internally within the
+         * container. Assumes all ports are TCP. To
+         * use other Internet protocols please see the
+         * {@link setContainerPorts} method.
+         * Ensure that the number of elements in this list is the same as
+         * the number of elements set with {@link setExternalPorts}.
+         *
+         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for network
          *             protocol to be specified in a port mapping.
-         * 
-         *             Accepts a list<Integer> of ports to be open internally within the
-         *             container. Assumes all ports are TCP. To
-         *             use other Internet protocols please see the
-         *             {@link setContainerPorts} method.
-         *             Ensure that the number of elements in this list is the same as
-         *             the
-         *             number of elements set with {@link setExternalPorts}.
-         * 
+         *
          */
+        @Deprecated
         public ContainerConfigurationBuilder setInternalPorts(List<Integer> containerPortsInternal) {
             this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;
@@ -497,7 +499,7 @@ public class ContainerConfiguration {
 
         /**
          * Set if container will restart on failure
-         * 
+         *
          * @since 2.4
          */
         public ContainerConfigurationBuilder setRestartOnFailure(boolean containerRestartOnFailure) {

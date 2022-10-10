@@ -110,14 +110,15 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * @deprecated please use {@link getContainerPorts} as it includes the network
-     *             protocol with the port mapping.
-     * 
-     *             Returns the list of external ports that will be mapped to the
-     *             given container
+     * Returns the list of external ports that will be mapped to the
+     * given container
      *
      * @return
+     *
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
      */
+    @Deprecated
     public List<Integer> getContainerPortsExternal() {
         List<Integer> portList = new LinkedList<>();
         for (ContainerPort port : this.containerPorts) {
@@ -127,14 +128,16 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * @deprecated please use {@link getContainerPorts} as it includes the network
-     *             protocol with the port mapping.
-     * 
-     *             Returns the list of internal ports that will be mapped to the
-     *             given container
+     * Returns the list of internal ports that will be mapped to the
+     * given container
      *
      * @return
+     *
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
+     *
      */
+    @Deprecated
     public List<Integer> getContainerPortsInternal() {
         List<Integer> portList = new LinkedList<>();
         for (ContainerPort port : this.containerPorts) {
@@ -214,10 +217,10 @@ public class ContainerInstanceDescriptor {
         }
 
         /**
-         * 
+         *
          * Set a list of container ports, to express which ports to expose and what
          * protocol to use.
-         * 
+         *
          * @since 2.5
          */
         public ContainerInstanceDescriptorBuilder setContainerPorts(List<ContainerPort> containerPorts) {
@@ -226,36 +229,36 @@ public class ContainerInstanceDescriptor {
         }
 
         /**
+         * Accepts a list<Integer> of ports to be exposed. Assumes all ports
+         * are TCP. To use other Internet protocols
+         * please see the {@link setContainerPorts} method. Ensure that the
+         * number of elements in this list is the same
+         * as the number of elements set with {@link setInternalPorts}.
+         *
          * @deprecated please use {@link setContainerPorts} as it allows for network
          *             protocol to be specified in a port mapping.
-         * 
-         * 
-         *             Accepts a list<Integer> of ports to be exposed. Assumes all ports
-         *             are TCP. To use other Internet protocols
-         *             please see the {@link setContainerPorts} method. Ensure that the
-         *             number of elements in this list is the same
-         *             as the number of elements set with {@link setInternalPorts}.
-         * 
+         *
          */
+        @Deprecated
         public ContainerInstanceDescriptorBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
         /**
+         * Accepts a list<Integer> of ports to be open internally within the
+         * container.
+         * Assumes all ports are TCP. To
+         * use other Internet protocols please see the
+         * {@link setContainerPorts} method.
+         * Ensure that the number of elements in this list is the same as
+         * the number of elements set with {@link setExternalPorts}.
+         *
          * @deprecated please use {@link setContainerPorts} as it allows for network
          *             protocol to be specified in a port mapping.
-         * 
-         *             Accepts a list<Integer> of ports to be open internally within the
-         *             container.
-         *             Assumes all ports are TCP. To
-         *             use other Internet protocols please see the
-         *             {@link setContainerPorts} method.
-         *             Ensure that the number of elements in this list is the same as
-         *             the
-         *             number of elements set with {@link setExternalPorts}.
-         * 
+         *
          */
+        @Deprecated
         public ContainerInstanceDescriptorBuilder setInternalPorts(List<Integer> containerPortsInternal) {
             this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;

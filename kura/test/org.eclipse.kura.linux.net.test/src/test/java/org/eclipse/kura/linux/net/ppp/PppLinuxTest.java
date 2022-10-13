@@ -60,7 +60,7 @@ public class PppLinuxTest {
     public PppLinuxTest() {
         Mockito.when(commandExecutorService.getPids(Mockito.any())).thenAnswer(i -> {
 
-            final String[] requestedCommand = i.getArgumentAt(0, String[].class);
+            final String[] requestedCommand = i.getArgument(0, String[].class);
 
             final String requestedCommandConcat = concat(requestedCommand, " ");
 
@@ -71,8 +71,8 @@ public class PppLinuxTest {
         });
 
         Mockito.when(commandExecutorService.stop(Mockito.any(), Mockito.any())).then(i -> {
-            final Pid pid = i.getArgumentAt(0, Pid.class);
-            final Signal signal = i.getArgumentAt(1, Signal.class);
+            final Pid pid = i.getArgument(0, Pid.class);
+            final Signal signal = i.getArgument(1, Signal.class);
 
             final Optional<Process> targetProcess = process.filter(p -> p.pid.getPid() == pid.getPid());
 
@@ -85,7 +85,7 @@ public class PppLinuxTest {
         });
 
         Mockito.when(commandExecutorService.isRunning(Mockito.any(Pid.class))).thenAnswer(i -> {
-            final Pid pid = i.getArgumentAt(0, Pid.class);
+            final Pid pid = i.getArgument(0, Pid.class);
 
             return process.filter(p -> p.pid.getPid() == pid.getPid() && !p.stopped).isPresent();
         });

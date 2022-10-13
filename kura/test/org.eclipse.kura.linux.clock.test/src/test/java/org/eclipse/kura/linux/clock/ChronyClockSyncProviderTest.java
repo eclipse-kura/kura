@@ -14,7 +14,7 @@ package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,12 +54,12 @@ public class ChronyClockSyncProviderTest {
         successFullStatus.setOutputStream(statusOutputStream);
 
         CommandExecutorService commandExecutorMock = mock(CommandExecutorService.class);
-        when(commandExecutorMock.execute(anyObject())).thenReturn(successFullStatus);
+        when(commandExecutorMock.execute(any())).thenReturn(successFullStatus);
         when(commandExecutorMock.execute(new Command(new String[] { "systemctl", "status", "chrony" })))
                 .thenReturn(notRunningProgramStatus);
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
-        when(cryptoServiceMock.sha256Hash(anyObject())).thenReturn("");
+        when(cryptoServiceMock.sha256Hash(any())).thenReturn("");
 
         ChronyClockSyncProvider ntsClockSyncProvider = new ChronyClockSyncProvider(commandExecutorMock,
                 cryptoServiceMock);

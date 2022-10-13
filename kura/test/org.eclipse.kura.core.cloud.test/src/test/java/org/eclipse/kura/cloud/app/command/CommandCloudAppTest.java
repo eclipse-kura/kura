@@ -21,8 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -597,7 +597,7 @@ public class CommandCloudAppTest {
         status.setTimedout(false);
 
         UnprivilegedExecutorService unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);
-        when(unprivilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(unprivilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         PrivilegedExecutorService privilegedExecutorServiceMock = mock(PrivilegedExecutorService.class);
 
@@ -629,8 +629,8 @@ public class CommandCloudAppTest {
         String out = cca.execute(cmd, pass);
 
         assertTrue(out.trim().endsWith("OK"));
-        verify(privilegedExecutorServiceMock, times(0)).execute(anyObject());
-        verify(unprivilegedExecutorServiceMock, times(1)).execute(anyObject());
+        verify(privilegedExecutorServiceMock, times(0)).execute(any());
+        verify(unprivilegedExecutorServiceMock, times(1)).execute(any());
     }
 
     @Test
@@ -655,10 +655,10 @@ public class CommandCloudAppTest {
         status.setTimedout(false);
 
         UnprivilegedExecutorService unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);
-        when(unprivilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(unprivilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         PrivilegedExecutorService privilegedExecutorServiceMock = mock(PrivilegedExecutorService.class);
-        when(privilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(privilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         CommandCloudApp cca = new CommandCloudApp();
         cca.setUnprivilegedExecutorService(unprivilegedExecutorServiceMock);
@@ -689,8 +689,8 @@ public class CommandCloudAppTest {
         String out = cca.execute(cmd, pass);
 
         assertTrue(out.trim().endsWith("OK"));
-        verify(unprivilegedExecutorServiceMock, times(0)).execute(anyObject());
-        verify(privilegedExecutorServiceMock, times(1)).execute(anyObject());
+        verify(unprivilegedExecutorServiceMock, times(0)).execute(any());
+        verify(privilegedExecutorServiceMock, times(1)).execute(any());
     }
 
     @Test
@@ -715,7 +715,7 @@ public class CommandCloudAppTest {
         status.setTimedout(false);
 
         UnprivilegedExecutorService unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);
-        when(unprivilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(unprivilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         PrivilegedExecutorService privilegedExecutorServiceMock = mock(PrivilegedExecutorService.class);
 
@@ -747,7 +747,7 @@ public class CommandCloudAppTest {
         String out = cca.execute(cmd, pass);
 
         assertEquals("NOK", out.trim());
-        verify(privilegedExecutorServiceMock, times(0)).execute(anyObject());
+        verify(privilegedExecutorServiceMock, times(0)).execute(any());
     }
 
     @Test(expected = KuraException.class)
@@ -764,7 +764,7 @@ public class CommandCloudAppTest {
         status.setTimedout(false);
 
         UnprivilegedExecutorService unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);
-        when(unprivilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(unprivilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         PrivilegedExecutorService privilegedExecutorServiceMock = mock(PrivilegedExecutorService.class);
 
@@ -789,7 +789,7 @@ public class CommandCloudAppTest {
         payload.addMetric("command.command", "");
 
         cca.execute(payload);
-        verify(privilegedExecutorServiceMock, times(0)).execute(anyObject());
+        verify(privilegedExecutorServiceMock, times(0)).execute(any());
     }
 
     @Test(expected = KuraException.class)
@@ -837,7 +837,7 @@ public class CommandCloudAppTest {
         status.setTimedout(false);
 
         UnprivilegedExecutorService unprivilegedExecutorServiceMock = mock(UnprivilegedExecutorService.class);
-        when(unprivilegedExecutorServiceMock.execute(anyObject())).thenReturn(status);
+        when(unprivilegedExecutorServiceMock.execute(any())).thenReturn(status);
 
         PrivilegedExecutorService privilegedExecutorServiceMock = mock(PrivilegedExecutorService.class);
 
@@ -874,6 +874,6 @@ public class CommandCloudAppTest {
         KuraPayload response = cca.execute(payload);
 
         assertNotNull(response);
-        verify(privilegedExecutorServiceMock, times(0)).execute(anyObject());
+        verify(privilegedExecutorServiceMock, times(0)).execute(any());
     }
 }

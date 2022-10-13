@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -112,7 +112,7 @@ public class FloodingProtectionConfiguratorTest {
         this.properties.put("flooding.protection.enabled", true);
         this.floodingProtectionConfigurator.updated(this.properties);
         
-        verify(this.mockFirewallService, times(2)).addFloodingProtectionRules(anyObject());
+        verify(this.mockFirewallService, times(2)).addFloodingProtectionRules(any());
         
         this.floodingProtectionConfigurator.deactivate(mockContext);
         

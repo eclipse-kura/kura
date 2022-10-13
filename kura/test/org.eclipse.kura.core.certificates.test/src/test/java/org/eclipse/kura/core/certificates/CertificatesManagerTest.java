@@ -15,8 +15,8 @@ package org.eclipse.kura.core.certificates;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,7 +87,7 @@ public class CertificatesManagerTest {
         kuraCertificate = certificatesManager.getCertificateEntry(defaultKeystore + ":" + alias);
         assertEquals(defaultKeystore, kuraCertificate.getKeystoreId());
         assertEquals(alias, kuraCertificate.getAlias());
-        verify(ksMock).setEntry(eq(alias), anyObject());
+        verify(ksMock).setEntry(eq(alias), any());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class CertificatesManagerTest {
         KuraCertificateEntry kuraCertificate = certificatesManager.getCertificateEntry(httpsKeystore + ":" + alias);
         assertEquals(httpsKeystore, kuraCertificate.getKeystoreId());
         assertEquals(alias, kuraCertificate.getAlias());
-        verify(ksMock).setEntry(eq(alias), anyObject());
+        verify(ksMock).setEntry(eq(alias), any());
     }
 
     @Test
@@ -252,7 +252,7 @@ public class CertificatesManagerTest {
         kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
-        verify(ksMock).setEntry(eq("certTest"), anyObject());
+        verify(ksMock).setEntry(eq("certTest"), any());
     }
 
     @Test
@@ -271,7 +271,7 @@ public class CertificatesManagerTest {
         kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
-        verify(ksMock).setEntry(eq("certTest"), anyObject());
+        verify(ksMock).setEntry(eq("certTest"), any());
     }
 
     @Test

@@ -22,6 +22,28 @@
 
     <packaging>pom</packaging>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <check.plugins.exist.remote>false</check.plugins.exist.remote>
+        <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
+        <skip.libsocket-can>true</skip.libsocket-can>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <!-- plugins versions common to Java 8 and Java 17 builds -->
+        <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
+        <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <maven-clean-plugin.version>2.4.1</maven-clean-plugin.version>
+        <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
+        <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
+        <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>
+        <maven-site-plugin.version>3.3</maven-site-plugin.version>
+        <maven-surefire-plugin.version>2.7.2</maven-surefire-plugin.version>
+        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
+    </properties>
+
     <modules>
         <module>org.apache.activemq.artemis</module>
         <module>org.eclipse.kura.camel.sun.misc</module>
@@ -34,7 +56,7 @@
         <module>jdk.dio-parent</module>
         <module>com.gwt.user</module>
         <module>moquette-broker</module>
-        <module>org.apache.log4j2-api-config</module>
+        <module>log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
         <module>p2-repo-common</module>
         <module>p2-repo-equinox_3.16.0</module>
@@ -79,15 +101,30 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <check.plugins.exist.remote>false</check.plugins.exist.remote>
-        <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
-        <skip.libsocket-can>true</skip.libsocket-can>
-    </properties>
     
     <profiles>
+        <profile>
+            <id>java8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <maven-bundle-plugin.version>3.3.0</maven-bundle-plugin.version>
+                <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+                <tycho-p2-extras-plugin.version>1.7.0</tycho-p2-extras-plugin.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>java17</id>
+            <activation>
+                <jdk>17</jdk>
+            </activation>
+            <properties>
+                <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
+                <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+                <tycho-p2-extras-plugin.version>3.0.0</tycho-p2-extras-plugin.version>
+            </properties>
+        </profile>
         <profile>
             <id>can</id>
             <activation>
@@ -123,29 +160,29 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
+                <version>${maven-site-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
+                <version>${maven-checkstyle-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>jcl-over-slf4j</artifactId>
-                        <version>1.7.5</version>
+                        <version>1.7.36</version>
                     </dependency>
                     <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-jdk14</artifactId>
-                        <version>1.7.5</version>
+                        <version>1.7.36</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -168,7 +205,7 @@
             <plugin>
                 <groupId>org.honton.chas</groupId>
                 <artifactId>exists-maven-plugin</artifactId>
-                <version>0.0.3</version>
+                <version>${exists-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -188,12 +225,12 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>${maven-bundle-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
+                    <version>${lifecycle-mapping.version}</version>
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>

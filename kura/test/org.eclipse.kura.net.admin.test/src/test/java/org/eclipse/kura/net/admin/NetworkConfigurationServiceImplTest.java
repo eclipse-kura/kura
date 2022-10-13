@@ -16,8 +16,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -87,9 +88,9 @@ public class NetworkConfigurationServiceImplTest {
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentContextMock.getBundleContext()).thenReturn(bundleCtxMock);
 
-        when(bundleCtxMock.registerService(eq(EventHandler.class.getName()), eq(svc), anyObject()))
+        when(bundleCtxMock.registerService(eq(EventHandler.class.getName()), eq(svc), any()))
                 .thenAnswer(invocation -> {
-                    Dictionary<String, String[]> dict = invocation.getArgumentAt(2, Dictionary.class);
+                    Dictionary<String, String[]> dict = invocation.getArgument(2, Dictionary.class);
 
                     assertEquals(1, dict.size());
 
@@ -139,7 +140,7 @@ public class NetworkConfigurationServiceImplTest {
         AtomicBoolean posted = new AtomicBoolean(false);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", event.getTopic());
 
             posted.set(true);
@@ -149,7 +150,7 @@ public class NetworkConfigurationServiceImplTest {
             }
 
             return null;
-        }).when(eventAdminMock).postEvent(anyObject());
+        }).when(eventAdminMock).postEvent(any());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", "");
@@ -185,7 +186,7 @@ public class NetworkConfigurationServiceImplTest {
 
         svc.updated(properties);
 
-        verify(eventAdminMock, never()).postEvent(anyObject());
+        verify(eventAdminMock, never()).postEvent(any());
     }
 
     @Test
@@ -210,7 +211,7 @@ public class NetworkConfigurationServiceImplTest {
         svc.setEventAdmin(eventAdminMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", event.getTopic());
             assertEquals(12, event.getPropertyNames().length);
@@ -220,7 +221,7 @@ public class NetworkConfigurationServiceImplTest {
             invocations[1] = true;
 
             return null;
-        }).when(eventAdminMock).postEvent(anyObject());
+        }).when(eventAdminMock).postEvent(any());
 
         List<NetworkConfigurationVisitor> visitors = new ArrayList<>();
         NetworkConfigurationVisitor visitor = new NetworkConfigurationVisitor() {
@@ -256,7 +257,7 @@ public class NetworkConfigurationServiceImplTest {
 
         svc.updated(properties);
 
-        verify(eventAdminMock, times(1)).postEvent(anyObject());
+        verify(eventAdminMock, times(1)).postEvent(any());
 
         assertTrue(invocations[0]);
         assertTrue(invocations[1]);

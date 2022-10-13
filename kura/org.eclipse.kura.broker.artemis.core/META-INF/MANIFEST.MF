@@ -6,7 +6,7 @@ Bundle-Version: 1.4.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
 Import-Package: org.apache.activemq.artemis.core.config;version="2.6.0",
  org.apache.activemq.artemis.core.config.impl;version="2.6.0",
  org.apache.activemq.artemis.core.deployers;version="2.6.0",
@@ -18,5 +18,5 @@ Import-Package: org.apache.activemq.artemis.core.config;version="2.6.0",
  org.eclipse.kura.configuration;version="[1.1,2)",
  org.osgi.framework;version="[1.8,2)",
  org.osgi.util.tracker;version="[1.5,2)",
- org.slf4j;version="[1.7,2)"
+ org.slf4j;version="[1.7.36,1.8.0)"
 Export-Package: org.eclipse.kura.broker.artemis.core;version="1.0.0";uses:="org.apache.activemq.artemis.core.config.impl"

@@ -16,9 +16,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,7 +45,7 @@ public class DefaultCamelCloudServiceTest {
         CamelContext camelContextMock = mock(CamelContext.class);
         ExecutorServiceManager esmMock = mock(ExecutorServiceManager.class);
         ExecutorService esMock = mock(ExecutorService.class);
-        when(esmMock.newThreadPool(anyObject(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
+        when(esmMock.newThreadPool(any(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
         when(camelContextMock.getExecutorServiceManager()).thenReturn(esmMock);
 
         DefaultCamelCloudService dccs = new DefaultCamelCloudService(camelContextMock);
@@ -80,7 +80,7 @@ public class DefaultCamelCloudServiceTest {
         CamelContext camelContextMock = mock(CamelContext.class);
         ExecutorServiceManager esmMock = mock(ExecutorServiceManager.class);
         ExecutorService esMock = mock(ExecutorService.class);
-        when(esmMock.newThreadPool(anyObject(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
+        when(esmMock.newThreadPool(any(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
         when(camelContextMock.getExecutorServiceManager()).thenReturn(esmMock);
 
         DefaultCamelCloudService dccs = new DefaultCamelCloudService(camelContextMock);
@@ -119,7 +119,7 @@ public class DefaultCamelCloudServiceTest {
         CamelContext camelContextMock = mock(CamelContext.class);
         ExecutorServiceManager esmMock = mock(ExecutorServiceManager.class);
         ExecutorService esMock = mock(ExecutorService.class);
-        when(esmMock.newThreadPool(anyObject(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
+        when(esmMock.newThreadPool(any(), anyString(), anyInt(), anyInt())).thenReturn(esMock);
         doThrow(new RuntimeException("test")).when(esmMock).shutdown(esMock);
         when(camelContextMock.getExecutorServiceManager()).thenReturn(esmMock);
 

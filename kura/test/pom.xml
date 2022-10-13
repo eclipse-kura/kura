@@ -26,26 +26,56 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.10.19</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>can</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <!-- <module>org.eclipse.kura.protocol.can.test</module> -->
+            </modules>
+        </profile>
+
+        <profile>
+            <id>test-debug</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.eclipse.tycho</groupId>
+                            <artifactId>tycho-surefire-plugin</artifactId>
+                            <configuration>
+                                <debugPort>8000</debugPort>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.3</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -71,7 +101,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>${maven-surefire-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>default-test</id>
@@ -94,24 +124,10 @@
                         <failIfNoTests>false</failIfNoTests>
                         <providerHint>junit4</providerHint>
                         <useUnlimitedThreads>false</useUnlimitedThreads>
-                        <argLine>${tycho.testArgLine}
-                        -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dds.showtrace=true
-                        -Djava.io.tmpdir=/tmp
-                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
-                        -Dosgi.clean=true
-                        -Dkura.home=${project.basedir}/target/kura
-                        -Dkura.plugins=${project.basedir}/target/kura/plugins
-                        -Dkura.packages=${project.basedir}/target/kura/data/packages
-                        -Dkura.data=${project.basedir}/target/kura
-                        -Dkura.tmp=${project.basedir}/target/kura/tmp
-                        -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
-                        -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                        -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
-                        -Dorg.eclipse.kura.mode=emulator
-                        -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
-                        -Ddpa.configuration=/tmp/kura/dpa.properties
-                          -Dosgi.console=5002</argLine>
+                        <argLine>
+                            ${tycho.testArgLine}
+                            ${tycho.surefire.testenv.args}
+                        </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
@@ -345,7 +361,7 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.apache.log4j2-api-config</id>
+                                <id>log4j2-api-config</id>
                                 <level>4</level>
                                 <autoStart>false</autoStart>
                             </bundle>
@@ -474,11 +490,13 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            <!-- TODO: Nashorn removed since Java 15, need an alternative
                             <bundle>
                                 <id>org.eclipse.kura.wire.script.filter.provider</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            -->
                             <bundle>
                                 <id>org.eclipse.kura.protocol.can</id>
                                 <level>4</level>
@@ -598,7 +616,7 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.apache.log4j2-api-config</id>
+                                    <id>log4j2-api-config</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>
@@ -741,11 +759,13 @@
                                     <id>org.eclipse.kura.deployment.agent</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                <!-- TODO: Nashorn removed since Java 15, need an alternative
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.wire.script.filter.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                -->
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.jetty.customizer</id>
@@ -832,7 +852,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -845,7 +865,11 @@
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>
         <module>org.eclipse.kura.asset.helper.provider.test</module>
+        <!-- TODO: failing because using a ScriptEngine (maybe Nashorn which is not present on Java 17)
+        Camel is dependeant on javax.script, which is just API. Default Java 17 installs might not have any EngineImpl
+
         <module>org.eclipse.kura.camel.test</module>
+        -->
         <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
@@ -894,7 +918,9 @@
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
         <module>org.eclipse.kura.wire.db.component.provider.test</module>
+        <!-- TODO: Nashorn removed since Java 15, need an alternative
         <module>org.eclipse.kura.wire.script.filter.provider.test</module>
+        -->
         <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
@@ -917,32 +943,4 @@
         -->
         <!-- note: examples have their own test modules -->
     </modules>
-    <profiles>
-        <profile>
-            <id>can</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <!-- <module>org.eclipse.kura.protocol.can.test</module> -->
-            </modules>
-        </profile>
-        <profile>
-            <id>test-debug</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.eclipse.tycho</groupId>
-                            <artifactId>tycho-surefire-plugin</artifactId>
-                            <configuration>
-                                <debugPort>8000</debugPort>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
-
 </project>

@@ -15,7 +15,7 @@ package org.eclipse.kura.wire.script.filter.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,7 +52,7 @@ public class ScriptFilterTest {
         when(whsMock.newWireSupport(svc, null)).thenReturn(wsMock);
 
         doAnswer(invocation -> {
-            List<WireRecord> records = invocation.getArgumentAt(0, List.class);
+            List<WireRecord> records = invocation.getArgument(0, List.class);
 
             assertEquals(2, records.size());
 
@@ -60,7 +60,7 @@ public class ScriptFilterTest {
             assertEquals(5, records.get(1).getProperties().get("five").getValue());
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         Map<String, Object> properties = new HashMap<>();
         String script = "logger.info('testing');\n logger.info(input.emitterPid);\n" // some logging
@@ -99,7 +99,7 @@ public class ScriptFilterTest {
 
         svc.onWireReceive(wireEnvelope);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
 
         svc.deactivate();
     }

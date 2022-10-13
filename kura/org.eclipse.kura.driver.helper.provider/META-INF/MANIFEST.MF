@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.driver.helper.provider
 Bundle-Version: 1.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
 Import-Package: org.eclipse.kura.asset;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.1,2.0)",
  org.eclipse.kura.driver;version="[1.0,1.1)",
@@ -15,6 +15,6 @@ Import-Package: org.eclipse.kura.asset;version="[1.0,2.0)",
  org.osgi.framework;version="1.8",
  org.osgi.service.cm;version="1.5.0",
  org.osgi.service.component;version="1.2.2",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="[1.7.36,1.8.0)"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

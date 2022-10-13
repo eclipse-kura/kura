@@ -193,14 +193,14 @@ public class ScheduleStrategyTest {
             Mockito.when(executor.schedule((Runnable) Mockito.any(), Mockito.anyLong(), Mockito.any()))
                     .thenAnswer(i -> {
 
-                        this.task.complete(i.getArgumentAt(0, Runnable.class));
-                        this.lastDelay.complete(i.getArgumentAt(1, Long.class));
+                        this.task.complete(i.getArgument(0, Runnable.class));
+                        this.lastDelay.complete(i.getArgument(1, Long.class));
 
                         return Mockito.mock(ScheduledFuture.class);
                     });
 
             Mockito.doAnswer(i -> {
-                i.getArgumentAt(0, Runnable.class).run();
+                i.getArgument(0, Runnable.class).run();
 
                 return Mockito.mock(ScheduledFuture.class);
             }).when(executor).execute(Mockito.any());

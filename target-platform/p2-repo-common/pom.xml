@@ -32,18 +32,18 @@
                     <value>false</value>
                 </property>
             </activation>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.kura</groupId>
-                        <artifactId>libsocket-can-osgi</artifactId>
-                        <version>1.1.0-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>libsocket-can-osgi</artifactId>
+                    <version>1.1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.9</version>
+                        <version>${maven-dependency-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-can-bundle-for-publishing</id>
@@ -68,6 +68,7 @@
                     <plugin>
                         <!--  rename bundles with version appended -->
                         <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>setup-can</id>
@@ -92,7 +93,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>${properties-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -115,7 +116,7 @@
 				this directory -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.9</version>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>copy-bundles-for-publishing</id>
@@ -242,8 +243,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.apache.log4j2-api-config</artifactId>
-                                    <version>${org.apache.log4j2-api-config.version}</version>
+                                    <artifactId>log4j2-api-config</artifactId>
+                                    <version>${log4j2-api-config.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.logging.log4j</groupId>
@@ -626,6 +627,7 @@
             <plugin>
                 <!--  rename bundles with version appended -->
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>setup</id>
@@ -657,7 +659,7 @@
                                 <move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
                                 <move file="target/source/plugins/jcl-over-slf4j.jar" tofile="target/source/plugins/jcl-over-slf4j_${jcl.over.slf4j.version}.jar"/>
                                 <move file="target/source/plugins/log4j-api.jar" tofile="target/source/plugins/log4j-api_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.log4j2-api-config.jar" tofile="target/source/plugins/org.apache.log4j2-api-config_${org.apache.log4j2-api-config.version}.jar"/>
+                                <move file="target/source/plugins/log4j2-api-config.jar" tofile="target/source/plugins/org.apache.log4j2-api-config_${log4j2-api-config.version}.jar"/>
                                 <move file="target/source/plugins/log4j-core.jar" tofile="target/source/plugins/log4j-core_${log4j.version}.jar"/>
                                 <move file="target/source/plugins/log4j-slf4j-impl.jar" tofile="target/source/plugins/log4j-slf4j-impl_${log4j.version}.jar"/>
                                 <move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
@@ -755,7 +757,7 @@
             <plugin>
                 <groupId>org.eclipse.tycho.extras</groupId>
                 <artifactId>tycho-p2-extras-plugin</artifactId>
-                <version>0.26.0</version>
+                <version>${tycho-p2-extras-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>prepare-package</phase>
@@ -771,7 +773,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

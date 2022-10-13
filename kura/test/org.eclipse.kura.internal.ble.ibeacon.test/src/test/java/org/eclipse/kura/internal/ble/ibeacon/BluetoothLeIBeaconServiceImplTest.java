@@ -14,8 +14,8 @@ package org.eclipse.kura.internal.ble.ibeacon;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,10 +38,10 @@ public class BluetoothLeIBeaconServiceImplTest {
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
 
         BluetoothLeBeaconAdvertiser advMock = mock(BluetoothLeBeaconAdvertiser.class);
-        when(mgrMock.newBeaconAdvertiser(eq(adapter), anyObject())).thenReturn(advMock);
+        when(mgrMock.newBeaconAdvertiser(eq(adapter), any())).thenReturn(advMock);
 
         BluetoothLeBeaconScanner scMock = mock(BluetoothLeBeaconScanner.class);
-        when(mgrMock.newBeaconScanner(eq(adapter), anyObject())).thenReturn(scMock);
+        when(mgrMock.newBeaconScanner(eq(adapter), any())).thenReturn(scMock);
 
         BluetoothLeIBeaconServiceImpl svc = new BluetoothLeIBeaconServiceImpl();
 
@@ -59,7 +59,7 @@ public class BluetoothLeIBeaconServiceImplTest {
         BluetoothLeBeaconAdvertiser<BluetoothLeIBeacon> advertiser = svc.newBeaconAdvertiser(adapter);
 
         assertEquals(advMock, advertiser);
-        verify(mgrMock, times(1)).newBeaconAdvertiser(eq(adapter), anyObject());
+        verify(mgrMock, times(1)).newBeaconAdvertiser(eq(adapter), any());
 
         svc.deleteBeaconAdvertiser(advertiser);
 
@@ -68,7 +68,7 @@ public class BluetoothLeIBeaconServiceImplTest {
         BluetoothLeBeaconScanner<BluetoothLeIBeacon> scanner = svc.newBeaconScanner(adapter);
 
         assertEquals(scMock, scanner);
-        verify(mgrMock, times(1)).newBeaconScanner(eq(adapter), anyObject());
+        verify(mgrMock, times(1)).newBeaconScanner(eq(adapter), any());
 
         svc.deleteBeaconScanner(scanner);
 

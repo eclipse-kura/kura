@@ -16,7 +16,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -273,7 +274,7 @@ public class ModemMonitorServiceImplTest {
         svc.setExecutorService(esMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/modem/READY", event.getTopic());
             assertEquals("imei", event.getProperty("IMEI"));
@@ -283,13 +284,13 @@ public class ModemMonitorServiceImplTest {
 
             return null;
         }).doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/modem/gps/DISABLED", event.getTopic());
 
             return null;
         }).doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/modem/gps/ENABLED", event.getTopic());
             assertEquals("gps0", event.getProperty("port"));
@@ -300,7 +301,7 @@ public class ModemMonitorServiceImplTest {
 
             return null;
         }).doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/modem/gps/ENABLED", event.getTopic());
             assertEquals("gps0", event.getProperty("port"));
@@ -311,12 +312,12 @@ public class ModemMonitorServiceImplTest {
 
             return null;
         }).doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC", event.getTopic());
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         // modem mock
         setModemMock(modemDevice);
@@ -328,7 +329,7 @@ public class ModemMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "monitor");
 
-        verify(eaMock, times(5)).postEvent(anyObject());
+        verify(eaMock, times(5)).postEvent(any());
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "serviceActivated"));
 
@@ -363,9 +364,9 @@ public class ModemMonitorServiceImplTest {
 
         final AtomicReference<List<NetConfig>> config = new AtomicReference<>();
         doAnswer(invocation -> {
-            config.set(invocation.getArgumentAt(0, List.class));
+            config.set(invocation.getArgument(0, List.class));
             return ((Void) null);
-        }).when(modem).setConfiguration(anyObject());
+        }).when(modem).setConfiguration(any());
         when(modem.getConfiguration()).thenAnswer(invocation -> config.get());
 
         CommURI commuri = CommURI.parseString(
@@ -719,7 +720,7 @@ public class ModemMonitorServiceImplTest {
 
         AtomicInteger visited = new AtomicInteger(0);
         doAnswer(invocation -> {
-            NetworkStatusChangeEvent event = invocation.getArgumentAt(0, NetworkStatusChangeEvent.class);
+            NetworkStatusChangeEvent event = invocation.getArgument(0, NetworkStatusChangeEvent.class);
 
             final String interfaceName = event.getInterfaceState().getName();
             assertTrue(ppp0.equals(interfaceName) || ppp2.equals(interfaceName) || ppp3.equals(interfaceName));
@@ -733,7 +734,7 @@ public class ModemMonitorServiceImplTest {
             visited.getAndIncrement();
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         Map<String, InterfaceState> oldStatuses = new HashMap<>();
         oldStatuses.put(ppp1, new InterfaceState(ppp1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
@@ -747,7 +748,7 @@ public class ModemMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "checkStatusChange", oldStatuses, newStatuses);
 
-        verify(eaMock, times(3)).postEvent(anyObject());
+        verify(eaMock, times(3)).postEvent(any());
 
         assertEquals(3, visited.get());
     }
@@ -780,7 +781,7 @@ public class ModemMonitorServiceImplTest {
 
         // test disabling modem
         when(modemMock.isGpsEnabled()).thenReturn(true);
-        when(modemMock.isPortReachable(anyObject())).thenReturn(true);
+        when(modemMock.isPortReachable(any())).thenReturn(true);
 
         // add old configuration with modem and IP4 config
         List<NetConfig> modemOldConfigs = new ArrayList<>();

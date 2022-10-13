@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.wire.h2db.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -415,8 +415,8 @@ public class H2DbWireRecordStoreTest {
             this.dbConnection = DriverManager.getConnection("jdbc:h2:mem:kuradb", "SA", "");
             this.dbServiceMock = mock(H2DbService.class);
 
-            when(this.dbServiceMock.withConnection(anyObject())).thenAnswer(invocation -> {
-                return invocation.getArgumentAt(0, H2DbService.ConnectionCallable.class).call(this.dbConnection);
+            when(this.dbServiceMock.withConnection(any())).thenAnswer(invocation -> {
+                return invocation.getArgument(0, H2DbService.ConnectionCallable.class).call(this.dbConnection);
             });
 
             when(this.dbServiceMock.getConnection()).thenReturn(this.dbConnection);

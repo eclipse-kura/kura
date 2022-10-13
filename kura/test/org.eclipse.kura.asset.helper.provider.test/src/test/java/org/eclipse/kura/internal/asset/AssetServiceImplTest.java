@@ -16,7 +16,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -156,7 +156,7 @@ public class AssetServiceImplTest {
 
     private AssetServiceImpl getService(ServiceReference<Asset>[] references, Asset asset) {
         BundleContext ctxMock = mock(BundleContext.class);
-        when(ctxMock.getService(anyObject())).thenReturn(asset);
+        when(ctxMock.getService(any())).thenReturn(asset);
 
         return new AssetServiceImpl() {
 

@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.web2;singleton:=true
 Bundle-Version: 2.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
@@ -93,7 +93,7 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
  org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.6.4",
+ org.slf4j;version="[1.7.36,1.8.0)",
  org.w3c.dom,
  org.xml.sax
 Require-Bundle: com.gwt.user;bundle-version="[1.1.0,2.0.0)"

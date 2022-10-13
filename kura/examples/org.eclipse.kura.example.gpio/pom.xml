@@ -33,15 +33,15 @@
 	</properties>
 
 	<build>
-        	<plugins>
-            		<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-                		<artifactId>maven-eclipse-plugin</artifactId>
-                		<version>2.9</version>
-                		<configuration>
-                    			<skip>false</skip>
-                		</configuration>
-            		</plugin>
-                </plugins>
+        <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>${maven-eclipse-plugin.version}</version>
+                    <configuration>
+                            <skip>false</skip>
+                    </configuration>
+                </plugin>
+        </plugins>
 	</build>
 </project>

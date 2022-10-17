@@ -347,7 +347,7 @@ public class DbDataStore implements DataStore {
                     pstmt.setNull(9, Types.BLOB);
                 } else {
                     pstmt.setNull(8, Types.VARBINARY);
-                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload));    // largePayload
+                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);    // largePayload
                 }
 
                 pstmt.setInt(10, priority);                                         // priority

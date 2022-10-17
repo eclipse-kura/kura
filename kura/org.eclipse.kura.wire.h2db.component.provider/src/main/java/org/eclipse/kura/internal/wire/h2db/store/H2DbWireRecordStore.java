@@ -36,8 +36,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.db.store.DbDataTypeMapper;
-import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
 import org.eclipse.kura.internal.wire.db.store.DbDataTypeMapper.JdbcType;
+import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
@@ -517,7 +517,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
             case BYTE_ARRAY:
                 byte[] byteArrayValue = ((ByteArrayValue) value).getValue();
                 InputStream is = new ByteArrayInputStream(byteArrayValue);
-                stmt.setBlob(i, is);
+                stmt.setBlob(i, is, byteArrayValue.length);
                 break;
             case STRING:
                 stmt.setString(i, ((StringValue) value).getValue());

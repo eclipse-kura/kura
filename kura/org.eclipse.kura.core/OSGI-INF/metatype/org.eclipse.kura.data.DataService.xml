@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -163,7 +163,31 @@
             default="1"
             min="1"
             description="The token bucket burst size."/>
-                                    
+            
+        <AD id="connection.schedule.enabled" 
+            name="Enable Connection Schedule" 
+            type="Boolean" 
+            cardinality="0" 
+            required="true" 
+            default="false"
+            description="Enables or disables the connection scheduling feature." />
+            
+        <AD id="connection.schedule.expression" 
+            name="Connection Schedule CRON Expression" 
+            type="String" 
+            cardinality="0" 
+            required="true" 
+            default="0 0 0 ? * * *"
+            description="A CRON expression that specifies the instants when the gateway should perform a connection attempt. This parameter is only used if Enable Connection Schedule is set to true. The default expression schedules a connection every day at midnight." />
+            
+         <AD id="connection.schedule.inactivity.interval.seconds" 
+            name="Connection Schedule Disconnect Inactivity Interval Seconds" 
+            type="Long" 
+            cardinality="0" 
+            required="true" 
+            default="60"
+            description="Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if Enable Connection Schedule is set to true." />
+
     </OCD>
     <Designate pid="org.eclipse.kura.data.DataService" factoryPid="org.eclipse.kura.data.DataService">
         <Object ocdref="org.eclipse.kura.data.DataService"/>

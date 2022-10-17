@@ -52,7 +52,7 @@ The **DataService** offers methods and configuration options to manage the conne
 
 - **rate.limit.burst.size**: The token bucket burst size.
 
-## Connection Monitors
+## Connection Monitors
 
 The DataService offers methods and configuration options to monitor the connection to the remote server and, eventually, cause a system reboot to recover from transient network problems.
 
@@ -90,9 +90,29 @@ In the image below, the parameters that need to be tuned, in the Data Service, t
 
 - **rate.limit.burst.size**: The token bucket burst size.
 
+- **connection.schedule.enabled**: Enables or disables the [connection schedule](#connection-schedule) feature.
+
+- **connection.schedule.expression**: The Cron Expression for the [connection schedule](#connection-schedule) feature.
+
+- **connection.schedule.inactivity.interval.seconds**: The inactivity interval for the [connection schedule](#connection-schedule) feature.
+
 The default setup limits the data flow to **1 message per second with a bucket size of 1 token**.
 
 !!! warning
     This feature needs to be properly tuned by the System Administrator in order to prevent delays in the remote cloud platform due to messages stacked at the edge.
 
     **If not sure of the number of messages that your gateways will try to push to the remote platform, we suggest to disable this feature.**
+
+## Connection schedule
+
+Starting from Kura 5.3.0, the Data Service supports a configurable time based connection schedule. If this functionality is enabled, the Data Service will connect at specific time instants represented by a configurable Cron expression, keep the connection open until it becomes idle and then disconnect until the next instant that matches the expression.
+
+More in detail, the connection logic is as follows:
+
+1. The DataService parses the confgiured Cron expression and scedules a connection attempt at the next instant that matches the expression. When the connection instant is reached, the logic continues from step 2.
+
+2. The Data Service will start the auto connect logic. One or more connection attempts will be performed until the connection is established honoring the _connect.retry-interval_ parameter.
+
+3. The Data Service starts a timer that ticks after _connection.schedule.inactivity.interval.seconds_ seconds. When the timer ticks the connection will be closed, and the logic resumed from step 1. The timer is reset delaying the disconnection when a message is published or confirmed (for QoS >= 1). The connection will not be closed if there are messages with QoS >= 1 that have not been confirmed yet. If an unexpected connection drop occurs in this phase, the logic will resume from step 2.
+
+The Data Service will attempt to detect large time shifts in system clock, if a time shift is detected, the logic will switch to step 1, rescheduling the next connection attempt.

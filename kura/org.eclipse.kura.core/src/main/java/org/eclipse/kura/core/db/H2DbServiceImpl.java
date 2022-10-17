@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
+
+    private static final int MAX_LENGTH_INPLACE_LOB_VALUE = 2000000000;
 
     private static Logger logger = LoggerFactory.getLogger(H2DbServiceImpl.class);
 
@@ -366,6 +368,11 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     private void setParameters(H2DbServiceOptions configuration) throws SQLException {
         if (!configuration.isFileBasedLogLevelSpecified()) {
             executeInternal("SET TRACE_LEVEL_FILE 0");
+        }
+
+        // Set the maximum length for which a lob is created inline, regardless of the connection string.
+        if (configuration.isInMemory()) {
+            executeInternal("SET MAX_LENGTH_INPLACE_LOB " + MAX_LENGTH_INPLACE_LOB_VALUE);
         }
 
         this.connectionPool.setMaxConnections(configuration.getConnectionPoolMaxSize());

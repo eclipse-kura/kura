@@ -189,7 +189,7 @@ public class CommonDbServiceProvider {
             case BYTE_ARRAY:
                 byte[] byteArrayValue = ((ByteArrayValue) value).getValue();
                 InputStream is = new ByteArrayInputStream(byteArrayValue);
-                stmt.setBlob(i, is);
+                stmt.setBlob(i, is, byteArrayValue.length);
                 break;
             case STRING:
                 stmt.setString(i, ((StringValue) value).getValue());

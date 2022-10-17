@@ -172,6 +172,7 @@
         <setEntry value="org.usb4java@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="usb4java-javax@default:default"/>
+        <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="org.eclipse.kura.demo.heater@default:default"/>

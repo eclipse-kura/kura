@@ -601,6 +601,11 @@
                                     <artifactId>gpsd4java</artifactId>
                                     <version>${com.eurotech.gpsd4java.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.bundles</groupId>
+                                    <artifactId>org.apache.servicemix.bundles.c3p0</artifactId>
+                                    <version>${org.apache.servicemix.bundles.c3p0.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -710,6 +715,7 @@
                                 <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
+                                <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

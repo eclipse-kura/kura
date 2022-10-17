@@ -981,6 +981,8 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.osgi-resource-locator_${osgi-resource-locator.version}.jar@2:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar@3" />
         </propertyfile>
     </target>
 

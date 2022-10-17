@@ -187,6 +187,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.usb4java/libusb4java/1.2.0, MIT, approved, #3088
 * maven/mavencentral/org.usb4java/usb4java-javax/1.2.0, MIT, approved, #3090
 * maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
+* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 
 ### Additional Dependencies
 

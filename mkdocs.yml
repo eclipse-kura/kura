@@ -139,8 +139,8 @@ nav:
     - References:
       - MQTT Namespace: references/mqtt-namespace.md
       - Javadoc: references/javadoc.md
-    - Examples:
-      - Anomaly Detection: references/AD-EdgeAI.ipynb
+    - Tutorials:
+      - Anomaly Detection: tutorials/AD-EdgeAI.ipynb
 
 theme:
   name: material

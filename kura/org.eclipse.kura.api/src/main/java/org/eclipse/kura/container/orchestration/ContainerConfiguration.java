@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
@@ -100,11 +101,7 @@ public class ContainerConfiguration {
      */
     @Deprecated
     public List<Integer> getContainerPortsExternal() {
-        List<Integer> portList = new LinkedList<>();
-        for (ContainerPort port : this.containerPorts) {
-            portList.add(port.getExternalPort());
-        }
-        return portList;
+        return this.containerPorts.stream().map(ContainerPort::getExternalPort).collect(Collectors.toList());
     }
 
     /**
@@ -118,11 +115,7 @@ public class ContainerConfiguration {
      */
     @Deprecated
     public List<Integer> getContainerPortsInternal() {
-        List<Integer> portList = new LinkedList<>();
-        for (ContainerPort port : this.containerPorts) {
-            portList.add(port.getInternalPort());
-        }
-        return portList;
+        return this.containerPorts.stream().map(ContainerPort::getInternalPort).collect(Collectors.toList());
     }
 
     /**

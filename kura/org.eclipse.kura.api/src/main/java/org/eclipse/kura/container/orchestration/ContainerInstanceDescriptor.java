@@ -15,14 +15,15 @@ package org.eclipse.kura.container.orchestration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a instantiated container. Used to track created containers.
+ * Object which represents a instantiated container. Used to track created
+ * containers.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
@@ -52,9 +53,11 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * The method will provide information if the container is or not managed by the framework
+     * The method will provide information if the container is or not managed by the
+     * framework
      *
-     * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
+     * @return <code>true</code> if the framework manages the container.
+     *         <code>false</code> otherwise
      */
     public boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
@@ -107,29 +110,32 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * Returns the list of external ports that will be mapped to the given container
+     * Returns the list of external ports that will be mapped to the
+     * given container
      *
      * @return
+     *
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
      */
+    @Deprecated
     public List<Integer> getContainerPortsExternal() {
-        List<Integer> portList = new LinkedList<>();
-        for (ContainerPort port : this.containerPorts) {
-            portList.add(port.getExternalPort());
-        }
-        return portList;
+        return this.containerPorts.stream().map(ContainerPort::getExternalPort).collect(Collectors.toList());
     }
 
     /**
-     * Returns the list of internal ports that will be mapped to the given container
+     * Returns the list of internal ports that will be mapped to the
+     * given container
      *
      * @return
+     *
+     * @deprecated please use {@link getContainerPorts} as it includes the network
+     *             protocol with the port mapping.
+     *
      */
+    @Deprecated
     public List<Integer> getContainerPortsInternal() {
-        List<Integer> portList = new LinkedList<>();
-        for (ContainerPort port : this.containerPorts) {
-            portList.add(port.getInternalPort());
-        }
-        return portList;
+        return this.containerPorts.stream().map(ContainerPort::getInternalPort).collect(Collectors.toList());
     }
 
     @Override
@@ -156,7 +162,8 @@ public class ContainerInstanceDescriptor {
     }
 
     /**
-     * Creates a builder for creating a new {@link ContainerInstanceDescriptor} instance.
+     * Creates a builder for creating a new {@link ContainerInstanceDescriptor}
+     * instance.
      *
      * @return the builder.
      */
@@ -202,9 +209,10 @@ public class ContainerInstanceDescriptor {
         }
 
         /**
-         * 
-         * Set a list of container ports, to express which ports to expose and what protocol to use.
-         * 
+         *
+         * Set a list of container ports, to express which ports to expose and what
+         * protocol to use.
+         *
          * @since 2.5
          */
         public ContainerInstanceDescriptorBuilder setContainerPorts(List<ContainerPort> containerPorts) {
@@ -213,23 +221,36 @@ public class ContainerInstanceDescriptor {
         }
 
         /**
-         * Accepts a list<Integer> of ports to be exposed. Assumes all ports are TCP. To use other Internet protocols
-         * please see the {@link setContainerPorts} method. Ensure that the number of elements in this list is the same
+         * Accepts a list<Integer> of ports to be exposed. Assumes all ports
+         * are TCP. To use other Internet protocols
+         * please see the {@link setContainerPorts} method. Ensure that the
+         * number of elements in this list is the same
          * as the number of elements set with {@link setInternalPorts}.
-         * 
+         *
+         * @deprecated please use {@link setContainerPorts} as it allows for network
+         *             protocol to be specified in a port mapping.
+         *
          */
+        @Deprecated
         public ContainerInstanceDescriptorBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
         /**
-         * Accepts a list<Integer> of ports to be open internally within the container. Assumes all ports are TCP. To
-         * use other Internet protocols please see the {@link setContainerPorts} method.
-         * Ensure that the number of elements in this list is the same as the
-         * number of elements set with {@link setExternalPorts}.
-         * 
+         * Accepts a list<Integer> of ports to be open internally within the
+         * container.
+         * Assumes all ports are TCP. To
+         * use other Internet protocols please see the
+         * {@link setContainerPorts} method.
+         * Ensure that the number of elements in this list is the same as
+         * the number of elements set with {@link setExternalPorts}.
+         *
+         * @deprecated please use {@link setContainerPorts} as it allows for network
+         *             protocol to be specified in a port mapping.
+         *
          */
+        @Deprecated
         public ContainerInstanceDescriptorBuilder setInternalPorts(List<Integer> containerPortsInternal) {
             this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;

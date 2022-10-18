@@ -24,7 +24,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     chmod a+x -R /usr/local/bin && \
     apk update && \
     apk --no-cache add git openjdk8 maven && \
-    apk --no-cache add bash zip curl xmlstarlet gcompat && \
+    apk --no-cache add bash zip curl gcompat && \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
       mv /kura/kura/container/kura_alpine /context; \

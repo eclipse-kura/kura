@@ -109,7 +109,7 @@ Starting from Kura 5.3.0, the Data Service supports a configurable time based co
 
 More in detail, the connection logic is as follows:
 
-1. The DataService parses the confgiured Cron expression and scedules a connection attempt at the next instant that matches the expression. When the connection instant is reached, the logic continues from step 2.
+1. The DataService parses the confgiured Cron expression and schedules a connection attempt at the next instant that matches the expression. When the connection instant is reached, the logic continues from step 2.
 
 2. The Data Service will start the auto connect logic. One or more connection attempts will be performed until the connection is established honoring the _connect.retry-interval_ parameter.
 

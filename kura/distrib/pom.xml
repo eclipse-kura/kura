@@ -1029,7 +1029,7 @@
 
     <profiles>
         <profile>
-            <id>raspberry-pi-ubuntu-20</id>
+            <id>raspberry-pi-arm64</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1060,7 +1060,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-ubuntu-20-jars</id>
+                                <id>raspberry-pi-arm64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1071,11 +1071,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-ubuntu-20" />
-                                        <property name="target.device" value="raspberry-pi-ubuntu-20" />
+                                        <property name="build.name" value="raspberry-pi-arm64" />
+                                        <property name="target.device" value="raspberry-pi-arm64" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="raspberry-pi-ubuntu-20" />
+                                        <property name="kura.arch" value="raspberry-pi-arm64" />
                                         <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
@@ -1092,18 +1092,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-ubuntu-20-deb</id>
+                                <id>raspberry-pi-arm64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-ubuntu-20/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-arm64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-arm64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-arm64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1119,7 +1119,7 @@
             </build>
         </profile>
         <profile>
-            <id>raspberry-pi-ubuntu-20-nn</id>
+            <id>raspberry-pi-arm64-nn</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1150,7 +1150,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-ubuntu-20-nn</id>
+                                <id>raspberry-pi-arm64-nn</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1161,11 +1161,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-ubuntu-20-nn" />
-                                        <property name="target.device" value="raspberry-pi-ubuntu-20-nn" />
+                                        <property name="build.name" value="raspberry-pi-arm64-nn" />
+                                        <property name="target.device" value="raspberry-pi-arm64-nn" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="raspberry-pi-ubuntu-20-nn" />
+                                        <property name="kura.arch" value="raspberry-pi-arm64-nn" />
                                         <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
@@ -1182,18 +1182,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-ubuntu-20-deb-nn</id>
+                                <id>raspberry-pi-arm64-deb-nn</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer-nn.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-ubuntu-20-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-arm64_installer-nn.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-arm64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-arm64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

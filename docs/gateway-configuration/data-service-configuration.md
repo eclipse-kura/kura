@@ -90,12 +90,6 @@ In the image below, the parameters that need to be tuned, in the Data Service, t
 
 - **rate.limit.burst.size**: The token bucket burst size.
 
-- **connection.schedule.enabled**: Enables or disables the [connection schedule](#connection-schedule) feature.
-
-- **connection.schedule.expression**: The Cron Expression for the [connection schedule](#connection-schedule) feature.
-
-- **connection.schedule.inactivity.interval.seconds**: The inactivity interval for the [connection schedule](#connection-schedule) feature.
-
 The default setup limits the data flow to **1 message per second with a bucket size of 1 token**.
 
 !!! warning
@@ -116,3 +110,11 @@ More in detail, the connection logic is as follows:
 3. The Data Service starts a timer that ticks after _connection.schedule.inactivity.interval.seconds_ seconds. When the timer ticks the connection will be closed, and the logic resumed from step 1. The timer is reset delaying the disconnection when a message is published or confirmed (for QoS >= 1). The connection will not be closed if there are messages with QoS >= 1 that have not been confirmed yet. If an unexpected connection drop occurs in this phase, the logic will resume from step 2.
 
 The Data Service will attempt to detect large time shifts in system clock, if a time shift is detected, the logic will switch to step 1, rescheduling the next connection attempt.
+
+The relevant configuration parameters are the following:
+
+- **connection.schedule.enabled**: Enables or disables the connection schedule feature. Please note that in order to enable the connection logic, the **connect.auto-on-startup** parameter must be set to true as well.
+
+- **connection.schedule.expression**: The Cron Expression to be used.
+
+- **connection.schedule.inactivity.interval.seconds**: The inactivity interval duration in seconds.

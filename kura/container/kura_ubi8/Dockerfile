@@ -37,7 +37,7 @@ RUN if [ -n "$KURA_COMMIT" ]; then git checkout "$KURA_COMMIT"; fi && git log -1
 # Replace broken 'nn' script
 RUN cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh
 
-# Customize stating snapshot and properties
+# Customize starting snapshot and properties
 RUN sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' kura/distrib/src/main/resources/intel-up2-ubuntu-20-nn/kura.properties && \
     xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false kura/distrib/src/main/resources/intel-up2-ubuntu-20-nn/snapshot_0.xml
 

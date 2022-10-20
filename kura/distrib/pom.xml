@@ -1209,7 +1209,7 @@
             </build>
         </profile>
         <profile>
-            <id>raspberry-pi</id>
+            <id>raspberry-pi-armhf</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1240,7 +1240,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-jars</id>
+                                <id>raspberry-pi-armhf-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1251,8 +1251,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi" />
-                                        <property name="target.device" value="raspberry-pi" />
+                                        <property name="build.name" value="raspberry-pi-armhf" />
+                                        <property name="target.device" value="raspberry-pi-armhf" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1272,18 +1272,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-deb</id>
+                                <id>raspberry-pi-armhf-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/raspberry-pi/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-armhf_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-armhf/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-armhf.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1300,7 +1300,7 @@
         </profile>
 
         <profile>
-            <id>raspberry-pi-nn</id>
+            <id>raspberry-pi-armhf-nn</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1331,7 +1331,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-nn-jars</id>
+                                <id>raspberry-pi-armhf-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1342,8 +1342,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-nn" />
-                                        <property name="target.device" value="raspberry-pi-nn" />
+                                        <property name="build.name" value="raspberry-pi-armhf-nn" />
+                                        <property name="target.device" value="raspberry-pi-armhf-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1363,18 +1363,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-nn-deb</id>
+                                <id>raspberry-pi-armhf-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-armhf-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-armhf-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-armhf-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

@@ -1,0 +1,89 @@
+#!/bin/bash
+
+INSTALL_DIR=/opt/eclipse
+TIMESTAMP=`date +%Y%m%d%H%M%S`
+LOG=/tmp/kura_install_${TIMESTAMP}.log
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
+TIMEOUT_TIME=300
+
+##############################################
+# UTILITY FUNCTIONS
+##############################################
+# Run postInstall function and start watchdog if needed
+function runPostInstall {
+    if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        echo "Got watchdog ${WATCHDOG_DEVICE}" >> $LOG 2>&1
+        postInstall &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            echo w > ${WATCHDOG_DEVICE}
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+        stopWatchdog
+    else
+        postInstall &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+    fi
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
+}
+
+# Pre-install script
+function postInstall {
+    mkdir -p ${INSTALL_DIR} >> ${LOG} 2>&1
+    unzip /tmp/kura_*.zip -d ${INSTALL_DIR} >> ${LOG} 2>&1
+    
+    #install KURA files
+    sh ${INSTALL_DIR}/kura_*/install/kura_install.sh >> ${LOG} 2>&1
+    
+    #clean up
+    rm -rf ${INSTALL_DIR}/kura/install >> ${LOG} 2>&1
+    rm /tmp/kura_*.zip >> ${LOG} 2>&1
+    
+    #move the log file
+    mkdir -p ${INSTALL_DIR}/kura/log
+    mv ${LOG} ${INSTALL_DIR}/kura/log/
+    
+    #flush all cached filesystem to disk
+    sync
+    
+    echo ""
+    echo "Finished. KURA has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
+}
+##############################################
+# END UTILITY FUNCTIONS
+##############################################
+
+##############################################
+# POST INSTALL SCRIPT
+##############################################
+runPostInstall
+exit 0
+#############################################
+# END POST INSTALL SCRIPT
+##############################################
+

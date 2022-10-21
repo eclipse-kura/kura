@@ -161,6 +161,7 @@
 <setEntry value="org.eclipse.kura.wire.script.filter.provider@default:default"/>
 <setEntry value="org.eclipse.kura.xml.marshaller.unmarshaller.provider@2:default"/>
 <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
+<setEntry value="com.zaxxer.HikariCP@default:default"/>
 </setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="timestamp" value="1449054439069"/>

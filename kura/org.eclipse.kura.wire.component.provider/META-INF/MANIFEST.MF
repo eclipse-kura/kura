@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Different Wire Components Provider
 Bundle-SymbolicName: org.eclipse.kura.wire.component.provider;singleton:=true
-Bundle-Version: 1.3.0.qualifier
+Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-Category: Kura Wires
@@ -36,10 +36,12 @@ Import-Package: org.apache.logging.log4j;version="2.8.2",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
  org.osgi.util.tracker;version="1.5.1",
+ org.quartz;version="2.3.2",
+ org.quartz.impl;version="2.3.2",
+ org.quartz.impl.matchers;version="2.3.2",
+ org.quartz.utils;version="2.3.2",
  org.slf4j;version="1.7.25"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Bundle-ClassPath: lib/quartz.jar,
- .
 Export-Package: org.eclipse.kura.internal.wire.asset;version="1.0.0"

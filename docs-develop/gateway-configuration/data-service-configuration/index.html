@@ -631,6 +631,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#connection-schedule" class="md-nav__link">
+    Connection schedule
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2677,6 +2684,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#connection-schedule" class="md-nav__link">
+    Connection schedule
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2800,6 +2814,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>This feature needs to be properly tuned by the System Administrator in order to prevent delays in the remote cloud platform due to messages stacked at the edge.</p>
 <p><strong>If not sure of the number of messages that your gateways will try to push to the remote platform, we suggest to disable this feature.</strong></p>
 </div>
+<h2 id="connection-schedule">Connection schedule</h2>
+<p>Starting from Kura 5.3.0, the Data Service supports a configurable time based connection schedule. If this functionality is enabled, the Data Service will connect at specific time instants represented by a configurable Cron expression, keep the connection open until it becomes idle and then disconnect until the next instant that matches the expression.</p>
+<p>More in detail, the connection logic is as follows:</p>
+<ol>
+<li>
+<p>The DataService parses the confgiured Cron expression and schedules a connection attempt at the next instant that matches the expression. When the connection instant is reached, the logic continues from step 2.</p>
+</li>
+<li>
+<p>The Data Service will start the auto connect logic. One or more connection attempts will be performed until the connection is established honoring the <em>connect.retry-interval</em> parameter.</p>
+</li>
+<li>
+<p>The Data Service starts a timer that ticks after <em>connection.schedule.inactivity.interval.seconds</em> seconds. When the timer ticks the connection will be closed, and the logic resumed from step 1. The timer is reset delaying the disconnection when a message is published or confirmed (for QoS &gt;= 1). The connection will not be closed if there are messages with QoS &gt;= 1 that have not been confirmed yet. If an unexpected connection drop occurs in this phase, the logic will resume from step 2.</p>
+</li>
+</ol>
+<p>The Data Service will attempt to detect large time shifts in system clock, if a time shift is detected, the logic will switch to step 1, rescheduling the next connection attempt.</p>
+<p>The relevant configuration parameters are the following:</p>
+<ul>
+<li>
+<p><strong>connection.schedule.enabled</strong>: Enables or disables the connection schedule feature. Please note that in order to enable the connection logic, the <strong>connect.auto-on-startup</strong> parameter must be set to true as well.</p>
+</li>
+<li>
+<p><strong>connection.schedule.expression</strong>: The Cron Expression to be used.</p>
+</li>
+<li>
+<p><strong>connection.schedule.inactivity.interval.seconds</strong>: The inactivity interval duration in seconds.</p>
+</li>
+</ul>
 
               
             </article>

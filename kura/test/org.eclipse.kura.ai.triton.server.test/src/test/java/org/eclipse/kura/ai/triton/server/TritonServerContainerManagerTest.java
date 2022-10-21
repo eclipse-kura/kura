@@ -402,7 +402,7 @@ public class TritonServerContainerManagerTest {
 
         try {
             // Wait for monitor thread to do its job
-            Thread.sleep(10);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             fail();

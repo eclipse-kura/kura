@@ -60,7 +60,6 @@ RUN true && \
         unzip \
         gzip \
         tar \
-        xmlstarlet \
         psmisc \
         socat \
         dos2unix \

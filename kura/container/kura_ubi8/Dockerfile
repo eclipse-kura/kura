@@ -10,7 +10,7 @@ ARG KURA_COMMIT
 ARG PACKED=false
 
 RUN chmod a+x -R /usr/local/bin
-RUN dnf -y install git java-11-openjdk-devel maven zip
+RUN dnf -y install git java-11-openjdk-devel maven zip http://mirror.centos.org/centos/8-stream/PowerTools/x86_64/os/Packages/xmlstarlet-1.6.1-20.el8.x86_64.rpm
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
@@ -37,6 +37,10 @@ RUN if [ -n "$KURA_COMMIT" ]; then git checkout "$KURA_COMMIT"; fi && git log -1
 # Replace broken 'nn' script
 RUN cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh
 
+# Customize starting snapshot and properties
+RUN sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' kura/distrib/src/main/resources/intel-up2-ubuntu-20-nn/kura.properties && \
+    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false kura/distrib/src/main/resources/intel-up2-ubuntu-20-nn/snapshot_0.xml
+
 ENV \
   MAVEN_PROPS="-DskipTests -Dmaven.artifact.threads=20"
 
@@ -60,7 +64,6 @@ RUN true && \
         unzip \
         gzip \
         tar \
-        xmlstarlet \
         psmisc \
         socat \
         dos2unix \
@@ -95,8 +98,6 @@ RUN true && \
     test -x "${KURA_DIR}/bin/start_kura.sh" && \
     chmod a+x /usr/local/bin/* && \
     install -m 0777 -d "${KURA_DIR}/data" && \
-    sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
-    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false ${KURA_DIR}/user/snapshots/snapshot_0.xml && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
     \

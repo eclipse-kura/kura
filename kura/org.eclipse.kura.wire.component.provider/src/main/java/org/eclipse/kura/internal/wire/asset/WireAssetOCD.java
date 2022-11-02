@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,8 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 
 public class WireAssetOCD extends BaseAssetOCD {
 
+    private static final String FALSE = "false";
+
     private static final String EMIT_ALL_CHANNELS_DESCRIPTION = "Specifies wheter the values of all READ or READ_WRITE "
             + "channels should be emitted in case of a channel event."
             + " If set to true, the values for all channels will be read and emitted,"
@@ -38,6 +40,13 @@ public class WireAssetOCD extends BaseAssetOCD {
 
     private static final String EMIT_ERRORS_DESCRIPTION = "Specifies wheter errors should be included or not "
             + "in the emitted envelope";
+
+    private static final String EMIT_ON_CHANGE_DESCRIPTION = "If set to true, this component will emit a value on Kura Wires"
+            + " only if it is different than the one obtained from the previous read operation or event for the corresponding channel."
+            + " Channel errors will always be emitted if emit.errors is set to true.";
+
+    private static final String EMIT_EMPTY_ENVELOPES_DESCRIPTION = "If set to false, this component will not emit empty envelopes."
+            + " This property can be useful if combined with emit.on.change.";
 
     private static void addOptions(Tad target, Enum<?>[] values) {
         final List<Option> options = target.getOption();
@@ -60,7 +69,7 @@ public class WireAssetOCD extends BaseAssetOCD {
         emitAllChannelsAd.setType(Tscalar.BOOLEAN);
         emitAllChannelsAd.setDescription(EMIT_ALL_CHANNELS_DESCRIPTION);
         emitAllChannelsAd.setRequired(true);
-        emitAllChannelsAd.setDefault("false");
+        emitAllChannelsAd.setDefault(FALSE);
 
         addAD(emitAllChannelsAd);
 
@@ -84,9 +93,31 @@ public class WireAssetOCD extends BaseAssetOCD {
         emitErrorsAd.setType(Tscalar.BOOLEAN);
         emitErrorsAd.setDescription(EMIT_ERRORS_DESCRIPTION);
         emitErrorsAd.setRequired(true);
-        emitErrorsAd.setDefault("false");
+        emitErrorsAd.setDefault(FALSE);
 
         addAD(emitErrorsAd);
+
+        final Tad emitOnChangeAd = new Tad();
+        emitOnChangeAd.setId(WireAssetOptions.EMIT_ON_CHANGE_PROP_NAME);
+        emitOnChangeAd.setName(WireAssetOptions.EMIT_ON_CHANGE_PROP_NAME);
+        emitOnChangeAd.setCardinality(0);
+        emitOnChangeAd.setType(Tscalar.BOOLEAN);
+        emitOnChangeAd.setDescription(EMIT_ON_CHANGE_DESCRIPTION);
+        emitOnChangeAd.setRequired(true);
+        emitOnChangeAd.setDefault(FALSE);
+
+        addAD(emitOnChangeAd);
+
+        final Tad emitEmptyEnvelopesAd = new Tad();
+        emitEmptyEnvelopesAd.setId(WireAssetOptions.EMIT_EMPTY_ENVELOPES_PROP_NAME);
+        emitEmptyEnvelopesAd.setName(WireAssetOptions.EMIT_EMPTY_ENVELOPES_PROP_NAME);
+        emitEmptyEnvelopesAd.setCardinality(0);
+        emitEmptyEnvelopesAd.setType(Tscalar.BOOLEAN);
+        emitEmptyEnvelopesAd.setDescription(EMIT_EMPTY_ENVELOPES_DESCRIPTION);
+        emitEmptyEnvelopesAd.setRequired(true);
+        emitEmptyEnvelopesAd.setDefault("true");
+
+        addAD(emitEmptyEnvelopesAd);
 
     }
 

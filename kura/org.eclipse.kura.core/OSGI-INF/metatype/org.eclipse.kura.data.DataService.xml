@@ -186,6 +186,7 @@
             cardinality="0" 
             required="true" 
             default="60"
+            min="1"
             description="Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if Enable Connection Schedule is set to true." />
 
     </OCD>

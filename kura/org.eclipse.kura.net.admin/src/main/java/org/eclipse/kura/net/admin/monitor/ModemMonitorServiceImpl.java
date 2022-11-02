@@ -963,7 +963,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         .getNetInterfaceConfig(ifaceName);
 
                 if (netInterfaceConfig == null) {
-                    networkConfig = netConfigService.getNetworkConfiguration(false);
+                    networkConfig = netConfigService.getNetworkConfiguration(true);
                     if (networkConfig.isPresent()) {
                         netInterfaceConfig = networkConfig.get().getNetInterfaceConfig(ifaceName);
                     }

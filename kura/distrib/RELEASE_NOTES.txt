@@ -24,6 +24,11 @@ Target Environments:
 
 Bug Fixes :
   * Changelog:
+    * 5f0ac7c66d - chore: Updated release notes (MMaiero)
+    * 12ed330615 - chore: Release notes for Kura 4.1.4 (MMaiero)
+    * c270630f59 - chore: automated uptick to 4.1.4 (#4217) (github-actions[bot])
+    * 1d9fc50ae9 - fix: Updated versions (#4216) (Matteo Maiero)
+    * fd5661f05a - chore: Aligned github actions to develop (MMaiero)
     * 0cf89d16dc - fix:(core.ssl): prevent SSLManager to updated keystore password if password did not change (#4192) (Marcello Rinaldo Martina)
     * 0b5aad5b20 - Maintenance branch uptick to 4.1.4-SNAPSHOT (#3758) (nicolatimeus)
     

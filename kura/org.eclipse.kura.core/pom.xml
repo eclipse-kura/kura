@@ -27,6 +27,6 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.core</artifactId>
-	<version>1.0.503-SNAPSHOT</version>
+	<version>1.0.503</version>
 	<packaging>eclipse-plugin</packaging>
 </project>

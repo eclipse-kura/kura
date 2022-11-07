@@ -79,6 +79,18 @@ Train the model with the data provided in this repository with:
 ./train.py
 ```
 
+> **Note**: If you get the following error:
+> ```
+> TypeError: Descriptors cannot not be created directly.
+> If this call came from a _pb2.py file, your generated code is out of date and must be regenerated with protoc >= 3.19.0.
+> If you cannot immediately regenerate your protos, some other possible workarounds are:
+>
+> Downgrade the protobuf package to 3.20.x or lower.
+> Set PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python (but this will use pure-Python parsing and will be much slower).
+> More information: https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
+> ```
+> run the training script with: `PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python ./train.py`
+
 Train script options:
 
 ```bash

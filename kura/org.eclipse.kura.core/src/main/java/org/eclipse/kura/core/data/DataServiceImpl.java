@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -59,11 +60,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
-        CloudConnectionStatusComponent, CriticalComponent {
+        CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 
@@ -106,6 +108,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private AtomicInteger connectionAttempts;
 
+    private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -138,7 +142,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         this.dataTransportService.addDataTransportListener(this);
 
-        startConnectionMonitorTask();
+        createAutoConnectStrategy();
     }
 
     private void restartDbServiceTracker(String kuraServicePid) {
@@ -219,7 +223,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        stopConnectionMonitorTask();
+        shutdownAutoConnectStrategy();
 
         final String oldDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
 
@@ -238,15 +242,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             restartDbServiceTracker(currentDbServicePid);
         }
 
-        if (!this.dataTransportService.isConnected()) {
-            startConnectionMonitorTask();
-        }
+        createAutoConnectStrategy();
     }
 
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivating {}...", this.dataServiceOptions.getKuraServicePid());
 
-        stopConnectionMonitorTask();
+        shutdownAutoConnectStrategy();
         this.connectionMonitorExecutor.shutdownNow();
 
         this.congestionExecutor.shutdownNow();
@@ -344,14 +346,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // Forget them.
         // Unpublish them so they will be republished on the new session.
         //
-        // The latter has the potential drawback that duplicates can be generated with any QoS.
-        // This can occur for example if the DataPublisherService is connecting with a different client ID
+        // The latter has the potential drawback that duplicates can be generated with
+        // any QoS.
+        // This can occur for example if the DataPublisherService is connecting with a
+        // different client ID
         // or to a different broker URL resolved to the same broker instance.
         //
         // Also note that unpublished messages will be republished accordingly to their
         // original priority. Thus a message reordering may occur too.
-        // Even if we artificially upgraded the priority of unpublished messages to -1 so to
-        // republish them first, their relative order would not necessarily match the order
+        // Even if we artificially upgraded the priority of unpublished messages to -1
+        // so to
+        // republish them first, their relative order would not necessarily match the
+        // order
         // in the DataPublisherService persistence.
 
         if (newSession) {
@@ -401,15 +407,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void onConfigurationUpdating(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updating...");
-        stopConnectionMonitorTask();
-        disconnect(0);
+        this.dataTransportService.disconnect(0);
     }
 
     @Override
     public void onConfigurationUpdated(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updated.");
-        boolean autoConnect = startConnectionMonitorTask();
-        if (!autoConnect && wasConnected) {
+        createAutoConnectStrategy();
+        if (!this.autoConnectStrategy.isPresent() && wasConnected) {
             try {
                 connect();
             } catch (KuraConnectException e) {
@@ -421,9 +426,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void onConnectionLost(Throwable cause) {
         logger.info("connectionLost");
-
-        stopConnectionMonitorTask(); // Just in case...
-        startConnectionMonitorTask();
 
         // Notify the listeners
         this.dataServiceListeners.onConnectionLost(cause);
@@ -441,7 +443,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     @Override
-    // It's very important that the publishInternal and messageConfirmed methods are synchronized
+    // It's very important that the publishInternal and messageConfirmed methods are
+    // synchronized
     public synchronized void onMessageConfirmed(DataTransportToken token) {
 
         logger.debug("Confirmed message with MQTT message ID: {} on session ID: {}", token.getMessageId(),
@@ -481,7 +484,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void connect() throws KuraConnectException {
-        stopConnectionMonitorTask();
+        shutdownAutoConnectStrategy();
         if (this.dbService == null) {
             throw new KuraConnectException("H2DbService instance not attached, not connecting");
         }
@@ -508,7 +511,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void disconnect(long quiesceTimeout) {
-        stopConnectionMonitorTask();
+        shutdownAutoConnectStrategy();
         this.dataTransportService.disconnect(quiesceTimeout);
     }
 
@@ -526,7 +529,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
-        
+
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 
@@ -560,10 +563,46 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.lock.unlock();
     }
 
-    private boolean startConnectionMonitorTask() {
+    private void createAutoConnectStrategy() {
+        if (!this.dataServiceOptions.isAutoConnect()) {
+            return;
+        }
+
+        final Optional<AutoConnectStrategy> currentStrategy = this.autoConnectStrategy;
+
+        if (currentStrategy.isPresent()) {
+            return;
+        }
+
+        final Optional<CronExpression> schedule = this.dataServiceOptions.getConnectionScheduleExpression();
+
+        final AutoConnectStrategy strategy;
+
+        if (!this.dataServiceOptions.isConnectionScheduleEnabled() || !schedule.isPresent()) {
+            strategy = new AlwaysConnectedStrategy(this);
+        } else {
+            strategy = new ScheduleStrategy(schedule.get(),
+                    this.dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, this);
+        }
+
+        this.autoConnectStrategy = Optional.of(strategy);
+        this.dataServiceListeners.prepend(strategy);
+
+    }
+
+    private void shutdownAutoConnectStrategy() {
+        final Optional<AutoConnectStrategy> currentStrategy = this.autoConnectStrategy;
+
+        if (currentStrategy.isPresent()) {
+            currentStrategy.get().shutdown();
+            this.dataServiceListeners.remove(currentStrategy.get());
+            this.autoConnectStrategy = Optional.empty();
+        }
+    }
+
+    private void startConnectionMonitorTask() {
         if (this.connectionMonitorFuture != null && !this.connectionMonitorFuture.isDone()) {
-            logger.error("Reconnect task already running");
-            throw new IllegalStateException("Reconnect task already running");
+            logger.info("Reconnect task already running");
         }
 
         //
@@ -578,7 +617,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 this.connectionAttempts = new AtomicInteger(0);
             }
 
-            // Change notification status to slow blinking when connection is expected to happen in the future
+            // Change notification status to slow blinking when connection is expected to
+            // happen in the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
             // add a delay on the reconnect
             int maxDelay = reconnectInterval / 5;
@@ -623,7 +663,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     } finally {
                         if (connected) {
                             unregisterAsCriticalComponent();
-                            // Throwing an exception will suppress subsequent executions of this periodic task.
+                            // Throwing an exception will suppress subsequent executions of this periodic
+                            // task.
                             throw new RuntimeException("Connected. Reconnect task will be terminated.");
                         }
                     }
@@ -644,11 +685,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }
             }, initialDelay, reconnectInterval, TimeUnit.SECONDS);
         } else {
-            // Change notification status to off. Connection is not expected to happen in the future
+            // Change notification status to off. Connection is not expected to happen in
+            // the future
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
             unregisterAsCriticalComponent();
         }
-        return autoConnect;
     }
 
     private void createThrottle() {
@@ -678,7 +719,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.watchdogService.unregisterCriticalComponent(this);
     }
 
-    private void disconnect() {
+    @Override
+    public void disconnect() {
         long millis = this.dataServiceOptions.getDisconnectDelay() * 1000L;
         this.dataTransportService.disconnect(millis);
     }
@@ -689,7 +731,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.publisherExecutor.execute(new PublishManager());
     }
 
-    // It's very important that the publishInternal and messageConfirmed methods are synchronized
+    // It's very important that the publishInternal and messageConfirmed methods are
+    // synchronized
     private synchronized void publishInternal(DataMessage message) throws KuraException {
 
         String topic = message.getTopic();
@@ -707,7 +750,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             logger.debug("Published message with ID: {}", msgId);
         } else {
 
-            // Check if the token is already tracked in the map (in which case we are in trouble)
+            // Check if the token is already tracked in the map (in which case we are in
+            // trouble)
             Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
             if (trackedMsgId != null) {
                 logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
@@ -881,5 +925,21 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         result.put("Username", this.dataTransportService.getUsername());
         result.put("Client ID", this.dataTransportService.getClientId());
         return result;
+    }
+
+    @Override
+    public void startConnectionTask() {
+        startConnectionMonitorTask();
+    }
+
+    @Override
+    public void stopConnectionTask() {
+        disconnect();
+        stopConnectionMonitorTask();
+    }
+
+    @Override
+    public boolean hasInFlightMessages() {
+        return !inFlightMsgIds.isEmpty();
     }
 }

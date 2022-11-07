@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,12 +16,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.db.H2DbService;
+import org.quartz.CronExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataServiceOptions {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataServiceOptions.class);
 
     private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
     private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
@@ -39,6 +45,9 @@ public class DataServiceOptions {
     private static final String RATE_LIMIT_BURST_SIZE_PROP_NAME = "rate.limit.burst.size";
     private static final String RECOVERY_ENABLE_PROP_NAME = "enable.recovery.on.connection.failure";
     private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
+    private static final String CONNECTION_SCHEDULE_ENABLED = "connection.schedule.enabled";
+    private static final String CONNECTION_SCHECULE_EXPRESSION = "connection.schedule.expression";
+    private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS = "connection.schedule.inactivity.interval.seconds";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -56,6 +65,8 @@ public class DataServiceOptions {
     private static final int RATE_LIMIT_BURST_SIZE_DEFAULT = 1;
     private static final boolean RECOVERY_ENABLE_DEFAULT = true;
     private static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
+    private static final boolean CONNECTION_SCHEDULE_ENABLED_DEFAULT = false;
+    private static final long CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT = 60;
 
     private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
 
@@ -157,5 +168,23 @@ public class DataServiceOptions {
 
     int getCriticalComponentTimeout() {
         return getConnectDelay() * CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER;
+    }
+
+    boolean isConnectionScheduleEnabled() {
+        return (boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_ENABLED, CONNECTION_SCHEDULE_ENABLED_DEFAULT);
+    }
+
+    Optional<CronExpression> getConnectionScheduleExpression() {
+        try {
+            return Optional.of(new CronExpression((String) this.properties.get(CONNECTION_SCHECULE_EXPRESSION)));
+        } catch (final Exception e) {
+            logger.warn("failed to parse connection schedule expression", e);
+            return Optional.empty();
+        }
+    }
+
+    long getConnectionScheduleDisconnectDelay() {
+        return (long) this.properties.getOrDefault(CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
+                CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT);
     }
 }

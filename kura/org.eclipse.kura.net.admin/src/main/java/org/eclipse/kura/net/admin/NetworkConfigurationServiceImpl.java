@@ -349,15 +349,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
-        // This method returns the network configuration properties without the current
-        // values.
-        // i.e. the ip address that should be applied to the system, but not the actual
-        // one.
-        Optional<NetworkConfiguration> networkConfiguration = getNetworkConfiguration(false);
-        if (!networkConfiguration.isPresent()) {
-            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "The network component configuration cannot be retrieved");
-        }
 
         return new ComponentConfigurationImpl(PID, getDefinition(this.properties),
                 this.properties);

@@ -190,7 +190,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             logger.debug("Got null properties...");
         } else {
             logger.debug("Props...{}", properties);
-            this.properties = properties;
+            this.properties = new HashMap<>(properties);
             updated(this.properties);
         }
     }

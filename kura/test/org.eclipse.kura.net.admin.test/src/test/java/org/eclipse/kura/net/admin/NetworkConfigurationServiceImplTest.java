@@ -16,7 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -36,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -340,37 +338,6 @@ public class NetworkConfigurationServiceImplTest {
     }
 
     @Test
-    public void testGetConfigurationException() throws KuraException, NoSuchFieldException {
-        NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
-
-            @Override
-            protected List<String> getAllInterfaceNames() throws KuraException {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, "test");
-            }
-        };
-
-        NetworkService networkServiceMock = mock(NetworkService.class);
-        svc.setNetworkService(networkServiceMock);
-
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
-        NetInterface<? extends NetInterfaceAddress> netInterface = new WifiInterfaceImpl("wlan1");
-        interfaces.add(netInterface);
-        when(networkServiceMock.getNetworkInterfaces()).thenReturn(interfaces);
-
-        UsbService usbServiceMock = mock(UsbService.class);
-        svc.setUsbService(usbServiceMock);
-
-        try {
-            svc.getConfiguration();
-            fail("Exception was expected.");
-        } catch (KuraRuntimeException e) {
-            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
-            assertTrue(e.getMessage().endsWith("retrieved"));
-        }
-
-    }
-
-    @Test
     public void testGetConfiguration() throws KuraException, NoSuchFieldException {
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
 
@@ -391,20 +358,20 @@ public class NetworkConfigurationServiceImplTest {
                 NetInterfaceType type;
 
                 switch (interfaceName) {
-                case "eth2":
-                    type = NetInterfaceType.ETHERNET;
-                    break;
-                case "lo":
-                    type = NetInterfaceType.LOOPBACK;
-                    break;
-                case "ppp1":
-                    type = NetInterfaceType.MODEM;
-                    break;
-                case "wlan1":
-                    type = NetInterfaceType.WIFI;
-                    break;
-                default:
-                    type = NetInterfaceType.UNKNOWN;
+                    case "eth2":
+                        type = NetInterfaceType.ETHERNET;
+                        break;
+                    case "lo":
+                        type = NetInterfaceType.LOOPBACK;
+                        break;
+                    case "ppp1":
+                        type = NetInterfaceType.MODEM;
+                        break;
+                    case "wlan1":
+                        type = NetInterfaceType.WIFI;
+                        break;
+                    default:
+                        type = NetInterfaceType.UNKNOWN;
                 }
 
                 return type;

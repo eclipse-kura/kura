@@ -3,7 +3,7 @@
 
 /var/log/kura*.log
 {
-        su root syslog
+        su root kurad
         missingok
         notifempty
         copytruncate

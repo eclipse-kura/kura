@@ -270,9 +270,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName, boolean recompute) throws KuraException {
 
         List<NetConfig> netConfigs = new ArrayList<>();
-        long started = System.currentTimeMillis();
         NetworkConfiguration networkConfig = getNetworkConfigurationInternal(recompute);
-        logger.info("GetNetworkConfiguration1 {}", (System.currentTimeMillis() - started));
         if (interfaceName != null && networkConfig != null) {
             try {
                 logger.debug("Getting networkInterfaceConfigs for {}", interfaceName);

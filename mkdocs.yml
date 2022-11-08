@@ -139,6 +139,8 @@ nav:
     - References:
       - MQTT Namespace: references/mqtt-namespace.md
       - Javadoc: references/javadoc.md
+    - Tutorials:
+      - Anomaly Detection: tutorials/AD-EdgeAI.ipynb
 
 theme:
   name: material
@@ -177,6 +179,7 @@ edit_uri: "" # Remove edit button
 
 plugins:
   - search
+  - mkdocs-jupyter
 
 markdown_extensions:
   - attr_list

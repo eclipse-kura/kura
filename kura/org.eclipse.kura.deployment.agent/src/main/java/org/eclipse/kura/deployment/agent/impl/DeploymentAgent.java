@@ -442,21 +442,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.setProperty(packageName, packageUrl);
 
-        if (this.dpaConfPath == null) {
-            logger.warn("Configuration file not specified");
-            return;
-        }
-
-        if (oldDeployedPackages.equals(deployedPackages)) {
-            return;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
-            deployedPackages.store(fos, null);
-            fos.flush();
-            fos.getFD().sync();
-        } catch (IOException e) {
-            logger.error("Error writing package configuration file", e);
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            writeConfigurationFile(this.dpaConfPath, deployedPackages);
         }
     }
 
@@ -466,16 +453,18 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.remove(packageName);
 
-        if (this.dpaConfPath == null) {
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            writeConfigurationFile(this.dpaConfPath, deployedPackages);
+        }
+    }
+
+    private static void writeConfigurationFile(String dpaConfPath, Properties deployedPackages) {
+        if (dpaConfPath == null) {
             logger.warn("Configuration file not specified");
             return;
         }
 
-        if (oldDeployedPackages.equals(deployedPackages)) {
-            return;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
+        try (FileOutputStream fos = new FileOutputStream(dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();

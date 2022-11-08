@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  3 PORT d.o.o.
  ******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
@@ -18,8 +19,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -367,7 +370,11 @@ public class DeploymentAgentTest {
     public void testAddPackageToConfFileStoreException() throws Throwable {
         // test adding packages to configuration file, but fail doing so
 
-        final Properties deployedPackages = mock(Properties.class);
+        final Properties deployedPackages = spy(new Properties());
+
+        when(deployedPackages.entrySet()).thenCallRealMethod();
+        doCallRealMethod().when(deployedPackages).setProperty(anyObject(), anyObject());
+
         DeploymentAgent svc = new DeploymentAgent() {
 
             @Override
@@ -416,7 +423,12 @@ public class DeploymentAgentTest {
     public void testRemovePackageToConfFileStoreException() throws Throwable {
         // test removing packages from configuration file, but fail doing so
 
-        final Properties deployedPackages = mock(Properties.class);
+        final Properties props = new Properties();
+        props.put("testdp", "file:///tmp/testdp.dp");
+
+        final Properties deployedPackages = spy(props);
+        when(deployedPackages.entrySet()).thenCallRealMethod();
+
         DeploymentAgent svc = new DeploymentAgent() {
 
             @Override
@@ -442,7 +454,12 @@ public class DeploymentAgentTest {
     public void testRemovePackageToConfFile() throws Throwable {
         // test removing packages from configuration file
 
-        final Properties deployedPackages = mock(Properties.class);
+        final Properties props = new Properties();
+        props.put("testdp", "file:///tmp/testdp.dp");
+
+        final Properties deployedPackages = spy(props);
+        when(deployedPackages.entrySet()).thenCallRealMethod();
+
         DeploymentAgent svc = new DeploymentAgent() {
 
             @Override

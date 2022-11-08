@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
+ *  3 PORT d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
@@ -367,13 +368,14 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             dpFile = getFileFromFilesystem(url);
         }
 
+        File dpPersistentFile = null;
         DeploymentPackage dp = null;
         try (InputStream dpInputStream = new FileInputStream(dpFile);) {
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
             String dpFsName = dp.getName() + "_" + dp.getVersion() + ".dp";
             String dpPersistentFilePath = this.packagesPath + File.separator + dpFsName;
-            File dpPersistentFile = new File(dpPersistentFilePath);
+            dpPersistentFile = new File(dpPersistentFilePath);
 
             // Now we need to copy the deployment package file to the Kura
             // packages directory unless it's already there.
@@ -386,8 +388,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         } finally {
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.
-            File packagesFolder = new File(this.packagesPath);
-            if (!dpFile.getCanonicalPath().startsWith(packagesFolder.getCanonicalPath())) {
+            if (dpPersistentFile != null && dpPersistentFile.exists()
+                    && !dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
                 Files.delete(dpFile.toPath());
                 logger.debug("Deleted file: {}", dpFile.getName());
             }
@@ -436,10 +438,16 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private void addPackageToConfFile(String packageName, String packageUrl) {
         Properties deployedPackages = readDeployedPackages();
+        Properties oldDeployedPackages = new Properties();
+        oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.setProperty(packageName, packageUrl);
 
         if (this.dpaConfPath == null) {
             logger.warn("Configuration file not specified");
+            return;
+        }
+
+        if (oldDeployedPackages.equals(deployedPackages)) {
             return;
         }
 
@@ -454,10 +462,16 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private void removePackageFromConfFile(String packageName) {
         Properties deployedPackages = readDeployedPackages();
+        Properties oldDeployedPackages = new Properties();
+        oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.remove(packageName);
 
         if (this.dpaConfPath == null) {
             logger.warn("Configuration file not specified");
+            return;
+        }
+
+        if (oldDeployedPackages.equals(deployedPackages)) {
             return;
         }
 

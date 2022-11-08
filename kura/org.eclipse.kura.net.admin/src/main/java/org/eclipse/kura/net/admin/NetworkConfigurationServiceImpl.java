@@ -268,10 +268,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
             NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
 
-            for (NetworkConfigurationVisitor visitor : getVisitors()) {
-                visitor.setExecutorService(this.commandExecutorService);
-                networkConfiguration.accept(visitor);
-            }
+            executeVisitors(networkConfiguration);
 
             updateCurrentNetworkConfiguration();
 
@@ -279,6 +276,13 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
         } catch (Exception e) {
             logger.error("Error updating the configuration", e);
+        }
+    }
+
+    private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
+        for (NetworkConfigurationVisitor visitor : getVisitors()) {
+            visitor.setExecutorService(this.commandExecutorService);
+            networkConfiguration.accept(visitor);
         }
     }
 
@@ -432,8 +436,25 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
+        executeVisitorsIfNewInterfacesArePresent(networkConfiguration);
+
         this.properties.putAll(networkConfiguration.getConfigurationProperties());
         this.currentNetworkConfiguration = Optional.of(networkConfiguration);
+    }
+
+    private void executeVisitorsIfNewInterfacesArePresent(NetworkConfiguration newNetworkConfiguration)
+            throws KuraException {
+        if (this.currentNetworkConfiguration.isPresent()) {
+            final NetworkConfiguration currentConfiguration = this.currentNetworkConfiguration.get();
+
+            final boolean hasNewInterfaceConfigs = newNetworkConfiguration.getNetInterfaceConfigs().stream()
+                    .anyMatch(c -> currentConfiguration.getNetInterfaceConfig(c.getName()) == null);
+
+            if (hasNewInterfaceConfigs) {
+                logger.info("found new network interfaces, rewriting network configuration");
+                executeVisitors(newNetworkConfiguration);
+            }
+        }
     }
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,

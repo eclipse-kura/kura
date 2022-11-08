@@ -29,7 +29,8 @@ public class JsonJavaDockerContainersMapper {
     // {
     // "name" : "rfkill",
     // "version": "nginx:latest",
-    // type": "DOCKER",
+    // "type": "DOCKER",
+    // "state" : "active",
     // }
     // ]
     // }
@@ -38,6 +39,7 @@ public class JsonJavaDockerContainersMapper {
     private static final String SYSTEM_CONTAINERS_CONTAINER_NAME = "name";
     private static final String SYSTEM_CONTAINERS_CONTAINER_VERSION = "version";
     private static final String SYSTEM_CONTAINERS_CONTAINER_TYPE = "type";
+    private static final String SYSTEM_CONTAINERS_CONTAINER_STATE = "state";
 
     private JsonJavaDockerContainersMapper() {
         // empty constructor
@@ -48,8 +50,9 @@ public class JsonJavaDockerContainersMapper {
 
         final String name = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_NAME);
         final String version = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_VERSION);
+        final String state = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_STATE);
 
-        return new DockerContainer(name, version);
+        return new DockerContainer(name, version, state);
     }
 
     public static String marshal(DockerContainers dockerContainers) {
@@ -66,6 +69,7 @@ public class JsonJavaDockerContainersMapper {
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_NAME, p.getName());
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_VERSION, p.getVersion());
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_TYPE, p.getTypeString());
+        jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_STATE, p.getContainerStateName());
         return jsonObject;
     }
 

@@ -37,6 +37,12 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerName = name;
     }
 
+    public DockerContainer(String name, String version, String state) {
+        super(name, version, SystemResourceType.DOCKER);
+        this.containerName = name;
+        this.containerState = ContainerState.valueOf(state);
+    }
+
     public DockerContainer(ContainerInstanceDescriptor container) {
         super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);
@@ -95,6 +101,10 @@ public class DockerContainer extends SystemResourceInfo {
 
     public ContainerState getContainerState() {
         return this.containerState;
+    }
+
+    public String getContainerStateName() {
+        return this.containerState.name();
     }
 
     public void setContainerState(ContainerState containerState) {

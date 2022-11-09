@@ -348,12 +348,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     protected Properties readDeployedPackages() {
         Properties deployedPackages = new Properties();
-        if (this.dpaConfPath != null) {
-            try (FileReader fr = new FileReader(this.dpaConfPath)) {
-                deployedPackages.load(fr);
-            } catch (IOException e) {
-                logger.error("Exception loading deployment packages configuration file", e);
-            }
+        try (FileReader fr = new FileReader(this.dpaConfPath)) {
+            deployedPackages.load(fr);
+        } catch (IOException e) {
+            logger.error("Exception loading deployment packages configuration file", e);
         }
         return deployedPackages;
     }

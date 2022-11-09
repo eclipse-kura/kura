@@ -459,11 +459,6 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private void writeDPAPropertiesFile(String dpaConfPath, Properties deployedPackages) {
-        if (dpaConfPath == null) {
-            logger.warn("Configuration file not specified");
-            return;
-        }
-
         try (FileOutputStream fos = new FileOutputStream(dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();

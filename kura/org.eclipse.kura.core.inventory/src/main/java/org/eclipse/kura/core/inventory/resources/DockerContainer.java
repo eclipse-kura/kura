@@ -48,7 +48,6 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerPortsExternal = container.getContainerPortsExternal();
         this.containerPortsInternal = container.getContainerPortsInternal();
         this.containerState = container.getContainerState();
-
         this.isFrameworkManaged = container.isFrameworkManaged();
 
     }

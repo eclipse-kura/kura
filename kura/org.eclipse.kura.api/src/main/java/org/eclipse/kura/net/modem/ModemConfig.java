@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.modem;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.eclipse.kura.configuration.Password;
@@ -566,7 +567,8 @@ public class ModemConfig implements NetConfig {
                 && this.headerCompression == other.headerCompression && this.holdoff == other.holdoff
                 && this.idle == other.idle && Objects.equals(this.ipAddress, other.ipAddress)
                 && this.lcpEchoFailure == other.lcpEchoFailure && this.lcpEchoInterval == other.lcpEchoInterval
-                && this.maxFail == other.maxFail && Objects.equals(this.password, other.password)
+                && this.maxFail == other.maxFail
+                && Arrays.equals(this.password.getPassword(), other.getPasswordAsPassword().getPassword())
                 && this.pdpType == other.pdpType && this.persist == other.persist && this.pppNumber == other.pppNumber
                 && this.profileID == other.profileID && this.resetTimeout == other.resetTimeout
                 && Objects.equals(this.username, other.username);

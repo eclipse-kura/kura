@@ -42,6 +42,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.pdpType", null);
         properties.put("net.interface.ppp.config.persist", null);
         properties.put("net.interface.ppp.config.maxFail", null);
+        properties.put("net.interface.ppp.config.holdoff", null);
         properties.put("net.interface.ppp.config.idle", null);
         properties.put("net.interface.ppp.config.activeFilter", null);
         properties.put("net.interface.ppp.config.resetTimeout", null);
@@ -65,6 +66,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setGpsEnabled(false);
         expected.setPersist(true);
         expected.setMaxFail(5);
+        expected.setHoldoff(1);
         expected.setIdle(95);
         expected.setActiveFilter("inbound");
         expected.setResetTimeout(5);
@@ -99,6 +101,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.pdpType", "");
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
+        properties.put("net.interface.ppp.config.holdoff", 1);
         properties.put("net.interface.ppp.config.idle", 6);
         properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
@@ -121,6 +124,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setPdpType(PdpType.IP);
         expected.setPersist(true);
         expected.setMaxFail(5);
+        expected.setHoldoff(1);
         expected.setIdle(6);
         expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);
@@ -159,6 +163,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.pdpType", "IP");
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
+        properties.put("net.interface.ppp.config.holdoff", 1);
         properties.put("net.interface.ppp.config.idle", 6);
         properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
@@ -181,6 +186,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setPdpType(PdpType.IP);
         expected.setPersist(true);
         expected.setMaxFail(5);
+        expected.setHoldoff(1);
         expected.setIdle(6);
         expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);
@@ -219,6 +225,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.pdpType", "IP");
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
+        properties.put("net.interface.ppp.config.holdoff", 1);
         properties.put("net.interface.ppp.config.idle", 6);
         properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
@@ -241,6 +248,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setPdpType(PdpType.IP);
         expected.setPersist(true);
         expected.setMaxFail(5);
+        expected.setHoldoff(1);
         expected.setIdle(6);
         expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);

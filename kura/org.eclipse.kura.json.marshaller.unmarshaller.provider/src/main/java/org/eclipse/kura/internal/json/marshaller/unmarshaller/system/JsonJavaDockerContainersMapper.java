@@ -50,9 +50,14 @@ public class JsonJavaDockerContainersMapper {
 
         final String name = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_NAME);
         final String version = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_VERSION);
-        final String state = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_STATE);
 
-        return new DockerContainer(name, version, state);
+        try {
+            final String state = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_STATE);
+            return new DockerContainer(name, version, state);
+        } catch (Exception e) {
+            return new DockerContainer(name, version);
+        }
+
     }
 
     public static String marshal(DockerContainers dockerContainers) {

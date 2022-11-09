@@ -1121,10 +1121,10 @@ public class InventoryHandlerV1Test {
                 "{\"name\":\"nginx\",\"version\":\"latest\"}");
         thenCheckIfImageHasDelete();
     }
-    
+
     @Test
     public void testContainerImageDataStuct() throws BundleException, KuraException, InterruptedException {
-    	thenCompareOutputOfContainerImage();
+        thenCompareOutputOfContainerImage();
     }
 
     // endregion
@@ -1303,7 +1303,7 @@ public class InventoryHandlerV1Test {
 
     private void thenCheckIfContainerMatchesJSON() {
         assertEquals(
-                "{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\"}]}",
+                "{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\",\"state\":\"STOPPING\"}]}",
                 TEST_JSON);
     }
 
@@ -1315,10 +1315,11 @@ public class InventoryHandlerV1Test {
     private void thenCheckIfContainerMatchesXML() {
         /**
          * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
-         * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
+         * <name>dockerContainer1</name> <version>nginx:latest</version>
+         * <state>STOPPING</state> </container>
          * </containers> ]>
          */
-        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
+        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version><state>STOPPING</state></container></containers>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
@@ -1410,27 +1411,27 @@ public class InventoryHandlerV1Test {
 
         return result;
     }
-    
+
     private void thenCompareOutputOfContainerImage() {
-    	containerImageObject = new ContainerImage("test", "latest");
-    	
+        containerImageObject = new ContainerImage("test", "latest");
+
         String imageName = "test";
         String imageTag = "latest";
         String imageId = "3e3rf32e2wsd2f";
         String imageAuthor = "Greg";
         String imageArch = "ARM64";
         long imageSize = 9883829;
-        
+
         containerImageObject.setImageName(imageName);
         containerImageObject.setImageTag(imageTag);
         containerImageObject.setImageId(imageId);
         containerImageObject.setImageAuthor(imageAuthor);
         containerImageObject.setImageArch(imageArch);
         containerImageObject.setImageSize(imageSize);
-        
+
         containerImagesObject = new ContainerImages(new LinkedList<ContainerImage>());
         containerImagesObject.setContainerImages(Arrays.asList(containerImageObject));
-        
+
         assertEquals(containerImageObject.getImageName(), imageName);
         assertEquals(containerImageObject.getImageTag(), imageTag);
         assertEquals(containerImageObject.getImageId(), imageId);

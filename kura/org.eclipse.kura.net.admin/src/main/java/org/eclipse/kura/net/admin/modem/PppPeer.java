@@ -125,6 +125,8 @@ public class PppPeer {
     private boolean allowMagic = false;
 
     private boolean persist = false;
+    
+    private int holdoff = 1; 
 
     private int maxFail = 0;
 
@@ -627,6 +629,14 @@ public class PppPeer {
     public void setPersist(boolean persist) {
         this.persist = persist;
     }
+    
+    public int getHoldoff() {
+        return this.holdoff;
+    }
+    
+    public void setHoldoff(int holdoff) {
+        this.holdoff = holdoff;
+    }
 
     public int getMaxFail() {
         return this.maxFail;
@@ -961,7 +971,7 @@ public class PppPeer {
 
             if (this.persist) {
                 writer.println("persist");
-                writer.println("holdoff 1");
+                writer.println("holdoff " + this.holdoff);
             } else {
                 writer.println("nopersist");
             }

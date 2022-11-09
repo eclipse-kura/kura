@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -54,6 +54,7 @@ public class ModemConfig implements NetConfig {
     private String username = "";
     private Password password = new Password("");
     private boolean persist = false;
+    private int holdoff = 1;
     private int maxFail = 0;
     private int idle = 0;
     private String activeFilter = "";
@@ -234,6 +235,30 @@ public class ModemConfig implements NetConfig {
      */
     public void setPersist(boolean persist) {
         this.persist = persist;
+    }
+
+    /**
+     * Returns the 'holdoff' parameter that instruct pppd on how many seconds to wait before re-initiating the link
+     * after it terminates. This option only has any effect if the persist or demand option is used. The holdoff period
+     * is not
+     * applied if the link was terminated because it was idle.
+     *
+     * @return 'holdoff' parameter {@link integer}
+     */
+    public int getHoldoff() {
+        return this.holdoff;
+    }
+
+    /**
+     * Sets 'holdoff' parameter to instruct pppd on how many seconds to wait before re-initiating the link after it
+     * terminates. This option only has any effect if the persist or demand option is used. The holdoff period is not
+     * applied if the link was terminated because it was idle.
+     *
+     * @param holdoff
+     *            as {@link integer}
+     */
+    public void setHoldoff(int holdoff) {
+        this.holdoff = holdoff;
     }
 
     /**
@@ -550,59 +575,24 @@ public class ModemConfig implements NetConfig {
 
         ModemConfig otherConfig = (ModemConfig) obj;
 
-        if (this.enabled != otherConfig.isEnabled()) {
+        if (this.enabled != otherConfig.isEnabled() || this.pppNumber != otherConfig.getPppNumber()
+                || this.persist != otherConfig.isPersist() || this.maxFail != otherConfig.getMaxFail()) {
             return false;
         }
 
-        if (this.pppNumber != otherConfig.getPppNumber()) {
+        if (this.resetTimeout != otherConfig.getResetTimeout() || this.idle != otherConfig.getIdle()
+                || this.lcpEchoInterval != otherConfig.getLcpEchoInterval()
+                || this.lcpEchoFailure != otherConfig.getLcpEchoFailure()) {
             return false;
         }
 
-        if (this.persist != otherConfig.isPersist()) {
+        if (this.profileID != otherConfig.getProfileID() || this.pdpType != otherConfig.getPdpType()
+                || this.authType != otherConfig.getAuthType()
+                || this.dataCompression != otherConfig.getDataCompression()) {
             return false;
         }
 
-        if (this.maxFail != otherConfig.getMaxFail()) {
-            return false;
-        }
-
-        if (this.resetTimeout != otherConfig.getResetTimeout()) {
-            return false;
-        }
-
-        if (this.idle != otherConfig.getIdle()) {
-            return false;
-        }
-
-        if (this.lcpEchoInterval != otherConfig.getLcpEchoInterval()) {
-            return false;
-        }
-
-        if (this.lcpEchoFailure != otherConfig.getLcpEchoFailure()) {
-            return false;
-        }
-
-        if (this.profileID != otherConfig.getProfileID()) {
-            return false;
-        }
-
-        if (this.pdpType != otherConfig.getPdpType()) {
-            return false;
-        }
-
-        if (this.authType != otherConfig.getAuthType()) {
-            return false;
-        }
-
-        if (this.dataCompression != otherConfig.getDataCompression()) {
-            return false;
-        }
-
-        if (this.headerCompression != otherConfig.getHeaderCompression()) {
-            return false;
-        }
-
-        if (this.gpsEnabled != otherConfig.isGpsEnabled()) {
+        if ((this.headerCompression != otherConfig.getHeaderCompression()) || (this.gpsEnabled != otherConfig.isGpsEnabled())) {
             return false;
         }
 

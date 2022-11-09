@@ -167,6 +167,17 @@
                                         formValue="false" ui:field="radio2" />
                                 </g:FlowPanel>
                             </b:FormGroup>
+                            
+                            <b:FormGroup ui:field="groupHoldoff">
+                                <b:FormLabel for="holdoff"
+                                    ui:field="labelHoldoff" />
+                                <util:HelpButton
+                                    ui:field="holdoffHelp" />
+                                <b:HelpBlock color="red"
+                                    ui:field="helpHoldoff" />
+                                <b:TextBox b:id="holdoff"
+                                    ui:field="holdoff" />
+                            </b:FormGroup>
 
                             <b:FormGroup ui:field="groupMaxfail">
                                 <b:FormLabel for="maxfail"

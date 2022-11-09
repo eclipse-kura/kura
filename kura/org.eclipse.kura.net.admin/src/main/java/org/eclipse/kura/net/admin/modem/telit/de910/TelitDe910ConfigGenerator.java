@@ -53,6 +53,7 @@ public class TelitDe910ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setDisconnectScript(disconnectScript);
         pppPeer.setDialString(modemConfig.getDialString());
         pppPeer.setPersist(modemConfig.isPersist());
+        pppPeer.setHoldoff(modemConfig.getHoldoff());
         pppPeer.setMaxFail(modemConfig.getMaxFail());
         pppPeer.setIdleTime(modemConfig.getIdle());
         pppPeer.setActiveFilter(modemConfig.getActiveFilter());

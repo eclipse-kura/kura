@@ -41,6 +41,7 @@ public class ModemConfigurationInterpreter {
     private static final String NET_INTERFACE = "net.interface.";
 
     private static final Boolean DEFAULT_PERSIST_VALUE = true;
+    private static final Integer DEFAULT_HOLDOFF_VALUE = 1;
     private static final Integer DEFAULT_MAXFAIL_VALUE = 5;
     private static final Integer DEFAULT_RESET_TIMEOUT_VALUE = 5;
     private static final Integer DEFAULT_IDLE_VALUE = 95;
@@ -133,6 +134,7 @@ public class ModemConfigurationInterpreter {
         modemConfig.setPdpType(getPdpType(prefix, properties));
         modemConfig.setProfileID(getProfileId(prefix, properties));
         modemConfig.setPersist(isPersist(prefix, properties));
+        modemConfig.setHoldoff(getHoldoff(prefix, properties));
         modemConfig.setMaxFail(getMaximumFailures(prefix, properties));
         modemConfig.setResetTimeout(getResetTimeout(prefix, properties));
         modemConfig.setIdle(getIdle(prefix, properties));
@@ -205,6 +207,12 @@ public class ModemConfigurationInterpreter {
         String key = prefix + "persist";
         Object value = properties.getOrDefault(key, DEFAULT_PERSIST_VALUE);
         return value != null ? (Boolean) value : DEFAULT_PERSIST_VALUE;
+    }
+
+    private static int getHoldoff(String prefix, Map<String, Object> properties) {
+        String key = prefix + "holdoff";
+        Object value = properties.getOrDefault(key, DEFAULT_HOLDOFF_VALUE);
+        return value != null ? (Integer) value : DEFAULT_HOLDOFF_VALUE;
     }
 
     private static int getProfileId(String prefix, Map<String, Object> properties) {

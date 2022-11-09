@@ -443,7 +443,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         deployedPackages.setProperty(packageName, packageUrl);
 
         if (!oldDeployedPackages.equals(deployedPackages)) {
-            writeConfigurationFile(this.dpaConfPath, deployedPackages);
+            writeDPAPropertiesFile(this.dpaConfPath, deployedPackages);
         }
     }
 
@@ -454,11 +454,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         deployedPackages.remove(packageName);
 
         if (!oldDeployedPackages.equals(deployedPackages)) {
-            writeConfigurationFile(this.dpaConfPath, deployedPackages);
+            writeDPAPropertiesFile(this.dpaConfPath, deployedPackages);
         }
     }
 
-    private static void writeConfigurationFile(String dpaConfPath, Properties deployedPackages) {
+    private static void writeDPAPropertiesFile(String dpaConfPath, Properties deployedPackages) {
         if (dpaConfPath == null) {
             logger.warn("Configuration file not specified");
             return;

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -61,6 +61,7 @@ import org.eclipse.kura.net.LoopbackInterface;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
@@ -101,6 +102,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private ModemManagerService modemManagerService;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+    private ConfigurationService configurationService;
 
     private List<NetworkConfigurationVisitor> writeVisitors;
 
@@ -176,6 +178,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
     }
 
+    public void setConfigurationService(final ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -247,14 +253,12 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
             logger.debug("new properties - updating");
             logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
-            this.properties.putAll(receivedProperties);
 
-            Map<String, Object> modifiedProps = new HashMap<>();
-            modifiedProps.putAll(newProperties);
-            String interfaces = (String) newProperties.get(NET_INTERFACES);
-            StringTokenizer st = new StringTokenizer(interfaces, ",");
-            while (st.hasMoreTokens()) {
-                String interfaceName = st.nextToken();
+            Map<String, Object> modifiedProps = new HashMap<>(newProperties);
+
+            final Set<String> interfaces = getNetworkInterfaceNamesInConfig(newProperties);
+
+            for (final String interfaceName : interfaces) {
                 NetInterfaceType type = getNetworkType(interfaceName);
 
                 setInterfaceType(modifiedProps, interfaceName, type);
@@ -264,8 +268,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                 }
             }
 
-            decryptPasswordProperties(modifiedProps);
+            final boolean changed = checkWanInterfaces(this.properties, modifiedProps);
+            mergeNetworkConfigurationProperties(modifiedProps, this.properties);
 
+            decryptPasswordProperties(modifiedProps);
             NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
 
             executeVisitors(networkConfiguration);
@@ -274,9 +280,55 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
 
+            if (changed) {
+                this.configurationService.snapshot();
+            }
+
         } catch (Exception e) {
             logger.error("Error updating the configuration", e);
         }
+    }
+
+    private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
+            final Map<String, Object> newProperties) {
+        final Set<String> oldWanInterfaces = getWanInterfaces(oldProperties);
+        final Set<String> newWanInterfaces = getWanInterfaces(newProperties);
+
+        boolean changed = false;
+
+        if (newWanInterfaces.stream().anyMatch(i -> !oldWanInterfaces.contains(i))) {
+            Set<String> allNetworkInterfaces;
+            try {
+                allNetworkInterfaces = this.networkService.getNetworkInterfaces().stream()
+                        .map(this::probeNetInterfaceConfigName)
+                        .collect(Collectors.toSet());
+            } catch (KuraException e) {
+                logger.warn("failed to retrieve network interface names", e);
+                return changed;
+            }
+
+            for (final String intf : newWanInterfaces) {
+                if (!allNetworkInterfaces.contains(intf)) {
+                    logger.info(
+                            "A new interface has been enabled for WAN and interface {} is also enabled for WAN but it is not currently available."
+                                    + " Disabling it to avoid potentially unwanted multiple interfaces enabled for WAN.",
+                            intf);
+                    newProperties.put(PREFIX + intf + ".config.ip4.status",
+                            NetInterfaceStatus.netIPv4StatusDisabled.name());
+
+                    changed = true;
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    private Set<String> getWanInterfaces(final Map<String, Object> properties) {
+        return getNetworkInterfaceNamesInConfig(properties).stream()
+                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
+                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
+                .collect(Collectors.toSet());
     }
 
     private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
@@ -436,13 +488,21 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
-        executeVisitorsIfNewInterfacesArePresent(networkConfiguration);
+        mergeNetworkConfigurationProperties(networkConfiguration.getConfigurationProperties(), this.properties);
 
-        this.properties.putAll(networkConfiguration.getConfigurationProperties());
+        handleNewNetworkInterfaces(networkConfiguration);
         this.currentNetworkConfiguration = Optional.of(networkConfiguration);
     }
 
-    private void executeVisitorsIfNewInterfacesArePresent(NetworkConfiguration newNetworkConfiguration)
+    private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
+        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(source);
+        interfaces.addAll(getNetworkInterfaceNamesInConfig(dest));
+
+        dest.putAll(source);
+        dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
+    }
+
+    private void handleNewNetworkInterfaces(NetworkConfiguration newNetworkConfiguration)
             throws KuraException {
         if (this.currentNetworkConfiguration.isPresent()) {
             final NetworkConfiguration currentConfiguration = this.currentNetworkConfiguration.get();
@@ -453,6 +513,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             if (hasNewInterfaceConfigs) {
                 logger.info("found new network interfaces, rewriting network configuration");
                 executeVisitors(newNetworkConfiguration);
+                this.eventAdmin.postEvent(
+                        new NetworkConfigurationChangeEvent(newNetworkConfiguration.getConfigurationProperties()));
             }
         }
     }

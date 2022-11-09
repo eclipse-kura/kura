@@ -14,8 +14,10 @@
 package org.eclipse.kura.core.inventory.resources;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
@@ -44,9 +46,13 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerName = container.getContainerName();
         this.containerImage = container.getContainerImage();
         this.containerImageTag = container.getContainerImageTag();
+
         this.containerID = container.getContainerId();
-        this.containerPortsExternal = container.getContainerPortsExternal();
-        this.containerPortsInternal = container.getContainerPortsInternal();
+        this.containerPortsExternal = container.getContainerPorts().stream().map(ContainerPort::getExternalPort)
+                .collect(Collectors.toList());
+
+        this.containerPortsInternal = container.getContainerPorts().stream().map(ContainerPort::getInternalPort)
+                .collect(Collectors.toList());
         this.containerState = container.getContainerState();
 
         this.isFrameworkManaged = container.isFrameworkManaged();

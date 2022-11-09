@@ -37,12 +37,6 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerName = name;
     }
 
-    public DockerContainer(String name, String version, String state) {
-        super(name, version, SystemResourceType.DOCKER);
-        this.containerName = name;
-        this.containerState = ContainerState.valueOf(state);
-    }
-
     public DockerContainer(ContainerInstanceDescriptor container) {
         super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);
@@ -103,8 +97,19 @@ public class DockerContainer extends SystemResourceInfo {
         return this.containerState;
     }
 
-    public String getContainerStateName() {
-        return this.containerState.name();
+    public String getFrameworkContainerState() {
+
+        switch (containerState) {
+            case STARTING:
+                return "installed";
+            case ACTIVE:
+                return "active";
+            case FAILED:
+            case STOPPING:
+                return "uninstalled";
+            default:
+                return "unknown";
+        }
     }
 
     public void setContainerState(ContainerState containerState) {

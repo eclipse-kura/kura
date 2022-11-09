@@ -51,12 +51,7 @@ public class JsonJavaDockerContainersMapper {
         final String name = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_NAME);
         final String version = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_VERSION);
 
-        try {
-            final String state = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_STATE);
-            return new DockerContainer(name, version, state);
-        } catch (Exception e) {
-            return new DockerContainer(name, version);
-        }
+        return new DockerContainer(name, version);
 
     }
 
@@ -74,7 +69,7 @@ public class JsonJavaDockerContainersMapper {
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_NAME, p.getName());
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_VERSION, p.getVersion());
         jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_TYPE, p.getTypeString());
-        jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_STATE, p.getContainerStateName());
+        jsonObject.add(SYSTEM_CONTAINERS_CONTAINER_STATE, p.getFrameworkContainerState());
         return jsonObject;
     }
 

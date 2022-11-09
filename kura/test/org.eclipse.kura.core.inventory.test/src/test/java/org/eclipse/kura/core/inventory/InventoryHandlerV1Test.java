@@ -1303,7 +1303,7 @@ public class InventoryHandlerV1Test {
 
     private void thenCheckIfContainerMatchesJSON() {
         assertEquals(
-                "{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\",\"state\":\"STOPPING\"}]}",
+                "{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\",\"state\":\"uninstalled\"}]}",
                 TEST_JSON);
     }
 
@@ -1316,10 +1316,10 @@ public class InventoryHandlerV1Test {
         /**
          * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
          * <name>dockerContainer1</name> <version>nginx:latest</version>
-         * <state>STOPPING</state> </container>
+         * <state>uninstalled</state> </container>
          * </containers> ]>
          */
-        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version><state>STOPPING</state></container></containers>";
+        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version><state>uninstalled</state></container></containers>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 

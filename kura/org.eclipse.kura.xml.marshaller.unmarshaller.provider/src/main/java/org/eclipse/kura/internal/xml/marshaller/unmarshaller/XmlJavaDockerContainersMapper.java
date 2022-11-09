@@ -55,7 +55,7 @@ public class XmlJavaDockerContainersMapper implements XmlJavaDataMapper {
         // Extract data from XmlDeploymentPackage
         String containerName = container.getName();
         String containerVersion = container.getVersion();
-        String containerState = container.getContainerStateName();
+        String containerState = container.getFrameworkContainerState();
 
         // Create xml elements
         if (containerName != null && !containerName.trim().isEmpty()) {

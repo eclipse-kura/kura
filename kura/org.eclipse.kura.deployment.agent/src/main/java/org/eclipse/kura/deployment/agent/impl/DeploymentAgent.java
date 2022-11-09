@@ -456,7 +456,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
     }
 
-    private void writeDPAPropertiesFile(String dpaConfPath, Properties deployedPackages) {
+    private static void writeDPAPropertiesFile(String dpaConfPath, Properties deployedPackages) {
         try (FileOutputStream fos = new FileOutputStream(dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();

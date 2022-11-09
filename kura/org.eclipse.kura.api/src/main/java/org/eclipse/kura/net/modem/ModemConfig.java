@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.modem;
 
-import java.util.Arrays;
+import java.util.Objects;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.IPAddress;
@@ -244,6 +244,7 @@ public class ModemConfig implements NetConfig {
      * applied if the link was terminated because it was idle.
      *
      * @return 'holdoff' parameter {@link integer}
+     * @since 2.5
      */
     public int getHoldoff() {
         return this.holdoff;
@@ -256,6 +257,7 @@ public class ModemConfig implements NetConfig {
      *
      * @param holdoff
      *            as {@link integer}
+     * @since 2.5
      */
     public void setHoldoff(int holdoff) {
         this.holdoff = holdoff;
@@ -542,121 +544,32 @@ public class ModemConfig implements NetConfig {
 
     @Override
     public int hashCode() {
-        final int prime = 59;
-        int result = super.hashCode();
-
-        result = prime * result + this.profileID;
-        result = prime * result + (this.pdpType == null ? 0 : this.pdpType.hashCode());
-        result = prime * result + (this.authType == null ? 0 : this.authType.hashCode());
-        result = prime * result + (this.apn == null ? 0 : this.apn.hashCode());
-        result = prime * result + (this.username == null ? 0 : this.username.hashCode());
-        result = prime * result + (this.password == null ? 0 : this.password.hashCode());
-        result = prime * result + (this.ipAddress == null ? 0 : this.ipAddress.hashCode());
-        result = prime * result + this.pppNumber;
-        result = prime * result + this.maxFail;
-        result = prime * result + this.resetTimeout;
-        result = prime * result + this.idle;
-        result = prime * result + (this.activeFilter == null ? 0 : this.activeFilter.hashCode());
-        result = prime * result + this.lcpEchoFailure;
-        result = prime * result + this.lcpEchoInterval;
-        result = prime * result + this.dataCompression;
-        result = prime * result + this.headerCompression;
-        result = prime * result + (this.persist ? 1 : 0);
-        result = prime * result + (this.gpsEnabled ? 1 : 0);
-
-        return result;
+        return Objects.hash(this.activeFilter, this.apn, this.authType, this.dataCompression, this.dialString,
+                this.diversityEnabled, this.enabled, this.gpsEnabled, this.headerCompression, this.holdoff, this.idle,
+                this.ipAddress, this.lcpEchoFailure, this.lcpEchoInterval, this.maxFail, this.password, this.pdpType,
+                this.persist, this.pppNumber, this.profileID, this.resetTimeout, this.username);
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (!(obj instanceof ModemConfig)) {
             return false;
         }
-
-        ModemConfig otherConfig = (ModemConfig) obj;
-
-        if (this.enabled != otherConfig.isEnabled() || this.pppNumber != otherConfig.getPppNumber()
-                || this.persist != otherConfig.isPersist() || this.maxFail != otherConfig.getMaxFail()) {
-            return false;
-        }
-
-        if (this.resetTimeout != otherConfig.getResetTimeout() || this.idle != otherConfig.getIdle()
-                || this.lcpEchoInterval != otherConfig.getLcpEchoInterval()
-                || this.lcpEchoFailure != otherConfig.getLcpEchoFailure()) {
-            return false;
-        }
-
-        if (this.profileID != otherConfig.getProfileID() || this.pdpType != otherConfig.getPdpType()
-                || this.authType != otherConfig.getAuthType()
-                || this.dataCompression != otherConfig.getDataCompression()) {
-            return false;
-        }
-
-        if ((this.headerCompression != otherConfig.getHeaderCompression()) || (this.gpsEnabled != otherConfig.isGpsEnabled())) {
-            return false;
-        }
-
-        if (this.dialString != null) {
-            if (!this.dialString.equals(otherConfig.getDialString())) {
-                return false;
-            }
-        } else {
-            if (otherConfig.getDialString() != null) {
-                return false;
-            }
-        }
-        if (this.apn != null) {
-            if (!this.apn.equals(otherConfig.getApn())) {
-                return false;
-            }
-        } else {
-            if (otherConfig.getApn() != null) {
-                return false;
-            }
-        }
-
-        if (this.username != null && this.username.length() > 0) {
-            if (!this.username.equals(otherConfig.getUsername())) {
-                return false;
-            }
-        } else {
-            if (otherConfig.getUsername() != null && otherConfig.getUsername().length() > 0) {
-                return false;
-            }
-        }
-
-        if (this.password != null && this.password.getPassword().length > 0) {
-            if (!Arrays.equals(this.password.getPassword(), otherConfig.getPasswordAsPassword().getPassword())) {
-                return false;
-            }
-        } else {
-            Password otherConfigPassword = otherConfig.getPasswordAsPassword();
-            if (otherConfigPassword != null && otherConfigPassword.getPassword().length > 0) {
-                return false;
-            }
-        }
-
-        if (this.activeFilter != null && this.activeFilter.length() > 0) {
-            if (!this.activeFilter.equals(otherConfig.getActiveFilter())) {
-                return false;
-            }
-        } else {
-            if (otherConfig.getActiveFilter() != null && otherConfig.getActiveFilter().length() > 0) {
-                return false;
-            }
-        }
-
-        if (this.ipAddress != null) {
-            if (!this.ipAddress.equals(otherConfig.ipAddress)) {
-                return false;
-            }
-        } else {
-            if (otherConfig.getIpAddress() != null) {
-                return false;
-            }
-        }
-
-        return true;
+        ModemConfig other = (ModemConfig) obj;
+        return Objects.equals(this.activeFilter, other.activeFilter) && Objects.equals(this.apn, other.apn)
+                && this.authType == other.authType && this.dataCompression == other.dataCompression
+                && Objects.equals(this.dialString, other.dialString) && this.diversityEnabled == other.diversityEnabled
+                && this.enabled == other.enabled && this.gpsEnabled == other.gpsEnabled
+                && this.headerCompression == other.headerCompression && this.holdoff == other.holdoff
+                && this.idle == other.idle && Objects.equals(this.ipAddress, other.ipAddress)
+                && this.lcpEchoFailure == other.lcpEchoFailure && this.lcpEchoInterval == other.lcpEchoInterval
+                && this.maxFail == other.maxFail && Objects.equals(this.password, other.password)
+                && this.pdpType == other.pdpType && this.persist == other.persist && this.pppNumber == other.pppNumber
+                && this.profileID == other.profileID && this.resetTimeout == other.resetTimeout
+                && Objects.equals(this.username, other.username);
     }
 
     @Override
@@ -684,10 +597,10 @@ public class ModemConfig implements NetConfig {
 
     @Override
     public boolean isValid() {
+        boolean result = true;
         if (this.pppNumber < 0) {
-            return false;
+            result = false;
         }
-
-        return true;
+        return result;
     }
 }

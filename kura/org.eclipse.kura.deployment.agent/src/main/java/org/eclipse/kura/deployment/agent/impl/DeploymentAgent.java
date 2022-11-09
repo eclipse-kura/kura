@@ -441,7 +441,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         deployedPackages.setProperty(packageName, packageUrl);
 
         if (!oldDeployedPackages.equals(deployedPackages)) {
-            writeDPAPropertiesFile(this.dpaConfPath, deployedPackages);
+            writeDPAPropertiesFile(deployedPackages);
         }
     }
 
@@ -452,12 +452,12 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         deployedPackages.remove(packageName);
 
         if (!oldDeployedPackages.equals(deployedPackages)) {
-            writeDPAPropertiesFile(this.dpaConfPath, deployedPackages);
+            writeDPAPropertiesFile(deployedPackages);
         }
     }
 
-    private static void writeDPAPropertiesFile(String dpaConfPath, Properties deployedPackages) {
-        try (FileOutputStream fos = new FileOutputStream(dpaConfPath)) {
+    private void writeDPAPropertiesFile(Properties deployedPackages) {
+        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();

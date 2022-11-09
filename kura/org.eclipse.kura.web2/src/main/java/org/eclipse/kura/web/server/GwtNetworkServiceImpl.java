@@ -672,6 +672,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 gwtModemConfig.setResetTimeout(modemConfig.getResetTimeout());
 
                                 gwtModemConfig.setPersist(modemConfig.isPersist());
+                                
+                                gwtModemConfig.setHoldoff(modemConfig.getHoldoff());
 
                                 gwtModemConfig.setMaxFail(modemConfig.getMaxFail());
 

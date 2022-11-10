@@ -419,8 +419,6 @@ public class NetworkConfigurationServiceImplTest {
 
         assertNotNull(properties);
 
-        System.out.println("properties: " + properties);
-
         assertEquals(83, properties.size());
         assertEquals("ETHERNET", properties.get("net.interface.eth2.type"));
         assertEquals("LOOPBACK", properties.get("net.interface.lo.type"));

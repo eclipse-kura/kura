@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,7 @@ public class TelitLe910v2ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setPassword(modemConfig.getPasswordAsPassword());
         pppPeer.setDialString(modemConfig.getDialString());
         pppPeer.setPersist(modemConfig.isPersist());
+        pppPeer.setHoldoff(modemConfig.getHoldoff());
         pppPeer.setMaxFail(modemConfig.getMaxFail());
         pppPeer.setIdleTime(modemConfig.getIdle());
         pppPeer.setActiveFilter(modemConfig.getActiveFilter());

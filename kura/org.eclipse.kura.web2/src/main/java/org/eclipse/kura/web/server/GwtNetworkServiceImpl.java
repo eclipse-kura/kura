@@ -672,6 +672,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 gwtModemConfig.setResetTimeout(modemConfig.getResetTimeout());
 
                                 gwtModemConfig.setPersist(modemConfig.isPersist());
+                                
+                                gwtModemConfig.setHoldoff(modemConfig.getHoldoff());
 
                                 gwtModemConfig.setMaxFail(modemConfig.getMaxFail());
 
@@ -1481,6 +1483,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         properties.put(basePropName + "username", gwtModemConfig.getUsername());
         properties.put(basePropName + "resetTimeout", gwtModemConfig.getResetTimeout());
         properties.put(basePropName + "persist", gwtModemConfig.isPersist());
+        properties.put(basePropName + "holdoff", gwtModemConfig.getHoldoff());
         properties.put(basePropName + "maxFail", gwtModemConfig.getMaxFail());
         properties.put(basePropName + "idle", gwtModemConfig.getIdle());
         properties.put(basePropName + "activeFilter", gwtModemConfig.getActiveFilter());

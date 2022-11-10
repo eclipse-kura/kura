@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -114,6 +114,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setMaxFail(int maxFail) {
         set("maxFail", Integer.valueOf(maxFail));
+    }
+
+    public int getHoldoff() {
+        return ((Integer) get("holdoff")).intValue();
+    }
+
+    public void setHoldoff(int holdoff) {
+        set("holdoff", Integer.valueOf(holdoff));
     }
 
     public int getIdle() {

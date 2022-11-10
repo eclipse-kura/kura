@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 3 PORT d.o.o. and others
+ * Copyright (c) 2020, 2022 3 PORT d.o.o. and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  3 PORT d.o.o.
+ *  Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.simtech.sim7000;
@@ -62,6 +63,7 @@ public class SimTechSim7000ConfigGenerator implements ModemPppConfigGenerator {
         pppPeer.setPassword(modemConfig.getPasswordAsPassword());
         pppPeer.setDialString(modemConfig.getDialString());
         pppPeer.setPersist(modemConfig.isPersist());
+        pppPeer.setHoldoff(modemConfig.getHoldoff());
         pppPeer.setMaxFail(modemConfig.getMaxFail());
         pppPeer.setIdleTime(modemConfig.getIdle());
         pppPeer.setActiveFilter(modemConfig.getActiveFilter());

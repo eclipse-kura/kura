@@ -54,7 +54,6 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerPortsInternal = container.getContainerPorts().stream().map(ContainerPort::getInternalPort)
                 .collect(Collectors.toList());
         this.containerState = container.getContainerState();
-
         this.isFrameworkManaged = container.isFrameworkManaged();
 
     }
@@ -101,6 +100,21 @@ public class DockerContainer extends SystemResourceInfo {
 
     public ContainerState getContainerState() {
         return this.containerState;
+    }
+
+    public String getFrameworkContainerState() {
+
+        switch (containerState) {
+            case STARTING:
+                return "installed";
+            case ACTIVE:
+                return "active";
+            case FAILED:
+            case STOPPING:
+                return "uninstalled";
+            default:
+                return "unknown";
+        }
     }
 
     public void setContainerState(ContainerState containerState) {

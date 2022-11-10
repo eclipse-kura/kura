@@ -25,6 +25,7 @@ public class XmlJavaDockerContainersMapper implements XmlJavaDataMapper {
     private static final String CONTAINERS_CONTAINER = "container";
     private static final String CONTAINERS_CONTAINER_NAME = "name";
     private static final String CONTAINERS_CONTAINER_VERSION = "version";
+    private static final String CONTAINERS_CONTAINER_STATE = "state";
 
     @Override
     public Element marshal(Document doc, Object object) throws Exception {
@@ -54,6 +55,7 @@ public class XmlJavaDockerContainersMapper implements XmlJavaDataMapper {
         // Extract data from XmlDeploymentPackage
         String containerName = container.getName();
         String containerVersion = container.getVersion();
+        String containerState = container.getFrameworkContainerState();
 
         // Create xml elements
         if (containerName != null && !containerName.trim().isEmpty()) {
@@ -66,6 +68,12 @@ public class XmlJavaDockerContainersMapper implements XmlJavaDataMapper {
             Element version = doc.createElement(CONTAINERS_CONTAINER_VERSION);
             version.setTextContent(containerVersion);
             packageInstalled.appendChild(version);
+        }
+
+        if (containerState != null && !containerState.trim().isEmpty()) {
+            Element state = doc.createElement(CONTAINERS_CONTAINER_STATE);
+            state.setTextContent(containerState);
+            packageInstalled.appendChild(state);
         }
     }
 }

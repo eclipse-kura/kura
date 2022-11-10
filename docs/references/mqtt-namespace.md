@@ -830,11 +830,10 @@ The container JSON message is comprised of the following elements:
 * Type: denotes the type of inventory payload
 
 * State: describes the container's current state
-     * Active: Container is running
-     * Installed: Container is starting
-     * Uninstalled: Container has failed, or is stopped
-     * Unknown: Container state can not be determined
-
+     * `active`: Container is running
+     * `installed`: Container is starting
+     * `uninstalled`: Container has failed, or is stopped
+     * `unknown`: Container state can not be determined
 
 #### Start a Container
 

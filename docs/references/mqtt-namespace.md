@@ -814,7 +814,8 @@ The following JSON message is an example of what this request outputs:
     {
       "name":"container_1",
       "version":"nginx:latest",
-      "type":"DOCKER"
+      "type":"DOCKER",
+      "state":"active"
     }
   ]
 }
@@ -827,6 +828,8 @@ The container JSON message is comprised of the following elements:
 * Version: describes both the container's respective image and tag separated by a colon.
 
 * Type: denotes the type of inventory payload
+
+* State: describes the container's current state
 
 #### Start a Container
 
@@ -857,7 +860,8 @@ Examples:
 {
     "name":"container_1",
     "version":"nginx:latest",
-    "type":"DOCKER"
+    "type":"DOCKER",
+    "state":"active"
 }
 ```
 

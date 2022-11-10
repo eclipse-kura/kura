@@ -73,6 +73,11 @@ public class NetworkConfigurationServiceImplTest {
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
 
             @Override
+            protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+                return guessNetworkType(interfaceName);
+            }
+
+            @Override
             protected void initVisitors() {
                 inited.set(true);
             }
@@ -106,6 +111,11 @@ public class NetworkConfigurationServiceImplTest {
     @Test
     public void testPostEvent() throws InterruptedException, NoSuchFieldException {
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
+
+            @Override
+            protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+                return guessNetworkType(interfaceName);
+            }
 
             @Override
             protected void initVisitors() {
@@ -257,6 +267,11 @@ public class NetworkConfigurationServiceImplTest {
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
 
             @Override
+            protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+                return guessNetworkType(interfaceName);
+            }
+
+            @Override
             protected void initVisitors() {
             }
 
@@ -355,26 +370,7 @@ public class NetworkConfigurationServiceImplTest {
 
             @Override
             protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
-                NetInterfaceType type;
-
-                switch (interfaceName) {
-                    case "eth2":
-                        type = NetInterfaceType.ETHERNET;
-                        break;
-                    case "lo":
-                        type = NetInterfaceType.LOOPBACK;
-                        break;
-                    case "ppp1":
-                        type = NetInterfaceType.MODEM;
-                        break;
-                    case "wlan1":
-                        type = NetInterfaceType.WIFI;
-                        break;
-                    default:
-                        type = NetInterfaceType.UNKNOWN;
-                }
-
-                return type;
+                return guessNetworkType(interfaceName);
             }
 
             @Override
@@ -758,6 +754,22 @@ public class NetworkConfigurationServiceImplTest {
             }
         }
         assertEquals(45, adsConfigured);
+    }
+
+    private static NetInterfaceType guessNetworkType(final String interfaceName) {
+
+        if (interfaceName.startsWith("eth")) {
+            return NetInterfaceType.ETHERNET;
+        } else if (interfaceName.equals("lo")) {
+            return NetInterfaceType.LOOPBACK;
+        } else if (interfaceName.startsWith("ppp")) {
+            return NetInterfaceType.MODEM;
+        } else if (interfaceName.startsWith("wlan")) {
+            return NetInterfaceType.WIFI;
+        } else {
+            return NetInterfaceType.UNKNOWN;
+        }
+
     }
 
 }

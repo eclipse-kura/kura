@@ -41,8 +41,8 @@ public class WireAssetOCD extends BaseAssetOCD {
     private static final String EMIT_ERRORS_DESCRIPTION = "Specifies wheter errors should be included or not "
             + "in the emitted envelope";
 
-    private static final String EMIT_ON_CHANGE_DESCRIPTION = "If set to true, this component will emit a value on Kura Wires"
-            + " only if it is different than the one obtained from the previous read operation or event for the corresponding channel."
+    private static final String EMIT_ON_CHANGE_DESCRIPTION = "If set to true, this component will include a channel value in the output emitted in Kura Wires"
+            + " only if it is different than the one from the previous read operation or event."
             + " Channel errors will always be emitted if emit.errors is set to true.";
 
     private static final String EMIT_EMPTY_ENVELOPES_DESCRIPTION = "If set to false, this component will not emit empty envelopes."

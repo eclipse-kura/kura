@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +67,8 @@ import org.osgi.service.wireadmin.Wire;
  * <li>{@code <channelName>_timestamp}</li>
  * </ul>
  *
- * For example, if the processing of data of a channel with a name of {@code LED} becomes
+ * For example, if the processing of data of a channel with a name of
+ * {@code LED} becomes
  * <b>successful</b>, the data will be as follows:
  *
  * <pre>
@@ -80,11 +82,14 @@ import org.osgi.service.wireadmin.Wire;
  * channel wire field name, then it would be considered as a WRITE wire field
  * value to the specific channel. <br/>
  * <br/>
- * For instance, {@code A} asset sends a {@link WireRecord} to {@code B} asset and the
- * received {@link WireRecord} contains list of Wire Fields. If there exists a Wire
+ * For instance, {@code A} asset sends a {@link WireRecord} to {@code B} asset
+ * and the
+ * received {@link WireRecord} contains list of Wire Fields. If there exists a
+ * Wire
  * Field which signifies the channel name and if this channel name also exists
  * in {@code B}'s list of configured channels, then the Wire Field which
- * contains the typed value of this channel in the received {@link WireRecord} will be
+ * contains the typed value of this channel in the received {@link WireRecord}
+ * will be
  * considered as a WRITE Value in that specific channel in B and this value will
  * be written to {@code B}'s channel
  *
@@ -101,6 +106,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     private WireSupport wireSupport;
 
+    private Optional<ValueChangeCache> valueChangeCache = Optional.empty();
+
     private WireAssetOptions options = new WireAssetOptions();
 
     private PreparedEmit preparedEmit;
@@ -109,7 +116,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Binds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                          the new Wire Helper Service
      */
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (isNull(this.wireHelperService)) {
@@ -121,7 +128,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Unbinds the Wire Helper Service.
      *
      * @param wireHelperService
-     *            the new Wire Helper Service
+     *                          the new Wire Helper Service
      */
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
@@ -133,9 +140,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * OSGi service component activation callback.
      *
      * @param componentContext
-     *            the component context
+     *                         the component context
      * @param properties
-     *            the service properties
+     *                         the service properties
      */
     @Override
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
@@ -150,12 +157,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * OSGi service component update callback.
      *
      * @param properties
-     *            the service properties
+     *                   the service properties
      */
     @Override
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating Wire Asset...");
         this.options = new WireAssetOptions(properties);
+
+        if (this.options.emitOnChange()) {
+            this.valueChangeCache = Optional.of(new ValueChangeCache());
+        } else {
+            this.valueChangeCache = Optional.empty();
+        }
+
         super.updated(properties);
         logger.debug("Updating Wire Asset...Done");
     }
@@ -164,7 +178,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * OSGi service component deactivate callback.
      *
      * @param context
-     *            the context
+     *                the context
      */
     @Override
     protected void deactivate(final ComponentContext context) {
@@ -187,7 +201,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
 
     /**
      * This method is triggered as soon as the wire component receives a Wire
-     * Envelope. After it receives a {@link WireEnvelope}, it checks for all associated
+     * Envelope. After it receives a {@link WireEnvelope}, it checks for all
+     * associated
      * channels to read and write and perform the operations accordingly. The
      * order of executions are performed the following way:
      *
@@ -196,13 +211,15 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * <li>Perform all write operations on associated writing channels</li>
      * <ul>
      *
-     * Both the aforementioned operations are performed as soon as this Wire Component
-     * receives {@code Non Null} {@link WireEnvelop} from its upstream Wire Component(s).
+     * Both the aforementioned operations are performed as soon as this Wire
+     * Component
+     * receives {@code Non Null} {@link WireEnvelop} from its upstream Wire
+     * Component(s).
      *
      * @param wireEnvelope
-     *            the received {@link WireEnvelope}
+     *                     the received {@link WireEnvelope}
      * @throws NullPointerException
-     *             if {@link WireEnvelope} is null
+     *                              if {@link WireEnvelope} is null
      */
     @Override
     public void onWireReceive(final WireEnvelope wireEnvelope) {
@@ -241,10 +258,10 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Determine the channels to write
      *
      * @param records
-     *            the list of {@link WireRecord}s to parse
+     *                the list of {@link WireRecord}s to parse
      * @return list of Channel Records containing the values to be written
      * @throws NullPointerException
-     *             if argument is null
+     *                              if argument is null
      */
     private List<ChannelRecord> determineWritingChannels(final WireRecord record) {
         requireNonNull(record, "Wire Record cannot be null");
@@ -277,12 +294,13 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Emit the provided list of channel records to the associated wires.
      *
      * @param channelRecords
-     *            the list of channel records conforming to the aforementioned
-     *            specification
+     *                       the list of channel records conforming to the
+     *                       aforementioned
+     *                       specification
      * @throws NullPointerException
-     *             if provided records list is null
+     *                                  if provided records list is null
      * @throws IllegalArgumentException
-     *             if provided records list is empty
+     *                                  if provided records list is empty
      */
     private void emitChannelRecords(final List<ChannelRecord> channelRecords) {
         requireNonNull(channelRecords, "List of Channel Records cannot be null");
@@ -290,12 +308,19 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             throw new IllegalArgumentException("Channel Records cannot be empty");
         }
 
+        final List<ChannelRecord> toBeEmitted = this.valueChangeCache.map(c -> c.filterRecords(channelRecords))
+                .orElse(channelRecords);
+
         final Map<String, TypedValue<?>> wireRecordProperties;
 
         if (this.preparedEmit != null) {
-            wireRecordProperties = this.preparedEmit.execute(channelRecords);
+            wireRecordProperties = this.preparedEmit.execute(toBeEmitted);
         } else {
-            wireRecordProperties = Utils.toWireRecordProperties(channelRecords, this.options);
+            wireRecordProperties = Utils.toWireRecordProperties(toBeEmitted, this.options);
+        }
+
+        if (!this.options.emitEmptyEnvelopes() && wireRecordProperties.isEmpty()) {
+            return;
         }
 
         try {
@@ -312,9 +337,9 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
      * Perform Channel Write operation
      *
      * @param channelRecordsToWrite
-     *            the list of {@link ChannelRecord}s
+     *                              the list of {@link ChannelRecord}s
      * @throws NullPointerException
-     *             if the provided list is null
+     *                              if the provided list is null
      */
     private void writeChannels(final List<ChannelRecord> channelRecordsToWrite) {
         requireNonNull(channelRecordsToWrite, "List of Channel Records cannot be null");

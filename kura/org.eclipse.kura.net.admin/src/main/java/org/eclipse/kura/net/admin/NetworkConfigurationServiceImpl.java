@@ -561,7 +561,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {
         return Optional.ofNullable(properties).map(p -> p.get(NET_INTERFACES))
-                .map(s -> COMMA.splitAsStream((String) s).collect(Collectors.toCollection(HashSet::new)))
+                .map(s -> COMMA.splitAsStream((String) s).filter(p -> !p.trim().isEmpty())
+                        .collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
     }
 

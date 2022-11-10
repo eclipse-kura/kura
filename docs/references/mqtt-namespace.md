@@ -833,6 +833,7 @@ The container JSON message is comprised of the following elements:
      * Active: Container is running
      * Installed: Container is starting
      * Uninstalled: Container has failed, or is stopped
+     * Unknown: Container state can not be determined
 
 
 #### Start a Container

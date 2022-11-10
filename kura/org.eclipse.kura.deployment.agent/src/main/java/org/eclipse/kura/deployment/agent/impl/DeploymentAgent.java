@@ -348,12 +348,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     protected Properties readDeployedPackages() {
         Properties deployedPackages = new Properties();
-        if (this.dpaConfPath != null) {
-            try (FileReader fr = new FileReader(this.dpaConfPath)) {
-                deployedPackages.load(fr);
-            } catch (IOException e) {
-                logger.error("Exception loading deployment packages configuration file", e);
-            }
+        try (FileReader fr = new FileReader(this.dpaConfPath)) {
+            deployedPackages.load(fr);
+        } catch (IOException e) {
+            logger.error("Exception loading deployment packages configuration file", e);
         }
         return deployedPackages;
     }
@@ -442,21 +440,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.setProperty(packageName, packageUrl);
 
-        if (this.dpaConfPath == null) {
-            logger.warn("Configuration file not specified");
-            return;
-        }
-
-        if (oldDeployedPackages.equals(deployedPackages)) {
-            return;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
-            deployedPackages.store(fos, null);
-            fos.flush();
-            fos.getFD().sync();
-        } catch (IOException e) {
-            logger.error("Error writing package configuration file", e);
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            writeDPAPropertiesFile(deployedPackages);
         }
     }
 
@@ -466,15 +451,12 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.remove(packageName);
 
-        if (this.dpaConfPath == null) {
-            logger.warn("Configuration file not specified");
-            return;
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            writeDPAPropertiesFile(deployedPackages);
         }
+    }
 
-        if (oldDeployedPackages.equals(deployedPackages)) {
-            return;
-        }
-
+    private void writeDPAPropertiesFile(Properties deployedPackages) {
         try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();

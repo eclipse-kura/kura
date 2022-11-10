@@ -4,7 +4,7 @@ Brief description of the PR. [e.g. Added `null` check on `object` to avoid `Null
 
 **Related Issue:** This PR fixes/closes {issue number}
 
-**Description of the solution adopted:** A more detailed description of the changes made to solve/close one or more issues. If the PR is simple and easy to inderstand this section can be skipped.
+**Description of the solution adopted:** A more detailed description of the changes made to solve/close one or more issues. If the PR is simple and easy to understand this section can be skipped.
 
 **Screenshots:** If applicable, add screenshots to help explain your solution
 

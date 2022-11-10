@@ -404,12 +404,12 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> inputProperties = new HashMap<>();
         inputProperties.put("net.interfaces", "");
 
-        svc.activate(null, inputProperties);
-
         List<UsbNetDevice> usbNetDevices = new ArrayList<>();
         usbNetDevices.add(new UsbNetDevice("vendor", "product", "manufacturer", "productName", "usbBusNumber",
                 "usbDevicePath", "wlan1"));
         when(usbServiceMock.getUsbNetDevices()).thenReturn(usbNetDevices);
+
+        svc.activate(null, inputProperties);
 
         ComponentConfiguration configuration = svc.getConfiguration();
 
@@ -418,6 +418,9 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> properties = configuration.getConfigurationProperties();
 
         assertNotNull(properties);
+
+        System.out.println("properties: " + properties);
+
         assertEquals(83, properties.size());
         assertEquals("ETHERNET", properties.get("net.interface.eth2.type"));
         assertEquals("LOOPBACK", properties.get("net.interface.lo.type"));

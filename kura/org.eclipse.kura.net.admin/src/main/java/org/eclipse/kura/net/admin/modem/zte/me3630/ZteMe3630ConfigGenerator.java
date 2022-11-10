@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 3 PORT d.o.o. and others
+ * Copyright (c) 2019, 2022 3 PORT d.o.o. and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  3 PORT d.o.o.
+ *  Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.zte.me3630;

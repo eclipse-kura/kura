@@ -373,7 +373,7 @@ public class DeploymentAgentTest {
         final Properties deployedPackages = spy(new Properties());
 
         when(deployedPackages.entrySet()).thenCallRealMethod();
-        doCallRealMethod().when(deployedPackages).setProperty(anyObject(), anyObject());
+        doCallRealMethod().when(deployedPackages).setProperty(any(), any());
 
         DeploymentAgent svc = new DeploymentAgent() {
 

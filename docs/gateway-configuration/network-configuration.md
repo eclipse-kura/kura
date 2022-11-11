@@ -154,7 +154,7 @@ Name                                                  | Type    | Description
 `net.interface.\<interface\>.config.pdpType`          |String	|The PdP type; possible values are IP, PPP and IPv6
 `net.interface.\<interface\>.config.maxFail`          |Integer	|The maxfail option of the PPP daemon
 `net.interface.\<interface\>.config.authType`         |String	|The authentication type; possible values are None, Auto, CHAP and PAP
-`net.interface.\<interface\>.config.lpcEchoInterval`  |Integer	|the lcp-echo-interval option of the PPP daemon
+`net.interface.\<interface\>.config.lpcEchoInterval`  |Integer	|The lcp-echo-interval option of the PPP daemon
 `net.interface.\<interface\>.config.activeFilter`     |String	|The active-filter option of the PPP daemon
 `net.interface.\<interface\>.config.lpcEchoFailure`   |Integer	|The lcp-echo-failure option of the PPP daemon
 `net.interface.\<interface\>.config.diversityEnabled` |Boolean	|Enable the LTE diversity antenna
@@ -163,6 +163,7 @@ Name                                                  | Type    | Description
 `net.interface.\<interface\>.config.persist`          |Boolean	|The persist option of the PPP daemon
 `net.interface.\<interface\>.config.apn`              |String	|The modem Access Point Name
 `net.interface.\<interface\>.config.dialString`       |String	|The dial string used for connecting to the APN
+`net.interface.\<interface\>.config.holdoff`          |Integer	|The holdoff option of the PPP daemon (in seconds)
 
 ## Network Configuration recipes
 

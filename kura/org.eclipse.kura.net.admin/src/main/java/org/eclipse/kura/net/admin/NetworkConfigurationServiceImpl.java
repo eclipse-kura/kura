@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -61,6 +61,7 @@ import org.eclipse.kura.net.LoopbackInterface;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
@@ -101,12 +102,13 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private ModemManagerService modemManagerService;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+    private ConfigurationService configurationService;
 
     private List<NetworkConfigurationVisitor> writeVisitors;
 
     private LinuxNetworkUtil linuxNetworkUtil;
 
-    private Map<String, Object> properties;
+    private Map<String, Object> properties = new HashMap<>();
     private Optional<NetworkConfiguration> currentNetworkConfiguration = Optional.empty();
 
     // ----------------------------------------------------------------
@@ -176,6 +178,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
     }
 
+    public void setConfigurationService(final ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -190,7 +196,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             logger.debug("Got null properties...");
         } else {
             logger.debug("Props...{}", properties);
-            this.properties = properties;
+            this.properties = new HashMap<>(properties);
             updated(this.properties);
         }
     }
@@ -221,51 +227,114 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
     }
 
+    private Optional<NetInterfaceType> getNetworkTypeFromProperties(final String interfaceName,
+            final Map<String, Object> properties) {
+        return Optional.ofNullable(properties.get(PREFIX + interfaceName + ".type")).flatMap(p -> {
+            try {
+                return Optional.of(NetInterfaceType.valueOf((String) p));
+            } catch (final Exception e) {
+                return Optional.empty();
+            }
+        });
+    }
+
     @Override
     public synchronized void setNetworkConfiguration(NetworkConfiguration networkConfiguration) throws KuraException {
         updated(networkConfiguration.getConfigurationProperties());
     }
 
     public synchronized void updated(Map<String, Object> receivedProperties) {
+        if (receivedProperties == null) {
+            logger.debug("properties are null");
+            return;
+        }
+
         try {
-            if (receivedProperties != null) {
-                final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
-                logger.debug("new properties - updating");
-                logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
-                this.properties = newProperties;
+            final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
+            logger.debug("new properties - updating");
+            logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
 
-                Map<String, Object> modifiedProps = new HashMap<>();
-                modifiedProps.putAll(newProperties);
-                String interfaces = (String) newProperties.get(NET_INTERFACES);
-                StringTokenizer st = new StringTokenizer(interfaces, ",");
-                while (st.hasMoreTokens()) {
-                    String interfaceName = st.nextToken();
-                    NetInterfaceType type = getNetworkType(interfaceName);
+            Map<String, Object> modifiedProps = new HashMap<>(newProperties);
 
-                    setInterfaceType(modifiedProps, interfaceName, type);
-                    if (NetInterfaceType.MODEM.equals(type)) {
-                        setModemPppNumber(modifiedProps, interfaceName);
-                        setModemUsbDeviceProperties(modifiedProps, interfaceName);
-                    }
+            final Set<String> interfaces = getNetworkInterfaceNamesInConfig(newProperties);
+
+            for (final String interfaceName : interfaces) {
+                NetInterfaceType type = getNetworkType(interfaceName);
+
+                setInterfaceType(modifiedProps, interfaceName, type);
+                if (NetInterfaceType.MODEM.equals(type)) {
+                    setModemPppNumber(modifiedProps, interfaceName);
+                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
                 }
-
-                decryptPasswordProperties(modifiedProps);
-
-                NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
-
-                for (NetworkConfigurationVisitor visitor : getVisitors()) {
-                    visitor.setExecutorService(this.commandExecutorService);
-                    networkConfiguration.accept(visitor);
-                }
-
-                updateCurrentNetworkConfiguration();
-
-                this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
-            } else {
-                logger.debug("properties are null");
             }
+
+            final boolean changed = checkWanInterfaces(this.properties, modifiedProps);
+            mergeNetworkConfigurationProperties(modifiedProps, this.properties);
+
+            decryptPasswordProperties(modifiedProps);
+            NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
+
+            executeVisitors(networkConfiguration);
+
+            updateCurrentNetworkConfiguration();
+
+            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
+
+            if (changed) {
+                this.configurationService.snapshot();
+            }
+
         } catch (Exception e) {
             logger.error("Error updating the configuration", e);
+        }
+    }
+
+    private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
+            final Map<String, Object> newProperties) {
+        final Set<String> oldWanInterfaces = getWanInterfaces(oldProperties);
+        final Set<String> newWanInterfaces = getWanInterfaces(newProperties);
+
+        boolean changed = false;
+
+        if (newWanInterfaces.stream().anyMatch(i -> !oldWanInterfaces.contains(i))) {
+            Set<String> allNetworkInterfaces;
+            try {
+                allNetworkInterfaces = this.networkService.getNetworkInterfaces().stream()
+                        .map(this::probeNetInterfaceConfigName)
+                        .collect(Collectors.toSet());
+            } catch (KuraException e) {
+                logger.warn("failed to retrieve network interface names", e);
+                return changed;
+            }
+
+            for (final String intf : newWanInterfaces) {
+                if (!allNetworkInterfaces.contains(intf)) {
+                    logger.info(
+                            "A new interface has been enabled for WAN and interface {} is also enabled for WAN but it is not currently available."
+                                    + " Disabling it to avoid potentially unwanted multiple interfaces enabled for WAN.",
+                            intf);
+                    newProperties.put(PREFIX + intf + ".config.ip4.status",
+                            NetInterfaceStatus.netIPv4StatusDisabled.name());
+
+                    changed = true;
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    private Set<String> getWanInterfaces(final Map<String, Object> properties) {
+        return getNetworkInterfaceNamesInConfig(properties).stream()
+                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
+                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
+                .collect(Collectors.toSet());
+    }
+
+    private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
+        for (NetworkConfigurationVisitor visitor : getVisitors()) {
+            visitor.setExecutorService(this.commandExecutorService);
+            networkConfiguration.accept(visitor);
         }
     }
 
@@ -336,16 +405,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
-        // This method returns the network configuration properties without the current values.
-        // i.e. the ip address that should be applied to the system, but not the actual one.
-        Optional<NetworkConfiguration> networkConfiguration = getNetworkConfiguration(false);
-        if (!networkConfiguration.isPresent()) {
-            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "The network component configuration cannot be retrieved");
 
-        }
-        return new ComponentConfigurationImpl(PID, getDefinition(),
-                networkConfiguration.get().getConfigurationProperties());
+        return new ComponentConfigurationImpl(PID, getDefinition(this.properties),
+                this.properties);
     }
 
     @Override
@@ -374,12 +436,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
                 .getNetworkInterfaces();
         Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
-        Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<>();
+
         for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
             allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-            if (netInterface.isUp()) {
-                activeNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-            }
         }
 
         // Create the NetInterfaceConfig objects
@@ -399,29 +458,29 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                     logger.debug("Getting config for {} type: {}", interfaceName, type);
                     switch (type) {
-                    case LOOPBACK:
-                        populateLoopbackConfiguration(networkConfiguration, netInterface, usbDevice);
-                        break;
+                        case LOOPBACK:
+                            populateLoopbackConfiguration(networkConfiguration, netInterface, usbDevice);
+                            break;
 
-                    case ETHERNET:
-                        populateEthernetConfiguration(networkConfiguration, netInterface, usbDevice);
-                        break;
+                        case ETHERNET:
+                            populateEthernetConfiguration(networkConfiguration, netInterface, usbDevice);
+                            break;
 
-                    case WIFI:
-                        populateWifiConfig(networkConfiguration, netInterface, usbDevice);
-                        break;
+                        case WIFI:
+                            populateWifiConfig(networkConfiguration, netInterface, usbDevice);
+                            break;
 
-                    case MODEM:
-                        populateModemConfig(networkConfiguration, netInterface, usbDevice);
-                        break;
+                        case MODEM:
+                            populateModemConfig(networkConfiguration, netInterface, usbDevice);
+                            break;
 
-                    case UNKNOWN:
-                        logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
-                                interfaceName);
-                        break;
+                        case UNKNOWN:
+                            logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
+                                    interfaceName);
+                            break;
 
-                    default:
-                        logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
+                        default:
+                            logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
                     }
                 } catch (Exception e) {
                     logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
@@ -429,7 +488,35 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
+        mergeNetworkConfigurationProperties(networkConfiguration.getConfigurationProperties(), this.properties);
+
+        handleNewNetworkInterfaces(networkConfiguration);
         this.currentNetworkConfiguration = Optional.of(networkConfiguration);
+    }
+
+    private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
+        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(source);
+        interfaces.addAll(getNetworkInterfaceNamesInConfig(dest));
+
+        dest.putAll(source);
+        dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
+    }
+
+    private void handleNewNetworkInterfaces(NetworkConfiguration newNetworkConfiguration)
+            throws KuraException {
+        if (this.currentNetworkConfiguration.isPresent()) {
+            final NetworkConfiguration currentConfiguration = this.currentNetworkConfiguration.get();
+
+            final boolean hasNewInterfaceConfigs = newNetworkConfiguration.getNetInterfaceConfigs().stream()
+                    .anyMatch(c -> currentConfiguration.getNetInterfaceConfig(c.getName()) == null);
+
+            if (hasNewInterfaceConfigs) {
+                logger.info("found new network interfaces, rewriting network configuration");
+                executeVisitors(newNetworkConfiguration);
+                this.eventAdmin.postEvent(
+                        new NetworkConfigurationChangeEvent(newNetworkConfiguration.getConfigurationProperties()));
+            }
+        }
     }
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,
@@ -474,7 +561,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {
         return Optional.ofNullable(properties).map(p -> p.get(NET_INTERFACES))
-                .map(s -> COMMA.splitAsStream((String) s).collect(Collectors.toCollection(HashSet::new)))
+                .map(s -> COMMA.splitAsStream((String) s).filter(p -> !p.trim().isEmpty())
+                        .collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
     }
 
@@ -602,7 +690,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
     }
 
-    private Tocd getDefinition() throws KuraException {
+    private Tocd getDefinition(final Map<String, Object> properties) throws KuraException {
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
 
@@ -625,18 +713,24 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
         // Get the network interfaces on the platform
         try {
-            List<String> networkInterfaceNames = getAllInterfaceNames();
+            Set<String> networkInterfaceNames = getNetworkInterfaceNamesInConfig(properties);
             for (String ifaceName : networkInterfaceNames) {
                 // get the current configuration for this interface
-                NetInterfaceType type = getNetworkType(ifaceName);
 
-                if (type == NetInterfaceType.LOOPBACK) {
+                Optional<NetInterfaceType> type = getNetworkTypeFromProperties(ifaceName, properties);
+
+                if (!type.isPresent()) {
+                    logger.warn("failed to compute the interface type for {}", ifaceName);
+                    continue;
+                }
+
+                if (type.get() == NetInterfaceType.LOOPBACK) {
                     getLoopbackDefinition(objectFactory, tocd, ifaceName);
-                } else if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
+                } else if (type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI) {
                     getUsbDeviceDefinition(usbNetDevices, objectFactory, tocd, ifaceName);
                     getInterfaceCommonDefinition(objectFactory, tocd, ifaceName);
                     getDnsDefinition(objectFactory, tocd, ifaceName);
-                    getWifiDefinition(type, objectFactory, tocd, ifaceName);
+                    getWifiDefinition(type.get(), objectFactory, tocd, ifaceName);
                     // TODO - deal with USB devices (READ ONLY)
                 }
             }

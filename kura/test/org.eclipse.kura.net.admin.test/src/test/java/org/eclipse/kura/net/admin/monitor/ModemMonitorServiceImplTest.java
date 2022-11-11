@@ -16,10 +16,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,6 +83,7 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
@@ -178,7 +177,7 @@ public class ModemMonitorServiceImplTest {
         interfaceAddressConfigs.add(modemInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
-        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
+        when(ncsMock.getNetworkConfiguration(Mockito.anyBoolean())).thenReturn(Optional.of(nc));
         svc.setNetworkConfigurationService(ncsMock);
 
         // for obtaining the available network interfaces, ppp port
@@ -353,7 +352,8 @@ public class ModemMonitorServiceImplTest {
         when(modem.getIntegratedCirquitCardId(false)).thenReturn("cardid");
         when(modem.getSignalStrength(false)).thenReturn(2);
         when(modem.isGpsSupported()).thenReturn(true);
-        // 1. for start of disabling, 2. check after being disabled, 3. log it, 4. another check before enabling it
+        // 1. for start of disabling, 2. check after being disabled, 3. log it, 4.
+        // another check before enabling it
         when(modem.isGpsEnabled()).thenReturn(true).thenReturn(false).thenReturn(false).thenReturn(false);
         when(modem.getModel()).thenReturn("testModem");
         when(modem.getAtPort()).thenReturn("usb0");
@@ -392,7 +392,8 @@ public class ModemMonitorServiceImplTest {
         when(task.isDone()).thenReturn(false);
 
         // produce a warning log...
-        when(executor.awaitTermination(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(new InterruptedException("test"));
+        when(executor.awaitTermination(Mockito.anyLong(), Mockito.eq(TimeUnit.SECONDS)))
+                .thenThrow(new InterruptedException("test"));
 
         svc.deactivate();
 
@@ -640,7 +641,8 @@ public class ModemMonitorServiceImplTest {
 
     @Test
     public void testGetModemResetTimeoutMsecNull() throws Throwable {
-        // test retrieval of reset timeout from configuration where interface name is null
+        // test retrieval of reset timeout from configuration where interface name is
+        // null
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
 
@@ -940,7 +942,7 @@ public class ModemMonitorServiceImplTest {
         NetworkConfigurationService nsCfgMock = mock(NetworkConfigurationService.class);
         NetworkConfiguration networkConfigMock = mock(NetworkConfiguration.class);
 
-        when(nsCfgMock.getNetworkConfiguration(false)).thenReturn(Optional.of(networkConfigMock));
+        when(nsCfgMock.getNetworkConfiguration(Mockito.anyBoolean())).thenReturn(Optional.of(networkConfigMock));
         svc.setNetworkConfigurationService(nsCfgMock);
 
         svc.setNetworkService(nsMock);

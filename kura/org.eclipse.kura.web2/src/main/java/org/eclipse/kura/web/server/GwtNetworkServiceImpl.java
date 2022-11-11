@@ -334,7 +334,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                             }
 
                             // The NetConfigIP4 section above should also apply for a wireless interface
-                            // Note that this section is used to configure both a station config and an access point
+                            // Note that this section is used to configure both a station config and an
+                            // access point
                             // config
                             if (netConfig instanceof WifiConfig) {
                                 logger.debug("Setting up WifiConfigIP4");
@@ -442,25 +443,25 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 GwtWifiRadioMode gwtWifiRadioMode = null;
                                 if (wifiConfig.getRadioMode() != null) {
                                     switch (wifiConfig.getRadioMode()) {
-                                    case RADIO_MODE_80211a:
-                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
-                                        break;
-                                    case RADIO_MODE_80211b:
-                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
-                                        break;
-                                    case RADIO_MODE_80211g:
-                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
-                                        break;
-                                    case RADIO_MODE_80211nHT20:
-                                    case RADIO_MODE_80211nHT40above:
-                                    case RADIO_MODE_80211nHT40below:
-                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
-                                        break;
-                                    case RADIO_MODE_80211_AC:
-                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
-                                        break;
-                                    default:
-                                        break;
+                                        case RADIO_MODE_80211a:
+                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
+                                            break;
+                                        case RADIO_MODE_80211b:
+                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
+                                            break;
+                                        case RADIO_MODE_80211g:
+                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
+                                            break;
+                                        case RADIO_MODE_80211nHT20:
+                                        case RADIO_MODE_80211nHT40above:
+                                        case RADIO_MODE_80211nHT40below:
+                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
+                                            break;
+                                        case RADIO_MODE_80211_AC:
+                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
                                 if (gwtWifiRadioMode != null) {
@@ -1405,7 +1406,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             logger.debug("mode is DHCP");
             properties.put(dhcpClient4PropName, true);
             properties.put(addressPropName, "");
-            properties.put(prefixPropName, "");
             properties.put(gatewayPropName, "");
         } else {
             logger.debug("mode is STATIC");
@@ -1424,8 +1424,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 short prefix = NetworkUtil.getNetmaskShortForm(
                         ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
                 properties.put(prefixPropName, prefix);
-            } else {
-                properties.put(prefixPropName, "");
             }
 
             if (config.getGateway() != null && !config.getGateway().isEmpty()) {
@@ -1823,24 +1821,24 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         WifiRadioMode wifiRadioMode;
 
         switch (radioMode) {
-        case netWifiRadioModeA:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
-            break;
-        case netWifiRadioModeB:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
-            break;
-        case netWifiRadioModeBG:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
-            break;
-        case netWifiRadioModeBGN:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
-            break;
-        case netWifiRadioModeANAC:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
-            break;
+            case netWifiRadioModeA:
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+                break;
+            case netWifiRadioModeB:
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
+                break;
+            case netWifiRadioModeBG:
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
+                break;
+            case netWifiRadioModeBGN:
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
+                break;
+            case netWifiRadioModeANAC:
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
+                break;
 
-        default:
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            default:
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
 
         return wifiRadioMode;

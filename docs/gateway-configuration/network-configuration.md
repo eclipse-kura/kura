@@ -163,7 +163,7 @@ Name                                                  | Type    | Description
 `net.interface.\<interface\>.config.persist`          |Boolean	|The persist option of the PPP daemon
 `net.interface.\<interface\>.config.apn`              |String	|The modem Access Point Name
 `net.interface.\<interface\>.config.dialString`       |String	|The dial string used for connecting to the APN
-`net.interface.\<interface\>.config.holdoff`          |Integer	|The holdoff option of the PPP daemon
+`net.interface.\<interface\>.config.holdoff`          |Integer	|The holdoff option of the PPP daemon (in seconds)
 
 ## Network Configuration recipes
 

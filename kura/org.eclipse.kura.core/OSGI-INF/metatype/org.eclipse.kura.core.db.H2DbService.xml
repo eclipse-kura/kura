@@ -70,7 +70,17 @@
             default="10"
             min="1"
             description="The H2DbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool"/>
+
+        <AD id="db.max.compact.time" 
+            name="Maximum compact time"
+            type="Integer" 
+            cardinality="0" 
+            required="true" 
+            default="120000" 
+            min="0"
+            description="The maximum time allowed to perform database defragmentation." />
         </OCD>
+
     <Designate pid="org.eclipse.kura.core.db.H2DbService" factoryPid="org.eclipse.kura.core.db.H2DbService">
         <Object ocdref="org.eclipse.kura.core.db.H2DbService"/>
     </Designate>

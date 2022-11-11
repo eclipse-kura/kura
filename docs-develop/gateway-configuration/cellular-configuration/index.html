@@ -2779,6 +2779,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Reopen Connection on Termination</strong>: sets the <em>persist</em> option of the PPP daemon that specifies if PPP daemon should exit after connection is terminated. Note that the <em>maxfail</em> option still has an effect on persistent connections.</p>
 </li>
 <li>
+<p><strong>Connection Attempts Retry Delay</strong>: Sets the <em>holdoff</em> parameter to instruct the PPP daemon on how many seconds to wait before re-initiating the link after it terminates. This option only has any effect if the persist option (Reopen Connection on Termination) is set to true. The holdoff period is not applied if the link was terminated because it was idle. The default value is 1 second.</p>
+</li>
+<li>
 <p><strong>Connection Attempts</strong>: sets the <em>maxfail</em> option of the PPP daemon that limits the number of consecutive failed PPP connection attempts. The default value is 5 connection attempts. A value of zero means no limit. The PPP daemon terminates after the specified number of failed PPP connection attempts and restarts by the <em>ModemMonitor</em> thread.  </p>
 </li>
 <li>

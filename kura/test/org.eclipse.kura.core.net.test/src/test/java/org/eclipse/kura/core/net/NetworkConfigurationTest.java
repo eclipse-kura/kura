@@ -170,7 +170,7 @@ public class NetworkConfigurationTest {
     public void testModifiedInterfaceNames() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = new ArrayList<>();
         modifiedInterfaceNames.add("if1");
@@ -190,24 +190,24 @@ public class NetworkConfigurationTest {
     public void testModifiedInterfaceNamesNull() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = null;
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertNull(config.getModifiedInterfaceNames());
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
     public void testModifiedInterfaceNamesEmpty() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
 
         List<String> modifiedInterfaceNames = new ArrayList<>();
         config.setModifiedInterfaceNames(modifiedInterfaceNames);
         assertNull(config.getModifiedInterfaceNames());
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
     }
 
     @Test
@@ -811,8 +811,8 @@ public class NetworkConfigurationTest {
     public void testGetConfigurationPropertiesNull() throws NoSuchFieldException {
         NetworkConfiguration config = new NetworkConfiguration();
 
-        assertEquals(false, TestUtil.getFieldValue(config, "recomputeProperties"));
-        assertNull(config.getConfigurationProperties());
+        assertEquals(true, TestUtil.getFieldValue(config, "recomputeProperties"));
+        assertNotNull(config.getConfigurationProperties());
     }
 
     @Test

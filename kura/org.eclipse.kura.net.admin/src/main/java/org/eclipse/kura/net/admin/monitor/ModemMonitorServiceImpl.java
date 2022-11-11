@@ -357,6 +357,8 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     }
 
     private synchronized void processNetworkConfigurationChangeEvent(NetworkConfiguration newNetworkConfig) {
+        this.networkConfig = Optional.of(newNetworkConfig);
+
         if (this.modems == null || this.modems.isEmpty()) {
             return;
         }
@@ -410,7 +412,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     if (oldNetConfigs == null || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {
                         logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort,
                                 ifaceName);
-                        this.networkConfig = Optional.of(newNetworkConfig);
+
                         NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(newNetConfigs);
                         if (pppService != null && netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
                             PppState pppSt = pppService.getPppState();
@@ -963,7 +965,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                         .getNetInterfaceConfig(ifaceName);
 
                 if (netInterfaceConfig == null) {
-                    networkConfig = netConfigService.getNetworkConfiguration(false);
+                    networkConfig = netConfigService.getNetworkConfiguration(true);
                     if (networkConfig.isPresent()) {
                         netInterfaceConfig = networkConfig.get().getNetInterfaceConfig(ifaceName);
                     }

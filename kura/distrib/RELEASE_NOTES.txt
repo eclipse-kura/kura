@@ -3,6 +3,7 @@ Eclipse Kura - 5.2.1 - November 2022
 Description:
 This service release of Eclipse Kura includes the following changes:
   - Fixed H2 memory leak in case of in-memory database instances
+  - Fixed H2 abnormal size of file-based database.
   - The configuration of network interfaces that are not connected to the system is no longer discarded on NetworkConfigurationService update
   - Fixed build of Ubi8-based Docker image
 
@@ -18,6 +19,7 @@ Breaking Changes:
   * Eclipse Kura 5.2.1 does not introduce API breakage with Eclipse Kura 5.2.0.
 
 Bug Fixes:
+  * f001abb735 - [core] Fixed abnormal size of file-based database. [backport release-5.2.0] (#4237) (github-actions[bot])
   * e801026468 - Prevent discarding of NetworkConfigurationService properties [backport release-5.2.0] (#4231) (github-actions[bot])
   * 9dc28dd39b - failing Ubi8-based Docker image build on maintenance branch (#4209) (Mattia Dal Ben)
   * 6cc5998e7f - [core] Resolved database memory leak [backport release-5.2.0] (#4205) (github-actions[bot])
@@ -36,7 +38,6 @@ Known Issues:
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
-  * #4234: H2 Database size continues to grow with high data entry rate
   * #4133: Intermittent error parsing Kura log timestamp
   * #4126: GPS fix never lost on serial provider
   * #3913: Potential incorrect keystore password after rollback to snapshot0
@@ -74,6 +75,9 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * f001abb735 - fix(core): Fixed abnormal size of file-based database. [backport release-5.2.0] (#4237) (github-actions[bot])
+  * 79c09ef64f - chore: Fixed missing uptick (#4235) (nicolatimeus)
+  * 6542f9b024 - chore: add Kura 5.2.1 release notes (#4233) (github-actions[bot])
   * e801026468 - fix: Prevent discarding of NetworkConfigurationService properties [backport release-5.2.0] (#4231) (github-actions[bot])
   * 42efab2ad6 - chore: automated uptick to 5.2.1 (#4226) (github-actions[bot])
   * 9dc28dd39b - fix: failing Ubi8-based Docker image build on maintenance branch (#4209) (Mattia Dal Ben)

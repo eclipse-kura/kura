@@ -448,13 +448,17 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
         this.dataSource = new JdbcDataSource();
 
-        this.dataSource.setURL(configuration.getDbUrl());
+        this.dataSource.setURL(withMaxCompactTime(configuration.getMaxCompactTime(), configuration.getDbUrl()));
         this.dataSource.setUser(configuration.getUser());
         this.dataSource.setPassword(password);
 
         this.connectionPool = JdbcConnectionPool.create(this.dataSource);
 
         openDatabase(configuration, true);
+    }
+
+    private String withMaxCompactTime(Integer maxCompactTime, String dbUrl) {
+        return dbUrl.concat(";MAX_COMPACT_TIME=").concat(maxCompactTime.toString());
     }
 
     private void openDatabase(H2DbServiceOptions configuration, boolean deleteDbOnError) {
@@ -574,7 +578,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             try {
                 conn = H2DbServiceImpl.this.dataSource.getConnection();
                 stmt = conn.createStatement();
-                stmt.execute("SHUTDOWN DEFRAG");
+                stmt.execute("SHUTDOWN");
             } finally {
                 close(stmt);
                 close(conn);

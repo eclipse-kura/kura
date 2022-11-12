@@ -27,10 +27,12 @@ class H2DbServiceOptions {
     private static final Property<Integer> DEFRAG_INTERVAL_MINUTES_PROP = new Property<>("db.defrag.interval.minutes",
             20);
     private static final Property<Integer> CONNECTION_POOL_MAX_SIZE = new Property<>("db.connection.pool.max.size", 10);
+    private static final Property<Integer> MAX_COMPACT_TIME = new Property<>("db.max.compact.time", 120000);
 
     private static final Pattern FILE_LOG_LEVEL_PATTERN = generatePatternForProperty("trace_level_file");
     private static final Pattern USER_PATTERN = generatePatternForProperty("user");
     private static final Pattern PASSWORD_PATTERN = generatePatternForProperty("password");
+    private static final Pattern MAX_COMPACT_TIME_PATTERN = generatePatternForProperty("max_compact_time");
 
     private static final Pattern JDBC_URL_PARSE_PATTERN = Pattern.compile("jdbc:([^:]+):(([^:]+):)?([^;]*)(;.*)?");
 
@@ -40,6 +42,7 @@ class H2DbServiceOptions {
     private final long checkpointIntervalSeconds;
     private final long defragIntervalMinutes;
     private final int maxConnectionPoolSize;
+    private final int maxCompactTime;
 
     private boolean isInMemory;
     private boolean isFileBased;
@@ -57,11 +60,13 @@ class H2DbServiceOptions {
         this.checkpointIntervalSeconds = CHECKPOINT_INTERVAL_SECONDS_PROP.get(properties);
         this.defragIntervalMinutes = DEFRAG_INTERVAL_MINUTES_PROP.get(properties);
         this.maxConnectionPoolSize = CONNECTION_POOL_MAX_SIZE.get(properties);
+        this.maxCompactTime = MAX_COMPACT_TIME.get(properties);
 
         String dbUrlProp = CONNECTOR_URL_PROP.get(properties);
 
         dbUrlProp = USER_PATTERN.matcher(dbUrlProp).replaceAll("");
         dbUrlProp = PASSWORD_PATTERN.matcher(dbUrlProp).replaceAll("");
+        dbUrlProp = MAX_COMPACT_TIME_PATTERN.matcher(dbUrlProp).replaceAll("");
 
         this.dbUrl = dbUrlProp;
         computeUrlParts();
@@ -180,6 +185,10 @@ class H2DbServiceOptions {
 
     public int getConnectionPoolMaxSize() {
         return this.maxConnectionPoolSize;
+    }
+
+    public int getMaxCompactTime() {
+        return maxCompactTime;
     }
 
     public boolean isFileBasedLogLevelSpecified() {

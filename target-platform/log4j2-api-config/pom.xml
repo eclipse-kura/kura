@@ -45,6 +45,9 @@
                         <DynamicImport-Package>
                             *;resolution:=optional
                         </DynamicImport-Package>
+                        <Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

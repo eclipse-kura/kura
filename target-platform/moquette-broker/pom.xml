@@ -86,6 +86,9 @@
                         <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
                         <_noee>true</_noee>
                         <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
+                        <Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

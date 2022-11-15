@@ -86,6 +86,9 @@
 							!com.google.gwt.user.tools.templates.sample._warFolder_.WEB-INF
 						</Export-Package>
 						<_exportcontents>com.google.*, org.gwtbootstrap3.*, javax.validation.*</_exportcontents>
+						<Require-Capability>
+							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+						</Require-Capability>
 					</instructions>
 				</configuration>
 			</plugin>

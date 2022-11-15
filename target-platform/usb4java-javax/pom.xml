@@ -78,6 +78,9 @@
                             javax.usb.event;version="1.0.2",
                             javax.usb.util;version="1.0.2"
                         </Export-Package>
+                        <Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

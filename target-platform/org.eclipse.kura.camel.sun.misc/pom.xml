@@ -63,6 +63,9 @@
 				<configuration>
 					<instructions>
 						<Fragment-Host>org.apache.camel.camel-core;bundle-version="[2.16.0,2.26.0)"</Fragment-Host>>
+						<Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                        </Require-Capability>
 					</instructions>
 				</configuration>
 			</plugin>

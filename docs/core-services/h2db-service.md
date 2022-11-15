@@ -50,6 +50,25 @@ To create a new H2 database instance, use the following procedure:
 2. Select ```org.eclipse.kura.core.db.H2DbService``` from the **Factory** drop-down list, enter an arbitrary name for the new instance and click **Apply**.
 3. An entry for the newly created instance should appear in the side menu under **Services**, click on it to review its configuration. It is not possible to create different DB instances that manage the same DB URL. When creating a new instance please make sure that the URL specified in the field **db.connector.url** is not managed by another instance.
 
+### Configuration Parameters
+The **H2DbService** provides the following configuration parameters:
+
+* **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. 
+
+  In addition, the MAX_COMPACT_TIME parameter will also be ignored in the DB URL.  Please use the Maximum compact time field.
+
+* **User**: Specifies the user for the database connection. Furthermore 
+
+* **Password**: Specifies the password. The default password is the empty string.
+
+* **Checkpoint interval (seconds)**: H2DbService instances support running periodic checkpoints to ensure data consistency. This parameter specifies the interval in seconds between two successive checkpoints. This setting has no effect for in-memory database instances.
+
+* **Defrag interval (minutes)**: H2DbService instances support running periodic defragmentation (compaction). This parameter specifies the interval in minutes between two successive checkpoints, set to zero to disable. This setting has no effect for in-memory database instances. Existing database connections will be closed during the defragmentation process and need to be reopened by the applications.
+
+* **Connection pool max size**: The H2DbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool
+
+* **Maximum compact time**: The maximum time allowed to perform database defragmentation (compaction). The default value should be sufficient in most common configurations to avoid abnormal file size growth using persistence mode. However, at high data entry rates, an increase in the value may help mitigate size growth.
+
 ### Selecting a database instance for existing components
 A database instance is identified by its **Kura service PID**. The PID for the default instance is ```org.eclipse.kura.db.H2DbService``` while the PID for instances created using the Web UI is the string entered in the Name field at step 2 of the previous section.
 

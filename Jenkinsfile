@@ -23,9 +23,14 @@ node {
         }
     }
 
-    stage('Test reports and artifacts archivation') {
+    stage('Generate test reports') {
         dir("kura") {
             junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
+        }
+    }
+
+    stage('Archive .deb artifacts') {
+        dir("kura") {
             archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
         }
     }
@@ -54,7 +59,7 @@ node {
         }
     }
 
-    stage('Quality Gate'){
+    stage('Sonar Quality Gate'){
         timeout(time: 30, unit: 'MINUTES') {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {

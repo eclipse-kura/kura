@@ -2328,12 +2328,14 @@
                                 </goals>
                                 <configuration>
                                     <skip>${skip.js.engine.bundles}</skip>
-                                    <artifactItem>
-                                        <groupId>org.eclipse.kura.feature</groupId>
-                                        <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                        <version>${org.eclipse.kura.wire.script.filter.version}</version>
-                                        <type>dp</type>
-                                    </artifactItem>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
+                                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                    </artifactItems>
                                 </configuration>
                             </execution>
                             <execution>

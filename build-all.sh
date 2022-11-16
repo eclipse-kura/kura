@@ -25,5 +25,5 @@ MAVEN_PROPS="-B"
 mvn "$@" -f target-platform/pom.xml clean install $MAVEN_PROPS &&
 mvn "$@" -f kura/pom.xml clean install $MAVEN_PROPS &&
 mvn "$@" -f kura/examples/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/distrib/pom.xml clean install $MAVEN_PROPS -PbuildAll
+mvn "$@" -f kura/distrib/pom.xml clean install $MAVEN_PROPS -DbuildAll
 

@@ -121,7 +121,7 @@ mvn -f kura/examples/pom.xml clean install
 Build the target profiles:
 
 ```bash
-mvn -f kura/distrib/pom.xml clean install -PbuildAll
+mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 > *Note*: You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Praspberry-pi-armhf`).

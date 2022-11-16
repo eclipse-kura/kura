@@ -134,12 +134,14 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- plugins versions common to Java 8 and Java 17 builds -->
+        <bnd.baseline.version>6.3.1</bnd.baseline.version>
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
         <jacoco.version>0.8.8</jacoco.version>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <license-maven-plugin.version>2.2</license-maven-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
         <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
         <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
@@ -179,8 +181,6 @@
                 <jdk>1.8</jdk>
             </activation>
             <properties>
-                <bnd.baseline.version>3.4.0</bnd.baseline.version>
-                <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
                 <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
                 <tycho-version>1.7.0</tycho-version>
 
@@ -229,8 +229,6 @@
                 <jdk>17</jdk>
             </activation>
             <properties>
-                <bnd.baseline.version>6.3.1</bnd.baseline.version>
-                <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
                 <!-- TODO: update when new version is released to be working with Tycho 3. -->
                 <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
                 <tycho-version>3.0.0</tycho-version>

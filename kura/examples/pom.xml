@@ -44,6 +44,7 @@
         <license-maven-plugin.version>2.2</license-maven-plugin.version>
         <jacoco.version>0.8.8</jacoco.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
@@ -108,7 +109,6 @@
             <properties>
                 <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
                 <tycho-version>1.7.0</tycho-version>
-                <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
 
                 <tycho.surefire.testenv.args>
                     -Dosgi.console=5002
@@ -132,7 +132,6 @@
                 <!-- TODO: update when new version is released to be working with Tycho 3. -->
                 <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
                 <tycho-version>3.0.0</tycho-version>
-                <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
 
                 <tycho.surefire.testenv.args>
                     -Dosgi.console=5002

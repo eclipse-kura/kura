@@ -29,19 +29,17 @@ node {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.6.3') {
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                         withSonarQubeEnv {
-                            sh '''
-                                mvn -f kura/pom.xml sonar:sonar
-                                -Dmaven.test.failure.ignore=true
-                                -Dsonar.organization=eclipse
-                                -Dsonar.host.url=${SONAR_HOST_URL}
-                                -Dsonar.login=${SONARCLOUD_TOKEN}
-                                -Dsonar.branch.name=${BRANCH_NAME}
-                                -Dsonar.junit.reportPaths='target/surefire-reports'
-                                -Dsonar.jacoco.reportPaths='target/jacoco/'
-                                -Dsonar.java.binaries='target/'
-                                -Dsonar.core.codeCoveragePlugin=jacoco
-                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java
-                            '''
+                            sh '''mvn -f kura/pom.xml sonar:sonar \
+                                -Dmaven.test.failure.ignore=true \
+                                -Dsonar.organization=eclipse \
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.login=${SONARCLOUD_TOKEN} \
+                                -Dsonar.branch.name=${BRANCH_NAME} \
+                                -Dsonar.junit.reportPaths='target/surefire-reports' \
+                                -Dsonar.jacoco.reportPaths='target/jacoco/' \
+                                -Dsonar.java.binaries='target/' \
+                                -Dsonar.core.codeCoveragePlugin=jacoco \
+                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java'''
                         }
                     }
                 }

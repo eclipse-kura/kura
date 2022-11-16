@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data.store;
 
+import static java.util.Objects.isNull;
+
 import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -342,12 +344,13 @@ public class DbDataStore implements DataStore {
                 pstmt.setInt(6, -1);                                                // publishedMessageId
                 pstmt.setTimestamp(7, null);                                        // confirmedOn
 
-                if (payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
-                    pstmt.setBytes(8, payload);                                     // smallPayload
+                // smallPayload (=8) vs. largePayload (=9)
+                if (isNull(payload) || payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
+                    pstmt.setBytes(8, payload);
                     pstmt.setNull(9, Types.BLOB);
                 } else {
                     pstmt.setNull(8, Types.VARBINARY);
-                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);    // largePayload
+                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);
                 }
 
                 pstmt.setInt(10, priority);                                         // priority

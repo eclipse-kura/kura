@@ -1,14 +1,14 @@
 node {
     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), gitLabConnection('gitlab.eclipse.org'), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JobLocalConfiguration', changeReasonComment: '']])
-    
+
     deleteDir()
-    
+
     stage('Preparation') { 
         dir("kura") {
             checkout scm
         }
     }
-    
+
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
@@ -22,7 +22,14 @@ node {
             }
         }
     }
-    
+
+    stage('Test reports and artifacts archivation') {
+        dir("kura") {
+            junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+        }
+    }
+
     stage('Sonar') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
@@ -44,13 +51,6 @@ node {
                     }
                 }
             }
-        }
-    }
-    
-    stage('Results') {
-        dir("kura") {
-            junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: 'kura/distrib/target/*.deb, kura/distrib/target/*_intel-edison-nn_installer.sh', onlyIfSuccessful: true
         }
     }
 

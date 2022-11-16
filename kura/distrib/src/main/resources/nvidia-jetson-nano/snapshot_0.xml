@@ -65,9 +65,6 @@
             <esf:property name="net.interface.eth0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
             </esf:property>
-            <esf:property name="modified.interface.names" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
             <esf:property name="net.interface.lo.config.ip4.address" array="false" encrypted="false" type="String">
                 <esf:value>127.0.0.1</esf:value>
             </esf:property>

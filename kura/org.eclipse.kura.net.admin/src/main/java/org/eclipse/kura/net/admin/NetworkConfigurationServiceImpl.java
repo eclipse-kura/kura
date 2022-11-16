@@ -92,6 +92,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
     private static final String CONFIG_MTU = ".config.mtu";
     private static final String NET_INTERFACES = "net.interfaces";
+    private static final String MODIFIED_INTERFACE_NAMES = "modified.interface.names";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp[0-9]+");
     private static final Pattern COMMA = Pattern.compile(",");
@@ -196,7 +197,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             logger.debug("Got null properties...");
         } else {
             logger.debug("Props...{}", properties);
-            this.properties = new HashMap<>(properties);
+            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties));
             updated(this.properties);
         }
     }
@@ -252,7 +253,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         try {
             final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
             logger.debug("new properties - updating");
-            logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
+            logger.debug("modified.interface.names: {}", newProperties.get(MODIFIED_INTERFACE_NAMES));
 
             Map<String, Object> modifiedProps = new HashMap<>(newProperties);
 
@@ -279,6 +280,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             updateCurrentNetworkConfiguration();
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
+
+            this.properties = discardModifiedNetworkInterfaces(this.properties);
 
             if (changed) {
                 this.configurationService.snapshot();
@@ -747,6 +750,16 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             getWifiInfraDefinition(objectFactory, tocd, ifaceName);
             getWifiMasterDefinition(objectFactory, tocd, ifaceName);
         }
+    }
+
+    private static Map<String, Object> discardModifiedNetworkInterfaces(final Map<String, Object> properties) {
+        if (!properties.containsKey(MODIFIED_INTERFACE_NAMES)) {
+            return properties;
+        }
+
+        final Map<String, Object> result = new HashMap<>(properties);
+        result.remove(MODIFIED_INTERFACE_NAMES);
+        return result;
     }
 
     private void getWifiMasterDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {

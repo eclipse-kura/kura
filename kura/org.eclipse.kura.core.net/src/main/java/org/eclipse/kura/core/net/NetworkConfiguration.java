@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -79,6 +80,7 @@ public class NetworkConfiguration {
     private static final String SECURITY_TYPE = ".securityType";
     private static final String NET_INTERFACE = "net.interface.";
     private static final String NET_INTERFACES = "net.interfaces";
+    private static final Pattern COMMA = Pattern.compile(",");
 
     private final Map<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
     private Map<String, Object> properties;
@@ -139,9 +141,8 @@ public class NetworkConfiguration {
         this.modifiedInterfaceNames = new ArrayList<>();
         String modifiedInterfaces = (String) properties.get("modified.interface.names");
         if (modifiedInterfaces != null) {
-            for (String interfaceName : modifiedInterfaces.split(",")) {
-                this.modifiedInterfaceNames.add(interfaceName);
-            }
+            COMMA.splitAsStream(modifiedInterfaces).filter(s -> !s.trim().isEmpty())
+                    .forEach(this.modifiedInterfaceNames::add);
         }
 
         this.recomputeProperties = true;

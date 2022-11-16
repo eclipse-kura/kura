@@ -253,7 +253,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         try {
             final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
             logger.debug("new properties - updating");
-            logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
+            logger.debug("modified.interface.names: {}", newProperties.get(MODIFIED_INTERFACE_NAMES));
 
             Map<String, Object> modifiedProps = new HashMap<>(newProperties);
 

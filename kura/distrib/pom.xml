@@ -1085,7 +1085,9 @@
         <profile>
             <id>raspberry-pi-arm64</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1175,7 +1177,9 @@
         <profile>
             <id>raspberry-pi-arm64-nn</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1265,7 +1269,9 @@
         <profile>
             <id>raspberry-pi-armhf</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1356,7 +1362,9 @@
         <profile>
             <id>raspberry-pi-armhf-nn</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1446,7 +1454,9 @@
         <profile>
             <id>intel-up2-ubuntu-20</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1537,7 +1547,9 @@
         <profile>
             <id>intel-up2-ubuntu-20-nn</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1628,7 +1640,9 @@
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1719,7 +1733,9 @@
         <profile>
             <id>nvidia-jetson-nano</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1810,7 +1826,9 @@
         <profile>
             <id>nvidia-jetson-nano-nn</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1901,7 +1919,9 @@
         <profile>
             <id>dev-env</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -2286,7 +2306,9 @@
         <profile>
             <id>core-dp</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <plugins>
@@ -2394,7 +2416,9 @@
         <profile>
             <id>can-dp</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>buildAll</name>
+                </property>
             </activation>
             <build>
                 <plugins>

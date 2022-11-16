@@ -51,6 +51,17 @@ public class DbDataStoreStorageTest {
     /*
      * Scenarios
      */
+    
+    @Test
+    public void shouldStoreNullPayload() {
+        givenNullPayload();
+        givenDbDataStore(10000, 10000, 10);
+        
+        whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+        
+        thenNoExceptionsOccurred();
+        thenStoredMessageIs(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+    }
 
     @Test
     public void shouldStoreSmallPayload() {
@@ -144,6 +155,10 @@ public class DbDataStoreStorageTest {
     /*
      * Given
      */
+    
+    private void givenNullPayload() {
+        this.payload = null;
+    }
 
     private void givenSmallPayload() {
         this.payload = new byte[200];

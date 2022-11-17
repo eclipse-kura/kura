@@ -30,12 +30,12 @@ The OPC UA Driver channel configuration is composed of the following parameters:
 
 If the **listen** flag is enabled for an OPC-UA channel, the driver will request the server to send notifications if it detects changes in the referenced attribute value.
 
-In order to enable this, the driver will create a global Subscription (one per Driver instance), and a Monitored Item for each channel. See [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
-The **Subscription publish interval** global configuration parameter can be used to tune the subscription publishing interval.
+In order to enable this, the driver will create a global _subscription_ (one per Driver instance), and a _monitored item_ for each channel. See [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+The **Subscription publish interval** global configuration parameter can be used to tune the _subscription publishing interval_.
 
- - **listen.sampling.interval**: The sampling interval for the Monitored Item. See the Sampling Interval section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
- - **listen.queue.size**: The queue size for the Monitored Item. See the Queue parameters section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
- - **listen.discard.oldest**: The value of the discardOldest flag for the Monitored Itemd. See the Queue parameters section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+ - **listen.sampling.interval**: The sampling interval for the _monitored item_. See the **Sampling interval** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+ - **listen.queue.size**: The queue size for the _monitored item_. See the **Queue parameters** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+ - **listen.discard.oldest**: The value of the _discardOldest_ flag for the _monitored item_. See the **Queue parameters** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
 
 The **listen.subscribe.to.children** parameter can be used to enable the [Subtree Subscription](#substree-subscription) feature.
 
@@ -125,13 +125,13 @@ The following steps can be used to generate the keystore:
 
 ## Substree Subscription
 
-The driver can be configured to recursively visit the children of folder node and create a Monitored Item for the value of each discovered variable node with a single channel in Asset configuration.
+The driver can be configured to recursively visit the children of a folder node and create a Monitored Item for the value of each discovered variable node with a single channel in Asset configuration.
 
 > Warning: This feature should be used with care since it can cause high load on both the gateway and the server if the referenced folder contains a large number of nodes and/or the notification rate is high.
 
 ### Channel configuration
 
-In order to configure the driver for performing the discovery operation, a single channel can be defined with the following configuration:
+In order to configure the driver to perform the discovery operation, a single channel can be defined with the following configuration:
 
 * **type**: `READ`
 * **value.type**: `STRING` (see below)
@@ -147,24 +147,24 @@ The **listen.sampling.interval**, **listen.queue.size** and **listen.discard.old
 
 ### Discovery procedure
 
-The driver will consider as folders to visit all nodes that whose type definition is `FolderType`, that is all nodes with the following reference:
+The driver will consider as folders to visit all nodes that whose type definition is `FolderType`, or more precisely all nodes with the following reference:
 
 `HasTypeDefinition`:
   * namespace index: 0
   * node id: 61 (numeric)
   * URN: `http://opcfoundation.org/UA/`
 
-The driver will subscribe to all variable nodes found.
+The driver will subscribe to all the variable nodes found.
 
 ### Event reporting
 
 If the Driver is used by a Wire Asset, it will emit on the wire a single message per received event.
 
-All emitted events will contain a single property, the name of this property is the browse path of the source OPCUA node relative to the root folder defined in channel configuration or the node id, depending on the value of the **Subtree subscription events channel name format** global configuration parameter.
+All emitted events will contain a single property. Depending on the value of the **Subtree subscription events channel name format** global configuration parameter, the name of this property is the node id or the browsed path of the source OPCUA node relative to the root folder defined in the channel configuration.
 
 ### Type conversion
 
-The current version of the driver tries to convert the values received for all events on a subtree to the type defined in the **value.type** configuration parameter.
+The current version of the driver tries to convert the values received for all the events on a subtree to the type defined in the **value.type** configuration parameter.
 
 Since the value types of the discovered nodes are heterogeneous, the conversion might fail if the types are not compatible (e.g. if **value.type** is set to `INTEGER` and the received value is a string).
 

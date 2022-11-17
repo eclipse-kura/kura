@@ -24,6 +24,14 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
 
 ![](images/packageMarketplace.png)
 
+!!! warning
+    In some cases the installation from the Eclipse Marketplace fails for the lack of the correct certificates. In order to install the needed certificates, proceed as follows.
+
+    1. Download the certificate chain with this command:
+    ```
+    openssl s_client -showcerts -connect kura-repo.s3.us-west-2.amazonaws.com:443
+    ```
+    2. Copy the certificate with `CN=*.s3-us-west-2.amazonaws.com` and install it in the _SSLKeystore_ from the _Certificate List_ tab under the _Security_ section. For more details about the procedure see [here](../../gateway-configuration/keys-and-certificates/).
 ## Package Signature
 
 Once the selected application deployment package (dp) file is installed, it will be listed in the **Packages** page and detailed with the name of the deployment package, the version and the signature status.

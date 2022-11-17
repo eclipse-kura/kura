@@ -35,3 +35,5 @@ bin/
 +# IntelliJ Idea
 .idea/
 *.iml
+maven.deps
+DEPENDENCIES

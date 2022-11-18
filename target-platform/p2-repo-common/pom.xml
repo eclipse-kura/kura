@@ -489,6 +489,16 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-epoll</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-kqueue</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
                                     <artifactId>netty-transport-native-kqueue</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
@@ -497,7 +507,6 @@
                                     <artifactId>netty-transport-native-unix-common</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
-                                <artifactItem>
                                 <artifactItem>
                                     <groupId>org.jboss.logging</groupId>
                                     <artifactId>jboss-logging</artifactId>
@@ -713,6 +722,7 @@
                                 <move file="target/source/plugins/netty-handler.jar" tofile="target/source/plugins/netty-handler_${io.netty.version}.jar"/>
                                 <move file="target/source/plugins/netty-resolver.jar" tofile="target/source/plugins/netty-resolver_${io.netty.version}.jar"/>
                                 <move file="target/source/plugins/netty-transport.jar" tofile="target/source/plugins/netty-transport_${io.netty.version}.jar"/>
+                                <move file="target/source/plugins/netty-transport-classes-epoll.jar" tofile="target/source/plugins/netty-transport-classes-epoll_${io.netty.version}.jar"/>
                                 <move file="target/source/plugins/netty-transport-native-epoll.jar" tofile="target/source/plugins/netty-transport-native-epoll_${io.netty.version}.jar"/>
                                 <move file="target/source/plugins/jboss-logging.jar" tofile="target/source/plugins/jboss-logging_${org.jboss.logging.version}.jar"/>
                                 <move file="target/source/plugins/commons-beanutils.jar" tofile="target/source/plugins/commons-beanutils_${commons-beanutils.version}.jar"/>

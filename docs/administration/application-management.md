@@ -72,6 +72,17 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
     27xpfZdJ4icIb/HnCAH77fDLHks/qbK1a0ktUBtrfYRkbUN4ESej3MiKqqgpC2z7
     NDsupck3+/l202BzMqgBliCbJmateCFiWw==
     -----END CERTIFICATE-----
+
+    Common Name: *.eclipse.org
+    Subject Alternative Names: *.eclipse.org, eclipse.org
+    Organization: Eclipse.org Foundation, Inc.
+    Locality: Ottawa
+    State: Ontario
+    Country: CA
+    Valid From: November 8, 2022
+    Valid To: December 10, 2023
+    Issuer: DigiCert TLS RSA SHA256 2020 CA1, DigiCert Inc
+    Serial Number: 0b724d5fb2ba5053e07b603ea059e676
     ```
     
     If the dp is not hosted by Eclipse, the download will likely fail. In this case, retrieve 

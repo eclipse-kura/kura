@@ -54,6 +54,8 @@
         <setEntry value="io.netty.resolver@default:default"/>
         <setEntry value="io.netty.transport-native-epoll@default:default"/>
         <setEntry value="io.netty.transport-native-kqueue@default:default"/>
+        <setEntry value="io.netty.transport-classes-epoll@default:default"/>
+        <setEntry value="io.netty.transport-classes-kqueue@default:default"/>
         <setEntry value="io.netty.transport-native-unix-common@default:default"/>
         <setEntry value="io.netty.transport@default:default"/>
         <setEntry value="javax.servlet@default:default"/>

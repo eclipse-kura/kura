@@ -498,10 +498,6 @@
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>io.netty</groupId>
-                                    <artifactId>netty-transport-native-epoll</artifactId>
-                                    <version>${io.netty.version}</version>
-                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.jboss.logging</groupId>
                                     <artifactId>jboss-logging</artifactId>

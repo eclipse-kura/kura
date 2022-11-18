@@ -25,7 +25,9 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
 ![](images/packageMarketplace.png)
 
 !!! warning
-    If the installation from the Eclipse Marketplace fails, it can be for the lack of the correct certificates. In this case, import the following certificate in the _SSLKeystore_ from the _Certificate List_ tab under the _Security_ section. For more details about the procedure see [here](../../gateway-configuration/keys-and-certificates/).
+    If the installation from the Eclipse Marketplace fails, it can be for the lack of the correct certificates. In this case, import the certificate in the _SSLKeystore_ from the _Certificate List_ tab under the _Security_ section. For more details about the procedure see [here](../../gateway-configuration/keys-and-certificates/).
+
+    If the bundle is an official add-on for Eclipse Kura, the following certificate has to be imported:
 
     ```
     -----BEGIN CERTIFICATE-----
@@ -72,7 +74,9 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
     27xpfZdJ4icIb/HnCAH77fDLHks/qbK1a0ktUBtrfYRkbUN4ESej3MiKqqgpC2z7
     NDsupck3+/l202BzMqgBliCbJmateCFiWw==
     -----END CERTIFICATE-----
-
+    ```
+    that has the following description:
+    ```
     Common Name: *.eclipse.org
     Subject Alternative Names: *.eclipse.org, eclipse.org
     Organization: Eclipse.org Foundation, Inc.
@@ -85,13 +89,12 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
     Serial Number: 0b724d5fb2ba5053e07b603ea059e676
     ```
     
-    If the dp is not hosted by Eclipse, the download will likely fail. In this case, retrieve 
-    the certificate with this command:
+    If the bundle is not an official one and it is not hosted by Eclipse, retrieve the certificate with this command:
     ```
     openssl s_client -showcerts -connect <download_link>:443
     ```
     
-    and import in the _SSLKeystore_.
+    and import it in the _SSLKeystore_.
 
 ## Package Signature
 

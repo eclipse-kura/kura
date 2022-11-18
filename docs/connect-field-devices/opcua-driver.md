@@ -25,7 +25,21 @@ The OPC UA Driver channel configuration is composed of the following parameters:
  - **value type**: the Java type of the channel value.
  - **node.id**: The node id of the variable node to be used, the format of the node id depends on the value of the **node.id.type** property.
  - **node.namespace.index**: The namespace index of the variable node to be used.
- - **node.id.type**: The type of the node id (see below)
+ - **node.id.type**: The type of the node id (see the [Node Id types](#node-id-types) section)
+ - **attribute**: The attribute of the referenced variable node.
+
+If the **listen** flag is enabled for an OPC-UA channel, the driver will request the server to send notifications if it detects changes in the referenced attribute value.
+
+In order to enable this, the driver will create a global _subscription_ (one per Driver instance), and a _monitored item_ for each channel. See [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+The **Subscription publish interval** global configuration parameter can be used to tune the _subscription publishing interval_.
+
+ - **listen.sampling.interval**: The sampling interval for the _monitored item_. See the **Sampling interval** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+ - **listen.queue.size**: The queue size for the _monitored item_. See the **Queue parameters** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+ - **listen.discard.oldest**: The value of the _discardOldest_ flag for the _monitored item_. See the **Queue parameters** section of [[1](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)] for more details.
+
+The **listen.subscribe.to.children** parameter can be used to enable the [Subtree Subscription](#substree-subscription) feature.
+
+[1] [MonitoredItem model](https://reference.opcfoundation.org/v104/Core/docs/Part4/5.12.1/)
 
 ## Node ID types
 
@@ -108,3 +122,50 @@ The following steps can be used to generate the keystore:
   * Make a connection attempt using OPC-UA driver, this will likely fail because the server does not trust client certificate.
   * After the failed connection attempt, the server should display the certificate used by the driver in the administration UI. The server UI should allow to set it as trusted.
   * Make another connection attempt once the certificate has been set to trusted, this connection attempt should succeed.
+
+## Substree Subscription
+
+The driver can be configured to recursively visit the children of a folder node and create a Monitored Item for the value of each discovered variable node with a single channel in Asset configuration.
+
+> Warning: This feature should be used with care since it can cause high load on both the gateway and the server if the referenced folder contains a large number of nodes and/or the notification rate is high.
+
+### Channel configuration
+
+In order to configure the driver to perform the discovery operation, a single channel can be defined with the following configuration:
+
+* **type**: `READ`
+* **value.type**: `STRING` (see below)
+* **listen**: `true`
+* **node.id**: the node id of the root of the subtree to visit
+* **node.namespace.index**: the namespace index of the root of the subtree to visit
+* **node.id.type** the node id type of the root of the subtree to visit
+* **listen.subscribe.to.children** (**NEW**): `true`
+
+The rest of the configuration parameters can be specified in the same way as for the single node subscription use case.
+
+The **listen.sampling.interval**, **listen.queue.size** and **listen.discard.oldest** parameters of the root will be used for all subscriptions on the subtree.
+
+### Discovery procedure
+
+The driver will consider as folders to visit all nodes that whose type definition is `FolderType`, or more precisely all nodes with the following reference:
+
+`HasTypeDefinition`:
+  * namespace index: 0
+  * node id: 61 (numeric)
+  * URN: `http://opcfoundation.org/UA/`
+
+The driver will subscribe to all the variable nodes found.
+
+### Event reporting
+
+If the Driver is used by a Wire Asset, it will emit on the wire a single message per received event.
+
+All emitted events will contain a single property. Depending on the value of the **Subtree subscription events channel name format** global configuration parameter, the name of this property is the node id or the browsed path of the source OPCUA node relative to the root folder defined in the channel configuration.
+
+### Type conversion
+
+The current version of the driver tries to convert the values received for all the events on a subtree to the type defined in the **value.type** configuration parameter.
+
+Since the value types of the discovered nodes are heterogeneous, the conversion might fail if the types are not compatible (e.g. if **value.type** is set to `INTEGER` and the received value is a string).
+
+Setting **value.type** to `STRING` should allow to perform safe conversions for most data types.

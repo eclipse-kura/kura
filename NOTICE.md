@@ -189,6 +189,8 @@ This project leverages the following third party content.
 * maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.gwtproject/gwt-user/2.10.0, Apache-2.0 AND CC0-1.0, approved, #4958
+* maven/mavencentral/org.gwtbootstrap3/gwtbootstrap3/1.0.1, Apache-2.0 AND MIT AND OFL-1.1, approved, #2020
 
 ### Additional Dependencies
 
@@ -240,7 +242,6 @@ This project leverages the following third party content.
 * org.eclipse.equinox.http.registry_1.2.0.v20200614-1851, EPL-2.0, approved, eclipse.platform
 * org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918, EPL-1.0, approved, CQ7880
 * com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871
-* Google Web Toolkit GWT User Library 2.8.0, Apache-2.0, approved, CQ12311
 * soda.dk.comm, EPL-1.0, approved, CQ8156
 * org.hamcrest.core 1.1, New BSD License, approved, CQ7842
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078

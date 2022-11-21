@@ -4,7 +4,7 @@ Bundle-Name:  org.eclipse.kura.https.server.manager.test
 Bundle-SymbolicName: org.eclipse.kura.http.server.manager.test;singleton:=true
 Bundle-Version: 5.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.1.0"
 Import-Package: org.bouncycastle.asn1.x500;version="1.68.0",

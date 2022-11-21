@@ -49,7 +49,7 @@
                             Moka7;version="1.0.2"
                         </Export-Package>
                         <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
                         </Require-Capability>
                     </instructions>
                 </configuration>

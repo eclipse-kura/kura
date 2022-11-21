@@ -8,7 +8,7 @@ Bundle-Name: ${package}
 Bundle-SymbolicName: ${package};singleton:=true
 Bundle-Version: ${manifestVersion}
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura.cloud; version="[1.0,2.0)",

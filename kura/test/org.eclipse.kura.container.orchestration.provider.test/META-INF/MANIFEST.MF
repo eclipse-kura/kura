@@ -6,7 +6,7 @@ Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.container.orchestration.provider
 Automatic-Module-Name: org.eclipse.kura.container.orchestration.provider.test
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: com.eclipsesource.json;version="0.9.5",
  org.eclipse.kura;version="1.6.0",
  org.junit;version="[4.12.0,5.0.0)",

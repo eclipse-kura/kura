@@ -105,7 +105,7 @@
                         </Import-Package>
                         <_exportcontents>org.apache.*</_exportcontents>
                         <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
                         </Require-Capability>
                     </instructions>
                 </configuration>

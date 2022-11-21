@@ -87,7 +87,7 @@
 						</Export-Package>
 						<_exportcontents>com.google.*, org.gwtbootstrap3.*, javax.validation.*</_exportcontents>
 						<Require-Capability>
-							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
 						</Require-Capability>
 					</instructions>
 				</configuration>

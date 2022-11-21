@@ -4,7 +4,7 @@ Bundle-Name: Unit tests for 'org.eclipse.kura.camel'
 Bundle-SymbolicName: org.eclipse.kura.camel.test
 Bundle-Version: 5.3.0.qualifier
 Fragment-Host: org.eclipse.kura.camel;bundle-version="1.1.1"
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: javax.activation,
  javax.xml.bind,
  org.apache.camel.component.mock;version="[2.17.2,3.0.0)",

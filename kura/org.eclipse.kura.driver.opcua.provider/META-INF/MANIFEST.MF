@@ -28,7 +28,7 @@ Import-Package: javax.crypto,
  org.slf4j;version="[1.7.36,1.8.0)",
  org.xml.sax
 Service-Component: OSGI-INF/*.xml
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ClassPath: .,
  lib/guava.jar,
  lib/jool.jar,

@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.wire.script.filter.provider.test
 Bundle-SymbolicName: org.eclipse.kura.wire.script.filter.provider.test;singleton:=true
 Bundle-Version: 5.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.wire.script.filter.provider
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",

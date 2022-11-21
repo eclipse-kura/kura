@@ -87,7 +87,7 @@
                         <_noee>true</_noee>
                         <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
                         <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
                         </Require-Capability>
                     </instructions>
                 </configuration>

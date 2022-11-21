@@ -18,7 +18,7 @@ Import-Package: org.apache.logging.log4j;version="2.19.0",
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.wireadmin;version="1.0.1",
  org.osgi.util.tracker;version="1.5.1"
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.kura.internal.wire.db.common;version="1.0.0",

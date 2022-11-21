@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.ai.triton.server
 Bundle-SymbolicName: org.eclipse.kura.ai.triton.server;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(|(version=1.8)(version=17)))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
  lib/grpc-netty-shaded-1.33.1.jar,

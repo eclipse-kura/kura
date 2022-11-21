@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+  Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -52,7 +52,7 @@
 
   <!--<set-property name='user.agent' value='safari'/>-->
   <!--<set-property name='user.agent' value='gecko1_8' />-->
-  <set-property name="user.agent" value="ie9,ie10,gecko1_8,safari"/>
+  <set-property name="user.agent" value="gecko1_8,safari"/>
 
   <!-- Specify the paths for translatable code                    -->
   <source path='client' />

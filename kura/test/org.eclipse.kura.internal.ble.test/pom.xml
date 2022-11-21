@@ -16,7 +16,7 @@ Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>4.1.4</version>
+        <version>4.1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.internal.ble.test</artifactId>

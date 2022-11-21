@@ -43,7 +43,7 @@ Import-Package: javax.comm,
  org.osgi.service.deploymentadmin;version="1.0.0",
  org.osgi.service.event,
  org.osgi.service.io;version="1.0.0",
- org.slf4j;version="[1.7.36,1.8.0)",
+ org.slf4j;version="1.6.4",
  org.w3c.dom,
  org.xml.sax
 Fragment-Host: org.eclipse.kura.core

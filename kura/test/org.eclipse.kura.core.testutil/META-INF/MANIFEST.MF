@@ -42,7 +42,7 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.event;version="1.4.0",
  org.osgi.util.tracker;version="1.5.2",
- org.slf4j;version="[1.7.36,1.8.0)"
+ org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
 Comment: Unit testing utilities
 Export-Package: org.eclipse.kura.core.testutil;version="1.0.0",

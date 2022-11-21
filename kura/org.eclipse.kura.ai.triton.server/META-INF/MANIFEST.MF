@@ -52,4 +52,4 @@ Import-Package: com.google.common.base;version="25.0.0",
  org.osgi.service.component;version="1.4.0",
  org.osgi.service.event;version="1.3.0",
  org.osgi.service.wireadmin;version="1.0.1",
- org.slf4j;version="[1.7.36,1.8.0)"
+ org.slf4j;version="1.6.4"

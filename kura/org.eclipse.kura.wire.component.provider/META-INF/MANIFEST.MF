@@ -40,7 +40,7 @@ Import-Package: org.apache.logging.log4j;version="2.19.0",
  org.quartz.impl;version="2.3.2",
  org.quartz.impl.matchers;version="2.3.2",
  org.quartz.utils;version="2.3.2",
- org.slf4j;version="[1.7.36,1.8.0)"
+ org.slf4j;version="1.6.4"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml

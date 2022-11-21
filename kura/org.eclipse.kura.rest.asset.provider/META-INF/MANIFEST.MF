@@ -19,5 +19,5 @@ Import-Package: com.google.gson;version="2.7.0",
  org.eclipse.kura.type;version="[1.1,2.0]",
  org.osgi.framework;version="1.8.0",
  org.osgi.service.useradmin;version="1.1.0",
- org.slf4j;version="[1.7.36,1.8.0)"
+ org.slf4j;version="1.6.4"
 Export-Package: org.eclipse.kura.internal.rest.asset

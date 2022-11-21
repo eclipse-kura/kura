@@ -37,3 +37,4 @@ bin/
 *.iml
 maven.deps
 DEPENDENCIES
+lib/

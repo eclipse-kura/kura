@@ -127,14 +127,14 @@ This project leverages the following third party content.
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.71, MIT AND LicenseRef-scancode-ocb-open-source-2013, approved, #2666
 * maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.71, MIT, approved, #2664
 * maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.71, MIT, approved, #2663
-* maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-security/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-server/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-security/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-server/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.milo/bsd-parser-core/0.2.4, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/bsd-parser-gson/0.2.4, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/sdk-client/0.2.4, EPL-2.0, approved, iot.milo

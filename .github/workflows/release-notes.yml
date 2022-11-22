@@ -10,7 +10,7 @@ on:
           required: true
         starting_commit:
           type: string
-          description: Commit from which to start generating the release notes
+          description: Commit from which to start generating the release notes (non-inclusive)
           required: true
 
 jobs:

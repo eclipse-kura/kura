@@ -50,7 +50,7 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.osgi.service.event;version="1.4.0",
  org.osgi.service.useradmin;version="1.1.0",
  org.osgi.util.tracker;version="1.5.2",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.7.32"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.core.keystore.util;version="1.1.0"

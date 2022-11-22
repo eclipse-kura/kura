@@ -20,5 +20,5 @@ Import-Package: org.bouncycastle.asn1.x500;version="1.68.0",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.event;version="1.4.0",
  org.osgi.util.tracker;version="1.5.2",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml

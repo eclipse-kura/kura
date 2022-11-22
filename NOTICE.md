@@ -111,9 +111,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1, Apache-2.0, approved, CQ2334
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.0.3, Apache-2.0 and MIT, approved, CQ23948
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.0.2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.17.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.17.1, Apache-2.0, approved, #2168
-* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.17.1, Apache-2.0, approved, #2537
+* maven/mavencentral/org.apache.logging.log4j/log4j-api/2.19.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.apache.logging.log4j/log4j-core/2.19.0, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #5009
+* maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.19.0, Apache-2.0, approved, #5010
 * maven/mavencentral/org.apache.qpid/proton-j/0.33.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.qpid/qpid-jms-client/0.45.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16239
@@ -180,25 +180,17 @@ This project leverages the following third party content.
 * maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
 * maven/mavencentral/org.jooq/jool/0.9.10, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.osgi/osgi.annotation/6.0.1, Apache-2.0, approved, CQ11704
+* maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
 * maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979
-<<<<<<< HEAD
-<<<<<<< HEAD
 * maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.36, Apache-2.0, approved, CQ12843
 * maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368
-=======
-* maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368
-* maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.36, Apache-2.0, approved, CQ12843
->>>>>>> aca23fc5c (chore: updated NOTICE file)
-=======
-* maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.32, Apache-2.0, approved, CQ12843
-* maven/mavencentral/org.slf4j/slf4j-api/1.7.32, MIT, approved, CQ13368
->>>>>>> fb4885be2 (build: reverted non-test deps updates, to add in a separate PR)
 * maven/mavencentral/org.usb4java/libusb4java/1.2.0, MIT, approved, #3088
 * maven/mavencentral/org.usb4java/usb4java-javax/1.2.0, MIT, approved, #3090
 * maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.gwtproject/gwt-user/2.10.0, Apache-2.0 AND CC0-1.0, approved, #4958
+* maven/mavencentral/org.gwtbootstrap3/gwtbootstrap3/1.0.1, Apache-2.0 AND MIT AND OFL-1.1, approved, #2020
 
 ### Additional Dependencies
 
@@ -250,7 +242,6 @@ This project leverages the following third party content.
 * org.eclipse.equinox.http.registry_1.2.0.v20200614-1851, EPL-2.0, approved, eclipse.platform
 * org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918, EPL-1.0, approved, CQ7880
 * com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871
-* Google Web Toolkit GWT User Library 2.8.0, Apache-2.0, approved, CQ12311
 * soda.dk.comm, EPL-1.0, approved, CQ8156
 * org.hamcrest.core 1.1, New BSD License, approved, CQ7842
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078

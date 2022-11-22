@@ -75,6 +75,8 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters. More information can be found in the container-engine logger documentation, for instance [here](https://docs.docker.com/config/containers/logging/configure/).
 
+- **Restart Container On Failure** - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.
+
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
 ![Container Orchestration Provider Container Configuration](./images/container-orchestration-provider-container-configuration.png)

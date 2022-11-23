@@ -26,7 +26,9 @@
             default="jdbc:h2:mem:kuradb"
             description="JDBC connector URL of the database instance. See http://www.h2database.com/html/features.html for more information. 
             Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. 
-            Please use the db.user and db.password fields to provide the credentials."/>
+            Please use the db.user and db.password fields to provide the credentials.
+	    In case of persisted databases, the database file path is subject to limitations. 
+            Please make sure to read official H2DbService documentation before creating a new database."/>
 
         <AD id="db.user"
             name="User"

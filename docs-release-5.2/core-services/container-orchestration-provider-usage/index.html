@@ -2877,6 +2877,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p><strong>Logger Parameters (optional)</strong> - This field accepts a comma-separated list of logging parameters. More information can be found in the container-engine logger documentation, for instance <a href="https://docs.docker.com/config/containers/logging/configure/">here</a>.</p>
 </li>
+<li>
+<p><strong>Restart Container On Failure</strong> - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.</p>
+</li>
 </ul>
 <p>After specifying container parameters, ensure to set <strong>Enabled</strong> to <strong>true</strong> and press <strong>Apply</strong>. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to <strong>enabled</strong>, the framework will automatically start the container again upon startup.</p>
 <p><img alt="Container Orchestration Provider Container Configuration" src="../images/container-orchestration-provider-container-configuration.png" /></p>

@@ -2953,10 +2953,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h3 id="configuration-parameters">Configuration Parameters</h3>
 <p>The <strong>H2DbService</strong> provides the following configuration parameters:</p>
 <ul>
-<li><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. </li>
-</ul>
-<p>In addition, the MAX_COMPACT_TIME parameter will also be ignored in the DB URL.  Please use the Maximum compact time field.</p>
-<ul>
+<li>
+<p><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. </p>
+</li>
 <li>
 <p><strong>User</strong>: Specifies the user for the database connection. Furthermore </p>
 </li>
@@ -2971,9 +2970,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 <li>
 <p><strong>Connection pool max size</strong>: The H2DbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool</p>
-</li>
-<li>
-<p><strong>Maximum compact time</strong>: The maximum time allowed to perform database defragmentation (compaction). The default value should be sufficient in most common configurations to avoid abnormal file size growth using persistence mode. However, at high data entry rates, an increase in the value may help mitigate size growth.</p>
 </li>
 </ul>
 <h3 id="selecting-a-database-instance-for-existing-components">Selecting a database instance for existing components</h3>

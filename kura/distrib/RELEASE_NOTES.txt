@@ -28,7 +28,7 @@ Bug Fixes:
   * 6cc5998e7f - [core] Resolved database memory leak [backport release-5.2.0] (#4205) (github-actions[bot])
 
 Known Issues:
- * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
+  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
   * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
     built and run immediately after installation.
   * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.

@@ -10,7 +10,7 @@ on:
           required: true
         starting_commit:
           type: string
-          description: Commit from which to start generating the release notes
+          description: Commit from which to start generating the release notes (non-inclusive)
           required: true
 
 jobs:
@@ -56,5 +56,5 @@ jobs:
       with:
         title: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
         commit-message: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
-        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.version }} version release notes"
+        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.version }} version release notes since commit `${{ github.event.inputs.starting_commit }}` (non-inclusive)"
         branch-suffix: short-commit-hash

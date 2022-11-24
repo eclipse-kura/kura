@@ -2953,9 +2953,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h3 id="configuration-parameters">Configuration Parameters</h3>
 <p>The <strong>H2DbService</strong> provides the following configuration parameters:</p>
 <ul>
-<li>
-<p><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. </p>
-</li>
+<li><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. </li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the database is created in persisted mode, please make sure that the Linux user running Eclipse Kura has the permissions required to create the database file.
+If the permissions are not ok, Eclipse Kura may be able to create the database (by default it runs with the CAP_DAC_OVERRIDE capability) but it may not be able to perform the periodic defragmentation process, this may cause the database file size to grow expecially if the write rate is high.</p>
+<p>Executing the following commands as <code>root</code> can be useful to detect potential issues, replace <code>database_parent_directory</code> with the parent directory of the database file and <code>kura_linux_user</code> with the Linux user that is executing Eclipse Kura (e.g. kurad):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>export TARGET=&quot;$(readlink -f database_parent_directory)&quot;
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>export KURA_USER=&quot;kura_linux_user&quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sudo -u &quot;${KURA_USER}&quot; sh -c &quot;touch &#39;${TARGET}/.testfile&#39; &amp;&amp; rm &#39;${TARGET}/.testfile&#39;&quot;
+</code></pre></div></p>
+<p>If command fails it may be necessary to change the database directory or adjust the permissions.</p>
+</div>
+<ul>
 <li>
 <p><strong>User</strong>: Specifies the user for the database connection. Furthermore </p>
 </li>

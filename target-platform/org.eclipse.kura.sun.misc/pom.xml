@@ -52,7 +52,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>${maven-bundle-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>bundle-manifest</id>
@@ -66,22 +66,25 @@
 					<instructions>
 						<Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
 						<Bundle-Vendor>Eclipse Kura</Bundle-Vendor>
+						<Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
+                        </Require-Capability>
 					</instructions>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.1</version>
+				<version>${maven-deploy-plugin.version}</version>
 				<configuration>
 				</configuration>
 			</plugin>

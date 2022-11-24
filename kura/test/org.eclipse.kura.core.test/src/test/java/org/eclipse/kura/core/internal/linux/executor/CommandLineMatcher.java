@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ import java.util.List;
 import org.apache.commons.exec.CommandLine;
 import org.mockito.ArgumentMatcher;
 
-public class CommandLineMatcher extends ArgumentMatcher<CommandLine> {
+public class CommandLineMatcher implements ArgumentMatcher<CommandLine> {
 
     String executable;
     List<String> arguments;
@@ -36,7 +36,7 @@ public class CommandLineMatcher extends ArgumentMatcher<CommandLine> {
     }
 
     @Override
-    public boolean matches(Object argument) {
+    public boolean matches(CommandLine argument) {
         boolean matched = false;
         if (argument instanceof CommandLine) {
             CommandLine cl = (CommandLine) argument;

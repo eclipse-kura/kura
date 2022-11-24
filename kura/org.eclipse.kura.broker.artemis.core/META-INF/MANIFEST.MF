@@ -6,7 +6,7 @@ Bundle-Version: 1.4.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: org.apache.activemq.artemis.core.config;version="2.6.0",
  org.apache.activemq.artemis.core.config.impl;version="2.6.0",
  org.apache.activemq.artemis.core.deployers;version="2.6.0",

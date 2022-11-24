@@ -14,7 +14,7 @@
 package org.eclipse.kura.container.provider;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -162,7 +162,7 @@ public class ContainerInstanceTest {
             final AtomicReference<ContainerConfiguration> config = new AtomicReference<>();
 
             when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {
-                config.set(i.getArgumentAt(0, ContainerConfiguration.class));
+                config.set(i.getArgument(0, ContainerConfiguration.class));
                 this.containerStarted.complete(null);
                 return "1234";
             });

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,10 +15,10 @@ package org.eclipse.kura.linux.position;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -100,8 +100,8 @@ public class GpsDeviceTest implements GpsDevice.Listener {
 
         InputStream is = mock(InputStream.class);
         when(is.read()).thenThrow(new IOException("test"));
-        when(is.read(anyObject())).thenThrow(new IOException("test"));
-        when(is.read(anyObject(), anyInt(), anyInt())).thenThrow(new IOException("test"));
+        when(is.read(any())).thenThrow(new IOException("test"));
+        when(is.read(any(), anyInt(), anyInt())).thenThrow(new IOException("test"));
 
         CommConnection connMock = mock(CommConnection.class);
         when(connMock.openInputStream()).thenReturn(is);

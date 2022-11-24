@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.system.test
 Bundle-SymbolicName: org.eclipse.kura.core.tamper.detection.test;singleton:=true
 Bundle-Version: 5.3.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.kura.core.tamper.detection;bundle-version="1.1.0",
  org.eclipse.kura.http.server.manager;bundle-version="1.1.0",
@@ -27,10 +27,10 @@ Import-Package: com.google.gson;version="2.7.0",
  org.eclipse.kura.type;version="1.1.0",
  org.eclipse.kura.util.wire.test;version="1.1.0",
  org.junit,
- org.junit.runner;version="4.12.0",
- org.junit.runners;version="4.12.0",
- org.mockito;version="1.10.19",
- org.mockito.stubbing;version="1.10.19",
+ org.junit.runner;version="[4.12.0,5.0.0)",
+ org.junit.runners;version="[4.12.0,5.0.0)",
+ org.mockito;version="[4.0.0,5.0.0)",
+ org.mockito.stubbing;version="[4.0.0,5.0.0)",
  org.osgi.framework;version="1.10.0",
  org.osgi.util.tracker;version="1.5.2",
  org.slf4j;version="1.7.25"

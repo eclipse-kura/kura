@@ -14,8 +14,8 @@ package org.eclipse.kura.internal.wire.h2db.filter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,8 +45,8 @@ public class H2DbWireRecordFilterTest {
 
     private H2DbService createMockH2DbService(final Connection connection) throws SQLException {
         final H2DbService dbServiceMock = mock(H2DbService.class);
-        when(dbServiceMock.withConnection(anyObject())).thenAnswer(invocation -> {
-            return invocation.getArgumentAt(0, H2DbService.ConnectionCallable.class).call(connection);
+        when(dbServiceMock.withConnection(any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0, H2DbService.ConnectionCallable.class).call(connection);
         });
         when(dbServiceMock.getConnection()).thenReturn(connection);
         return dbServiceMock;

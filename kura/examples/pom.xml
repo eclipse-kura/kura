@@ -25,20 +25,33 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>1.6.0</tycho-version>
-
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
-
         <skip.can.example>true</skip.can.example>
-
-        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <!-- plugins versions common to Java 8 and Java 17 builds -->
+        <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
+        <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
+        <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+        <license-maven-plugin.version>2.2</license-maven-plugin.version>
+        <jacoco.version>0.8.8</jacoco.version>
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
+        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+        <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
+        <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
+        <maven-site-plugin.version>3.3</maven-site-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
     </properties>
 
     <distributionManagement>
@@ -88,6 +101,53 @@
     </modules>
 
     <profiles>
+        <profile>
+            <id>java8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+                <tycho-version>1.7.0</tycho-version>
+
+                <tycho.surefire.testenv.args>
+                    -Dosgi.console=5002
+                    -DbuildingWithTycho=true -Dosgi.locking=none
+                    -Dds.showtrace=true -Djava.io.tmpdir=/tmp
+                    -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                    -Dosgi.clean=true
+                    -Dorg.eclipse.kura.mode=emulator
+                    -Dkura.snapshots=${project.basedir}/target/
+                    -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+                    -Ddpa.configuration=/tmp/kura/dpa.properties
+                </tycho.surefire.testenv.args>
+            </properties>
+        </profile>
+        <profile>
+            <id>java17</id>
+            <activation>
+                <jdk>17</jdk>
+            </activation>
+            <properties>
+                <!-- TODO: update when new version is released to be working with Tycho 3. -->
+                <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+                <tycho-version>3.0.0</tycho-version>
+
+                <tycho.surefire.testenv.args>
+                    -Dosgi.console=5002
+                    -DbuildingWithTycho=true -Dosgi.locking=none
+                    -Dds.showtrace=true -Djava.io.tmpdir=/tmp
+                    -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                    -Dosgi.clean=true
+                    -Dorg.eclipse.kura.mode=emulator
+                    -Dkura.snapshots=${project.basedir}/target/
+                    -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+                    -Ddpa.configuration=/tmp/kura/dpa.properties
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.util=ALL-UNNAMED
+                </tycho.surefire.testenv.args>
+            </properties>
+        </profile>
         <profile>
             <id>default</id>
             <activation>
@@ -167,7 +227,7 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
+                <version>${wagon-ssh.version}</version>
             </extension>
         </extensions>
 
@@ -175,7 +235,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
+                <version>${maven-checkstyle-plugin.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.slf4j</groupId>
@@ -208,16 +268,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>${findbugs-maven-plugin.version}</version>
                 <configuration>
                     <findbugsXmlOutput>true</findbugsXmlOutput>
                     <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
@@ -227,7 +287,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <version>${maven-eclipse-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -235,7 +295,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>false</skip>
                 </configuration>
@@ -323,19 +383,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
+                <version>${maven-site-plugin.version}</version>
             </plugin>
             <plugin>
                 <!-- license:format to add license:check to check -->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.2</version>
+                <version>${license-maven-plugin.version}</version>
                 <configuration>
                     <header>distrib/eclipse_license.txt</header>
                     <properties>
                         <owner>Eurotech and/or its affiliates</owner>
                         <contributor>Eurotech</contributor>
-                        <dates>2011, 2014</dates>
+                        <dates>2011, 2022</dates>
                     </properties>
                     <includes>
                         <include>**/*.java</include>
@@ -353,7 +413,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>${maven-antrun-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>verify-jdeps</id>
@@ -386,7 +446,7 @@
             <plugin>
                 <groupId>org.honton.chas</groupId>
                 <artifactId>exists-maven-plugin</artifactId>
-                <version>0.0.3</version>
+                <version>${exists-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -416,7 +476,7 @@
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
+                    <version>${lifecycle-mapping.version}</version>
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>

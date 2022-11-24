@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,9 +17,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -98,11 +98,11 @@ public class DefaultCloudServiceFactoryTest {
 
                 return null;
             }
-        }).when(csMock).createFactoryConfiguration(anyString(), anyString(), anyObject(), anyBoolean());
+        }).when(csMock).createFactoryConfiguration(anyString(), anyString(), any(), anyBoolean());
 
         factory.createConfiguration(pid);
 
-        verify(csMock, times(3)).createFactoryConfiguration(anyString(), anyString(), anyObject(), anyBoolean());
+        verify(csMock, times(3)).createFactoryConfiguration(anyString(), anyString(), any(), anyBoolean());
     }
 
     @Test
@@ -205,8 +205,8 @@ public class DefaultCloudServiceFactoryTest {
         refProperties.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
 
         final ServiceReference<CloudConnectionManager> ref = mock(ServiceReference.class);
-        when(ref.getProperty(anyObject())).thenAnswer(answer -> {
-            final String key = answer.getArgumentAt(0, String.class);
+        when(ref.getProperty(any())).thenAnswer(answer -> {
+            final String key = answer.getArgument(0, String.class);
             return refProperties.get(key);
         });
 

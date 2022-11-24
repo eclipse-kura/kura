@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -1620,7 +1620,7 @@ public class CloudDeploymentHandlerV2Test {
         @SuppressWarnings("unchecked")
         final ServiceReference<DeploymentHook> reference = mock(ServiceReference.class);
         when(reference.getProperty(anyString())).then(invocation -> {
-            String arg = invocation.getArgumentAt(0, String.class);
+            String arg = invocation.getArgument(0, String.class);
             if (ConfigurationService.KURA_SERVICE_PID.equals(arg)) {
                 return kuraServicePid;
             }
@@ -1632,8 +1632,8 @@ public class CloudDeploymentHandlerV2Test {
     private DeploymentHookManager getDeploymentHookManager() throws NoSuchFieldException {
         final DeploymentHookManager result = new DeploymentHookManager();
         final BundleContext mockBundleContext = mock(BundleContext.class);
-        when(mockBundleContext.getService(anyObject())).then(invocation -> {
-            final ServiceReference<?> ref = invocation.getArgumentAt(0, ServiceReference.class);
+        when(mockBundleContext.getService(any())).then(invocation -> {
+            final ServiceReference<?> ref = invocation.getArgument(0, ServiceReference.class);
             return ref.getProperty("service");
         });
         TestUtil.setFieldValue(result, "bundleContext", mockBundleContext);

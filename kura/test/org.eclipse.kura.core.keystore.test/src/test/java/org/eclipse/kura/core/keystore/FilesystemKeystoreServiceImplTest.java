@@ -62,7 +62,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
@@ -350,7 +350,7 @@ public class FilesystemKeystoreServiceImplTest {
         Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
-        Mockito.verify(eventAdmin, Mockito.times(1)).postEvent(Mockito.anyObject());
+        Mockito.verify(eventAdmin, Mockito.times(1)).postEvent(Mockito.any());
     }
 
     @Test
@@ -377,7 +377,7 @@ public class FilesystemKeystoreServiceImplTest {
         Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
-        Mockito.verify(eventAdmin, Mockito.times(0)).postEvent(Mockito.anyObject());
+        Mockito.verify(eventAdmin, Mockito.times(0)).postEvent(Mockito.any());
     }
 
     @Test
@@ -931,7 +931,7 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_RANDOMIZE_PASSWORD, true);
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
@@ -956,8 +956,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_RANDOMIZE_PASSWORD, true);
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
@@ -984,8 +984,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_RANDOMIZE_PASSWORD, true);
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -1015,8 +1015,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_RANDOMIZE_PASSWORD, true);
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -1042,8 +1042,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
@@ -1069,8 +1069,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
@@ -1100,8 +1100,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
 
         CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.encryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
+        when(cryptoService.decryptAes((char[]) ArgumentMatchers.any())).thenAnswer(i -> i.getArgument(0, char[].class));
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);

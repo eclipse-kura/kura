@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@ package org.eclipse.kura.internal.wire.regexfilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -175,7 +175,7 @@ public class RegexFilterTest {
         WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
 
         doAnswer(invocation -> {
-            List<WireRecord> records = invocation.getArgumentAt(0, List.class);
+            List<WireRecord> records = invocation.getArgument(0, List.class);
 
             assertNotNull(records);
             assertEquals(1, records.size());
@@ -184,11 +184,11 @@ public class RegexFilterTest {
             assertEquals(0, records.get(0).getProperties().size());
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         rf.onWireReceive(wireEnvelope);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
     }
 
     @Test
@@ -226,7 +226,7 @@ public class RegexFilterTest {
         WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
 
         doAnswer(invocation -> {
-            List<WireRecord> records = invocation.getArgumentAt(0, List.class);
+            List<WireRecord> records = invocation.getArgument(0, List.class);
 
             assertNotNull(records);
             assertEquals(1, records.size());
@@ -236,11 +236,11 @@ public class RegexFilterTest {
             assertTrue(records.get(0).getProperties().containsKey("key"));
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         rf.onWireReceive(wireEnvelope);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
     }
 
     @Test
@@ -295,7 +295,7 @@ public class RegexFilterTest {
         WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
 
         doAnswer(invocation -> {
-            List<WireRecord> records = invocation.getArgumentAt(0, List.class);
+            List<WireRecord> records = invocation.getArgument(0, List.class);
 
             assertNotNull(records);
             assertEquals(3, records.size()); // all records and filtered properties!
@@ -321,11 +321,11 @@ public class RegexFilterTest {
             assertEquals(0, props.size());
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         rf.onWireReceive(wireEnvelope);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
     }
 
     @Test
@@ -380,7 +380,7 @@ public class RegexFilterTest {
         WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
 
         doAnswer(invocation -> {
-            List<WireRecord> records = invocation.getArgumentAt(0, List.class);
+            List<WireRecord> records = invocation.getArgument(0, List.class);
 
             assertNotNull(records);
             assertEquals(3, records.size());
@@ -406,11 +406,11 @@ public class RegexFilterTest {
             assertTrue(props.containsKey("abcacba"));
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         rf.onWireReceive(wireEnvelope);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
     }
 
 }

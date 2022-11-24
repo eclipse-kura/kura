@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -546,7 +546,7 @@ public class BluetoothLeBeaconManagerImplTest {
         };
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
+        when(esMock.kill(any(), any())).thenReturn(true);
         svc.setExecutorService(esMock);
 
         SystemService ssMock = mock(SystemService.class);
@@ -588,7 +588,7 @@ public class BluetoothLeBeaconManagerImplTest {
         };
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-        when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
+        when(esMock.kill(any(), any())).thenReturn(true);
         svc.setExecutorService(esMock);
 
         SystemService ssMock = mock(SystemService.class);

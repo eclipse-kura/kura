@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,8 @@ package org.eclipse.kura.internal.wire.subscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -69,7 +69,7 @@ public class CloudSubscriberTest {
         when(wireHelperServiceMock.newWireSupport(cs, null)).thenReturn(wsMock);
 
         doAnswer(invocation -> {
-            List<?> wireRecords = invocation.getArgumentAt(0, List.class);
+            List<?> wireRecords = invocation.getArgument(0, List.class);
 
             assertNotNull(wireRecords);
             assertEquals(1, wireRecords.size());
@@ -94,7 +94,7 @@ public class CloudSubscriberTest {
             assertEquals(strval, properties.get("string").getValue());
 
             return null;
-        }).when(wsMock).emit(anyObject());
+        }).when(wsMock).emit(any());
 
         BundleContext bundleCtxMock = mock(BundleContext.class);
         Filter filter = mock(Filter.class);
@@ -110,7 +110,7 @@ public class CloudSubscriberTest {
 
         cs.onMessageArrived(message);
 
-        verify(wsMock, times(1)).emit(anyObject());
+        verify(wsMock, times(1)).emit(any());
     }
 
     @Test

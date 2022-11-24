@@ -18,7 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -319,7 +319,7 @@ public class NetworkAdminServiceImplTest {
         when(((SelfConfiguringComponent) networkConfigurationServiceMock).getConfiguration()).thenReturn(cc);
 
         doAnswer(invocation -> {
-            NetworkConfiguration networkConfiguration = invocation.getArgumentAt(0, NetworkConfiguration.class);
+            NetworkConfiguration networkConfiguration = invocation.getArgument(0, NetworkConfiguration.class);
 
             assertEquals(1, networkConfiguration.getModifiedInterfaceNames().size());
             assertEquals(interfaceName, networkConfiguration.getModifiedInterfaceNames().get(0));
@@ -355,7 +355,7 @@ public class NetworkAdminServiceImplTest {
             }
 
             return null;
-        }).when(networkConfigurationServiceMock).setNetworkConfiguration(anyObject());
+        }).when(networkConfigurationServiceMock).setNetworkConfiguration(any());
 
         ConfigurationService configurationServiceMock = mock(ConfigurationService.class);
         nasi.setConfigurationService(configurationServiceMock);
@@ -369,7 +369,7 @@ public class NetworkAdminServiceImplTest {
 
             nasi.handleEvent(event);
 
-            return 1234;
+            return 1234L;
         });
 
         NetworkConfiguration nc = new NetworkConfiguration();
@@ -413,7 +413,7 @@ public class NetworkAdminServiceImplTest {
         WifiAccessPoint accessPoint = new WifiAccessPointImpl(ssid);
         nasi.updateWifiInterfaceConfig(interfaceName, true, accessPoint, netConfigs);
 
-        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(anyObject());
+        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(any());
     }
 
     @Test
@@ -559,7 +559,7 @@ public class NetworkAdminServiceImplTest {
         when(((SelfConfiguringComponent) networkConfigurationServiceMock).getConfiguration()).thenReturn(cc);
 
         doAnswer(invocation -> {
-            NetworkConfiguration networkConfiguration = invocation.getArgumentAt(0, NetworkConfiguration.class);
+            NetworkConfiguration networkConfiguration = invocation.getArgument(0, NetworkConfiguration.class);
 
             assertEquals(1, networkConfiguration.getModifiedInterfaceNames().size());
             assertEquals(interfaceName, networkConfiguration.getModifiedInterfaceNames().get(0));
@@ -594,7 +594,7 @@ public class NetworkAdminServiceImplTest {
             }
 
             return null;
-        }).when(networkConfigurationServiceMock).setNetworkConfiguration(anyObject());
+        }).when(networkConfigurationServiceMock).setNetworkConfiguration(any());
 
         ConfigurationService configurationServiceMock = mock(ConfigurationService.class);
         nasi.setConfigurationService(configurationServiceMock);
@@ -608,7 +608,7 @@ public class NetworkAdminServiceImplTest {
 
             nasi.handleEvent(event);
 
-            return 1234;
+            return 1234L;
         });
 
         NetworkConfiguration nc = new NetworkConfiguration();
@@ -641,7 +641,7 @@ public class NetworkAdminServiceImplTest {
 
         nasi.updateEthernetInterfaceConfig(interfaceName, true, 1500, netConfigs);
 
-        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(anyObject());
+        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(any());
     }
 
     @Test
@@ -819,7 +819,7 @@ public class NetworkAdminServiceImplTest {
         when(((SelfConfiguringComponent) networkConfigurationServiceMock).getConfiguration()).thenReturn(cc);
 
         doAnswer(invocation -> {
-            NetworkConfiguration networkConfiguration = invocation.getArgumentAt(0, NetworkConfiguration.class);
+            NetworkConfiguration networkConfiguration = invocation.getArgument(0, NetworkConfiguration.class);
 
             assertEquals(1, networkConfiguration.getModifiedInterfaceNames().size());
             assertEquals(interfaceName, networkConfiguration.getModifiedInterfaceNames().get(0));
@@ -854,7 +854,7 @@ public class NetworkAdminServiceImplTest {
             }
 
             return null;
-        }).when(networkConfigurationServiceMock).setNetworkConfiguration(anyObject());
+        }).when(networkConfigurationServiceMock).setNetworkConfiguration(any());
 
         ConfigurationService configurationServiceMock = mock(ConfigurationService.class);
         nasi.setConfigurationService(configurationServiceMock);
@@ -868,7 +868,7 @@ public class NetworkAdminServiceImplTest {
 
             nasi.handleEvent(event);
 
-            return 1234;
+            return 1234L;
         });
 
         NetworkConfiguration nc = new NetworkConfiguration();
@@ -907,7 +907,7 @@ public class NetworkAdminServiceImplTest {
         int ppp = 0;
         nasi.updateModemInterfaceConfig(interfaceName, serial, modemId, ppp, true, 1500, netConfigs);
 
-        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(anyObject());
+        verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(any());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,9 @@
 package org.eclipse.kura.core.internal.linux.executor;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
@@ -34,6 +35,7 @@ import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 public class ExecutorUtilExecutionTest {
 
@@ -144,12 +146,12 @@ public class ExecutorUtilExecutionTest {
                 this.callback.accept(csFailure);
                 return null;
             }).when(deMock).execute(argThat(new CommandLineMatcher(executableUnprivileged, argumentsUnprivileged)),
-                    anyMap(), anyObject());
+                    anyMap(), any());
             doAnswer(invocation -> {
                 this.callback.accept(csSuccess);
                 return null;
             }).when(deMock).execute(argThat(new CommandLineMatcher(executablePrivileged, argumentsPrivileged)),
-                    anyMap(), anyObject());
+                    anyMap(), any());
         } catch (IOException e) {
             // Do nothing...
         }

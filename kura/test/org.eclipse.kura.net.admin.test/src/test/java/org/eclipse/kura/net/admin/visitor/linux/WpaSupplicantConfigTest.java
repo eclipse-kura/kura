@@ -14,7 +14,7 @@ package org.eclipse.kura.net.admin.visitor.linux;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -705,7 +705,7 @@ public class WpaSupplicantConfigTest {
             e.printStackTrace();
         }
 
-        when(esMock.execute(anyObject())).thenReturn(status);
+        when(esMock.execute(any())).thenReturn(status);
 
         writer.setExecutorService(esMock);
 

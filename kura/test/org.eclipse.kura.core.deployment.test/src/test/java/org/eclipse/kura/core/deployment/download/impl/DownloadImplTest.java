@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -93,11 +93,11 @@ public class DownloadImplTest {
 
                 return null;
             }
-        }).when(callback).publishMessage(anyObject(), anyObject(), anyObject());
+        }).when(callback).publishMessage(any(), any(), any());
 
         di.progressChanged(progressEvent);
 
-        verify(callback).publishMessage(anyObject(), anyObject(), anyObject());
+        verify(callback).publishMessage(any(), any(), any());
     }
 
     @Test
@@ -124,8 +124,8 @@ public class DownloadImplTest {
 
         di.downloadDeploymentPackageInternal();
 
-        verify(callback, times(0)).publishMessage(anyObject(), anyObject(), anyObject());
-        verify(callback, times(0)).installDownloadedFile(anyObject(), anyObject());
+        verify(callback, times(0)).publishMessage(any(), any(), any());
+        verify(callback, times(0)).installDownloadedFile(any(), any());
     }
 
     @Test
@@ -173,12 +173,12 @@ public class DownloadImplTest {
 
                 return null;
             }
-        }).when(callback).publishMessage(anyObject(), anyObject(), anyObject());
+        }).when(callback).publishMessage(any(), any(), any());
 
         di.downloadDeploymentPackageInternal();
 
-        verify(callback).publishMessage(anyObject(), anyObject(), anyObject());
-        verify(callback, times(0)).installDownloadedFile(anyObject(), anyObject());
+        verify(callback).publishMessage(any(), any(), any());
+        verify(callback, times(0)).installDownloadedFile(any(), any());
     }
 
     @Test
@@ -408,12 +408,12 @@ public class DownloadImplTest {
 
                 return null;
             }
-        }).when(callback).publishMessage(anyObject(), anyObject(), anyObject());
+        }).when(callback).publishMessage(any(), any(), any());
 
         TestUtil.invokePrivate(di, "alreadyDownloadedAsync");
 
-        verify(callback).publishMessage(anyObject(), anyObject(), anyObject());
-        verify(callback, times(0)).installDownloadedFile(anyObject(), anyObject());
+        verify(callback).publishMessage(any(), any(), any());
+        verify(callback, times(0)).installDownloadedFile(any(), any());
     }
 
 }

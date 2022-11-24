@@ -17,8 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -119,11 +119,11 @@ public class InstallImplTest {
 
                 return null;
             }
-        }).when(callbackMock).publishMessage(eq(options), Mockito.anyObject(), eq(InstallImpl.RESOURCE_INSTALL));
+        }).when(callbackMock).publishMessage(eq(options), Mockito.any(), eq(InstallImpl.RESOURCE_INSTALL));
 
         ii.installDp(options, dpFile);
 
-        verify(callbackMock, times(1)).publishMessage(eq(options), Mockito.anyObject(),
+        verify(callbackMock, times(1)).publishMessage(eq(options), Mockito.any(),
                 eq(InstallImpl.RESOURCE_INSTALL));
     }
 
@@ -154,7 +154,7 @@ public class InstallImplTest {
         File dpFile = new File(dpFineName);
         dpFile.createNewFile();
 
-        when(deploymentAdminMock.installDeploymentPackage(anyObject()))
+        when(deploymentAdminMock.installDeploymentPackage(any()))
                 .thenThrow(new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "test"));
 
         doAnswer(new Answer<Object>() {
@@ -172,11 +172,11 @@ public class InstallImplTest {
 
                 return null;
             }
-        }).when(callbackMock).publishMessage(eq(options), Mockito.anyObject(), eq(InstallImpl.RESOURCE_INSTALL));
+        }).when(callbackMock).publishMessage(eq(options), Mockito.any(), eq(InstallImpl.RESOURCE_INSTALL));
 
         ii.installDp(options, dpFile);
 
-        verify(callbackMock, times(1)).publishMessage(eq(options), Mockito.anyObject(),
+        verify(callbackMock, times(1)).publishMessage(eq(options), Mockito.any(),
                 eq(InstallImpl.RESOURCE_INSTALL));
 
         veriDir.delete();
@@ -205,7 +205,7 @@ public class InstallImplTest {
         dpFile.createNewFile();
 
         DeploymentPackage dpMock = mock(DeploymentPackage.class);
-        when(deploymentAdminMock.installDeploymentPackage(anyObject())).thenReturn(dpMock);
+        when(deploymentAdminMock.installDeploymentPackage(any())).thenReturn(dpMock);
 
         Object dp = TestUtil.invokePrivate(ii, "installDeploymentPackageInternal", dpFile);
 
@@ -213,7 +213,7 @@ public class InstallImplTest {
         persDir.delete();
         dpFile.delete();
 
-        verify(deploymentAdminMock, times(1)).installDeploymentPackage(anyObject());
+        verify(deploymentAdminMock, times(1)).installDeploymentPackage(any());
 
         assertEquals("Should return our dp", dpMock, dp);
     }
@@ -243,7 +243,7 @@ public class InstallImplTest {
         dpFile.createNewFile();
 
         DeploymentPackage dpMock = mock(DeploymentPackage.class);
-        when(deploymentAdminMock.installDeploymentPackage(anyObject())).thenReturn(dpMock);
+        when(deploymentAdminMock.installDeploymentPackage(any())).thenReturn(dpMock);
 
         when(dpMock.getName()).thenReturn("dpname");
 
@@ -252,7 +252,7 @@ public class InstallImplTest {
 
         Object dp = TestUtil.invokePrivate(ii, "installDeploymentPackageInternal", dpFile);
 
-        verify(deploymentAdminMock, times(1)).installDeploymentPackage(anyObject());
+        verify(deploymentAdminMock, times(1)).installDeploymentPackage(any());
 
         assertEquals("Should return our dp", dpMock, dp);
         assertFalse("File should have been deleted", dpFile.exists());
@@ -316,7 +316,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
-        when(serviceMock.execute(anyObject())).thenReturn(status);
+        when(serviceMock.execute(any())).thenReturn(status);
         String kuraDataDir = "/tmp";
 
         InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, serviceMock);
@@ -371,11 +371,11 @@ public class InstallImplTest {
 
                 return null;
             }
-        }).when(callbackMock).publishMessage(Mockito.anyObject(), Mockito.anyObject(),
+        }).when(callbackMock).publishMessage(Mockito.any(), Mockito.any(),
                 eq(InstallImpl.RESOURCE_INSTALL));
 
         CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
-        when(notificationPublisher.publish(anyObject())).thenReturn("12345");
+        when(notificationPublisher.publish(any())).thenReturn("12345");
 
         ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher",
                 notificationPublisher);
@@ -384,7 +384,7 @@ public class InstallImplTest {
         assertTrue("File should not have been deleted.", f1.exists());
         assertFalse("File should have been deleted.", fperf.exists());
 
-        verify(callbackMock, times(1)).publishMessage(Mockito.anyObject(), Mockito.anyObject(), Mockito.anyObject());
+        verify(callbackMock, times(1)).publishMessage(Mockito.any(), Mockito.any(), Mockito.any());
 
         f1.delete();
         veriDir.delete();
@@ -396,7 +396,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(1));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
-        when(serviceMock.execute(anyObject())).thenReturn(status);
+        when(serviceMock.execute(any())).thenReturn(status);
         String kuraDataDir = "/tmp";
 
         InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, serviceMock);
@@ -447,11 +447,11 @@ public class InstallImplTest {
 
                 return null;
             }
-        }).when(callbackMock).publishMessage(Mockito.anyObject(), Mockito.anyObject(),
+        }).when(callbackMock).publishMessage(Mockito.any(), Mockito.any(),
                 eq(InstallImpl.RESOURCE_INSTALL));
 
         CloudNotificationPublisher notificationPublisher = mock(CloudNotificationPublisher.class);
-        when(notificationPublisher.publish(anyObject())).thenReturn("12345");
+        when(notificationPublisher.publish(any())).thenReturn("12345");
 
         ii.sendInstallConfirmations("org.eclipse.kura.cloud.publisher.CloudNotificationPublisher",
                 notificationPublisher);
@@ -459,7 +459,7 @@ public class InstallImplTest {
         assertFalse("File should have been deleted.", f.exists());
         assertFalse("File should have been deleted.", fperf.exists());
 
-        verify(callbackMock, times(1)).publishMessage(Mockito.anyObject(), Mockito.anyObject(), Mockito.anyObject());
+        verify(callbackMock, times(1)).publishMessage(Mockito.any(), Mockito.any(), Mockito.any());
 
         veriDir.delete();
         persDir.delete();

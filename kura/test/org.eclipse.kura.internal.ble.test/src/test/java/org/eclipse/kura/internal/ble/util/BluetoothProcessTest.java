@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,7 +33,7 @@ public class BluetoothProcessTest {
         Command command = new Command(commandLine);
         bluetoothProcess.exec(commandLine, null);
 
-        verify(executorMock, times(1)).execute(eq(command), anyObject());
+        verify(executorMock, times(1)).execute(eq(command), any());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class BluetoothProcessTest {
         command.setExecuteInAShell(true);
         bluetoothProcess.execSnoop(commandLine, null);
 
-        verify(executorMock, times(1)).execute(eq(command), anyObject());
+        verify(executorMock, times(1)).execute(eq(command), any());
     }
 
 }

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
@@ -120,7 +120,7 @@ public class DeploymentAgentTest {
 
         Object notifier = new Object();
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertFalse((boolean) event.getProperty("successful"));
             assertEquals("UNKNOWN", event.getProperty("deploymentpackage.name"));
@@ -129,7 +129,7 @@ public class DeploymentAgentTest {
                 notifier.notifyAll(); // continue the test
             }
             throw new InterruptedException("test"); // stop the installer thread
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         Thread t = new Thread(() -> {
             try {
@@ -174,7 +174,7 @@ public class DeploymentAgentTest {
 
         Object notifier = new Object();
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertTrue((boolean) event.getProperty("successful"));
 
@@ -182,7 +182,7 @@ public class DeploymentAgentTest {
                 notifier.notifyAll(); // continue the test
             }
             throw new InterruptedException("test"); // stop the installer thread
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         DeploymentAdmin daMock = mock(DeploymentAdmin.class);
         svc.setDeploymentAdmin(daMock);
@@ -218,14 +218,14 @@ public class DeploymentAgentTest {
 
         AtomicBoolean invoked = new AtomicBoolean(false);
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertTrue((boolean) event.getProperty("successful"));
 
             invoked.set(true);
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         DeploymentPackage dp = mock(DeploymentPackage.class);
         when(dp.getName()).thenReturn(DP_NAME);
@@ -310,7 +310,7 @@ public class DeploymentAgentTest {
 
         DeploymentAdmin daMock = mock(DeploymentAdmin.class);
         svc.setDeploymentAdmin(daMock);
-        when(daMock.installDeploymentPackage(anyObject())).thenReturn(dp);
+        when(daMock.installDeploymentPackage(any())).thenReturn(dp);
 
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
@@ -326,7 +326,7 @@ public class DeploymentAgentTest {
 
         TestUtil.invokePrivate(svc, "installDeploymentPackageInternal", url);
 
-        verify(daMock, times(1)).installDeploymentPackage(anyObject());
+        verify(daMock, times(1)).installDeploymentPackage(any());
 
         FileReader reader = new FileReader(dpaConfPath);
         char[] buf = new char[200];
@@ -363,7 +363,7 @@ public class DeploymentAgentTest {
         TestUtil.invokePrivate(svc, "addPackageToConfFile", dpName, url);
 
         verify(deployedPackages, times(1)).setProperty(dpName, url);
-        verify(deployedPackages, times(0)).store((FileOutputStream) anyObject(), anyObject());
+        verify(deployedPackages, times(0)).store((FileOutputStream) any(), any());
     }
 
     @Test
@@ -373,7 +373,7 @@ public class DeploymentAgentTest {
         final Properties deployedPackages = spy(new Properties());
 
         when(deployedPackages.entrySet()).thenCallRealMethod();
-        doCallRealMethod().when(deployedPackages).setProperty(anyObject(), anyObject());
+        doCallRealMethod().when(deployedPackages).setProperty(any(), any());
 
         DeploymentAgent svc = new DeploymentAgent() {
 
@@ -383,7 +383,7 @@ public class DeploymentAgentTest {
             }
         };
 
-        doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) anyObject(), anyObject());
+        doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) any(), any());
 
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
@@ -394,7 +394,7 @@ public class DeploymentAgentTest {
         TestUtil.invokePrivate(svc, "addPackageToConfFile", dpName, url);
 
         verify(deployedPackages, times(1)).setProperty(dpName, url);
-        verify(deployedPackages, times(1)).store((FileOutputStream) anyObject(), anyObject());
+        verify(deployedPackages, times(1)).store((FileOutputStream) any(), any());
     }
 
     @Test
@@ -416,7 +416,7 @@ public class DeploymentAgentTest {
         TestUtil.invokePrivate(svc, "removePackageFromConfFile", dpName);
 
         verify(deployedPackages, times(1)).remove(dpName);
-        verify(deployedPackages, times(0)).store((FileOutputStream) anyObject(), anyObject());
+        verify(deployedPackages, times(0)).store((FileOutputStream) any(), any());
     }
 
     @Test
@@ -437,7 +437,7 @@ public class DeploymentAgentTest {
             }
         };
 
-        doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) anyObject(), anyObject());
+        doThrow(new IOException("test")).when(deployedPackages).store((FileOutputStream) any(), any());
 
         String dpaConfPath = "target/dpa.properties";
         TestUtil.setFieldValue(svc, "dpaConfPath", dpaConfPath);
@@ -447,7 +447,7 @@ public class DeploymentAgentTest {
         TestUtil.invokePrivate(svc, "removePackageFromConfFile", dpName);
 
         verify(deployedPackages, times(1)).remove(dpName);
-        verify(deployedPackages, times(1)).store((FileOutputStream) anyObject(), anyObject());
+        verify(deployedPackages, times(1)).store((FileOutputStream) any(), any());
     }
 
     @Test
@@ -476,7 +476,7 @@ public class DeploymentAgentTest {
         TestUtil.invokePrivate(svc, "removePackageFromConfFile", dpName);
 
         verify(deployedPackages, times(1)).remove(dpName);
-        verify(deployedPackages, times(1)).store((FileOutputStream) anyObject(), anyObject());
+        verify(deployedPackages, times(1)).store((FileOutputStream) any(), any());
     }
 
 }

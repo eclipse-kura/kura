@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -57,7 +57,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -224,11 +224,11 @@ public class ConfigurationServiceJunitTest {
             assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
 
             return null;
-        }).when(cfgMock2).update((Dictionary<String, Object>) anyObject());
+        }).when(cfgMock2).update((Dictionary<String, Object>) any());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
 
-        verify(cfgMock2, times(1)).update((Dictionary<String, Object>) anyObject());
+        verify(cfgMock2, times(1)).update((Dictionary<String, Object>) any());
     }
 
     @Test
@@ -274,11 +274,11 @@ public class ConfigurationServiceJunitTest {
             assertEquals("additional key", "val2", dict.get("key2"));
 
             return null;
-        }).when(cfgMock2).update((Dictionary<String, Object>) Matchers.anyObject());
+        }).when(cfgMock2).update((Dictionary<String, Object>) ArgumentMatchers.any());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
 
-        verify(cfgMock2, Mockito.times(1)).update((Dictionary<String, Object>) Matchers.anyObject());
+        verify(cfgMock2, Mockito.times(1)).update((Dictionary<String, Object>) ArgumentMatchers.any());
     }
 
     @Test
@@ -410,7 +410,7 @@ public class ConfigurationServiceJunitTest {
         ConfigurationAdmin configAdminMock = mock(ConfigurationAdmin.class);
 
         if (config != null) {
-            when(configAdminMock.listConfigurations(anyObject())).thenReturn(new Configuration[] { config });
+            when(configAdminMock.listConfigurations(any())).thenReturn(new Configuration[] { config });
         }
 
         return configAdminMock;
@@ -586,13 +586,13 @@ public class ConfigurationServiceJunitTest {
         cs.setCryptoService(cryptoServiceMock);
 
         KuraException exc = new KuraException(KuraErrorCode.STORE_ERROR);
-        when(cryptoServiceMock.decryptAes((char[]) Matchers.anyObject())).thenThrow(exc);
+        when(cryptoServiceMock.decryptAes((char[]) ArgumentMatchers.any())).thenThrow(exc);
 
         assertEquals("config size before decryption", 1, props.size());
 
         cs.decryptConfigurationProperties(config.getConfigurationProperties());
 
-        verify(cryptoServiceMock, times(1)).decryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).decryptAes((char[]) ArgumentMatchers.any());
 
         assertEquals("config size after decryption", 1, props.size());
     }
@@ -670,11 +670,11 @@ public class ConfigurationServiceJunitTest {
 
         String pid = null;
 
-        when(allPidsMock.contains(Matchers.anyObject())).thenThrow(new RuntimeException());
+        when(allPidsMock.contains(ArgumentMatchers.any())).thenThrow(new RuntimeException());
 
         cs.registerSelfConfiguringComponent(pid, pid);
 
-        verify(allPidsMock, times(0)).contains(Matchers.anyObject());
+        verify(allPidsMock, times(0)).contains(ArgumentMatchers.any());
     }
 
     @Test
@@ -746,11 +746,11 @@ public class ConfigurationServiceJunitTest {
 
         String pid = null;
 
-        when(allPidsMock.contains(Matchers.anyObject())).thenThrow(new RuntimeException());
+        when(allPidsMock.contains(ArgumentMatchers.any())).thenThrow(new RuntimeException());
 
         cs.unregisterComponentConfiguration(pid);
 
-        verify(allPidsMock, times(0)).contains(Matchers.anyObject());
+        verify(allPidsMock, times(0)).contains(ArgumentMatchers.any());
     }
 
     @Test
@@ -908,7 +908,7 @@ public class ConfigurationServiceJunitTest {
         TestUtil.invokePrivate(cs, "encryptConfigs", configs);
 
         verify(cryptoServiceMock, times(1)).decryptAes("pass".toCharArray());
-        verify(cryptoServiceMock, times(0)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(0)).encryptAes((char[]) ArgumentMatchers.any());
 
         assertEquals("property remains", 1, props.size());
         assertTrue("key still exists", props.containsKey("key1"));
@@ -1023,7 +1023,7 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.decryptAes((char[]) anyObject())).thenReturn("dec".toCharArray());
+        when(cryptoServiceMock.decryptAes((char[]) any())).thenReturn("dec".toCharArray());
 
         // make updateConfigurationsInternal fail with NPE
         TestUtil.setFieldValue(cs, "allActivatedPids", null);
@@ -1035,7 +1035,7 @@ public class ConfigurationServiceJunitTest {
             // OK
         }
 
-        verify(cryptoServiceMock, times(1)).decryptAes((char[]) anyObject());
+        verify(cryptoServiceMock, times(1)).decryptAes((char[]) any());
     }
 
     @Test
@@ -1329,7 +1329,7 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        when(cryptoServiceMock.decryptAes((char[]) anyObject())).thenReturn(null);
+        when(cryptoServiceMock.decryptAes((char[]) any())).thenReturn(null);
 
         try {
             cs.loadEncryptedSnapshotFileContent(snapshotID);
@@ -1677,14 +1677,14 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
         TestUtil.invokePrivate(cs, "encryptPlainSnapshots");
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
 
         FileReader fr = new FileReader(f1);
         char[] chars = new char[encCfg.length()];
@@ -1776,7 +1776,7 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         try {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
@@ -1785,7 +1785,7 @@ public class ConfigurationServiceJunitTest {
             assertEquals("Error code.", KuraErrorCode.INTERNAL_ERROR, e.getCode());
         }
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
 
         d1.delete();
         d2.delete();
@@ -1836,14 +1836,14 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
         TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
 
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         f1.deleteOnExit();
@@ -2132,7 +2132,7 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2144,7 +2144,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2213,7 +2213,7 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2228,7 +2228,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2298,7 +2298,7 @@ public class ConfigurationServiceJunitTest {
 
         String encCfg = "encrypted";
         char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) Matchers.anyObject())).thenReturn(encrypted);
+        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2310,7 +2310,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2335,12 +2335,12 @@ public class ConfigurationServiceJunitTest {
     public void testLineBreakHandling() throws KuraException, IOException {
         final CryptoService csMock = mock(CryptoService.class);
 
-        when(csMock.encryptAes(Matchers.any(char[].class))).thenAnswer(invocation -> {
-            return invocation.getArgumentAt(0, char[].class);
+        when(csMock.encryptAes(ArgumentMatchers.any(char[].class))).thenAnswer(invocation -> {
+            return invocation.getArgument(0, char[].class);
         });
 
-        when(csMock.decryptAes(Matchers.any(char[].class))).thenAnswer(invocation -> {
-            return invocation.getArgumentAt(0, char[].class);
+        when(csMock.decryptAes(ArgumentMatchers.any(char[].class))).thenAnswer(invocation -> {
+            return invocation.getArgument(0, char[].class);
         });
 
         final File snapshotsDir = new File("/tmp/snapshot_test_dir_" + System.currentTimeMillis());
@@ -2519,7 +2519,7 @@ public class ConfigurationServiceJunitTest {
 
         assertTrue("method called", calls[0]);
 
-        verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
+        verify(cfgMock, times(1)).update((Dictionary<String, ?>) any());
     }
 
     @Test
@@ -2561,13 +2561,13 @@ public class ConfigurationServiceJunitTest {
             assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
 
             return null;
-        }).when(cfgMock).update((Dictionary<String, ?>) anyObject());
+        }).when(cfgMock).update((Dictionary<String, ?>) any());
 
         TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);
 
         assertTrue("method called", calls[0]);
 
-        verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
+        verify(cfgMock, times(1)).update((Dictionary<String, ?>) any());
     }
 
     @Test
@@ -2879,7 +2879,7 @@ public class ConfigurationServiceJunitTest {
         String decrypted = prepareSnapshotXML();
         when(cryptoServiceMock.decryptAes("test".toCharArray())).thenReturn(decrypted.toCharArray());
 
-        when(cryptoServiceMock.encryptAes((char[]) anyObject())).thenReturn("encrypted".toCharArray());
+        when(cryptoServiceMock.encryptAes((char[]) any())).thenReturn("encrypted".toCharArray());
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2902,7 +2902,7 @@ public class ConfigurationServiceJunitTest {
         cs.rollback(id);
 
         verify(cryptoServiceMock, times(1)).decryptAes("test".toCharArray());
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         File[] files = d1.listFiles();
@@ -2980,7 +2980,7 @@ public class ConfigurationServiceJunitTest {
         String decrypted = prepareSnapshotXML();
         when(cryptoServiceMock.decryptAes("test".toCharArray())).thenReturn(decrypted.toCharArray());
 
-        when(cryptoServiceMock.encryptAes((char[]) anyObject())).thenReturn("encrypted".toCharArray());
+        when(cryptoServiceMock.encryptAes((char[]) any())).thenReturn("encrypted".toCharArray());
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -3016,7 +3016,7 @@ public class ConfigurationServiceJunitTest {
         Bundle bundleMock = mock(Bundle.class);
         when(svcRefMock.getBundle()).thenReturn(bundleMock);
 
-        when(bundleMock.getResource(Matchers.anyString())).thenThrow(new NullPointerException("test"));
+        when(bundleMock.getResource(ArgumentMatchers.anyString())).thenThrow(new NullPointerException("test"));
 
         try {
             cs.rollback(id);
@@ -3074,7 +3074,7 @@ public class ConfigurationServiceJunitTest {
         String decrypted = prepareSnapshotXML();
         when(cryptoServiceMock.decryptAes("test".toCharArray())).thenReturn(decrypted.toCharArray());
 
-        when(cryptoServiceMock.encryptAes((char[]) anyObject())).thenReturn("encrypted".toCharArray());
+        when(cryptoServiceMock.encryptAes((char[]) any())).thenReturn("encrypted".toCharArray());
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -3101,12 +3101,12 @@ public class ConfigurationServiceJunitTest {
         Bundle bundleMock = mock(Bundle.class);
         when(svcRefMock.getBundle()).thenReturn(bundleMock);
 
-        when(bundleMock.getResource(Matchers.anyString())).thenReturn(null);
+        when(bundleMock.getResource(ArgumentMatchers.anyString())).thenReturn(null);
 
         cs.rollback(id);
 
         verify(cryptoServiceMock, times(1)).decryptAes("test".toCharArray());
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) anyObject());
+        verify(cryptoServiceMock, times(1)).encryptAes((char[]) any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         File[] files = d1.listFiles();

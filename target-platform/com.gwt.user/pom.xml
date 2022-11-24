@@ -35,6 +35,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin.version}</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
@@ -42,6 +43,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>${maven-bundle-plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<manifestLocation>META-INF</manifestLocation>
@@ -70,11 +72,23 @@
 							!net.sourceforge.htmlunit.corejs.javascript,
 							!junit.framework,
 							!org.w3c.css.sac,
+							!javax.jdo.annotations.*,
+							!javax.persistence.*,
 							javax.servlet.http; version="2.6.0",
 							javax.servlet;version="2.6.0",
 							*
 						</Import-Package>
+						<Export-Package>
+							!com.google.gwt.user.client.ui.doc-files,
+							!com.google.gwt.user.tools.templates._eclipse-test,
+							!com.google.gwt.user.tools.templates._sample-test._testFolder_._moduleFolder_,
+							!com.google.gwt.user.tools.templates._sample-test._testFolder_._moduleFolder_.client,
+							!com.google.gwt.user.tools.templates.sample._warFolder_.WEB-INF
+						</Export-Package>
 						<_exportcontents>com.google.*, org.gwtbootstrap3.*, javax.validation.*</_exportcontents>
+						<Require-Capability>
+							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
+						</Require-Capability>
 					</instructions>
 				</configuration>
 			</plugin>

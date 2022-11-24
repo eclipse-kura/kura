@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,7 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 public class NotificationPublisherImplTest {
 
@@ -73,9 +73,9 @@ public class NotificationPublisherImplTest {
         CloudServiceOptions options = new CloudServiceOptions(optionsProps, systemService);
 
         when(cloudServiceImpl.getCloudServiceOptions()).thenReturn(options);
-        when(cloudServiceImpl.encodePayload(Matchers.any())).thenReturn(new byte[0]);
+        when(cloudServiceImpl.encodePayload(ArgumentMatchers.any())).thenReturn(new byte[0]);
         when(cloudServiceImpl.getDataService()).thenReturn(dataService);
-        when(cloudServiceImpl.publish(Matchers.any())).thenReturn("1");
+        when(cloudServiceImpl.publish(ArgumentMatchers.any())).thenReturn("1");
 
         NotificationPublisherImpl notificationPublisherImpl = new NotificationPublisherImpl(cloudServiceImpl);
 

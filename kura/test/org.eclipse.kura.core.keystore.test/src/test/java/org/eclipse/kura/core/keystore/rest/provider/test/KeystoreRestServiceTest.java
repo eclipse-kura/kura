@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,9 @@ package org.eclipse.kura.core.keystore.rest.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -324,7 +324,7 @@ public class KeystoreRestServiceTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         when(ksMock.getKeyStore()).thenReturn(ks);
-        when(ksMock.getCSR(eq("MyAlias"), anyObject(), eq("SHA256WithRSA")))
+        when(ksMock.getCSR(eq("MyAlias"), any(), eq("SHA256WithRSA")))
                 .thenReturn("-----BEGIN CERTIFICATE REQUEST-----");
 
         KeystoreRestService krs = new KeystoreRestService() {

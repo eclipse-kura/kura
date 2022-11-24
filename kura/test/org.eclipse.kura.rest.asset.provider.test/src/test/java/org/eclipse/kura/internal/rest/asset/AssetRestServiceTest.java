@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -329,7 +329,7 @@ public class AssetRestServiceTest {
         };
 
         doAnswer(invocation -> {
-            List<ChannelRecord> records = invocation.getArgumentAt(0, List.class);
+            List<ChannelRecord> records = invocation.getArgument(0, List.class);
             assertEquals(7, records.size());
 
             assertChannelWrite(records, 0, "ch1", TypedValues.newDoubleValue(1.234));
@@ -341,11 +341,11 @@ public class AssetRestServiceTest {
             assertChannelWrite(records, 6, "ch7", TypedValues.newLongValue(1234L));
 
             return null;
-        }).when(asset).write(anyObject());
+        }).when(asset).write(any());
 
         svc.write(pid, requestsMock);
 
-        verify(asset, times(1)).write(anyObject());
+        verify(asset, times(1)).write(any());
     }
 
     private void assertChannelWrite(List<ChannelRecord> records, int idx, String channel, TypedValue value) {

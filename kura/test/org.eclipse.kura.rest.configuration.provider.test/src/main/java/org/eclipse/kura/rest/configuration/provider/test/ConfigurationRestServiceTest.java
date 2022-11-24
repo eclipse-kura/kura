@@ -21,7 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -66,7 +66,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.FrameworkUtil;
@@ -1068,17 +1068,17 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         this.cryptoService = WireTestUtil.trackService(CryptoService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         Mockito.reset(configurationService);
         Mockito.doAnswer(i -> {
-            Optional.of(i.getArgumentAt(0, List.class));
+            Optional.of(i.getArgument(0, List.class));
             return (Void) null;
-        }).when(configurationService).updateConfigurations(Matchers.any());
+        }).when(configurationService).updateConfigurations(ArgumentMatchers.any());
         final Answer<?> configurationUpdateAnswer = i -> {
-            this.receivedConfigsByPid.put(i.getArgumentAt(0, String.class), i.getArgumentAt(1, Map.class));
+            this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(Matchers.any(),
-                Matchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(Matchers.any(),
-                Matchers.any(), Matchers.anyBoolean());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
+                ArgumentMatchers.any());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
+                ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
@@ -1217,7 +1217,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenMockGetDefaultComponentConfigurationReturnException() throws KuraException {
-        when(configurationService.getDefaultComponentConfiguration(Matchers.anyObject()))
+        when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any()))
                 .thenThrow(new KuraException(KuraErrorCode.BAD_REQUEST));
     }
 
@@ -1266,7 +1266,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             }
         };
 
-        when(configurationService.getDefaultComponentConfiguration(Matchers.anyObject())).thenReturn(config);
+        when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenReturn(config);
     }
 
     private void givenMockGetSnapshotReturnException() throws KuraException {
@@ -1329,8 +1329,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         Mockito.when(configurationService.getComponentConfigurations())
                 .thenReturn(byPid.values().stream().collect(Collectors.toList()));
 
-        Mockito.when(configurationService.getComponentConfiguration(Matchers.any())).thenAnswer(i -> {
-            final String pid = i.getArgumentAt(0, String.class);
+        Mockito.when(configurationService.getComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
+            final String pid = i.getArgument(0, String.class);
             return byPid.get(pid);
         });
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.driver.s7plc.task;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,7 +45,7 @@ public class S7PlcToplevelBlockTaskTest {
         int db = 3;
         int start = 0;
 
-        when(s7Mock.ReadArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), anyObject())).thenReturn(0);
+        when(s7Mock.ReadArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), any())).thenReturn(0);
 
         Mode mode = Mode.READ;
         int end = 5;
@@ -53,7 +53,7 @@ public class S7PlcToplevelBlockTaskTest {
 
         task.processBuffer();
 
-        verify(s7Mock, times(1)).ReadArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), anyObject());
+        verify(s7Mock, times(1)).ReadArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), any());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class S7PlcToplevelBlockTaskTest {
         int db = 3;
         int start = 0;
 
-        when(s7Mock.WriteArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), anyObject())).thenReturn(0);
+        when(s7Mock.WriteArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), any())).thenReturn(0);
 
         Mode mode = Mode.UPDATE;
         int end = 5;
@@ -76,6 +76,6 @@ public class S7PlcToplevelBlockTaskTest {
 
         task.processBuffer();
 
-        verify(s7Mock, times(1)).WriteArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), anyObject());
+        verify(s7Mock, times(1)).WriteArea(eq(S7.S7AreaDB), eq(db), eq(start), eq(5), any());
     }
 }

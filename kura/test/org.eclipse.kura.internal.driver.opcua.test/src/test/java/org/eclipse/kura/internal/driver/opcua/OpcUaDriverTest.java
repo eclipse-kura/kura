@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.driver.opcua;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -163,14 +163,14 @@ public class OpcUaDriverTest {
         when(clientMock.getAddressSpace()).thenReturn(asMock);
 
         doAnswer(invocation -> {
-            NodeId nodeId = invocation.getArgumentAt(0, NodeId.class);
+            NodeId nodeId = invocation.getArgument(0, NodeId.class);
 
             assertEquals(1, ((UInteger) nodeId.getIdentifier()).intValue());
             assertEquals(1, nodeId.getNamespaceIndex().intValue());
             assertEquals(IdType.Numeric, nodeId.getType());
 
             return null; // cause exception later on
-        }).when(asMock).createVariableNode(anyObject());
+        }).when(asMock).createVariableNode(any());
 
         List<ChannelRecord> records = new ArrayList<>();
         ChannelRecord record = ChannelRecord.createReadRecord("ch1", DataType.BOOLEAN);
@@ -264,7 +264,7 @@ public class OpcUaDriverTest {
         CompletableFuture<ReadResponse> futureValue = mock(CompletableFuture.class);
         when(futureValue.get(1000, TimeUnit.MILLISECONDS)).thenReturn(response);
 
-        when(clientMock.read(Mockito.eq(0.0), Mockito.eq(TimestampsToReturn.Both), anyObject()))
+        when(clientMock.read(Mockito.eq(0.0), Mockito.eq(TimestampsToReturn.Both), any()))
                 .thenReturn(futureValue);
     }
 

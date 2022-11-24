@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.wire.script.filter.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -101,12 +101,12 @@ public class ScriptFilterTest {
     public void testReceive() throws SQLException {
         Wire wire = mock(Wire.class);
         doAnswer(invocation -> {
-            WireEnvelope envelope = invocation.getArgumentAt(0, WireEnvelope.class);
+            WireEnvelope envelope = invocation.getArgument(0, WireEnvelope.class);
 
             assertEquals(2, envelope.getRecords().size());
 
             return null;
-        }).when(wire).update(anyObject());
+        }).when(wire).update(any());
 
         final Dictionary wireProperties = new Hashtable<>();
         wireProperties.put("emitter.port", 0);
@@ -138,7 +138,7 @@ public class ScriptFilterTest {
 
         filter.onWireReceive(wireEnvelope);
 
-        verify(wire, times(1)).update(anyObject());
+        verify(wire, times(1)).update(any());
     }
 
     protected void bindFilter(WireComponent filter) {

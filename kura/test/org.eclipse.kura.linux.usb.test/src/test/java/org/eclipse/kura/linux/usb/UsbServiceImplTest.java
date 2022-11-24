@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.linux.usb;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -51,7 +51,7 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/ADDED", event.getTopic());
             assertEquals(vendorId, event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY));
@@ -65,14 +65,14 @@ public class UsbServiceImplTest {
             assertEquals(deviceNode, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbBlockDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, deviceNode);
 
         svc.attached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
     @Test
     public void testAttachedNet() {
@@ -82,20 +82,20 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/ADDED", event.getTopic());
             assertEquals(interfaceName, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbNetDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, interfaceName);
 
         svc.attached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
     @Test
     public void testAttachedTty() {
@@ -105,20 +105,20 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/ADDED", event.getTopic());
             assertEquals(deviceNode, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbTtyDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, deviceNode);
 
         svc.attached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
     @Test
     public void testDetachedBlock() {
@@ -128,20 +128,20 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/REMOVED", event.getTopic());
             assertEquals(deviceNode, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbBlockDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, deviceNode);
 
         svc.detached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/REMOVED", event.getTopic());
             assertEquals(vendorId, event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY));
@@ -166,14 +166,14 @@ public class UsbServiceImplTest {
             assertEquals(interfaceName, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbNetDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, interfaceName);
 
         svc.detached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
 
     @Test
@@ -184,20 +184,20 @@ public class UsbServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         doAnswer(invocation -> {
-            Event event = invocation.getArgumentAt(0, Event.class);
+            Event event = invocation.getArgument(0, Event.class);
 
             assertEquals("org/eclipse/kura/usb/NetworkEvent/device/REMOVED", event.getTopic());
             assertEquals(deviceNode, event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY));
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         UsbDevice device = new UsbTtyDevice(vendorId, productId, manufacturerName, productName, usbBusNumber,
                 usbDevicePath, deviceNode);
 
         svc.detached(device);
 
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@ package org.eclipse.kura.example.ble.tisensortag.dbus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -224,7 +224,7 @@ public class BluetoothLeTest {
         verify(tistMock, times(1)).enableBarometer();
         verify(tistMock, times(1)).enableGyroscope(new byte[] { 7 });
         verify(tistMock, times(1)).enableLuxometer();
-        verify(tistMock, times(1)).enableKeysNotification(anyObject());
+        verify(tistMock, times(1)).enableKeysNotification(any());
         verify(tistMock, times(1)).switchOnRedLed();
         verify(tistMock, times(1)).switchOnGreenLed();
         verify(tistMock, times(1)).switchOnBuzzer();

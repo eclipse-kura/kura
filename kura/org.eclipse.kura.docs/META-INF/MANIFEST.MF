@@ -3,4 +3,4 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.docs
 Bundle-SymbolicName: org.eclipse.kura.docs
 Bundle-Version: 0.4.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,8 @@ package org.eclipse.kura.internal.wire.publisher;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,8 +88,8 @@ public class CloudPublisherTest {
         org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
                 org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
 
-        when(cloudPublisherMock.publish((KuraMessage) anyObject())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgumentAt(1, KuraMessage.class);
+        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
+            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
 
             KuraPayload payload = message.getPayload();
 
@@ -119,7 +119,7 @@ public class CloudPublisherTest {
 
         cp.onWireReceive(wireEnvelope);
 
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) anyObject());
+        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
     }
 
     @Test
@@ -154,8 +154,8 @@ public class CloudPublisherTest {
 
         when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 
-        when(cloudPublisherMock.publish((KuraMessage) anyObject())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgumentAt(1, KuraMessage.class);
+        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
+            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
 
             KuraPayload payload = message.getPayload();
             KuraPosition position = payload.getPosition();
@@ -191,7 +191,7 @@ public class CloudPublisherTest {
 
         cp.onWireReceive(wireEnvelope);
 
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) anyObject());
+        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
     }
 
     @Test
@@ -226,8 +226,8 @@ public class CloudPublisherTest {
 
         when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 
-        when(cloudPublisherMock.publish((KuraMessage) anyObject())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgumentAt(1, KuraMessage.class);
+        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
+            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
 
             KuraPayload payload = message.getPayload();
             KuraPosition position = payload.getPosition();
@@ -266,7 +266,7 @@ public class CloudPublisherTest {
 
         cp.onWireReceive(wireEnvelope);
 
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) anyObject());
+        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
     }
     
     @Test

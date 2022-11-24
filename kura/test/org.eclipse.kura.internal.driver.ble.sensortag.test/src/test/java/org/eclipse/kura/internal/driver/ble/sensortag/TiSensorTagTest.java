@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -213,7 +213,7 @@ public class TiSensorTagTest {
     @Test
     public void testEnableThermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
-        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
+        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(any());
 
         BluetoothLeGattService svcMock = mock(BluetoothLeGattService.class);
         when(svcMock.findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE)).thenReturn(bch);
@@ -235,7 +235,7 @@ public class TiSensorTagTest {
     @Test
     public void testDisableThermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
-        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
+        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(any());
 
         BluetoothLeGattService svcMock = mock(BluetoothLeGattService.class);
         when(svcMock.findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE)).thenReturn(bch);
@@ -289,7 +289,7 @@ public class TiSensorTagTest {
     @Test
     public void testSetThermometerPeriodFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
-        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
+        doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(any());
 
         BluetoothLeGattService svcMock = mock(BluetoothLeGattService.class);
         when(svcMock.findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_PERIOD)).thenReturn(bch);
@@ -364,7 +364,7 @@ public class TiSensorTagTest {
 
         tag.disableAccelerometer();
 
-        verify(bch, times(0)).writeValue(anyObject());
+        verify(bch, times(0)).writeValue(any());
     }
 
     @Test
@@ -523,7 +523,7 @@ public class TiSensorTagTest {
 
         tag.disableMagnetometer();
 
-        verify(bch, times(0)).writeValue(anyObject());
+        verify(bch, times(0)).writeValue(any());
     }
 
     @Test
@@ -1111,10 +1111,10 @@ public class TiSensorTagTest {
 
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
         doAnswer(invocation -> {
-            Consumer<byte[]> consumer = invocation.getArgumentAt(0, Consumer.class);
+            Consumer<byte[]> consumer = invocation.getArgument(0, Consumer.class);
             consumer.accept(val);
             return null;
-        }).when(bch).enableValueNotifications(anyObject());
+        }).when(bch).enableValueNotifications(any());
 
         BluetoothLeGattService svcMock = mock(BluetoothLeGattService.class);
         when(svcMock.findCharacteristic(characteristic)).thenReturn(bch);

@@ -13,7 +13,7 @@
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -461,6 +461,7 @@ public class ContainerOrchestrationServiceImplTest {
         List<Image> images = new LinkedList<>();
         Image mockImage = mock(Image.class);
 
+        when(mockImage.getId()).thenReturn("ngnix");
         when(mockImage.getRepoTags()).thenReturn(new String[] { "nginx", "latest", "nginx:latest" });
 
         images.add(mockImage);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,9 +17,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -109,7 +109,7 @@ public class WifiMonitorServiceImplTest {
 
         svc.activate(ccMock);
 
-        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), any());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class WifiMonitorServiceImplTest {
 
         svc.activate(ccMock);
 
-        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), any());
     }
 
     @Test
@@ -147,14 +147,14 @@ public class WifiMonitorServiceImplTest {
         when(ccMock.getBundleContext()).thenReturn(bcMock);
 
         doAnswer(invocation -> {
-            Hashtable props = invocation.getArgumentAt(2, Hashtable.class);
+            Hashtable props = invocation.getArgument(2, Hashtable.class);
             String[] topics = (String[]) props.get(EventConstants.EVENT_TOPIC);
 
             assertEquals(1, topics.length);
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", topics[0]);
 
             return null;
-        }).when(bcMock).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        }).when(bcMock).registerService(eq(EventHandler.class.getName()), eq(svc), any());
 
         NetworkConfigurationService netCfgSvcMock = mock(NetworkConfigurationService.class);
         svc.setNetworkConfigurationService(netCfgSvcMock);
@@ -180,7 +180,7 @@ public class WifiMonitorServiceImplTest {
 
         svc.activate(ccMock);
 
-        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), any());
 
         assertNotNull(TestUtil.getFieldValue(svc, "monitorTask"));
         assertFalse(((FutureTask) TestUtil.getFieldValue(svc, "monitorTask")).isDone());
@@ -358,8 +358,8 @@ public class WifiMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "enableInterface", wifiInterfaceConfig);
 
-        verify(naMock, times(0)).enableInterface(anyObject(), anyBoolean());
-        verify(naMock, times(0)).manageDhcpServer(anyObject(), anyBoolean());
+        verify(naMock, times(0)).enableInterface(any(), anyBoolean());
+        verify(naMock, times(0)).manageDhcpServer(any(), anyBoolean());
     }
 
     @Test
@@ -378,7 +378,7 @@ public class WifiMonitorServiceImplTest {
         TestUtil.invokePrivate(svc, "enableInterface", wifiInterfaceConfig);
 
         verify(naMock, times(1)).enableInterface("wlan1", false);
-        verify(naMock, times(0)).manageDhcpServer(anyObject(), anyBoolean());
+        verify(naMock, times(0)).manageDhcpServer(any(), anyBoolean());
     }
 
     @Test
@@ -665,7 +665,7 @@ public class WifiMonitorServiceImplTest {
 
         AtomicInteger visited = new AtomicInteger(0);
         doAnswer(invocation -> {
-            NetworkStatusChangeEvent event = invocation.getArgumentAt(0, NetworkStatusChangeEvent.class);
+            NetworkStatusChangeEvent event = invocation.getArgument(0, NetworkStatusChangeEvent.class);
 
             final String interfaceName = event.getInterfaceState().getName();
             assertTrue(wlan0.equals(interfaceName) || wlan2.equals(interfaceName) || wlan3.equals(interfaceName));
@@ -679,7 +679,7 @@ public class WifiMonitorServiceImplTest {
             visited.getAndIncrement();
 
             return null;
-        }).when(eaMock).postEvent(anyObject());
+        }).when(eaMock).postEvent(any());
 
         Map<String, InterfaceState> oldStatuses = new HashMap<>();
         oldStatuses.put(wlan1, new InterfaceState(wlan1, true, true, IPAddress.parseHostAddress("10.10.0.1"), 2));
@@ -693,7 +693,7 @@ public class WifiMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "checkStatusChange", oldStatuses, newStatuses);
 
-        verify(eaMock, times(3)).postEvent(anyObject());
+        verify(eaMock, times(3)).postEvent(any());
 
         assertEquals(3, visited.get());
     }
@@ -820,7 +820,7 @@ public class WifiMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         status.setOutputStream(outputStream);
-        when(esMock.execute(anyObject())).thenReturn(status);
+        when(esMock.execute(any())).thenReturn(status);
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl();
         svc.setExecutorService(esMock);
 
@@ -1062,7 +1062,7 @@ public class WifiMonitorServiceImplTest {
 
         verify(nsMock, times(1)).getAllNetworkInterfaceNames();
         verify(naMock, times(1)).disableInterface(interfaceName);
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(eaMock, times(1)).postEvent(any());
     }
 
     @Test

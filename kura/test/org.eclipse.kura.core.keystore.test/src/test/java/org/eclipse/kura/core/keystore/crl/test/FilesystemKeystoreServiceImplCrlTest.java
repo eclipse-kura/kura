@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,7 +50,7 @@ import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -448,16 +448,16 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
             this.options = new Options(this.keystoreFile);
 
-            Mockito.when(this.cryptoService.encryptAes((char[]) Matchers.any()))
-                    .thenAnswer(i -> i.getArgumentAt(0, char[].class));
-            Mockito.when(this.cryptoService.decryptAes((char[]) Matchers.any()))
-                    .thenAnswer(i -> i.getArgumentAt(0, char[].class));
-            Mockito.when(this.cryptoService.getKeyStorePassword(Matchers.any(String.class)))
+            Mockito.when(this.cryptoService.encryptAes((char[]) ArgumentMatchers.any()))
+                    .thenAnswer(i -> i.getArgument(0, char[].class));
+            Mockito.when(this.cryptoService.decryptAes((char[]) ArgumentMatchers.any()))
+                    .thenAnswer(i -> i.getArgument(0, char[].class));
+            Mockito.when(this.cryptoService.getKeyStorePassword(ArgumentMatchers.any(String.class)))
             .thenReturn(DEFAULT_KEYSTORE_PASSWORD.toCharArray());
             Mockito.doAnswer(i -> {
-                this.eventAdminListener.ifPresent(e -> e.accept(i.getArgumentAt(0, Event.class)));
+                this.eventAdminListener.ifPresent(e -> e.accept(i.getArgument(0, Event.class)));
                 return (Void) null;
-            }).when(this.eventAdmin).postEvent(Matchers.any());
+            }).when(this.eventAdmin).postEvent(ArgumentMatchers.any());
 
             this.keystoreService.setConfigurationService(this.configurationService);
             this.keystoreService.setEventAdmin(this.eventAdmin);

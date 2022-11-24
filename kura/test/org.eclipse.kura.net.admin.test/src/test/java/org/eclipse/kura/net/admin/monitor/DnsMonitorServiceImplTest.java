@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -267,7 +267,7 @@ public class DnsMonitorServiceImplTest {
         LinuxDns dns = mock(LinuxDns.class);
         TestUtil.setFieldValue(svc, "dnsUtil", dns);
 
-        doThrow(new RuntimeException("test")).when(dns).setDnServers(anyObject());
+        doThrow(new RuntimeException("test")).when(dns).setDnServers(any());
 
         TestUtil.invokePrivate(svc, "setDnsServers", (Set<IPAddress>) null);
 
@@ -297,20 +297,20 @@ public class DnsMonitorServiceImplTest {
 
         IPAddress address = IPAddress.parseHostAddress("10.10.0.10");
         doAnswer(invocation -> {
-            Set<IPAddress> ns = invocation.getArgumentAt(0, Set.class);
+            Set<IPAddress> ns = invocation.getArgument(0, Set.class);
 
             assertEquals(1, ns.size());
             assertEquals(address, ns.iterator().next());
 
             return null;
-        }).when(dns).setDnServers(anyObject());
+        }).when(dns).setDnServers(any());
 
         Set<IPAddress> servers = new HashSet<>();
         servers.add(address);
 
         TestUtil.invokePrivate(svc, "setDnsServers", servers);
 
-        verify(dns, times(1)).setDnServers(anyObject());
+        verify(dns, times(1)).setDnServers(any());
     }
 
     @Test
@@ -327,20 +327,20 @@ public class DnsMonitorServiceImplTest {
 
         IPAddress address = IPAddress.parseHostAddress("10.10.0.10");
         doAnswer(invocation -> {
-            Set<IPAddress> ns = invocation.getArgumentAt(0, Set.class);
+            Set<IPAddress> ns = invocation.getArgument(0, Set.class);
 
             assertEquals(1, ns.size());
             assertEquals(address, ns.iterator().next());
 
             return null;
-        }).when(dns).setDnServers(anyObject());
+        }).when(dns).setDnServers(any());
 
         Set<IPAddress> servers = new HashSet<>();
         servers.add(address);
 
         TestUtil.invokePrivate(svc, "setDnsServers", servers);
 
-        verify(dns, times(1)).setDnServers(anyObject());
+        verify(dns, times(1)).setDnServers(any());
     }
 
     @Test
@@ -355,7 +355,7 @@ public class DnsMonitorServiceImplTest {
         oldServers.add(oldAddress);
         when(dns.getDnServers()).thenReturn(oldServers);
 
-        doThrow(new RuntimeException("test")).when(dns).setDnServers(anyObject());
+        doThrow(new RuntimeException("test")).when(dns).setDnServers(any());
 
         Set<IPAddress> servers = new HashSet<>();
         IPAddress address = IPAddress.parseHostAddress("10.10.0.10");
@@ -363,7 +363,7 @@ public class DnsMonitorServiceImplTest {
 
         TestUtil.invokePrivate(svc, "setDnsServers", servers);
 
-        verify(dns, times(0)).setDnServers(anyObject());
+        verify(dns, times(0)).setDnServers(any());
     }
 
     @Test

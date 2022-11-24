@@ -55,6 +55,19 @@ The **H2DbService** provides the following configuration parameters:
 
 * **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. 
 
+!!! warning
+    If the database is created in persisted mode, please make sure that the Linux user running Eclipse Kura has the permissions required to create the database file.
+    If the permissions are not ok, Eclipse Kura may be able to create the database (by default it runs with the CAP_DAC_OVERRIDE capability) but it may not be able to perform the periodic defragmentation process, this may cause the database file size to grow expecially if the write rate is high.
+
+    Executing the following commands as `root` can be useful to detect potential issues, replace `database_parent_directory` with the parent directory of the database file and `kura_linux_user` with the Linux user that is executing Eclipse Kura (e.g. kurad):
+    ```
+    export TARGET="$(readlink -f database_parent_directory)"
+    export KURA_USER="kura_linux_user"
+    sudo -u "${KURA_USER}" sh -c "touch '${TARGET}/.testfile' && rm '${TARGET}/.testfile'"
+    ```
+
+    If command fails it may be necessary to change the database directory or adjust the permissions.
+
 * **User**: Specifies the user for the database connection. Furthermore 
 
 * **Password**: Specifies the password. The default password is the empty string.

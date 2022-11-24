@@ -3,7 +3,6 @@ Eclipse Kura - 5.2.1 - November 2022
 Description:
 This service release of Eclipse Kura includes the following changes:
   - Fixed H2 memory leak in case of in-memory database instances
-  - Fixed H2 abnormal size of file-based database.
   - The configuration of network interfaces that are not connected to the system is no longer discarded on NetworkConfigurationService update
   - Fixed build of Ubi8-based Docker image
   - Fixed potential issues if the obsolete modified.interface.names property is persisted in the snapshot
@@ -24,7 +23,6 @@ Bug Fixes:
   * 7311fd9e09 - [core.data.store] allow storing null payloads [backport release-5.2.0] (#4248) (github-actions[bot])
   * 810536f5ef - Filter out modified.interface.names property [backport release-5.2.0] (#4244) (github-actions[bot])
   * b2eca9d01a - network configuration not updating on Jetson Nano [backport release-5.2.0] (#4243) (github-actions[bot])
-  * f001abb735 - [core] Fixed abnormal size of file-based database. [backport release-5.2.0] (#4237) (github-actions[bot])
   * e801026468 - Prevent discarding of NetworkConfigurationService properties [backport release-5.2.0] (#4231) (github-actions[bot])
   * 9dc28dd39b - failing Ubi8-based Docker image build on maintenance branch (#4209) (Mattia Dal Ben)
   * 6cc5998e7f - [core] Resolved database memory leak [backport release-5.2.0] (#4205) (github-actions[bot])
@@ -80,12 +78,15 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * bc34926a95 - ci: Release Notes automation information improvements [backport release-5.2.0] (#4281) (github-actions[bot])
+  * 2c1aba99d8 - docs(core): Added warning about the database file path to H2DbService metatype [backport release-5.2.0] (#4279) (github-actions[bot])
+  * 518c281260 - ci: bump amannn/action-semantic-pull-request to v5 [backport release-5.2.0] (#4268) (github-actions[bot])
+  * 9dea3d40dc - chore: updated Kura 5.2.1 release notes (#4249) (github-actions[bot])
   * 7311fd9e09 - fix(core.data.store): allow storing null payloads [backport release-5.2.0] (#4248) (github-actions[bot])
   * 823ff21813 - chore: updated Kura 5.2.1 release notes (#4245) (github-actions[bot])
   * 810536f5ef - fix: Filter out modified.interface.names property [backport release-5.2.0] (#4244) (github-actions[bot])
   * b2eca9d01a - fix: network configuration not updating on Jetson Nano [backport release-5.2.0] (#4243) (github-actions[bot])
   * 24bfa1814e - chore: Updated release notes (MMaiero)
-  * f001abb735 - fix(core): Fixed abnormal size of file-based database. [backport release-5.2.0] (#4237) (github-actions[bot])
   * 79c09ef64f - chore: Fixed missing uptick (#4235) (nicolatimeus)
   * 6542f9b024 - chore: add Kura 5.2.1 release notes (#4233) (github-actions[bot])
   * e801026468 - fix: Prevent discarding of NetworkConfigurationService properties [backport release-5.2.0] (#4231) (github-actions[bot])

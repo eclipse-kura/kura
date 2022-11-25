@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -99,7 +99,7 @@
             	ui:field="uploadModal">
                 <b:ModalBody>
                         <b:Container fluid="true">
-                            <g:FormPanel ui:field="uploadForm">
+                            <b:Form ui:field="uploadForm">
                                 <b:FieldSet>
                                     <b:FormGroup>
                                         <b:FormLabel>File</b:FormLabel>
@@ -116,7 +116,7 @@
                                     <g:Hidden ui:field="driverPidField"></g:Hidden>
                                     <g:Hidden ui:field="appendCheckField"></g:Hidden>
                                 </b:FieldSet>
-                            </g:FormPanel>
+                            </b:Form>
                         </b:Container>
                 </b:ModalBody>
             </b:Modal>

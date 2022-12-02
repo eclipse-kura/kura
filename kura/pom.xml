@@ -112,6 +112,7 @@
         <module>org.eclipse.kura.container.provider</module>
         <module>org.eclipse.kura.event.publisher</module>
         <module>org.eclipse.kura.configuration.change.manager</module>
+        <module>org.eclipse.kura.wire.script.tools</module>
         <module>emulator</module>
         <module>test-util</module>
     </modules>

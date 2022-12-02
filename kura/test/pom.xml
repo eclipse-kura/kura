@@ -921,6 +921,7 @@
         <!-- TODO: Nashorn removed since Java 15, need an alternative
         <module>org.eclipse.kura.wire.script.filter.provider.test</module>
         -->
+        <module>org.eclipse.kura.wire.script.tools.test</module>
         <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>

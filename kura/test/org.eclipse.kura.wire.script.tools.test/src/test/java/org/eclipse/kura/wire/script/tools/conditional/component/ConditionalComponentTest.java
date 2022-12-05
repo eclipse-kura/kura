@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.wire.script.tools.conditional.component;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -39,7 +38,7 @@ import org.osgi.service.component.ComponentContext;
 
 public class ConditionalComponentTest {
 
-    private ArgumentCaptor<WireEnvelope> outputCaptor = ArgumentCaptor.forClass(WireEnvelope.class);
+    private ArgumentCaptor<Object> outputCaptor = ArgumentCaptor.forClass(Object.class);
     private MultiportWireSupport wireSupport = mock(MultiportWireSupport.class);
     private WireHelperService wireHelperService = mock(WireHelperService.class);
 
@@ -92,7 +91,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -107,7 +105,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -123,7 +120,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -138,7 +134,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -153,7 +148,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -168,7 +162,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
-        thenCheckValues();
 
     }
 
@@ -183,7 +176,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -198,7 +190,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -214,7 +205,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -229,7 +219,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -244,7 +233,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -259,7 +247,6 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
-        thenCheckValues();
 
     }
 
@@ -361,12 +348,4 @@ public class ConditionalComponentTest {
         this.properties = new HashMap<>();
         this.inputRecords = new LinkedList<>();
     }
-
-    private void thenCheckValues() {
-        this.inccomingWireEnvelope = this.outputCaptor.getValue();
-        assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey1), this.wireVal1);
-        assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey2), this.wireVal2);
-
-    }
-
 }

@@ -1,3 +1,4 @@
+/*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
@@ -38,7 +39,7 @@ import org.osgi.service.component.ComponentContext;
 
 public class ConditionalComponentTest {
 
-    private ArgumentCaptor<Object> outputCaptor = ArgumentCaptor.forClass(Object.class);
+    private ArgumentCaptor<WireEnvelope> outputCaptor = ArgumentCaptor.forClass(WireEnvelope.class);
     private MultiportWireSupport wireSupport = mock(MultiportWireSupport.class);
     private WireHelperService wireHelperService = mock(WireHelperService.class);
 
@@ -213,6 +214,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
 
     }
 
@@ -335,14 +337,14 @@ public class ConditionalComponentTest {
      */
 
     private void thenOutputTrue() {
-        verify(this.portThen, times(1)).emit((WireEnvelope) outputCaptor.capture());
-        this.inccomingWireEnvelope = (WireEnvelope) outputCaptor.getValue();
+        verify(this.portThen, times(1)).emit((WireEnvelope) this.outputCaptor.capture());
+        verify(this.portElse, times(0)).emit(any());
 
     }
 
     private void thenOutputFalse() {
-        verify(this.portElse, times(1)).emit((WireEnvelope) outputCaptor.capture());
-        this.inccomingWireEnvelope = (WireEnvelope) outputCaptor.getValue();
+        verify(this.portElse, times(1)).emit((WireEnvelope) this.outputCaptor.capture());
+        verify(this.portThen, times(0)).emit(any());
     }
 
     private void thenNoOutputProvided() {
@@ -361,8 +363,10 @@ public class ConditionalComponentTest {
     }
 
     private void thenCheckValues() {
+        this.inccomingWireEnvelope = this.outputCaptor.getValue();
         assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey1), this.wireVal1);
         assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey2), this.wireVal2);
+
     }
 
 }

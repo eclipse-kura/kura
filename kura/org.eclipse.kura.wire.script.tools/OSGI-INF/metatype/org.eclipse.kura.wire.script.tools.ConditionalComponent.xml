@@ -14,21 +14,19 @@
      
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-	<OCD id="org.eclipse.kura.wire.script.tools.ConditionalComponent"
-		name="Conditional Component"
-		description="A wire component that allows to forward the received envelopes to different ports depending on a boolean condition">
+    <OCD id="org.eclipse.kura.wire.script.tools.ConditionalComponent"
+        name="Conditional Component"
+        description="A wire component that allows to forward the received envelopes to different ports depending on a boolean condition">
 
-		<AD id="condition"
-			name="condition"
-			type="String" cardinality="0"
-			required="true"
-			default="input.getRecords()[0].getProperties().TIMER !== null &amp;&amp; input.getRecords()[0].getProperties().TIMER.getValue() &gt; 10 &amp;&amp; input.getRecords()[0].getProperties().TIMER.getValue() &lt; 30;&#10;"
-			description="The boolean expression to be evaluated by this component when a wire envelope is received.">
-		</AD>
-	</OCD>
+        <AD id="condition"
+        name="condition"
+        type="String"
+        cardinality="0"
+        required="true"
+        default="input.getRecords()[0].getProperties().TIMER !== null &amp;&amp; Math.floor(input.getRecords()[0].getProperties().TIMER.getValue() / 1000) % 2 == 0"></AD>
+    </OCD>
 
-	<Designate pid="org.eclipse.kura.wire.script.tools.ConditionalComponent"
-		factoryPid="org.eclipse.kura.wire.script.tools.ConditionalComponent">
-		<Object ocdref="org.eclipse.kura.wire.script.tools.ConditionalComponent"/>
-	</Designate>
+    <Designate pid="org.eclipse.kura.wire.script.tools.ConditionalComponent" factoryPid="org.eclipse.kura.wire.script.tools.ConditionalComponent">
+        <Object ocdref="org.eclipse.kura.wire.script.tools.ConditionalComponent" />
+    </Designate>
 </MetaData>

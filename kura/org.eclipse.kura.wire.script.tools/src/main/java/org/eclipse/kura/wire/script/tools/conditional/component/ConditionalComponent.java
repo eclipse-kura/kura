@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others 
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.wire.script.tools.conditional.component;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
@@ -57,9 +56,7 @@ public final class ConditionalComponent extends EngineProvider
     private ConditionalComponentOptions conditionalOptions;
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
-        if (isNull(this.wireHelperService)) {
-            this.wireHelperService = wireHelperService;
-        }
+        this.wireHelperService = wireHelperService;
     }
 
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
@@ -113,7 +110,7 @@ public final class ConditionalComponent extends EngineProvider
 
     private void evaluateScriptAndEmitOutput(WireEnvelope wireEnvelope) {
 
-        if (!this.booleanExpression.isPresent()) {
+        if (!this.booleanExpression.isPresent() || this.booleanExpression.get().isEmpty()) {
             logger.warn("No source specified! Ignoring received WireEnvelope.");
             return;
         }

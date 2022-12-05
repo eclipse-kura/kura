@@ -1,4 +1,3 @@
-/*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
@@ -12,6 +11,7 @@
  ******************************************************************************/
 package org.eclipse.kura.wire.script.tools.conditional.component;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -50,6 +50,14 @@ public class ConditionalComponentTest {
     EmitterPort portThen = mock(EmitterPort.class);
     EmitterPort portElse = mock(EmitterPort.class);
 
+    private String wireKey1;
+    private String wireKey2;
+
+    private TypedValue<?> wireVal1;
+    private TypedValue<?> wireVal2;
+
+    private WireEnvelope inccomingWireEnvelope;
+
     public ConditionalComponentTest() {
         this.conditionalComponent = new ConditionalComponent();
         this.properties = new HashMap<>();
@@ -83,6 +91,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -97,6 +106,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -112,6 +122,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -126,6 +137,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -140,6 +152,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -154,6 +167,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputTrue();
+        thenCheckValues();
 
     }
 
@@ -168,6 +182,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
 
     }
 
@@ -182,6 +197,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
 
     }
 
@@ -211,6 +227,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
 
     }
 
@@ -225,6 +242,7 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
 
     }
 
@@ -239,6 +257,33 @@ public class ConditionalComponentTest {
         whenOnWireReceive();
 
         thenOutputFalse();
+        thenCheckValues();
+
+    }
+
+    @Test
+    public void whenScriptIsEmpty() {
+        givenProperty(ConditionalComponentOptions.CONDITION_PROPERTY_KEY, "");
+        givenUpdated(this.properties);
+        givenInputWireRecord("p1", TypedValues.newIntegerValue(42), "p2", TypedValues.newIntegerValue(0));
+        givenInputWireEnvelope("test.pid.1");
+
+        whenOnWireReceive();
+
+        thenNoOutputProvided();
+
+    }
+
+    @Test
+    public void whenScriptIsOptionalEmpty() throws Exception {
+        givenProperty(ConditionalComponentOptions.CONDITION_PROPERTY_KEY, null);
+        givenUpdated(this.properties);
+        givenInputWireRecord("p1", TypedValues.newIntegerValue(42), "p2", TypedValues.newIntegerValue(0));
+        givenInputWireEnvelope("test.pid.1");
+
+        whenOnWireReceive();
+
+        thenNoOutputProvided();
 
     }
 
@@ -260,6 +305,13 @@ public class ConditionalComponentTest {
 
     private void givenInputWireRecord(String propertyKey, TypedValue<?> propertyValue, String propertyKey2,
             TypedValue<?> propertyValue2) {
+
+        this.wireKey1 = propertyKey;
+        this.wireVal1 = propertyValue;
+
+        this.wireKey2 = propertyKey2;
+        this.wireVal2 = propertyValue2;
+
         Map<String, TypedValue<?>> inputProperty = new HashMap<>();
         inputProperty.put(propertyKey, propertyValue);
         inputProperty.put(propertyKey2, propertyValue2);
@@ -282,14 +334,20 @@ public class ConditionalComponentTest {
      * Then
      */
 
-    @SuppressWarnings("unchecked")
     private void thenOutputTrue() {
-        verify(this.portThen, times(1)).emit(any());
+        verify(this.portThen, times(1)).emit((WireEnvelope) outputCaptor.capture());
+        this.inccomingWireEnvelope = (WireEnvelope) outputCaptor.getValue();
+
     }
 
-    @SuppressWarnings("unchecked")
     private void thenOutputFalse() {
-        verify(this.portElse, times(1)).emit(any());
+        verify(this.portElse, times(1)).emit((WireEnvelope) outputCaptor.capture());
+        this.inccomingWireEnvelope = (WireEnvelope) outputCaptor.getValue();
+    }
+
+    private void thenNoOutputProvided() {
+        verify(this.portThen, times(0)).emit(any());
+        verify(this.portElse, times(0)).emit(any());
     }
 
     /*
@@ -300,6 +358,11 @@ public class ConditionalComponentTest {
     public void cleanUp() {
         this.properties = new HashMap<>();
         this.inputRecords = new LinkedList<>();
+    }
+
+    private void thenCheckValues() {
+        assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey1), this.wireVal1);
+        assertEquals(this.inccomingWireEnvelope.getRecords().get(0).getProperties().get(this.wireKey2), this.wireVal2);
     }
 
 }

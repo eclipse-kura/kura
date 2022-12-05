@@ -1,6 +1,6 @@
-# Script Filter
+# Nashorn Script Filter
 
-The Script Filter component provides scripting functionalities in Kura Wires using the Nashorn Javascript engine:
+The **Script Filter Component** provides scripting functionalities in Kura Wires using the Nashorn Javascript engine:
 
 * The script execution is triggered when a wire envelope is received by the filter component.
 * It is possible to access to the received envelope and inspect the wire records contained in it form the script.
@@ -15,21 +15,20 @@ The Script Filter component provides scripting functionalities in Kura Wires usi
 
 The following global variables are available to the script:
 
-* [input](#received-envelope): An object that represents the received wire envelope.
-* [output](#creating-and-emitting-wire-records): An object that allows to emit wire records.
-* logger: A slf4j logger
+* [`input`](#received-envelope): an object that represents the received wire envelope.
+* [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
+* logger: a slf4j logger.
 
 The following utility functions are available:
 
-* [newWireRecord(void) -> WireRecordWrapper](#utility-functions)
-* [newByteArray(void) -> byte\[\]](#utility-functions)
-* [newBooleanValue(boolean) -> TypedValue](#utility-functions)
-* [newByteArrayValue(byte\[\]) -> TypedValue](#utility-functions)
-* [newDoubleValue(number) -> TypedValue](#utility-functions)
-* [newFloatValue(number) -> TypedValue](#utility-functions)
-* [newIntegerValue(number) -> TypedValue](#utility-functions)
-* [newLongValue(number) -> TypedValue](#utility-functions)
-* [newStringValue(object) -> TypedValue](#utility-functions)
+* `newWireRecord(void) -> WireRecordWrapper`
+* `newByteArray(void) -> byte[]`
+* `newBooleanValue(boolean) -> TypedValue`
+* `newByteArrayValue(byte[]) -> TypedValue`
+* `newDoubleValue(number) -> TypedValue`
+* `newIntegerValue(number) -> TypedValue`
+* `newLongValue(number) -> TypedValue`
+* `newStringValue(object) -> TypedValue`
 
 The following global constants expose the `org.eclipse.kura.type.DataType` enum variants:
 
@@ -47,8 +46,8 @@ The following global constants expose the `org.eclipse.kura.type.DataType` enum 
 
 The received envelope is represented by the **input** global variable and it has the following properties:
 
-* **emitterPid**: The emitter pid of the received envelope as a String.
-* **records**: An immutable array that represents the Wire Records contained in the Wire Envelope.
+* **emitterPid**: the emitter pid of the received envelope as a String.
+* **records**: an immutable array that represents the Wire Records contained in the Wire Envelope.
 
 Each element of the **records** array is an immutable object that represents a received wire record. Wire record properties are directly mapped to Javascript object properties, and are instances of the `org.eclipse.kura.type.TypedValue` class. Each Wire Record property has the following methods available:
 

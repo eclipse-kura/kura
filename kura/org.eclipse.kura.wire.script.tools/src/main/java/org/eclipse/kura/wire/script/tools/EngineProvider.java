@@ -95,7 +95,7 @@ public abstract class EngineProvider {
     }
 
     public Optional<TypedValue<Boolean>> getResultAsBoolean() {
-        if (currentResult.isPresent()) {
+        if (currentResult.isPresent() && this.currentResult.get().isBoolean()) {
             return Optional.of(TypedValues.newBooleanValue(this.currentResult.get().asBoolean()));
         }
         return Optional.empty();

@@ -276,6 +276,32 @@ public class ConditionalComponentTest {
 
     }
 
+    @Test
+    public void whenScriptResultIsIntNotBoolean() throws Exception {
+        givenProperty(ConditionalComponentOptions.CONDITION_PROPERTY_KEY, "5 + 6");
+        givenUpdated(this.properties);
+        givenInputWireRecord("p1", TypedValues.newIntegerValue(42), "p2", TypedValues.newIntegerValue(0));
+        givenInputWireEnvelope("test.pid.1");
+
+        whenOnWireReceive();
+
+        thenNoOutputProvided();
+
+    }
+
+    @Test
+    public void whenScriptResultIsStringNotBoolean() throws Exception {
+        givenProperty(ConditionalComponentOptions.CONDITION_PROPERTY_KEY, "test string");
+        givenUpdated(this.properties);
+        givenInputWireRecord("p1", TypedValues.newIntegerValue(42), "p2", TypedValues.newIntegerValue(0));
+        givenInputWireEnvelope("test.pid.1");
+
+        whenOnWireReceive();
+
+        thenNoOutputProvided();
+
+    }
+
     /*
      * Steps
      */

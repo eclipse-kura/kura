@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -122,12 +121,8 @@ public final class ConditionalComponent extends EngineProvider
         Optional<TypedValue<Boolean>> result = getResultAsBoolean();
 
         if (!result.isPresent()) {
-            logger.error("Failed to execute conditional logic.");
-            return;
-        }
-
-        if (result.get().getType() != DataType.BOOLEAN) {
-            logger.error("Result of conditional logic was not a boolean.");
+            logger.error(
+                    "Failed to execute conditional logic. Ether no result was produced, or the resulting datatype was not a boolean.");
             return;
         }
 

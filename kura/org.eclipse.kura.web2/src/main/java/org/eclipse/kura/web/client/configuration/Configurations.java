@@ -116,7 +116,6 @@ public class Configurations {
     }
 
     public void deleteConfiguration(String pid) {
-        // this.currentConfigurations.remove(pid);
         this.allActivePids.remove(pid);
     }
 

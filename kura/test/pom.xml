@@ -64,6 +64,18 @@
                 </pluginManagement>
             </build>
         </profile>
+
+        <profile>
+            <id>nashorn-available-tests</id>
+            <activation>
+                <jdk>[1.8,15)</jdk>
+            </activation>
+            
+            <modules>
+                <module>org.eclipse.kura.wire.script.filter.provider.test</module>
+                <module>org.eclipse.kura.camel.test</module>
+            </modules>
+        </profile>
     </profiles>
 
     <build>
@@ -490,13 +502,6 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
-                            <!-- TODO: Nashorn removed since Java 15, need an alternative
-                            <bundle>
-                                <id>org.eclipse.kura.wire.script.filter.provider</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            -->
                             <bundle>
                                 <id>org.eclipse.kura.protocol.can</id>
                                 <level>4</level>
@@ -759,13 +764,6 @@
                                     <id>org.eclipse.kura.deployment.agent</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
-                                <!-- TODO: Nashorn removed since Java 15, need an alternative
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.wire.script.filter.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                -->
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.jetty.customizer</id>
@@ -865,11 +863,6 @@
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>
         <module>org.eclipse.kura.asset.helper.provider.test</module>
-        <!-- TODO: failing because using a ScriptEngine (maybe Nashorn which is not present on Java 17)
-        Camel is dependeant on javax.script, which is just API. Default Java 17 installs might not have any EngineImpl
-
-        <module>org.eclipse.kura.camel.test</module>
-        -->
         <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
@@ -918,10 +911,6 @@
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
         <module>org.eclipse.kura.wire.db.component.provider.test</module>
-        <!-- TODO: Nashorn removed since Java 15, need an alternative
-        <module>org.eclipse.kura.wire.script.filter.provider.test</module>
-        -->
-        <module>org.eclipse.kura.wire.script.tools.test</module>
         <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>

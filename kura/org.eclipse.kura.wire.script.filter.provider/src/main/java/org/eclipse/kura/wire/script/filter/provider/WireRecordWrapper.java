@@ -23,6 +23,11 @@ import org.eclipse.kura.type.TypedValue;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
+/**
+ * 
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 class WireRecordWrapper extends AbstractJSObject {
 
     Map<String, TypedValue<?>> properties;

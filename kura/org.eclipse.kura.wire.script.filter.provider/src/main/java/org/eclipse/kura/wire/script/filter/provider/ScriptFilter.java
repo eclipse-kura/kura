@@ -44,6 +44,12 @@ import org.slf4j.LoggerFactory;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
+/**
+ * 
+ * @deprecated as of Kura 5.3.0, use
+ *             {@link org.eclipse.kura.wire.script.tools.filter.component.FilterComponent}
+ */
+@Deprecated
 public class ScriptFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ScriptFilter.class);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,11 @@ import java.util.List;
 
 import org.eclipse.kura.wire.WireRecord;
 
+/**
+ * 
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 class WireRecordListWrapper extends ImmutableJSObject {
 
     private static final String LENGTH_PROP_NAME = "length";

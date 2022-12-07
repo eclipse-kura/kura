@@ -205,12 +205,7 @@
                 </tycho.surefire.testenv.args>
             </properties>
             <!--
-                TODO: these modules are available only on Java 8 build;
-                readd them once they are fixed also for Java 17 build.
-                
-                Nashorn removed since Java 15, need an alternative engine.
-
-                The features module need a fix on the osgi-dp plugin for
+                TODO: the features module need a fix on the osgi-dp plugin for
                 working with Tycho 3.
 
                 org.eclipse.kura-p2 is working only with Java 8, we do not

@@ -200,7 +200,7 @@ Types other than `feat` and `fix` MAY be used in your commit messages and mu
 - `ci`: Changes to our CI configuration files and scripts
 - `revert`: Reverts a previous commit
 - `perf`: A code change that improves performance
-- `deprecate`: An API deprecation. Use the summary field to provide the API which was deprecated (eg: `deprecate: org.eclipse.kura.position.PositionService`)
+- `deprecate`: An API/component deprecation. Use the summary field to provide the API/component which was deprecated (eg: `deprecate: org.eclipse.kura.position.PositionService`)
 
 ### Scope
 

@@ -110,6 +110,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
 
+    private DataMessage priorityMessageStore;
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -469,6 +471,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             // Notify the listeners
             if (confirmedMessage != null) {
                 String topic = confirmedMessage.getTopic();
+
+                if (priorityMessageStore != null) {
+                    // Confirmed that priority message has been sent, can now safely disconnect.
+                    priorityMessageStore = null;
+                    this.dataTransportService.disconnect(this.dataServiceOptions.getDisconnectDelay());
+                }
+
                 this.dataServiceListeners.onMessageConfirmed(messageId, topic);
             } else {
                 logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
@@ -838,6 +847,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                                             + "Connecting before sceduled time to send this high prority message.",
                                     message.getId(), message.getPriority());
                             DataServiceImpl.this.dataTransportService.connect();
+
+                            // Cache Message locally, so that we can wait until it's sent to disconnect
+                            // service
+                            priorityMessageStore = message;
                         }
 
                         logger.info("DataPublisherService not connected");

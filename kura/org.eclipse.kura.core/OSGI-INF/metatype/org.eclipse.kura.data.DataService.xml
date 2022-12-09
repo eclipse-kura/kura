@@ -180,6 +180,22 @@
             default="0 0 0 ? * * *"
             description="A CRON expression that specifies the instants when the gateway should perform a connection attempt. This parameter is only used if Enable Connection Schedule is set to true. The default expression schedules a connection every day at midnight." />
             
+        <AD id="connection.schedule.priority.override.enable" 
+            name="Allow priority message to force connection beyond schedule" 
+            type="Boolean" 
+            cardinality="0" 
+            required="true" 
+            default="false"
+            description="Allows messages beyond a specified priority to force a connection and be sent regardless of connection schedule." />
+            
+        <AD id="connection.schedule.priority.override.threshold" 
+            name="Force message prority threshold" 
+            type="Integer" 
+            cardinality="0" 
+            required="true" 
+            default="1"
+            description="A message with a priority of equal or lessthen than this threshold will automatically re-connect and send regardless of the connection schedule." />
+            
          <AD id="connection.schedule.inactivity.interval.seconds" 
             name="Connection Schedule Disconnect Inactivity Interval Seconds" 
             type="Long" 

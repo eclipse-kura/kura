@@ -805,13 +805,15 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         @Override
         public void run() {
             Thread.currentThread().setName("DataServiceImpl:Submit");
+
             while (DataServiceImpl.this.publisherEnabled.get()) {
                 long sleepingTime = -1;
                 boolean messagePublished = false;
 
-                if (DataServiceImpl.this.dataTransportService.isConnected()) {
-                    try {
-                        DataMessage message = DataServiceImpl.this.store.getNextMessage();
+                try {
+                    DataMessage message = DataServiceImpl.this.store.getNextMessage();
+
+                    if (DataServiceImpl.this.dataTransportService.isConnected()) {
 
                         if (message != null) {
                             checkInFlightMessages(message);
@@ -825,16 +827,28 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                                 messagePublished = true;
                             }
                         }
-                    } catch (KuraNotConnectedException e) {
-                        logger.info("DataPublisherService is not connected");
-                    } catch (KuraTooManyInflightMessagesException e) {
-                        logger.info("Too many in-flight messages");
-                        handleInFlightCongestion();
-                    } catch (Exception e) {
-                        logger.error("Probably an unrecoverable exception", e);
+                    } else {
+
+                        if (Boolean.TRUE.equals(
+                                DataServiceImpl.this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled())
+                                && message.getPriority() <= DataServiceImpl.this.dataServiceOptions
+                                        .getConnectionSchedulePriorityOverridePriority()) {
+                            logger.debug(
+                                    "Published message with ID: {} has a prority of {}. "
+                                            + "Connecting before sceduled time to send this high prority message.",
+                                    message.getId(), message.getPriority());
+                            DataServiceImpl.this.dataTransportService.connect();
+                        }
+
+                        logger.info("DataPublisherService not connected");
                     }
-                } else {
-                    logger.info("DataPublisherService not connected");
+                } catch (KuraNotConnectedException e) {
+                    logger.info("DataPublisherService is not connected");
+                } catch (KuraTooManyInflightMessagesException e) {
+                    logger.info("Too many in-flight messages");
+                    handleInFlightCongestion();
+                } catch (Exception e) {
+                    logger.error("Probably an unrecoverable exception", e);
                 }
 
                 if (!messagePublished) {

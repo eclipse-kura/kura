@@ -48,6 +48,8 @@ public class DataServiceOptions {
     private static final String CONNECTION_SCHEDULE_ENABLED = "connection.schedule.enabled";
     private static final String CONNECTION_SCHECULE_EXPRESSION = "connection.schedule.expression";
     private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS = "connection.schedule.inactivity.interval.seconds";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE = "connection.schedule.priority.override.enable";
+    private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD = "connection.schedule.priority.override.threshold";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -67,6 +69,8 @@ public class DataServiceOptions {
     private static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
     private static final boolean CONNECTION_SCHEDULE_ENABLED_DEFAULT = false;
     private static final long CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT = 60;
+    private static final boolean CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT = false;
+    private static final int CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT = 1;
 
     private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
 
@@ -186,5 +190,18 @@ public class DataServiceOptions {
     long getConnectionScheduleDisconnectDelay() {
         return (long) this.properties.getOrDefault(CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
                 CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT);
+    }
+
+    Boolean isConnectionSchedulePriorityOverrideEnabled() {
+        return (Boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT) && isConnectionScheduleEnabled()
+                && getConnectionScheduleExpression().isPresent();
+    }
+
+    int getConnectionSchedulePriorityOverridePriority() {
+
+        return (Integer) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
+                CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT);
+
     }
 }

@@ -41,7 +41,7 @@ Bug Fixes:
 {{! Deprecated APIs/components section }}
 {{#ifContainsType commits type='deprecate'}}
 
-Deprecated:
+Deprecated APIs/components:
   {{#commits}}
     {{#ifCommitType . type='deprecate'}}
   * {{firstLetters hash number='10'}} - {{{commitDescription .}}} ({{authorName}})

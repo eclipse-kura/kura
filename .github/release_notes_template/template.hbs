@@ -38,10 +38,10 @@ Bug Fixes:
     {{/ifCommitType}}
   {{/commits}}
 {{/ifContainsType}}
-{{! Deprecated APIs section }}
+{{! Deprecated APIs/components section }}
 {{#ifContainsType commits type='deprecate'}}
 
-Deprecated APIs:
+Deprecated APIs/components:
   {{#commits}}
     {{#ifCommitType . type='deprecate'}}
   * {{firstLetters hash number='10'}} - {{{commitDescription .}}} ({{authorName}})

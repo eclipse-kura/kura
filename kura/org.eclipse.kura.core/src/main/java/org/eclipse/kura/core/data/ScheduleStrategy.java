@@ -39,11 +39,16 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     private State state;
 
     private Optional<ScheduledFuture<?>> timeout = Optional.empty();
+    private boolean isConnectionSchedulePriorityOverrideEnabled;
+    private int getConnectionSchedulePriorityOverridePriority;
 
     public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
-            final ConnectionManager connectionManager) {
+            final ConnectionManager connectionManager, boolean isConnectionSchedulePriorityOverrideEnabled,
+            int getConnectionSchedulePriorityOverridePriority) {
         this(expression, disconnectTimeoutMs, connectionManager, Executors.newSingleThreadScheduledExecutor(),
                 Date::new);
+        this.isConnectionSchedulePriorityOverrideEnabled = isConnectionSchedulePriorityOverrideEnabled;
+        this.getConnectionSchedulePriorityOverridePriority = getConnectionSchedulePriorityOverridePriority;
     }
 
     public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
@@ -268,6 +273,24 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
         updateState(State::onMessageEvent);
+    }
+
+    @Override
+    public void onPublish() {
+        DataMessage tempDataMessage = this.connectionManager.getNextMessage();
+
+        if (tempDataMessage == null) {
+            return;
+        }
+
+        if (this.isConnectionSchedulePriorityOverrideEnabled
+                && tempDataMessage.getPriority() <= this.getConnectionSchedulePriorityOverridePriority
+                && !this.connectionManager.isConnected()) {
+            logger.info("Initiating Connection to send message with a high priority.");
+            this.updateState(c -> new AwaitConnect());
+
+        }
+
     }
 
 }

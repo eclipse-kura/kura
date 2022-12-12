@@ -110,8 +110,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
 
-    private DataMessage priorityMessageStore;
-
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -471,13 +469,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             // Notify the listeners
             if (confirmedMessage != null) {
                 String topic = confirmedMessage.getTopic();
-
-                if (priorityMessageStore != null) {
-                    // Confirmed that priority message has been sent, can now safely disconnect.
-                    priorityMessageStore = null;
-                    this.dataTransportService.disconnect(this.dataServiceOptions.getDisconnectDelay());
-                }
-
                 this.dataServiceListeners.onMessageConfirmed(messageId, topic);
             } else {
                 logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
@@ -537,6 +528,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
+        if (this.autoConnectStrategy.isPresent()) {
+            this.autoConnectStrategy.get().onPublish();
+        }
+
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
@@ -591,7 +586,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             strategy = new AlwaysConnectedStrategy(this);
         } else {
             strategy = new ScheduleStrategy(schedule.get(),
-                    this.dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, this);
+                    this.dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, this,
+                    this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled(),
+                    this.dataServiceOptions.getConnectionSchedulePriorityOverridePriority());
         }
 
         this.autoConnectStrategy = Optional.of(strategy);
@@ -814,15 +811,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         @Override
         public void run() {
             Thread.currentThread().setName("DataServiceImpl:Submit");
-
             while (DataServiceImpl.this.publisherEnabled.get()) {
                 long sleepingTime = -1;
                 boolean messagePublished = false;
 
-                try {
-                    DataMessage message = DataServiceImpl.this.store.getNextMessage();
-
-                    if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                    try {
+                        DataMessage message = DataServiceImpl.this.store.getNextMessage();
 
                         if (message != null) {
                             checkInFlightMessages(message);
@@ -836,32 +831,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                                 messagePublished = true;
                             }
                         }
-                    } else {
-
-                        if (Boolean.TRUE.equals(
-                                DataServiceImpl.this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled())
-                                && message.getPriority() <= DataServiceImpl.this.dataServiceOptions
-                                        .getConnectionSchedulePriorityOverridePriority()) {
-                            logger.debug(
-                                    "Published message with ID: {} has a prority of {}. "
-                                            + "Connecting before sceduled time to send this high prority message.",
-                                    message.getId(), message.getPriority());
-                            DataServiceImpl.this.dataTransportService.connect();
-
-                            // Cache Message locally, so that we can wait until it's sent to disconnect
-                            // service
-                            priorityMessageStore = message;
-                        }
-
-                        logger.info("DataPublisherService not connected");
+                    } catch (KuraNotConnectedException e) {
+                        logger.info("DataPublisherService is not connected");
+                    } catch (KuraTooManyInflightMessagesException e) {
+                        logger.info("Too many in-flight messages");
+                        handleInFlightCongestion();
+                    } catch (Exception e) {
+                        logger.error("Probably an unrecoverable exception", e);
                     }
-                } catch (KuraNotConnectedException e) {
-                    logger.info("DataPublisherService is not connected");
-                } catch (KuraTooManyInflightMessagesException e) {
-                    logger.info("Too many in-flight messages");
-                    handleInFlightCongestion();
-                } catch (Exception e) {
-                    logger.error("Probably an unrecoverable exception", e);
+                } else {
+                    logger.info("DataPublisherService not connected");
                 }
 
                 if (!messagePublished) {
@@ -968,5 +947,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public boolean hasInFlightMessages() {
         return !inFlightMsgIds.isEmpty();
+    }
+
+    @Override
+    public DataMessage getNextMessage() {
+        DataMessage message = null;
+        try {
+            message = DataServiceImpl.this.store.getNextMessage();
+        } catch (Exception e) {
+            logger.error("Probably an unrecoverable exception", e);
+        }
+        return message;
     }
 }

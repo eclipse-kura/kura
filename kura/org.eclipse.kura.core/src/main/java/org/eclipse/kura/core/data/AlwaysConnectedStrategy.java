@@ -62,4 +62,10 @@ public class AlwaysConnectedStrategy implements AutoConnectStrategy {
         connectionManager.stopConnectionTask();
     }
 
+    @Override
+    public void onPublish() {
+        // do nothing
+
+    }
+
 }

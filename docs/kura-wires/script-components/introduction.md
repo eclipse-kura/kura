@@ -9,7 +9,7 @@ For **Java 8 devices**, a *Script Filter* and a *Conditional Component* are prov
 - [Nashorn-based Script Filter](nashorn-script-filter.md)
 - [Nashorn-based Conditional Component](nashorn-conditional-component.md)
 
-The above components will run only on Java 8 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries.
+The above components will run only on Java 8 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries. *These components are deprecated as of Kura version 5.3.*
 
 For devices that run **Java 17**, the following components are available instead:
 

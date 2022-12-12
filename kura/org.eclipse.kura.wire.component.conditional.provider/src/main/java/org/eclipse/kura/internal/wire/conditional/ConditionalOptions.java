@@ -19,7 +19,6 @@ import java.util.Map;
 import javax.script.ScriptException;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

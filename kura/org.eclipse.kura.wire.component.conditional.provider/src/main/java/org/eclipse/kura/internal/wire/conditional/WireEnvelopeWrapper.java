@@ -14,7 +14,6 @@
 package org.eclipse.kura.internal.wire.conditional;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

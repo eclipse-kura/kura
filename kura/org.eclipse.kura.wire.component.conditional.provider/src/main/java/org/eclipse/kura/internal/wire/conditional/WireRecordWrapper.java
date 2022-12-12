@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.kura.type.TypedValue;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.kura.wire.WireRecord;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

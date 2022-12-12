@@ -19,7 +19,6 @@ import org.eclipse.kura.wire.WireRecord;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

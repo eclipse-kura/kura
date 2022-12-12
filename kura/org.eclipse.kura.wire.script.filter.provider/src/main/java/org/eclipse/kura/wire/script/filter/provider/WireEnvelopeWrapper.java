@@ -13,7 +13,6 @@
 package org.eclipse.kura.wire.script.filter.provider;
 
 /**
- * 
  * @deprecated as of Kura 5.3.0
  */
 @Deprecated

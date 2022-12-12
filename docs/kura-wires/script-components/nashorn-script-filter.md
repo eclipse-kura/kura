@@ -1,7 +1,7 @@
 # Nashorn Script Filter
 
 !!! warning
-    This component is deprecated as of Kura version 5.3 since no more available on Java 8.
+    This component is deprecated as of Kura version 5.3 since no more available on Java 17.
 
 The **Script Filter Component** provides scripting functionalities in Kura Wires using the Nashorn Javascript engine:
 

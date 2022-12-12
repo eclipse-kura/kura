@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+	 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>5.3.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>eclipse-plugin</packaging>
+
+    <properties>
+        <graalvm.version>22.0.0.2</graalvm.version>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.wire.script.tools.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <!-- JS engine dependencies -->
+                                <artifactItem>
+                                    <groupId>org.graalvm.js</groupId>
+                                    <artifactId>js</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.graalvm.js</groupId>
+                                    <artifactId>js-scriptengine</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.graalvm.js</groupId>
+                                    <artifactId>js-launcher</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <!-- Common infrastructure dependencies -->
+                                <artifactItem>
+                                    <groupId>org.graalvm.sdk</groupId>
+                                    <artifactId>graal-sdk</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.graalvm.truffle</groupId>
+                                    <artifactId>truffle-api</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

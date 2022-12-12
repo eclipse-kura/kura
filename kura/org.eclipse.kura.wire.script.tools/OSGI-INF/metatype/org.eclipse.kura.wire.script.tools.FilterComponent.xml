@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+     Eurotech
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.script.tools.FilterComponent"
+        name="Filter Component"
+        description="A wire component that provides scripting functionalities in JavaScript.">
+
+        <AD id="script"
+            name="script"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=
+"
+// the following global variables are available:&#13;
+// input: an object that represents the received wire envelope&#13;
+// output: an object that can be used for emitting records&#13;
+// logger: a slf4j logger&#13;
+&#13;
+// input has two properties:&#13;
+// input.emitterPid contains the emitterPid of the received envelope&#13;
+// input.getRecords() is an array that contains the received records&#13;
+&#13;
+logger.info('Emitter pid is {}'\, input.getEmitterPid())&#13;
+&#13;
+// get the properties of the first record\, it is assumed it comes from a Timer&#13;
+var record = input.getRecords()[0].getProperties()&#13;
+&#13;
+// the properties of a record are TypedValues&#13;
+logger.info('timer value: {}'\, record.TIMER.getValue())&#13;
+logger.info('timer value type: {}'\, record.TIMER.getType())&#13;
+&#13;
+var records = input.getRecords()&#13;
+&#13;
+for(let i=0; i&#60;records.length; i++) {&#13;
+    // WireRecord.getProperties() returns a map of String - TypedValue&#13;
+    for (const [keyString\, typedValue] of records[i].getProperties()) {&#13;
+        logger.info('The {}-th record contains:'\, String(i))&#13;
+        logger.info('{}={}\n'\, keyString\, typedValue.getValue())&#13;
+    }&#13;
+}&#13;
+&#13;
+// creating a list of wire records to emit&#13;
+var output = new Array()&#13;
+&#13;
+// each WireRecord contains a map of properties&#13;
+var outputMap = new Object()&#13;
+&#13;
+// first record contains an integer&#13;
+outputMap = new Object()&#13;
+outputMap['example.integer'] = newIntegerValue(10)&#13;
+outputMap['example.long'] = newLongValue(100)&#13;
+outputMap['example.float'] = newFloatValue(1.014)&#13;
+outputMap['example.double'] = newDoubleValue(10.12)&#13;
+outputMap['example.boolean'] = newBooleanValue(true)&#13;
+output[0] = newWireRecord(outputMap)&#13;
+&#13;
+// second record contains a byte-array&#13;
+var byteArray = newByteArray(4)&#13;
+byteArray[0] = 1&#13;
+byteArray[1] = 2&#13;
+byteArray[2] = 0xaa&#13;
+byteArray[3] = 0xbb&#13;
+outputMap = new Object()&#13;
+outputMap['example.byte.array'] = newByteArrayValue(byteArray)&#13;
+output[1] = newWireRecord(outputMap)&#13;
+&#13;
+// third record contains strings&#13;
+outputMap = new Object()&#13;
+outputMap['example.string1'] = newStringValue('Hello World!')&#13;
+outputMap['example.string2'] = newStringValue('Hello World Twice!')&#13;
+output[2] = newWireRecord(outputMap)&#13;
+&#13;
+// the script context is retained across different&#13;
+// invocations for a single ScriptFilter&#13;
+// this allows stateful computations&#13;
+&#13;
+// create a persistent counter\, that is reset when an update is received&#13;
+// and the property script.context.drop is set to true&#13;
+counter = typeof(counter) === 'undefined' ? 0 : counter&#13;
+counter++&#13;
+&#13;
+// emit the counter value in a different WireRecord&#13;
+outputMap = new Object()&#13;
+outputMap['counter'] = newIntegerValue(counter)&#13;
+var counterRecord = newWireRecord(outputMap)&#13;
+output.push(counterRecord)&#13;
+"
+            description="The JavaScript code to be executed by this component when a wire envelope is received.|TextArea"></AD>
+
+        <AD id="script.context.drop"
+            name="script.context.drop"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, the script context will be dropped and recreated when the component configuration is updated, resetting the values of global variables."></AD>
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.wire.script.tools.FilterComponent" factoryPid="org.eclipse.kura.wire.script.tools.FilterComponent">
+        <Object ocdref="org.eclipse.kura.wire.script.tools.FilterComponent" />
+    </Designate>
+</MetaData>

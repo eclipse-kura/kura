@@ -43,11 +43,11 @@
             />
 
         <AD id="initCode"
-            name="JavaScript init code"
+            name="JavaScript init code (Java 8 only)"
             type="String"
             cardinality="1"
             required="false"
-            description="JavaScript code which is called when the router is initialized first. The camel context is available in the variable 'camelContext'.|TextArea"/>
+            description="JavaScript code which is called when the router is initialized first. The camel context is available in the variable 'camelContext'. This feature only works on JRE with Nashorn (Java &lt; 15).|TextArea"/>
 
         <AD id="disableJmx"
             name="Disable JMX"

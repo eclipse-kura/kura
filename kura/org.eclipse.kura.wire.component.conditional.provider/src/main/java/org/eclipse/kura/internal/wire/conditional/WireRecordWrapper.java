@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,10 @@ import java.util.Set;
 
 import org.eclipse.kura.type.TypedValue;
 
+/**
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 class WireRecordWrapper extends ImmutableJSObject {
 
     Map<String, TypedValue<?>> properties;

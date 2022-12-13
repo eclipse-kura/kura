@@ -191,6 +191,11 @@ This project leverages the following third party content.
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.gwtproject/gwt-user/2.10.0, Apache-2.0 AND CC0-1.0, approved, #4958
 * maven/mavencentral/org.gwtbootstrap3/gwtbootstrap3/1.0.1, Apache-2.0 AND MIT AND OFL-1.1, approved, #2020
+* maven/mavencentral/org.graalvm.js/js/22.0.0.2, UPL-1.0 AND (UPL-1.0 AND BSD-3-Clause) AND (UPL-1.0 AND GPL-2.0 WITH Classpath-exception-2.0) AND Unicode-TOU AND (MPL-2.0 AND X11), approved, #5271
+* maven/mavencentral/org.graalvm.js/js-scriptengine/22.0.0.2, UPL-1.0, approved, #5272
+* maven/mavencentral/org.graalvm.js/js-launcher/22.0.0.2, UPL-1.0, approved, #5273
+* maven/mavencentral/org.graalvm.sdk/graal-sdk/22.0.0.2, UPL-1.0, approved, clearlydefined
+* maven/mavencentral/org.graalvm.truffle/truffle-api/22.0.0.2, UPL-1.0, approved, #5274
 
 ### Additional Dependencies
 

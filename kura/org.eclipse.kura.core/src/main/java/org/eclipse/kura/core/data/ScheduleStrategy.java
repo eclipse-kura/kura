@@ -85,6 +85,10 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         public default State onTimeout() {
             return this;
         }
+
+        public default State onPublish(String topic, byte[] payload, int qos, boolean retain, int priority) {
+            return this;
+        }
     }
 
     private class AwaitConnectTime implements State {
@@ -111,6 +115,19 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         public State onTimeout() {
 
             return new AwaitConnect();
+        }
+
+        @Override
+        public State onPublish(String topic, byte[] payload, int qos, boolean retain, int priority) {
+
+            if (isConnectionSchedulePriorityOverrideEnabled
+                    && priority <= getConnectionSchedulePriorityOverridePriority
+                    && !connectionManager.isConnected()) {
+                logger.info("Initiating Connection to send message with a high priority.");
+
+                return new AwaitConnect();
+            }
+            return this;
         }
 
     }
@@ -276,21 +293,8 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     }
 
     @Override
-    public void onPublishRequested() {
-        DataMessage tempDataMessage = this.connectionManager.getNextMessage();
-
-        if (tempDataMessage == null) {
-            return;
-        }
-
-        if (this.isConnectionSchedulePriorityOverrideEnabled
-                && tempDataMessage.getPriority() <= this.getConnectionSchedulePriorityOverridePriority
-                && !this.connectionManager.isConnected()) {
-            logger.info("Initiating Connection to send message with a high priority.");
-            this.updateState(c -> new AwaitConnect());
-
-        }
-
+    public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
+        this.updateState(State::onPublish(topic, payload, qos, retain, priority));
     }
 
 }

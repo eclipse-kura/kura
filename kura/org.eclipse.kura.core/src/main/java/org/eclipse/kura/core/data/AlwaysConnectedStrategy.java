@@ -63,9 +63,8 @@ public class AlwaysConnectedStrategy implements AutoConnectStrategy {
     }
 
     @Override
-    public void onPublishRequested() {
+    public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
         // do nothing
-
     }
 
 }

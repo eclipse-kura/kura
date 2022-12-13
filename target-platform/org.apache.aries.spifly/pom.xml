@@ -1,0 +1,95 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>target-platform</artifactId>
+        <version>5.3.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>org.apache.aries.spifly</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <packaging>bundle</packaging>
+
+    <name>org.apache.aries.spifly</name>
+    <description>
+        SPI Fly component providing OSGi support for JRE SPI mechanisms, including the usage of java.util.ServiceLoader, META-INF/services and similar methods.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.aries.spifly</groupId>
+            <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+            <version>1.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-commons</artifactId>
+            <version>9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-util</artifactId>
+            <version>9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+            <version>9.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-analysis</artifactId>
+            <version>9.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Embed-Dependency>*</Embed-Dependency>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                        <Export-Package>                        
+                            *
+                        </Export-Package>
+                        <Require-Capability>
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
+                        </Require-Capability>
+                        <Provide-Capability>
+                            osgi.extender;osgi.extender=osgi.serviceloader.registrar;version:Version=1.0,
+                            osgi.extender;osgi.extender=osgi.serviceloader.processor;version:Version=1.0;uses:="org.apache.aries.spifly"
+                        </Provide-Capability>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

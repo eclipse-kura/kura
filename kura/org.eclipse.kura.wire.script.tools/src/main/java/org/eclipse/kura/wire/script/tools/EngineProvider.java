@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.script.ScriptEngineManager;
+
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -29,6 +31,9 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.oracle.truffle.js.scriptengine.GraalJSEngineFactory;
+import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 
 public abstract class EngineProvider {
 
@@ -46,6 +51,8 @@ public abstract class EngineProvider {
             this.engine = Optional.of(Context.newBuilder(LANGUAGE_ID).option("engine.WarnInterpreterOnly", "false")
                     .allowHostAccess(HostAccess.ALL).build());
             createDefaultBindings();
+
+            registerEngineInSystem();
         } catch (Exception e) {
             logger.error("Failed to initialize engine for language '" + LANGUAGE_ID + "'.", e);
             this.engine = Optional.empty();
@@ -100,6 +107,16 @@ public abstract class EngineProvider {
         }
         return Optional.empty();
 
+    }
+
+    public void registerEngineInSystem() {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        manager.registerEngineName(LANGUAGE_ID, new GraalJSEngineFactory());
+
+        GraalJSScriptEngine engione;
+
+        logger.info("REGISTERED ENGINE FACTORIES: {}", manager.getEngineFactories());
+        logger.info("REGISTERED ENGINE BY NAME 'js': {}", manager.getEngineByName(LANGUAGE_ID));
     }
 
     private List<WireRecord> valueToWireRecordList(Value value) {

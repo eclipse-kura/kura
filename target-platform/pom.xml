@@ -60,6 +60,7 @@
         <module>moquette-broker</module>
         <module>log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
+        <module>org.apache.aries.spifly</module>
         <module>p2-repo-common</module>
         <module>p2-repo-equinox_3.16.0</module>
         <module>p2-repo-test-deps</module>

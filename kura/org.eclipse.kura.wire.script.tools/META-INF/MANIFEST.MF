@@ -24,3 +24,14 @@ Bundle-ClassPath: .,
  lib/js-scriptengine.jar,
  lib/launcher-common.jar,
  lib/truffle-api.jar
+Provide-Capability: osgi.serviceloader;
+  osgi.serviceloader=javax.script.ScriptEngineFactory;
+  uses:="javax.script",
+ osgi.serviceloader;
+  osgi.serviceloader=javax.script.ScriptEngine;
+  uses:="javax.script",
+ osgi.serviceloader;
+  osgi.serviceloader=javax.script.AbstractScriptEngine;
+  uses:="javax.script"
+Require-Capability: osgi.extender;
+ filter:="(osgi.extender=osgi.serviceloader.registrar)"

@@ -14,6 +14,11 @@ package org.eclipse.kura.camel.utils;
 
 import static org.eclipse.kura.camel.runner.ScriptRunner.create;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
+
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
@@ -51,6 +56,20 @@ public final class CamelContexts {
         }
 
         try {
+
+            ScriptEngineManager manager = new ScriptEngineManager();
+            logger.info("REGISTERED ENGINE FACTORIES: {}", manager.getEngineFactories());
+            logger.info("REGISTERED ENGINE BY NAME 'js': {}", manager.getEngineByName("js"));
+
+            ServiceLoader<ScriptEngineFactory> svcLoader = ServiceLoader.load(ScriptEngineFactory.class);
+            Iterator<ScriptEngineFactory> it = svcLoader.iterator();
+            if (!it.hasNext()) {
+                logger.info("ScriptEngineFactory NOT FOUND BY SERVICE LOADER.");
+            }
+            while (it.hasNext()) {
+                ScriptEngineFactory f = it.next();
+                logger.info("ScriptEngineFactory FOUND BY SERVICE LOADER: {}", f);
+            }
 
             // setup runner
 

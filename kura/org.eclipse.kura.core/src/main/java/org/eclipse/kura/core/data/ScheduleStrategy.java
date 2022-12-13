@@ -93,6 +93,8 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
     private class AwaitConnectTime implements State {
 
+        boolean isSeccondMessage = false;
+
         @Override
         public State onEnterState() {
             connectionManager.stopConnectionTask();
@@ -122,10 +124,12 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
             if (isConnectionSchedulePriorityOverrideEnabled
                     && priority <= getConnectionSchedulePriorityOverridePriority
-                    && !connectionManager.isConnected()) {
+                    && !connectionManager.isConnected() && isSeccondMessage) {
                 logger.info("Initiating Connection to send message with a high priority.");
 
                 return new AwaitConnect();
+            } else {
+                isSeccondMessage = true;
             }
             return this;
         }

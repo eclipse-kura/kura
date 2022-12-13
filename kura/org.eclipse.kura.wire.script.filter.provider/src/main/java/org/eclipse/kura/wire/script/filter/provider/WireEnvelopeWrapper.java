@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.wire.script.filter.provider;
 
+/**
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 public class WireEnvelopeWrapper {
 
     @SuppressWarnings("checkstyle:visibilityModifier")

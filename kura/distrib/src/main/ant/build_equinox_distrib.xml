@@ -1491,7 +1491,11 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport-classes-epoll_${io.netty.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport-native-epoll_${io.netty.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport-classes-kqueue_${io.netty.version}.jar@3" />            
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/io.netty.transport-native-kqueue_${io.netty.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"

@@ -529,7 +529,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
         if (this.autoConnectStrategy.isPresent()) {
-            this.autoConnectStrategy.get().onPublish();
+            this.autoConnectStrategy.get().onPublishRequested();
         }
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);

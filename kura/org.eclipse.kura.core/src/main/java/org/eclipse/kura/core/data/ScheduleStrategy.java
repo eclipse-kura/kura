@@ -276,7 +276,7 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     }
 
     @Override
-    public void onPublish() {
+    public void onPublishRequested() {
         DataMessage tempDataMessage = this.connectionManager.getNextMessage();
 
         if (tempDataMessage == null) {

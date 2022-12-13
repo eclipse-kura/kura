@@ -18,7 +18,7 @@ interface AutoConnectStrategy extends DataServiceListener {
 
     public void shutdown();
 
-    public void onPublish();
+    public void onPublishRequested();
 
     interface ConnectionManager {
 

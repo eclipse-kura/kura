@@ -63,7 +63,7 @@ public class AlwaysConnectedStrategy implements AutoConnectStrategy {
     }
 
     @Override
-    public void onPublish() {
+    public void onPublishRequested() {
         // do nothing
 
     }

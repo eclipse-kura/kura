@@ -294,7 +294,7 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
     @Override
     public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
-        this.updateState(State::onPublish(topic, payload, qos, retain, priority));
+        this.updateState(c -> this.state.onPublish(topic, payload, qos, retain, priority));
     }
 
 }

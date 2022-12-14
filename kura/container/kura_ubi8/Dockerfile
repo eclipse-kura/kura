@@ -10,7 +10,7 @@ ARG KURA_COMMIT
 ARG PACKED=false
 
 RUN chmod a+x -R /usr/local/bin
-RUN dnf -y install git java-1.8.0-openjdk-devel.x86_64 maven zip
+RUN dnf -y install git java-1.8.0-openjdk-devel maven zip
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \

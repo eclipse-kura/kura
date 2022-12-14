@@ -44,10 +44,6 @@ RUN mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS
 RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS
 RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pdocker-x86_64-nn -nsu
 
-WORKDIR /
-
-RUN ls -la /kura/kura/distrib/target
-
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 RUN true && \

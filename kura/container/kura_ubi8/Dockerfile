@@ -10,12 +10,12 @@ ARG KURA_COMMIT
 ARG PACKED=false
 
 RUN chmod a+x -R /usr/local/bin
-RUN dnf -y install git java-11-openjdk-devel maven zip
+RUN dnf -y install git java-17-openjdk-devel maven zip
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
   GIT_BRANCH=${GIT_BRANCH:-develop} \
-  JAVA_HOME=/usr/lib/jvm/jre-11 \
+  JAVA_HOME=/usr/lib/jvm/jre-17 \
   LAUNCHER_VERSION="1.5.800.v20200727-1323"
 
 RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT"

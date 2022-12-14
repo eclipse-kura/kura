@@ -28,6 +28,8 @@ interface AutoConnectStrategy extends DataServiceListener {
 
         void disconnect();
 
+        DataMessage getNextMessage();
+
         boolean hasInFlightMessages();
 
         boolean isConnected();

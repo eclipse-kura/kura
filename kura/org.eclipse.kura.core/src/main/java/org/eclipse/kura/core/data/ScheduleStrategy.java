@@ -93,12 +93,16 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
     private class AwaitConnectTime implements State {
 
-        boolean isSeccondMessage = false;
-
         @Override
         public State onEnterState() {
-            connectionManager.stopConnectionTask();
-            connectionManager.disconnect();
+
+            DataMessage dm = connectionManager.getNextMessage();
+
+            if (dm != null && dm.getPriority() <= getConnectionSchedulePriorityOverridePriority) {
+                logger.info(
+                        "Priority message sent while disconnecting. Initiating Connection to send message with a high priority.");
+                return new AwaitConnect();
+            }
 
             final Date now = currentTimeProvider.get();
 
@@ -124,13 +128,12 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
             if (isConnectionSchedulePriorityOverrideEnabled
                     && priority <= getConnectionSchedulePriorityOverridePriority
-                    && !connectionManager.isConnected() && isSeccondMessage) {
+                    && !connectionManager.isConnected()) {
                 logger.info("Initiating Connection to send message with a high priority.");
 
                 return new AwaitConnect();
-            } else {
-                isSeccondMessage = true;
             }
+
             return this;
         }
 
@@ -186,8 +189,28 @@ public class ScheduleStrategy implements AutoConnectStrategy {
             if (connectionManager.hasInFlightMessages()) {
                 return this;
             } else {
-                return new AwaitConnectTime();
+                return new AwaitDisconnect();
             }
+        }
+    }
+
+    private class AwaitDisconnect implements State {
+
+        @Override
+        public State onEnterState() {
+            connectionManager.stopConnectionTask();
+            connectionManager.disconnect();
+            return this;
+        }
+
+        @Override
+        public State onConnectionLost() {
+            return new AwaitConnectTime();
+        }
+
+        @Override
+        public State onMessageEvent() {
+            return this;
         }
     }
 

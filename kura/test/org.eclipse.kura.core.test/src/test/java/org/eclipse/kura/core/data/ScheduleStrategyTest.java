@@ -82,7 +82,7 @@ public class ScheduleStrategyTest {
     }
 
     @Test
-    public void shouldForceRecconectOutsideOfSchedule() {
+    public void shouldForceReconnectOutsideOfSchedule() {
         givenTime("1/1/2000");
         givenCronExpression("0/2 * * * * ?");
         givenScheduleStrategy();

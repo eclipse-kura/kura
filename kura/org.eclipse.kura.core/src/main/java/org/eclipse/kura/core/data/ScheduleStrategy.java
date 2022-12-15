@@ -65,6 +65,23 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         executor.scheduleWithFixedDelay(new TimeShiftDetector(60000), 0, 1, TimeUnit.MINUTES);
     }
 
+    public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
+            final ConnectionManager connectionManager, final ScheduledExecutorService executor,
+            final Supplier<Date> currentTimeProvider, boolean isConnectionSchedulePriorityOverrideEnabled,
+            int getConnectionSchedulePriorityOverridePriority) {
+        this.expression = expression;
+        this.disconnectTimeoutMs = disconnectTimeoutMs;
+        this.connectionManager = connectionManager;
+        this.state = new AwaitConnectTime();
+        this.executor = executor;
+        this.currentTimeProvider = currentTimeProvider;
+        this.isConnectionSchedulePriorityOverrideEnabled = isConnectionSchedulePriorityOverrideEnabled;
+        this.getConnectionSchedulePriorityOverridePriority = getConnectionSchedulePriorityOverridePriority;
+
+        updateState(State::onEnterState);
+        executor.scheduleWithFixedDelay(new TimeShiftDetector(60000), 0, 1, TimeUnit.MINUTES);
+    }
+
     private interface State {
         public default State onEnterState() {
             return this;

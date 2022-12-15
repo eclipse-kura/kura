@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -80,6 +81,22 @@ public class ScheduleStrategyTest {
         thenConnectionTaskIsStopped();
     }
 
+    @Test
+    public void shouldForceRecconectOutsideOfSchedule() {
+        givenTime("1/1/2000");
+        givenCronExpression("0/2 * * * * ?");
+        givenScheduleStrategy();
+        givenTimeout();
+
+        whenMessageIsSent();
+
+        thenConnectionTaskIsNotStarted();
+
+        whenPriorityMessageIsSent();
+
+        thenConnectionTaskIsStarted();
+    }
+
     private final ExecutorState executorState = new ExecutorState();
     private final ConnectionManagerState connectionManagerState = new ConnectionManagerState();
     private Date now;
@@ -123,11 +140,19 @@ public class ScheduleStrategyTest {
     private void whenScheduleStrategyIsCreated() {
         this.strategy = new ScheduleStrategy(expression, disconnectTimeoutMs,
                 this.connectionManagerState.connectionManager,
-                this.executorState.executor, () -> this.now);
+                this.executorState.executor, () -> this.now, true, 3);
     }
 
     private void whenConnectionIsEstablished() {
         this.strategy.onConnectionEstablished();
+    }
+
+    private void whenMessageIsSent() {
+        this.strategy.onPublishRequested("test/topic", null, 0, false, 7);
+    }
+
+    private void whenPriorityMessageIsSent() {
+        this.strategy.onPublishRequested("test/topic", null, 0, false, 70);
     }
 
     private void thenTimeoutIsRequestedAfterMs(long expectedDelay) {
@@ -140,6 +165,10 @@ public class ScheduleStrategyTest {
         } catch (Exception e) {
             fail("connection task not started");
         }
+    }
+
+    private void thenConnectionTaskIsNotStarted() {
+        assertFalse(connectionManagerState.connectionManager.isConnected());
     }
 
     private void thenConnectionTaskIsStopped() {

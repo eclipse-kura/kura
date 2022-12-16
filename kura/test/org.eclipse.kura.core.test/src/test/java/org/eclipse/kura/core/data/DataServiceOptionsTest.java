@@ -13,6 +13,7 @@
 
 package org.eclipse.kura.core.data;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -35,6 +36,7 @@ public class DataServiceOptionsTest {
         givenPropertiesThatEnableOverrideSchedule();
         whenDataServiceOptionsIsCreated();
         thenConnectionScheduleEnabled();
+        thenCheckpriorityEquals(3);
     }
 
     @Test
@@ -42,6 +44,7 @@ public class DataServiceOptionsTest {
         givenPropertiesThatDisableOverrideSchedule();
         whenDataServiceOptionsIsCreated();
         thenConnectionScheduleDisabled();
+        thenCheckpriorityEquals(3);
     }
 
     /*
@@ -70,10 +73,9 @@ public class DataServiceOptionsTest {
 
         properties.put("connection.schedule.priority.override.enable", false);
         properties.put("connection.schedule.priority.override.threshold", 3);
-        properties.put("connect.auto-on-startup", true);
+        properties.put("connect.auto-on-startup", false);
         properties.put("connection.schedule.inactivity.interval.seconds", 2);
         properties.put("connection.schedule.enabled", false);
-        properties.put("connection.schedule.expression", "0 0 0 ? * * *");
     }
 
     /*
@@ -93,6 +95,10 @@ public class DataServiceOptionsTest {
 
     private void thenConnectionScheduleDisabled() {
         assertFalse(this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled());
+    }
+
+    private void thenCheckpriorityEquals(int priority) {
+        assertEquals(this.dataServiceOptions.getConnectionSchedulePriorityOverridePriority(), priority);
     }
 
 }

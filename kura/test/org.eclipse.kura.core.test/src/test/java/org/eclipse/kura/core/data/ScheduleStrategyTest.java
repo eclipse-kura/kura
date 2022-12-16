@@ -149,6 +149,8 @@ public class ScheduleStrategyTest {
         properties.put("connection.schedule.priority.override.threshold", 3);
         properties.put("connect.auto-on-startup", true);
         properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
+        properties.put("connection.schedule.enabled", true);
+        properties.put("connection.schedule.expression", expression.toString());
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 

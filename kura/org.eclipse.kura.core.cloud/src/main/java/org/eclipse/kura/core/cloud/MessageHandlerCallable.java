@@ -104,7 +104,7 @@ public class MessageHandlerCallable implements Callable<Void> {
             // The exception below will not show up in Kura's logs
             throw new ParseException("Not a valid request payload", 0);
         } else if ( requesterClientId == null) {
-            logger.error("Requester Client Id Id is null");
+            logger.error("Requester Client Id is null");
             // The exception below will not show up in Kura's logs
             throw new ParseException("Not a valid request payload", 0);
         }

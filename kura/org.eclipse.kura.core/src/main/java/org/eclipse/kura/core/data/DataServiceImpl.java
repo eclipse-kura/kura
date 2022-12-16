@@ -585,10 +585,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         if (!this.dataServiceOptions.isConnectionScheduleEnabled() || !schedule.isPresent()) {
             strategy = new AlwaysConnectedStrategy(this);
         } else {
-            strategy = new ScheduleStrategy(schedule.get(),
-                    this.dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, this,
-                    this.dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled(),
-                    this.dataServiceOptions.getConnectionSchedulePriorityOverridePriority());
+            strategy = new ScheduleStrategy(schedule.get(), this.dataServiceOptions, this);
         }
 
         this.autoConnectStrategy = Optional.of(strategy);

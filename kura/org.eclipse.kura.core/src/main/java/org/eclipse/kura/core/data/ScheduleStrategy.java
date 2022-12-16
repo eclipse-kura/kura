@@ -39,44 +39,25 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     private State state;
 
     private Optional<ScheduledFuture<?>> timeout = Optional.empty();
-    private boolean isConnectionSchedulePriorityOverrideEnabled;
-    private int getConnectionSchedulePriorityOverridePriority;
+    private DataServiceOptions dataServiceOptions;
 
-    public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
-            final ConnectionManager connectionManager, boolean isConnectionSchedulePriorityOverrideEnabled,
-            int getConnectionSchedulePriorityOverridePriority) {
-        this(expression, disconnectTimeoutMs, connectionManager, Executors.newSingleThreadScheduledExecutor(),
-                Date::new);
-        this.isConnectionSchedulePriorityOverrideEnabled = isConnectionSchedulePriorityOverrideEnabled;
-        this.getConnectionSchedulePriorityOverridePriority = getConnectionSchedulePriorityOverridePriority;
+    public ScheduleStrategy(final CronExpression expression, DataServiceOptions dataServiceOptions,
+            final ConnectionManager connectionManager) {
+        this(expression, dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, connectionManager,
+                Executors.newSingleThreadScheduledExecutor(),
+                Date::new, dataServiceOptions);
     }
 
     public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
             final ConnectionManager connectionManager, final ScheduledExecutorService executor,
-            final Supplier<Date> currentTimeProvider) {
+            final Supplier<Date> currentTimeProvider, DataServiceOptions dataServiceOptions) {
         this.expression = expression;
         this.disconnectTimeoutMs = disconnectTimeoutMs;
         this.connectionManager = connectionManager;
         this.state = new AwaitConnectTime();
         this.executor = executor;
         this.currentTimeProvider = currentTimeProvider;
-
-        updateState(State::onEnterState);
-        executor.scheduleWithFixedDelay(new TimeShiftDetector(60000), 0, 1, TimeUnit.MINUTES);
-    }
-
-    public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
-            final ConnectionManager connectionManager, final ScheduledExecutorService executor,
-            final Supplier<Date> currentTimeProvider, boolean isConnectionSchedulePriorityOverrideEnabled,
-            int getConnectionSchedulePriorityOverridePriority) {
-        this.expression = expression;
-        this.disconnectTimeoutMs = disconnectTimeoutMs;
-        this.connectionManager = connectionManager;
-        this.state = new AwaitConnectTime();
-        this.executor = executor;
-        this.currentTimeProvider = currentTimeProvider;
-        this.isConnectionSchedulePriorityOverrideEnabled = isConnectionSchedulePriorityOverrideEnabled;
-        this.getConnectionSchedulePriorityOverridePriority = getConnectionSchedulePriorityOverridePriority;
+        this.dataServiceOptions = dataServiceOptions;
 
         updateState(State::onEnterState);
         executor.scheduleWithFixedDelay(new TimeShiftDetector(60000), 0, 1, TimeUnit.MINUTES);
@@ -115,7 +96,8 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
             DataMessage dm = connectionManager.getNextMessage();
 
-            if (dm != null && dm.getPriority() <= getConnectionSchedulePriorityOverridePriority) {
+            if (dm != null
+                    && dm.getPriority() <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()) {
                 logger.info(
                         "Priority message sent while disconnecting. Initiating Connection to send message with a high priority.");
                 return new AwaitConnect();
@@ -143,8 +125,8 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         @Override
         public State onPublish(String topic, byte[] payload, int qos, boolean retain, int priority) {
 
-            if (isConnectionSchedulePriorityOverrideEnabled
-                    && priority <= getConnectionSchedulePriorityOverridePriority
+            if (dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled()
+                    && priority <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()
                     && !connectionManager.isConnected()) {
                 logger.info("Initiating Connection to send message with a high priority.");
 

@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -33,6 +35,8 @@ import org.mockito.Mockito;
 import org.quartz.CronExpression;
 
 public class ScheduleStrategyTest {
+
+    private DataServiceOptions dataServiceOptions;
 
     @Test
     public void shouldScheduleFirstConnectionAttempt() {
@@ -138,9 +142,18 @@ public class ScheduleStrategyTest {
     }
 
     private void whenScheduleStrategyIsCreated() {
+
+        // Create DataServiceOptions
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connection.schedule.priority.override.enable", true);
+        properties.put("connection.schedule.priority.override.threshold", 3);
+        properties.put("connect.auto-on-startup", true);
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
+
         this.strategy = new ScheduleStrategy(expression, disconnectTimeoutMs,
                 this.connectionManagerState.connectionManager,
-                this.executorState.executor, () -> this.now, true, 3);
+                this.executorState.executor, () -> this.now, this.dataServiceOptions);
     }
 
     private void whenConnectionIsEstablished() {

@@ -148,6 +148,7 @@ public class ScheduleStrategyTest {
         properties.put("connection.schedule.priority.override.enable", true);
         properties.put("connection.schedule.priority.override.threshold", 3);
         properties.put("connect.auto-on-startup", true);
+        properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 
@@ -165,7 +166,7 @@ public class ScheduleStrategyTest {
     }
 
     private void whenPriorityMessageIsSent() {
-        this.strategy.onPublishRequested("test/topic", null, 0, false, 70);
+        this.strategy.onPublishRequested("test/topic", null, 0, false, 0);
     }
 
     private void thenTimeoutIsRequestedAfterMs(long expectedDelay) {

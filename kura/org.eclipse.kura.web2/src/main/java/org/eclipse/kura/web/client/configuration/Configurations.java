@@ -150,8 +150,7 @@ public class Configurations {
     public List<String> getInvalidConfigurationPids() {
         final List<String> result = new ArrayList<>();
         for (Entry<String, HasConfiguration> entry : this.currentConfigurations.entrySet()) {
-            // Check if the item is invalid and if it is active (not queued for deletion).
-            if (!entry.getValue().isValid() && this.allActivePids.contains(entry.getKey())) {
+            if (!entry.getValue().isValid()) {
                 result.add(entry.getKey());
             }
         }

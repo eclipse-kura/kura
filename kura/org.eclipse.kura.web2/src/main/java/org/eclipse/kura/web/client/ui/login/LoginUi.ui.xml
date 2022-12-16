@@ -1,17 +1,17 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 
-<!-- 
-    
+<!--
+
     Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
-     Eurotech 
+     Eurotech
 
 -->
 
@@ -25,30 +25,33 @@
 	<ui:with field="msgs"
 		type="org.eclipse.kura.web.client.messages.Messages" />
 
-	<b:Container fluid="true" addStyleNames="login-background">
+    <g:HTMLPanel>
+        <b:Container fluid="true" addStyleNames="login-background">
 
-<g:FormPanel ui:field="loginForm">
-		<b:Modal ui:field="loginDialog" title="Login" closable="false"
-			fade="false" dataBackdrop="FALSE" addStyleNames="login-form" visible="false">
-			
-			<b:ModalBody ui:field="loginModalBody">
-						<b.html:Paragraph text="{msgs.loginWebUiAccessNotEnabled}" ui:field="noAuthMethodsWarning" />
-						<b:FormGroup ui:field="authenticationMethodGroup" visible="false">
-                            <b:FormLabel for="authenticationMethod" text="Authentication Method"/>
-                            <g:FlowPanel>
-                                <b:ListBox ui:field="authenticationMethod" b:id="authenticationMethod">
-                                </b:ListBox>
-                            </g:FlowPanel>
-                        </b:FormGroup>
-			</b:ModalBody>
-			<b:ModalFooter>
-				<b:SubmitButton text="Login" b:id="login-button" ui:field="loginButton" visible="false"/>
-			</b:ModalFooter>
-		
-				
-		</b:Modal>
-		</g:FormPanel>
-        
+            <g:FormPanel ui:field="loginForm">
+                <b:Modal ui:field="loginDialog" title="Login" closable="false"
+                    fade="false" dataBackdrop="FALSE" addStyleNames="login-form" visible="false">
+
+                    <b:ModalBody ui:field="loginModalBody">
+                                <b.html:Paragraph text="{msgs.loginWebUiAccessNotEnabled}" ui:field="noAuthMethodsWarning" />
+                                <b:FormGroup ui:field="authenticationMethodGroup" visible="false">
+                                    <b:FormLabel for="authenticationMethod" text="Authentication Method"/>
+                                    <g:FlowPanel>
+                                        <b:ListBox ui:field="authenticationMethod" b:id="authenticationMethod">
+                                        </b:ListBox>
+                                    </g:FlowPanel>
+                                </b:FormGroup>
+                    </b:ModalBody>
+                    <b:ModalFooter>
+                        <b:SubmitButton text="Login" b:id="login-button" ui:field="loginButton" visible="false"/>
+                    </b:ModalFooter>
+
+
+                </b:Modal>
+            </g:FormPanel>
+
+        </b:Container>
+
         <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
             dataKeyboard="true" ui:field="accessBannerModal"
             b:id="accessBannerModal">
@@ -65,7 +68,7 @@
             </b:ModalFooter>
         </b:Modal>
 
+        <kura:AlertDialog ui:field="alertDialog" />
 
-		<kura:AlertDialog ui:field="alertDialog" />
-	</b:Container>
+    </g:HTMLPanel>
 </ui:UiBinder>

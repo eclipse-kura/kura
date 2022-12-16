@@ -120,7 +120,7 @@
                 <jdk>17</jdk>
             </activation>
             <properties>
-                <tycho-p2-extras-plugin.version>3.0.0</tycho-p2-extras-plugin.version>
+                <tycho-p2-extras-plugin.version>3.0.1</tycho-p2-extras-plugin.version>
             </properties>
         </profile>
         <profile>

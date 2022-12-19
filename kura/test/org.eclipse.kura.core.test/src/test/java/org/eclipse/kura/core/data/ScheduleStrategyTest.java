@@ -92,6 +92,8 @@ public class ScheduleStrategyTest {
         givenScheduleStrategy();
         givenTimeout();
 
+        whenScheduleStrategyIsCreatedWithAlternativeConstructor();
+
         whenMessageIsSent();
 
         thenConnectionTaskIsNotStarted();
@@ -157,6 +159,23 @@ public class ScheduleStrategyTest {
         this.strategy = new ScheduleStrategy(expression, disconnectTimeoutMs,
                 this.connectionManagerState.connectionManager,
                 this.executorState.executor, () -> this.now, this.dataServiceOptions);
+    }
+
+    private void whenScheduleStrategyIsCreatedWithAlternativeConstructor() {
+
+        // Create DataServiceOptions
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connection.schedule.priority.override.enable", true);
+        properties.put("connection.schedule.priority.override.threshold", 3);
+        properties.put("connect.auto-on-startup", true);
+        properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
+        properties.put("connection.schedule.enabled", true);
+        properties.put("connection.schedule.expression", expression.toString());
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
+
+        this.strategy = new ScheduleStrategy(this.expression, this.dataServiceOptions,
+                this.connectionManagerState.connectionManager);
     }
 
     private void whenConnectionIsEstablished() {

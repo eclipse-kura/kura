@@ -198,7 +198,7 @@ public class ScheduleStrategyTest {
         properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
         properties.put("connection.schedule.enabled", true);
         properties.put("connection.schedule.expression", expression.toString());
-        properties.put("connection.schedule.inactivity.interval.seconds", 1);
+        properties.put("connection.schedule.inactivity.interval.seconds", (long) 1);
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 

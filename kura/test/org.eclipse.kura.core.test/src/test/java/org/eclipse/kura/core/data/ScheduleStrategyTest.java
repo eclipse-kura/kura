@@ -102,6 +102,33 @@ public class ScheduleStrategyTest {
 
         thenConnectionTaskIsStarted();
     }
+    
+    @Test
+    public void shouldReconnectIfMessageIsSentDuringDisconnect() {
+        givenTime("1/1/2000");
+        givenCronExpression("0/2 * * * * ?");
+        givenScheduleStrategy();
+        givenTimeout();
+        
+        whenScheduleStrategyIsCreatedWithAlternativeConstructor();
+        
+        whenMessageIsSent();
+        
+        thenConnectionTaskIsNotStarted();
+        
+        whenPriorityMessageIsSent();
+        
+        thenConnectionTaskIsStarted();
+        
+        //Create Minor Delay
+        whenMessageIsSent();
+        whenMessageIsSent();
+        whenMessageIsSent();
+        
+        whenPriorityMessageIsSent();
+        
+        thenConnectionTaskIsStarted();
+    }
 
     private final ExecutorState executorState = new ExecutorState();
     private final ConnectionManagerState connectionManagerState = new ConnectionManagerState();
@@ -171,6 +198,7 @@ public class ScheduleStrategyTest {
         properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
         properties.put("connection.schedule.enabled", true);
         properties.put("connection.schedule.expression", expression.toString());
+        properties.put("connection.schedule.inactivity.interval.seconds", 1);
 
         this.dataServiceOptions = new DataServiceOptions(properties);
 

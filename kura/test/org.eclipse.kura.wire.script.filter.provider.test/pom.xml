@@ -301,9 +301,14 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- parallel build config -->
+                    <parallel>classes</parallel>
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
+                    <forkCount>2C</forkCount>
+                    <reuseForks>true</reuseForks>
+
                     <failIfNoTests>false</failIfNoTests>
                     <providerHint>junit4</providerHint>
-                    <useUnlimitedThreads>false</useUnlimitedThreads>
                     <argLine>
                         ${tycho.testArgLine}
                         ${tycho.surefire.testenv.args}

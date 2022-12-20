@@ -7,9 +7,9 @@
    available under the terms of the Eclipse Public License 2.0
    which is available at https://www.eclipse.org/legal/epl-2.0/
  
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
+ SPDX-License-Identifier: EPL-2.0
+ 
+ Contributors:
     Eurotech
     
 -->
@@ -30,11 +30,10 @@
       <provide interface="org.osgi.service.wireadmin.Producer"/>
    </service>
    <reference bind="bindWireHelperService"
-   	          cardinality="1..1"
-   	          interface="org.eclipse.kura.wire.WireHelperService"
-   	          name="WireHelperService"
-   	          policy="static"
-   	          unbind="unbindWireHelperService"/>
+              cardinality="1..1"
+              interface="org.eclipse.kura.wire.WireHelperService"
+              name="WireHelperService"
+              policy="static"/>
    <reference name="CloudSubscriber"
            policy="dynamic"
            bind="setCloudSubscriber"

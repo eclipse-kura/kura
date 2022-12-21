@@ -117,6 +117,7 @@ public class Configurations {
 
     public void deleteConfiguration(String pid) {
         this.allActivePids.remove(pid);
+        this.currentConfigurations.remove(pid);
     }
 
     public void setChannelDescriptiors(List<GwtConfigComponent> descriptors) {

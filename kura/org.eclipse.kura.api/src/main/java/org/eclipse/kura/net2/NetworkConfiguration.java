@@ -12,11 +12,14 @@
  ******************************************************************************/
 package org.eclipse.kura.net2;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The NetworkConfiguration class contains the configuration of all
  * the network interfaces installed on the system.
  *
  */
+@ProviderType
 public class NetworkConfiguration {
 
     public NetworkConfiguration() {

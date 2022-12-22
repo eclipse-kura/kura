@@ -13,12 +13,15 @@
 package org.eclipse.kura.net2;
 
 import org.eclipse.kura.KuraException;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The NetworkProviderService provides methods for applying a
  * network configuration to the system.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetworkProviderService {
 
     /**

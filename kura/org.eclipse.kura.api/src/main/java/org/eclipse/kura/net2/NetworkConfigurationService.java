@@ -12,12 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.net2;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * The NetworkConfigurationService is a marker interface
  * used to identify the services responsible for storing
  * and applying a network configuration to the system.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+@ProviderType
 public interface NetworkConfigurationService {
 
 }

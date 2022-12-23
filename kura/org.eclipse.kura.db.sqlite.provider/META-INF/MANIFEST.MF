@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.db.sqlite.provider
+Bundle-SymbolicName: org.eclipse.kura.db.sqlite.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .,
+ lib/sqlite-jdbc.jar
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura.configuration;version="[1.2,2.0)",
+ org.eclipse.kura.db;version="[2.0,2.1)",
+ org.eclipse.kura.util.configuration;version="[1.0,1.1)",
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.component;version="1.4.0",
+ org.slf4j;version="1.7.32",
+ org.sqlite;version="3.39.3.0",
+ org.sqlite.core;version="3.39.3.0",
+ org.sqlite.date;version="3.39.3.0",
+ org.sqlite.javax;version="3.39.3.0",
+ org.sqlite.jdbc3;version="3.39.3.0",
+ org.sqlite.jdbc4;version="3.39.3.0",
+ org.sqlite.util;version="3.39.3.0"

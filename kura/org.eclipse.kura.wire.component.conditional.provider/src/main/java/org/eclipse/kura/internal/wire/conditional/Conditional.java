@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,11 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 /**
  * The Class Conditional is a specific Wire Component to apply a condition
  * on the received {@link WireEnvelope}
+ * 
+ * @deprecated as of Kura 5.3.0, use
+ *             {@link org.eclipse.kura.wire.script.tools.conditional.component.ConditionalComponent}
  */
+@Deprecated
 public final class Conditional implements WireReceiver, WireEmitter, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(Conditional.class);

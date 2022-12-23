@@ -10,12 +10,12 @@ ARG KURA_COMMIT
 ARG PACKED=false
 
 RUN chmod a+x -R /usr/local/bin
-RUN dnf -y install git java-11-openjdk-devel maven zip
+RUN dnf -y install git java-1.8.0-openjdk-devel maven zip
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
   GIT_BRANCH=${GIT_BRANCH:-develop} \
-  JAVA_HOME=/usr/lib/jvm/jre-11 \
+  JAVA_HOME=/usr/lib/jvm/jre-1.8.0 \
   LAUNCHER_VERSION="1.5.800.v20200727-1323"
 
 RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT"
@@ -43,10 +43,6 @@ ENV \
 RUN mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS
 RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS
 RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pdocker-x86_64-nn -nsu
-
-WORKDIR /
-
-RUN ls -la /kura/kura/distrib/target
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 

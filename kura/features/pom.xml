@@ -63,6 +63,7 @@
         <module>org.eclipse.kura.driver.gpio</module>
         <module>org.eclipse.kura.wire.ai.component.provider</module>
         <module>org.eclipse.kura.ai.triton.server</module>
+        <module>org.eclipse.kura.wire.script.tools</module>
     </modules>
 
     <profiles>

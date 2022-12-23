@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,10 @@ import org.eclipse.kura.type.TypedValue;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
+/**
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 class WireRecordWrapper extends AbstractJSObject {
 
     Map<String, TypedValue<?>> properties;

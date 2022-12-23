@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,10 @@ package org.eclipse.kura.internal.wire.conditional;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
 
+/**
+ * @deprecated as of Kura 5.3.0
+ */
+@Deprecated
 public class ImmutableJSObject extends AbstractJSObject {
 
     private static final String READ_ONLY_ERROR_MESSAGE = "This object is read-only";

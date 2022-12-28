@@ -276,7 +276,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
-        thenTestPropertyValueIs(Json.value("foobar"));
+        thenTestPropertyValueIs(Json.value("yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA=="));
     }
 
     @Test
@@ -397,7 +397,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
-        thenTestPropertyValueIs(Json.array("foobar"));
+        thenTestPropertyValueIs(Json.array("yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA=="));
     }
 
     @Test
@@ -492,7 +492,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":\"foobar\"}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsPassword("foo", "testProp", "foobar");
+        thenReceivedPropertiesForPidContainsPassword("foo", "testProp",
+                "yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA==");
     }
 
     @Test
@@ -584,7 +585,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsPasswords("foo", "testProp", "foobar", "a");
+        thenReceivedPropertiesForPidContainsPasswords("foo", "testProp",
+                "yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA==", "a");
     }
 
     @Test
@@ -1075,9 +1077,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
+                ArgumentMatchers.any(),
                 ArgumentMatchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
+                ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 

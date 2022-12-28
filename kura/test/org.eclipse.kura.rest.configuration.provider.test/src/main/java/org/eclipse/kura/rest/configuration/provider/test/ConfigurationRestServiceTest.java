@@ -397,7 +397,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
-        thenTestPropertyValueIs(Json.array("yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA=="));
+        thenTestPropertyValueIs(Json.array("foobar"));
     }
 
     @Test
@@ -492,8 +492,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":\"foobar\"}}" + "}" + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsPassword("foo", "testProp",
-                "yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA==");
+        thenReceivedPropertiesForPidContainsPassword("foo", "testProp", "foobar");
     }
 
     @Test
@@ -585,8 +584,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "]}");
 
         thenRequestSucceeds();
-        thenReceivedPropertiesForPidContainsPasswords("foo", "testProp",
-                "yh4bUAXLnYOzl4Z+-d3sF09StH+ea6DIfEOWS+aSQfLALsA==", "a");
+        thenReceivedPropertiesForPidContainsPasswords("foo", "testProp", "foobar", "a");
     }
 
     @Test
@@ -1077,11 +1075,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
                 ArgumentMatchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 

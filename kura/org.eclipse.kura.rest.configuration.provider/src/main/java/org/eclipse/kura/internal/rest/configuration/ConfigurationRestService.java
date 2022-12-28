@@ -361,12 +361,12 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, true);
+        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false);
 
     }
 
     /**
-     * GET method.
+     * POST method.
      *
      * Lists the component configurations of all the ConfigurableComponents tracked
      * by the
@@ -398,11 +398,11 @@ public class ConfigurationRestService {
             }
         });
 
-        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, true);
+        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
     }
 
     /**
-     * GET method.
+     * POST method.
      *
      * Provides the default Component Configuration for the component identified by
      * the specified PID
@@ -474,7 +474,7 @@ public class ConfigurationRestService {
     }
 
     /**
-     * GET method.
+     * POST method.
      *
      * Returns the content of a given snapshot tracked by the framework.
      *

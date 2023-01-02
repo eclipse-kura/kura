@@ -18,6 +18,8 @@ interface AutoConnectStrategy extends DataServiceListener {
 
     public void shutdown();
 
+    public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority);
+
     interface ConnectionManager {
 
         void startConnectionTask();
@@ -25,6 +27,8 @@ interface AutoConnectStrategy extends DataServiceListener {
         void stopConnectionTask();
 
         void disconnect();
+
+        DataMessage getNextMessage();
 
         boolean hasInFlightMessages();
 

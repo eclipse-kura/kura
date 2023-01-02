@@ -62,4 +62,9 @@ public class AlwaysConnectedStrategy implements AutoConnectStrategy {
         connectionManager.stopConnectionTask();
     }
 
+    @Override
+    public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
+        // do nothing
+    }
+
 }

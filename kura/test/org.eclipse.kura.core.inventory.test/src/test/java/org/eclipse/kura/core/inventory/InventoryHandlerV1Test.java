@@ -21,16 +21,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Principal;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -38,7 +52,6 @@ import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
@@ -104,8 +117,6 @@ public class InventoryHandlerV1Test {
 
     private ContainerInstanceDescriptor dockerContainer1;
     private ContainerInstanceDescriptor dockerContainer2;
-    private ContainerConfiguration dockerContainer1Config;
-    private ContainerConfiguration dockerContainer2Config;
 
     private ImageConfiguration containerImage1;
     private ImageInstanceDescriptor containerInstanceImage1;
@@ -234,7 +245,7 @@ public class InventoryHandlerV1Test {
     }
 
     @Test
-    public void testDoGetPackagesOneElementList() throws KuraException, NoSuchFieldException {
+    public void testDoGetPackagesOneElementListNotSigned() throws KuraException, NoSuchFieldException {
         DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
         DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
         DeploymentPackage dp = mock(DeploymentPackage.class);
@@ -258,11 +269,13 @@ public class InventoryHandlerV1Test {
                 assertEquals(1, packagesArray.length);
                 assertEquals(dp.getName(), packagesArray[0].getName());
                 assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
+                assertEquals(false, packagesArray[0].isSigned());
 
                 SystemBundle[] bis = packagesArray[0].getBundleInfos();
                 assertEquals(1, bis.length);
                 assertEquals(bundleInfo.getSymbolicName(), bis[0].getName());
                 assertEquals(bundleInfo.getVersion().toString(), bis[0].getVersion());
+                assertEquals(false, bis[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -293,6 +306,170 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
+
+        KuraMessage resMessage = inventory.doGet(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+        assertEquals(TEST_JSON, new String(resPayload.getBody(), Charset.forName("UTF-8")));
+    }
+    
+    @Test
+    public void testDoGetPackagesTwoElementsListPartiallySigned() throws KuraException, NoSuchFieldException {
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        deployedPackages[0] = dp;
+
+        BundleInfo[] bundleInfos = new BundleInfo[2];
+        BundleInfo bundleInfo = mock(BundleInfo.class);
+        bundleInfos[0] = bundleInfo;
+        
+        BundleInfo bundleInfo2 = mock(BundleInfo.class);
+        bundleInfos[1] = bundleInfo2;
+
+        Bundle[] bundles = new Bundle[2];
+        Bundle bundle = mock(Bundle.class);
+        Bundle bundle2 = mock(Bundle.class);
+        bundles[0] = bundle;
+        bundles[1] = bundle2;
+
+        InventoryHandlerV1 inventory = new InventoryHandlerV1() {
+
+            @Override
+            protected String marshal(Object object) {
+                SystemDeploymentPackages packages = (SystemDeploymentPackages) object;
+                SystemDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+
+                assertEquals(1, packagesArray.length);
+                assertEquals(dp.getName(), packagesArray[0].getName());
+                assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
+                assertEquals(false, packagesArray[0].isSigned());
+
+                SystemBundle[] bis = packagesArray[0].getBundleInfos();
+                assertEquals(2, bis.length);
+                assertEquals(bundleInfo.getSymbolicName(), bis[0].getName());
+                assertEquals(bundleInfo.getVersion().toString(), bis[0].getVersion());
+                assertEquals(false, bis[0].isSigned());
+                assertEquals(bundleInfo2.getSymbolicName(), bis[1].getName());
+                assertEquals(bundleInfo2.getVersion().toString(), bis[1].getVersion());
+                assertEquals(true, bis[1].isSigned());
+
+                return TEST_JSON;
+            }
+        };
+
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("deploymentPackages");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraMessage message = new KuraMessage(request, reqResources);
+
+        TestUtil.setFieldValue(inventory, "deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(bundleInfos);
+        when(bundleInfo.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundleInfo.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundleInfo2.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater2");
+        when(bundleInfo2.getVersion()).thenReturn(new Version("2.0.0"));
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(inventory, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.INSTALLED);
+        
+        when(bundle2.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater2");
+        when(bundle2.getVersion()).thenReturn(new Version("2.0.0"));
+        when(bundle2.getBundleId()).thenReturn(2L);
+        when(bundle2.getState()).thenReturn(Bundle.ACTIVE);
+        Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
+        signingCerts.put(getEmptyX509Cert(), null);
+        when(bundle2.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
+
+        KuraMessage resMessage = inventory.doGet(null, message);
+
+        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+        assertEquals(TEST_JSON, new String(resPayload.getBody(), Charset.forName("UTF-8")));
+    }
+
+    @Test
+    public void testDoGetPackagesOneElementListSigned() throws KuraException, NoSuchFieldException {
+        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage[] deployedPackages = new DeploymentPackage[1];
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        deployedPackages[0] = dp;
+
+        BundleInfo[] bundleInfos = new BundleInfo[1];
+        BundleInfo bundleInfo = mock(BundleInfo.class);
+        bundleInfos[0] = bundleInfo;
+
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
+        InventoryHandlerV1 inventory = new InventoryHandlerV1() {
+
+            @Override
+            protected String marshal(Object object) {
+                SystemDeploymentPackages packages = (SystemDeploymentPackages) object;
+                SystemDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+
+                assertEquals(1, packagesArray.length);
+                assertEquals(dp.getName(), packagesArray[0].getName());
+                assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
+                assertEquals(true, packagesArray[0].isSigned());
+
+                SystemBundle[] bis = packagesArray[0].getBundleInfos();
+                assertEquals(1, bis.length);
+                assertEquals(bundleInfo.getSymbolicName(), bis[0].getName());
+                assertEquals(bundleInfo.getVersion().toString(), bis[0].getVersion());
+                assertEquals(true, bis[0].isSigned());
+
+                return TEST_JSON;
+            }
+        };
+
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("deploymentPackages");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        KuraMessage message = new KuraMessage(request, reqResources);
+
+        TestUtil.setFieldValue(inventory, "deploymentAdmin", deploymentAdmin);
+
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deployedPackages);
+        when(dp.getName()).thenReturn("heater");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        when(dp.getBundleInfos()).thenReturn(bundleInfos);
+        when(bundleInfo.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundleInfo.getVersion()).thenReturn(new Version("1.0.0"));
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(inventory, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
+        
+        Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
+        signingCerts.put(getEmptyX509Cert(), null);
+        when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
 
         KuraMessage resMessage = inventory.doGet(null, message);
 
@@ -405,6 +582,7 @@ public class InventoryHandlerV1Test {
                 assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
                 assertEquals(bundle.getBundleId(), bundleArray[0].getId());
                 assertEquals("INSTALLED", bundleArray[0].getState());
+                assertEquals(true, bundleArray[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -426,6 +604,10 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.INSTALLED);
+        
+        Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
+        signingCerts.put(getEmptyX509Cert(), null);
+        when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
 
         KuraMessage resMessage = inventory.doGet(null, message);
 
@@ -453,6 +635,7 @@ public class InventoryHandlerV1Test {
                 assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
                 assertEquals(bundle.getBundleId(), bundleArray[0].getId());
                 assertEquals("RESOLVED", bundleArray[0].getState());
+                assertEquals(false, bundleArray[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -501,6 +684,7 @@ public class InventoryHandlerV1Test {
                 assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
                 assertEquals(bundle.getBundleId(), bundleArray[0].getId());
                 assertEquals("STARTING", bundleArray[0].getState());
+                assertEquals(false, bundleArray[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -549,6 +733,7 @@ public class InventoryHandlerV1Test {
                 assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
                 assertEquals(bundle.getBundleId(), bundleArray[0].getId());
                 assertEquals("STOPPING", bundleArray[0].getState());
+                assertEquals(false, bundleArray[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -597,6 +782,7 @@ public class InventoryHandlerV1Test {
                 assertEquals(bundle.getVersion().toString(), bundleArray[0].getVersion());
                 assertEquals(bundle.getBundleId(), bundleArray[0].getId());
                 assertEquals("ACTIVE", bundleArray[0].getState());
+                assertEquals(true, bundleArray[0].isSigned());
 
                 return TEST_JSON;
             }
@@ -618,6 +804,10 @@ public class InventoryHandlerV1Test {
         when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
         when(bundle.getBundleId()).thenReturn(1L);
         when(bundle.getState()).thenReturn(Bundle.ACTIVE);
+        
+        Map<X509Certificate, List<X509Certificate>> signingCerts = new HashMap<>();
+        signingCerts.put(getEmptyX509Cert(), null);
+        when(bundle.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(signingCerts);
 
         KuraMessage resMessage = inventory.doGet(null, message);
 
@@ -735,18 +925,6 @@ public class InventoryHandlerV1Test {
         when(this.mockContainerOrchestrationService.listImageInstanceDescriptors())
                 .thenReturn(Arrays.asList(this.containerInstanceImage1, this.containerInstanceImage2));
 
-        // convert ContainerDescriptor to a DockerContainer
-        DockerContainer testContainer = new DockerContainer(this.dockerContainer1);
-
-        // convert ContainerDescriptor to a DockerContainer
-        ContainerImage testImageInstance = new ContainerImage(this.containerInstanceImage1);
-
-        // doReturn(testImageInstance).when(handler).unmarshal(Mockito.any(String.class),
-        // ContainerImage.class);
-
-        // doReturn(testContainer).when(handler).unmarshal(Mockito.any(String.class),
-        // DockerContainer.class);
-
         Bundle[] bundles = new Bundle[1];
         Bundle bundle = mock(Bundle.class);
         bundles[0] = bundle;
@@ -761,6 +939,7 @@ public class InventoryHandlerV1Test {
         bundleInfos[0] = bundleInfo;
 
         InventoryHandlerV1 inventory = new InventoryHandlerV1() {
+
             @Override
             protected String marshal(Object object) {
                 SystemResourcesInfo resources = (SystemResourcesInfo) object;
@@ -1159,7 +1338,7 @@ public class InventoryHandlerV1Test {
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
         this.containerInstanceImage1 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
-                .setImageName(containerImage1.getImageName()).setImageTag(containerImage1.getImageTag())
+                .setImageName(this.containerImage1.getImageName()).setImageTag(this.containerImage1.getImageTag())
                 .setImageId("SHA256:3h278f34yhufy3h").build();
         this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
                 .setImageTag("alpine").setImageDownloadTimeoutSeconds(200)
@@ -1167,13 +1346,8 @@ public class InventoryHandlerV1Test {
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
         this.containerInstanceImage2 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
-                .setImageName(containerImage2.getImageName()).setImageTag(containerImage2.getImageTag())
+                .setImageName(this.containerImage2.getImageName()).setImageTag(this.containerImage2.getImageTag())
                 .setImageId("SHA256:dfiyegfyuwehf978ew4hu").build();
-
-        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
-                .setImageConfiguration(containerImage1).build();
-        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
-                .setImageConfiguration(containerImage2).build();
     }
 
     private void givenTheFollowingContainerJson() {
@@ -1391,8 +1565,8 @@ public class InventoryHandlerV1Test {
 
         when(bundleContext.getService(ref)).thenReturn(jsonMarshaller);
         try {
-            when(bundleContext.getServiceReferences(ArgumentMatchers.eq(Unmarshaller.class), ArgumentMatchers.anyString()))
-                    .thenReturn(Arrays.asList(ref));
+            when(bundleContext.getServiceReferences(ArgumentMatchers.eq(Unmarshaller.class),
+                    ArgumentMatchers.anyString())).thenReturn(Arrays.asList(ref));
         } catch (InvalidSyntaxException e) {
             throw new IllegalStateException(e);
         }
@@ -1413,7 +1587,7 @@ public class InventoryHandlerV1Test {
     }
 
     private void thenCompareOutputOfContainerImage() {
-        containerImageObject = new ContainerImage("test", "latest");
+        this.containerImageObject = new ContainerImage("test", "latest");
 
         String imageName = "test";
         String imageTag = "latest";
@@ -1422,23 +1596,186 @@ public class InventoryHandlerV1Test {
         String imageArch = "ARM64";
         long imageSize = 9883829;
 
-        containerImageObject.setImageName(imageName);
-        containerImageObject.setImageTag(imageTag);
-        containerImageObject.setImageId(imageId);
-        containerImageObject.setImageAuthor(imageAuthor);
-        containerImageObject.setImageArch(imageArch);
-        containerImageObject.setImageSize(imageSize);
+        this.containerImageObject.setImageName(imageName);
+        this.containerImageObject.setImageTag(imageTag);
+        this.containerImageObject.setImageId(imageId);
+        this.containerImageObject.setImageAuthor(imageAuthor);
+        this.containerImageObject.setImageArch(imageArch);
+        this.containerImageObject.setImageSize(imageSize);
 
-        containerImagesObject = new ContainerImages(new LinkedList<ContainerImage>());
-        containerImagesObject.setContainerImages(Arrays.asList(containerImageObject));
+        this.containerImagesObject = new ContainerImages(new LinkedList<ContainerImage>());
+        this.containerImagesObject.setContainerImages(Arrays.asList(this.containerImageObject));
 
-        assertEquals(containerImageObject.getImageName(), imageName);
-        assertEquals(containerImageObject.getImageTag(), imageTag);
-        assertEquals(containerImageObject.getImageId(), imageId);
-        assertEquals(containerImageObject.getImageAuthor(), imageAuthor);
-        assertEquals(containerImageObject.getImageArch(), imageArch);
-        assertEquals(containerImageObject.getImageSize(), imageSize);
-        assertEquals(containerImagesObject.getContainerImages().get(0).getName(), imageName);
+        assertEquals(this.containerImageObject.getImageName(), imageName);
+        assertEquals(this.containerImageObject.getImageTag(), imageTag);
+        assertEquals(this.containerImageObject.getImageId(), imageId);
+        assertEquals(this.containerImageObject.getImageAuthor(), imageAuthor);
+        assertEquals(this.containerImageObject.getImageArch(), imageArch);
+        assertEquals(this.containerImageObject.getImageSize(), imageSize);
+        assertEquals(this.containerImagesObject.getContainerImages().get(0).getName(), imageName);
+    }
+    
+    private X509Certificate getEmptyX509Cert() {
+        return new X509Certificate() {
+            
+            @Override
+            public boolean hasUnsupportedCriticalExtension() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            
+            @Override
+            public Set<String> getNonCriticalExtensionOIDs() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public byte[] getExtensionValue(String arg0) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Set<String> getCriticalExtensionOIDs() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public void verify(PublicKey arg0, String arg1) throws CertificateException, NoSuchAlgorithmException,
+                    InvalidKeyException, NoSuchProviderException, SignatureException {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void verify(PublicKey arg0) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException,
+                    NoSuchProviderException, SignatureException {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public String toString() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public PublicKey getPublicKey() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public byte[] getEncoded() throws CertificateEncodingException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public int getVersion() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+            
+            @Override
+            public byte[] getTBSCertificate() throws CertificateEncodingException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public boolean[] getSubjectUniqueID() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Principal getSubjectDN() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public byte[] getSignature() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public byte[] getSigAlgParams() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public String getSigAlgOID() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public String getSigAlgName() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public BigInteger getSerialNumber() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Date getNotBefore() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Date getNotAfter() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public boolean[] getKeyUsage() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public boolean[] getIssuerUniqueID() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public Principal getIssuerDN() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+            
+            @Override
+            public int getBasicConstraints() {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+            
+            @Override
+            public void checkValidity(Date date) throws CertificateExpiredException, CertificateNotYetValidException {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void checkValidity() throws CertificateExpiredException, CertificateNotYetValidException {
+                // TODO Auto-generated method stub
+                
+            }
+        };
     }
 
 }

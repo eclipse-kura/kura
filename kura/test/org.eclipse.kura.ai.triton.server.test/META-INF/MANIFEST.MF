@@ -20,4 +20,4 @@ Import-Package: javax.annotation;version="1.2.0",
  org.osgi.framework;version="1.7"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/grpc-testing-1.33.1.jar
+ lib/grpc-testing-1.51.1.jar

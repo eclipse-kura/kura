@@ -11,12 +11,19 @@ Bundle-ClassPath: .,
  lib/sdk-server.jar,
  lib/stack-core.jar,
  lib/stack-server.jar,
- lib/metrics-core.jar,
- lib/netty-all.jar,
- lib/netty-common.jar
+ lib/metrics-core.jar
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.driver.opcua.provider
-Import-Package: javax.xml.bind,
+Import-Package: io.netty.channel;version="4.1.86",
+ io.netty.channel.nio;version="4.1.86",
+ io.netty.channel.socket;version="4.1.86",
+ io.netty.channel.socket.nio;version="4.1.86",
+ io.netty.buffer;version="4.1.86",
+ io.netty.util.concurrent;version="4.1.86",
+ io.netty.handler.codec;version="4.1.86",
+ io.netty.util;version="4.1.86",
+ io.netty.bootstrap;version="4.1.86",
+ javax.xml.bind,
  org.eclipse.kura.core.testutil;version="1.0.0",
  org.junit;version="[4.12.0,5.0.0)",
  org.junit.runners;version="[4.12.0,5.0.0)",
@@ -24,3 +31,4 @@ Import-Package: javax.xml.bind,
  org.mockito.invocation;version="[4.0.0,5.0.0)",
  org.mockito.stubbing;version="[4.0.0,5.0.0)",
  org.slf4j;version="1.6.4"
+Require-Bundle: org.eclipse.kura.api

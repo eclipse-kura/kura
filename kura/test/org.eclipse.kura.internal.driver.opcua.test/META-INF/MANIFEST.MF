@@ -11,7 +11,9 @@ Bundle-ClassPath: .,
  lib/sdk-server.jar,
  lib/stack-core.jar,
  lib/stack-server.jar,
- lib/metrics-core.jar
+ lib/metrics-core.jar,
+ lib/netty-all.jar,
+ lib/netty-common.jar
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.driver.opcua.provider
 Import-Package: javax.xml.bind,

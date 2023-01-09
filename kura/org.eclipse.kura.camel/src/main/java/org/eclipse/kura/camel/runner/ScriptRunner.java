@@ -12,12 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.camel.runner;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
@@ -107,7 +111,17 @@ public abstract class ScriptRunner {
                 // passing null here since this will trigger
                 // the script engine lookup to use java basic
                 // support for JavaScript
-                return new ScriptEngineManager(null);
+                ScriptEngineManager manager = new ScriptEngineManager();
+                List<ScriptEngineFactory> factories = manager.getEngineFactories();
+                ServiceLoader<ScriptEngineFactory> svcLoader = ServiceLoader.load(ScriptEngineFactory.class);
+                Iterator<ScriptEngineFactory> it = svcLoader.iterator();
+                while (it.hasNext()) {
+                    ScriptEngineFactory factory = it.next();
+                    if (!factories.stream().anyMatch(f -> (f.getClass() == factory.getClass()))) {
+                        factory.getNames().forEach(name -> manager.registerEngineName(name, factory));
+                    }
+                }
+                return manager;
             }
         });
     }

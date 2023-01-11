@@ -682,8 +682,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ---------------------------------------------------------
     @Override
     public void onConfigurationUpdated() {
-        // The SSL service was update, build a new socket connection
+
+        // The SSL service was update, build a new socket connection and close the current SSL client session
+        if (this.mqttClient != null && isSSL(this.mqttClient.getServerURI())) {
+            closeMqttClient();
+        }
+
         update();
+
     }
 
     // ---------------------------------------------------------
@@ -813,7 +819,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         //
         // SSL
-        if (brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss")) {
+        if (isSSL(brokerUrl)) {
             try {
                 SSLSocketFactory ssf = this.sslManagerService.getSSLSocketFactory();
 
@@ -838,6 +844,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, localPersistenceType, conOpt);
 
         return clientConfiguration;
+    }
+
+    private boolean isSSL(String brokerUrl) {
+        return brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss");
     }
 
     private String replaceTopicVariables(String topic) {
@@ -1018,6 +1028,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     private void closeMqttClient() {
+
+        if (this.mqttClient == null) {
+            return;
+        }
+
         try {
             logger.info("Forcing client disconnect...");
             mqttClient.disconnectForcibly();

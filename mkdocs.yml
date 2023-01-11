@@ -43,6 +43,7 @@ nav:
         - Configuration V1 REST APIs: core-services/configuration-service-rest-v1.md
         - Configuration V2 REST APIs and CONF-V2 Request Handler: core-services/configuration-service-rest-v2.md
       - H2Db Service: core-services/h2db-service.md
+      - SQLite DB Service: core-services/sqlite-db-service.md
       - Position Service: core-services/position-service.md
       - REST Service: core-services/rest-service.md
       - Watchdog Service: core-services/watchdog-service.md

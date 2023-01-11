@@ -1018,6 +1018,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core-services/position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1091,18 +1105,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -2903,17 +2917,17 @@ All of the Kura files are located within <code>/opt/eclipse/kura</code> folder u
 </code></pre></div>
 <p>The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&lt;Loggers&gt;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;org.eclipse&quot;</span> <span class="na">level=</span><span class="s">&quot;info&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nt">&lt;/Logger&gt;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;org.eclipse&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&lt;/Logger&gt;</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;org.eclipse.kura.net.admin&quot;</span> <span class="na">level=</span><span class="s">&quot;debug&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="nt">&lt;/Logger&gt;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;org.eclipse.kura.net.admin&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;debug&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">&lt;/Logger&gt;</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="nt">&lt;Root</span> <span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="nt">&lt;/Root&gt;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">&lt;Root</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nt">&lt;/Root&gt;</span>
 <a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="nt">&lt;/Loggers&gt;</span>
 </code></pre></div>
 <p>In this example, the logger level is set to DEBUG only for the <strong>net.admin</strong> bundle. Additionally, more specific, properties may be defined as required for your particular logging needs. The logger levels are hierarchical, so that those in a deeper level of the hierarchy will apply; otherwise, the more general logger level will override them.</p>

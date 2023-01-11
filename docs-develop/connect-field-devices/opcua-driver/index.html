@@ -968,6 +968,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core-services/position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1041,18 +1055,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -3023,12 +3037,12 @@ The keystore does not exist by default and without it connections that use <stro
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nv">SERVER_CERTIFICATE_FILE</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># import existing certificate</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>keytool -import <span class="se">\</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        -alias <span class="s2">&quot;</span><span class="si">${</span><span class="nv">SERVER_ALIAS</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        -file <span class="s2">&quot;</span><span class="si">${</span><span class="nv">SERVER_CERTIFICATE_FILE</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        -keystore <span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_FILE_NAME</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        -noprompt <span class="se">\</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        -storepass <span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>keytool<span class="w"> </span>-import<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span>-alias<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SERVER_ALIAS</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span>-file<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SERVER_CERTIFICATE_FILE</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span>-keystore<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_FILE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span>-noprompt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">        </span>-storepass<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># alias for client certificate</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="nv">CLIENT_ALIAS</span><span class="o">=</span><span class="s2">&quot;client-cert&quot;</span>
@@ -3038,19 +3052,19 @@ The keystore does not exist by default and without it connections that use <stro
 <a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="nv">APPLICATION_ID</span><span class="o">=</span><span class="s2">&quot;urn:kura:opcua:client&quot;</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
 <a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="c1"># generate the client private key and certificate</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>keytool -genkey <span class="se">\</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>        -alias <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLIENT_ALIAS</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>        -keyalg RSA <span class="se">\</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>        -keysize <span class="m">4096</span> <span class="se">\</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>        -keystore <span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_FILE_NAME</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        -dname <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLIENT_DN</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>        -ext <span class="nv">ku</span><span class="o">=</span>digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment <span class="se">\</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>        -ext <span class="nv">eku</span><span class="o">=</span>clientAuth <span class="se">\</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>        -ext <span class="s2">&quot;san=uri:</span><span class="si">${</span><span class="nv">APPLICATION_ID</span><span class="si">}</span><span class="s2">&quot;</span> <span class="se">\</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>        -validity <span class="m">1000</span> <span class="se">\</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>        -noprompt <span class="se">\</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>        -storepass <span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span> <span class="se">\</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>        -keypass <span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>keytool<span class="w"> </span>-genkey<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">        </span>-alias<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLIENT_ALIAS</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">        </span>-keyalg<span class="w"> </span>RSA<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">        </span>-keysize<span class="w"> </span><span class="m">4096</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">        </span>-keystore<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KEYSTORE_FILE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">        </span>-dname<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLIENT_DN</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">        </span>-ext<span class="w"> </span><span class="nv">ku</span><span class="o">=</span>digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">        </span>-ext<span class="w"> </span><span class="nv">eku</span><span class="o">=</span>clientAuth<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">        </span>-ext<span class="w"> </span><span class="s2">&quot;san=uri:</span><span class="si">${</span><span class="nv">APPLICATION_ID</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">        </span>-validity<span class="w"> </span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">        </span>-noprompt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">        </span>-storepass<span class="w"> </span><span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">        </span>-keypass<span class="w"> </span><span class="si">${</span><span class="nv">KEYSTORE_PASSWORD</span><span class="si">}</span>
 </code></pre></div>
 </li>
 <li>

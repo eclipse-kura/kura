@@ -968,6 +968,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core-services/position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1041,18 +1055,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -4573,16 +4587,16 @@ Licensed under the Apache License, Version 2.0.
 <p>To make everything work on the Raspberry Pi we need to use the <code>develop</code> version of the <code>raspberry-pi-ubuntu-20-nn</code> Kura installer (yes, I know we're installing the Ubuntu package on the Raspberry Pi OS but bear with me...) . You can do so by downloading the repo and <a href="https://github.com/eclipse/kura#build-kura">building locally</a> or by downloading a pre-built installer from the <a href="https://ci.eclipse.org/kura/">Kura CI artifacts</a>.</p>
 <p>Copy the resulting file <code>kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer-nn.deb</code> on the target device.</p>
 <p>On the target device run the following commands:</p>
-<div class="highlight"><pre><span></span>sudo apt-get install -y wget apt-transport-https gnupg
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
 </pre></div>
-<div class="highlight"><pre><span></span>sudo wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public <span class="p">|</span> sudo apt-key add -
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
 </pre></div>
-<div class="highlight"><pre><span></span>sudo <span class="nb">echo</span> <span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk -F<span class="o">=</span> <span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span> /etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span> <span class="p">|</span> sudo tee /etc/apt/sources.list.d/adoptium.list
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
 </pre></div>
-<div class="highlight"><pre><span></span>sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install temurin-8-jdk chrony
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-8-jdk<span class="w"> </span>chrony
 </pre></div>
 <p>Finally install Kura with:</p>
-<div class="highlight"><pre><span></span>sudo apt install ./kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer-nn.deb
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer-nn.deb
 </pre></div>
 
 </div>
@@ -7110,7 +7124,7 @@ Normal Z-score -0.455488
 <p><img src="imgs/img18.png" alt="image18.png"></p>
 <p>The Nvidia™ Triton Inference Server is an open-source inference service software that enables the user to deploy trained AI models from any framework on GPU or CPU infrastructure. It supports all major frameworks like TensorFlow, TensorRT, PyTorch, ONNX Runtime, and even custom framework backend. With specific backends, it is also possible to run Python scripts, mainly for pre-and post-processing purposes, and exploit the DALI building block for optimized operations.</p>
 <p>For installation refer to the official <a href="https://eclipse.github.io/kura/docs-develop/core-services/nvidia-triton-server-inference-engine/#nvidiatm-triton-server-installation">Kura&trade;</a> and <a href="https://github.com/triton-inference-server/server/tree/main/docs#installation">Triton documentation</a>. For the rest of this tutorial we'll assume a Triton container is available on the target device. It can be simply installed with:</p>
-<div class="highlight"><pre><span></span>docker pull nvcr.io/nvidia/tritonserver:22.07-tf2-python-py3
+<div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>nvcr.io/nvidia/tritonserver:22.07-tf2-python-py3
 </pre></div>
 <p>We'll also need to install Kura&trade;'s Triton bundles:</p>
 <ul>
@@ -7802,9 +7816,9 @@ README.md            <span class="ansi-cyan-intense-fg ansi-bold">saved_model</s
 <p>You can leave everything else as default.</p>
 <p><img src="imgs/img22.png" alt="image22.png"></p>
 <p>Once you press the "<em>Apply</em>" button Kura will create a new container from the Triton image we set and spin up the service with our models loaded.</p>
-<div class="highlight"><pre><span></span>pi@raspberrypi:~ $ docker ps
-CONTAINER ID   IMAGE                                              COMMAND                  CREATED          STATUS          PORTS                                                                                                                             NAMES
-4deae2857b6f   nvcr.io/nvidia/tritonserver:22.07-tf2-python-py3   <span class="s2">&quot;tritonserver --mode…&quot;</span>   <span class="m">13</span> seconds ago   Up <span class="m">11</span> seconds   <span class="m">0</span>.0.0.0:4000-&gt;8000/tcp, :::4000-&gt;8000/tcp, <span class="m">0</span>.0.0.0:4001-&gt;8001/tcp, :::4001-&gt;8001/tcp, <span class="m">0</span>.0.0.0:4002-&gt;8002/tcp, :::4002-&gt;8002/tcp   tritonserver-kura
+<div class="highlight"><pre><span></span>pi@raspberrypi:~<span class="w"> </span>$<span class="w"> </span>docker<span class="w"> </span>ps
+CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                                              </span>COMMAND<span class="w">                  </span>CREATED<span class="w">          </span>STATUS<span class="w">          </span>PORTS<span class="w">                                                                                                                             </span>NAMES
+4deae2857b6f<span class="w">   </span>nvcr.io/nvidia/tritonserver:22.07-tf2-python-py3<span class="w">   </span><span class="s2">&quot;tritonserver --mode…&quot;</span><span class="w">   </span><span class="m">13</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">11</span><span class="w"> </span>seconds<span class="w">   </span><span class="m">0</span>.0.0.0:4000-&gt;8000/tcp,<span class="w"> </span>:::4000-&gt;8000/tcp,<span class="w"> </span><span class="m">0</span>.0.0.0:4001-&gt;8001/tcp,<span class="w"> </span>:::4001-&gt;8001/tcp,<span class="w"> </span><span class="m">0</span>.0.0.0:4002-&gt;8002/tcp,<span class="w"> </span>:::4002-&gt;8002/tcp<span class="w">   </span>tritonserver-kura
 </pre></div>
 <blockquote><p><strong>Note</strong>: if no container is created check that the "<em>Container Orchestration Service</em>" is enabled in the Kura UI. Full documentation for the service can be found <a href="https://eclipse.github.io/kura/docs-release-5.2/core-services/container-orchestration-provider-usage/#starting-the-service">here</a>.</p>
 <p><strong>Note</strong>: if you see an error in the logs like "_Internal: Unable to initialize shared memory key 'triton_python_backend_shm_region<em>2' to requested size (67108864 bytes). If you are running Triton inside docker, use '--shm-size' flag to control the shared memory region size. Each Python backend model instance requires at least 64MBs of shared memory.</em>", you can update the default shared memory size allocated by the Docker daemon. Go to <code>/etc/docker/daemon.json</code>, set <code>"default-shm-size": "200m"</code> and restart the Docker daemon with: <code>sudo systemctl restart docker</code>.</p>

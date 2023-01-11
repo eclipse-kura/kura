@@ -1027,6 +1027,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core-services/position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1100,18 +1114,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -2974,7 +2988,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
 </div>
 <p>When the Wi-Fi configuration for the <em>Access Point</em> mode is submitted, Kura generates the <code>/etc/hostapd.conf</code> file and launches the hostapd program as shown below.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>hostapd:B /etc/hostapd.conf
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>hostapd:B<span class="w"> </span>/etc/hostapd.conf
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># /etc/hostapd/hostapd.conf</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
@@ -3035,7 +3049,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a><span class="nv">ignore_broadcast_ssid</span><span class="o">=</span><span class="m">0</span>
 </code></pre></div>
 <p>When the Wi-Fi configuration for the <em>Station</em> mode is submitted, Kura generates the <code>/etc/wpa_supplicant.conf</code> file and launches the <code>wpa_supplicant</code> program as shown below.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wpa_supplicant:B:D nl80211:i wlan0:c /etc/wpa_supplicant.conf
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wpa_supplicant:B:D<span class="w"> </span>nl80211:i<span class="w"> </span>wlan0:c<span class="w"> </span>/etc/wpa_supplicant.conf
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># /etc/wpa_supplicant.conf</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># allow frontend (e.g., wpa_cli) to be used by all users in &#39;wheel&#39; group</span>
@@ -3044,16 +3058,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># home network; allow all valid ciphers</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">network</span><span class="o">={</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="nv">mode</span><span class="o">=</span><span class="m">0</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;Eurotech-INC&quot;</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="nv">scan_ssid</span><span class="o">=</span><span class="m">1</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nv">key_mgmt</span><span class="o">=</span>WPA-PSK
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="nv">psk</span><span class="o">=</span><span class="s2">&quot;WG4t3101&quot;</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="nv">proto</span><span class="o">=</span>RSN
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="nv">pairwise</span><span class="o">=</span>CCMP TKIP
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="nv">group</span><span class="o">=</span>CCMP TKIP
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="nv">scan_freq</span><span class="o">=</span><span class="m">2412</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>    <span class="nv">bgscan</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nv">mode</span><span class="o">=</span><span class="m">0</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;Eurotech-INC&quot;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nv">scan_ssid</span><span class="o">=</span><span class="m">1</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="nv">key_mgmt</span><span class="o">=</span>WPA-PSK
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nv">psk</span><span class="o">=</span><span class="s2">&quot;WG4t3101&quot;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="nv">proto</span><span class="o">=</span>RSN
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="nv">pairwise</span><span class="o">=</span>CCMP<span class="w"> </span>TKIP
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nv">group</span><span class="o">=</span>CCMP<span class="w"> </span>TKIP
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="nv">scan_freq</span><span class="o">=</span><span class="m">2412</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nv">bgscan</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
 <a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="o">}</span>
 </code></pre></div>
 

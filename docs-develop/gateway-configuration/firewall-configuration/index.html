@@ -1045,6 +1045,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../core-services/position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1118,18 +1132,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -2883,18 +2897,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <p>When a new firewall configuration is submitted, Kura immediately applies it using the iptables service provided by the OS. Moreover, the rules are stored in the filesystem and a new Kura snapshot is generated containing the new configuration. At the next startup, the <strong>firewall</strong> service in the OS will re-apply them and Kura will check the firewall configuration against the one contained in the last snapshot. In this way, the user can update the snapshot with the needed rules and apply them to the system using the webUI or modify the <code>snapshot_0.xml</code> before the first start of Kura.</p>
 <p>In order to allow a better coexistence between Kura and external applications that need to modify firewall rules, Kura writes its rules to a set of custom iptables chains. They are <em>input-kura</em>, <em>output-kura</em>, <em>forward-kura</em>, <em>forward-kura-pf</em> and <em>forward-kura-ipf</em> for the filter table and <em>input-kura</em>, <em>output-kura</em>, <em>prerouting-kura</em>, <em>prerouting-kura-pf</em>, <em>postrouting-kura</em>, <em>postrouting-kura-pf</em> and <em>postrouting-kura-ipf</em> for the nat table. The custom chains are then put in their respective standard iptables chains, as shown in the following:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iptables -t filter -I INPUT -j input-kura
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>iptables -t filter -I OUTPUT -j output-kura
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>iptables -t filter -I FORWARD -j forward-kura
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>iptables -t filter -I forward-kura -j forward-kura-pf
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>iptables -t filter -I forward-kura -j forward-kura-ipf
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>iptables -t nat -I PREROUTING -j prerouting-kura
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>iptables -t nat -I prerouting-kura -j prerouting-kura-pf
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>iptables -t nat -I INPUT -j input-kura
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>iptables -t nat -I OUTPUT -j output-kura
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>iptables -t nat -I POSTROUTING -j postrouting-kura
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>iptables -t nat -I postrouting-kura -j postrouting-kura-pf
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>iptables -t nat -I postrouting-kura -j postrouting-kura-ipf
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iptables<span class="w"> </span>-t<span class="w"> </span>filter<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span>-j<span class="w"> </span>input-kura
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>iptables<span class="w"> </span>-t<span class="w"> </span>filter<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span>-j<span class="w"> </span>output-kura
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>iptables<span class="w"> </span>-t<span class="w"> </span>filter<span class="w"> </span>-I<span class="w"> </span>FORWARD<span class="w"> </span>-j<span class="w"> </span>forward-kura
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>iptables<span class="w"> </span>-t<span class="w"> </span>filter<span class="w"> </span>-I<span class="w"> </span>forward-kura<span class="w"> </span>-j<span class="w"> </span>forward-kura-pf
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>iptables<span class="w"> </span>-t<span class="w"> </span>filter<span class="w"> </span>-I<span class="w"> </span>forward-kura<span class="w"> </span>-j<span class="w"> </span>forward-kura-ipf
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>PREROUTING<span class="w"> </span>-j<span class="w"> </span>prerouting-kura
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>prerouting-kura<span class="w"> </span>-j<span class="w"> </span>prerouting-kura-pf
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span>-j<span class="w"> </span>input-kura
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span>-j<span class="w"> </span>output-kura
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>POSTROUTING<span class="w"> </span>-j<span class="w"> </span>postrouting-kura
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>postrouting-kura<span class="w"> </span>-j<span class="w"> </span>postrouting-kura-pf
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-I<span class="w"> </span>postrouting-kura<span class="w"> </span>-j<span class="w"> </span>postrouting-kura-ipf
 </code></pre></div>
 <p>Even if many firewall rules can be handled by Kura, it could be that some rules cannot be filled through the Web Console. In this case, custom firewall rules may be added to the /etc/init.d/firewall_cust script manually. These rules are applied/reapplied every time the <strong>firewall</strong> service starts, that is at the gateway startup. These custom rules should <strong>not</strong> be applied to the Kura custom chains, but to the standard ones.</p>
 <h2 id="open-ports">Open Ports</h2>
@@ -3010,14 +3024,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p>The <em>Permitted Network</em>, <em>Permitted MAC Address</em>, and <em>Source Port Range</em> fields are left blank.</p>
 <p>The following iptables rules are applied and added to the /etc/sysconfig/iptables file:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>iptables -t nat -A prerouting-kura-pf -i wlan0 -p tcp -s <span class="m">0</span>.0.0.0/0 --dport <span class="m">8080</span> -j DNAT --to <span class="m">172</span>.16.0.5:80
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>iptables -t nat -A postrouting-kura-pf -o eth0 -p tcp -d <span class="m">172</span>.16.0.5 -j MASQUERADE
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>iptables -A forward-kura-pf -i wlan0 -o eth0 -p tcp -s <span class="m">0</span>.0.0.0/0 --dport <span class="m">80</span> -d <span class="m">172</span>.16.0.5 -j ACCEPT
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>iptables -A forward-kura-pf -i eth0 -o wlan0 -p tcp -s <span class="m">172</span>.16.0.5 -m state --state RELATED,ESTABLISHED -j ACCEPT
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>prerouting-kura-pf<span class="w"> </span>-i<span class="w"> </span>wlan0<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>--dport<span class="w"> </span><span class="m">8080</span><span class="w"> </span>-j<span class="w"> </span>DNAT<span class="w"> </span>--to<span class="w"> </span><span class="m">172</span>.16.0.5:80
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>postrouting-kura-pf<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-d<span class="w"> </span><span class="m">172</span>.16.0.5<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-pf<span class="w"> </span>-i<span class="w"> </span>wlan0<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>--dport<span class="w"> </span><span class="m">80</span><span class="w"> </span>-d<span class="w"> </span><span class="m">172</span>.16.0.5<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-pf<span class="w"> </span>-i<span class="w"> </span>eth0<span class="w"> </span>-o<span class="w"> </span>wlan0<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">172</span>.16.0.5<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
 <p>The following iptables commands may be used to verify that the new rules have been applied:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo iptables -v -n -L
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo iptables -v -n -L -t nat
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>iptables<span class="w"> </span>-v<span class="w"> </span>-n<span class="w"> </span>-L
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>iptables<span class="w"> </span>-v<span class="w"> </span>-n<span class="w"> </span>-L<span class="w"> </span>-t<span class="w"> </span>nat
 </code></pre></div>
 <p>At this point, it is possible to try to connect to  http://10.200.12.6 and to http://10.200.12.6:8080 from the laptop. Note that when a connection is made to the device on port 80, it is to the Kura configuration page on the device itself (the second RaspberryPi). When the gateway is connected on port 8080, you are forwarded to the Kura Gateway Administration Console on the first RaspberryPi. The destination host can only be reached by connecting to the gateway on port 8080.</p>
 <p>Another way to connect to the Kura Gateway Administration Console on the first RaspberryPi would be to add an IP Forwarding/Masquerading entry as described in the next section.</p>
@@ -3076,18 +3090,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 <p>This case applies the following iptables rules:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>iptables -t nat -A postrouting-kura-ipf -p tcp -s <span class="m">10</span>.11.5.21/32 -d <span class="m">172</span>.16.0.5/32 -o eth0 -j MASQUERADE
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>iptables -A forward-kura-ipf -p tcp -s <span class="m">172</span>.16.0.5/32 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>iptables -A forward-kura-ipf -p tcp -s <span class="m">10</span>.11.5.21/32 -d <span class="m">172</span>.16.0.5/32 -i eth1 -o eth0 -m tcp -j ACCEPT
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>postrouting-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.11.5.21/32<span class="w"> </span>-d<span class="w"> </span><span class="m">172</span>.16.0.5/32<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">172</span>.16.0.5/32<span class="w"> </span>-i<span class="w"> </span>eth0<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.11.5.21/32<span class="w"> </span>-d<span class="w"> </span><span class="m">172</span>.16.0.5/32<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
 <p>Additionally, a route to the 172.16.0.0/24 network needs to be configured on a connecting laptop as shown below:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo route add -net <span class="m">172</span>.16.0.0 netmask <span class="m">255</span>.255.255.0 gw <span class="m">10</span>.11.5.4
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>route<span class="w"> </span>add<span class="w"> </span>-net<span class="w"> </span><span class="m">172</span>.16.0.0<span class="w"> </span>netmask<span class="w"> </span><span class="m">255</span>.255.255.0<span class="w"> </span>gw<span class="w"> </span><span class="m">10</span>.11.5.4
 </code></pre></div>
 <p>Since <em>masquerading</em> is enabled, there is no need to specify the back route on the destination host. Note that with this setup, the gateway only forwards packets originating on the 10.11.5.21 laptop to the 172.16.0.5 destination.</p>
 <p>If the <em>Source Network/Host</em> and <em>Destination Network/Host</em> fields are empty, iptables rules appear as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>iptables -t nat -A postrouting-kura-ipf -p tcp -s <span class="m">0</span>.0.0.0/0 -d <span class="m">0</span>.0.0.0/0 -o eth0 -j MASQUERADE
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>iptables -A forward-kura-ipf -p tcp -s <span class="m">0</span>.0.0.0/0 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>iptables -A forward-kura-ipf -p tcp -s <span class="m">0</span>.0.0.0/0 -d <span class="m">0</span>.0.0.0/0 -i eth1 -o eth0 -j ACCEPT
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>postrouting-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>-d<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>-i<span class="w"> </span>eth0<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>iptables<span class="w"> </span>-A<span class="w"> </span>forward-kura-ipf<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>-d<span class="w"> </span><span class="m">0</span>.0.0.0/0<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
 <p>The gateway forwards packets from any external host (connected to eth1) to any destination on the local network (eth0 interface).</p>
 

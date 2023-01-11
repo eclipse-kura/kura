@@ -970,6 +970,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../position-service/" class="md-nav__link">
         Position Service
       </a>
@@ -1043,18 +1057,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_12" type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_4_12">
+        <label class="md-nav__link" for="__nav_4_13">
           Container Orchestration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_12">
+        <label class="md-nav__title" for="__nav_4_13">
           <span class="md-nav__icon md-icon"></span>
           Container Orchestration
         </label>
@@ -2828,14 +2842,14 @@ There are two main components that enable this:</p>
 <li><strong>Notification send delay (sec)</strong>: allows to stack the changed PIDs for a given time before sending. In other words, it allows to group together sequences of PIDs that are changed in that time frame. This is to prevent message flooding at reboot or rollback.</li>
 </ul>
 <p>The collected PIDs are sent to the Cloud Publisher as a <code>KuraMessage</code> with a payload body in JSON format. The timestamp of the <code>KuraMessage</code> is set to the last detected configuration change event. An example of message body is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">[</span><span class="w"></span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p">{</span><span class="w"></span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="err">“pid”</span><span class="p">:</span><span class="w"> </span><span class="err">“org.eclipse.kura.clock.ClockService”</span><span class="w"></span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="p">},</span><span class="w"></span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="p">{</span><span class="w"></span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="err">“pid”</span><span class="p">:</span><span class="w"> </span><span class="err">“org.eclipse.kura.log.</span><span class="kc">f</span><span class="err">ilesys</span><span class="kc">te</span><span class="err">m.provider.Filesys</span><span class="kc">te</span><span class="err">mLogProvider”</span><span class="w"></span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">[</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="err">“pid”</span><span class="p">:</span><span class="w"> </span><span class="err">“org.eclipse.kura.clock.ClockService”</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="err">“pid”</span><span class="p">:</span><span class="w"> </span><span class="err">“org.eclipse.kura.log.</span><span class="kc">f</span><span class="err">ilesys</span><span class="kc">te</span><span class="err">m.provider.Filesys</span><span class="kc">te</span><span class="err">mLogProvider”</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">]</span>
 </code></pre></div>
 <p>In the example above, a <em>ClockService</em> update triggered the delay timer, which was then reset by a configuration update on the <em>FilesystemLogProvider</em>. Afterward, no configuration updates reset the timer so the message containing the two PIDs was sent after expiration.</p>
 <h2 id="event-publisher">Event Publisher</h2>

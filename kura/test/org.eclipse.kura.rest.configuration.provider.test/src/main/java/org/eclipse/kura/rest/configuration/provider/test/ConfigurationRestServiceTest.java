@@ -1034,6 +1034,65 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("option"));
     }
 
+    @Test
+    public void testGetConfigurationByPid() throws KuraException {
+        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.PASSWORD) //
+                                        .withOption(null, "foo") //
+                                        .withOption("pass", "baz") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(
+                        singletonMap("testProp", new Password[] { new Password(this.EncryptedPassword) }))
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.parse(
+                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+                        + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
+                        + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
+                        + "\"properties\":{\"testProp\":{\"value\":[\""
+                        + new String(this.EncryptedPassword)
+                        + "\"],\"type\":\"PASSWORD\"}}}"),
+                self().field("configs").arrayItem(0));
+    }
+
+    @Test
+    public void testGetConfigurationByPidDefault() throws KuraException {
+        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("fooAdName", Scalar.STRING) //
+                                        .withOption(null, "foo") //
+                                        .withOption("pass", "baz") //
+                                        .withDefault("default")
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(
+                        singletonMap("testProp", new Password[] { new Password(this.EncryptedPassword) }))
+                .build());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid/_default",
+                "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.parse(
+                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+                        + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"STRING\","
+                        + "\"cardinality\":0,\"defaultValue\":\"default\",\"isRequired\":false}]"
+                        + ",\"id\":\"foo\"},\"properties\":{\"testProp\":{\"value\":[\""
+                        + new String(this.EncryptedPassword)
+                        + "\"],\"type\":\"PASSWORD\"}}}"),
+                self().field("configs").arrayItem(0));
+    }
+
     private static ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
     private final CryptoService cryptoService;
 
@@ -1338,6 +1397,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 .thenReturn(byPid.values().stream().collect(Collectors.toList()));
 
         Mockito.when(configurationService.getComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
+            final String pid = i.getArgument(0, String.class);
+            return byPid.get(pid);
+        });
+
+        Mockito.when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
             final String pid = i.getArgument(0, String.class);
             return byPid.get(pid);
         });

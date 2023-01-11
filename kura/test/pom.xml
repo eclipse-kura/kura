@@ -928,6 +928,7 @@
         <module>org.eclipse.kura.container.provider.test</module>
         <module>org.eclipse.kura.ai.triton.server.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
+        <module>org.eclipse.kura.db.sqlite.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

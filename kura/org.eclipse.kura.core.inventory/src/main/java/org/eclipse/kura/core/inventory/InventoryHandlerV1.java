@@ -352,6 +352,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             int state = bundle.getState();
             systemBundle.setState(bundleStateToString(state));
+            
+            systemBundle.setSigned(isSigned(bundle));
 
             axb[i] = systemBundle;
         }
@@ -588,6 +590,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
 
         return stateString;
+    }
+    
+    private boolean isSigned(Bundle bundle) {
+        return !bundle.getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty();
     }
 
     private SystemBundleRef extractBundleRef(final KuraMessage message) throws KuraException {

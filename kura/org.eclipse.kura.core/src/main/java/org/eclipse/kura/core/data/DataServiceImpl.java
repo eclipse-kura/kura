@@ -528,6 +528,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
+        if (this.autoConnectStrategy.isPresent()) {
+            this.autoConnectStrategy.get().onPublishRequested(topic, payload, qos, retain, priority);
+        }
+
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
@@ -581,8 +585,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         if (!this.dataServiceOptions.isConnectionScheduleEnabled() || !schedule.isPresent()) {
             strategy = new AlwaysConnectedStrategy(this);
         } else {
-            strategy = new ScheduleStrategy(schedule.get(),
-                    this.dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, this);
+            strategy = new ScheduleStrategy(schedule.get(), this.dataServiceOptions, this);
         }
 
         this.autoConnectStrategy = Optional.of(strategy);
@@ -942,4 +945,16 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public boolean hasInFlightMessages() {
         return !inFlightMsgIds.isEmpty();
     }
+
+    @Override
+    public DataMessage getNextMessage() {
+        DataMessage message = null;
+        try {
+            message = DataServiceImpl.this.store.getNextMessage();
+        } catch (Exception e) {
+            logger.error("Probably an unrecoverable exception", e);
+        }
+        return message;
+    }
+
 }

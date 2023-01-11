@@ -39,22 +39,25 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     private State state;
 
     private Optional<ScheduledFuture<?>> timeout = Optional.empty();
+    private DataServiceOptions dataServiceOptions;
 
-    public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
+    public ScheduleStrategy(final CronExpression expression, DataServiceOptions dataServiceOptions,
             final ConnectionManager connectionManager) {
-        this(expression, disconnectTimeoutMs, connectionManager, Executors.newSingleThreadScheduledExecutor(),
-                Date::new);
+        this(expression, dataServiceOptions.getConnectionScheduleDisconnectDelay() * 1000, connectionManager,
+                Executors.newSingleThreadScheduledExecutor(),
+                Date::new, dataServiceOptions);
     }
 
     public ScheduleStrategy(final CronExpression expression, final long disconnectTimeoutMs,
             final ConnectionManager connectionManager, final ScheduledExecutorService executor,
-            final Supplier<Date> currentTimeProvider) {
+            final Supplier<Date> currentTimeProvider, DataServiceOptions dataServiceOptions) {
         this.expression = expression;
         this.disconnectTimeoutMs = disconnectTimeoutMs;
         this.connectionManager = connectionManager;
         this.state = new AwaitConnectTime();
         this.executor = executor;
         this.currentTimeProvider = currentTimeProvider;
+        this.dataServiceOptions = dataServiceOptions;
 
         updateState(State::onEnterState);
         executor.scheduleWithFixedDelay(new TimeShiftDetector(60000), 0, 1, TimeUnit.MINUTES);
@@ -80,14 +83,25 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         public default State onTimeout() {
             return this;
         }
+
+        public default State onPublish(String topic, byte[] payload, int qos, boolean retain, int priority) {
+            return this;
+        }
     }
 
     private class AwaitConnectTime implements State {
 
         @Override
         public State onEnterState() {
-            connectionManager.stopConnectionTask();
-            connectionManager.disconnect();
+
+            DataMessage dm = connectionManager.getNextMessage();
+
+            if (dm != null
+                    && dm.getPriority() <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()) {
+                logger.info(
+                        "Priority message sent while disconnecting. Initiating Connection to send message with a high priority.");
+                return new AwaitConnect();
+            }
 
             final Date now = currentTimeProvider.get();
 
@@ -106,6 +120,20 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         public State onTimeout() {
 
             return new AwaitConnect();
+        }
+
+        @Override
+        public State onPublish(String topic, byte[] payload, int qos, boolean retain, int priority) {
+
+            if (dataServiceOptions.isConnectionSchedulePriorityOverrideEnabled()
+                    && priority <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()
+                    && !connectionManager.isConnected()) {
+                logger.info("Initiating Connection to send message with a high priority.");
+
+                return new AwaitConnect();
+            }
+
+            return this;
         }
 
     }
@@ -160,8 +188,28 @@ public class ScheduleStrategy implements AutoConnectStrategy {
             if (connectionManager.hasInFlightMessages()) {
                 return this;
             } else {
-                return new AwaitConnectTime();
+                return new AwaitDisconnect();
             }
+        }
+    }
+
+    private class AwaitDisconnect implements State {
+
+        @Override
+        public State onEnterState() {
+            connectionManager.stopConnectionTask();
+            connectionManager.disconnect();
+            return this;
+        }
+
+        @Override
+        public State onConnectionLost() {
+            return new AwaitConnectTime();
+        }
+
+        @Override
+        public State onMessageEvent() {
+            return this;
         }
     }
 
@@ -268,6 +316,11 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
         updateState(State::onMessageEvent);
+    }
+
+    @Override
+    public void onPublishRequested(String topic, byte[] payload, int qos, boolean retain, int priority) {
+        this.updateState(c -> this.state.onPublish(topic, payload, qos, retain, priority));
     }
 
 }

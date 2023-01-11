@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -32,6 +35,8 @@ import org.mockito.Mockito;
 import org.quartz.CronExpression;
 
 public class ScheduleStrategyTest {
+
+    private DataServiceOptions dataServiceOptions;
 
     @Test
     public void shouldScheduleFirstConnectionAttempt() {
@@ -80,6 +85,51 @@ public class ScheduleStrategyTest {
         thenConnectionTaskIsStopped();
     }
 
+    @Test
+    public void shouldForceReconnectOutsideOfSchedule() {
+        givenTime("1/1/2000");
+        givenCronExpression("0/2 * * * * ?");
+        givenScheduleStrategy();
+        givenTimeout();
+
+        whenScheduleStrategyIsCreatedWithAlternativeConstructor();
+
+        whenMessageIsSent();
+
+        thenConnectionTaskIsNotStarted();
+
+        whenPriorityMessageIsSent();
+
+        thenConnectionTaskIsStarted();
+    }
+    
+    @Test
+    public void shouldReconnectIfMessageIsSentDuringDisconnect() {
+        givenTime("1/1/2000");
+        givenCronExpression("0/2 * * * * ?");
+        givenScheduleStrategy();
+        givenTimeout();
+        
+        whenScheduleStrategyIsCreatedWithAlternativeConstructor();
+        
+        whenMessageIsSent();
+        
+        thenConnectionTaskIsNotStarted();
+        
+        whenPriorityMessageIsSent();
+        
+        thenConnectionTaskIsStarted();
+        
+        //Create Minor Delay
+        whenMessageIsSent();
+        whenMessageIsSent();
+        whenMessageIsSent();
+        
+        whenPriorityMessageIsSent();
+        
+        thenConnectionTaskIsStarted();
+    }
+
     private final ExecutorState executorState = new ExecutorState();
     private final ConnectionManagerState connectionManagerState = new ConnectionManagerState();
     private Date now;
@@ -121,13 +171,51 @@ public class ScheduleStrategyTest {
     }
 
     private void whenScheduleStrategyIsCreated() {
+
+        // Create DataServiceOptions
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connection.schedule.priority.override.enable", true);
+        properties.put("connection.schedule.priority.override.threshold", 3);
+        properties.put("connect.auto-on-startup", true);
+        properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
+        properties.put("connection.schedule.enabled", true);
+        properties.put("connection.schedule.expression", expression.toString());
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
+
         this.strategy = new ScheduleStrategy(expression, disconnectTimeoutMs,
                 this.connectionManagerState.connectionManager,
-                this.executorState.executor, () -> this.now);
+                this.executorState.executor, () -> this.now, this.dataServiceOptions);
+    }
+
+    private void whenScheduleStrategyIsCreatedWithAlternativeConstructor() {
+
+        // Create DataServiceOptions
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("connection.schedule.priority.override.enable", true);
+        properties.put("connection.schedule.priority.override.threshold", 3);
+        properties.put("connect.auto-on-startup", true);
+        properties.put("connection.schedule.inactivity.interval.seconds", disconnectTimeoutMs);
+        properties.put("connection.schedule.enabled", true);
+        properties.put("connection.schedule.expression", expression.toString());
+        properties.put("connection.schedule.inactivity.interval.seconds", (long) 1);
+
+        this.dataServiceOptions = new DataServiceOptions(properties);
+
+        this.strategy = new ScheduleStrategy(this.expression, this.dataServiceOptions,
+                this.connectionManagerState.connectionManager);
     }
 
     private void whenConnectionIsEstablished() {
         this.strategy.onConnectionEstablished();
+    }
+
+    private void whenMessageIsSent() {
+        this.strategy.onPublishRequested("test/topic", null, 0, false, 7);
+    }
+
+    private void whenPriorityMessageIsSent() {
+        this.strategy.onPublishRequested("test/topic", null, 0, false, 0);
     }
 
     private void thenTimeoutIsRequestedAfterMs(long expectedDelay) {
@@ -140,6 +228,10 @@ public class ScheduleStrategyTest {
         } catch (Exception e) {
             fail("connection task not started");
         }
+    }
+
+    private void thenConnectionTaskIsNotStarted() {
+        assertFalse(connectionManagerState.connectionManager.isConnected());
     }
 
     private void thenConnectionTaskIsStopped() {

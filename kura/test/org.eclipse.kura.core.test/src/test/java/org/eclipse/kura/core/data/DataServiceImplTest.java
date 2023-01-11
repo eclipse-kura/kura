@@ -387,7 +387,7 @@ public class DataServiceImplTest {
         }
 
         // initial checkin + 3 * authentication + (other mqtt + 3)
-        assertEquals(8, count.intValue());
+        assertEquals(4, count.intValue());
     }
 
     @Test

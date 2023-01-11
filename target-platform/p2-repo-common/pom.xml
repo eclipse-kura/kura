@@ -627,6 +627,11 @@
                                     <artifactId>quartz</artifactId>
                                     <version>${quartz.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.xerial</groupId>
+                                    <artifactId>sqlite-jdbc</artifactId>
+                                    <version>${org.xerial.sqlite-jdbc.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -741,6 +746,7 @@
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
                                 <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/HikariCP_${hikaricp.version}.jar"/>
                                 <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
+                                <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

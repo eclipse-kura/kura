@@ -113,6 +113,7 @@
         <module>org.eclipse.kura.event.publisher</module>
         <module>org.eclipse.kura.configuration.change.manager</module>
         <module>org.eclipse.kura.wire.script.tools</module>
+        <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>emulator</module>
         <module>test-util</module>
     </modules>
@@ -150,6 +151,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <slf4j.version>1.7.36</slf4j.version>
         <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
+        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
     </properties>
 
     <distributionManagement>
@@ -345,7 +347,8 @@
             <properties>
                 <org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
             </properties>
-            <activation>  <!-- deactivated if noweb property is selected -->
+            <activation>
+                <!-- deactivated if noweb property is selected -->
                 <property>
                     <name>kura.skip.web</name>
                     <value>!true</value>

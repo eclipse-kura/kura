@@ -64,6 +64,7 @@
         <module>org.eclipse.kura.wire.ai.component.provider</module>
         <module>org.eclipse.kura.ai.triton.server</module>
         <module>org.eclipse.kura.wire.script.tools</module>
+        <module>org.eclipse.kura.db.sqlite.provider</module>
     </modules>
 
     <profiles>

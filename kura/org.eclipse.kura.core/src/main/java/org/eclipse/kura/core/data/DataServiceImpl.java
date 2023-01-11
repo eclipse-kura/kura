@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -67,6 +67,8 @@ import org.slf4j.LoggerFactory;
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager {
 
+    private static final int RECONNECTION_MIN_DELAY = 5;
+
     private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 
     private static final int TRANSPORT_TASK_TIMEOUT = 1; // In seconds
@@ -109,6 +111,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private AtomicInteger connectionAttempts;
 
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
+
+    private final Random random = new Random();
 
     // ----------------------------------------------------------------
     //
@@ -413,6 +417,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void onConfigurationUpdated(boolean wasConnected) {
         logger.info("Notified DataTransportService configuration updated.");
+        shutdownAutoConnectStrategy();
         createAutoConnectStrategy();
         if (!this.autoConnectStrategy.isPresent() && wasConnected) {
             try {
@@ -626,7 +631,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             // add a delay on the reconnect
             int maxDelay = reconnectInterval / 5;
             maxDelay = maxDelay > 0 ? maxDelay : 1;
-            int initialDelay = new Random().nextInt(maxDelay);
+
+            int initialDelay = Math.max(this.random.nextInt(maxDelay), RECONNECTION_MIN_DELAY);
 
             logger.info("Starting reconnect task with initial delay {}", initialDelay);
             this.connectionMonitorFuture = this.connectionMonitorExecutor.scheduleAtFixedRate(new Runnable() {
@@ -943,7 +949,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public boolean hasInFlightMessages() {
-        return !inFlightMsgIds.isEmpty();
+        return !this.inFlightMsgIds.isEmpty();
     }
 
     @Override

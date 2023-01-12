@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -376,8 +376,7 @@ public class DataServiceImplTest {
         cause = new MqttException(MqttException.REASON_CODE_BROKER_UNAVAILABLE);
         Throwable exc4 = new KuraConnectException(cause, "test");
         doThrow(exc1).doThrow(exc2).doThrow(exc3).doThrow(exc4)
-                .doThrow(new KuraConnectException("test ordinary exception"))
-                .when(dtsMock).connect();
+                .doThrow(new KuraConnectException("test ordinary exception")).when(dtsMock).connect();
 
         svc.activate(ctxMock, properties);
 

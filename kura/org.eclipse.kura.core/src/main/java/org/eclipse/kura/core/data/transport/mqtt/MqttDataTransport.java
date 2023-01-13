@@ -99,8 +99,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
     private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
 
-    private static final long MQTT_QUIESCE_TIMEOUT = 2;
-    private static final long MQTT_DISCONNECT_TIMEOUT = 2;
+    private static final long MQTT_QUIESCE_TIMEOUT = 2000;
+    private static final long MQTT_DISCONNECT_TIMEOUT = 2000;
 
     private SystemService systemService;
     private SslManagerService sslManagerService;

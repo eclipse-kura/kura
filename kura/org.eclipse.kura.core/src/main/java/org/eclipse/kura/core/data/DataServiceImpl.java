@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager {
 
-    private static final int RECONNECTION_MIN_DELAY = 5;
+    private static final int RECONNECTION_MIN_DELAY = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 

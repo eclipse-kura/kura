@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -99,6 +99,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
     private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
 
+    private static final long MQTT_QUIESCE_TIMEOUT = 2000;
+    private static final long MQTT_DISCONNECT_TIMEOUT = 2000;
+
     private SystemService systemService;
     private SslManagerService sslManagerService;
     private CloudConnectionStatusService cloudConnectionStatusService;
@@ -140,7 +143,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     public void setSslManagerService(SslManagerService sslManagerService) {
         final boolean update;
 
-        synchronized (updateLock) {
+        synchronized (this.updateLock) {
             this.sslManagerService = sslManagerService;
             update = this.clientConf != null;
         }
@@ -151,7 +154,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        synchronized (updateLock) {
+        synchronized (this.updateLock) {
             if (sslManagerService == this.sslManagerService) {
                 this.sslManagerService = null;
             }
@@ -181,7 +184,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        synchronized (updateLock) {
+        synchronized (this.updateLock) {
             logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
             // We need to catch the configuration exception and activate anyway.
@@ -236,7 +239,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void updated(Map<String, Object> properties) {
-        synchronized (updateLock) {
+        synchronized (this.updateLock) {
             logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
             this.properties.clear();
@@ -281,7 +284,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // Listeners will not be notified of an invalid configuration update.
         logger.info("Building new configuration...");
 
-        synchronized (updateLock) {
+        synchronized (this.updateLock) {
             this.clientConf = buildConfiguration(this.properties);
         }
 
@@ -682,8 +685,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ---------------------------------------------------------
     @Override
     public void onConfigurationUpdated() {
-        // The SSL service was update, build a new socket connection
+
+        // The SSL service was update, build a new socket connection and close the current SSL client session
+        if (this.mqttClient != null && isSSL(this.mqttClient.getServerURI())) {
+            closeMqttClient();
+        }
+
         update();
+
     }
 
     // ---------------------------------------------------------
@@ -813,7 +822,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         //
         // SSL
-        if (brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss")) {
+        if (isSSL(brokerUrl)) {
             try {
                 SSLSocketFactory ssf = this.sslManagerService.getSSLSocketFactory();
 
@@ -838,6 +847,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         clientConfiguration = new MqttClientConfiguration(brokerUrl, clientId, localPersistenceType, conOpt);
 
         return clientConfiguration;
+    }
+
+    private boolean isSSL(String brokerUrl) {
+        return brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss");
     }
 
     private String replaceTopicVariables(String topic) {
@@ -1018,10 +1031,15 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     private void closeMqttClient() {
+
+        if (this.mqttClient == null) {
+            return;
+        }
+
         try {
             logger.info("Forcing client disconnect...");
-            mqttClient.disconnectForcibly();
-        } catch (MqttException e) {
+            this.mqttClient.disconnectForcibly(MQTT_QUIESCE_TIMEOUT, MQTT_DISCONNECT_TIMEOUT);
+        } catch (Exception e) {
             logger.warn("Cannot force client disconnect", e);
         }
         try {
@@ -1030,7 +1048,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             this.mqttClient.setCallback(null);
             this.mqttClient.close();
             logger.info("Closed");
-        } catch (MqttException e) {
+        } catch (Exception e) {
             logger.warn("Cannot close client", e);
         } finally {
             this.mqttClient = null;

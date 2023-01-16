@@ -42,6 +42,24 @@ ResultInactive=no
 ResultActive=no
 ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla
 	    fi
+	    if [[ $NN == "NO" ]]; then
+    	    if [ ! -f /etc/polkit-1/localauthority/50-local.d/52-org.freedesktop.networkmanager.pkla ]; then
+                echo "[No password prompt for kurad user when using NetworkManager]
+Identity=unix-user:kurad
+Action=org.freedesktop.NetworkManager.*
+ResultInactive=no
+ResultActive=no
+ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/52-org.freedesktop.networkmanager.pkla
+            fi
+            if [ ! -f /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla ]; then
+                echo "[No password prompt for kurad user when using ModemManager]
+Identity=unix-user:kurad
+Action=org.freedesktop.ModemManager.*
+ResultInactive=no
+ResultActive=no
+ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla
+            fi
+        fi
 	else  
 	    if [ ! -f /usr/share/polkit-1/rules.d/kura.rules ]; then
 	    	if [[ $NN == "NO" ]]; then
@@ -53,6 +71,11 @@ ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.syst
         return polkit.Result.YES;
     }
     if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
+        subject.user == \"kurad\") {
+        return polkit.Result.YES;
+    }
+    if (action.id.indexOf(\"org.freedesktop.NetworkManager.\") == 0 ||
+        action.id.indexOf(\"org.freedesktop.ModemManager.\") == 0 &&
         subject.user == \"kurad\") {
         return polkit.Result.YES;
     }
@@ -125,6 +148,12 @@ function delete_users {
 	if [ -f /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla ]; then
 		rm -f /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla
 	fi
+	if [ -f /etc/polkit-1/localauthority/50-local.d/52-org.freedesktop.networkmanager.pkla ]; then
+        rm -f /etc/polkit-1/localauthority/50-local.d/52-org.freedesktop.networkmanager.pkla
+    fi
+    if [ -f /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla ]; then
+        rm -f /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla
+    fi
 	
 	# recover pam policy
 	if [ -f /etc/pam.d/su ]; then

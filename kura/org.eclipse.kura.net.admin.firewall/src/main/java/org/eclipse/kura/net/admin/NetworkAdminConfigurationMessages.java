@@ -48,7 +48,12 @@ public class NetworkAdminConfigurationMessages {
             }
         } catch (MissingResourceException mre) {
             // log the failure to load a message bundle
+<<<<<<< HEAD
             logger.warn("Could not find Messages Bundle for Locale " + locale, mre);
+=======
+            logger.warn("Could not find Messages Bundle for Locale {}", locale);
+            mre.printStackTrace();
+>>>>>>> 1dbc260d3 (Added new NetworkConfigurationService)
         }
 
         return message;

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -18,10 +18,10 @@ INSTALL_DIR=/opt/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 #set up network helper scripts
-cp ${INSTALL_DIR}/kura/install/ifup-local.raspbian /etc/network/if-up.d/ifup-local
-cp ${INSTALL_DIR}/kura/install/ifdown-local /etc/network/if-down.d/ifdown-local
-chmod +x /etc/network/if-up.d/ifup-local
-chmod +x /etc/network/if-down.d/ifdown-local
+#cp ${INSTALL_DIR}/kura/install/ifup-local.raspbian /etc/network/if-up.d/ifup-local
+#cp ${INSTALL_DIR}/kura/install/ifdown-local /etc/network/if-down.d/ifdown-local
+#chmod +x /etc/network/if-up.d/ifup-local
+#chmod +x /etc/network/if-down.d/ifdown-local
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2022 Eurotech and/or its affiliates and others
+# Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -134,8 +134,10 @@ systemctl stop isc-dhcp-server6.service
 systemctl disable isc-dhcp-server6.service
 
 # disable NetworkManager.service - kura is the network manager
-systemctl stop NetworkManager.service
-systemctl disable NetworkManager.service
+#systemctl stop NetworkManager.service
+#systemctl disable NetworkManager.service
+systemctl enable NetworkManager.service
+systemctl start NetworkManager.service
 
 #disable netplan
 systemctl disable systemd-networkd.socket
@@ -154,8 +156,10 @@ systemctl stop resolvconf.service
 systemctl disable resolvconf.service
 
 #disable ModemManager
-systemctl stop ModemManager
-systemctl disable ModemManager
+#systemctl stop ModemManager
+#systemctl disable ModemManager
+systemctl enable ModemManager
+systemctl start ModemManager
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant

@@ -216,7 +216,9 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 //            executeVisitors(networkConfiguration); // <----- replace with NetworkManager!!!!
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
-            this.properties = discardModifiedNetworkInterfaces(this.properties);
+            this.properties = discardModifiedNetworkInterfaces(this.properties); // The stored properties are not
+                                                                                 // changed by the service, except for
+                                                                                 // the modifiedInterfaces property
 
             if (changed) {
                 this.configurationService.snapshot();

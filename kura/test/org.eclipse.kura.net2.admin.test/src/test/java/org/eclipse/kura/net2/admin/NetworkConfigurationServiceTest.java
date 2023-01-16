@@ -13,6 +13,7 @@
 package org.eclipse.kura.net2.admin;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -22,13 +23,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.usb.UsbService;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -43,7 +47,8 @@ public class NetworkConfigurationServiceTest {
     private ComponentConfiguration configuration;
     private Map<String, Object> retrievedProperties;
     private OCD ocd;
-    private Object lock;
+    private List<AD> ads;
+    private Object lock = new Object();
     private AtomicBoolean posted;
     private Event event;
 
@@ -80,6 +85,33 @@ public class NetworkConfigurationServiceTest {
         thenComponentDefinitionHasBasicProperties();
     }
 
+    @Test
+    public void getDefinitionHasInterfaceTypesTest() throws KuraException {
+        givenPropertiesWithInterfaces();
+        givenNetworkConfigurationService();
+        whenServiceIsActivated();
+        whenComponentDefinitionIsRetrieved();
+        thenComponentDefinitionHasInterfaceTypes();
+    }
+
+    @Test
+    public void getDefinitionHasCorrectNumberOfPropertiesTest() throws KuraException {
+        givenPropertiesWithInterfaces();
+        givenNetworkConfigurationService();
+        whenServiceIsActivated();
+        whenComponentDefinitionIsRetrieved();
+        thenComponentDefinitionHasCorrectNumberOfResources();
+    }
+
+    @Test
+    public void getDefinitionHasCorrectPropertiesTest() throws KuraException {
+        givenPropertiesWithInterfaces();
+        givenNetworkConfigurationService();
+        whenServiceIsActivated();
+        whenComponentDefinitionIsRetrieved();
+        thenComponentDefinitionHasCorrectProperties();
+    }
+
     private void givenPropertiesWithModifiedInterfaces() {
         this.properties.clear();
         this.properties.put("modified.interface.names", "eth0");
@@ -88,6 +120,11 @@ public class NetworkConfigurationServiceTest {
     private void givenPropertiesWithoutInterfaces() {
         this.properties.clear();
         this.properties.put("net.interfaces", "");
+    }
+
+    private void givenPropertiesWithInterfaces() {
+        this.properties.clear();
+        this.properties.put("net.interfaces", "eth0,lo,wlp1s0,1-5");
     }
 
     private void givenNetworkConfigurationService() {
@@ -106,6 +143,10 @@ public class NetworkConfigurationServiceTest {
 
         UsbService usbServiceMock = mock(UsbService.class);
         this.networkConfigurationService.setUsbService(usbServiceMock);
+
+        NetworkService networkServiceMock = mock(NetworkService.class);
+        when(networkServiceMock.getModemPppInterfaceName("1-5")).thenReturn("ppp3");
+        this.networkConfigurationService.setNetworkService(networkServiceMock);
 
         this.posted = new AtomicBoolean(false);
 
@@ -136,12 +177,12 @@ public class NetworkConfigurationServiceTest {
         this.configuration = this.networkConfigurationService.getConfiguration();
         this.retrievedProperties = this.configuration.getConfigurationProperties();
         this.ocd = this.configuration.getDefinition();
+        this.ads = ocd.getAD();
     }
 
     private void thenEventIsPosted() throws InterruptedException {
-        Object lock = new Object();
-        synchronized (lock) {
-            lock.wait(6000); // > 5s wait is necessary
+        synchronized (this.lock) {
+            this.lock.wait(6000); // > 5s wait is necessary
         }
 
         assertTrue(this.posted.get());
@@ -161,6 +202,340 @@ public class NetworkConfigurationServiceTest {
         assertEquals("Network Configuration Service", this.ocd.getDescription());
     }
 
+    private void thenComponentDefinitionHasInterfaceTypes() {
+        assertEquals("ETHERNET", retrievedProperties.get("net.interface.eth0.type"));
+        assertEquals("LOOPBACK", retrievedProperties.get("net.interface.lo.type"));
+        assertEquals("MODEM", retrievedProperties.get("net.interface.1-5.type"));
+        assertEquals("WIFI", retrievedProperties.get("net.interface.wlp1s0.type"));
+    }
+
+    private void thenComponentDefinitionHasCorrectNumberOfResources() {
+        assertEquals(6, retrievedProperties.size());
+        assertNotNull(ads);
+        assertEquals(55, ads.size());
+    }
+
+    private void thenComponentDefinitionHasCorrectProperties() {
+        int adsConfigured = 0;
+        for (AD ad : ads) {
+            // ??????
+            if ("net.interface.eth2.config.dhcpClient4.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpClient4.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertTrue(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.defaultLeaseTime".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.defaultLeaseTime", ad.getName());
+                assertEquals("INTEGER", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.maxLeaseTime".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.maxLeaseTime", ad.getName());
+                assertEquals("INTEGER", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.passDns".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.passDns", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.prefix".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.prefix", ad.getName());
+                assertEquals("SHORT", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.rangeEnd".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.rangeEnd", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dhcpServer4.rangeStart".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dhcpServer4.rangeStart", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.dnsServers".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.dnsServers", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.ip4.address".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.ip4.address", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.ip4.gateway".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.ip4.gateway", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.ip4.prefix".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.ip4.prefix", ad.getName());
+                assertEquals("SHORT", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.eth2.config.nat.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.eth2.config.nat.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.lo.config.driver".equals(ad.getId())) {
+                assertEquals("net.interface.lo.config.driver", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.lo.config.ip4.address".equals(ad.getId())) {
+                assertEquals("net.interface.lo.config.ip4.address", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.lo.config.ip4.prefix".equals(ad.getId())) {
+                assertEquals("net.interface.lo.config.ip4.prefix", ad.getName());
+                assertEquals("SHORT", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpClient4.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpClient4.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertTrue(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.defaultLeaseTime".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.defaultLeaseTime", ad.getName());
+                assertEquals("INTEGER", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.maxLeaseTime".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.maxLeaseTime", ad.getName());
+                assertEquals("INTEGER", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.passDns".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.passDns", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.prefix".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.prefix", ad.getName());
+                assertEquals("SHORT", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.rangeEnd".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.rangeEnd", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dhcpServer4.rangeStart".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dhcpServer4.rangeStart", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.dnsServers".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.dnsServers", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.ip4.address".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.ip4.address", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.ip4.gateway".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.ip4.gateway", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.ip4.prefix".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.ip4.prefix", ad.getName());
+                assertEquals("SHORT", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.nat.enabled".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.nat.enabled", ad.getName());
+                assertEquals("BOOLEAN", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.channel".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.channel", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.groupCiphers".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.groupCiphers", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.hardwareMode".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.hardwareMode", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.pairwiseCiphers".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.pairwiseCiphers", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.passphrase".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.passphrase", ad.getName());
+                assertEquals("PASSWORD", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.radioMode".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.radioMode", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.securityType".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.securityType", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.infra.ssid".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.infra.ssid", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.master.channel".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.master.channel", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.master.passphrase".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.master.passphrase", ad.getName());
+                assertEquals("PASSWORD", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.master.radioMode".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.master.radioMode", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.master.securityType".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.master.securityType", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.master.ssid".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.master.ssid", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.config.wifi.mode".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.config.wifi.mode", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlan1.wifi.capabilities".equals(ad.getId())) {
+                assertEquals("net.interface.wlan1.wifi.capabilities", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interfaces".equals(ad.getId())) {
+                assertEquals("net.interfaces", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertTrue(ad.isRequired());
+                adsConfigured++;
+            }
+        }
+        assertEquals(4, adsConfigured);
+    }
 //    @Test
 //    public void testActivate() throws NoSuchFieldException {
 //        AtomicBoolean inited = new AtomicBoolean(false);
@@ -858,9 +1233,9 @@ public class NetworkConfigurationServiceTest {
             return NetInterfaceType.ETHERNET;
         } else if (interfaceName.equals("lo")) {
             return NetInterfaceType.LOOPBACK;
-        } else if (interfaceName.startsWith("ppp")) {
+        } else if (interfaceName.startsWith("ppp") || Character.isDigit(interfaceName.charAt(0))) {
             return NetInterfaceType.MODEM;
-        } else if (interfaceName.startsWith("wlan")) {
+        } else if (interfaceName.startsWith("wlan") || interfaceName.startsWith("wlp")) {
             return NetInterfaceType.WIFI;
         } else {
             return NetInterfaceType.UNKNOWN;

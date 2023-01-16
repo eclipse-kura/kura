@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
 
-    private final Random random = new Random();
+    private final Random random = new SecureRandom();
 
     // ----------------------------------------------------------------
     //

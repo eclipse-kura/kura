@@ -53,5 +53,7 @@ Import-Package: javax.microedition.io,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/dbus-java-osgi-3.3.2-javadoc.jar,
+ lib/dbus-java-osgi-3.3.2.jar
 Bundle-ActivationPolicy: lazy

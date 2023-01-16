@@ -1,0 +1,57 @@
+package org.freedesktop.networkmanager.device;
+
+import java.util.Map;
+import org.freedesktop.dbus.DBusPath;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.messages.DBusSignal;
+import org.freedesktop.dbus.types.UInt16;
+import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
+
+/**
+ * Auto-generated class.
+ */
+@DBusInterfaceName("org.freedesktop.NetworkManager.Device.Vxlan")
+@DBusProperty(name = "Parent", type = DBusPath.class, access = Access.READ)
+@DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
+@DBusProperty(name = "Id", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "Group", type = String.class, access = Access.READ)
+@DBusProperty(name = "Local", type = String.class, access = Access.READ)
+@DBusProperty(name = "Tos", type = Byte.class, access = Access.READ)
+@DBusProperty(name = "Ttl", type = Byte.class, access = Access.READ)
+@DBusProperty(name = "Learning", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "Ageing", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "Limit", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "DstPort", type = UInt16.class, access = Access.READ)
+@DBusProperty(name = "SrcPortMin", type = UInt16.class, access = Access.READ)
+@DBusProperty(name = "SrcPortMax", type = UInt16.class, access = Access.READ)
+@DBusProperty(name = "Proxy", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "Rsc", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "L2miss", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "L3miss", type = Boolean.class, access = Access.READ)
+public interface Vxlan extends DBusInterface {
+
+
+
+
+    public static class PropertiesChanged extends DBusSignal {
+
+        private final Map<String, Variant<?>> properties;
+
+        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
+            super(_path, _properties);
+            this.properties = _properties;
+        }
+
+
+        public Map<String, Variant<?>> getProperties() {
+            return properties;
+        }
+
+
+    }
+}

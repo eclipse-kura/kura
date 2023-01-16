@@ -1,0 +1,1140 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.net.admin.monitor;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.net.AbstractNetInterface;
+import org.eclipse.kura.core.net.NetworkConfiguration;
+import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.internal.board.BoardPowerState;
+import org.eclipse.kura.internal.linux.net.wifi.WifiDriverService;
+import org.eclipse.kura.linux.net.route.RouteService;
+import org.eclipse.kura.linux.net.route.RouteServiceImpl;
+import org.eclipse.kura.linux.net.util.IScanTool;
+import org.eclipse.kura.linux.net.util.IwLinkTool;
+import org.eclipse.kura.linux.net.util.IwconfigLinkTool;
+import org.eclipse.kura.linux.net.util.LinkTool;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
+import org.eclipse.kura.linux.net.util.ScanTool;
+import org.eclipse.kura.linux.net.wifi.WifiOptions;
+import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.NetConfigIP4;
+import org.eclipse.kura.net.NetInterfaceAddressConfig;
+import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceStatus;
+import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.NetworkAdminService;
+import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.admin.NetworkAdminServiceImpl;
+import org.eclipse.kura.net.admin.NetworkConfigurationService;
+import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
+import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
+import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
+import org.eclipse.kura.net.route.RouteConfig;
+import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiClientMonitorListener;
+import org.eclipse.kura.net.wifi.WifiClientMonitorService;
+import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
+import org.eclipse.kura.net.wifi.WifiMode;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(WifiMonitorServiceImpl.class);
+
+    private static final String[] EVENT_TOPICS = new String[] {
+            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC };
+
+    private static Object lock = new Object();
+    private static final long THREAD_INTERVAL = 10000;
+    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static Future<?> monitorTask;
+    private static AtomicBoolean stopThread;
+    private boolean first;
+    private NetworkService networkService;
+    private EventAdmin eventAdmin;
+    private NetworkAdminService netAdminService;
+    private NetworkConfigurationService netConfigService;
+    private CommandExecutorService executorService;
+    private List<WifiClientMonitorListener> listeners;
+    private Set<String> enabledInterfaces;
+    private Set<String> disabledInterfaces;
+    private Set<String> unmanagedInterfaces;
+    private Map<String, InterfaceState> interfaceStatuses;
+    private ExecutorService executor;
+    private NetworkConfiguration currentNetworkConfiguration;
+    private NetworkConfiguration newNetConfiguration;
+    private RouteService routeService;
+    private LinuxNetworkUtil linuxNetworkUtil;
+    private int rssi;
+
+    private WifiDriverService wifiDriverService;
+
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
+    }
+
+    public void unsetNetworkService(NetworkService networkService) {
+        this.networkService = null;
+    }
+
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+
+    public void unsetEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = null;
+    }
+
+    public void setNetworkAdminService(NetworkAdminService netAdminService) {
+        this.netAdminService = netAdminService;
+        if (this.netAdminService instanceof NetworkAdminServiceImpl) {
+            ((NetworkAdminServiceImpl) this.netAdminService).setWifiClientMonitorServiceLock(lock);
+        }
+    }
+
+    public void unsetNetworkAdminService(NetworkAdminService netAdminService) {
+        if (this.netAdminService instanceof NetworkAdminServiceImpl) {
+            ((NetworkAdminServiceImpl) this.netAdminService).unsetWifiClientMonitorServiceLock();
+        }
+        this.netAdminService = null;
+    }
+
+    public void setNetworkConfigurationService(NetworkConfigurationService netConfigService) {
+        this.netConfigService = netConfigService;
+    }
+
+    public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
+        this.netConfigService = null;
+    }
+
+    public void setWifiDriverService(WifiDriverService wifiDriverService) {
+        this.wifiDriverService = wifiDriverService;
+    }
+
+    public void unsetWifiDriverService(WifiDriverService wifiUtils) {
+        this.wifiDriverService = null;
+    }
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        this.executorService = null;
+    }
+
+    protected void activate(ComponentContext componentContext) {
+        logger.debug("Activating WifiMonitor Service...");
+        this.first = true;
+        this.enabledInterfaces = new HashSet<>();
+        this.disabledInterfaces = new HashSet<>();
+        this.unmanagedInterfaces = new HashSet<>();
+        this.interfaceStatuses = new HashMap<>();
+        this.executor = Executors.newSingleThreadExecutor();
+        this.routeService = new RouteServiceImpl(this.executorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
+        stopThread = new AtomicBoolean();
+        Dictionary<String, String[]> d = new Hashtable<>();
+        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
+        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
+        this.listeners = new ArrayList<>();
+        try {
+            this.currentNetworkConfiguration = this.netConfigService.getNetworkConfiguration();
+            initializeMonitoredInterfaces(this.currentNetworkConfiguration);
+        } catch (KuraException e) {
+            logger.error("Could not update list of interfaces", e);
+        }
+    }
+
+    protected void deactivate(ComponentContext componentContext) {
+        this.listeners = null;
+        if (monitorTask != null && !monitorTask.isDone()) {
+            stopThread.set(true);
+            monitorNotify();
+            logger.debug("Cancelling WifiMonitor task ...");
+            monitorTask.cancel(true);
+            logger.info("WifiMonitor task cancelled? = {}", monitorTask.isDone());
+        }
+        if (this.executor != null) {
+            logger.debug("Terminating WifiMonitor Thread ...");
+            this.executor.shutdownNow();
+            try {
+                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
+            }
+            logger.info("WifiMonitor Thread terminated? - {}", this.executor.isTerminated());
+            this.executor = null;
+        }
+    }
+
+    protected LinkTool getLinkTool(String interfaceName) throws KuraException {
+        Collection<String> supportedWifiOptions = new WifiOptions(this.executorService)
+                .getSupportedOptions(interfaceName);
+        LinkTool linkTool = null;
+        if (!supportedWifiOptions.isEmpty()) {
+            if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_NL80211)) {
+                linkTool = new IwLinkTool(interfaceName, this.executorService);
+            } else if (supportedWifiOptions.contains(WifiOptions.WIFI_MANAGED_DRIVER_WEXT)) {
+                linkTool = new IwconfigLinkTool(interfaceName, this.executorService);
+            }
+        }
+        return linkTool;
+    }
+
+    protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+        return this.linuxNetworkUtil.getType(interfaceName);
+    }
+
+    protected RouteService getRouteService() {
+        return this.routeService;
+    }
+
+    protected IScanTool getScanTool(String interfaceName) throws KuraException {
+        return ScanTool.get(interfaceName, this.executorService);
+    }
+
+    protected boolean isWifiDeviceOn(String interfaceName) {
+        if (this.wifiDriverService != null) {
+            BoardPowerState wifiState;
+            try {
+                wifiState = this.wifiDriverService.getState(interfaceName);
+            } catch (IOException e) {
+                wifiState = BoardPowerState.OFF;
+            }
+            return wifiState == BoardPowerState.ON;
+        }
+        return false;
+    }
+
+    private void monitor() {
+        synchronized (lock) {
+            NetworkConfiguration newNetConfig = this.newNetConfiguration;
+            try {
+                // Track the interfaces being reconfigured
+                List<String> interfacesToReconfigure = new ArrayList<>();
+
+                logger.debug("monitor() :: wifi has started another run ...");
+                // Find and disable interfaces affected by the configuration change
+                if (newNetConfig != null && !newNetConfig.equals(this.currentNetworkConfiguration)) {
+                    logger.info(
+                            "monitor() :: Found a new network configuration, will check if wifi has been reconfigured ...");
+
+                    // Note that the call to getReconfiguredWifiInterfaces() may also update
+                    // m_enabledInterfaces or m_disabledInterfaces
+                    interfacesToReconfigure.addAll(getReconfiguredWifiInterfaces());
+
+                    this.currentNetworkConfiguration = newNetConfig;
+
+                    // The interface being reconfigured is first disabled calling disableInterface().
+                    // Note that calling disableInterface() does not update
+                    // m_enabledInterfaces or m_disabledInterfaces.
+                    // After calling disableInterface() and refreshing the list of
+                    // interface statuses, a call to WifiState.isUp() should return false.
+                    for (String interfaceName : interfacesToReconfigure) {
+                        if (!this.unmanagedInterfaces.contains(interfaceName)) {
+                            logger.debug("monitor() :: configuration has changed for {} , disabling...", interfaceName);
+                            disableInterface(interfaceName);
+                        }
+                    }
+                }
+
+                // Check all interfaces configured to be enabled.
+                // This includes the interfaces that might have been enabled by the above configuration change.
+                // Get fresh interface statuses and post status change events.
+                Map<String, InterfaceState> oldStatuses = new HashMap<>();
+                if (this.interfaceStatuses != null) {
+                    oldStatuses.putAll(this.interfaceStatuses);
+                }
+                Map<String, InterfaceState> newStatuses = getInterfaceStatuses(this.enabledInterfaces);
+                checkStatusChange(this.interfaceStatuses, newStatuses);
+                this.interfaceStatuses = newStatuses;
+
+                monitorEnabledInterfaces(interfacesToReconfigure, oldStatuses);
+
+                // Check all interfaces configured to be disabled
+                monitorDisabledInterfaces();
+
+                // Shut down the monitor if no interface is configured to be enabled
+                if (this.enabledInterfaces.isEmpty() && monitorTask != null) {
+                    logger.info("monitor() :: No enabled wifi interfaces - shutting down monitor thread");
+                    stopThread.set(true);
+                    monitorTask.cancel(true);
+                    monitorTask = null;
+                }
+            } catch (Exception e) {
+                logger.warn("Error during WiFi Monitor handle event", e);
+            }
+        }
+
+    }
+
+    @SuppressWarnings("checkstyle:methodLength")
+    private void monitorEnabledInterfaces(List<String> interfacesToReconfigure, Map<String, InterfaceState> oldStatuses)
+            throws Exception {
+        for (String interfaceName : this.enabledInterfaces) {
+            // Get current configuration
+            WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) this.currentNetworkConfiguration
+                    .getNetInterfaceConfig(interfaceName);
+            WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
+
+            // Make sure we have enough information
+            if (wifiInterfaceConfig == null) {
+                logger.warn("monitor() :: missing WifiInterfaceConfigImpl for {}", interfaceName);
+                continue;
+            }
+            if (wifiConfig == null) {
+                logger.warn("monitor() :: missing WifiConfig for {}", interfaceName);
+                continue;
+            }
+
+            // There are interfaces for which we need to initially check if
+            // the right kernel module is loaded for the desired mode.
+            // If not we treat the interface as if needing to be reconfigured.
+            if (this.first && this.wifiDriverService != null
+                    && !this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, wifiConfig.getMode())) {
+                logger.info("monitor() :: {} kernel module not suitable for WiFi mode {}", interfaceName,
+                        wifiConfig.getMode());
+                this.first = false;
+                interfacesToReconfigure.add(interfaceName);
+                disableInterface(interfaceName);
+                // Update the current wifi state
+                this.interfaceStatuses.remove(interfaceName);
+                NetConfigIP4 netConfig = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                boolean isL2Only = netConfig.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
+                InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+                builder.setInterfaceName(interfaceName);
+                builder.setType(NetInterfaceType.WIFI);
+                builder.setL2OnlyInterface(isL2Only);
+                this.interfaceStatuses.put(interfaceName, builder.buildInterfaceState());
+            }
+
+            // Get current state
+            InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
+            if (wifiState == null) {
+                logger.warn("monitor() :: missing InterfaceState for {}", interfaceName);
+                continue;
+            }
+
+            // This flag is changed if the interface is disabled intentionally by the code below
+            boolean up = wifiState.isUp();
+            boolean linkUp = wifiState.isLinkUp();
+            logger.debug("monitor() :: interfaceName={}, wifiState.isLinkUp()={}", interfaceName, wifiState.isLinkUp());
+            logger.debug("monitor() :: interfaceName={}, wifiState.isUp()={}", interfaceName, wifiState.isUp());
+            if (!up || !linkUp) {
+                // Either initially down or initially up and we disabled it explicitly
+                // * Check if the interface is being reconfigured and
+                // reload the kernel module (this may be ignored by the platform)
+                // * Infrastructure (Station) mode:
+                // * Configured to ignore SSID: just enable interface. Otherwise:
+                // * enable interface only if Access Point is available
+                //
+                // * Master (Access Point) mode:
+                // * just enable interface
+                // Some interfaces may require reloading the kernel module
+                // accordingly to the desired WifiMode.
+                // FIXME ideally we only need to this if the WifiMode changes.
+                // FIXME if reloading fails it won't be retried.
+                if (interfacesToReconfigure.contains(interfaceName)) {
+                    try {
+                        logger.info("monitor() :: reload {} kernel module for WiFi mode {}", interfaceName,
+                                wifiConfig.getMode());
+                        reloadKernelModule(interfaceName, wifiConfig.getMode());
+                    } catch (KuraException e) {
+                        logger.warn("monitor() :: failed to reload {} kernel module.", interfaceName, e);
+                        continue;
+                    }
+                }
+                try {
+                    if (WifiMode.MASTER.equals(wifiConfig.getMode())) {
+                        logger.debug("monitor() :: enable {} in master mode", interfaceName);
+                        enableInterface(wifiInterfaceConfig);
+                    } else if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+                        if (wifiConfig.ignoreSSID()) {
+                            logger.info("monitor() :: enable {} in infra mode", interfaceName);
+                            enableInterface(wifiInterfaceConfig);
+                        } else {
+                            if (isAccessPointAvailable(interfaceName, wifiConfig.getSSID())) {
+                                logger.info("monitor() :: found access point - enable {} in infra mode", interfaceName);
+                                enableInterface(wifiInterfaceConfig);
+                            } else {
+                                logger.warn("monitor() :: {} - access point is not available", wifiConfig.getSSID());
+                            }
+                        }
+                    }
+                } catch (KuraException e) {
+                    logger.error("monitor() :: Error enabling {} interface, will try to reset wifi", interfaceName, e);
+                    resetWifiDevice(interfaceName);
+                }
+            } else {
+                // Infrastructure (Station) mode:
+                // * Notify RSSI to listeners
+                // * Detect interface link down: disable the interface
+                // * Cannot ping Access Point: renew DHCP lease
+                // * Check if enabled for LAN in DHCP mode: remove default gateway from route table
+                //
+                // Master (Access Point) mode:
+                // * Detect interface link down: enable interface.
+                // FIXME should we just disable it like in the Infrastructure case above?
+                if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
+                    // get signal strength only if somebody needs it
+                    if (this.listeners != null && !this.listeners.isEmpty()) {
+                        int signalLevel = 0;
+                        try {
+                            logger.debug("monitor() :: Getting Signal Level for {} -> {}", interfaceName,
+                                    wifiConfig.getSSID());
+                            signalLevel = getSignalLevel(interfaceName, wifiConfig.getSSID());
+                            logger.debug("monitor() :: Wifi RSSI is {}", signalLevel);
+                        } catch (KuraException e) {
+                            logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName,
+                                    wifiConfig.getSSID());
+                            logger.error("monitor() :: Failed to get Signal Level ", e);
+                            signalLevel = 0;
+                        }
+                        for (WifiClientMonitorListener listener : this.listeners) {
+                            listener.setWifiSignalLevel(interfaceName, signalLevel);
+                        }
+                    }
+
+                    if (!wifiState.isLinkUp()) {
+                        logger.debug("monitor() :: link is down - disabling {}", interfaceName);
+                        disableInterface(interfaceName);
+                        up = false;
+                    }
+
+                    NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
+                    boolean isDhcpClient = isDhcpClientEnabled(netConfigIP4);
+                    boolean dhcpLeaseRenewed = false;
+                    logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
+                    if (isDhcpClient && wifiConfig.pingAccessPoint()) {
+                        boolean isApReachable = false;
+                        for (int i = 0; i < 3; i++) {
+                            isApReachable = isAccessPointReachable(interfaceName, 1000);
+                            if (isApReachable) {
+                                break;
+                            }
+                            sleep(1000);
+                        }
+                        if (!isApReachable) {
+                            this.netAdminService.renewDhcpLease(interfaceName);
+                            dhcpLeaseRenewed = true;
+                        }
+                    }
+
+                    // Check if wifi network reconnected between monitor executions
+                    InterfaceState oldState = oldStatuses.get(interfaceName);
+                    if (!dhcpLeaseRenewed && isDhcpClient
+                            && (oldState == null || oldState.getCarrierChanges() != wifiState.getCarrierChanges())) {
+                        logger.debug("monitor() :: carrier changes - renewing DHCP lease {}", interfaceName);
+                        this.netAdminService.renewDhcpLease(interfaceName);
+                    }
+
+                    if (isDhcpClient && netConfigIP4.getStatus().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)) {
+                        RouteConfig rconf = this.routeService.getDefaultRoute(interfaceName);
+                        if (rconf != null) {
+                            logger.debug("monitor() :: {} is configured for LAN/DHCP - removing GATEWAY route ...",
+                                    rconf.getInterfaceName());
+                            this.routeService.removeStaticRoute(rconf.getDestination(), rconf.getGateway(),
+                                    rconf.getNetmask(), rconf.getInterfaceName());
+                        }
+                    }
+                } else if (WifiMode.MASTER.equals(wifiConfig.getMode()) && !wifiState.isLinkUp()) {
+                    // disabling interface is probably needed to handle potential driver issues.
+                    logger.warn("monitor() :: !! Link is down for the {} in AP mode, while IP address is assigned. "
+                            + "Will disable and reenable interface ...", interfaceName);
+                    disableInterface(interfaceName);
+                    enableInterface(wifiInterfaceConfig);
+                }
+            }
+        }
+    }
+
+    private boolean isDhcpClientEnabled(NetConfigIP4 netConfigIP4) {
+        return netConfigIP4 != null && netConfigIP4.isDhcp()
+                && (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                        || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN);
+    }
+
+    private void monitorDisabledInterfaces() throws KuraException {
+        for (String interfaceName : this.disabledInterfaces) {
+            InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
+            if (wifiState != null && wifiState.isUp()) {
+                logger.debug("monitor() :: {} is currently up - disable interface", interfaceName);
+                disableInterface(interfaceName);
+            }
+        }
+    }
+
+    private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses)
+            throws KuraException {
+
+        if (newStatuses != null) {
+            postEventForStatusChanged(oldStatuses, newStatuses);
+            postEventForDisabledInterfaces(oldStatuses, newStatuses);
+        }
+    }
+
+    private void postEventForDisabledInterfaces(Map<String, InterfaceState> oldStatuses,
+            Map<String, InterfaceState> newStatuses) throws KuraException {
+        Iterator<String> it;
+        // post NetworkStatusChangeEvent on interfaces that are no longer there
+        if (oldStatuses != null) {
+            it = oldStatuses.keySet().iterator();
+            while (it.hasNext()) {
+                String interfaceName = it.next();
+                if (!newStatuses.containsKey(interfaceName)) {
+                    logCurrentNetworkConfiguration();
+                    logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
+                    this.eventAdmin.postEvent(
+                            new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
+                }
+            }
+        }
+    }
+
+    private void postEventForStatusChanged(Map<String, InterfaceState> oldStatuses,
+            Map<String, InterfaceState> newStatuses) throws KuraException {
+        // post NetworkStatusChangeEvent on current and new interfaces
+        Iterator<String> it = newStatuses.keySet().iterator();
+        while (it.hasNext()) {
+            String interfaceName = it.next();
+            if (oldStatuses != null && oldStatuses.containsKey(interfaceName)) {
+                if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
+                    logCurrentNetworkConfiguration();
+                    logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
+                    this.eventAdmin.postEvent(
+                            new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
+                }
+            } else {
+                logCurrentNetworkConfiguration();
+                logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
+                this.eventAdmin
+                        .postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
+            }
+        }
+    }
+
+    private void logCurrentNetworkConfiguration() throws KuraException {
+        if (logger.isDebugEnabled()) {
+            logger.debug(this.netConfigService.getNetworkConfiguration().toString());
+        }
+    }
+
+    @Override
+    public void registerListener(WifiClientMonitorListener newListener) {
+        boolean found = false;
+        if (this.listeners == null) {
+            this.listeners = new ArrayList<>();
+        }
+        if (!this.listeners.isEmpty()) {
+            for (WifiClientMonitorListener listener : this.listeners) {
+                if (listener.equals(newListener)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            this.listeners.add(newListener);
+        }
+    }
+
+    @Override
+    public void unregisterListener(WifiClientMonitorListener listenerToUnregister) {
+        if (this.listeners != null && !this.listeners.isEmpty()) {
+
+            for (int i = 0; i < this.listeners.size(); i++) {
+                if (this.listeners.get(i).equals(listenerToUnregister)) {
+                    this.listeners.remove(i);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        logger.debug("handleEvent - topic: {}", event.getTopic());
+        String topic = event.getTopic();
+
+        if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
+            logger.debug("handleEvent - received network change event");
+            NetworkConfigurationChangeEvent netConfigChangedEvent = (NetworkConfigurationChangeEvent) event;
+            String[] propNames = netConfigChangedEvent.getPropertyNames();
+            if (propNames != null && propNames.length > 0) {
+                Map<String, Object> props = new HashMap<>();
+                for (String propName : propNames) {
+                    Object prop = netConfigChangedEvent.getProperty(propName);
+                    if (prop != null) {
+                        props.put(propName, prop);
+                    }
+                }
+                try {
+                    this.newNetConfiguration = new NetworkConfiguration(props);
+
+                    // Initialize the monitor thread if needed
+                    if (monitorTask == null) {
+                        initializeMonitoredInterfaces(this.newNetConfiguration);
+                    } else {
+                        monitorNotify();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error during WiFi Monitor handle event", e);
+                }
+            }
+        }
+    }
+
+    private boolean isWifiEnabled(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        if (wifiInterfaceConfig == null) {
+            return false;
+        }
+        WifiMode wifiMode = getWifiInterfaceMode(wifiInterfaceConfig);
+        NetInterfaceStatus status = ((AbstractNetInterface<?>) wifiInterfaceConfig).getInterfaceStatus();
+
+        boolean statusEnabled = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        boolean wifiEnabled = wifiMode == WifiMode.INFRA || wifiMode == WifiMode.MASTER ? true : false;
+
+        logger.debug("isWifiEnabled() :: {} interface - status: {}", wifiInterfaceConfig.getName(), statusEnabled);
+        logger.debug("isWifiEnabled() :: {} interface - WiFi Mode: {}", wifiInterfaceConfig.getName(), wifiEnabled);
+
+        return statusEnabled && wifiEnabled;
+    }
+
+    private WifiMode getWifiInterfaceMode(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        WifiMode wifiMode = WifiMode.UNKNOWN;
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig;
+        try {
+            wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                    .getNetInterfaceAddressConfig();
+            wifiMode = wifiInterfaceAddressConfig.getMode();
+        } catch (KuraException e) {
+            logger.error("Failed to obtain WifiInterfaceMode", e);
+        }
+        return wifiMode;
+    }
+
+    private WifiConfig getWifiConfig(WifiInterfaceConfigImpl wifiInterfaceConfig) {
+        if (wifiInterfaceConfig == null) {
+            return null;
+        }
+        WifiConfig selectedWifiConfig = null;
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig;
+        try {
+            wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                    .getNetInterfaceAddressConfig();
+            WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
+            for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+                if (netConfig instanceof WifiConfig) {
+                    WifiConfig wifiConfig = (WifiConfig) netConfig;
+                    if (wifiMode.equals(wifiConfig.getMode())) {
+                        selectedWifiConfig = wifiConfig;
+                        break;
+                    }
+                }
+            }
+        } catch (KuraException e) {
+            logger.error("Failed to obtain WifiConfig", e);
+        }
+
+        return selectedWifiConfig;
+    }
+
+    private void disableInterface(String interfaceName) throws KuraException {
+        logger.debug("Disabling {}", interfaceName);
+        this.netAdminService.disableInterface(interfaceName);
+        this.netAdminService.manageDhcpServer(interfaceName, false);
+    }
+
+    private void enableInterface(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+            throws KuraException {
+        logger.debug("enableInterface: {}", netInterfaceConfig);
+        WifiInterfaceConfigImpl wifiInterfaceConfig;
+
+        if (!(netInterfaceConfig instanceof WifiInterfaceConfigImpl)) {
+            return;
+        }
+        wifiInterfaceConfig = (WifiInterfaceConfigImpl) netInterfaceConfig;
+        String interfaceName = wifiInterfaceConfig.getName();
+        WifiMode wifiMode;
+        NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
+        boolean isDhcpClient = false;
+        boolean enableDhcpServer = false;
+
+        WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                .getNetInterfaceAddressConfig();
+
+        wifiMode = wifiInterfaceAddressConfig.getMode();
+        for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+            if (netConfig instanceof NetConfigIP4) {
+                status = ((NetConfigIP4) netConfig).getStatus();
+                isDhcpClient = ((NetConfigIP4) netConfig).isDhcp();
+            } else if (netConfig instanceof DhcpServerConfig4) {
+                enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
+            }
+        }
+        if (status == NetInterfaceStatus.netIPv4StatusL2Only) {
+            isDhcpClient = false;
+        }
+        boolean enStatus = status == NetInterfaceStatus.netIPv4StatusL2Only
+                || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+        boolean enWifiMode = wifiMode == WifiMode.INFRA || wifiMode == WifiMode.MASTER ? true : false;
+        if (enStatus && enWifiMode) {
+            this.netAdminService.enableInterface(interfaceName, isDhcpClient);
+            if (enableDhcpServer) {
+                this.netAdminService.manageDhcpServer(interfaceName, true);
+            }
+        }
+    }
+
+    private void reloadKernelModule(String interfaceName, WifiMode wifiMode) throws KuraException {
+        logger.info("monitor() :: reload {} using kernel module for WiFi mode {}", interfaceName, wifiMode);
+        if (this.wifiDriverService == null) {
+            return;
+        }
+        if (this.wifiDriverService.isKernelModuleLoaded(interfaceName)) {
+            this.wifiDriverService.unloadKernelModule(interfaceName);
+        }
+        this.wifiDriverService.loadKernelModule(interfaceName, wifiMode);
+    }
+
+    private void initializeMonitoredInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
+        synchronized (lock) {
+            logger.info("initializing monitor");
+            this.enabledInterfaces.clear();
+            this.disabledInterfaces.clear();
+            this.unmanagedInterfaces.clear();
+
+            if (networkConfiguration != null) {
+                for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfiguration
+                        .getNetInterfaceConfigs()) {
+                    String interfaceName = netInterfaceConfig.getName();
+                    if (netInterfaceConfig.getType() != NetInterfaceType.WIFI || interfaceName.startsWith("mon")) {
+                        // ignore non-wifi or "mon" interfaces
+                        continue;
+                    }
+                    if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+                        if (isWifiEnabled((WifiInterfaceConfigImpl) netInterfaceConfig)) {
+                            logger.debug("Adding {} to enabledInterfaces", interfaceName);
+                            this.enabledInterfaces.add(interfaceName);
+                        } else if (!((AbstractNetInterface<?>) netInterfaceConfig).isInterfaceManaged()) {
+                            logger.debug("Adding {} to unmanagedInterfaces", interfaceName);
+                            this.unmanagedInterfaces.add(interfaceName);
+                        } else {
+                            logger.debug("Adding {} to disabledInterfaces", interfaceName);
+                            this.disabledInterfaces.add(interfaceName);
+                        }
+                    }
+                }
+            } else {
+                logger.info("networkConfiguration is null");
+            }
+
+            if (!this.enabledInterfaces.isEmpty() || !this.disabledInterfaces.isEmpty()) {
+                this.interfaceStatuses = getInterfaceStatuses(this.enabledInterfaces);
+
+                if (monitorTask == null) {
+                    logger.info("Starting WifiMonitor thread...");
+                    stopThread.set(false);
+                    monitorTask = this.executor.submit(() -> {
+                        while (!stopThread.get()) {
+                            Thread.currentThread().setName("WifiMonitor Thread");
+                            try {
+                                monitor();
+                                monitorWait();
+                            } catch (InterruptedException interruptedException) {
+                                logger.debug("WiFi monitor interrupted - {}", interruptedException);
+                                Thread.currentThread().interrupt();
+                            } catch (Throwable t) {
+                                logger.error("Exception while monitoring WiFi connection - {}", t);
+                            }
+                        }
+                    });
+                } else {
+                    monitorNotify();
+                }
+            }
+        }
+    }
+
+    private Collection<String> getReconfiguredWifiInterfaces() throws KuraException {
+        Set<String> reconfiguredInterfaces = new HashSet<>();
+        for (String interfaceName : this.networkService.getAllNetworkInterfaceNames()) {
+            // skip non-wifi interfaces
+            if (getNetworkType(interfaceName) != NetInterfaceType.WIFI || interfaceName.startsWith("mon")) {
+                // ignore non-wifi or "mon" interfaces
+                continue;
+            }
+
+            // Get the old wifi config
+            WifiInterfaceConfigImpl currentConfig = null;
+            if (this.currentNetworkConfiguration != null) {
+                NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = this.currentNetworkConfiguration
+                        .getNetInterfaceConfig(interfaceName);
+                if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+                    currentConfig = (WifiInterfaceConfigImpl) netInterfaceConfig;
+                }
+            }
+
+            // Get the new wifi config
+            WifiInterfaceConfigImpl newConfig = null;
+            if (this.newNetConfiguration != null) {
+                NetInterfaceConfig<? extends NetInterfaceAddressConfig> newNetInterfaceConfig = this.newNetConfiguration
+                        .getNetInterfaceConfig(interfaceName);
+                if (newNetInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+                    newConfig = (WifiInterfaceConfigImpl) newNetInterfaceConfig;
+                }
+            }
+
+            if (newConfig != null && currentConfig != null) {
+                List<WifiInterfaceAddressConfig> currentInterfaceAddressConfigs = currentConfig
+                        .getNetInterfaceAddresses();
+                List<WifiInterfaceAddressConfig> newInterfaceAddressConfigs = newConfig.getNetInterfaceAddresses();
+
+                if (currentInterfaceAddressConfigs == null && newInterfaceAddressConfigs == null) {
+                    // no config changed - continue
+                    continue;
+                }
+
+                if (currentInterfaceAddressConfigs == null || newInterfaceAddressConfigs == null) {
+                    reconfiguredInterfaces.add(interfaceName);
+                    continue;
+                }
+                // FIXME: compare interfaceAddressConfigs
+                // FIXME - assuming one InterfaceAddressConfig for now
+                WifiInterfaceAddressConfig currentInterfaceAddressConfig = currentInterfaceAddressConfigs.get(0);
+                WifiInterfaceAddressConfig newInterfaceAddressConfig = newInterfaceAddressConfigs.get(0);
+
+                if (currentInterfaceAddressConfig.getConfigs() == null
+                        && newInterfaceAddressConfig.getConfigs() == null) {
+                    continue;
+                }
+
+                if (currentInterfaceAddressConfig.getConfigs() == null
+                        || newInterfaceAddressConfig.getConfigs() == null) {
+                    reconfiguredInterfaces.add(interfaceName);
+                    continue;
+                }
+
+                // Remove other WifiConfigs that don't match the selected mode, for comparison purposes
+                //
+                List<NetConfig> currentNetConfigs = new ArrayList<>(currentInterfaceAddressConfig.getConfigs());
+                List<NetConfig> newNetConfigs = new ArrayList<>(newInterfaceAddressConfig.getConfigs());
+
+                WifiMode newWifiMode = newInterfaceAddressConfig.getMode();
+                WifiMode currentWifiMode = currentInterfaceAddressConfig.getMode();
+
+                if (newWifiMode != currentWifiMode) {
+                    reconfiguredInterfaces.add(interfaceName);
+                    continue;
+                }
+                // Modes don't match. We need to compare configs deeply
+                internalWifiConfigCompare(reconfiguredInterfaces, interfaceName, currentNetConfigs, newNetConfigs);
+            } else if (newConfig != null) {
+                // only newConfig - oldConfig is null
+                logger.debug("oldConfig was null, adding newConfig");
+                reconfiguredInterfaces.add(interfaceName);
+            } else if (currentConfig != null) {
+                logger.debug("Configuration for {} has changed", interfaceName);
+                reconfiguredInterfaces.add(interfaceName);
+                logger.debug("Removing {} from list of enabled interfaces because it is not configured", interfaceName);
+                this.disabledInterfaces.add(interfaceName);
+            } else {
+                logger.debug("old and new wifi config are null...");
+            }
+        }
+        updateInterfacesLists(reconfiguredInterfaces);
+        return reconfiguredInterfaces;
+    }
+
+    private void updateInterfacesLists(Set<String> reconfiguredInterfaces) {
+        Set<String> enabledIfaces = new HashSet<>();
+        Set<String> disabledIfaces = new HashSet<>();
+        Set<String> unmanagedIfaces = new HashSet<>();
+
+        for (String interfaceName : reconfiguredInterfaces) {
+            logger.info("WifiMonitor: configuration for {} has changed", interfaceName);
+            WifiInterfaceConfigImpl newConfig = null;
+            if (this.newNetConfiguration != null) {
+                NetInterfaceConfig<? extends NetInterfaceAddressConfig> newNetInterfaceConfig = this.newNetConfiguration
+                        .getNetInterfaceConfig(interfaceName);
+                if (newNetInterfaceConfig instanceof WifiInterfaceConfigImpl) {
+                    newConfig = (WifiInterfaceConfigImpl) newNetInterfaceConfig;
+                }
+            }
+
+            // do we need to monitor?
+            if (isWifiEnabled(newConfig) && !enabledIfaces.contains(interfaceName)) {
+                logger.debug("Adding {} to list of enabled interfaces", interfaceName);
+                enabledIfaces.add(interfaceName);
+            } else if (newConfig != null && !((AbstractNetInterface<?>) newConfig).isInterfaceManaged()
+                    && !unmanagedIfaces.contains(interfaceName)) {
+                logger.debug("Removing {} from list of enabled interfaces because it is set not to be managed by Kura",
+                        interfaceName);
+                unmanagedIfaces.add(interfaceName);
+            } else if (!disabledIfaces.contains(interfaceName)) {
+                logger.debug("Removing {} from list of enabled interfaces because it is disabled", interfaceName);
+                disabledIfaces.add(interfaceName);
+            }
+        }
+        if (!reconfiguredInterfaces.isEmpty()) {
+            this.enabledInterfaces = enabledIfaces;
+            this.disabledInterfaces = disabledIfaces;
+            this.unmanagedInterfaces = unmanagedIfaces;
+        }
+    }
+
+    private void internalWifiConfigCompare(Set<String> reconfiguredInterfaces, String interfaceName,
+            List<NetConfig> currentNetConfigs, List<NetConfig> newNetConfigs) {
+        for (NetConfig currentNetConfig : currentNetConfigs) {
+            if (currentNetConfig instanceof FirewallAutoNatConfig) {
+                continue; // we don't compare FirewallAutoNatConfig instances
+            }
+
+            for (NetConfig newNetConfig : newNetConfigs) {
+                if (newNetConfig instanceof FirewallAutoNatConfig) {
+                    continue; // we don't compare FirewallAutoNatConfig instances
+                }
+
+                if (newNetConfig.getClass() == currentNetConfig.getClass() && !newNetConfig.equals(currentNetConfig)
+                        && !(currentNetConfig instanceof WifiConfig && ((WifiConfig) currentNetConfig)
+                                .getMode() != ((WifiConfig) newNetConfig).getMode())) { // ((WifiConfig)
+                    // currentNetConfig).getMode()
+                    // != newWifiMode
+
+                    // we are not entering here if we are comparing WifiConfig instances and the mode differs. Two
+                    // instances
+                    // of WifiConfig exist: one with mode= MASTER and one with mode= INFRA.
+                    // we try to compare only objects with the same mode, in order to have a correct comparison.
+                    logger.debug("\tConfig changed - Old config: {}", currentNetConfig);
+                    logger.debug("\tConfig changed - New config: {}", newNetConfig);
+                    reconfiguredInterfaces.add(interfaceName);
+                    return;
+                }
+            }
+
+        }
+    }
+
+    private boolean isAccessPointAvailable(String interfaceName, String ssid) throws KuraException {
+        if (ssid == null) {
+            return false;
+        }
+        boolean available = false;
+        IScanTool scanTool = getScanTool(interfaceName);
+        if (scanTool != null) {
+            List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+            for (WifiAccessPoint wap : wifiAccessPoints) {
+                if (ssid.equals(wap.getSSID())) {
+                    logger.trace("isAccessPointAvailable() :: SSID={} is available :: strength={}", ssid,
+                            wap.getStrength());
+                    available = Math.abs(wap.getStrength()) > 0;
+                    break;
+                }
+            }
+        }
+        return available;
+    }
+
+    @Override
+    public int getSignalLevel(String interfaceName, String ssid, boolean recompute) throws KuraException {
+        if (recompute) {
+            int signalLevel;
+            if (this.wifiDriverService != null
+                    && !this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
+                logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName,
+                        WifiMode.INFRA);
+                reloadKernelModule(interfaceName, WifiMode.INFRA);
+            }
+            signalLevel = getSignalLevelWithLinkTool(interfaceName, ssid);
+            if (signalLevel != 0) {
+                this.rssi = signalLevel;
+            } else {
+                this.rssi = getSignalLevelWithScanTool(interfaceName, ssid);
+            }
+        }
+        return this.rssi;
+    }
+
+    @Override
+    public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
+        return getSignalLevel(interfaceName, ssid, true);
+    }
+
+    private int getSignalLevelWithLinkTool(String interfaceName, String ssid) throws KuraException {
+        InterfaceState wifiState = this.interfaceStatuses.get(interfaceName);
+        if (wifiState == null || ssid == null) {
+            return 0;
+        }
+        int signalLevel = 0;
+        if (wifiState.isUp()) {
+            logger.trace("getSignalLevelWithLinkTool() :: using 'iw dev wlan0 link' command ...");
+            LinkTool linkTool = getLinkTool(interfaceName);
+
+            if (linkTool != null && linkTool.get() && linkTool.isLinkDetected()) {
+                signalLevel = linkTool.getSignal();
+                logger.debug("getSignalLevelWithLinkTool() :: rssi={} (using 'iw dev wlan0 link')", signalLevel);
+            }
+        }
+        return signalLevel;
+    }
+
+    private int getSignalLevelWithScanTool(String interfaceName, String ssid) throws KuraException {
+        logger.trace("getSignalLevelWithScanTool() :: using 'iw dev wlan0 scan' command ...");
+        IScanTool scanTool = getScanTool(interfaceName);
+        if (scanTool == null || ssid == null) {
+            return 0;
+        }
+        int signalLevel = 0;
+        List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
+        for (WifiAccessPoint wap : wifiAccessPoints) {
+            if (ssid.equals(wap.getSSID())) {
+                if (wap.getStrength() > 0) {
+                    signalLevel = 0 - wap.getStrength();
+                    logger.debug("getSignalLevelWithScanTool() :: rssi={} (using 'iw dev wlan0 scan')", signalLevel);
+                }
+                break;
+            }
+        }
+        return signalLevel;
+    }
+
+    private boolean isAccessPointReachable(String interfaceName, int tout) throws KuraException {
+        boolean ret = true;
+        RouteService rs = getRouteService();
+        RouteConfig rconf = rs.getDefaultRoute(interfaceName);
+        if (rconf != null) {
+            IPAddress ipAddress = rconf.getGateway();
+            String iface = rconf.getInterfaceName();
+            if (ipAddress != null && iface != null && iface.equals(interfaceName)) {
+                try {
+                    InetAddress inetAddress = InetAddress.getByName(ipAddress.getHostAddress());
+                    ret = inetAddress.isReachable(tout);
+                    logger.info("Access point reachable? {}", ret);
+                } catch (Exception e) {
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private Map<String, InterfaceState> getInterfaceStatuses(Collection<String> interfaceList) throws KuraException {
+        Map<String, InterfaceState> statuses = new HashMap<>();
+
+        for (String interfaceName : interfaceList) {
+            WifiInterfaceConfigImpl wifiInterfaceConfig = (WifiInterfaceConfigImpl) this.currentNetworkConfiguration
+                    .getNetInterfaceConfig(interfaceName);
+            if (wifiInterfaceConfig == null) {
+                continue;
+            }
+            WifiConfig wifiConfig = getWifiConfig(wifiInterfaceConfig);
+            boolean isL2Only = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config()
+                    .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
+            if (wifiConfig != null) {
+                InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
+                builder.setInterfaceName(interfaceName);
+                builder.setWifiMode(wifiConfig.getMode());
+                builder.setL2OnlyInterface(isL2Only);
+                statuses.put(interfaceName, builder.buildWifiInterfaceState());
+            }
+        }
+        return statuses;
+    }
+
+    private boolean resetWifiDevice(String interfaceName) throws IOException {
+        boolean ret = false;
+        if (isWifiDeviceOn(interfaceName) && this.wifiDriverService != null) {
+            this.wifiDriverService.disable(interfaceName);
+        }
+        if (isWifiDeviceReady(interfaceName, false, 10) && this.wifiDriverService != null) {
+            this.wifiDriverService.enable(interfaceName);
+            ret = isWifiDeviceReady(interfaceName, true, 20);
+        }
+        return ret;
+    }
+
+    private boolean isWifiDeviceReady(String interfaceName, boolean expected, int tout) {
+        boolean deviceReady = false;
+        long tmrStart = System.currentTimeMillis();
+        do {
+            sleep(1000);
+            boolean deviceOn = isWifiDeviceOn(interfaceName);
+            logger.trace("isWifiDeviceReady()? :: deviceOn={}, expected={}", deviceOn, expected);
+            if (deviceOn == expected) {
+                deviceReady = true;
+                break;
+            }
+        } while (System.currentTimeMillis() - tmrStart < tout * 1000);
+
+        logger.debug("isWifiDeviceReady()? :: deviceReady={}", deviceReady);
+        return deviceReady;
+    }
+
+    private void monitorNotify() {
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.notifyAll();
+            }
+        }
+    }
+
+    private void monitorWait() throws InterruptedException {
+        if (stopThread != null) {
+            synchronized (stopThread) {
+                stopThread.wait(THREAD_INTERVAL);
+            }
+        }
+    }
+
+    private void sleep(long timeToSleep) {
+        try {
+            Thread.sleep(timeToSleep);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}

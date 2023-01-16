@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+			name="org.eclipse.kura.net.admin.NetworkAdminService"
+	        enabled="true" 
+            immediate="true">
+   <implementation class="org.eclipse.kura.net.admin.NetworkAdminServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.net.NetworkAdminService"/>
+   </service>
+   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
+   <reference bind="setNetworkConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.NetworkConfigurationService" name="NetworkConfigurationService" policy="static" unbind="unsetNetworkConfigurationService"/>
+   <reference bind="setFirewallConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.FirewallConfigurationService" name="FirewallConfigurationService" policy="static" unbind="unsetFirewallConfigurationService"/>
+   <reference bind="setDnsServerService" cardinality="1..1" interface="org.eclipse.kura.internal.linux.net.dns.DnsServerService" name="DNSService" policy="static" unbind="unsetDnsServerService"/>
+   <reference bind="setWifiDriverService" cardinality="0..1" interface="org.eclipse.kura.internal.linux.net.wifi.WifiDriverService" name="WifiDriverService" policy="static" unbind="unsetWifiDriverService"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
+   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+</scr:component>

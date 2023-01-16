@@ -165,10 +165,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         logger.debug("Deactivate NetworkConfigurationService...");
     }
 
-    protected List<String> getAllInterfaceNames() throws KuraException {
-        return this.networkService.getAllNetworkInterfaceNames();
-    }
-
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
         // Do be done with NM...
         if (isUsbPort(interfaceName)) {
@@ -379,7 +375,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         Tocd tocd = objectFactory.createTocd();
 
         tocd.setName("NetworkConfigurationService");
-        tocd.setId("org.eclipse.kura.net.admin.NetworkConfigurationService");
+        tocd.setId("org.eclipse.kura.net.admin.NetworkConfigurationService"); // for backward compatibility, let's keep
+                                                                              // the old id
         tocd.setDescription("Network Configuration Service");
 
         // get the USB network interfaces (if any)
@@ -415,7 +412,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                     getInterfaceCommonDefinition(objectFactory, tocd, ifaceName);
                     getDnsDefinition(objectFactory, tocd, ifaceName);
                     getWifiDefinition(type.get(), objectFactory, tocd, ifaceName);
-                    // TODO - deal with USB devices (READ ONLY)
                 }
             }
         } catch (Exception e) {

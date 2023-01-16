@@ -27,7 +27,6 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.NetworkAdminConfiguration;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
@@ -44,6 +43,7 @@ public abstract class AbstractNetworkConfigurationService {
     protected static final String CONFIG_DRIVER = ".config.driver";
     protected static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
     protected static final String CONFIG_MTU = ".config.mtu";
+    protected static final String CONFIG_TYPE = ".config.type";
     protected static final String NET_INTERFACES = "net.interfaces";
     protected static final Pattern COMMA = Pattern.compile(",");
 

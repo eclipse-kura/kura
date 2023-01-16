@@ -43,6 +43,7 @@ public abstract class AbstractNetworkConfigurationService {
     protected static final String CONFIG_DRIVER = ".config.driver";
     protected static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
     protected static final String CONFIG_MTU = ".config.mtu";
+    protected static final String CONFIG_TYPE = ".config.type";
     protected static final String NET_INTERFACES = "net.interfaces";
     protected static final Pattern COMMA = Pattern.compile(",");
 

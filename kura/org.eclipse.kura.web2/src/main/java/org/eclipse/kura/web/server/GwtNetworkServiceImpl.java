@@ -20,11 +20,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -114,8 +119,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final long serialVersionUID = -4188750359099902616L;
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
     private static final String FIREWALL_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
+    private static final String CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
     private static final String ENABLED = "enabled";
     private static final String UNKNOWN_NETWORK = "0.0.0.0/0";
+    protected static final String NET_INTERFACES = "net.interfaces";
+    protected static final Pattern COMMA = Pattern.compile(",");
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute) throws GwtKuraException {
@@ -141,15 +149,22 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return result;
     }
 
+    protected Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {
+        return Optional.ofNullable(properties).map(p -> p.get("net.interfaces"))
+                .map(s -> COMMA.splitAsStream((String) s).filter(p -> !p.trim().isEmpty())
+                        .collect(Collectors.toCollection(HashSet::new)))
+                .orElseGet(HashSet::new);
+    }
+
     private List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
 
         logger.debug("Starting");
 
         List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<>();
-        NetworkAdminService nas = null;
+        ConfigurationService configurationService = null;
         try {
-            nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+            configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         } catch (Exception t) {
             logger.warn("Exception", t);
             return gwtNetConfigs;
@@ -172,606 +187,605 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
 
             GwtNetInterfaceConfig gwtNetConfig;
-            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas
-                    .getNetworkInterfaceConfigs(recompute)) {
-                logger.debug("Getting config for {} with type {}", netIfConfig.getName(), netIfConfig.getType());
+            Map<String, Object> properties = configurationService.getComponentConfiguration(CONFIGURATION_SERVICE_PID)
+                    .getConfigurationProperties();
+            // Add checks for missing properties!!!!
+            Set<String> interfaceNames = getNetworkInterfaceNamesInConfig(properties);
+            for (String interfaceName : interfaceNames) {
+                String type = (String) properties.get("net.interface." + interfaceName + ".type");
+                logger.debug("Getting config for {} with type {}", interfaceName, type);
 
-                logger.debug("Interface State: {}", netIfConfig.getState());
+                gwtNetConfig = createGwtNetConfig(properties, interfaceName);
 
-                gwtNetConfig = createGwtNetConfig(netIfConfig);
-
-                gwtNetConfig.setName(netIfConfig.getName());
-                gwtNetConfig.setHwName(netIfConfig.getName());
-                if (netIfConfig.getType() != null) {
-                    gwtNetConfig.setHwType(netIfConfig.getType().name());
+                gwtNetConfig.setName(interfaceName);
+                gwtNetConfig.setHwName(interfaceName);
+                if (type != null) {
+                    gwtNetConfig.setHwType(type);
                 }
-                if (netIfConfig.getState() != null) {
-                    gwtNetConfig.setHwState(netIfConfig.getState().name());
+//                if (netIfConfig.getState() != null) {
+//                    gwtNetConfig.setHwState(netIfConfig.getState().name());
+//                }
+//                logger.debug("MAC: {}", NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
+//                gwtNetConfig.setHwAddress(NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
+//                gwtNetConfig.setHwDriver(netIfConfig.getDriver());
+//                gwtNetConfig.setHwDriverVersion(netIfConfig.getDriverVersion());
+//                gwtNetConfig.setHwFirmware(netIfConfig.getFirmwareVersion());
+//                gwtNetConfig.setHwMTU(netIfConfig.getMTU());
+//                if (netIfConfig.getUsbDevice() != null) {
+//                    gwtNetConfig.setHwUsbDevice(netIfConfig.getUsbDevice().getUsbDevicePath());
+//                } else {
+//                    gwtNetConfig.setHwUsbDevice("N/A");
+//                }
+
+//                NetInterfaceAddressConfig addressConfig = ((AbstractNetInterface<?>) netIfConfig)
+//                        .getNetInterfaceAddressConfig();
+//                if (addressConfig != null) {
+//                    // current status - not configuration!
+//                    if (addressConfig.getAddress() != null) {
+//                        logger.debug("current address: {}", addressConfig.getAddress().getHostAddress());
+//                    }
+//                    if (addressConfig.getNetworkPrefixLength() >= 0 && addressConfig.getNetworkPrefixLength() <= 32) {
+//                        logger.debug("current prefix length: {}", addressConfig.getNetworkPrefixLength());
+//                    }
+//                    if (addressConfig.getNetmask() != null) {
+//                        logger.debug("current netmask: {}", addressConfig.getNetmask().getHostAddress());
+//                    }
+
+//                List<NetConfig> netConfigs = addressConfig.getConfigs();
+//                if (netConfigs != null) {
+//                boolean isNatEnabled = (Boolean) properties
+//                        .get("net.interface." + interfaceName + ".config.nat.enabled");
+//                boolean isDhcpServerEnabled = (Boolean) properties
+//                        .get("net.interface." + interfaceName + ".config.dhcpServer4.enabled");
+                boolean isDhcpClientEnabled = (Boolean) properties
+                        .get("net.interface." + interfaceName + ".config.dhcpClient4.enabled");
+
+                // we are enabled - for LAN or WAN?
+                String status = (String) properties.get("net.interface." + interfaceName + ".config.ip4.status");
+                switch (status) {
+                    case "netIPv4StatusEnabledLAN":
+                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
+                        break;
+                    case "netIPv4StatusEnabledWAN":
+                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
+                        break;
+                    case "netIPv4StatusUnmanaged":
+                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
+                        break;
+                    case "netIPv4StatusL2Only":
+                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusL2Only.name());
+                        break;
+                    default:
+                        gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                 }
-                logger.debug("MAC: {}", NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
-                gwtNetConfig.setHwAddress(NetUtil.hardwareAddressToString(netIfConfig.getHardwareAddress()));
-                gwtNetConfig.setHwDriver(netIfConfig.getDriver());
-                gwtNetConfig.setHwDriverVersion(netIfConfig.getDriverVersion());
-                gwtNetConfig.setHwFirmware(netIfConfig.getFirmwareVersion());
-                gwtNetConfig.setHwMTU(netIfConfig.getMTU());
-                if (netIfConfig.getUsbDevice() != null) {
-                    gwtNetConfig.setHwUsbDevice(netIfConfig.getUsbDevice().getUsbDevicePath());
+
+                if (isDhcpClientEnabled || type.equals(NetInterfaceType.LOOPBACK.toString())) {
+
+                    if (isDhcpClientEnabled) {
+                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+                    }
+
+                    if (type.equals(NetInterfaceType.LOOPBACK.toString())) {
+                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
+                        gwtNetConfig.setIpAddress("127.0.0.1"); // maybe there is a better way to get the loopback
+                                                                // address
+                        gwtNetConfig.setSubnetMask("255.0.0.0");
+                    }
+
+                    // since DHCP or loopback - populate current data
+                    // Address in dhcp mode is status, not configuration
+//                                    if (addressConfig.getAddress() != null) {
+//                                        gwtNetConfig.setIpAddress(addressConfig.getAddress().getHostAddress());
+//                                    } else {
+//                                        gwtNetConfig.setIpAddress("");
+//                                    }
+//                                    if (addressConfig.getNetworkPrefixLength() > 0
+//                                            && addressConfig.getNetworkPrefixLength() <= 32) {
+//                                        gwtNetConfig.setSubnetMask(NetworkUtil
+//                                                .getNetmaskStringForm(addressConfig.getNetworkPrefixLength()));
+//                                    } else {
+//                                        if (addressConfig.getNetmask() != null) {
+//                                            gwtNetConfig.setSubnetMask(addressConfig.getNetmask().getHostAddress());
+//                                        } else {
+//                                            gwtNetConfig.setSubnetMask("");
+//                                        }
+//                                    }
+//                                    if (addressConfig.getGateway() != null) {
+//                                        gwtNetConfig.setGateway(addressConfig.getGateway().getHostAddress());
+//                                    } else {
+//                                        gwtNetConfig.setGateway("");
+//                                    }
+
+//                                    // DHCP supplied DNS servers
+//                                    StringBuilder sb = new StringBuilder();
+//                                    List<? extends IPAddress> dnsServers = addressConfig.getDnsServers();
+//                                    if (dnsServers != null && !dnsServers.isEmpty()) {
+//                                        String sep = "";
+//                                        for (IPAddress dnsServer : dnsServers) {
+//                                            sb.append(sep).append(dnsServer.getHostAddress());
+//                                            sep = "\n";
+//                                        }
+//
+//                                        logger.debug("DNS Servers: {}", sb);
+//                                        gwtNetConfig.setReadOnlyDnsServers(sb.toString());
+//                                    } else {
+//                                        logger.debug("DNS Servers: [empty String]");
+//                                        gwtNetConfig.setReadOnlyDnsServers("");
+//                                    }
                 } else {
-                    gwtNetConfig.setHwUsbDevice("N/A");
-                }
+                    gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
 
-                NetInterfaceAddressConfig addressConfig = ((AbstractNetInterface<?>) netIfConfig)
-                        .getNetInterfaceAddressConfig();
-                if (addressConfig != null) {
-                    // current status - not configuration!
-                    if (addressConfig.getAddress() != null) {
-                        logger.debug("current address: {}", addressConfig.getAddress().getHostAddress());
+                    // since STATIC - populate with configured values
+                    // add validation for addresses?
+                    String address = (String) properties
+                            .get("net.interface." + interfaceName + ".config.ip4.address");
+                    Short netmask = (Short) properties.get("net.interface." + interfaceName + ".config.ip4.prefix");
+                    if (address != null && !address.isEmpty() && netmask != null) {
+                        String addressCIDR = address + "/" + netmask;
+                        gwtNetConfig.setIpAddress(address);
+                        gwtNetConfig.setSubnetMask(new SubnetUtils(addressCIDR).getInfo().getNetmask());
+                    } else {
+                        gwtNetConfig.setIpAddress("");
+                        gwtNetConfig.setSubnetMask("");
                     }
-                    if (addressConfig.getNetworkPrefixLength() >= 0 && addressConfig.getNetworkPrefixLength() <= 32) {
-                        logger.debug("current prefix length: {}", addressConfig.getNetworkPrefixLength());
-                    }
-                    if (addressConfig.getNetmask() != null) {
-                        logger.debug("current netmask: {}", addressConfig.getNetmask().getHostAddress());
-                    }
-
-                    List<NetConfig> netConfigs = addressConfig.getConfigs();
-                    if (netConfigs != null) {
-                        boolean isNatEnabled = false;
-                        boolean isDhcpServerEnabled = false;
-
-                        for (NetConfig netConfig : netConfigs) {
-                            if (netConfig instanceof NetConfigIP4) {
-                                logger.debug("Setting up NetConfigIP4 with status {}",
-                                        ((NetConfigIP4) netConfig).getStatus());
-
-                                // we are enabled - for LAN or WAN?
-                                if (((NetConfigIP4) netConfig)
-                                        .getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
-                                } else if (((NetConfigIP4) netConfig)
-                                        .getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
-                                } else if (((NetConfigIP4) netConfig)
-                                        .getStatus() == NetInterfaceStatus.netIPv4StatusUnmanaged) {
-                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
-                                } else if (((NetConfigIP4) netConfig)
-                                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
-                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusL2Only.name());
-                                } else {
-                                    gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
-                                }
-
-                                if (((NetConfigIP4) netConfig).isDhcp() || netIfConfig.isLoopback()) {
-                                    if (((NetConfigIP4) netConfig).isDhcp()) {
-                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-                                    }
-
-                                    if (netIfConfig.isLoopback()) {
-                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
-                                    }
-
-                                    // since DHCP or loopback - populate current data
-                                    if (addressConfig.getAddress() != null) {
-                                        gwtNetConfig.setIpAddress(addressConfig.getAddress().getHostAddress());
-                                    } else {
-                                        gwtNetConfig.setIpAddress("");
-                                    }
-                                    if (addressConfig.getNetworkPrefixLength() > 0
-                                            && addressConfig.getNetworkPrefixLength() <= 32) {
-                                        gwtNetConfig.setSubnetMask(NetworkUtil
-                                                .getNetmaskStringForm(addressConfig.getNetworkPrefixLength()));
-                                    } else {
-                                        if (addressConfig.getNetmask() != null) {
-                                            gwtNetConfig.setSubnetMask(addressConfig.getNetmask().getHostAddress());
-                                        } else {
-                                            gwtNetConfig.setSubnetMask("");
-                                        }
-                                    }
-                                    if (addressConfig.getGateway() != null) {
-                                        gwtNetConfig.setGateway(addressConfig.getGateway().getHostAddress());
-                                    } else {
-                                        gwtNetConfig.setGateway("");
-                                    }
-
-                                    // DHCP supplied DNS servers
-                                    StringBuilder sb = new StringBuilder();
-                                    List<? extends IPAddress> dnsServers = addressConfig.getDnsServers();
-                                    if (dnsServers != null && !dnsServers.isEmpty()) {
-                                        String sep = "";
-                                        for (IPAddress dnsServer : dnsServers) {
-                                            sb.append(sep).append(dnsServer.getHostAddress());
-                                            sep = "\n";
-                                        }
-
-                                        logger.debug("DNS Servers: {}", sb);
-                                        gwtNetConfig.setReadOnlyDnsServers(sb.toString());
-                                    } else {
-                                        logger.debug("DNS Servers: [empty String]");
-                                        gwtNetConfig.setReadOnlyDnsServers("");
-                                    }
-                                } else {
-                                    gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
-
-                                    // since STATIC - populate with configured values
-                                    // TODO - should we throw an error if current state doesn't match configuration?
-                                    if (((NetConfigIP4) netConfig).getAddress() != null) {
-                                        gwtNetConfig
-                                                .setIpAddress(((NetConfigIP4) netConfig).getAddress().getHostAddress());
-                                    } else {
-                                        gwtNetConfig.setIpAddress("");
-                                    }
-                                    if (((NetConfigIP4) netConfig).getSubnetMask() != null) {
-                                        gwtNetConfig.setSubnetMask(
-                                                ((NetConfigIP4) netConfig).getSubnetMask().getHostAddress());
-                                    } else {
-                                        gwtNetConfig.setSubnetMask("");
-                                    }
-                                    if (((NetConfigIP4) netConfig).getGateway() != null) {
-                                        logger.debug("Gateway for {} is: {}", netIfConfig.getName(),
-                                                ((NetConfigIP4) netConfig).getGateway().getHostAddress());
-                                        gwtNetConfig
-                                                .setGateway(((NetConfigIP4) netConfig).getGateway().getHostAddress());
-                                    } else {
-                                        gwtNetConfig.setGateway("");
-                                    }
-                                }
-
-                                // Custom DNS servers
-                                StringBuilder sb = new StringBuilder();
-                                List<IP4Address> dnsServers = ((NetConfigIP4) netConfig).getDnsServers();
-                                if (dnsServers != null && !dnsServers.isEmpty()) {
-                                    for (IP4Address dnsServer : dnsServers) {
-                                        if (!dnsServer.getHostAddress().equals("127.0.0.1")) {
-                                            sb.append(' ').append(dnsServer.getHostAddress());
-                                        }
-                                    }
-                                    logger.debug("DNS Servers: {}", sb);
-                                    gwtNetConfig.setDnsServers(sb.toString().trim());
-                                } else {
-                                    logger.debug("DNS Servers: [empty String]");
-                                    gwtNetConfig.setDnsServers("");
-                                }
-                            }
-
-                            // The NetConfigIP4 section above should also apply for a wireless interface
-                            // Note that this section is used to configure both a station config and an
-                            // access point
-                            // config
-                            if (netConfig instanceof WifiConfig) {
-                                logger.debug("Setting up WifiConfigIP4");
-
-                                WifiConfig wifiConfig = (WifiConfig) netConfig;
-                                GwtWifiConfig gwtWifiConfig = new GwtWifiConfig();
-
-                                // mode
-                                if (wifiConfig.getMode() == WifiMode.MASTER) {
-                                    gwtWifiConfig
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
-
-                                    // set as the access point config for this interface
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig).setAccessPointWifiConfig(gwtWifiConfig);
-                                } else if (wifiConfig.getMode() == WifiMode.INFRA) {
-                                    gwtWifiConfig
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
-
-                                    // set as the station config for this interface
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig).setStationWifiConfig(gwtWifiConfig);
-                                } else if (wifiConfig.getMode() == WifiMode.ADHOC) {
-                                    gwtWifiConfig.setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name());
-
-                                    // set as the adhoc config for this interface
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig).setAdhocWifiConfig(gwtWifiConfig);
-                                }
-
-                                // ssid
-                                gwtWifiConfig.setWirelessSsid(wifiConfig.getSSID());
-
-                                // driver
-                                gwtWifiConfig.setDriver(wifiConfig.getDriver());
-
-                                // security
-                                if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
-                                } else {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
-                                }
-
-                                if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP_TKIP) {
-                                    gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
-                                } else if (wifiConfig.getPairwiseCiphers() == WifiCiphers.TKIP) {
-                                    gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
-                                } else if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP) {
-                                    gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP.name());
-                                }
-
-                                if (wifiConfig.getGroupCiphers() == WifiCiphers.CCMP_TKIP) {
-                                    gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
-                                } else if (wifiConfig.getGroupCiphers() == WifiCiphers.TKIP) {
-                                    gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
-                                } else if (wifiConfig.getGroupCiphers() == WifiCiphers.CCMP) {
-                                    gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP.name());
-                                }
-
-                                // bgscan
-                                WifiBgscan wifiBgscan = wifiConfig.getBgscan();
-                                if (wifiBgscan != null) {
-                                    if (wifiBgscan.getModule() == WifiBgscanModule.NONE) {
-                                        gwtWifiConfig
-                                                .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name());
-                                    } else if (wifiBgscan.getModule() == WifiBgscanModule.SIMPLE) {
-                                        gwtWifiConfig
-                                                .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_SIMPLE.name());
-                                    } else if (wifiBgscan.getModule() == WifiBgscanModule.LEARN) {
-                                        gwtWifiConfig
-                                                .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_LEARN.name());
-                                    }
-                                    gwtWifiConfig.setBgscanRssiThreshold(wifiBgscan.getRssiThreshold());
-                                    gwtWifiConfig.setBgscanShortInterval(wifiBgscan.getShortInterval());
-                                    gwtWifiConfig.setBgscanLongInterval(wifiBgscan.getLongInterval());
-                                }
-
-                                // ping access point?
-                                gwtWifiConfig.setPingAccessPoint(wifiConfig.pingAccessPoint());
-
-                                // ignore SSID?
-                                gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
-
-                                // passkey
-                                Password psswd = wifiConfig.getPasskey();
-                                if (psswd != null) {
-                                    String password = new String(psswd.getPassword());
-                                    gwtWifiConfig.setPassword(password);
-                                }
-
-                                // channel
-                                int[] channels = wifiConfig.getChannels();
-                                if (channels != null) {
-                                    ArrayList<Integer> alChannels = new ArrayList<>();
-                                    for (int channel : channels) {
-                                        alChannels.add(channel);
-                                    }
-                                    gwtWifiConfig.setChannels(alChannels);
-                                }
-
-                                // radio mode
-                                GwtWifiRadioMode gwtWifiRadioMode = null;
-                                if (wifiConfig.getRadioMode() != null) {
-                                    switch (wifiConfig.getRadioMode()) {
-                                        case RADIO_MODE_80211a:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
-                                            break;
-                                        case RADIO_MODE_80211b:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
-                                            break;
-                                        case RADIO_MODE_80211g:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
-                                            break;
-                                        case RADIO_MODE_80211nHT20:
-                                        case RADIO_MODE_80211nHT40above:
-                                        case RADIO_MODE_80211nHT40below:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
-                                            break;
-                                        case RADIO_MODE_80211_AC:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                                if (gwtWifiRadioMode != null) {
-                                    gwtWifiConfig.setRadioMode(gwtWifiRadioMode.name());
-                                }
-
-                                // set the currently active mode based on the address config
-                                WifiMode activeWirelessMode = ((WifiInterfaceAddressConfig) addressConfig).getMode();
-                                if (activeWirelessMode == WifiMode.MASTER) {
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig)
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
-                                    gwtNetConfig.setHwRssi("N/A");
-                                } else if (activeWirelessMode == WifiMode.INFRA) {
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig)
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
-                                    if (wifiClientMonitorService != null
-                                            && wifiConfig.getMode().equals(WifiMode.INFRA)) {
-                                        if (gwtNetConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
-                                                || gwtNetConfig.getStatus()
-                                                        .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
-                                            gwtNetConfig.setHwRssi("N/A");
-                                        } else {
-                                            readRssi(wifiClientMonitorService, gwtNetConfig, netIfConfig.getName(),
-                                                    wifiConfig.getSSID(), recompute);
-                                        }
-                                    }
-                                } else if (activeWirelessMode == WifiMode.ADHOC) {
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig)
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name());
-                                    gwtNetConfig.setHwRssi("N/A");
-                                } else {
-                                    ((GwtWifiNetInterfaceConfig) gwtNetConfig)
-                                            .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeDisabled.name());
-                                    gwtNetConfig.setHwRssi("N/A");
-                                }
-                            }
-
-                            if (netConfig instanceof ModemConfig) {
-                                logger.debug("Setting up ModemConfig");
-
-                                ModemConfig modemConfig = (ModemConfig) netConfig;
-                                GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtNetConfig;
-
-                                // gwtModemConfig.setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
-
-                                if (modemManagerService != null) {
-                                    UsbDevice usbDevice = netIfConfig.getUsbDevice();
-                                    String modemServiceId = null;
-                                    if (usbDevice != null) {
-                                        modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
-                                    }
-
-                                    if (modemServiceId != null) {
-                                        final GwtNetInterfaceConfig currentConfig = gwtNetConfig;
-
-                                        modemManagerService.withModemService(modemServiceId, m -> {
-                                            if (!m.isPresent()) {
-                                                return (Void) null;
-                                            }
-
-                                            final CellularModem cellModemService = m.get();
-
-                                            try {
-                                                String imei = cellModemService.getSerialNumber();
-                                                logger.debug("Setting IMEI/MEID to {}", imei);
-                                                gwtModemConfig.setHwSerial(imei);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get IMEI from modem", e);
-                                            }
-
-                                            try {
-                                                int rssi = cellModemService.getSignalStrength(recompute);
-                                                logger.debug("Setting Received Signal Strength to {}", rssi);
-                                                gwtModemConfig.setHwRssi(Integer.toString(rssi));
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get Received Signal Strength from modem", e);
-                                            }
-
-                                            try {
-                                                String iccid = cellModemService.getIntegratedCirquitCardId(recompute);
-                                                logger.debug("Setting ICCID to {}", iccid);
-                                                gwtModemConfig.setHwICCID(iccid);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get ICCID from modem", e);
-                                            }
-
-                                            try {
-                                                String imsi = cellModemService.getMobileSubscriberIdentity(recompute);
-                                                logger.debug("Setting IMSI to {}", imsi);
-                                                gwtModemConfig.setHwIMSI(imsi);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get IMSI from modem", e);
-                                            }
-
-                                            try {
-                                                ModemRegistrationStatus registration = cellModemService
-                                                        .getRegistrationStatus(recompute);
-                                                logger.debug("Setting Registration Status to {}", registration.name());
-                                                gwtModemConfig.setHwRegistration(registration.name());
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get Registration from modem", e);
-                                            }
-
-                                            try {
-                                                String plmnid = cellModemService.getPLMNID();
-                                                logger.debug("Setting PLMNID to {}", plmnid);
-                                                gwtModemConfig.setHwPLMNID(plmnid);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get PLMNID from modem", e);
-                                            }
-
-                                            try {
-                                                String network = cellModemService.getNetworkName();
-                                                logger.debug("Setting Network to {}", network);
-                                                gwtModemConfig.setHwNetwork(network);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get Network from modem", e);
-                                            }
-
-                                            try {
-                                                String radio = cellModemService.getRadio();
-                                                logger.debug("Setting Radio to {}", radio);
-                                                gwtModemConfig.setHwRadio(radio);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get Radio from modem", e);
-                                            }
-
-                                            try {
-                                                String band = cellModemService.getBand();
-                                                logger.debug("Setting Band to {}", band);
-                                                gwtModemConfig.setHwBand(band);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get Band from modem", e);
-                                            }
-
-                                            try {
-                                                String lac = cellModemService.getLAC();
-                                                logger.debug("Setting Band to {}", lac);
-                                                gwtModemConfig.setHwLAC(lac);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get LAC from modem", e);
-                                            }
-
-                                            try {
-                                                String ci = cellModemService.getCI();
-                                                logger.debug("Setting CI to {}", ci);
-                                                gwtModemConfig.setHwCI(ci);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get CI from modem", e);
-                                            }
-
-                                            try {
-                                                String sModel = cellModemService.getModel();
-                                                ((GwtModemInterfaceConfig) currentConfig).setModel(sModel);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get model information from modem", e);
-                                            }
-
-                                            try {
-                                                boolean gpsSupported = cellModemService.isGpsSupported();
-                                                logger.debug("Setting GPS supported to {}", gpsSupported);
-                                                ((GwtModemInterfaceConfig) currentConfig).setGpsSupported(gpsSupported);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get GPS supported from modem", e);
-                                            }
-
-                                            try {
-                                                String firmwareVersion = cellModemService.getFirmwareVersion();
-                                                logger.debug("Setting firwmare version to {}", firmwareVersion);
-                                                ((GwtModemInterfaceConfig) currentConfig)
-                                                        .setHwFirmware(firmwareVersion);
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed to get firmware version from modem", e);
-                                            }
-
-                                            return (Void) null;
-                                        });
-                                    }
-                                }
-
-                                // set as DHCP - populate current address
-                                gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-                                if (addressConfig.getAddress() != null) {
-                                    gwtModemConfig.setIpAddress(addressConfig.getAddress().getHostAddress());
-                                }
-                                if (addressConfig.getNetmask() != null) {
-                                    gwtModemConfig.setSubnetMask(addressConfig.getNetmask().getHostAddress());
-                                }
-
-                                gwtModemConfig.setDialString(modemConfig.getDialString());
-
-                                AuthType authType = modemConfig.getAuthType();
-                                if (authType == AuthType.AUTO) {
-                                    gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthAUTO);
-                                } else if (authType == AuthType.CHAP) {
-                                    gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthCHAP);
-                                } else if (authType == AuthType.PAP) {
-                                    gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthPAP);
-                                } else {
-                                    gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthNONE);
-                                }
-
-                                gwtModemConfig.setUsername(modemConfig.getUsername());
-
-                                gwtModemConfig.setPassword(modemConfig.getPasswordAsPassword().toString());
-
-                                gwtModemConfig.setPppNum(modemConfig.getPppNumber());
-
-                                gwtModemConfig.setResetTimeout(modemConfig.getResetTimeout());
-
-                                gwtModemConfig.setPersist(modemConfig.isPersist());
-                                
-                                gwtModemConfig.setHoldoff(modemConfig.getHoldoff());
-
-                                gwtModemConfig.setMaxFail(modemConfig.getMaxFail());
-
-                                gwtModemConfig.setIdle(modemConfig.getIdle());
-
-                                gwtModemConfig.setActiveFilter(modemConfig.getActiveFilter());
-
-                                gwtModemConfig.setLcpEchoInterval(modemConfig.getLcpEchoInterval());
-
-                                gwtModemConfig.setLcpEchoFailure(modemConfig.getLcpEchoFailure());
-
-                                gwtModemConfig.setGpsEnabled(modemConfig.isGpsEnabled());
-                                gwtModemConfig.setDiversityEnabled(modemConfig.isDiversityEnabled());
-
-                                gwtModemConfig.setProfileID(modemConfig.getProfileID());
-
-                                PdpType pdpType = modemConfig.getPdpType();
-                                if (pdpType == PdpType.IP) {
-                                    gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpIP);
-                                } else if (pdpType == PdpType.PPP) {
-                                    gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpPPP);
-                                } else if (pdpType == PdpType.IPv6) {
-                                    gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpIPv6);
-                                } else {
-                                    gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpUnknown);
-                                }
-
-                                gwtModemConfig.setApn(modemConfig.getApn());
-
-                                gwtModemConfig.setDataCompression(modemConfig.getDataCompression());
-
-                                gwtModemConfig.setHeaderCompression(modemConfig.getHeaderCompression());
-
-                                ModemConnectionStatus connectionStatus = ((ModemInterfaceAddressConfig) addressConfig)
-                                        .getConnectionStatus();
-                                if (connectionStatus == ModemConnectionStatus.DISCONNECTED) {
-                                    gwtModemConfig.setHwState(NetInterfaceState.DISCONNECTED.name());
-                                } else if (connectionStatus == ModemConnectionStatus.CONNECTING) {
-                                    gwtModemConfig.setHwState(NetInterfaceState.IP_CONFIG.name());
-                                } else if (connectionStatus == ModemConnectionStatus.CONNECTED) {
-                                    gwtModemConfig.setHwState(NetInterfaceState.ACTIVATED.name());
-                                } else {
-                                    gwtModemConfig.setHwState(NetInterfaceState.UNKNOWN.name());
-                                }
-
-                                gwtModemConfig.setConnectionType(
-                                        ((ModemInterfaceAddressConfig) addressConfig).getConnectionType().name());
-                            }
-
-                            if (netConfig instanceof DhcpServerConfigIP4) {
-                                logger.debug("Setting up DhcpServerConfigIP4: {} to {}",
-                                        ((DhcpServerConfigIP4) netConfig).getRangeStart().getHostAddress(),
-                                        ((DhcpServerConfigIP4) netConfig).getRangeEnd().getHostAddress());
-                                logger.debug("Setting up DhcpServerConfigIP4: {}", netConfig);
-
-                                isDhcpServerEnabled = ((DhcpServerConfigIP4) netConfig).isEnabled();
-
-                                gwtNetConfig.setRouterDhcpBeginAddress(
-                                        ((DhcpServerConfigIP4) netConfig).getRangeStart().getHostAddress());
-                                gwtNetConfig.setRouterDhcpEndAddress(
-                                        ((DhcpServerConfigIP4) netConfig).getRangeEnd().getHostAddress());
-                                gwtNetConfig.setRouterDhcpSubnetMask(
-                                        ((DhcpServerConfigIP4) netConfig).getSubnetMask().getHostAddress());
-                                gwtNetConfig.setRouterDhcpDefaultLease(
-                                        ((DhcpServerConfigIP4) netConfig).getDefaultLeaseTime());
-                                gwtNetConfig
-                                        .setRouterDhcpMaxLease(((DhcpServerConfigIP4) netConfig).getMaximumLeaseTime());
-                                gwtNetConfig.setRouterDnsPass(((DhcpServerConfigIP4) netConfig).isPassDns());
-                            }
-
-                            if (netConfig instanceof FirewallAutoNatConfig) {
-                                logger.debug("Setting up FirewallAutoNatConfig");
-
-                                isNatEnabled = true;
-                            }
-
-                            // TODO - only dealing with IPv4 right now
-                        }
-
-                        // set up the DHCP and NAT config
-                        if (isDhcpServerEnabled && isNatEnabled) {
-                            logger.debug("setting router mode to DHCP and NAT");
-                            gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterDchpNat.name());
-                        } else if (isDhcpServerEnabled && !isNatEnabled) {
-                            logger.debug("setting router mode to DHCP only");
-                            gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterDchp.name());
-                        } else if (!isDhcpServerEnabled && isNatEnabled) {
-                            logger.debug("setting router mode to NAT only");
-                            gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterNat.name());
-                        } else {
-                            logger.debug("setting router mode to disabled");
-                            gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterOff.name());
-                        }
+                    String gateway = (String) properties
+                            .get("net.interface." + interfaceName + ".config.ip4.gateway");
+                    if (gateway != null && !gateway.isEmpty()) {
+                        gwtNetConfig.setGateway(gateway);
+                    } else {
+                        gwtNetConfig.setGateway("");
                     }
                 }
+
+                // Custom DNS servers
+                String dnsServers = (String) properties
+                        .get("net.interface." + interfaceName + ".config.ip4.dnsServers");
+                if (dnsServers != null && !dnsServers.isEmpty()) {
+                    logger.debug("DNS Servers: {}", dnsServers);
+                    gwtNetConfig.setDnsServers(dnsServers.replace(",", " "));
+                } else {
+                    logger.debug("DNS Servers: [empty String]");
+                    gwtNetConfig.setDnsServers("");
+                }
+
+                // The NetConfigIP4 section above should also apply for a wireless interface
+                // Note that this section is used to configure both a station config and an
+                // access point
+                // config
+                if (type.equals(NetInterfaceType.WIFI.toString())) {
+                    GwtWifiConfig gwtWifiConfig = new GwtWifiConfig();
+
+                    // mode
+                    String wifiMode = (String) properties.get("net.interface." + interfaceName + ".config.wifi.mode");
+                    if (wifiMode != null && !wifiMode.isEmpty()) {
+                        if (wifiMode.equals(WifiMode.MASTER.toString())) {
+                            gwtWifiConfig
+                                    .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
+                            gwtWifiConfig.setWirelessSsid((String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.master.ssid"));
+                            gwtWifiConfig.setDriver((String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.master.driver"));
+                            String securityType = (String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.master.securityType");
+                            setSecurityType(gwtWifiConfig, securityType);
+                            String pairwiseCiphers = (String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.master.pairwiseCiphers");
+                            setPairwiseCiphers(gwtWifiConfig, pairwiseCiphers);
+                            // set as the access point config for this interface
+                            ((GwtWifiNetInterfaceConfig) gwtNetConfig).setAccessPointWifiConfig(gwtWifiConfig);
+                        } else if (wifiMode.equals(WifiMode.INFRA.toString())) {
+                            gwtWifiConfig
+                                    .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
+                            gwtWifiConfig.setWirelessSsid((String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.infra.ssid"));
+                            gwtWifiConfig.setDriver((String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.infra.driver"));
+                            String securityType = (String) properties
+                                    .get("net.interface." + interfaceName + ".config.wifi.infra.securityType");
+                            setSecurityType(gwtWifiConfig, securityType);
+                            // set as the station config for this interface
+                            ((GwtWifiNetInterfaceConfig) gwtNetConfig).setStationWifiConfig(gwtWifiConfig);
+                        } else if (wifiMode.equals(WifiMode.ADHOC.toString())) { // Do we support also adhoc mode?????
+                            gwtWifiConfig.setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name());
+
+                            // set as the adhoc config for this interface
+                            ((GwtWifiNetInterfaceConfig) gwtNetConfig).setAdhocWifiConfig(gwtWifiConfig);
+                        }
+                    }
+
+                    // PairwiseCiphers are status in infra and configuration in master
+//                    if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP_TKIP) {
+//                        gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
+//                    } else if (wifiConfig.getPairwiseCiphers() == WifiCiphers.TKIP) {
+//                        gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
+//                    } else if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP) {
+//                        gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP.name());
+//                    }
+
+                    // GroupCiphers are status
+//                    if (wifiConfig.getGroupCiphers() == WifiCiphers.CCMP_TKIP) {
+//                        gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
+//                    } else if (wifiConfig.getGroupCiphers() == WifiCiphers.TKIP) {
+//                        gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
+//                    } else if (wifiConfig.getGroupCiphers() == WifiCiphers.CCMP) {
+//                        gwtWifiConfig.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP.name());
+//                    }
+//QUI!!!!!
+//                    // bgscan
+//                    WifiBgscan wifiBgscan = wifiConfig.getBgscan();
+//                    if (wifiBgscan != null) {
+//                        if (wifiBgscan.getModule() == WifiBgscanModule.NONE) {
+//                            gwtWifiConfig
+//                                    .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name());
+//                        } else if (wifiBgscan.getModule() == WifiBgscanModule.SIMPLE) {
+//                            gwtWifiConfig
+//                                    .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_SIMPLE.name());
+//                        } else if (wifiBgscan.getModule() == WifiBgscanModule.LEARN) {
+//                            gwtWifiConfig
+//                                    .setBgscanModule(GwtWifiBgscanModule.netWifiBgscanMode_LEARN.name());
+//                        }
+//                        gwtWifiConfig.setBgscanRssiThreshold(wifiBgscan.getRssiThreshold());
+//                        gwtWifiConfig.setBgscanShortInterval(wifiBgscan.getShortInterval());
+//                        gwtWifiConfig.setBgscanLongInterval(wifiBgscan.getLongInterval());
+//                    }
+
+//                    // ping access point?
+//                    gwtWifiConfig.setPingAccessPoint(wifiConfig.pingAccessPoint());
+//
+//                    // ignore SSID?
+//                    gwtWifiConfig.setIgnoreSSID(wifiConfig.ignoreSSID());
+//
+//                    // passkey
+//                    Password psswd = wifiConfig.getPasskey();
+//                    if (psswd != null) {
+//                        String password = new String(psswd.getPassword());
+//                        gwtWifiConfig.setPassword(password);
+//                    }
+//
+//                    // channel
+//                    int[] channels = wifiConfig.getChannels();
+//                    if (channels != null) {
+//                        ArrayList<Integer> alChannels = new ArrayList<>();
+//                        for (int channel : channels) {
+//                            alChannels.add(channel);
+//                        }
+//                        gwtWifiConfig.setChannels(alChannels);
+//                    }
+//
+//                    // radio mode
+//                    GwtWifiRadioMode gwtWifiRadioMode = null;
+//                    if (wifiConfig.getRadioMode() != null) {
+//                        switch (wifiConfig.getRadioMode()) {
+//                            case RADIO_MODE_80211a:
+//                                gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
+//                                break;
+//                            case RADIO_MODE_80211b:
+//                                gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
+//                                break;
+//                            case RADIO_MODE_80211g:
+//                                gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
+//                                break;
+//                            case RADIO_MODE_80211nHT20:
+//                            case RADIO_MODE_80211nHT40above:
+//                            case RADIO_MODE_80211nHT40below:
+//                                gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
+//                                break;
+//                            case RADIO_MODE_80211_AC:
+//                                gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                    }
+//                    if (gwtWifiRadioMode != null) {
+//                        gwtWifiConfig.setRadioMode(gwtWifiRadioMode.name());
+//                    }
+//
+//                    // set the currently active mode based on the address config
+//                    WifiMode activeWirelessMode = ((WifiInterfaceAddressConfig) addressConfig).getMode();
+//                    if (activeWirelessMode == WifiMode.MASTER) {
+//                        ((GwtWifiNetInterfaceConfig) gwtNetConfig)
+//                                .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
+//                        gwtNetConfig.setHwRssi("N/A");
+//                    } else if (activeWirelessMode == WifiMode.INFRA) {
+//                        ((GwtWifiNetInterfaceConfig) gwtNetConfig)
+//                                .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
+//                        if (wifiClientMonitorService != null
+//                                && wifiConfig.getMode().equals(WifiMode.INFRA)) {
+//                            if (gwtNetConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
+//                                    || gwtNetConfig.getStatus()
+//                                            .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
+//                                gwtNetConfig.setHwRssi("N/A");
+//                            } else {
+//                                readRssi(wifiClientMonitorService, gwtNetConfig, netIfConfig.getName(),
+//                                        wifiConfig.getSSID(), recompute);
+//                            }
+//                        }
+//                    } else if (activeWirelessMode == WifiMode.ADHOC) {
+//                        ((GwtWifiNetInterfaceConfig) gwtNetConfig)
+//                                .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name());
+//                        gwtNetConfig.setHwRssi("N/A");
+//                    } else {
+//                        ((GwtWifiNetInterfaceConfig) gwtNetConfig)
+//                                .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeDisabled.name());
+//                        gwtNetConfig.setHwRssi("N/A");
+//                    }
+                }
+
+//                if (netConfig instanceof ModemConfig) {
+//                    logger.debug("Setting up ModemConfig");
+//
+//                    ModemConfig modemConfig = (ModemConfig) netConfig;
+//                    GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtNetConfig;
+//
+//                    // gwtModemConfig.setHwSerial(((ModemInterface)netIfConfig).getSerialNumber());
+//
+//                    if (modemManagerService != null) {
+//                        UsbDevice usbDevice = netIfConfig.getUsbDevice();
+//                        String modemServiceId = null;
+//                        if (usbDevice != null) {
+//                            modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
+//                        }
+//
+//                        if (modemServiceId != null) {
+//                            final GwtNetInterfaceConfig currentConfig = gwtNetConfig;
+//
+//                            modemManagerService.withModemService(modemServiceId, m -> {
+//                                if (!m.isPresent()) {
+//                                    return (Void) null;
+//                                }
+//
+//                                final CellularModem cellModemService = m.get();
+//
+//                                try {
+//                                    String imei = cellModemService.getSerialNumber();
+//                                    logger.debug("Setting IMEI/MEID to {}", imei);
+//                                    gwtModemConfig.setHwSerial(imei);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get IMEI from modem", e);
+//                                }
+//
+//                                try {
+//                                    int rssi = cellModemService.getSignalStrength(recompute);
+//                                    logger.debug("Setting Received Signal Strength to {}", rssi);
+//                                    gwtModemConfig.setHwRssi(Integer.toString(rssi));
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get Received Signal Strength from modem", e);
+//                                }
+//
+//                                try {
+//                                    String iccid = cellModemService.getIntegratedCirquitCardId(recompute);
+//                                    logger.debug("Setting ICCID to {}", iccid);
+//                                    gwtModemConfig.setHwICCID(iccid);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get ICCID from modem", e);
+//                                }
+//
+//                                try {
+//                                    String imsi = cellModemService.getMobileSubscriberIdentity(recompute);
+//                                    logger.debug("Setting IMSI to {}", imsi);
+//                                    gwtModemConfig.setHwIMSI(imsi);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get IMSI from modem", e);
+//                                }
+//
+//                                try {
+//                                    ModemRegistrationStatus registration = cellModemService
+//                                            .getRegistrationStatus(recompute);
+//                                    logger.debug("Setting Registration Status to {}", registration.name());
+//                                    gwtModemConfig.setHwRegistration(registration.name());
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get Registration from modem", e);
+//                                }
+//
+//                                try {
+//                                    String plmnid = cellModemService.getPLMNID();
+//                                    logger.debug("Setting PLMNID to {}", plmnid);
+//                                    gwtModemConfig.setHwPLMNID(plmnid);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get PLMNID from modem", e);
+//                                }
+//
+//                                try {
+//                                    String network = cellModemService.getNetworkName();
+//                                    logger.debug("Setting Network to {}", network);
+//                                    gwtModemConfig.setHwNetwork(network);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get Network from modem", e);
+//                                }
+//
+//                                try {
+//                                    String radio = cellModemService.getRadio();
+//                                    logger.debug("Setting Radio to {}", radio);
+//                                    gwtModemConfig.setHwRadio(radio);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get Radio from modem", e);
+//                                }
+//
+//                                try {
+//                                    String band = cellModemService.getBand();
+//                                    logger.debug("Setting Band to {}", band);
+//                                    gwtModemConfig.setHwBand(band);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get Band from modem", e);
+//                                }
+//
+//                                try {
+//                                    String lac = cellModemService.getLAC();
+//                                    logger.debug("Setting Band to {}", lac);
+//                                    gwtModemConfig.setHwLAC(lac);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get LAC from modem", e);
+//                                }
+//
+//                                try {
+//                                    String ci = cellModemService.getCI();
+//                                    logger.debug("Setting CI to {}", ci);
+//                                    gwtModemConfig.setHwCI(ci);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get CI from modem", e);
+//                                }
+//
+//                                try {
+//                                    String sModel = cellModemService.getModel();
+//                                    ((GwtModemInterfaceConfig) currentConfig).setModel(sModel);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get model information from modem", e);
+//                                }
+//
+//                                try {
+//                                    boolean gpsSupported = cellModemService.isGpsSupported();
+//                                    logger.debug("Setting GPS supported to {}", gpsSupported);
+//                                    ((GwtModemInterfaceConfig) currentConfig).setGpsSupported(gpsSupported);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get GPS supported from modem", e);
+//                                }
+//
+//                                try {
+//                                    String firmwareVersion = cellModemService.getFirmwareVersion();
+//                                    logger.debug("Setting firwmare version to {}", firmwareVersion);
+//                                    ((GwtModemInterfaceConfig) currentConfig)
+//                                            .setHwFirmware(firmwareVersion);
+//                                } catch (KuraException e) {
+//                                    logger.warn("Failed to get firmware version from modem", e);
+//                                }
+//
+//                                return (Void) null;
+//                            });
+//                        }
+//                    }
+//
+//                    // set as DHCP - populate current address
+//                    gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+//                    if (addressConfig.getAddress() != null) {
+//                        gwtModemConfig.setIpAddress(addressConfig.getAddress().getHostAddress());
+//                    }
+//                    if (addressConfig.getNetmask() != null) {
+//                        gwtModemConfig.setSubnetMask(addressConfig.getNetmask().getHostAddress());
+//                    }
+//
+//                    gwtModemConfig.setDialString(modemConfig.getDialString());
+//
+//                    AuthType authType = modemConfig.getAuthType();
+//                    if (authType == AuthType.AUTO) {
+//                        gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthAUTO);
+//                    } else if (authType == AuthType.CHAP) {
+//                        gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthCHAP);
+//                    } else if (authType == AuthType.PAP) {
+//                        gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthPAP);
+//                    } else {
+//                        gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthNONE);
+//                    }
+//
+//                    gwtModemConfig.setUsername(modemConfig.getUsername());
+//
+//                    gwtModemConfig.setPassword(modemConfig.getPasswordAsPassword().toString());
+//
+//                    gwtModemConfig.setPppNum(modemConfig.getPppNumber());
+//
+//                    gwtModemConfig.setResetTimeout(modemConfig.getResetTimeout());
+//
+//                    gwtModemConfig.setPersist(modemConfig.isPersist());
+//
+//                    gwtModemConfig.setHoldoff(modemConfig.getHoldoff());
+//
+//                    gwtModemConfig.setMaxFail(modemConfig.getMaxFail());
+//
+//                    gwtModemConfig.setIdle(modemConfig.getIdle());
+//
+//                    gwtModemConfig.setActiveFilter(modemConfig.getActiveFilter());
+//
+//                    gwtModemConfig.setLcpEchoInterval(modemConfig.getLcpEchoInterval());
+//
+//                    gwtModemConfig.setLcpEchoFailure(modemConfig.getLcpEchoFailure());
+//
+//                    gwtModemConfig.setGpsEnabled(modemConfig.isGpsEnabled());
+//                    gwtModemConfig.setDiversityEnabled(modemConfig.isDiversityEnabled());
+//
+//                    gwtModemConfig.setProfileID(modemConfig.getProfileID());
+//
+//                    PdpType pdpType = modemConfig.getPdpType();
+//                    if (pdpType == PdpType.IP) {
+//                        gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpIP);
+//                    } else if (pdpType == PdpType.PPP) {
+//                        gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpPPP);
+//                    } else if (pdpType == PdpType.IPv6) {
+//                        gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpIPv6);
+//                    } else {
+//                        gwtModemConfig.setPdpType(GwtModemPdpType.netModemPdpUnknown);
+//                    }
+//
+//                    gwtModemConfig.setApn(modemConfig.getApn());
+//
+//                    gwtModemConfig.setDataCompression(modemConfig.getDataCompression());
+//
+//                    gwtModemConfig.setHeaderCompression(modemConfig.getHeaderCompression());
+//
+//                    ModemConnectionStatus connectionStatus = ((ModemInterfaceAddressConfig) addressConfig)
+//                            .getConnectionStatus();
+//                    if (connectionStatus == ModemConnectionStatus.DISCONNECTED) {
+//                        gwtModemConfig.setHwState(NetInterfaceState.DISCONNECTED.name());
+//                    } else if (connectionStatus == ModemConnectionStatus.CONNECTING) {
+//                        gwtModemConfig.setHwState(NetInterfaceState.IP_CONFIG.name());
+//                    } else if (connectionStatus == ModemConnectionStatus.CONNECTED) {
+//                        gwtModemConfig.setHwState(NetInterfaceState.ACTIVATED.name());
+//                    } else {
+//                        gwtModemConfig.setHwState(NetInterfaceState.UNKNOWN.name());
+//                    }
+//
+//                    gwtModemConfig.setConnectionType(
+//                            ((ModemInterfaceAddressConfig) addressConfig).getConnectionType().name());
+////                            }
+//
+//                    if (netConfig instanceof DhcpServerConfigIP4) {
+//                        logger.debug("Setting up DhcpServerConfigIP4: {} to {}",
+//                                ((DhcpServerConfigIP4) netConfig).getRangeStart().getHostAddress(),
+//                                ((DhcpServerConfigIP4) netConfig).getRangeEnd().getHostAddress());
+//                        logger.debug("Setting up DhcpServerConfigIP4: {}", netConfig);
+//
+//                        isDhcpServerEnabled = ((DhcpServerConfigIP4) netConfig).isEnabled();
+//
+//                        gwtNetConfig.setRouterDhcpBeginAddress(
+//                                ((DhcpServerConfigIP4) netConfig).getRangeStart().getHostAddress());
+//                        gwtNetConfig.setRouterDhcpEndAddress(
+//                                ((DhcpServerConfigIP4) netConfig).getRangeEnd().getHostAddress());
+//                        gwtNetConfig.setRouterDhcpSubnetMask(
+//                                ((DhcpServerConfigIP4) netConfig).getSubnetMask().getHostAddress());
+//                        gwtNetConfig.setRouterDhcpDefaultLease(
+//                                ((DhcpServerConfigIP4) netConfig).getDefaultLeaseTime());
+//                        gwtNetConfig
+//                                .setRouterDhcpMaxLease(((DhcpServerConfigIP4) netConfig).getMaximumLeaseTime());
+//                        gwtNetConfig.setRouterDnsPass(((DhcpServerConfigIP4) netConfig).isPassDns());
+//                    }
+//
+//                    if (netConfig instanceof FirewallAutoNatConfig) {
+//                        logger.debug("Setting up FirewallAutoNatConfig");
+//
+//                        isNatEnabled = true;
+//                    }
+//
+//                    // TODO - only dealing with IPv4 right now
+////                        }
+//
+//                    // set up the DHCP and NAT config
+//                    if (isDhcpServerEnabled && isNatEnabled) {
+//                        logger.debug("setting router mode to DHCP and NAT");
+//                        gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterDchpNat.name());
+//                    } else if (isDhcpServerEnabled && !isNatEnabled) {
+//                        logger.debug("setting router mode to DHCP only");
+//                        gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterDchp.name());
+//                    } else if (!isDhcpServerEnabled && isNatEnabled) {
+//                        logger.debug("setting router mode to NAT only");
+//                        gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterNat.name());
+//                    } else {
+//                        logger.debug("setting router mode to disabled");
+//                        gwtNetConfig.setRouterMode(GwtNetRouterMode.netRouterOff.name());
+//                    }
+//                }
+//                }
 
                 gwtNetConfigs.add(gwtNetConfig);
+//            }
             }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
@@ -792,24 +806,25 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private GwtNetInterfaceConfig createGwtNetConfig(
-            NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig) {
+    private GwtNetInterfaceConfig createGwtNetConfig(Map<String, Object> properties, String interfaceName) {
         GwtNetInterfaceConfig gwtNetConfig;
-        if (netIfConfig.getType() == NetInterfaceType.WIFI) {
+        String type = (String) properties.get("net.interface." + interfaceName + ".type");
+
+        if (type.equals(NetInterfaceType.WIFI.toString())) {
             gwtNetConfig = new GwtWifiNetInterfaceConfig();
-        } else if (netIfConfig.getType() == NetInterfaceType.MODEM) {
+        } else if (type.equals(NetInterfaceType.MODEM.toString())) {
             gwtNetConfig = new GwtModemInterfaceConfig();
-            ((GwtModemInterfaceConfig) gwtNetConfig).setModemId(((ModemInterface) netIfConfig).getModemIdentifier());
-            ((GwtModemInterfaceConfig) gwtNetConfig).setManufacturer(((ModemInterface) netIfConfig).getManufacturer());
-            ((GwtModemInterfaceConfig) gwtNetConfig).setModel(((ModemInterface) netIfConfig).getModel());
+//            ((GwtModemInterfaceConfig) gwtNetConfig).setModemId(((ModemInterface) netIfConfig).getModemIdentifier());
+//            ((GwtModemInterfaceConfig) gwtNetConfig).setManufacturer(((ModemInterface) netIfConfig).getManufacturer());
+//            ((GwtModemInterfaceConfig) gwtNetConfig).setModel(((ModemInterface) netIfConfig).getModel());
 
             List<String> technologyList = new ArrayList<>();
-            List<ModemTechnologyType> technologyTypes = ((ModemInterface) netIfConfig).getTechnologyTypes();
-            if (technologyTypes != null) {
-                for (ModemTechnologyType techType : technologyTypes) {
-                    technologyList.add(techType.name());
-                }
-            }
+//            List<ModemTechnologyType> technologyTypes = ((ModemInterface) netIfConfig).getTechnologyTypes();
+//            if (technologyTypes != null) {
+//                for (ModemTechnologyType techType : technologyTypes) {
+//                    technologyList.add(techType.name());
+//                }
+//            }
             ((GwtModemInterfaceConfig) gwtNetConfig).setNetworkTechnology(technologyList);
         } else {
             gwtNetConfig = new GwtNetInterfaceConfig();
@@ -850,7 +865,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 fillModemProperties(gwtModemConfig, properties, basePropName, netInterfaceStatus);
             }
 
-            configurationService.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService",
+            configurationService.updateConfiguration(CONFIGURATION_SERVICE_PID,
                     properties, true);
 
         } catch (UnknownHostException | KuraException e) {
@@ -1917,6 +1932,30 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         if (networkAddress.length >= 2) {
             stringBuilder.append(((IP4Address) IPAddress.parseHostAddress(networkAddress[0])).getHostAddress())
                     .append("/").append(networkAddress[1]);
+        }
+    }
+
+    private void setSecurityType(GwtWifiConfig gwtWifiConfig, String securityType) {
+        if (securityType.equals(WifiSecurity.SECURITY_WPA.toString())) {
+            gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
+        } else if (securityType.equals(WifiSecurity.SECURITY_WPA2.toString())) {
+            gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
+        } else if (securityType.equals(WifiSecurity.SECURITY_WPA_WPA2.toString())) {
+            gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
+        } else if (securityType.equals(WifiSecurity.SECURITY_WEP.toString())) {
+            gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
+        } else {
+            gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+        }
+    }
+
+    private void setPairwiseCiphers(GwtWifiConfig gwtWifiConfig, String pairwiseCiphers) {
+        if (pairwiseCiphers.equals(WifiCiphers.CCMP_TKIP.toString())) {
+            gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
+        } else if (pairwiseCiphers.equals(WifiCiphers.TKIP.toString())) {
+            gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
+        } else if (pairwiseCiphers.equals(WifiCiphers.CCMP.toString())) {
+            gwtWifiConfig.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_CCMP.name());
         }
     }
 

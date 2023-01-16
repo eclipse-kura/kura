@@ -37,7 +37,6 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.usb.UsbDevice;
@@ -189,14 +188,14 @@ public class NetworkManagerImpl extends AbstractNetworkConfigurationService impl
             // interfaces that are not in the new are kept in the properties.
             mergeNetworkConfigurationProperties(modifiedProps, this.properties);
 
-            decryptPasswordProperties(modifiedProps);
+//            decryptPasswordProperties(modifiedProps);
             NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
 
 //            executeVisitors(networkConfiguration);
 
 //            updateCurrentNetworkConfiguration();
 
-            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
+//            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
 
             this.properties = discardModifiedNetworkInterfaces(this.properties);
 

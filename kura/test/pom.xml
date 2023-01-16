@@ -902,6 +902,7 @@
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
         <module>org.eclipse.kura.net.admin.test</module>
+        <module>org.eclipse.kura.net2.admin.test</module>
         <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>

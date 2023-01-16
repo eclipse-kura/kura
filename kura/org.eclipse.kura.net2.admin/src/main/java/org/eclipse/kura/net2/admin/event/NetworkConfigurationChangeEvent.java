@@ -10,17 +10,18 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin.modem;
+package org.eclipse.kura.net2.admin.event;
 
-import org.eclipse.kura.executor.CommandExecutorService;
+import java.util.Map;
 
-public final class PppFactory {
+import org.osgi.service.event.Event;
 
-    private PppFactory() {
-    }
+public class NetworkConfigurationChangeEvent extends Event {
 
-    public static IModemLinkService getPppService(final String interfaceName, String pppInterfaceName,
-            final String port, final CommandExecutorService executorService) {
-        return new Ppp(interfaceName, pppInterfaceName, port, executorService);
+    /** Topic of the NetworkConfigurationChangeEvent */
+    public static final String NETWORK_EVENT_CONFIG_CHANGE_TOPIC = "org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC";
+
+    public NetworkConfigurationChangeEvent(Map<String, ?> properties) {
+        super(NETWORK_EVENT_CONFIG_CHANGE_TOPIC, properties);
     }
 }

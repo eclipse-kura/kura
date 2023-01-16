@@ -13,17 +13,15 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.net.admin.NetworkConfigurationService">
-   <implementation class="org.eclipse.kura.net.admin.NetworkConfigurationServiceImpl"/>
-   <property name="service.pid" value="org.eclipse.kura.net.admin.NetworkConfigurationService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="update" name="org.eclipse.kura.net2.admin.NetworkConfigurationService">
+   <implementation class="org.eclipse.kura.net2.admin.NetworkConfigurationService"/>
+   <property name="service.pid" value="org.eclipse.kura.net2.admin.NetworkConfigurationService"/>
    <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
    <service>
-      <provide interface="org.eclipse.kura.net.admin.NetworkConfigurationService"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    <reference bind="setUsbService" cardinality="1..1" interface="org.eclipse.kura.usb.UsbService" name="UsbService" policy="static" unbind="unsetUsbService"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
-   <reference bind="setModemManagerService" cardinality="0..1" interface="org.eclipse.kura.net.admin.modem.ModemManagerService" name="ModemManagerService" policy="dynamic" unbind="unsetModemManagerService"/>
    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
    <reference name="CryptoService" interface="org.eclipse.kura.crypto.CryptoService" bind="setCryptoService" unbind="unsetCryptoService" cardinality="1..1" policy="static"/>
    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/> 

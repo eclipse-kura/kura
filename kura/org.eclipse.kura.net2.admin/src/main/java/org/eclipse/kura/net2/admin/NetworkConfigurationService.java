@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +33,6 @@ import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -44,10 +41,8 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
-import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
+import org.eclipse.kura.net2.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.modem.ModemDevice;
-import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
@@ -77,12 +72,9 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     private NetworkService networkService;
     private EventAdmin eventAdmin;
     private UsbService usbService;
-    private ModemManagerService modemManagerService;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
     private ConfigurationService configurationService;
-
-    private List<NetworkConfigurationVisitor> writeVisitors;
 
     private LinuxNetworkUtil linuxNetworkUtil;
 
@@ -123,18 +115,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         }
     }
 
-    public void setModemManagerService(ModemManagerService modemManagerService) {
-        logger.debug("Set the modem manager service");
-        this.modemManagerService = modemManagerService;
-    }
-
-    public void unsetModemManagerService(ModemManagerService modemManagerService) {
-        if (this.modemManagerService.equals(modemManagerService)) {
-            logger.debug("Unset the modem manager service");
-            this.modemManagerService = null;
-        }
-    }
-
     public void setExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
     }
@@ -166,30 +146,23 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     // ----------------------------------------------------------------
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activate NetworkConfigurationService...");
-//        initVisitors();
 
-//        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         if (properties == null) {
             logger.debug("Received null properties...");
         } else {
             logger.debug("Properties... {}", properties);
-//            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties)); // <-- for now apply the configuration in any case. Is the property the best approach for managing incremental updates?
-            updated(this.properties);
+            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties)); // <-- for now apply the
+                                                                                           // configuration in any case.
+                                                                                           // Is the property the best
+                                                                                           // approach for managing
+                                                                                           // incremental updates?
+            update(this.properties);
         }
     }
 
-//    protected void initVisitors() {
-//        this.writeVisitors = new ArrayList<>();
-//        this.writeVisitors.add(LinuxWriteVisitor.getInstance());
-//    }
-
-//    protected List<NetworkConfigurationVisitor> getVisitors() {
-//        return this.writeVisitors;
-//    }
-
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
-//        this.writeVisitors = null;
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
@@ -197,6 +170,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+        // Do be done with NM...
         if (isUsbPort(interfaceName)) {
             return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
         } else {
@@ -215,25 +189,24 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         });
     }
 
-    public synchronized void updated(Map<String, Object> receivedProperties) {
+    public synchronized void update(Map<String, Object> receivedProperties) {
+        logger.debug("Update NetworkConfigurationService...");
         if (receivedProperties == null) {
             logger.debug("Received null properties...");
             return;
         }
 
         try {
-            final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
-            logger.debug("new properties - updating");
-            logger.debug("modified.interface.names: {}", newProperties.get(MODIFIED_INTERFACE_NAMES));
+            final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties); // for backward
+                                                                                               // compatibility
 
             Map<String, Object> modifiedProps = new HashMap<>(newProperties);
-
             final Set<String> interfaces = getNetworkInterfaceNamesInConfig(newProperties);
 
             for (final String interfaceName : interfaces) {
                 NetInterfaceType type = getNetworkType(interfaceName);
-
-                setInterfaceType(modifiedProps, interfaceName, type);
+                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
+                                                                      // the system?
                 if (NetInterfaceType.MODEM.equals(type)) {
                     setModemPppNumber(modifiedProps, interfaceName);
                     setModemUsbDeviceProperties(modifiedProps, interfaceName);
@@ -244,14 +217,9 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             mergeNetworkConfigurationProperties(modifiedProps, this.properties);
 
             decryptPasswordProperties(modifiedProps);
-            NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
-
-            executeVisitors(networkConfiguration); // <----- replace with NetworkManager!!!!
-
-//            updateCurrentNetworkConfiguration();
+//            executeVisitors(networkConfiguration); // <----- replace with NetworkManager!!!!
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
-
             this.properties = discardModifiedNetworkInterfaces(this.properties);
 
             if (changed) {
@@ -305,13 +273,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 .collect(Collectors.toSet());
     }
 
-//    private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
-//        for (NetworkConfigurationVisitor visitor : getVisitors()) {
-//            visitor.setExecutorService(this.commandExecutorService);
-//            networkConfiguration.accept(visitor);
-//        }
-//    }
-
     protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {
         StringBuilder sb = new StringBuilder();
         sb.append(PREFIX).append(interfaceName).append(".config.pppNum");
@@ -326,6 +287,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     }
 
     protected void setModemUsbDeviceProperties(Map<String, Object> modifiedProps, String interfaceName) {
+        // Can we use the NM?
         Optional<ModemDevice> modemOptional = this.networkService.getModemDevice(interfaceName);
         if (modemOptional.isPresent() && modemOptional.get() instanceof UsbModemDevice) {
             String prefix = PREFIX + interfaceName + ".";
@@ -384,72 +346,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 this.properties);
     }
 
-//    @Override
-//    public synchronized void updateCurrentNetworkConfiguration() throws KuraException {
-//        NetworkConfiguration networkConfiguration = new NetworkConfiguration();
-//
-//        // Get the current values
-//        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
-//                .getNetworkInterfaces();
-//        Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
-//
-//        for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
-//            allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-//        }
-//
-//        // Create the NetInterfaceConfig objects
-//        if (allNetworkInterfacesMap.keySet() != null) {
-//            for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfacesMap.values()) {
-//
-//                String interfaceName = netInterface.getName();
-//                try {
-//                    // ignore mon interface
-//                    if (shouldSkipNetworkConfiguration(interfaceName)) {
-//                        continue;
-//                    }
-//
-//                    NetInterfaceType type = netInterface.getType();
-//
-//                    UsbDevice usbDevice = netInterface.getUsbDevice();
-//
-//                    logger.debug("Getting config for {} type: {}", interfaceName, type);
-//                    switch (type) {
-//                        case LOOPBACK:
-//                            populateLoopbackConfiguration(networkConfiguration, netInterface, usbDevice);
-//                            break;
-//
-//                        case ETHERNET:
-//                            populateEthernetConfiguration(networkConfiguration, netInterface, usbDevice);
-//                            break;
-//
-//                        case WIFI:
-//                            populateWifiConfig(networkConfiguration, netInterface, usbDevice);
-//                            break;
-//
-//                        case MODEM:
-//                            populateModemConfig(networkConfiguration, netInterface, usbDevice);
-//                            break;
-//
-//                        case UNKNOWN:
-//                            logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
-//                                    interfaceName);
-//                            break;
-//
-//                        default:
-//                            logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
-//                    }
-//                } catch (Exception e) {
-//                    logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
-//                }
-//            }
-//        }
-//
-//        mergeNetworkConfigurationProperties(networkConfiguration.getConfigurationProperties(), this.properties);
-//
-//        handleNewNetworkInterfaces(networkConfiguration);
-//        this.currentNetworkConfiguration = Optional.of(networkConfiguration);
-//    }
-
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
         final Set<String> interfaces = getNetworkInterfaceNamesInConfig(source);
         interfaces.addAll(getNetworkInterfaceNamesInConfig(dest));
@@ -457,50 +353,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         dest.putAll(source);
         dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
     }
-
-//    private void handleNewNetworkInterfaces(NetworkConfiguration newNetworkConfiguration)
-//            throws KuraException {
-//        if (this.currentNetworkConfiguration.isPresent()) {
-//            final NetworkConfiguration currentConfiguration = this.currentNetworkConfiguration.get();
-//
-//            final boolean hasNewInterfaceConfigs = newNetworkConfiguration.getNetInterfaceConfigs().stream()
-//                    .anyMatch(c -> currentConfiguration.getNetInterfaceConfig(c.getName()) == null);
-//
-//            if (hasNewInterfaceConfigs) {
-//                logger.info("found new network interfaces, rewriting network configuration");
-//                executeVisitors(newNetworkConfiguration);
-//                this.eventAdmin.postEvent(
-//                        new NetworkConfigurationChangeEvent(newNetworkConfiguration.getConfigurationProperties()));
-//            }
-//        }
-//    }
-
-//    private void populateModemConfig(NetworkConfiguration networkConfiguration,
-//            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
-//
-//        String interfaceConfigName = probeNetInterfaceConfigName(netInterface);
-//
-//        ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-//        addPropertiesInModemInterface(activeModemInterface);
-//        ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(activeModemInterface);
-//
-//        boolean isVirtual = modemInterfaceConfig.isVirtual();
-//
-//        modemInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
-//            try {
-//                List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
-//                        interfaceConfigName, netInterfaceAddress.getAddress(), isVirtual);
-//                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(netInterfaceAddress,
-//                        this.properties, interfaceConfigName, modemInterfaceConfig.getPppNum()));
-//                ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(modemNetConfigs);
-//            } catch (UnknownHostException | KuraException e) {
-//                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceConfigName, e);
-//            }
-//        });
-//
-//        modemInterfaceConfig.setUsbDevice(usbDevice);
-//        networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
-//    }
 
     private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
         final Set<String> interfaceNamesInConfig = getNetworkInterfaceNamesInConfig(this.properties);
@@ -521,130 +373,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                         .collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
     }
-
-//    private void populateWifiConfig(NetworkConfiguration networkConfiguration,
-//            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
-//        String interfaceName = netInterface.getName();
-//        WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-//        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
-//
-//        boolean isVirtual = wifiInterfaceConfig.isVirtual();
-//
-//        wifiInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
-//            try {
-//                List<NetConfig> wifiNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
-//                        interfaceName, netInterfaceAddress.getAddress(), isVirtual);
-//                wifiNetConfigs
-//                        .addAll(WifiConfigurationInterpreter.populateConfiguration(this.properties, interfaceName));
-//                ((WifiInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(wifiNetConfigs);
-//                ((WifiInterfaceAddressConfigImpl) netInterfaceAddress)
-//                        .setMode(WifiConfigurationInterpreter.getWifiMode(this.properties, interfaceName));
-//            } catch (UnknownHostException | KuraException e) {
-//                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
-//            }
-//        });
-//
-//        wifiInterfaceConfig.setUsbDevice(usbDevice);
-//        networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
-//    }
-//
-//    private void populateEthernetConfiguration(NetworkConfiguration networkConfiguration,
-//            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
-//        String interfaceName = netInterface.getName();
-//
-//        EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
-//        EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(activeEthInterface);
-//
-//        boolean isVirtual = ethernetInterfaceConfig.isVirtual();
-//
-//        ethernetInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
-//            try {
-//                ((NetInterfaceAddressConfigImpl) netInterfaceAddress)
-//                        .setNetConfigs(IpConfigurationInterpreter.populateConfiguration(this.properties, interfaceName,
-//                                netInterfaceAddress.getAddress(), isVirtual));
-//            } catch (UnknownHostException e) {
-//                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
-//            }
-//        });
-//
-//        ethernetInterfaceConfig.setUsbDevice(usbDevice);
-//        networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
-//    }
-//
-//    private void populateLoopbackConfiguration(NetworkConfiguration networkConfiguration,
-//            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
-//        String interfaceName = netInterface.getName();
-//
-//        LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
-//        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(activeLoopInterface);
-//
-//        boolean isVirtual = loopbackInterfaceConfig.isVirtual();
-//
-//        loopbackInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
-//            try {
-//                ((NetInterfaceAddressConfigImpl) netInterfaceAddress)
-//                        .setNetConfigs(IpConfigurationInterpreter.populateConfiguration(this.properties, interfaceName,
-//                                netInterfaceAddress.getAddress(), isVirtual));
-//            } catch (UnknownHostException e) {
-//                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
-//            }
-//        });
-//
-//        loopbackInterfaceConfig.setUsbDevice(usbDevice);
-//        networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
-//    }
-
-//    private boolean shouldSkipNetworkConfiguration(String interfaceName) {
-//        boolean result = false;
-//
-//        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
-//            result = true;
-//        }
-//
-//        return result;
-//    }
-//
-//    private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface) {
-//        String interfaceName = modemInterface.getName();
-//        if (isNull(this.modemManagerService)) {
-//            return;
-//        }
-//
-//        String modemPort = this.networkService.getModemUsbPort(interfaceName);
-//        if (modemPort == null) {
-//            modemPort = interfaceName;
-//        }
-//        try {
-//            this.modemManagerService.withModemService(modemPort, m -> {
-//                if (!m.isPresent()) {
-//                    return (Void) null;
-//                }
-//
-//                final CellularModem modem = m.get();
-//
-//                // set modem properties
-//                modemInterface.setSerialNumber(modem.getSerialNumber());
-//                modemInterface.setModel(modem.getModel());
-//                modemInterface.setFirmwareVersion(modem.getRevisionID());
-//                modemInterface.setGpsSupported(modem.isGpsSupported());
-//
-//                // set modem driver
-//                UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
-//                if (usbModemDevice != null) {
-//                    List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
-//                            .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
-//                    if (drivers != null && !drivers.isEmpty()) {
-//                        UsbModemDriver driver = drivers.get(0);
-//                        modemInterface.setDriver(driver.getName());
-//                    }
-//                }
-//
-//                return (Void) null;
-//            });
-//        } catch (KuraException e) {
-//            logger.warn("Error getting modem info");
-//        }
-//    }
 
     private Tocd getDefinition(final Map<String, Object> properties) throws KuraException {
         ObjectFactory objectFactory = new ObjectFactory();
@@ -1259,26 +987,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             final String migratedInterfaceName = usbBusNumber + "-" + usbDevicePath;
 
             logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
-
-            final String migratedPrefix = PREFIX + migratedInterfaceName + ".";
-
-            for (final Entry<String, Object> e : this.properties.entrySet()) {
-                final String key = e.getKey();
-
-                if (key.startsWith(prefix)) {
-                    final String suffix = key.substring(prefix.length());
-                    final String migratedPropertyKey = migratedPrefix + suffix;
-
-                    final Object existingProperty = this.properties.get(migratedPropertyKey);
-
-                    if (existingProperty != null) {
-                        result.put(migratedPropertyKey, existingProperty);
-                    } else {
-                        result.put(migratedPropertyKey, e.getValue());
-                    }
-                }
-            }
-
+            fillProperties(migratedInterfaceName, prefix, result);
             resultInterfaceNames.add(migratedInterfaceName);
 
             logger.info("migrating configuration for interface: {}...done", existingInterfaceName);
@@ -1287,5 +996,26 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
         result.put(NET_INTERFACES, resultInterfaceNames.stream().collect(Collectors.joining(",")));
         return result;
+    }
+
+    private void fillProperties(String migratedInterfaceName, String prefix, Map<String, Object> result) {
+        final String migratedPrefix = PREFIX + migratedInterfaceName + ".";
+
+        for (final Entry<String, Object> e : this.properties.entrySet()) {
+            final String key = e.getKey();
+
+            if (key.startsWith(prefix)) {
+                final String suffix = key.substring(prefix.length());
+                final String migratedPropertyKey = migratedPrefix + suffix;
+
+                final Object existingProperty = this.properties.get(migratedPropertyKey);
+
+                if (existingProperty != null) {
+                    result.put(migratedPropertyKey, existingProperty);
+                } else {
+                    result.put(migratedPropertyKey, e.getValue());
+                }
+            }
+        }
     }
 }

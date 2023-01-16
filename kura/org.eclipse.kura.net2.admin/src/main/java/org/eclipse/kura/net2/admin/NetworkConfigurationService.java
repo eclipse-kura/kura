@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin;
+package org.eclipse.kura.net2.admin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,26 +170,26 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
 //        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         if (properties == null) {
-            logger.debug("Got null properties...");
+            logger.debug("Received null properties...");
         } else {
             logger.debug("Properties... {}", properties);
-            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties));
+//            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties)); // <-- for now apply the configuration in any case. Is the property the best approach for managing incremental updates?
             updated(this.properties);
         }
     }
 
-    protected void initVisitors() {
-        this.writeVisitors = new ArrayList<>();
-        this.writeVisitors.add(LinuxWriteVisitor.getInstance());
-    }
+//    protected void initVisitors() {
+//        this.writeVisitors = new ArrayList<>();
+//        this.writeVisitors.add(LinuxWriteVisitor.getInstance());
+//    }
 
-    protected List<NetworkConfigurationVisitor> getVisitors() {
-        return this.writeVisitors;
-    }
+//    protected List<NetworkConfigurationVisitor> getVisitors() {
+//        return this.writeVisitors;
+//    }
 
     public void deactivate(ComponentContext componentContext) {
-        logger.debug("deactivate()");
-        this.writeVisitors = null;
+        logger.debug("Deactivate NetworkConfigurationService...");
+//        this.writeVisitors = null;
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
@@ -217,7 +217,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     public synchronized void updated(Map<String, Object> receivedProperties) {
         if (receivedProperties == null) {
-            logger.debug("properties are null");
+            logger.debug("Received null properties...");
             return;
         }
 
@@ -305,12 +305,12 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 .collect(Collectors.toSet());
     }
 
-    private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
-        for (NetworkConfigurationVisitor visitor : getVisitors()) {
-            visitor.setExecutorService(this.commandExecutorService);
-            networkConfiguration.accept(visitor);
-        }
-    }
+//    private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {
+//        for (NetworkConfigurationVisitor visitor : getVisitors()) {
+//            visitor.setExecutorService(this.commandExecutorService);
+//            networkConfiguration.accept(visitor);
+//        }
+//    }
 
     protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {
         StringBuilder sb = new StringBuilder();

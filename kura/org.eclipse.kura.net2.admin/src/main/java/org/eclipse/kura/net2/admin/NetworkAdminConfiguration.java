@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin;
+package org.eclipse.kura.net2.admin;
 
 public enum NetworkAdminConfiguration {
     PLATFORM_INTERFACES,

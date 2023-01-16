@@ -12,10 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.quectel.ex25;
 
-import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.util.AbstractCellularModemFactory;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.net2.admin.NetworkConfigurationService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.io.ConnectionFactory;

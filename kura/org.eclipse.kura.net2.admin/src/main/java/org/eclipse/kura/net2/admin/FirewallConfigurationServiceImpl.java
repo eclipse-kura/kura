@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin;
+package org.eclipse.kura.net2.admin;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;

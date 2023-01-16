@@ -1,12 +1,17 @@
 package org.freedesktop.networkmanager;
 
+import java.util.Map;
+
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
+import org.freedesktop.dbus.types.UInt64;
+import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
 public class GetAppliedConnectionTuple extends Tuple {
+
     @Position(0)
     private Map<String, Map<String, Variant<?>>> connection;
     @Position(1)
@@ -24,6 +29,7 @@ public class GetAppliedConnectionTuple extends Tuple {
     public Map<String, Map<String, Variant<?>>> getConnection() {
         return connection;
     }
+
     public void setVersionId(UInt64 arg) {
         versionId = arg;
     }
@@ -31,6 +37,5 @@ public class GetAppliedConnectionTuple extends Tuple {
     public UInt64 getVersionId() {
         return versionId;
     }
-
 
 }

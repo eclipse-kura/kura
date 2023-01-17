@@ -86,6 +86,9 @@ public class NMDbusConnector {
 
                 connection.Update(newConnectionSettings);
                 connection.Save();
+
+                nm.ActivateConnection(new DBusPath(connection.getObjectPath()),
+                        new DBusPath(ifaceDevice.getObjectPath()), new DBusPath("/"));
             } else {
                 logger.warn("Device type \"{}\" currently not supported", deviceType);
                 return;

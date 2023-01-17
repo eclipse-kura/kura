@@ -1,0 +1,363 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
+package org.eclipse.kura.message.store;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.eclipse.kura.data.DataTransportToken;
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * Represents a message stored by a MessageStore implementation.
+ * 
+ * @since 2.5
+ * @noextend This class is not intended to be extended by clients.
+ */
+@ProviderType
+public class StoredMessage {
+
+    private final int id;
+    private final String topic;
+    private final int qos;
+    private final boolean retain;
+    private final int priority;
+    private final byte[] payload;
+    private final Optional<Date> createdOn;
+    private final Optional<Date> publishedOn;
+    private final Optional<Date> confirmedOn;
+    private final Optional<Date> droppedOn;
+    private final Optional<DataTransportToken> dataTransportToken;
+
+    private StoredMessage(final Builder b) {
+        this.id = b.id;
+        this.topic = b.topic;
+        this.qos = b.qos;
+        this.retain = b.retain;
+        this.priority = b.priority;
+        this.payload = b.payload;
+        this.createdOn = Optional.ofNullable(b.createdOn);
+        this.publishedOn = Optional.ofNullable(b.publishedOn);
+        this.confirmedOn = Optional.ofNullable(b.confirmedOn);
+        this.dataTransportToken = Optional.ofNullable(b.dataTransportToken);
+        this.droppedOn = Optional.ofNullable(b.droppedOn);
+    }
+
+    /**
+     * Returns the unique identifier of this message.
+     * 
+     * @return the unique identifier of this message.
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Returns the topic of this message.
+     * 
+     * @return the topic.
+     */
+    public String getTopic() {
+        return topic;
+    }
+
+    /**
+     * Returns the QoS of this message.
+     * A QoS value of zero indicates that the message reception does not need to be
+     * acknowledged by the recipient.
+     * A QoS value greater or equal than one indicates that the acknowledgement is
+     * required.
+     * 
+     * @see StoredMessage#getConfirmedOn()
+     * @return the QoS value
+     */
+    public int getQos() {
+        return qos;
+    }
+
+    /**
+     * Returns the value of the MQTT <code>retain</code> field.
+     * 
+     * @return the value of the MQTT <code>retain</field>.
+     */
+    public boolean isRetain() {
+        return retain;
+    }
+
+    /**
+     * Defines a message priority. The lower the value of this field, the higher the
+     * priority.
+     * <br>
+     * Messages with higher priority (lower value of this field) will be published
+     * first.
+     * 
+     * @return the priority value
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * Returns the message payload.
+     * 
+     * @return the message payload.
+     */
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    /**
+     * Returns the timestamp of the instant when this message has been added to a
+     * store.
+     * 
+     * @return the timestamp of creation instant
+     */
+    public Optional<Date> getCreatedOn() {
+        return createdOn;
+    }
+
+    /**
+     * Returns the timestamp of the instant when this message has been sent to the
+     * recipient.
+     * An empty value means that the message has not been sent yet.
+     * 
+     * @return the publish timestamp, if any.
+     */
+    public Optional<Date> getPublishedOn() {
+        return publishedOn;
+    }
+
+    /**
+     * For messages with QoS greater or equal than one, this field reports the
+     * timestamp of the instant when the confirmation has been received from the
+     * recipient.
+     * <br>
+     * The returned value will be emtpy for messages with QoS zero, or for messages
+     * with QoS
+     * greater or equal than one that have not been confirmed yet.
+     * 
+     * @see StoredMessage#getQos()
+     * @return the timestamp of the confirmation, if any
+     */
+    public Optional<Date> getConfirmedOn() {
+        return confirmedOn;
+    }
+
+    /**
+     * Returns the timestamp of the instant when this messages has been discarded.
+     * If returned value is empty, this message has not been dropped.
+     * 
+     * @return the discard timestamp, if any
+     */
+    public Optional<Date> getDroppedOn() {
+        return droppedOn;
+    }
+
+    /**
+     * Returns the {@link DataTransportToken} associated with this message, if any.
+     * A {@link DataTransportToken} is an identifier of this message
+     * generated by the {@link org.eclipse.kura.data.DataTransportService} instance
+     * that published it.
+     * 
+     * @return the {@link DataTransportToken}.
+     */
+    public Optional<DataTransportToken> getDataTransportToken() {
+        return dataTransportToken;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(payload);
+        result = prime * result + Objects.hash(confirmedOn, createdOn, dataTransportToken, droppedOn, id, priority,
+                publishedOn, qos, retain, topic);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof StoredMessage)) {
+            return false;
+        }
+        StoredMessage other = (StoredMessage) obj;
+        return Objects.equals(confirmedOn, other.confirmedOn) && Objects.equals(createdOn, other.createdOn)
+                && Objects.equals(dataTransportToken, other.dataTransportToken)
+                && Objects.equals(droppedOn, other.droppedOn) && id == other.id && Arrays.equals(payload, other.payload)
+                && priority == other.priority && Objects.equals(publishedOn, other.publishedOn) && qos == other.qos
+                && retain == other.retain && Objects.equals(topic, other.topic);
+    }
+
+    @Override
+    public String toString() {
+        return "StoredMessage [id=" + id + ", topic=" + topic + ", qos=" + qos + ", retain=" + retain + ", priority="
+                + priority + ", payload=" + Arrays.toString(payload) + ", createdOn=" + createdOn + ", publishedOn="
+                + publishedOn + ", confirmedOn=" + confirmedOn + ", droppedOn=" + droppedOn + ", dataTransportToken="
+                + dataTransportToken + "]";
+    }
+
+    /**
+     * A builder that can be used to create {@link StoredMessage} instances.
+     * 
+     * @since 2.5
+     * @noextend This class is not intended to be extended by clients.
+     */
+    @ProviderType
+    public static class Builder {
+
+        private final int id;
+        private String topic;
+        private int qos;
+        private boolean retain;
+        private byte[] payload;
+        private int priority;
+        private Date createdOn;
+        private Date publishedOn;
+        private Date confirmedOn;
+        private Date droppedOn;
+        private DataTransportToken dataTransportToken;
+
+        /**
+         * Creates a new builder for a message with the given id.
+         * 
+         * @param id the message id.
+         */
+        public Builder(int id) {
+            this.id = id;
+        }
+
+        /**
+         * Sets the <code>topic</code> parameter.
+         * 
+         * @param topic the <code>topic</code> parameter.
+         * @return this builder.
+         */
+        public Builder withTopic(String topic) {
+            this.topic = topic;
+            return this;
+        }
+
+        /**
+         * Sets the <code>QoS</code> parameter.
+         * 
+         * @param qos the <code>QoS</code> parameter.
+         * @return this builder.
+         */
+        public Builder withQos(int qos) {
+            this.qos = qos;
+            return this;
+        }
+
+        /**
+         * Sets the <code>retain</code> parameter.
+         * 
+         * @param retain the <code>retain</code> parameter.
+         * @return this builder.
+         */
+        public Builder withRetain(boolean retain) {
+            this.retain = retain;
+            return this;
+        }
+
+        /**
+         * Sets the <code>createdOn</code> parameter.
+         * 
+         * @param createdOn the <code>createdOn</code> parameter.
+         * @return this builder.
+         */
+        public Builder withCreatedOn(Date createdOn) {
+            this.createdOn = createdOn;
+            return this;
+        }
+
+        /**
+         * Sets the <code>publishedOn</code> parameter.
+         * 
+         * @param publishedOn the <code>publishedOn</code> parameter.
+         * @return this builder.
+         */
+        public Builder withPublishedOn(Date publishedOn) {
+            this.publishedOn = publishedOn;
+            return this;
+        }
+
+        /**
+         * Sets the <code>confirmedOn</code> parameter.
+         * 
+         * @param confirmedOn the <code>confirmedOn</code> parameter.
+         * @return this builder.
+         */
+        public Builder withConfirmedOn(Date confirmedOn) {
+            this.confirmedOn = confirmedOn;
+            return this;
+        }
+
+        /**
+         * Sets the <code>payload</code> parameter.
+         * 
+         * @param payload the <code>payload</code> parameter.
+         * @return this builder.
+         */
+        public Builder withPayload(byte[] payload) {
+            this.payload = payload;
+            return this;
+        }
+
+        /**
+         * Sets the <code>priority</code> parameter.
+         * 
+         * @param priority the <code>priority</code> parameter.
+         * @return this builder.
+         */
+        public Builder withPriority(int priority) {
+            this.priority = priority;
+            return this;
+        }
+
+        /**
+         * Sets the <code>token</code> parameter.
+         * 
+         * @param token the <code>token</code> parameter.
+         * @return this builder.
+         */
+        public Builder withDataTransportToken(DataTransportToken token) {
+            this.dataTransportToken = token;
+            return this;
+        }
+
+        /**
+         * Sets the <code>droppedOn</code> parameter.
+         * 
+         * @param droppedOn the <code>droppedOn</code> parameter.
+         * @return this builder.
+         */
+        public Builder withDroppedOn(Date droppedOn) {
+            this.droppedOn = droppedOn;
+            return this;
+        }
+
+        /**
+         * Created a new {@link StoredMessage} basing on this builder.
+         * 
+         * @return the new message.
+         */
+        public StoredMessage build() {
+            return new StoredMessage(this);
+        }
+    }
+}

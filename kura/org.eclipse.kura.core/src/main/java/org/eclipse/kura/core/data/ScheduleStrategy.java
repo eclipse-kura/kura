@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import org.eclipse.kura.message.store.StoredMessage;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,10 +95,10 @@ public class ScheduleStrategy implements AutoConnectStrategy {
         @Override
         public State onEnterState() {
 
-            DataMessage dm = connectionManager.getNextMessage();
+            Optional<StoredMessage> dm = connectionManager.getNextMessage();
 
-            if (dm != null
-                    && dm.getPriority() <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()) {
+            if (dm.isPresent()
+                    && dm.get().getPriority() <= dataServiceOptions.getConnectionSchedulePriorityOverridePriority()) {
                 logger.info(
                         "Priority message sent while disconnecting. Initiating Connection to send message with a high priority.");
                 return new AwaitConnect();

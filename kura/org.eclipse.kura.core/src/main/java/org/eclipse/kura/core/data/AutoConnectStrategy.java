@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.core.data;
 
+import java.util.Optional;
+
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.message.store.StoredMessage;
 
 interface AutoConnectStrategy extends DataServiceListener {
 
@@ -28,7 +31,7 @@ interface AutoConnectStrategy extends DataServiceListener {
 
         void disconnect();
 
-        DataMessage getNextMessage();
+        Optional<StoredMessage> getNextMessage();
 
         boolean hasInFlightMessages();
 

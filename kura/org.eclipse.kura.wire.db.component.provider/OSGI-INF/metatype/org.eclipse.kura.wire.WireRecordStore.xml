@@ -15,20 +15,20 @@
      
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
-         name="DB Store (Deprecated)" 
+    <OCD id="org.eclipse.kura.wire.WireRecordStore"
+         name="Wire Record Store" 
          description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Database instance.">
 
-        <AD id="table.name"
-            name="table.name"
+        <AD id="store.name"
+            name="store.name"
             type="String"
             cardinality="0"
             required="true"
             default="WR_data"
             description="The name of the table to be created. All the operations will be performed on it."/>   
         
-        <AD id="maximum.table.size"
-            name="maximum.table.size"
+        <AD id="maximum.store.size"
+            name="maximum.store.size"
             type="Integer"
             cardinality="0"
             required="true"
@@ -47,17 +47,17 @@
             min="0">
         </AD>
         
-        <AD id="BaseDbService.target"
-            name="DbService Target Filter"
+        <AD id="WireRecordStoreProvider.target"
+            name="WireRecordStoreProvider Target Filter"
             type="String"
             cardinality="0"
             required="true"
             default="(kura.service.pid=org.eclipse.kura.db.H2DbService)"
-            description="Specifies, as an OSGi target filter, the pid of the of the database instance to be used.">
+            description="Specifies, as an OSGi target filter, the pid of the of the wire record store instance to be used.">
         </AD>
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.DbWireRecordStore" factoryPid="org.eclipse.kura.wire.DbWireRecordStore">
-        <Object ocdref="org.eclipse.kura.wire.DbWireRecordStore"/>
+    <Designate pid="org.eclipse.kura.wire.WireRecordStore" factoryPid="org.eclipse.kura.wire.WireRecordStore">
+        <Object ocdref="org.eclipse.kura.wire.WireRecordStore"/>
     </Designate>
 </MetaData>

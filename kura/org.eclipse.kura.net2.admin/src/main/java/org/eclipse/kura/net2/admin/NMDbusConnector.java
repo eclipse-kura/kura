@@ -72,7 +72,7 @@ public class NMDbusConnector {
             if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
                 Device ifaceDevice = getDeviceByIpIface(iface);
 
-                String connectionUuid = getAppliedConnectionUuid(ifaceDevice);
+                String connectionUuid = getAppliedConnectionUuid(ifaceDevice); // What if there's no applied connection?
                 Connection connection = getConnectionByUuid(connectionUuid);
 
                 Map<String, Map<String, Variant<?>>> currentConnectionSettings = connection.GetSettings();

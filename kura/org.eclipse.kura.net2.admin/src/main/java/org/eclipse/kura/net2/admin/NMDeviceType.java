@@ -103,8 +103,8 @@ public enum NMDeviceType {
             return NM_DEVICE_TYPE_WIFI_P2P;
         case 31:
             return NM_DEVICE_TYPE_VRF;
+        default:
+            return null;
         }
-
-        return null;
     }
 }

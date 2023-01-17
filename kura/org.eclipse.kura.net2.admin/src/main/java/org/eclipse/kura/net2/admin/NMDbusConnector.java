@@ -161,6 +161,8 @@ public class NMDbusConnector {
         String dhcpClient4EnabledProperty = String.format("net.interface.%s.config.dhcpClient4.enabled", iface);
         Boolean dhcpClient4Enabled = (Boolean) networkConfiguration.get(dhcpClient4EnabledProperty);
 
+        // Should handle net.interface.eth0.config.ip4.status here
+
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
             ipv4Map.put("method", new Variant<>("manual"));
 

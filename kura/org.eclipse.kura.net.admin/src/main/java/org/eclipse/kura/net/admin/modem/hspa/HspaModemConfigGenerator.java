@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.modem.hspa;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
+import org.eclipse.kura.net.admin.util.PppPdpUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -79,7 +80,7 @@ public class HspaModemConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
-            pdpPid = getPdpContextNumber(dialString);
+            pdpPid = PppPdpUtil.getPdpContextNumber(dialString);
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -150,9 +151,5 @@ public class HspaModemConfigGenerator implements ModemPppConfigGenerator {
         pdpcontext.append('"');
 
         return pdpcontext.toString();
-    }
-
-    private int getPdpContextNumber(String dialString) {
-        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
     }
 }

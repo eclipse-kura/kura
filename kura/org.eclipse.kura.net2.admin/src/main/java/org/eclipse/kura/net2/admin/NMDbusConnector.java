@@ -201,10 +201,7 @@ public class NMDbusConnector {
             String dhcpClient4DNSProperty = String.format("net.interface.%s.config.ip4.dnsServers", iface);
             if (networkConfiguration.containsKey(dhcpClient4DNSProperty)) {
                 String dhcpClient4DNS = (String) networkConfiguration.get(dhcpClient4DNSProperty);
-                ipv4Map.put("ignore-auto-dns", new Variant<>(true));
                 ipv4Map.put("dns-search", new Variant<>(getDNSServers(dhcpClient4DNS)));
-            } else {
-                ipv4Map.put("ignore-auto-dns", new Variant<>(false));
             }
 
             String dhcpClient4GatewayProperty = String.format("net.interface.%s.config.ip4.gateway", iface);
@@ -212,9 +209,15 @@ public class NMDbusConnector {
                 String dhcpClient4Gateway = (String) networkConfiguration.get(dhcpClient4GatewayProperty);
                 ipv4Map.put("gateway", new Variant<>(dhcpClient4Gateway));
             }
-
         } else {
             ipv4Map.put("method", new Variant<>("auto"));
+
+            String dhcpClient4DNSProperty = String.format("net.interface.%s.config.ip4.dnsServers", iface);
+            if (networkConfiguration.containsKey(dhcpClient4DNSProperty)) {
+                String dhcpClient4DNS = (String) networkConfiguration.get(dhcpClient4DNSProperty);
+                ipv4Map.put("ignore-auto-dns", new Variant<>(true));
+                ipv4Map.put("dns-search", new Variant<>(getDNSServers(dhcpClient4DNS)));
+            }
         }
 
         return ipv4Map;

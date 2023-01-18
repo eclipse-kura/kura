@@ -12,14 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -90,20 +87,20 @@ public class NMDbusConnector {
     public void apply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
-        List<String> netInterfaces = getNetworkInterfaces((String) networkConfiguration.get("net.interfaces"));
+        List<String> netInterfaces = NMSettingsConverter
+                .splitCommaSeparatedStrings((String) networkConfiguration.get("net.interfaces"));
 
         for (String iface : netInterfaces) {
             Device device = getDeviceByIpIface(iface); // What if no device matches?
             NMDeviceType deviceType = getDeviceType(device);
 
-            logger.info("Interface: {}", iface);
-            logger.info("DeviceType: {}", deviceType);
+            logger.info("Settings iface \"{}\":{}", iface, deviceType);
 
             if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
                 Connection connection = getAppliedConnection(device); // What if there's no applied connection?
 
                 Map<String, Variant<?>> connectionMap = copyConnectionSettings(connection.GetSettings());
-                Map<String, Variant<?>> ipv4Map = buildIpv4Settings(networkConfiguration, iface);
+                Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(networkConfiguration, iface);
 
                 Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
                 newConnectionSettings.put("ipv4", ipv4Map);
@@ -120,26 +117,6 @@ public class NMDbusConnector {
             }
         }
 
-    }
-
-    private List<String> getNetworkInterfaces(String netInterfaces) {
-        List<String> netInterfacesNames = new ArrayList<>();
-        Pattern comma = Pattern.compile(",");
-        if (netInterfaces != null) {
-            comma.splitAsStream(netInterfaces).filter(s -> !s.trim().isEmpty()).forEach(netInterfacesNames::add);
-        }
-
-        return netInterfacesNames;
-    }
-
-    private List<String> getDNSServers(String dnsServersString) {
-        List<String> dnsServers = new ArrayList<>();
-        Pattern comma = Pattern.compile(",");
-        if (dnsServersString != null) {
-            comma.splitAsStream(dnsServersString).filter(s -> !s.trim().isEmpty()).forEach(dnsServers::add);
-        }
-
-        return dnsServers;
     }
 
     private NMDeviceType getDeviceType(Device device) throws DBusException {
@@ -173,54 +150,4 @@ public class NMDbusConnector {
 
         return connectionMap;
     }
-
-    private Map<String, Variant<?>> buildIpv4Settings(Map<String, Object> networkConfiguration, String iface) {
-        Map<String, Variant<?>> ipv4Map = new HashMap<>();
-
-        String dhcpClient4EnabledProperty = String.format("net.interface.%s.config.dhcpClient4.enabled", iface);
-        Boolean dhcpClient4Enabled = (Boolean) networkConfiguration.get(dhcpClient4EnabledProperty);
-
-        // Should handle net.interface.eth0.config.ip4.status here
-
-        if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
-            ipv4Map.put("method", new Variant<>("manual"));
-
-            String dhcpClient4AddressProperty = String.format("net.interface.%s.config.ip4.address", iface);
-            String dhcpClient4Address = (String) networkConfiguration.get(dhcpClient4AddressProperty);
-
-            String dhcpClient4PrefixProperty = String.format("net.interface.%s.config.ip4.prefix", iface);
-            Short dhcpClient4Prefix = (Short) networkConfiguration.get(dhcpClient4PrefixProperty);
-
-            Map<String, Variant<?>> address = new HashMap<>();
-            address.put("address", new Variant<>(dhcpClient4Address));
-            address.put("prefix", new Variant<>(new UInt32(dhcpClient4Prefix)));
-
-            List<Map<String, Variant<?>>> addressData = Arrays.asList(address);
-            ipv4Map.put("address-data", new Variant<>(addressData, "aa{sv}"));
-
-            String dhcpClient4DNSProperty = String.format("net.interface.%s.config.ip4.dnsServers", iface);
-            if (networkConfiguration.containsKey(dhcpClient4DNSProperty)) {
-                String dhcpClient4DNS = (String) networkConfiguration.get(dhcpClient4DNSProperty);
-                ipv4Map.put("dns-search", new Variant<>(getDNSServers(dhcpClient4DNS)));
-            }
-
-            String dhcpClient4GatewayProperty = String.format("net.interface.%s.config.ip4.gateway", iface);
-            if (networkConfiguration.containsKey(dhcpClient4GatewayProperty)) {
-                String dhcpClient4Gateway = (String) networkConfiguration.get(dhcpClient4GatewayProperty);
-                ipv4Map.put("gateway", new Variant<>(dhcpClient4Gateway));
-            }
-        } else {
-            ipv4Map.put("method", new Variant<>("auto"));
-
-            String dhcpClient4DNSProperty = String.format("net.interface.%s.config.ip4.dnsServers", iface);
-            if (networkConfiguration.containsKey(dhcpClient4DNSProperty)) {
-                String dhcpClient4DNS = (String) networkConfiguration.get(dhcpClient4DNSProperty);
-                ipv4Map.put("ignore-auto-dns", new Variant<>(true));
-                ipv4Map.put("dns-search", new Variant<>(getDNSServers(dhcpClient4DNS)));
-            }
-        }
-
-        return ipv4Map;
-    }
-
 }

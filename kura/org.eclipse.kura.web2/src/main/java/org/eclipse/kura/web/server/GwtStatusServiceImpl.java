@@ -269,7 +269,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         String nl = "<br />";
         String tab = "&nbsp&nbsp&nbsp&nbsp";
 
-        GwtNetworkServiceImpl gwtNetworkService = new GwtNetworkServiceImpl();
+        GwtNetworkServiceImplFacade gwtNetworkService = new GwtNetworkServiceImplFacade();
 
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 

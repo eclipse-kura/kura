@@ -206,8 +206,10 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         public void store(final List<WireRecord> records) throws KuraStoreException {
             final WireRecordStore currentStore = getWireRecordStore();
 
-            if (currentStore.getSize() > options.getMaximumStoreSize()) {
-                currentStore.truncate(Math.min(options.getCleanupRecordsKeep(), options.getMaximumStoreSize()));
+            if (currentStore.getSize() >= options.getMaximumStoreSize()) {
+                final int recordsToKeep = Math.min(options.getCleanupRecordsKeep(), options.getMaximumStoreSize());
+
+                currentStore.truncate(Math.max(0, recordsToKeep - 1));
             }
 
             currentStore.insertRecords(records);

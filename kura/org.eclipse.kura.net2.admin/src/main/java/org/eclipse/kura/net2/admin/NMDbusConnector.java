@@ -40,14 +40,40 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
 
+    private static NMDbusConnector instance;
     private DBusConnection dbusConnection;
     private NetworkManager nm;
     private Map<String, Object> configurationCache;
 
-    public NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
+    private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
+    }
 
+    public static NMDbusConnector createInstance() throws DBusException {
+        instance = new NMDbusConnector(DBusConnection.getConnection(DBusConnection.DEFAULT_SYSTEM_BUS_ADDRESS));
+        return instance;
+    }
+
+    public static NMDbusConnector createInstance(DBusConnection dbusConnection) throws DBusException {
+        instance = new NMDbusConnector(dbusConnection);
+        return instance;
+    }
+
+    public void closeConnection() {
+        dbusConnection.disconnect();
+    }
+
+    public static NMDbusConnector getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException(
+                    "Instance not created yet. Please use NMDbusConnector.createInstance() first");
+        }
+
+        return instance;
+    }
+
+    public void checkPermissions() {
         Map<String, String> getPermissions = nm.GetPermissions();
         for (Entry<String, String> entry : getPermissions.entrySet()) {
             if (!entry.getValue().equals("yes")) {
@@ -56,16 +82,19 @@ public class NMDbusConnector {
         }
     }
 
+    public DBusConnection getDbusConnection() {
+        return this.dbusConnection;
+    }
+
     public void apply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
         List<String> netInterfaces = getNetworkInterfaces((String) networkConfiguration.get("net.interfaces"));
 
         for (String iface : netInterfaces) {
-            logger.info("Modified: {}", iface);
-
             NMDeviceType deviceType = getDeviceTypeByIpIface(iface);
 
+            logger.info("Interface: {}", iface);
             logger.info("DeviceType: {}", deviceType);
 
             if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
@@ -96,15 +125,14 @@ public class NMDbusConnector {
 
     }
 
-    private List<String> getNetworkInterfaces(String modifiedInterfaces) {
-        List<String> modifiedInterfaceNames = new ArrayList<>();
+    private List<String> getNetworkInterfaces(String netInterfaces) {
+        List<String> netInterfacesNames = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
-        if (modifiedInterfaces != null) {
-            comma.splitAsStream(modifiedInterfaces).filter(s -> !s.trim().isEmpty())
-                    .forEach(modifiedInterfaceNames::add);
+        if (netInterfaces != null) {
+            comma.splitAsStream(netInterfaces).filter(s -> !s.trim().isEmpty()).forEach(netInterfacesNames::add);
         }
 
-        return modifiedInterfaceNames;
+        return netInterfacesNames;
     }
 
     private List<String> getDNSServers(String dnsServersString) {

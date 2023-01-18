@@ -17,11 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -97,26 +99,28 @@ public class NMDbusConnector {
             logger.info("Settings iface \"{}\":{}", iface, deviceType);
 
             if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-                Connection connection = getAppliedConnection(device); // What if there's no applied connection?
+                Optional<Connection> connection = getAppliedConnection(device);
 
-                Map<String, Variant<?>> connectionMap = copyConnectionSettings(connection.GetSettings());
+                Map<String, Variant<?>> connectionMap = buildConnectionSettings(connection, iface);
                 Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(networkConfiguration, iface);
 
                 Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
                 newConnectionSettings.put("ipv4", ipv4Map);
                 newConnectionSettings.put("connection", connectionMap);
 
-                connection.Update(newConnectionSettings);
-                connection.Save();
-
-                nm.ActivateConnection(new DBusPath(connection.getObjectPath()), new DBusPath(device.getObjectPath()),
-                        new DBusPath("/"));
+                if (connection.isPresent()) {
+                    connection.get().Update(newConnectionSettings);
+                    nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
+                            new DBusPath(device.getObjectPath()), new DBusPath("/"));
+                } else {
+                    nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
+                            new DBusPath("/"));
+                }
             } else {
                 logger.warn("Device type \"{}\" currently not supported", deviceType);
                 return;
             }
         }
-
     }
 
     private NMDeviceType getDeviceType(Device device) throws DBusException {
@@ -131,22 +135,42 @@ public class NMDbusConnector {
         return dbusConnection.getRemoteObject(NM_BUS_NAME, ifaceDevicePath.getPath(), Device.class);
     }
 
-    private Connection getAppliedConnection(Device dev) throws DBusException {
-        Map<String, Map<String, Variant<?>>> connectionSettings = dev.GetAppliedConnection(new UInt32(0))
-                .getConnection();
-        String uuid = String.valueOf(connectionSettings.get("connection").get("uuid")).replaceAll("\\[|\\]", "");
+    private Optional<Connection> getAppliedConnection(Device dev) throws DBusException {
+        try {
+            Map<String, Map<String, Variant<?>>> connectionSettings = dev.GetAppliedConnection(new UInt32(0))
+                    .getConnection();
+            String uuid = String.valueOf(connectionSettings.get("connection").get("uuid")).replaceAll("\\[|\\]", "");
 
-        Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_PATH, Settings.class);
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_PATH, Settings.class);
 
-        DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
-        return dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class);
+            DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
+            return Optional.of(dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+            return Optional.empty();
+        }
     }
 
-    private Map<String, Variant<?>> copyConnectionSettings(Map<String, Map<String, Variant<?>>> connectionSettings) {
+    private Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface) {
+        if (!connection.isPresent()) {
+            return createConnectionSettings(iface);
+        }
+
+        Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
         Map<String, Variant<?>> connectionMap = new HashMap<>();
         for (String key : connectionSettings.get("connection").keySet()) {
             connectionMap.put(key, connectionSettings.get("connection").get(key));
         }
+
+        return connectionMap;
+    }
+
+    private Map<String, Variant<?>> createConnectionSettings(String iface) {
+        Map<String, Variant<?>> connectionMap = new HashMap<>();
+
+        String connectionName = String.format("kura-%s-connection", iface);
+        connectionMap.put("id", new Variant<>(connectionName));
+        connectionMap.put("interface-name", new Variant<>(iface));
 
         return connectionMap;
     }

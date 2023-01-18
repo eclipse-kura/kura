@@ -17,7 +17,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
          name="DB Store (Deprecated)" 
-         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Database instance.">
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Database instance. **Deprecated** Use the Wire Record Store instead.">
 
         <AD id="table.name"
             name="table.name"

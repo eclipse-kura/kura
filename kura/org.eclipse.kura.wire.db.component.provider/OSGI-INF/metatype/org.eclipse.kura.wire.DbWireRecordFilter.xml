@@ -17,7 +17,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.DbWireRecordFilter"
          name="DB Filter (Deprecated)" 
-         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores. **Deprecated** Use the Wire Record Query component instead.">
 
         <AD id="sql.view"
             name="sql.view"

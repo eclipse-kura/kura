@@ -17,33 +17,33 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.WireRecordStore"
          name="Wire Record Store" 
-         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Database instance.">
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Wire Record Store instance.">
 
         <AD id="store.name"
-            name="store.name"
+            name="Record Collection Name"
             type="String"
             cardinality="0"
             required="true"
             default="WR_data"
-            description="The name of the table to be created. All the operations will be performed on it."/>   
+            description="The name of the record collection that should be used. The implementation of the collection depends on the Wire Record Store implementation, if it is a SQL database, the collection will be likely implemented as a table."/>
         
         <AD id="maximum.store.size"
-            name="maximum.store.size"
+            name="Maximum Record Collection Size"
             type="Integer"
             cardinality="0"
             required="true"
             default="10000"
-            description="Maximum table size"
+            description="Maximum record collection size"
             min="1">
         </AD>
         
         <AD id="cleanup.records.keep"
-            name="cleanup.records.keep"
+            name="Cleanup Records Keep"
             type="Integer"
             cardinality="0"
             required="true"
             default="5000"
-            description="Specifies the number of records in the table to keep while performing a cleanup operation (if set to 0 all the records will be deleted)."
+            description="Specifies the number of records in the collection to keep while performing a cleanup operation (if set to 0 all the records will be deleted)."
             min="0">
         </AD>
         
@@ -53,7 +53,7 @@
             cardinality="0"
             required="true"
             default="(kura.service.pid=org.eclipse.kura.db.H2DbService)"
-            description="Specifies, as an OSGi target filter, the pid of the of the wire record store instance to be used.">
+            description="Specifies, as an OSGi target filter, the pid of the of the Wire Record Store instance to be used.">
         </AD>
     </OCD>
     

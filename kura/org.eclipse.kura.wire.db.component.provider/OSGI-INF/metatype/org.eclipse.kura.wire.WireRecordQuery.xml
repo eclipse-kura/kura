@@ -17,7 +17,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.WireRecordQuery"
          name="Wire Record Query" 
-         description="A wire component that provides filtering and aggregation for Wire Records stored by the DbWireRecordStores.">
+         description="A wire component that allows to perform queries on Queryable Wire Record Store instances and emit the result on the Wires.">
 
         <AD id="query"
             name="query"
@@ -25,7 +25,7 @@
             cardinality="0"
             required="true"
             default="SELECT * FROM &quot;WR_data&quot; LIMIT 10;"
-            description="SQL to be executed to build a view">
+            description="Query to be executed. The query syntax depends on the Queryable Wire Record Store implementation.">
         </AD>
         
         <AD id="cache.expiration.interval"
@@ -44,7 +44,7 @@
             cardinality="0"
             required="true"
             default="(kura.service.pid=org.eclipse.kura.db.H2DbService)"
-            description="Specifies, as an OSGi target filter, the pid of the of the qureryable record store instance to be used.">
+            description="Specifies, as an OSGi target filter, the pid of the of the Queryable Wire Record Store instance to be used.">
         </AD>
             
         <AD id="emit.on.empty.result"

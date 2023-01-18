@@ -59,10 +59,9 @@ public class NMDbusConnector {
     public void apply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
-        List<String> modifiedInterfaces = getModifiedInterfaces(
-                (String) networkConfiguration.get("modified.interface.names"));
+        List<String> netInterfaces = getNetworkInterfaces((String) networkConfiguration.get("net.interfaces"));
 
-        for (String iface : modifiedInterfaces) {
+        for (String iface : netInterfaces) {
             logger.info("Modified: {}", iface);
 
             NMDeviceType deviceType = getDeviceTypeByIpIface(iface);
@@ -97,7 +96,7 @@ public class NMDbusConnector {
 
     }
 
-    private List<String> getModifiedInterfaces(String modifiedInterfaces) {
+    private List<String> getNetworkInterfaces(String modifiedInterfaces) {
         List<String> modifiedInterfaceNames = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
         if (modifiedInterfaces != null) {

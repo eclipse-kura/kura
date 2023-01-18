@@ -49,7 +49,7 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Image Download Timeout** - Describes the amount of time the framework will let the image download before timeout.
   
-- **Internal Ports** - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up container. In this field, you can also specify which protocol to run at the port by appending a port with a colon and typing in the name of the network protocol. Example: 80, 443:tcp, 8080:udp.
+- **Internal Ports** - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up container. In this field, you can also specify which protocol to run at the port by appending a port with a colon and typing in the name of the network protocol. Example: `80, 443:tcp, 8080:udp`.
   
 - **External Ports** - This field accepts a comma-separated list of ports that will be externally exposed on the host machine.
   

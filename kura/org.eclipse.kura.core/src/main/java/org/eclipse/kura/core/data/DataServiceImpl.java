@@ -106,7 +106,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private final AtomicBoolean publisherEnabled = new AtomicBoolean();
 
-    private ServiceTracker<Object, MessageStoreProvider> dbServiceTracker;
+    private ServiceTracker<Object, Object> dbServiceTracker;
     private ComponentContext componentContext;
 
     private WatchdogService watchdogService;
@@ -156,36 +156,31 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             final Filter filter = FrameworkUtil
                     .createFilter("(" + ConfigurationService.KURA_SERVICE_PID + "=" + kuraServicePid + ")");
             this.dbServiceTracker = new ServiceTracker<>(this.componentContext.getBundleContext(), filter,
-                    new ServiceTrackerCustomizer<Object, MessageStoreProvider>() {
+                    new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
-                        public MessageStoreProvider addingService(ServiceReference<Object> reference) {
+                        public Object addingService(ServiceReference<Object> reference) {
                             logger.info("Message store instance found");
                             Object service = DataServiceImpl.this.componentContext
                                     .getBundleContext()
                                     .getService(reference);
 
-                            final MessageStoreProvider messageStoreProvider;
-
                             if (service instanceof MessageStoreProvider) {
-                                messageStoreProvider = (MessageStoreProvider) service;
+                                setMessageStoreProvider((MessageStoreProvider) service);
                             } else if (service instanceof H2DbService) {
-                                messageStoreProvider = (name, capacity) -> new H2DbMessageStoreImpl(
-                                        (H2DbService) service, name,
-                                        capacity);
+                                setH2DbService((H2DbService) service);
                             } else {
                                 DataServiceImpl.this.componentContext
                                         .getBundleContext().ungetService(reference);
                                 return null;
                             }
 
-                            setMessageStoreProvider(messageStoreProvider);
-                            return messageStoreProvider;
+                            return service;
                         }
 
                         @Override
                         public void modifiedService(ServiceReference<Object> reference,
-                                MessageStoreProvider service) {
+                                Object service) {
                             logger.info("Message store instance updated, recreating table if needed...");
                             synchronized (DataServiceImpl.this) {
                                 DataServiceImpl.this.store.update(
@@ -195,9 +190,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                         @Override
                         public void removedService(ServiceReference<Object> reference,
-                                MessageStoreProvider service) {
+                                Object service) {
                             logger.info("Message store instance removed");
-                            unsetMessageStoreProvider(service);
+                            unsetMessageStoreProvider();
                             DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                         }
                     });
@@ -318,10 +313,20 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         signalPublisher();
     }
 
-    public synchronized void unsetMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
+    public synchronized void unsetMessageStoreProvider() {
         disconnect();
         this.store.shutdown();
         this.store = null;
+    }
+
+    public synchronized void setH2DbService(H2DbService dbService) {
+        setMessageStoreProvider((name, capacity) -> new H2DbMessageStoreImpl(
+                dbService, name,
+                capacity));
+    }
+
+    public synchronized void unsetH2DbService(H2DbService dbService) {
+        unsetMessageStoreProvider();
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {

@@ -2928,7 +2928,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Image Download Timeout</strong> - Describes the amount of time the framework will let the image download before timeout.</p>
 </li>
 <li>
-<p><strong>Internal Ports</strong> - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up container.</p>
+<p><strong>Internal Ports</strong> - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up container. In this field, you can also specify which protocol to run at the port by appending a port with a colon and typing in the name of the network protocol. Example: <code>80, 443:tcp, 8080:udp</code>.</p>
 </li>
 <li>
 <p><strong>External Ports</strong> - This field accepts a comma-separated list of ports that will be externally exposed on the host machine.</p>

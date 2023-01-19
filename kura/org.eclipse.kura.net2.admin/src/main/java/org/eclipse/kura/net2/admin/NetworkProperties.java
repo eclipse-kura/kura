@@ -56,10 +56,19 @@ public class NetworkProperties {
 
     public Optional<List<String>> getOptStringList(String key, Object... args) {
         String formattedKey = String.format(key, args);
-        if (this.properties.containsKey(formattedKey)) {
-            return Optional.of(getStringList(formattedKey, args));
-        } else {
+        if (!this.properties.containsKey(formattedKey)) {
             return Optional.empty();
         }
+
+        String commaSeparatedString = get(String.class, key, args);
+        if (Objects.isNull(commaSeparatedString) || commaSeparatedString.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<String> stringList = new ArrayList<>();
+        Pattern comma = Pattern.compile(",");
+        comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+
+        return Optional.of(stringList);
     }
 }

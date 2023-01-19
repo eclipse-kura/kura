@@ -89,8 +89,8 @@ public class NMSettingsConverter {
             settings.put("ignore-auto-dns", new Variant<>(true));
 
             Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
-            if (gateway.isPresent()) {
-                settings.put("gateway", new Variant<>(gateway));
+            if (gateway.isPresent() && !gateway.get().isEmpty()) {
+                settings.put("gateway", new Variant<>(gateway.get()));
             }
         } else {
             settings.put("method", new Variant<>("auto"));
@@ -129,7 +129,7 @@ public class NMSettingsConverter {
         settings.put("mode", new Variant<>(mode));
         settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
         settings.put("band", new Variant<>(band));
-        if (channel.isPresent()) {
+        if (channel.isPresent() && !channel.get().isEmpty()) {
             settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
         }
 

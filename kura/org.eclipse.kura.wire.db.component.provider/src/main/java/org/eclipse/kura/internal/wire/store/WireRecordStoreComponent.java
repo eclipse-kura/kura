@@ -9,7 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
- *  
+ * 
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 

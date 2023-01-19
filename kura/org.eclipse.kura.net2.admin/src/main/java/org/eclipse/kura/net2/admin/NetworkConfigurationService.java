@@ -42,6 +42,7 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net2.admin.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.net2.admin.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -165,7 +166,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         logger.debug("Deactivate NetworkConfigurationService...");
     }
 
-    protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+    protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
         // Do be done with NM...
         if (isUsbPort(interfaceName)) {
             return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
@@ -176,9 +177,19 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     private Optional<NetInterfaceType> getNetworkTypeFromProperties(final String interfaceName,
             final Map<String, Object> properties) {
-        return Optional.ofNullable(properties.get(PREFIX + interfaceName + ".type")).flatMap(p -> {
+        Optional<NetInterfaceType> type = Optional.empty();
+        Optional<Object> value = getValueFromProperties(PREFIX + interfaceName + ".type", properties);
+        if (value.isPresent()) {
+            type = Optional.of(NetInterfaceType.valueOf((String) value.get()));
+        }
+        return type;
+    }
+
+    private Optional<Object> getValueFromProperties(final String key,
+            final Map<String, Object> properties) {
+        return Optional.ofNullable(properties.get(key)).flatMap(p -> {
             try {
-                return Optional.of(NetInterfaceType.valueOf((String) p));
+                return Optional.of(p);
             } catch (final Exception e) {
                 return Optional.empty();
             }
@@ -192,40 +203,34 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             return;
         }
 
-        try {
-            final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties); // for backward
-                                                                                               // compatibility
+        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
+                                                                                           // compatibility
+        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
 
-            Map<String, Object> modifiedProps = new HashMap<>(newProperties);
-            final Set<String> interfaces = getNetworkInterfaceNamesInConfig(newProperties);
-
-            for (final String interfaceName : interfaces) {
-                NetInterfaceType type = getNetworkType(interfaceName);
-                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
-                                                                      // the system?
-                if (NetInterfaceType.MODEM.equals(type)) {
-                    setModemPppNumber(modifiedProps, interfaceName);
-                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
-                }
+        for (final String interfaceName : interfaces) {
+            NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
+            setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
+                                                                  // the system?
+            if (NetInterfaceType.MODEM.equals(type)) {
+                setModemPppNumber(modifiedProps, interfaceName);
+                setModemUsbDeviceProperties(modifiedProps, interfaceName);
             }
+        }
 
-            final boolean changed = checkWanInterfaces(this.properties, modifiedProps);
-            mergeNetworkConfigurationProperties(modifiedProps, this.properties);
+        final boolean changed = checkWanInterfaces(this.properties, modifiedProps);
+        mergeNetworkConfigurationProperties(modifiedProps, this.properties);
 
-            decryptPasswordProperties(modifiedProps);
-//            executeVisitors(networkConfiguration); // <----- replace with NetworkManager!!!!
+        decryptPasswordProperties(modifiedProps);
+        // networkManager.applyConfiguration
+        // writeConfigurationFiles
+        writeDhcpServerConfiguration(interfaces, modifiedProps);
 
-            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
-            this.properties = discardModifiedNetworkInterfaces(this.properties); // The stored properties are not
-                                                                                 // changed by the service, except for
-                                                                                 // the modifiedInterfaces property
+        this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the management
+                                                                                       // of the modifiedprops...
+        this.properties = discardModifiedNetworkInterfaces(this.properties);
 
-            if (changed) {
-                this.configurationService.snapshot();
-            }
-
-        } catch (Exception e) {
-            logger.error("Error updating the configuration", e);
+        if (changed) {
+            this.configurationService.snapshot();
         }
     }
 
@@ -370,6 +375,26 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 .map(s -> COMMA.splitAsStream((String) s).filter(p -> !p.trim().isEmpty())
                         .collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
+    }
+
+    private void writeDhcpServerConfiguration(Set<String> interfaceNames, Map<String, Object> properties) { // do we
+                                                                                                            // need the
+                                                                                                            // modified
+                                                                                                            // properties?
+        interfaceNames.forEach(interfaceName -> {
+            Optional<NetInterfaceType> type = getNetworkTypeFromProperties(interfaceName, properties);
+            if (type.isPresent() && NetInterfaceType.ETHERNET.equals(type.get())
+                    || NetInterfaceType.WIFI.equals(type.get())) {
+                Optional<Object> isDhcpServerEnabled = getValueFromProperties(
+                        PREFIX + interfaceName + ".config.dhcpClient4.enabled", properties);
+                if (isDhcpServerEnabled.isPresent() && Boolean.valueOf((String) isDhcpServerEnabled.get())) {
+                    // write the config only if is it enabled, but not delete it if not.
+//                    DhcpServerConfigWriter.
+                    check if not l2only
+                }
+
+            }
+        });
     }
 
     private Tocd getDefinition(final Map<String, Object> properties) throws KuraException {

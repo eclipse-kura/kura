@@ -252,7 +252,7 @@ public class NetworkConfigurationServiceTest {
         when(componentContextMock.getBundleContext()).thenReturn(bundleCtxMock);
         this.networkConfigurationService = new NetworkConfigurationService() {
             @Override
-            protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
+            protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
                 return guessNetworkType(interfaceName);
             }
         };

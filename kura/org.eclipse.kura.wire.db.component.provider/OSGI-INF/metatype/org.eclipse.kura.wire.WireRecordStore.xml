@@ -32,7 +32,7 @@
             cardinality="0"
             required="true"
             default="10000"
-            description="Maximum record collection size"
+            description="The maximum number of records that is possible to store in the collection."
             min="1">
         </AD>
         
@@ -42,7 +42,7 @@
             cardinality="0"
             required="true"
             default="5000"
-            description="Specifies the number of records in the collection to keep while performing a cleanup operation (if set to 0 all the records will be deleted)."
+            description="The number of records in the collection to keep while performing a cleanup operation (if set to 0 all the records will be deleted)."
             min="0">
         </AD>
         

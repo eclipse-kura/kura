@@ -19,7 +19,7 @@
          description="A wire component that allows to perform queries on Queryable Wire Record Store instances and emit the result on the Wires.">
 
         <AD id="query"
-            name="query"
+            name="Query"
             type="String"
             cardinality="0"
             required="true"
@@ -28,17 +28,17 @@
         </AD>
         
         <AD id="cache.expiration.interval"
-            name="cache.expiration.interval"
+            name="Cache Expiration Interval (Seconds)"
             type="Integer"
             cardinality="0"
             required="true"
             default="0"
             min="0"
-            description="This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
+            description="This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
         </AD>
         
         <AD id="QueryableWireRecordStoreProvider.target"
-            name="QueryableWireRecordStore Target Filter"
+            name="QueryableWireRecordStoreProvider Target Filter"
             type="String"
             cardinality="0"
             required="true"
@@ -47,12 +47,12 @@
         </AD>
             
         <AD id="emit.on.empty.result"
-            name="emit.on.empty.result"
+            name="Emit On Empty Result"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="Defines the behaviour of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted."/>
+            description="Defines the behavior of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted."/>
 
     </OCD>
     

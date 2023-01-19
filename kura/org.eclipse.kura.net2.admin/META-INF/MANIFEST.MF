@@ -55,5 +55,6 @@ Import-Package: javax.microedition.io,
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
  lib/dbus-java-osgi-3.3.2-javadoc.jar,
- lib/dbus-java-osgi-3.3.2.jar
+ lib/dbus-java-osgi-3.3.2.jar,
+ lib/jnr-unixsocket-0.38.17.jar
 Bundle-ActivationPolicy: lazy

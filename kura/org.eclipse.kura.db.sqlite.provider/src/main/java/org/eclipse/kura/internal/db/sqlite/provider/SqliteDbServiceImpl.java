@@ -127,7 +127,9 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                             options.getJournalMode() == JournalMode.ROLLBACK_JOURNAL ? "DELETE" : "WAL");
                 }
 
-                this.connectionPool = new ConnectionPoolManager(dataSource, options.getConnectionPoolMaxSize());
+                int maxConnectionCount = options.getMode() == Mode.PERSISTED ? options.getConnectionPoolMaxSize() : 1;
+
+                this.connectionPool = new ConnectionPoolManager(dataSource, maxConnectionCount);
 
                 this.connectionPool.getConnection().close();
 

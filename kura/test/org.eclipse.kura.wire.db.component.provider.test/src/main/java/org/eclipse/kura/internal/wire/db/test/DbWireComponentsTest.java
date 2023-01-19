@@ -191,7 +191,7 @@ public class DbWireComponentsTest {
         givenPerformedQuery("SELECT * FROM \"" + tableName + "\";");
 
         whenTimePasses(6, TimeUnit.SECONDS);
-        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY TIMESTAMP ASC;");
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY ID ASC;");
 
         thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(23));
         thenFilterEmitsEnvelopeWithProperty(1, 0, "foo", TypedValues.newIntegerValue(23));
@@ -211,7 +211,7 @@ public class DbWireComponentsTest {
         givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(6));
         givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(7));
 
-        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY TIMESTAMP DESC;");
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY ID DESC;");
 
         thenEnvelopeRecordCountIs(0, 5);
         thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(7));
@@ -232,7 +232,7 @@ public class DbWireComponentsTest {
         givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(5));
         givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(6));
 
-        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY TIMESTAMP DESC;");
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY ID DESC;");
 
         thenEnvelopeRecordCountIs(0, 2);
         thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(6));

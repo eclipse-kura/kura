@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -42,13 +42,17 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
     private static Optional<Boolean> isNet2 = Optional.empty();
 
     @Override
-    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute) throws GwtKuraException {
-        if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
-        } else {
-            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
-        }
+    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
+            throws GwtKuraException {
+        return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+
+        // if (isNet2()) {
+        // return
+        // org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+        // } else {
+        // return
+        // org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+        // }
     }
 
     @Override

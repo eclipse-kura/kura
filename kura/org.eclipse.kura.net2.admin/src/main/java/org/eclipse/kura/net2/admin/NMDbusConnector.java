@@ -98,17 +98,29 @@ public class NMDbusConnector {
 
             logger.info("Settings iface \"{}\":{}", iface, deviceType);
 
-            if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+            if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
                 Optional<Connection> connection = getAppliedConnection(device);
 
                 Map<String, Variant<?>> connectionMap = buildConnectionSettings(connection, iface);
                 Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(networkConfiguration, iface);
+                Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(networkConfiguration, iface);
+                Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter
+                        .build802_11_WirelessSettings(networkConfiguration, iface);
+                Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
+                        .build802_11_WirelessSecuritySettings(networkConfiguration, iface);
 
                 Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
                 newConnectionSettings.put("ipv4", ipv4Map);
+                newConnectionSettings.put("ipv6", ipv6Map);
                 newConnectionSettings.put("connection", connectionMap);
+                newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
+                newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+
+                logger.info("Configuration: {}", newConnectionSettings);
 
                 if (connection.isPresent()) {
+                    logger.info("Current settings: {}", connection.get().GetSettings());
+
                     connection.get().Update(newConnectionSettings);
                     nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                             new DBusPath(device.getObjectPath()), new DBusPath("/"));

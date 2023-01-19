@@ -192,7 +192,7 @@ public class DataServiceOptions {
                 CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT);
     }
 
-    public Boolean isConnectionSchedulePriorityOverrideEnabled() {
+    public boolean isConnectionSchedulePriorityOverrideEnabled() {
         return (Boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT) && isConnectionScheduleEnabled()
                 && getConnectionScheduleExpression().isPresent();

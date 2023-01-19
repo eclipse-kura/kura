@@ -318,7 +318,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
                 stmt.execute();
                 c.commit();
-                return (Void) null;
+                return null;
             }
         }, "Cannot update timestamp");
 
@@ -393,7 +393,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 }
                 stmt.execute();
                 c.commit();
-                return (Void) null;
+                return null;
             }
         }, "Cannot update timestamp");
     }
@@ -422,7 +422,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 }
                 stmt.execute();
                 c.commit();
-                return (Void) null;
+                return null;
             }
         }, "Cannot execute query");
     }
@@ -442,7 +442,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
                 stmt.execute();
                 c.commit();
-                return (Void) null;
+                return null;
             }
         }, "Cannot execute query");
     }

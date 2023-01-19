@@ -40,7 +40,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_SETTINGS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
-    private static final List<NMDeviceType> supportedDevices = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+    private static final List<NMDeviceType> SUPPORTED_DEVICES = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
             NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
     private static NMDbusConnector instance;
@@ -100,7 +100,7 @@ public class NMDbusConnector {
             NMDeviceType deviceType = getDeviceType(device);
 
             logger.info("Settings iface \"{}\":{}", iface, deviceType);
-            if (!supportedDevices.contains(deviceType)) {
+            if (!SUPPORTED_DEVICES.contains(deviceType)) {
                 logger.warn("Device type \"{}\" currently not supported", deviceType);
                 continue;
             }

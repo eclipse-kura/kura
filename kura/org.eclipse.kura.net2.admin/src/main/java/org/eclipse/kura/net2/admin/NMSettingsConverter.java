@@ -35,10 +35,10 @@ public class NMSettingsConverter {
     private static final String WIFI_INFRA = "infra";
     private static final String WIFI_MASTER = "master";
 
-    private static final Map<String, String> wifiModeConverter = initWifiModeConverter();
-    private static final Map<String, String> wifiBandConverter = initWifiBandConverter();
-    private static final Map<String, List<String>> wifiCipherConverter = initWifiCipherConverter();
-    private static final Map<String, String> wifiKeyMgmtConverter = initWifiKeyMgmtConverter();
+    private static final Map<String, String> WIFI_MODE_CONVERTER = initWifiModeConverter();
+    private static final Map<String, String> WIFI_BAND_CONVERTER = initWifiBandConverter();
+    private static final Map<String, List<String>> WIFI_CIPHER_CONVERTER = initWifiCipherConverter();
+    private static final Map<String, String> WIFI_KEYMGMT_CONVERTER = initWifiKeyMgmtConverter();
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -143,7 +143,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> build802_11_WirelessSettings(Map<String, Object> networkConfiguration,
+    public static Map<String, Variant<?>> build80211WirelessSettings(Map<String, Object> networkConfiguration,
             String iface) {
         NetworkProperties props = new NetworkProperties(networkConfiguration);
 
@@ -156,9 +156,9 @@ public class NMSettingsConverter {
             return settings;
         }
 
-        String mode = wifiModeConverter.get(propMode);
+        String mode = WIFI_MODE_CONVERTER.get(propMode);
         String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
-        String band = wifiBandConverter.get(
+        String band = WIFI_BAND_CONVERTER.get(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
         Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
                 propMode.toLowerCase());
@@ -173,7 +173,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> build802_11_WirelessSecuritySettings(Map<String, Object> networkConfiguration,
+    public static Map<String, Variant<?>> build80211WirelessSecuritySettings(Map<String, Object> networkConfiguration,
             String iface) {
         NetworkProperties props = new NetworkProperties(networkConfiguration);
 
@@ -188,7 +188,7 @@ public class NMSettingsConverter {
 
         String psk = props.get(String.class, "net.interface.%s.config.wifi.%s.passphrase", iface,
                 propMode.toLowerCase());
-        String keyMgmt = wifiKeyMgmtConverter.get(
+        String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
         // List<String> group = wifiCipherConverter.get(props.get(String.class,
         // "net.interface.%s.config.wifi.%s.groupCiphers", iface, propMode.toLowerCase()));

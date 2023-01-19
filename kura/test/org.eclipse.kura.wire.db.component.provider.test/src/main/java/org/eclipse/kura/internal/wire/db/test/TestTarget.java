@@ -1,7 +1,20 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *  
+ *******************************************************************************/
 package org.eclipse.kura.internal.wire.db.test;
 
 public interface TestTarget {
-    
+
     public static final TestTarget DB_FILTER_AND_DB_STORE = new DbFilterStore();
     public static final TestTarget WIRE_RECORD_QUERY_AND_WIRE_RECORD_STORE = new WireRecordQueryStore();
 

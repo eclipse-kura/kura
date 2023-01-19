@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *  
+ *******************************************************************************/
 package org.eclipse.kura.internal.wire.query;
 
 import java.util.List;
@@ -107,9 +120,11 @@ public class WireRecordQueryComponent implements WireEmitter, WireReceiver, Conf
 
         public State setOptions(WireRecordQueryComponentOptions options);
 
-        public State setQueryableWireRecordStoreProvider(final QueryableWireRecordStoreProvider queryableWireRecordStore);
+        public State setQueryableWireRecordStoreProvider(
+                final QueryableWireRecordStoreProvider queryableWireRecordStore);
 
-        public State unsetQueryableWireRecordStoreProvider(final QueryableWireRecordStoreProvider queryableWireRecordStore);
+        public State unsetQueryableWireRecordStoreProvider(
+                final QueryableWireRecordStoreProvider queryableWireRecordStore);
 
         public Optional<List<WireRecord>> getRecords() throws KuraStoreException;
     }
@@ -165,7 +180,8 @@ public class WireRecordQueryComponent implements WireEmitter, WireReceiver, Conf
 
         private Optional<CachedRecords> cachedRecords = Optional.empty();
 
-        public Satisfied(final WireRecordQueryComponentOptions options, final QueryableWireRecordStoreProvider provider) {
+        public Satisfied(final WireRecordQueryComponentOptions options,
+                final QueryableWireRecordStoreProvider provider) {
             this.options = options;
             this.provider = provider;
         }

@@ -32,9 +32,6 @@ public class NMSettingsConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(NMSettingsConverter.class);
 
-    private static final String WIFI_INFRA = "infra";
-    private static final String WIFI_MASTER = "master";
-
     private static final Map<String, String> WIFI_MODE_CONVERTER = initWifiModeConverter();
     private static final Map<String, String> WIFI_BAND_CONVERTER = initWifiBandConverter();
     private static final Map<String, List<String>> WIFI_CIPHER_CONVERTER = initWifiCipherConverter();
@@ -42,6 +39,163 @@ public class NMSettingsConverter {
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static Map<String, Map<String, Variant<?>>> buildSettings(Map<String, Object> networkConfiguration,
+            Optional<Connection> oldConnection, String iface, NMDeviceType deviceType) {
+        NetworkProperties props = new NetworkProperties(networkConfiguration);
+
+        Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
+
+        Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface);
+        newConnectionSettings.put("connection", connectionMap);
+
+        Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(props, iface);
+        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(props, iface);
+        newConnectionSettings.put("ipv4", ipv4Map);
+        newConnectionSettings.put("ipv6", ipv6Map);
+
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+            Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
+            Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
+                    .build80211WirelessSecuritySettings(props, iface);
+            newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
+            newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+        }
+
+        return newConnectionSettings;
+    }
+
+    public static Map<String, Variant<?>> buildIpv4Settings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", iface);
+
+        // Should handle net.interface.eth0.config.ip4.status here
+
+        if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
+            settings.put("method", new Variant<>("manual"));
+
+            String address = props.get(String.class, "net.interface.%s.config.ip4.address", iface);
+            Short prefix = props.get(Short.class, "net.interface.%s.config.ip4.prefix", iface);
+
+            Map<String, Variant<?>> addressEntry = new HashMap<>();
+            addressEntry.put("address", new Variant<>(address));
+            addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
+
+            List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
+            settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
+
+            Optional<String> dnsServers = props.getOpt(String.class, "net.interface.%s.config.ip4.dnsServers", iface);
+            if (dnsServers.isPresent()) {
+                settings.put("dns-search", new Variant<>(splitCommaSeparatedStrings(dnsServers.get())));
+            }
+            settings.put("ignore-auto-dns", new Variant<>(true));
+
+            Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
+            if (gateway.isPresent()) {
+                settings.put("gateway", new Variant<>(gateway));
+            }
+        } else {
+            settings.put("method", new Variant<>("auto"));
+
+            Optional<String> dnsServers = props.getOpt(String.class, "net.interface.%s.config.ip4.dnsServers", iface);
+            if (dnsServers.isPresent()) {
+                settings.put("ignore-auto-dns", new Variant<>(true));
+                settings.put("dns-search", new Variant<>(splitCommaSeparatedStrings(dnsServers.get())));
+            }
+        }
+
+        return settings;
+    }
+
+    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        // Disabled for now
+        settings.put("method", new Variant<>("disabled"));
+
+        return settings;
+    }
+
+    public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
+
+        String mode = WIFI_MODE_CONVERTER.get(propMode);
+        String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
+        String band = WIFI_BAND_CONVERTER.get(
+                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
+        Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
+                propMode.toLowerCase());
+
+        settings.put("mode", new Variant<>(mode));
+        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
+        settings.put("band", new Variant<>(band));
+        if (channel.isPresent()) {
+            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
+        }
+
+        return settings;
+    }
+
+    public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
+
+        String psk = props.get(String.class, "net.interface.%s.config.wifi.%s.passphrase", iface,
+                propMode.toLowerCase());
+        String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
+                props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
+        // List<String> group = wifiCipherConverter.get(props.get(String.class,
+        // "net.interface.%s.config.wifi.%s.groupCiphers", iface, propMode.toLowerCase()));
+        // List<String> pairwise = wifiCipherConverter.get(props.get(String.class,
+        // "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface, propMode.toLowerCase()));
+
+        settings.put("psk", new Variant<>(psk)); // Will require decryption in Kura
+        settings.put("key-mgmt", new Variant<>(keyMgmt));
+        // settings.put("group", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible type
+        // (from java.lang.String to ().
+        // settings.put("pairwise", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible
+        // type (from java.lang.String to ().
+
+        return settings;
+    }
+
+    public static List<String> splitCommaSeparatedStrings(String commaSeparatedString) {
+        List<String> stringList = new ArrayList<>();
+        Pattern comma = Pattern.compile(",");
+        if (Objects.nonNull(commaSeparatedString) && !commaSeparatedString.isEmpty()) {
+            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+        }
+
+        return stringList;
+    }
+
+    private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface) {
+        if (!connection.isPresent()) {
+            return createConnectionSettings(iface);
+        }
+
+        Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
+        Map<String, Variant<?>> connectionMap = new HashMap<>();
+        for (String key : connectionSettings.get("connection").keySet()) {
+            connectionMap.put(key, connectionSettings.get("connection").get(key));
+        }
+
+        return connectionMap;
+    }
+
+    private static Map<String, Variant<?>> createConnectionSettings(String iface) {
+        Map<String, Variant<?>> connectionMap = new HashMap<>();
+
+        String connectionName = String.format("kura-%s-connection", iface);
+        connectionMap.put("id", new Variant<>(connectionName));
+        connectionMap.put("interface-name", new Variant<>(iface));
+
+        return connectionMap;
     }
 
     private static Map<String, String> initWifiModeConverter() {
@@ -89,129 +243,4 @@ public class NMSettingsConverter {
         return map;
     }
 
-    public static Map<String, Variant<?>> buildIpv4Settings(Map<String, Object> networkConfiguration, String iface) {
-        NetworkProperties props = new NetworkProperties(networkConfiguration);
-
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", iface);
-
-        // Should handle net.interface.eth0.config.ip4.status here
-
-        if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
-            settings.put("method", new Variant<>("manual"));
-
-            String address = props.get(String.class, "net.interface.%s.config.ip4.address", iface);
-            Short prefix = props.get(Short.class, "net.interface.%s.config.ip4.prefix", iface);
-
-            Map<String, Variant<?>> addressEntry = new HashMap<>();
-            addressEntry.put("address", new Variant<>(address));
-            addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
-
-            List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
-            settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
-
-            Optional<String> dnsServers = props.getOpt(String.class, "net.interface.%s.config.ip4.dnsServers", iface);
-            if (dnsServers.isPresent()) {
-                settings.put("dns-search", new Variant<>(splitCommaSeparatedStrings(dnsServers.get())));
-            }
-            settings.put("ignore-auto-dns", new Variant<>(true));
-
-            Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
-            if (gateway.isPresent()) {
-                settings.put("gateway", new Variant<>(gateway));
-            }
-        } else {
-            settings.put("method", new Variant<>("auto"));
-
-            Optional<String> dnsServers = props.getOpt(String.class, "net.interface.%s.config.ip4.dnsServers", iface);
-            if (dnsServers.isPresent()) {
-                settings.put("ignore-auto-dns", new Variant<>(true));
-                settings.put("dns-search", new Variant<>(splitCommaSeparatedStrings(dnsServers.get())));
-            }
-        }
-
-        return settings;
-    }
-
-    public static Map<String, Variant<?>> buildIpv6Settings(Map<String, Object> networkConfiguration, String iface) {
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        // Disabled for now
-        settings.put("method", new Variant<>("disabled"));
-
-        return settings;
-    }
-
-    public static Map<String, Variant<?>> build80211WirelessSettings(Map<String, Object> networkConfiguration,
-            String iface) {
-        NetworkProperties props = new NetworkProperties(networkConfiguration);
-
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
-
-        if (!propMode.equals("INFRA")) {
-            logger.warn("Unsupported WiFi mode"); // WIP
-            return settings;
-        }
-
-        String mode = WIFI_MODE_CONVERTER.get(propMode);
-        String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
-        String band = WIFI_BAND_CONVERTER.get(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
-        Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
-                propMode.toLowerCase());
-
-        settings.put("mode", new Variant<>(mode));
-        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
-        settings.put("band", new Variant<>(band));
-        if (channel.isPresent()) {
-            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
-        }
-
-        return settings;
-    }
-
-    public static Map<String, Variant<?>> build80211WirelessSecuritySettings(Map<String, Object> networkConfiguration,
-            String iface) {
-        NetworkProperties props = new NetworkProperties(networkConfiguration);
-
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
-
-        if (!propMode.equals("INFRA")) {
-            logger.warn("Unsupported WiFi mode"); // WIP
-            return settings;
-        }
-
-        String psk = props.get(String.class, "net.interface.%s.config.wifi.%s.passphrase", iface,
-                propMode.toLowerCase());
-        String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
-        // List<String> group = wifiCipherConverter.get(props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.groupCiphers", iface, propMode.toLowerCase()));
-        // List<String> pairwise = wifiCipherConverter.get(props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface, propMode.toLowerCase()));
-
-        settings.put("psk", new Variant<>(psk)); // Will require decryption in Kura
-        settings.put("key-mgmt", new Variant<>(keyMgmt));
-        // settings.put("group", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible type
-        // (from java.lang.String to ().
-        // settings.put("pairwise", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible
-        // type (from java.lang.String to ().
-
-        return settings;
-    }
-
-    public static List<String> splitCommaSeparatedStrings(String commaSeparatedString) {
-        List<String> stringList = new ArrayList<>();
-        Pattern comma = Pattern.compile(",");
-        if (Objects.nonNull(commaSeparatedString) && !commaSeparatedString.isEmpty()) {
-            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
-        }
-
-        return stringList;
-    }
 }

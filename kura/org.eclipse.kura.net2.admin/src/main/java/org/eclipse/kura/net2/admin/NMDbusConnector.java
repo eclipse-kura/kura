@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +39,9 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_SETTINGS_PATH = "/org/freedesktop/NetworkManager/Settings";
+
+    private static final List<NMDeviceType> supportedDevices = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+            NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
     private static NMDbusConnector instance;
     private DBusConnection dbusConnection;
@@ -97,40 +100,27 @@ public class NMDbusConnector {
             NMDeviceType deviceType = getDeviceType(device);
 
             logger.info("Settings iface \"{}\":{}", iface, deviceType);
-
-            if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
-                Optional<Connection> connection = getAppliedConnection(device);
-
-                Map<String, Variant<?>> connectionMap = buildConnectionSettings(connection, iface);
-                Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(networkConfiguration, iface);
-                Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(networkConfiguration, iface);
-                Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter
-                        .build80211WirelessSettings(networkConfiguration, iface);
-                Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
-                        .build80211WirelessSecuritySettings(networkConfiguration, iface);
-
-                Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
-                newConnectionSettings.put("ipv4", ipv4Map);
-                newConnectionSettings.put("ipv6", ipv6Map);
-                newConnectionSettings.put("connection", connectionMap);
-                newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
-                newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
-
-                logger.info("Configuration: {}", newConnectionSettings);
-
-                if (connection.isPresent()) {
-                    logger.info("Current settings: {}", connection.get().GetSettings());
-
-                    connection.get().Update(newConnectionSettings);
-                    nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
-                            new DBusPath(device.getObjectPath()), new DBusPath("/"));
-                } else {
-                    nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
-                            new DBusPath("/"));
-                }
-            } else {
+            if (!supportedDevices.contains(deviceType)) {
                 logger.warn("Device type \"{}\" currently not supported", deviceType);
-                return;
+                continue;
+            }
+
+            Optional<Connection> connection = getAppliedConnection(device);
+
+            Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter
+                    .buildSettings(networkConfiguration, connection, iface, deviceType);
+
+            logger.info("New settings: {}", newConnectionSettings);
+
+            if (connection.isPresent()) {
+                logger.info("Current settings: {}", connection.get().GetSettings());
+
+                connection.get().Update(newConnectionSettings);
+                nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
+                        new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            } else {
+                nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
+                        new DBusPath("/"));
             }
         }
     }
@@ -161,29 +151,5 @@ public class NMDbusConnector {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();
         }
-    }
-
-    private Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface) {
-        if (!connection.isPresent()) {
-            return createConnectionSettings(iface);
-        }
-
-        Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
-        Map<String, Variant<?>> connectionMap = new HashMap<>();
-        for (String key : connectionSettings.get("connection").keySet()) {
-            connectionMap.put(key, connectionSettings.get("connection").get(key));
-        }
-
-        return connectionMap;
-    }
-
-    private Map<String, Variant<?>> createConnectionSettings(String iface) {
-        Map<String, Variant<?>> connectionMap = new HashMap<>();
-
-        String connectionName = String.format("kura-%s-connection", iface);
-        connectionMap.put("id", new Variant<>(connectionName));
-        connectionMap.put("interface-name", new Variant<>(iface));
-
-        return connectionMap;
     }
 }

@@ -40,7 +40,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_SETTINGS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
-    private static final List<NMDeviceType> SUPPORTED_DEVICES = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+    private static final List<NMDeviceType> supportedDevices = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
             NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
     private static NMDbusConnector instance;
@@ -92,23 +92,24 @@ public class NMDbusConnector {
     public void apply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
-        List<String> netInterfaces = NMSettingsConverter
-                .splitCommaSeparatedStrings((String) networkConfiguration.get("net.interfaces"));
+        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+
+        List<String> netInterfaces = properties.getStringList("net.interfaces");
 
         for (String iface : netInterfaces) {
             Device device = getDeviceByIpIface(iface); // What if no device matches?
             NMDeviceType deviceType = getDeviceType(device);
 
             logger.info("Settings iface \"{}\":{}", iface, deviceType);
-            if (!SUPPORTED_DEVICES.contains(deviceType)) {
+            if (!supportedDevices.contains(deviceType)) {
                 logger.warn("Device type \"{}\" currently not supported", deviceType);
                 continue;
             }
 
             Optional<Connection> connection = getAppliedConnection(device);
 
-            Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter
-                    .buildSettings(networkConfiguration, connection, iface, deviceType);
+            Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
+                    connection, iface, deviceType);
 
             logger.info("New settings: {}", newConnectionSettings);
 

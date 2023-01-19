@@ -1,23 +1,36 @@
-# DB Store and Filter
+# Wire Record Store and Wire Record Query
 
-This tutorial will present how to use DB Store and DB Filter components in Wires using the OPC-UA simulated server already used in [OPC-UA Application](../../connect-field-devices/opcua-driver.md).
+This tutorial will present how to use Wire Record Store and Wire Record Query components and provide an example based on the OPC-UA simulated server already used in [OPC-UA Application](../../connect-field-devices/opcua-driver.md).
 
-The DB Store component allows the wire graphs to interact with the database provided by Kura. It stores in a user-defined table all the envelopes received by the component. The component can be configured as follows:
+The Wire Record Store component allows the wire graphs to interact with a persistend Wire Record store implementation, for example a SQL database. It stores in a user-defined collection all the envelopes received by the component.
 
-- **table.name**: the name of the table to be created.
-- **maximum.table.size**: the size of the table.
-- **cleanup.records.keep**: the number of records in the table to keep while performing a cleanup operation.
-- **DbService Target Filter** : the database instance to be used.
+The DB Filter component, instead, can run a custom query on the attached store and emit the result on the wire.
 
-The DB Filter component, instead, can run a custom SQL query on the Kura database. It can be configured as follows:
+!!! note
+    The Wire Record Store and Wire Record Query components have been introduced in Kura 5.3.0 as a replacement of the Db Store and Db Filter, that have been deprecated.
 
-- **sql.view**: SQL to be executed to build a view.
-- **cache.expiration.interval**: cache validity in seconds. When the cache expires, a new read in the database will be performed.
-- **DbService Target Filter** : the database instance to be used.
-- **emit.empty.result** : defines if the envelope should be emitted even if the query return an empty result.
+    The reason of the deprecation is the fact that Db Store and Db Filter only support databases that provide a JDBC interface. Moreover, the old Db Store interacts with the database using a set of hardcoded SQL queries.
+    This fact makes it difficult to use it with different databases since the syntax of the queries is usually database-specific.
+    
+    The new components use the `org.eclipse.kura.wire.store.provider.WireRecordStoreProvider` and `org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider` APIs introduced in 5.3.0 allowing to use them with generic data store implementations.
 
-The following procedure will create a wire graph that collects data from a simulated OPC-UA Server, stores it in a table in the database, using the DB Store component, and publishes it in the cloud platform. Moreover, the DB Filter is used to read from the database and write data to the OPC-UA Server based on the values read.
+    Please note that Wire Record Query component is not portable by nature, since it allows to execute an arbitrary user defined query. The new APIs allows to use it with non-JDBC data stores.
 
+The Wire Record Store component can be configured as follows:
+
+- **Record Collection Name**: The name of the record collection that should be used. The implementation of the collection depends on the Wire Record Store implementation, if it is a SQL database, the collection will likely be a table.
+- **Maximum Record Collection Size**: The maximum number of records that is possible to store in the collection.
+- **Cleanup Records Keep**: The number of records in the collection to keep while performing a cleanup operation (if set to 0 all the records will be deleted). The cleanup operation is performed when a new record is inserted and the current size of the record collection is greater than the configured **Maximum Record Collection Size**.
+- **WireRecordStoreProvider Target Filter** : Specifies, as an OSGi target filter, the pid of the of the Wire Record Store instance to be used.
+
+The Wire Record Query component can be configured as follows:
+
+- **Query**: Query to be executed. The query syntax depends on the Queryable Wire Record Store implementation.
+- **Cache Expiration Interval (Seconds)**: This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity interval in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.
+- **QueryableWireRecordStoreProvider Target Filter** : Specifies, as an OSGi target filter, the pid of the of the Queryable Wire Record Store instance to be used.
+- **Emit On Empty Result** : Defines the behavior of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted.
+
+The following procedure will create a wire graph that collects data from a simulated OPC-UA Server, stores it in a table in the database, using the Wire Record Store component, and publishes it in the cloud platform. Moreover, the Wire Record Query component is used to read from the database and write data to the OPC-UA Server based on the values read.
 
 
 ## Configure OPC-UA server simulator
@@ -45,23 +58,23 @@ The following procedure will create a wire graph that collects data from a simul
 7. Configure the new OPC-UA asset, adding new Channels as shown in the following image. Make sure that all the channels are set to READ.
     ![WireAsset Opcua Example Read Mode](./images/opcua-wire-asset-config-read.png)
 
-8. Add a new **DBStore** component and configure it as follows:
-    - **table.name**: WR_data
-    - **maximum.table.size**: 10000
-    - **cleanup.records.keep**: 0
-    - **DbService Target Filter** : the DB Service pid to be used
+8. Add a new Wire Record Store named **DBStore** component and configure it as follows:
+    - **Record Collection Name**: WR_data
+    - **Maximum Record Collection Size**: 10000
+    - **Cleanup Records Keep**: 0
+    - **WireRecordStoreProvider Target Filter** : the DB Service pid to be used
 9.  Add a new **Publisher** component and configure the chosen cloud platform stack in **cloud.service.pid** option
 10. Add **Logger** component
 11. Add another instance of **Timer**
-12. Add a new **DBFilter** component and configure it as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
-    - **sql.view**: SELECT (CASE WHEN “light” < 200 THEN 1 ELSE 0 END) AS “led” FROM “WR_data” ORDER BY TIMESTAMP DESC LIMIT 1;
-    - **cache.expiration.interval**: 0
-    - **DbService Target Filter** : the DB Service pid to be used
+12. Add a new Wire Record Query component named **DBFilter** component and configure it as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
+    - **Query**: SELECT (CASE WHEN “light” < 200 THEN 1 ELSE 0 END) AS “led” FROM “WR_data” ORDER BY TIMESTAMP DESC LIMIT 1;
+    - **Cache Expiration Interval (Seconds)**: 0
+    - **QueryableWireRecordStoreProvider Target Filter** : the DB Service pid to be used
 13. Add another **Asset** with the OPC-UA Driver, configured as shown in the following image. Be sure that all the channels are set to WRITE.
     ![WireAsset Opcua Example Write Mode](./images/opcua-wire-asset-config-write.png)
 
     !!! note
-        Be aware that the **sql.view** syntax can vary accordingly to the SQL dialect used by the database. For example, the MySQL dialect doesn't allow to surrond the table or columns names with double-quotes. In the H2DB, this is mandatory instead.
+        Be aware that the **Query** syntax can vary accordingly to the dialect used by the database. For example, the MySQL dialect doesn't allow to surround the table or columns names with double-quotes. In the H2DB, this is mandatory instead.
 
 14. Connect the components as shown in the following image, then click on “Apply” and check the logs and the cloud platform that the data is correctly published.
     ![WireAsset Opcua Example Graph](./images/opcua-wire-asset-graph.png)

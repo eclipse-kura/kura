@@ -4,6 +4,9 @@ The **DataService** provides the ability to connect to a remote broker, publish 
 
 The DataService also adds the capability of storing published messages in a persistent store function and sending them over the wire at a later time. The purpose of this feature is to relieve service users from implementing their own persistent store. Service users may publish messages independently on the DataService connection status.
 
+!!! info
+    Starting from Kura 5.3.0, the DataService allows to bind to custom persistent stores. A custom persistent store can be defined by creating an implementation the new `org.eclipse.kura.message.store.provider.MessageStoreProvider` service interface and registering it as an OSGi service.
+
 In order to overcome the potential latencies introduced by buffering messages, the DataService allows a priority level to be assigned to​ each published message. Depending on the store configuration, there are certain guarantees that stored messages are not lost due to sudden crashes or power outages.
 
 To use this service, select the **DataService** option located in the **Cloud Connections** area as shown in the screen capture below.
@@ -22,7 +25,7 @@ The **DataService** offers methods and configuration options to manage the conne
 
 - **disconnect.quiesce-timeout**: allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.
 
-- **store.db.service.pid**: The Kura Service PID of the database instance to be used. The PID of the default instance is org.eclipse.kura.db.H2DbService.
+- **store.db.service.pid**: The Kura Service PID of the persistent store instance to be used. The PID of the default instance is org.eclipse.kura.db.H2DbService. The target service must implement `org.eclipse.kura.message.store.provider.MessageStoreProvider`.
 
 - **store.housekeeper-interval**: defines the interval in seconds used to run the Data Store housekeeper task.
 

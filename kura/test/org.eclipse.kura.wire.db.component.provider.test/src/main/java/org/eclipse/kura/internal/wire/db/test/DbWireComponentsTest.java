@@ -189,7 +189,7 @@ public class DbWireComponentsTest {
         givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(24));
         givenPerformedQuery("SELECT * FROM \"" + tableName + "\";");
 
-        whenTimePasses(5, TimeUnit.SECONDS);
+        whenTimePasses(6, TimeUnit.SECONDS);
         whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY TIMESTAMP ASC;");
 
         thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(23));
@@ -240,8 +240,8 @@ public class DbWireComponentsTest {
 
     private static final AtomicInteger NEXT_ID = new AtomicInteger();
 
-    private final String tableName = Long.toString(System.currentTimeMillis());
-    private final String h2DbServicePid = "store." + tableName;
+    private final String tableName;
+    private final String h2DbServicePid;
 
     private final TestTarget target;
 
@@ -275,6 +275,8 @@ public class DbWireComponentsTest {
         this.testFilterPid = "testDbFilter" + nextId;
         this.testReceiverPid = "testReceiver" + nextId;
         this.testEmitterPid = "testEmitter" + nextId;
+        this.tableName = "testTable" + nextId;
+        this.h2DbServicePid = "h2db" + nextId;
 
         this.configurationService = WireTestUtil.trackService(ConfigurationService.class, Optional.empty()).get(30,
                 TimeUnit.SECONDS);

@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -41,12 +41,13 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net2.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net2.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
+import org.freedesktop.dbus.exceptions.DBusException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -79,6 +80,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     private LinuxNetworkUtil linuxNetworkUtil;
 
     private Map<String, Object> properties = new HashMap<>();
+    private NMDbusConnector nmDbusConnector;
 
     // ----------------------------------------------------------------
     //
@@ -148,6 +150,15 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         logger.debug("Activate NetworkConfigurationService...");
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
+
+        try {
+            this.nmDbusConnector = NMDbusConnector.createInstance();
+            this.nmDbusConnector.checkPermissions();
+        } catch (DBusException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         if (properties == null) {
             logger.debug("Received null properties...");
         } else {
@@ -163,6 +174,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
+        this.nmDbusConnector.closeConnection();
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
@@ -213,7 +225,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             mergeNetworkConfigurationProperties(modifiedProps, this.properties);
 
             decryptPasswordProperties(modifiedProps);
-//            executeVisitors(networkConfiguration); // <----- replace with NetworkManager!!!!
+            this.nmDbusConnector.apply(modifiedProps);
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
             this.properties = discardModifiedNetworkInterfaces(this.properties); // The stored properties are not
@@ -240,8 +252,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             Set<String> allNetworkInterfaces;
             try {
                 allNetworkInterfaces = this.networkService.getNetworkInterfaces().stream()
-                        .map(this::probeNetInterfaceConfigName)
-                        .collect(Collectors.toSet());
+                        .map(this::probeNetInterfaceConfigName).collect(Collectors.toSet());
             } catch (KuraException e) {
                 logger.warn("failed to retrieve network interface names", e);
                 return changed;
@@ -266,8 +277,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     private Set<String> getWanInterfaces(final Map<String, Object> properties) {
         return getNetworkInterfaceNamesInConfig(properties).stream()
-                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
-                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
+                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN.name()
+                        .equals(properties.get(PREFIX + p + ".config.ip4.status")))
                 .collect(Collectors.toSet());
     }
 
@@ -340,8 +351,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(PID, getDefinition(this.properties),
-                this.properties);
+        return new ComponentConfigurationImpl(PID, getDefinition(this.properties), this.properties);
     }
 
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
@@ -366,9 +376,9 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     }
 
     private Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {
-        return Optional.ofNullable(properties).map(p -> p.get(NET_INTERFACES))
-                .map(s -> COMMA.splitAsStream((String) s).filter(p -> !p.trim().isEmpty())
-                        .collect(Collectors.toCollection(HashSet::new)))
+        return Optional
+                .ofNullable(properties).map(p -> p.get(NET_INTERFACES)).map(s -> COMMA.splitAsStream((String) s)
+                        .filter(p -> !p.trim().isEmpty()).collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
     }
 

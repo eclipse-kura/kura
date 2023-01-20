@@ -33,7 +33,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface MessageStore {
 
     /**
-     * Inserts a new message in the store. The implementation must se the value of
+     * Inserts a new message in the store. The implementation must set the value of
      * the <code>createdOn</code> message parameter to the current time.
      * <br>
      * This method must throw a {@link KuraStoreException} if the number of messages

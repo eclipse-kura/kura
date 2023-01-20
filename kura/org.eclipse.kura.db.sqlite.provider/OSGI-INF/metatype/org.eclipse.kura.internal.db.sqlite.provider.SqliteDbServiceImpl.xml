@@ -71,7 +71,7 @@
             required="true"
             default="10"
             min="1"
-            description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool"/>
+            description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. Only 1 connection is available in In Memory mode."/>
 
         <AD id="debug.shell.access.enabled"
             name="Debug Shell Access Enabled"

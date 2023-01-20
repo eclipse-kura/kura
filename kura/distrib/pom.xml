@@ -401,6 +401,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.net.admin.firewall</artifactId>
+                                    <version>${org.eclipse.kura.net.admin.firewall.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
                                     <version>${org.eclipse.kura.protocol.modbus.version}</version>
                                 </artifactItem>
@@ -727,6 +732,7 @@
                                 <move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net2.admin.jar" tofile="target/plugins/org.eclipse.kura.net2.admin_${org.eclipse.kura.net2.admin.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.net.admin.firewall.jar" tofile="target/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.util.jar" tofile="target/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar" />

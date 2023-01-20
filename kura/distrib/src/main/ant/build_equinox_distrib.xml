@@ -1677,6 +1677,8 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net2.admin_${org.eclipse.kura.net2.admin.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar@5:start" />
         </propertyfile>
     </target>
 
@@ -1770,6 +1772,9 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.net2.admin_${org.eclipse.kura.net2.admin.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

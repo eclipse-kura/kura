@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+  Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -78,6 +78,7 @@
         <module>org.eclipse.kura.localization.resources</module>
         <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.net2.admin</module>
+        <module>org.eclipse.kura.net.admin.firewall</module>
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>

@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationService.class);
-    public static final String PID = "org.eclipse.kura.net2.admin.NetworkConfigurationService";
+    public static final String PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
 
     private static final String PREFIX = "net.interface.";
     private static final String CONFIG_IP4_PREFIX = ".config.ip4.prefix";

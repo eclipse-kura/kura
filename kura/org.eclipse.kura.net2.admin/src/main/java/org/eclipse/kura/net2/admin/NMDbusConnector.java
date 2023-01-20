@@ -79,9 +79,7 @@ public class NMDbusConnector {
     public void checkPermissions() {
         Map<String, String> getPermissions = nm.GetPermissions();
         for (Entry<String, String> entry : getPermissions.entrySet()) {
-            if (!entry.getValue().equals("yes")) {
-                logger.warn("Missing permission for {}", entry.getKey());
-            }
+            logger.info("Permission for {}: {}", entry.getKey(), entry.getValue());
         }
     }
 
@@ -120,8 +118,10 @@ public class NMDbusConnector {
                 nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                         new DBusPath(device.getObjectPath()), new DBusPath("/"));
             } else {
-                nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
-                        new DBusPath("/"));
+                Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_PATH, Settings.class);
+                DBusPath connectionPath = settings.AddConnection(newConnectionSettings);
+
+                nm.ActivateConnection(connectionPath, new DBusPath(device.getObjectPath()), new DBusPath("/"));
             }
         }
     }
@@ -149,7 +149,7 @@ public class NMDbusConnector {
             DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
             return Optional.of(dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {
-            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+            logger.info("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();
         }
     }

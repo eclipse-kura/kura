@@ -34,6 +34,7 @@ public class NMSettingsConverter {
     private static final Map<String, String> WIFI_BAND_CONVERTER = initWifiBandConverter();
     private static final Map<String, List<String>> WIFI_CIPHER_CONVERTER = initWifiCipherConverter();
     private static final Map<String, String> WIFI_KEYMGMT_CONVERTER = initWifiKeyMgmtConverter();
+    private static final Map<NMDeviceType, String> DEVICE_TYPE_CONVERTER = initDeviceTypeConverter();
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -43,7 +44,7 @@ public class NMSettingsConverter {
             Optional<Connection> oldConnection, String iface, NMDeviceType deviceType) {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
-        Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface);
+        Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
         newConnectionSettings.put("connection", connectionMap);
 
         Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, iface);
@@ -161,15 +162,18 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface) {
-        if (!connection.isPresent()) {
-            return createConnectionSettings(iface);
-        }
-
-        Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
+    private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
+            NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
-        for (String key : connectionSettings.get("connection").keySet()) {
-            connectionMap.put(key, connectionSettings.get("connection").get(key));
+
+        if (!connection.isPresent()) {
+            connectionMap = createConnectionSettings(iface);
+            connectionMap.put("type", new Variant<>(DEVICE_TYPE_CONVERTER.get(deviceType)));
+        } else {
+            Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
+            for (String key : connectionSettings.get("connection").keySet()) {
+                connectionMap.put(key, connectionSettings.get("connection").get(key));
+            }
         }
 
         return connectionMap;
@@ -226,6 +230,15 @@ public class NMSettingsConverter {
         map.put("SECURITY_WPA", "wpa-psk");
         map.put("SECURITY_WPA2", "wpa-psk");
         map.put("SECURITY_WPA_WPA2", "wpa-psk");
+
+        return map;
+    }
+
+    private static Map<NMDeviceType, String> initDeviceTypeConverter() {
+        Map<NMDeviceType, String> map = new HashMap<>();
+
+        map.put(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, "802-3-ethernet");
+        map.put(NMDeviceType.NM_DEVICE_TYPE_WIFI, "802-11-wireless");
 
         return map;
     }

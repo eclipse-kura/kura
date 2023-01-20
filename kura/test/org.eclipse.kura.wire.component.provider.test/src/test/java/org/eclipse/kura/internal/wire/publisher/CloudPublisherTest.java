@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,15 +15,11 @@ package org.eclipse.kura.internal.wire.publisher;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,351 +51,163 @@ import org.slf4j.LoggerFactory;
 public class CloudPublisherTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudPublisherTest.class);
-    
-    public interface FakeCloudPublisher extends org.eclipse.kura.cloudconnection.publisher.CloudPublisher {
 
-        public KuraMessage getMessage();
-    }
-
+    private CloudPublisher cp;
+    private org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock;
+    private Map<String, Object> properties;
+    private PositionService positionServiceMock;
+    private FakeCloudPublisher fakeCloudPublisher;
+    private Map<String, TypedValue<?>> recordProps;
+    private KuraPayload payload;
+    private KuraPosition position;
+    private KuraMessage kuraMessage;
+    private Map<String, Object> kuraMessageProps;
 
     @Test
     public void testOnWireReceive() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "none");
+        givenActivatedComponentProperties();
+        givenDefaultRecordProp();
 
-        String topic = "my test topic";
+        whenOnWireReceive();
+        whenKuraMessageReceived();
 
-        CloudPublisher cp = new CloudPublisher();
-
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
-        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", "none");
-
-        cp.activate(ctxMock, properties);
-
-        org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
-                org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
-
-        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
-
-            KuraPayload payload = message.getPayload();
-
-            assertNull(payload.getBody());
-            assertNull(payload.getPosition());
-            assertNotNull(payload.getTimestamp());
-            assertNotNull(payload.metrics());
-            assertEquals(2, payload.metrics().size());
-            assertEquals("val", payload.getMetric("key"));
-            assertEquals(topic, payload.getMetric("topic"));
-
-            return 1234;
-        });
-
-        TestUtil.setFieldValue(cp, "cloudConnectionPublisher", cloudPublisherMock);
-
-        String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        WireRecord record = new WireRecord(recordProps);
-        wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-
-        cp.onWireReceive(wireEnvelope);
-
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
+        thenPayloadHasNullBody();
+        thenPayloadHasNullPosition();
+        thenTotalMetricReceived(2);
+        thenCheckDefaultMetricReceived();
+        thenTotalKuraMessagePropsReceived(2);
+        thenCheckDefaultKuraMessageProps();
     }
-    
+
     @Test
     public void testOnWireReceiveSetBody() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "none");
+        givenBodyProperties("key", Boolean.FALSE);
+        givenActivatedComponentProperties();
+        givenDefaultRecordProp();
 
-        String topic = "my test topic";
+        whenOnWireReceive();
+        whenKuraMessageReceived();
 
-        CloudPublisher cp = new CloudPublisher();
-
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
-        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", "none");
-        properties.put("set.body.from.property", "key");
-        properties.put("remove.body.from.metrics", Boolean.FALSE);
-        cp.activate(ctxMock, properties);
-
-        org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
-                org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
-
-        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
-
-            KuraPayload payload = message.getPayload();
-
-            assertNotNull(payload.getBody());
-            assertEquals("val", Base64.getDecoder().decode(payload.getBody()));
-            assertNull(payload.getPosition());
-            assertNotNull(payload.getTimestamp());
-            assertNotNull(payload.metrics());
-            assertEquals(2, payload.metrics().size());
-            assertEquals("val", payload.getMetric("key"));
-            assertEquals(topic, payload.getMetric("topic"));
-
-            return 1234;
-        });
-
-        TestUtil.setFieldValue(cp, "cloudConnectionPublisher", cloudPublisherMock);
-
-        String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        WireRecord record = new WireRecord(recordProps);
-        wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-
-        cp.onWireReceive(wireEnvelope);
-
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
+        thenPayloadHasNotNullBody();
+        thenPayloadHasNullPosition();
+        thenTotalMetricReceived(2);
+        thenCheckDefaultMetricReceived();
+        thenTotalKuraMessagePropsReceived(2);
+        thenCheckDefaultKuraMessageProps();
     }
-    
+
     @Test
-    public void testOnWireReceiveSetBodyRemoveFromMetrics() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
+    public void testOnWireReceiveSetBodyRemoveFromMetrics()
+            throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "none");
+        givenBodyProperties("key", Boolean.TRUE);
+        givenActivatedComponentProperties();
+        givenDefaultRecordProp();
 
-        String topic = "my test topic";
+        whenOnWireReceive();
+        whenKuraMessageReceived();
 
-        CloudPublisher cp = new CloudPublisher();
-
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
-        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", "none");
-        properties.put("set.body.from.property", "key");
-        properties.put("remove.body.from.metrics", Boolean.TRUE);
-        cp.activate(ctxMock, properties);
-
-        org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
-                org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
-
-        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
-
-            KuraPayload payload = message.getPayload();
-
-            assertNotNull(payload.getBody());
-            assertEquals("val", Base64.getDecoder().decode(payload.getBody()));
-            assertNull(payload.getPosition());
-            assertNotNull(payload.getTimestamp());
-            assertNotNull(payload.metrics());
-            assertEquals(1, payload.metrics().size());
-            assertEquals(topic, payload.getMetric("topic"));
-
-            return 1234;
-        });
-
-        TestUtil.setFieldValue(cp, "cloudConnectionPublisher", cloudPublisherMock);
-
-        String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        WireRecord record = new WireRecord(recordProps);
-        wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-
-        cp.onWireReceive(wireEnvelope);
-
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
+        thenPayloadHasNotNullBody();
+        thenPayloadHasNullPosition();
+        thenTotalMetricReceived(1);
+        thenCheckOneMetricReceived();
+        thenTotalKuraMessagePropsReceived(1);
+        thenCheckOneKuraMessagePropsReceived();
     }
 
     @Test
     public void testOnWireReceiveWithBasicPosition()
             throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement and position
-        String positionType = "basic";
-        String topic = "my test topic";
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "basic");
+        givenActivatedComponentProperties();
+        givenPositionServiceMock();
+        givenDefaultRecordProp();
 
-        CloudPublisher cp = new CloudPublisher();
+        whenSetPositionServiceMock();
+        whenOnWireReceive();
+        whenKuraMessageReceived();
 
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
-        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", positionType);
-
-        cp.activate(ctxMock, properties);
-
-        org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
-                org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
-
-        PositionService positionServiceMock = mock(PositionService.class);
-
-        when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-
-        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
-
-            KuraPayload payload = message.getPayload();
-            KuraPosition position = payload.getPosition();
-
-            assertNull(payload.getBody());
-            assertNotNull(position);
-            assertNotNull(position.getAltitude());
-            assertNotNull(position.getLatitude());
-            assertNotNull(position.getLongitude());
-            assertNull(position.getSatellites());
-            assertNotNull(payload.getTimestamp());
-            assertNotNull(payload.metrics());
-            assertEquals(2, payload.metrics().size());
-            assertEquals("val", payload.getMetric("key"));
-            assertEquals(topic, payload.getMetric("topic"));
-
-            return 1234;
-        });
-
-        TestUtil.setFieldValue(cp, "cloudConnectionPublisher", cloudPublisherMock);
-        TestUtil.setFieldValue(cp, "positionService", positionServiceMock);
-
-        String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        WireRecord record = new WireRecord(recordProps);
-        wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-
-        cp.onWireReceive(wireEnvelope);
-
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
+        thenPayloadHasNullBody();
+        thenCheckBasicPosition();
+        thenTotalMetricReceived(2);
+        thenCheckDefaultMetricReceived();
+        thenTotalKuraMessagePropsReceived(2);
+        thenCheckDefaultKuraMessageProps();
     }
 
     @Test
     public void testOnWireReceiveWithFullPosition() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement and position
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "full");
+        givenActivatedComponentProperties();
+        givenPositionServiceMock();
+        givenDefaultRecordProp();
 
-        String positionType = "full";
-        String topic = "my test topic";
+        whenSetPositionServiceMock();
+        whenOnWireReceive();
+        whenKuraMessageReceived();
 
-        CloudPublisher cp = new CloudPublisher();
-
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
-
-        BundleContext bundleCtxMock = mock(BundleContext.class);
-        Filter filter = mock(Filter.class);
-        when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
-        ComponentContext ctxMock = mock(ComponentContext.class);
-        when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", positionType);
-
-        cp.activate(ctxMock, properties);
-
-        org.eclipse.kura.cloudconnection.publisher.CloudPublisher cloudPublisherMock = mock(
-                org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class);
-
-        PositionService positionServiceMock = mock(PositionService.class);
-
-        when(positionServiceMock.getNmeaPosition()).thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-
-        when(cloudPublisherMock.publish((KuraMessage) any())).thenAnswer(invocation -> {
-            KuraMessage message = invocation.getArgument(1, KuraMessage.class);
-
-            KuraPayload payload = message.getPayload();
-            KuraPosition position = payload.getPosition();
-
-            assertNull(payload.getBody());
-            assertNotNull(position);
-            assertNotNull(position.getAltitude());
-            assertNotNull(position.getLatitude());
-            assertNotNull(position.getLongitude());
-            assertNotNull(position.getHeading());
-            assertNotNull(position.getPrecision());
-            assertNotNull(position.getSpeed());
-            assertNotNull(position.getSatellites());
-            assertNotNull(payload.getTimestamp());
-            assertNotNull(payload.metrics());
-            assertEquals(2, payload.metrics().size());
-            assertEquals("val", payload.getMetric("key"));
-            assertEquals(topic, payload.getMetric("topic"));
-
-            return 1234;
-        });
-
-        TestUtil.setFieldValue(cp, "cloudConnectionPublisher", cloudPublisherMock);
-        TestUtil.setFieldValue(cp, "positionService", positionServiceMock);
-
-        String emitterPid = "emitter";
-        List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        WireRecord record = new WireRecord(recordProps);
-        wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-
-        cp.onWireReceive(wireEnvelope);
-
-        verify(cloudPublisherMock, times(1)).publish((KuraMessage) any());
+        thenPayloadHasNullBody();
+        thenCheckFullPosition();
+        thenTotalMetricReceived(2);
+        thenCheckDefaultMetricReceived();
+        thenTotalKuraMessagePropsReceived(2);
+        thenCheckDefaultKuraMessageProps();
     }
-    
+
     @Test
     public void testTopicReplacementOnWireReceive() throws InvalidSyntaxException, NoSuchFieldException, KuraException {
         // test publishing a normal message with topic replacement
+        givenCloudPublisher();
+        givenDefaultProperties();
+        givenUpdatedProperties("publish.position", "none");
+        givenUpdatedProperties("app.topic", "$assetName/$test");
+        givenActivatedComponentProperties();
+        givenDefaultRecordProp();
+        givenAddedRecordProp("assetName", "testAsset");
+        givenAddedRecordProp("test", "replaceTest");
 
-        FakeCloudPublisher fakeCloudPublisher = new FakeCloudPublisher() {
+        whenOnWireReceive();
+        whenKuraMessageReceived();
+
+        thenPayloadHasNullBody();
+        thenPayloadHasNullPosition();
+        thenTotalMetricReceived(4);
+        thenCheckDefaultMetricReceived();
+        thenCheckSemanticTopic();
+        thenTotalKuraMessagePropsReceived(4);
+        thenCheckDefaultKuraMessageProps();
+    }
+
+    /*
+     * Steps
+     */
+
+    /*
+     * Given steps
+     */
+
+    private void givenCloudPublisher() {
+        this.cp = new CloudPublisher();
+        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
+        this.cp.bindWireHelperService(wireHelperServiceMock);
+        this.fakeCloudPublisher = new FakeCloudPublisher() {
 
             private KuraMessage kmessage = new KuraMessage(null);
 
@@ -438,63 +246,159 @@ public class CloudPublisherTest {
                 return kmessage;
             }
         };
+    }
 
-        String topic = "my test topic";
+    private void givenDefaultProperties() throws InvalidSyntaxException {
+        this.properties = new HashMap<>();
+        this.properties.put("CloudPublisher.target", "cspid");
+    }
 
-        CloudPublisher cp = new CloudPublisher();
+    private void givenUpdatedProperties(String key, String value) {
+        this.properties.put(key, value);
+    }
 
-        WireHelperService wireHelperServiceMock = mock(WireHelperService.class);
-        cp.bindWireHelperService(wireHelperServiceMock);
+    private void givenBodyProperties(String setBodyFromProperty, Boolean removeBodyFromMetrics) {
+        this.properties.put("set.body.from.property", setBodyFromProperty);
+        this.properties.put("remove.body.from.metrics", removeBodyFromMetrics);
+    }
 
+    private void givenActivatedComponentProperties() throws InvalidSyntaxException {
         BundleContext bundleCtxMock = mock(BundleContext.class);
         Filter filter = mock(Filter.class);
         when(bundleCtxMock.createFilter(anyString())).thenReturn(filter);
-
         ComponentContext ctxMock = mock(ComponentContext.class);
         when(ctxMock.getBundleContext()).thenReturn(bundleCtxMock);
+        this.cp.activate(ctxMock, this.properties);
+        this.cp.setCloudPublisher(this.fakeCloudPublisher);
+    }
 
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("CloudPublisher.target", "cspid");
-        properties.put("publish.position", "none");
-        properties.put("app.topic", "$assetName/$test");
+    private void givenPositionServiceMock() {
+        this.positionServiceMock = mock(PositionService.class);
+    }
 
-        cp.activate(ctxMock, properties);
-        cp.setCloudPublisher(fakeCloudPublisher);
+    private void givenFakeCloudPublisher() {
 
-        String emitterPid = "emitter";
+    }
+
+    private void givenSetFakeCloudPublisher() {
+
+    }
+
+    private void givenDefaultRecordProp() {
+        this.recordProps = new HashMap<>();
+        this.recordProps.put("key", new StringValue("val"));
+        this.recordProps.put("topic", new StringValue("my test topic"));
+    }
+
+    private void givenAddedRecordProp(String key, String stringValue) {
+        this.recordProps.put(key, new StringValue(stringValue));
+    }
+
+    /*
+     * When
+     */
+
+    private void whenOnWireReceive() {
         List<WireRecord> wireRecords = new ArrayList<>();
-        Map<String, TypedValue<?>> recordProps = new HashMap<>();
-        TypedValue<?> val = new StringValue("val");
-        recordProps.put("key", val);
-        val = new StringValue(topic);
-        recordProps.put("topic", val);
-        recordProps.put("assetName", new StringValue("testAsset"));
-        recordProps.put("test", new StringValue("replaceTest"));
-        WireRecord record = new WireRecord(recordProps);
+
+        WireRecord record = new WireRecord(this.recordProps);
         wireRecords.add(record);
-        WireEnvelope wireEnvelope = new WireEnvelope(emitterPid, wireRecords);
-        cp.onWireReceive(wireEnvelope);
 
-        KuraMessage km = fakeCloudPublisher.getMessage();
-        Map<String, Object> messageProps = km.getProperties();
-        for (String key : messageProps.keySet()) {
-            logger.info("{} -> {}", key, messageProps.get(key));
-        }
-        KuraPayload payload = km.getPayload();
+        WireEnvelope wireEnvelope = new WireEnvelope("emitter", wireRecords);
+        this.cp.onWireReceive(wireEnvelope);
+    }
 
-        assertNull(payload.getBody());
-        assertNull(payload.getPosition());
-        assertNotNull(payload.getTimestamp());
-        assertNotNull(payload.metrics());
-        assertEquals(4, payload.metrics().size());
-        assertEquals("val", payload.getMetric("key"));
-        assertEquals(topic, payload.getMetric("topic"));
+    private void whenSetPositionServiceMock() throws NoSuchFieldException {
+        when(this.positionServiceMock.getNmeaPosition())
+                .thenReturn(new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        TestUtil.setFieldValue(this.cp, "positionService", this.positionServiceMock);
+    }
 
-        String appTopic = fillAppTopicPlaceholders("$assetName/$test", km);
+    private void whenKuraMessageReceived() {
+        this.kuraMessage = this.fakeCloudPublisher.getMessage();
+        this.kuraMessageProps = this.kuraMessage.getProperties();
+        this.payload = this.kuraMessage.getPayload();
+        this.position = this.payload.getPosition();
+    }
+
+    /*
+     * Then
+     */
+
+    private void thenPayloadHasNullBody() {
+        assertNull(this.payload.getBody());
+    }
+
+    private void thenPayloadHasNotNullBody() {
+        assertNotNull(this.payload.getBody());
+        byte[] body = this.payload.getBody();
+        // byte[] decodedBody = Base64.getDecoder().decode(body);
+        String stringBody = new String(body);
+        assertEquals("val", stringBody);
+    }
+
+    private void thenPayloadHasNullPosition() {
+        assertNull(this.payload.getPosition());
+    }
+
+    private void thenTotalMetricReceived(int numMetrics) {
+        assertNotNull(this.payload.getTimestamp());
+        assertNotNull(this.payload.metrics());
+        assertEquals(numMetrics, this.payload.metrics().size());
+    }
+
+    private void thenCheckDefaultMetricReceived() {
+        assertEquals("val", this.payload.getMetric("key"));
+        assertEquals("my test topic", this.payload.getMetric("topic"));
+    }
+
+    private void thenCheckOneMetricReceived() {
+        assertEquals("my test topic", this.payload.getMetric("topic"));
+    }
+
+    private void thenTotalKuraMessagePropsReceived(int numMetrics) {
+        assertNotNull(this.kuraMessageProps);
+        assertEquals(numMetrics, this.kuraMessageProps.size());
+    }
+
+    private void thenCheckDefaultKuraMessageProps() {
+        assertEquals("val", this.kuraMessageProps.get("key"));
+        assertEquals("my test topic", this.kuraMessageProps.get("topic"));
+    }
+
+    private void thenCheckOneKuraMessagePropsReceived() {
+        assertEquals("my test topic", this.kuraMessageProps.get("topic"));
+    }
+
+    private void thenCheckSemanticTopic() {
+        String appTopic = fillAppTopicPlaceholders("$assetName/$test", this.kuraMessage);
         assertEquals("testAsset/replaceTest", appTopic);
-        
-        logger.info("appTopic = {}",appTopic);
+    }
 
+    private void thenCheckBasicPosition() {
+        assertNotNull(this.position);
+        assertNotNull(this.position.getAltitude());
+        assertNotNull(this.position.getLatitude());
+        assertNotNull(this.position.getLongitude());
+        assertNull(this.position.getSatellites());
+    }
+
+    private void thenCheckFullPosition() {
+        assertNotNull(this.position.getAltitude());
+        assertNotNull(this.position.getLatitude());
+        assertNotNull(this.position.getLongitude());
+        assertNotNull(this.position.getHeading());
+        assertNotNull(this.position.getPrecision());
+        assertNotNull(this.position.getSpeed());
+        assertNotNull(this.position.getSatellites());
+    }
+    /*
+     * Utilities
+     */
+
+    public interface FakeCloudPublisher extends org.eclipse.kura.cloudconnection.publisher.CloudPublisher {
+
+        public KuraMessage getMessage();
     }
 
     private String fillAppTopicPlaceholders(String appTopic, KuraMessage message) {

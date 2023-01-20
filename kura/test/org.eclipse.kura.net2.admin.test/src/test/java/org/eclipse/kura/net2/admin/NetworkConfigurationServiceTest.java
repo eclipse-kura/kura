@@ -182,7 +182,7 @@ public class NetworkConfigurationServiceTest {
         this.properties.put("net.interface.wlp1s0.config.wifi.infra.bgscan", "");
         this.properties.put("net.interface.1-4.config.ipAddress", "");
         this.properties.put("net.interface.eno1.config.dhcpServer4.defaultLeaseTime", 7200);
-        this.properties.put("net.interface.eno1.config.dhcpServer4.enabled", true);
+        this.properties.put("net.interface.eno1.config.dhcpServer4.enabled", false);
         this.properties.put("net.interface.wlp1s0.config.wifi.infra.passphrase", "");
         this.properties.put("net.interface.1-4.config.persist", true);
         this.properties.put("net.interface.1-4.config.diversityEnabled", false);
@@ -222,7 +222,7 @@ public class NetworkConfigurationServiceTest {
         this.properties.put("net.interface.enp5s0.config.ip6.status", "netIPv6StatusDisabled");
         this.properties.put("net.interface.eno1.config.dhcpServer4.rangeStart", "172.16.0.100");
         this.properties.put("net.interface.wlp1s0.config.dhcpClient4.enabled", false);
-        this.properties.put("net.interface.wlp1s0.config.dhcpServer4.enabled", true);
+        this.properties.put("net.interface.wlp1s0.config.dhcpServer4.enabled", false);
         this.properties.put("net.interface.1-4.config.gpsEnabled", false);
         this.properties.put("net.interface.wlp1s0.config.wifi.master.ignoreSSID", false);
         this.properties.put("net.interface.wlp1s0.config.ip4.address", "172.16.1.1");

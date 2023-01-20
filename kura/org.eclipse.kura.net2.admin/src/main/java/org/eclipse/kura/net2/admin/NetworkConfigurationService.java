@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +80,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     private LinuxNetworkUtil linuxNetworkUtil;
 
-    private Map<String, Object> properties = new HashMap<>();
+//    private Map<String, Object> properties = new HashMap<>();
+    private NetworkProperties networkProperties;
 
     // ----------------------------------------------------------------
     //
@@ -153,12 +155,10 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             logger.debug("Received null properties...");
         } else {
             logger.debug("Properties... {}", properties);
-            this.properties = discardModifiedNetworkInterfaces(new HashMap<>(properties)); // <-- for now apply the
-                                                                                           // configuration in any case.
-                                                                                           // Is the property the best
-                                                                                           // approach for managing
-                                                                                           // incremental updates?
-            update(this.properties);
+            // for now apply the configuration in any case. Is the property the best
+            // approach to manage the incremental updates?
+            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(properties)));
+            update(this.networkProperties.getProperties());
         }
     }
 
@@ -175,25 +175,14 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         }
     }
 
-    private Optional<NetInterfaceType> getNetworkTypeFromProperties(final String interfaceName,
-            final Map<String, Object> properties) {
+    private Optional<NetInterfaceType> getNetworkTypeFromProperties(final String interfaceName) {
         Optional<NetInterfaceType> type = Optional.empty();
-        Optional<Object> value = getValueFromProperties(PREFIX + interfaceName + ".type", properties);
-        if (value.isPresent()) {
-            type = Optional.of(NetInterfaceType.valueOf((String) value.get()));
+        Optional<String> typeString = this.networkProperties.getOpt(String.class, "net.interface.%s.type",
+                interfaceName);
+        if (typeString.isPresent()) {
+            type = Optional.of(NetInterfaceType.valueOf(typeString.get()));
         }
         return type;
-    }
-
-    private Optional<Object> getValueFromProperties(final String key,
-            final Map<String, Object> properties) {
-        return Optional.ofNullable(properties.get(key)).flatMap(p -> {
-            try {
-                return Optional.of(p);
-            } catch (final Exception e) {
-                return Optional.empty();
-            }
-        });
     }
 
     public synchronized void update(Map<String, Object> receivedProperties) {
@@ -207,30 +196,35 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                                                                                            // compatibility
         final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
 
-        for (final String interfaceName : interfaces) {
-            NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
-            setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
-                                                                  // the system?
-            if (NetInterfaceType.MODEM.equals(type)) {
-                setModemPppNumber(modifiedProps, interfaceName);
-                setModemUsbDeviceProperties(modifiedProps, interfaceName);
+        try {
+            for (final String interfaceName : interfaces) {
+                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
+                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
+                                                                      // the system?
+                if (NetInterfaceType.MODEM.equals(type)) {
+                    setModemPppNumber(modifiedProps, interfaceName);
+                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
+                }
             }
-        }
 
-        final boolean changed = checkWanInterfaces(this.properties, modifiedProps);
-        mergeNetworkConfigurationProperties(modifiedProps, this.properties);
+            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
+            mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
-        decryptPasswordProperties(modifiedProps);
-        // networkManager.applyConfiguration
-        // writeConfigurationFiles
-        writeDhcpServerConfiguration(interfaces, modifiedProps);
+            decryptPasswordProperties(modifiedProps);
+            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
-        this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the management
-                                                                                       // of the modifiedprops...
-        this.properties = discardModifiedNetworkInterfaces(this.properties);
+            // networkManager.applyConfiguration
+            writeDhcpServerConfiguration(interfaces);
 
-        if (changed) {
-            this.configurationService.snapshot();
+            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
+                                                                                           // management
+                                                                                           // of the modifiedprops...
+
+            if (changed) {
+                this.configurationService.snapshot();
+            }
+        } catch (KuraException e) {
+            logger.error("Failed to apply network configuration", e);
         }
     }
 
@@ -345,8 +339,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(PID, getDefinition(this.properties),
-                this.properties);
+        return new ComponentConfigurationImpl(PID, getDefinition(),
+                this.networkProperties.getProperties());
     }
 
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
@@ -358,7 +352,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     }
 
     private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = getNetworkInterfaceNamesInConfig(this.properties);
+        final Set<String> interfaceNamesInConfig = getNetworkInterfaceNamesInConfig(
+                this.networkProperties.getProperties());
 
         final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
 
@@ -377,27 +372,51 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 .orElseGet(HashSet::new);
     }
 
-    private void writeDhcpServerConfiguration(Set<String> interfaceNames, Map<String, Object> properties) { // do we
-                                                                                                            // need the
-                                                                                                            // modified
-                                                                                                            // properties?
+    private void writeDhcpServerConfiguration(Set<String> interfaceNames) { // do we
+                                                                            // need the
+                                                                            // modified
+                                                                            // properties?
         interfaceNames.forEach(interfaceName -> {
-            Optional<NetInterfaceType> type = getNetworkTypeFromProperties(interfaceName, properties);
-            if (type.isPresent() && NetInterfaceType.ETHERNET.equals(type.get())
-                    || NetInterfaceType.WIFI.equals(type.get())) {
-                Optional<Object> isDhcpServerEnabled = getValueFromProperties(
-                        PREFIX + interfaceName + ".config.dhcpClient4.enabled", properties);
-                if (isDhcpServerEnabled.isPresent() && Boolean.valueOf((String) isDhcpServerEnabled.get())) {
-                    // write the config only if is it enabled, but not delete it if not.
-//                    DhcpServerConfigWriter.
-                    check if not l2only
+            if (isDhcpServerValid(interfaceName)) {
+                DhcpServerConfigWriter dhcpServerConfigWriter = new DhcpServerConfigWriter(interfaceName,
+                        this.networkProperties);
+                try {
+                    dhcpServerConfigWriter.writeConfiguration();
+                } catch (UnknownHostException | KuraException e) {
+                    logger.error("Failed to write DHCP Server configuration", e);
                 }
-
             }
         });
     }
 
-    private Tocd getDefinition(final Map<String, Object> properties) throws KuraException {
+    private boolean isDhcpServerValid(String interfaceName) {
+        boolean isValid = false;
+        Optional<NetInterfaceType> type = getNetworkTypeFromProperties(interfaceName);
+        Optional<Boolean> isDhcpServerEnabled = this.networkProperties.getOpt(Boolean.class,
+                "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
+        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+
+        if (type.isPresent() && (NetInterfaceType.ETHERNET.equals(type.get())
+                || NetInterfaceType.WIFI.equals(type.get()))
+                && Boolean.TRUE
+                        .equals(isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
+                && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
+            isValid = true;
+        }
+        return isValid;
+    }
+
+    private Optional<NetInterfaceStatus> getNetInterfaceStatus(String interfaceName) {
+        Optional<String> interfaceStatus = this.networkProperties.getOpt(String.class,
+                "net.interface.%s.config.ip4.status", interfaceName);
+        if (interfaceStatus.isPresent()) {
+            return Optional.of(NetInterfaceStatus.valueOf(interfaceStatus.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Tocd getDefinition() throws KuraException {
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
 
@@ -421,11 +440,12 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
         // Get the network interfaces on the platform
         try {
-            Set<String> networkInterfaceNames = getNetworkInterfaceNamesInConfig(properties);
+            Set<String> networkInterfaceNames = getNetworkInterfaceNamesInConfig(
+                    this.networkProperties.getProperties());
             for (String ifaceName : networkInterfaceNames) {
                 // get the current configuration for this interface
 
-                Optional<NetInterfaceType> type = getNetworkTypeFromProperties(ifaceName, properties);
+                Optional<NetInterfaceType> type = getNetworkTypeFromProperties(ifaceName);
 
                 if (!type.isPresent()) {
                     logger.warn("failed to compute the interface type for {}", ifaceName);
@@ -1000,14 +1020,19 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
             String prefix = PREFIX + existingInterfaceName + ".";
 
-            final Object usbBusNumber = this.properties.get(prefix + "usb.busNumber");
-            final Object usbDevicePath = this.properties.get(prefix + "usb.devicePath");
+            final Optional<String> usbBusNumber = this.networkProperties.getOpt(String.class,
+                    "net.interface.%s.usb.busNumber",
+                    existingInterfaceName);
+            final Optional<String> usbDevicePath = this.networkProperties.getOpt(String.class,
+                    "net.interface.%s.usb.devicePath",
+                    existingInterfaceName);
 
-            if (!(usbBusNumber instanceof String) || !(usbDevicePath instanceof String)) {
+            if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
                 logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
+                continue;
             }
 
-            final String migratedInterfaceName = usbBusNumber + "-" + usbDevicePath;
+            final String migratedInterfaceName = usbBusNumber.get() + "-" + usbDevicePath.get();
 
             logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
             fillProperties(migratedInterfaceName, prefix, result);
@@ -1024,14 +1049,14 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     private void fillProperties(String migratedInterfaceName, String prefix, Map<String, Object> result) {
         final String migratedPrefix = PREFIX + migratedInterfaceName + ".";
 
-        for (final Entry<String, Object> e : this.properties.entrySet()) {
+        for (final Entry<String, Object> e : this.networkProperties.getProperties().entrySet()) {
             final String key = e.getKey();
 
             if (key.startsWith(prefix)) {
                 final String suffix = key.substring(prefix.length());
                 final String migratedPropertyKey = migratedPrefix + suffix;
 
-                final Object existingProperty = this.properties.get(migratedPropertyKey);
+                final Object existingProperty = this.networkProperties.getProperties().get(migratedPropertyKey);
 
                 if (existingProperty != null) {
                     result.put(migratedPropertyKey, existingProperty);

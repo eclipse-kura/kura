@@ -20,7 +20,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
@@ -46,9 +45,9 @@ public class DhcpServerConfigWriter {
     private final String interfaceName;
     private final NetworkProperties networkProperties;
 
-    public DhcpServerConfigWriter(String interfaceName, Map<String, Object> properties) {
+    public DhcpServerConfigWriter(String interfaceName, NetworkProperties properties) {
         this.interfaceName = interfaceName;
-        this.networkProperties = new NetworkProperties(properties);
+        this.networkProperties = properties;
     }
 
     protected String getConfigFilename(String interfaceName) {

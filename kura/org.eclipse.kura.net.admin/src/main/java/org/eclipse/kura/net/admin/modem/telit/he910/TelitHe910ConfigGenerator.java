@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,6 +14,7 @@ package org.eclipse.kura.net.admin.modem.telit.he910;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
+import org.eclipse.kura.net.admin.util.PppPdpUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -79,7 +80,7 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
-            pdpPid = getPdpContextNumber(dialString);
+            pdpPid = PppPdpUtil.getPdpContextNumber(dialString);
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -114,14 +115,6 @@ public class TelitHe910ConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 
         return modemXchange;
-    }
-
-    private int getPdpContextNumber(String dialString) {
-        int pdpPid = 1;
-        if (!dialString.isEmpty() && dialString.contains("atd*99***")) {
-            pdpPid = Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
-        }
-        return pdpPid;
     }
 
     /*

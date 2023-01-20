@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -18,6 +18,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModemAtCommands;
+import org.eclipse.kura.net.admin.util.PppPdpUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -87,7 +88,7 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
-            pdpPid = getPdpContextNumber(dialString);
+            pdpPid = PppPdpUtil.getPdpContextNumber(dialString);
             authType = modemConfig.getAuthType();
             username = modemConfig.getUsername();
             password = modemConfig.getPasswordAsPassword();
@@ -201,9 +202,5 @@ public class UbloxModemConfigGenerator implements ModemPppConfigGenerator {
         authReq.append('"');
 
         return authReq.toString();
-    }
-
-    private int getPdpContextNumber(String dialString) {
-        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
     }
 }

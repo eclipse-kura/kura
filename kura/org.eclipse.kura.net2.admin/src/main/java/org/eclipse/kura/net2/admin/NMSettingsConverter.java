@@ -12,7 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +70,8 @@ public class NMSettingsConverter {
 
         Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", iface);
 
-        // Should handle net.interface.eth0.config.ip4.status here
+        KuraInterfaceStatus ip4Status = KuraInterfaceStatus
+                .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", iface));
 
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
             settings.put("method", new Variant<>("manual"));
@@ -81,25 +85,34 @@ public class NMSettingsConverter {
 
             List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
             settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
+        } else {
+            settings.put("method", new Variant<>("auto"));
+        }
 
+        if (ip4Status.equals(KuraInterfaceStatus.ENABLEDLAN)) {
+            settings.put("ignore-auto-dns", new Variant<>(true));
+            settings.put("ignore-auto-routes", new Variant<>(true));
+        } else if (ip4Status.equals(KuraInterfaceStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", iface);
             if (dnsServers.isPresent()) {
-                settings.put("dns-search", new Variant<>(dnsServers.get()));
+                List<UInt32> uintDnsServers = new ArrayList<>();
+                for (String dnsServer : dnsServers.get()) {
+                    try {
+                        UInt32 uintDnsServer = convertIp4(dnsServer);
+                        uintDnsServers.add(uintDnsServer);
+                    } catch (UnknownHostException e) {
+                        logger.warn("Cannot convert dns server \"{}\" because: ", dnsServer, e);
+                    }
+                }
+                settings.put("dns", new Variant<>(uintDnsServers, "au"));
+                settings.put("ignore-auto-dns", new Variant<>(true));
             }
-            settings.put("ignore-auto-dns", new Variant<>(true));
-
             Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
             if (gateway.isPresent() && !gateway.get().isEmpty()) {
                 settings.put("gateway", new Variant<>(gateway.get()));
             }
         } else {
-            settings.put("method", new Variant<>("auto"));
-
-            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", iface);
-            if (dnsServers.isPresent()) {
-                settings.put("ignore-auto-dns", new Variant<>(true));
-                settings.put("dns-search", new Variant<>(dnsServers.get()));
-            }
+            logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip4Status);
         }
 
         return settings;
@@ -145,20 +158,30 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
         String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
-        // List<String> group = wifiCipherConverter.get(props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.groupCiphers", iface, propMode.toLowerCase()));
-        // List<String> pairwise = wifiCipherConverter.get(props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface, propMode.toLowerCase()));
+        List<String> group = WIFI_CIPHER_CONVERTER.get(
+                props.get(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", iface, propMode.toLowerCase()));
+        List<String> pairwise = WIFI_CIPHER_CONVERTER.get(props.get(String.class,
+                "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface, propMode.toLowerCase()));
 
-        // String plainPsk = String.valueOf(this.cryptoService.decryptAes(psk.toCharArray()));
-        settings.put("psk", new Variant<>(psk)); // Will require decryption in Kura
+        settings.put("psk", new Variant<>(psk));
         settings.put("key-mgmt", new Variant<>(keyMgmt));
-        // settings.put("group", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible type
-        // (from java.lang.String to ().
-        // settings.put("pairwise", new Variant<>(group, "a(s)")); <- Not working: Trying to marshall to unconvertible
-        // type (from java.lang.String to ().
+        settings.put("group", new Variant<>(group, "as"));
+        settings.put("pairwise", new Variant<>(pairwise, "as"));
 
         return settings;
+    }
+
+    private static UInt32 convertIp4(String ipAddrString) throws UnknownHostException {
+        InetAddress address = InetAddress.getByName(ipAddrString);
+        byte[] addrBytes = address.getAddress();
+
+        long result = 0;
+        result = result << 8 | (addrBytes[3] & 0xFF);
+        result = result << 8 | (addrBytes[2] & 0xFF);
+        result = result << 8 | (addrBytes[1] & 0xFF);
+        result = result << 8 | (addrBytes[0] & 0xFF);
+
+        return new UInt32(result);
     }
 
     private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
@@ -238,6 +261,7 @@ public class NMSettingsConverter {
 
         map.put(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, "802-3-ethernet");
         map.put(NMDeviceType.NM_DEVICE_TYPE_WIFI, "802-11-wireless");
+        // ... WIP
 
         return map;
     }

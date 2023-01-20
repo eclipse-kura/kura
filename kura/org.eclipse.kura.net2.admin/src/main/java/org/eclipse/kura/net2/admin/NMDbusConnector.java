@@ -42,11 +42,12 @@ public class NMDbusConnector {
 
     private static final List<NMDeviceType> SUPPORTED_DEVICES = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
             NMDeviceType.NM_DEVICE_TYPE_WIFI);
+    private static final List<KuraInterfaceStatus> SUPPORTED_STATUSES = Arrays.asList(KuraInterfaceStatus.DISABLED,
+            KuraInterfaceStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLEDWAN);
 
     private static NMDbusConnector instance;
     private DBusConnection dbusConnection;
     private NetworkManager nm;
-    private Map<String, Object> configurationCache;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -95,16 +96,29 @@ public class NMDbusConnector {
         List<String> netInterfaces = properties.getStringList("net.interfaces");
 
         for (String iface : netInterfaces) {
-            Device device = getDeviceByIpIface(iface); // What if no device matches?
+            Device device = getDeviceByIpIface(iface);
             NMDeviceType deviceType = getDeviceType(device);
 
-            logger.info("Settings iface \"{}\":{}", iface, deviceType);
-            if (!SUPPORTED_DEVICES.contains(deviceType)) {
-                logger.warn("Device type \"{}\" currently not supported", deviceType);
+            KuraInterfaceStatus ip4Status = KuraInterfaceStatus
+                    .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
+
+            if (!SUPPORTED_DEVICES.contains(deviceType) || !SUPPORTED_STATUSES.contains(ip4Status)) {
+                logger.warn("Device \"{}\" of type \"{}\" with status \"{}\" currently not supported", iface,
+                        deviceType, ip4Status);
                 continue;
             }
 
+            logger.info("Settings iface \"{}\":{}", iface, deviceType);
+
             Optional<Connection> connection = getAppliedConnection(device);
+
+            if (ip4Status.equals(KuraInterfaceStatus.DISABLED)) {
+                device.Disconnect();
+                if (connection.isPresent()) {
+                    connection.get().Delete();
+                }
+                return;
+            }
 
             Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
                     connection, iface, deviceType);

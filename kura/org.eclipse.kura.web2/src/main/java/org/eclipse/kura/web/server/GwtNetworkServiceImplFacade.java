@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,8 +72,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
+            return (ArrayList<GwtFirewallOpenPortEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
+                    .findDeviceFirewallOpenPorts();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallOpenPorts();
         }
@@ -126,8 +125,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
+            return (ArrayList<GwtFirewallPortForwardEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
+                    .findDeviceFirewallPortForwards();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallPortForwards();
         }
@@ -138,8 +137,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
+            return (ArrayList<GwtFirewallNatEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
+                    .findDeviceFirewallNATs();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallNATs();
         }

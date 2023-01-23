@@ -66,8 +66,11 @@ public class NetworkConfigurationServiceAdapter {
 
     public NetworkConfigurationServiceAdapter() throws GwtKuraException, KuraException {
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        logger.info("Is the ConfigurationService null? {}", configurationService == null);
+        logger.info(NETWORK_CONFIGURATION_SERVICE_PID);
         ComponentConfiguration config = configurationService
                 .getComponentConfiguration(NETWORK_CONFIGURATION_SERVICE_PID);
+        logger.info("Is the config null? {}", config == null);
         this.properties = new NetworkConfigurationServiceProperties(config.getConfigurationProperties());
     }
 
@@ -242,7 +245,7 @@ public class NetworkConfigurationServiceAdapter {
             if (securityType.get().equals(WifiSecurity.SECURITY_WEP.name())) {
                 return GwtWifiSecurity.netWifiSecurityWEP.name();
             }
-            
+
             if (securityType.get().equals(WifiSecurity.SECURITY_WPA.name())) {
                 return GwtWifiSecurity.netWifiSecurityWPA.name();
             }
@@ -275,7 +278,7 @@ public class NetworkConfigurationServiceAdapter {
 
     private List<Integer> getWifiChannels(String channelValue) {
         List<Integer> channels = new ArrayList<>();
-        
+
         String[] split = channelValue.split(" ");
 
         for (String channel : split) {
@@ -296,11 +299,11 @@ public class NetworkConfigurationServiceAdapter {
             if (radioMode.get().equals(WifiRadioMode.RADIO_MODE_80211_AC.name())) {
                 return Optional.of(GwtWifiRadioMode.netWifiRadioModeANAC.name());
             }
-            
-            if(radioMode.get().equals(WifiRadioMode.RADIO_MODE_80211a.name())) {
+
+            if (radioMode.get().equals(WifiRadioMode.RADIO_MODE_80211a.name())) {
                 return Optional.of(GwtWifiRadioMode.netWifiRadioModeA.name());
             }
-            
+
             if (radioMode.get().equals(WifiRadioMode.RADIO_MODE_80211b.name())) {
                 return Optional.of(GwtWifiRadioMode.netWifiRadioModeB.name());
             }

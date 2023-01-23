@@ -192,40 +192,45 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             return;
         }
 
-        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
-                                                                                           // compatibility
-        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
+//        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
+//                                                                                           // compatibility
+//        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
+        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(receivedProperties);
+//
+//        try {
+//            for (final String interfaceName : interfaces) {
+//                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
+//                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
+//                                                                      // the system?
+//                if (NetInterfaceType.MODEM.equals(type)) {
+//                    setModemPppNumber(modifiedProps, interfaceName);
+//                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
+//                }
+//            }
+//
+//            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
+//            mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
-        try {
-            for (final String interfaceName : interfaces) {
-                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
-                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
-                                                                      // the system?
-                if (NetInterfaceType.MODEM.equals(type)) {
-                    setModemPppNumber(modifiedProps, interfaceName);
-                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
-                }
-            }
+//            decryptPasswordProperties(modifiedProps);
+//            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
+        this.networkProperties = new NetworkProperties(receivedProperties);
 
-            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
-            mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
+        // networkManager.applyConfiguration
+        writeDhcpServerConfiguration(interfaces);
 
-            decryptPasswordProperties(modifiedProps);
-            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
+//            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
+        // management
+        // of the modifiedprops...
+        this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(receivedProperties));
 
-            // networkManager.applyConfiguration
-            writeDhcpServerConfiguration(interfaces);
-
-            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
-                                                                                           // management
-                                                                                           // of the modifiedprops...
-
-            if (changed) {
-                this.configurationService.snapshot();
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to apply network configuration", e);
-        }
+//        if (changed) {
+//            this.configurationService.snapshot();
+//        }
+//        } catch (
+//
+//        KuraException e) {
+//            logger.error("Failed to apply network configuration", e);
+//        }
     }
 
     private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
@@ -339,6 +344,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
+        logger.info("I'm here!!!!");
         return new ComponentConfigurationImpl(PID, getDefinition(),
                 this.networkProperties.getProperties());
     }

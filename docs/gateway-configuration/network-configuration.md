@@ -85,85 +85,91 @@ The following table describes all the properties related to the Network Configur
 Name                                             | Type     | Description
 -------------------------------------------------|----------|------------------------------------------
 `net.interfaces`                                 | String   | Comma-separated list of the interface names in the device
-`net.interface.\<interface\>.config.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK
-`net.interface.\<interface\>.config.wifi.mode`   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
-`net.interface.\<interface\>.config.nat.enabled` | Boolean  | Enable the NAT feature
+`net.interface.<interface>.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK
+`net.interface.<interface>.config.wifi.mode`   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
+`net.interface.<interface>.config.nat.enabled` | Boolean  | Enable the NAT feature
 
 ### IPv4 properties
 
 Name                                                | Type     | Description
 ----------------------------------------------------|----------|------------------------------------------
-`net.interface.\<interface\>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
-`net.interface.\<interface\>.config.ip4.address`    | String   | The IPv4 address assigned to the network interface
-`net.interface.\<interface\>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
-`net.interface.\<interface\>.config.ip4.gateway`    | String   | The IPv4 address of the default gateway
-`net.interface.\<interface\>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers
+`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
+`net.interface.<interface>.config.ip4.address`    | String   | The IPv4 address assigned to the network interface
+`net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
+`net.interface.<interface>.config.ip4.gateway`    | String   | The IPv4 address of the default gateway
+`net.interface.<interface>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers
 
 ### IPv4 DHCP Server properties
 
 Name                                                              | Type    | Description
 ------------------------------------------------------------------|---------|------------------------------------------
-`net.interface.\<interface\>.config.dhcpServer4.enabled`          | Boolean	| Specify if the DHCP server is enabled
-`net.interface.\<interface\>.config.dhcpServer4.rangeStart`       | String	| First IP address available for clients
-`net.interface.\<interface\>.config.dhcpServer4.rangeEnd`         | String	| Last IP address available for clients
-`net.interface.\<interface\>.config.dhcpServer4.defaultLeaseTime` | Integer	| The default lease time
-`net.interface.\<interface\>.config.dhcpServer4.maxLeaseTime`     | Integer	| The maximum lease time
-`net.interface.\<interface\>.config.dhcpServer4.prefix`           | Short	| The netmask for the available IP addresses
-`net.interface.\<interface\>.config.dhcpServer4.passDns`          | Boolean	| Specify if the DNS server addresses has to be passed through DHCP
+`net.interface.<interface>.config.dhcpServer4.enabled`          | Boolean	| Specify if the DHCP server is enabled
+`net.interface.<interface>.config.dhcpServer4.rangeStart`       | String	| First IP address available for clients
+`net.interface.<interface>.config.dhcpServer4.rangeEnd`         | String	| Last IP address available for clients
+`net.interface.<interface>.config.dhcpServer4.defaultLeaseTime` | Integer	| The default lease time
+`net.interface.<interface>.config.dhcpServer4.maxLeaseTime`     | Integer	| The maximum lease time
+`net.interface.<interface>.config.dhcpServer4.prefix`           | Short	| The netmask for the available IP addresses
+`net.interface.<interface>.config.dhcpServer4.passDns`          | Boolean	| Specify if the DNS server addresses has to be passed through DHCP
 
 ### IPv4 DHCP Client properties
 
 Name                                                     | Type     | Description
 ---------------------------------------------------------|----------|------------------------------------------
-`net.interface.\<interface\>.config.dhcpClient4.enabled` | Boolean	| Specify if the DHCP client is enabled
+`net.interface.<interface>.config.dhcpClient4.enabled` | Boolean	| Specify if the DHCP client is enabled
 
 ### WiFi Master (Access Point) properties
 
-Name                                                          | Type    | Description
----------------------------------------------------|----------|------------------------------------------
-`net.interface.\<interface\>.config.wifi.master.driver`	      | String	| The driver used for the connection
-`net.interface.\<interface\>.config.wifi.master.passphrase`	  | Password	| The password for the access point
-`net.interface.\<interface\>.config.wifi.master.ssid`	      | String	| The SSID of the access point
-`net.interface.\<interface\>.config.wifi.master.securityType` | String	| The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
-`net.interface.\<interface\>.config.wifi.master.mode`	      | String	| The mode of the wireless connection; for the access point mode set it to MASTER
-`net.interface.\<interface\>.config.wifi.master.channel`	  | String	| The channel to be used for the access point
-`net.interface.\<interface\>.config.wifi.master.radioMode`	  | String	| Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC
-`net.interface.\<interface\>.config.wifi.master.ignoreSSID`	  | Boolean	| Specify if the SSID broadcast is ignored
+Name                                                             | Type     | Description
+---------------------------------------------------|-------------|------------------------------------------
+`net.interface.<interface>.config.wifi.master.driver`	         | String	| The driver used for the connection
+`net.interface.<interface>.config.wifi.master.passphrase`	     | Password	| The password for the access point
+`net.interface.<interface>.config.wifi.master.ssid`	         | String	| The SSID of the access point
+`net.interface.<interface>.config.wifi.master.securityType`    | String	| The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
+`net.interface.<interface>.config.wifi.master.mode`	         | String	| The mode of the wireless connection; for the access point mode set it to MASTER
+`net.interface.<interface>.config.wifi.master.channel`	     | String	| The channel to be used for the access point
+`net.interface.<interface>.config.wifi.master.radioMode`	     | String	| Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC
+`net.interface.<interface>.config.wifi.master.ignoreSSID`	     | Boolean	| Specify if the SSID broadcast is ignored
+`net.interface.<interface>.config.wifi.master.groupCiphers`    | String   | Group ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.master.pairwiseCiphers` | String   | Pairwise ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 
 ### WiFi Infra (Station Mode) properties
 
-Name                                                            | Type      | Description
-----------------------------------------------------------------|-----------|------------------------------------------
-`net.interface.\<interface\>.config.wifi.infra.ssid`	        | String	| The SSID of the wireless network to connect to
-`net.interface.\<interface\>.config.wifi.infra.channel`	        | String	| The channel of the wireless network to connect to
-`net.interface.\<interface\>.config.wifi.infra.bgscan`	        | String	| Set the background scans; possible values are None, Simple and Learn
-`net.interface.\<interface\>.config.wifi.infra.passphrase`	    | Password	| The password for the wireless network
-`net.interface.\<interface\>.config.wifi.infra.ignoreSSID`	    |Boolean	| Specify if a scan for SSID is required before attempting to associate
-`net.interface.\<interface\>.config.wifi.infra.mode`	        | String	| The mode of the wireless connection; for station mode set to INFRA
-`net.interface.\<interface\>.config.wifi.infra.pingAccessPoint`	| Boolean	| Enable pinging the access point after connection is established
-`net.interface.\<interface\>.config.wifi.infra.driver`	        | String	| The driver used for the connection
-`net.interface.\<interface\>.config.wifi.infra.securityType`	| String	| The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
+Name                                                             | Type      | Description
+-----------------------------------------------------------------|-----------|------------------------------------------
+`net.interface.<interface>.config.wifi.infra.ssid`	             | String	 | The SSID of the wireless network to connect to
+`net.interface.<interface>.config.wifi.infra.channel`	         | String	 | The channel of the wireless network to connect to
+`net.interface.<interface>.config.wifi.infra.bgscan`	         | String	 | Set the background scans; possible values have the form `<mode>:<shortInterval>:<rssiThreshold>:<longInterval>` where `mode` (String) is one of NONE, SIMPLE, or LEARN, `shortInterval` (Integer) sets the Bgscan short interval (secs), `rssiThreshold` (Integer) sets the Bgscan Signal strength threshold (dBm), and `longInterval` (Integer) sets the Bgscan long interval (secs)
+`net.interface.<interface>.config.wifi.infra.passphrase`	     | Password	 | The password for the wireless network
+`net.interface.<interface>.config.wifi.infra.ignoreSSID`	     | Boolean	 | Specify if a scan for SSID is required before attempting to associate
+`net.interface.<interface>.config.wifi.infra.mode`	             | String	 | The mode of the wireless connection; for station mode set to INFRA
+`net.interface.<interface>.config.wifi.infra.pingAccessPoint`	 | Boolean	 | Enable pinging the access point after connection is established
+`net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection
+`net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
+`net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 
 ### Cellular Modem properties
 
-Name                                                  | Type    | Description
-------------------------------------------------------|---------|------------------------------------------
-`net.interface.\<interface\>.config.enabled`	      |Boolean	|Enable the interface
-`net.interface.\<interface\>.config.idle`             |Integer	|The idle option of the PPP daemon
-`net.interface.\<interface\>.config.password`         |Password	|The password used for the connection
-`net.interface.\<interface\>.config.pdpType`          |String	|The PdP type; possible values are IP, PPP and IPv6
-`net.interface.\<interface\>.config.maxFail`          |Integer	|The maxfail option of the PPP daemon
-`net.interface.\<interface\>.config.authType`         |String	|The authentication type; possible values are None, Auto, CHAP and PAP
-`net.interface.\<interface\>.config.lpcEchoInterval`  |Integer	|The lcp-echo-interval option of the PPP daemon
-`net.interface.\<interface\>.config.activeFilter`     |String	|The active-filter option of the PPP daemon
-`net.interface.\<interface\>.config.lpcEchoFailure`   |Integer	|The lcp-echo-failure option of the PPP daemon
-`net.interface.\<interface\>.config.diversityEnabled` |Boolean	|Enable the LTE diversity antenna
-`net.interface.\<interface\>.config.resetTimeout`     |Integer	|The modem reset timeout in minutes
-`net.interface.\<interface\>.config.gpsEnabled`       |Boolean	|Enable the GPS device in the modem if available
-`net.interface.\<interface\>.config.persist`          |Boolean	|The persist option of the PPP daemon
-`net.interface.\<interface\>.config.apn`              |String	|The modem Access Point Name
-`net.interface.\<interface\>.config.dialString`       |String	|The dial string used for connecting to the APN
-`net.interface.\<interface\>.config.holdoff`          |Integer	|The holdoff option of the PPP daemon (in seconds)
+Name                                                  | Type     | Description
+------------------------------------------------------|----------|------------------------------------------
+`net.interface.<interface>.config.enabled`	          | Boolean  | Enable the interface
+`net.interface.<interface>.config.idle`               | Integer  | The idle option of the PPP daemon
+`net.interface.<interface>.config.username`           | String   | The username used for the connection
+`net.interface.<interface>.config.password`           | Password | The password used for the connection
+`net.interface.<interface>.config.pdpType`            | String   | The PdP type; possible values are IP, PPP and IPv6
+`net.interface.<interface>.config.maxFail`            | Integer  | The maxfail option of the PPP daemon
+`net.interface.<interface>.config.authType`           | String   | The authentication type; possible values are None, Auto, CHAP and PAP
+`net.interface.<interface>.config.lpcEchoInterval`    | Integer  | The lcp-echo-interval option of the PPP daemon
+`net.interface.<interface>.config.activeFilter`       | String   | The active-filter option of the PPP daemon
+`net.interface.<interface>.config.lpcEchoFailure`     | Integer  | The lcp-echo-failure option of the PPP daemon
+`net.interface.<interface>.config.diversityEnabled`   | Boolean  | Enable the LTE diversity antenna
+`net.interface.<interface>.config.resetTimeout`       | Integer  | The modem reset timeout in minutes
+`net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available
+`net.interface.<interface>.config.persist`            | Boolean  | The persist option of the PPP daemon
+`net.interface.<interface>.config.apn`                | String   | The modem Access Point Name
+`net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN
+`net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)
+`net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number
 
 ## Network Configuration recipes
 

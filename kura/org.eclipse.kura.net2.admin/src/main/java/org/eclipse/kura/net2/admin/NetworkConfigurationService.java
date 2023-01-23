@@ -437,7 +437,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(10000);
         tad.setRequired(true);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
         tocd.addAD(tad);
 
         // Get the network interfaces on the platform
@@ -499,7 +500,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_SSID));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SSID));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -511,8 +512,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_BROADCAST_ENABLED));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_BROADCAST_ENABLED));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -524,8 +525,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_HARDWARE_MODE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -537,8 +538,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_HARDWARE_MODE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -550,8 +551,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_SECURITY_TYPE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SECURITY_TYPE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -564,7 +565,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_PASSPHRASE));
+                NetworkConfigurationMessages
+                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_PASSPHRASE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -576,7 +578,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MASTER_CHANNEL));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_CHANNEL));
         tocd.addAD(tad);
     }
 
@@ -591,7 +593,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_SSID));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SSID));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -603,8 +605,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_HARDWARE_MODE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -616,8 +618,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_HARDWARE_MODE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -629,8 +631,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_SECURITY_TYPE));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SECURITY_TYPE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -643,7 +645,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_PASSPHRASE));
+                NetworkConfigurationMessages
+                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PASSPHRASE));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -655,8 +658,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -668,8 +671,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_GROUP_CIPHERS));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_GROUP_CIPHERS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -681,7 +684,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_INFRA_CHANNEL));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_CHANNEL));
         tocd.addAD(tad);
     }
 
@@ -695,7 +698,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.WIFI_CAPABILITIES));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.WIFI_CAPABILITIES));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -705,7 +709,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WIFI_MODE));
+        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MODE));
         tocd.addAD(tad);
     }
 
@@ -719,7 +723,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(10000);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_DNS_SERVERS));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_DNS_SERVERS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -729,7 +734,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(10000);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_WINS_SERVERS));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WINS_SERVERS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -740,8 +746,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_ENABLED));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_ENABLED));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -753,8 +759,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -766,8 +772,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_MAX_LEASE_TIME));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_MAX_LEASE_TIME));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -779,7 +785,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(
-                NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_PREFIX));
+                NetworkConfigurationMessages
+                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PREFIX));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -791,8 +798,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_RANGE_START));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_START));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -804,8 +811,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_RANGE_END));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_END));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -816,8 +823,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_PASS_DNS));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PASS_DNS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -827,8 +834,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_SERVER_NAT_ENABLED));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_NAT_ENABLED));
         tocd.addAD(tad);
     }
 
@@ -845,8 +852,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages
-                .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_CLIENT_ENABLED));
+        tad.setDescription(NetworkConfigurationMessages
+                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_CLIENT_ENABLED));
         tocd.addAD(tad);
 
         addIp4AddressDefinition(objectFactory, tocd, ifaceName);
@@ -859,7 +866,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_GATEWAY));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY));
         tocd.addAD(tad);
     }
 
@@ -880,7 +888,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_DRIVER));
+        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_DRIVER));
         tocd.addAD(tad);
     }
 
@@ -893,7 +901,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_AUTOCONNECT));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_AUTOCONNECT));
         tocd.addAD(tad);
     }
 
@@ -906,7 +915,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_MTU));
+        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_MTU));
         tocd.addAD(tad);
     }
 
@@ -919,7 +928,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_PREFIX));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_PREFIX));
         tocd.addAD(tad);
     }
 
@@ -932,7 +942,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         tad.setCardinality(0);
         tad.setRequired(false);
         tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_ADDRESS));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_ADDRESS));
         tocd.addAD(tad);
     }
 
@@ -951,7 +962,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 tad.setCardinality(0);
                 tad.setRequired(false);
                 tad.setDefault("");
-                tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.USB_PORT));
+                tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PORT));
                 tocd.addAD(tad);
 
                 tad = objectFactory.createTad();
@@ -962,7 +973,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 tad.setRequired(false);
                 tad.setDefault("");
                 tad.setDescription(
-                        NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.USB_MANUFACTURER));
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER));
                 tocd.addAD(tad);
 
                 tad = objectFactory.createTad();
@@ -972,7 +983,8 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 tad.setCardinality(0);
                 tad.setRequired(false);
                 tad.setDefault("");
-                tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.USB_PRODUCT));
+                tad.setDescription(
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT));
                 tocd.addAD(tad);
 
                 tad = objectFactory.createTad();
@@ -985,7 +997,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 tad.setRequired(false);
                 tad.setDefault("");
                 tad.setDescription(
-                        NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.USB_MANUFACTURER_ID));
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER_ID));
                 tocd.addAD(tad);
 
                 tad = objectFactory.createTad();
@@ -996,7 +1008,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
                 tad.setRequired(false);
                 tad.setDefault("");
                 tad.setDescription(
-                        NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.USB_PRODUCT_ID));
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT_ID));
                 tocd.addAD(tad);
             }
         }

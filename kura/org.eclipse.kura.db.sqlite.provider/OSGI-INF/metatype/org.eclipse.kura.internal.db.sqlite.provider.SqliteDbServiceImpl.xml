@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -71,7 +71,7 @@
             required="true"
             default="10"
             min="1"
-            description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool"/>
+            description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. Only 1 connection is available in In Memory mode."/>
 
         <AD id="debug.shell.access.enabled"
             name="Debug Shell Access Enabled"

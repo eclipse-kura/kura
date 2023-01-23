@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -127,7 +127,9 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                             options.getJournalMode() == JournalMode.ROLLBACK_JOURNAL ? "DELETE" : "WAL");
                 }
 
-                this.connectionPool = new ConnectionPoolManager(dataSource, options.getConnectionPoolMaxSize());
+                int maxConnectionCount = options.getMode() == Mode.PERSISTED ? options.getConnectionPoolMaxSize() : 1;
+
+                this.connectionPool = new ConnectionPoolManager(dataSource, maxConnectionCount);
 
                 this.connectionPool.getConnection().close();
 

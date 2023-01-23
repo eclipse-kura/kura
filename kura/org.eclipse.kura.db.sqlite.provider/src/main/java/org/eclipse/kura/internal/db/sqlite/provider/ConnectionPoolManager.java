@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,104 +14,57 @@ package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
-import javax.sql.PooledConnection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+import org.sqlite.SQLiteDataSource;
 
-public class ConnectionPoolManager implements ConnectionEventListener {
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
+
+public class ConnectionPoolManager {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionPoolManager.class);
 
-    private final Set<PooledConnection> availableConnections = new HashSet<>();
-    private final SQLiteConnectionPoolDataSource dataSource;
-    private final int maxConnectionCount;
+    private static final Long ACTIVE_CONNECTION_WAIT_TIMEOUT = 30000L;
 
-    private int activeConnections = 0;
+    private HikariDataSource hikariDatasource;
+    private SQLiteDataSource sqliteDataSource;
 
-    public ConnectionPoolManager(final SQLiteConnectionPoolDataSource dataSource, final int maxConnectionCount) {
-        this.dataSource = dataSource;
-        this.maxConnectionCount = maxConnectionCount;
+    public ConnectionPoolManager(final SQLiteDataSource sqliteDataSource, final int maxConnectionCount) {
+
+        HikariConfig config = new HikariConfig();
+
+        config.setDataSource(sqliteDataSource);
+        config.setMaximumPoolSize(maxConnectionCount);
+        config.setConnectionTimeout(ACTIVE_CONNECTION_WAIT_TIMEOUT);
+        config.setAutoCommit(false);
+        config.setAllowPoolSuspension(true);
+
+        this.sqliteDataSource = sqliteDataSource;
+        this.hikariDatasource = new HikariDataSource(config);
     }
 
     public synchronized Connection getConnection() throws SQLException {
         logger.debug("getting connection");
 
-        final Connection result;
+        return this.hikariDatasource.getConnection();
 
-        if (!availableConnections.isEmpty()) {
-            logger.debug("reusing available connection");
-
-            final Iterator<PooledConnection> iter = this.availableConnections.iterator();
-
-            result = iter.next().getConnection();
-
-            iter.remove();
-        } else {
-            if (activeConnections == maxConnectionCount) {
-                throw new SQLException("Maximum connection count reached");
-            }
-
-            logger.debug("no idle connections available in the pool, creating new one");
-
-            final PooledConnection newConnection = this.dataSource.getPooledConnection();
-
-            newConnection.addConnectionEventListener(this);
-
-            result = newConnection.getConnection();
-        }
-
-        addToActiveConnectionCount(1);
-        this.notifyAll();
-
-        result.setAutoCommit(false);
-
-        return result;
-    }
-
-    @Override
-    public synchronized void connectionClosed(final ConnectionEvent event) {
-
-        try {
-            final PooledConnection conn = (PooledConnection) event.getSource();
-
-            if (availableConnections.add(conn)) {
-                logger.debug("connection released");
-
-                addToActiveConnectionCount(-1);
-            }
-        } catch (final Exception e) {
-            logger.warn("Unexpected exception handling connection closed", e);
-        }
-
-    }
-
-    @Override
-    public synchronized void connectionErrorOccurred(final ConnectionEvent event) {
-
-        try {
-            logger.warn("Connection error", event.getSQLException());
-        } catch (final Exception e) {
-            logger.warn("Unexpected exception handling connection error", e);
-        }
     }
 
     synchronized void withExclusiveConnection(final Consumer<Connection> consumer) {
-        waitCondition(() -> this.activeConnections <= 0, Optional.empty());
+
+        HikariPoolMXBean hikariPoolMXBean = this.hikariDatasource.getHikariPoolMXBean();
+
+        waitNoActiveConnections(hikariPoolMXBean, Optional.empty());
 
         try {
-            try (final Connection conn = this.dataSource.getConnection()) {
+            try (final Connection conn = this.sqliteDataSource.getConnection()) {
                 conn.setAutoCommit(false);
 
                 consumer.accept(conn);
@@ -119,51 +72,50 @@ public class ConnectionPoolManager implements ConnectionEventListener {
 
         } catch (final Exception e) {
             logger.warn("Exception while running task with exclusive connection", e);
+        } finally {
+            hikariPoolMXBean.resumePool();
         }
     }
 
-    private synchronized void addToActiveConnectionCount(final int count) {
-        final int newCount = this.activeConnections + count;
-        logger.debug("active connection count changed: {} -> {}", this.activeConnections, newCount);
-        this.activeConnections = newCount;
-        this.notifyAll();
+    private void waitNoActiveConnections(HikariPoolMXBean hikariPoolMXBean, Optional<Long> timeoutMs) {
+        hikariPoolMXBean.suspendPool();
+
+        waitCondition(() -> hikariPoolMXBean.getActiveConnections() <= 0, timeoutMs);
     }
 
     public synchronized void shutdown(final Optional<Long> waitIdleTimeoutMs) {
+
+        HikariPoolMXBean hikariPoolMXBean = this.hikariDatasource.getHikariPoolMXBean();
+
         if (waitIdleTimeoutMs.isPresent()) {
-            waitCondition(() -> this.activeConnections <= 0, waitIdleTimeoutMs);
+            waitNoActiveConnections(hikariPoolMXBean, waitIdleTimeoutMs);
         }
 
-        if (activeConnections > 0) {
-            logger.warn("Closing connection pool with {} active connections", activeConnections);
+        if (hikariPoolMXBean.getActiveConnections() > 0) {
+            logger.warn("Closing connection pool with {} active connections", hikariPoolMXBean.getActiveConnections());
         }
 
-        for (final PooledConnection conn : this.availableConnections) {
-            try {
-                conn.close();
-            } catch (Exception e) {
-                logger.warn("failed to close pooled connection", e);
-            }
-        }
+        this.hikariDatasource.close();
     }
 
-    private synchronized void waitCondition(final BooleanSupplier condition, final Optional<Long> timeoutMs) {
+    private synchronized boolean waitCondition(final BooleanSupplier condition, final Optional<Long> timeoutMs) {
 
         final long end = timeoutMs.map(t -> System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(t))
                 .orElse(Long.MAX_VALUE);
 
-        while (true) {
-            long waitTime = TimeUnit.NANOSECONDS.toMillis(end - System.nanoTime());
+        while (System.nanoTime() < end) {
 
-            if (waitTime <= 0 || condition.getAsBoolean()) {
-                break;
+            if (condition.getAsBoolean()) {
+                return true;
             }
 
             try {
-                this.wait(waitTime);
+                this.wait(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+
+        return false;
     }
 }

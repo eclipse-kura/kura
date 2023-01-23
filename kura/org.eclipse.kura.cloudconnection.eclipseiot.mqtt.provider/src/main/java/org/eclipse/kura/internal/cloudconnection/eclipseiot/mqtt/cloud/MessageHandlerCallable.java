@@ -94,6 +94,9 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         String requestId = (String) this.kuraMessage.getMetric(METRIC_REQUEST_ID);
         if (requestId == null) {
+        if(logger.isDebugEnabled()) {
+            logger.debug("Request Id is null"); 
+        }
             throw new ParseException("Not a valid request payload", 0);
         }
 

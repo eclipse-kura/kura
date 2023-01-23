@@ -9,37 +9,31 @@
  * 
  * Contributors:
  *  Eurotech
- ******************************************************************************/
-package org.eclipse.kura.core.db;
-
-import static java.util.Objects.isNull;
+ *******************************************************************************/
+package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.io.ByteArrayInputStream;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.sql.Types;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
-import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
-import org.h2.api.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class H2DbMessageStoreImpl implements MessageStore {
+public class SqliteMessageStoreImpl implements MessageStore {
 
     private static final String TOPIC_ELEMENT = "topic";
 
@@ -50,27 +44,9 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private static final String SELECT_MESSAGE_METADATA_FROM = "SELECT id, topic, qos, retain, createdOn, publishedOn, "
             + "publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM ";
 
-    private static final String ALTER_TABLE = "ALTER TABLE ";
+    private static final Logger logger = LoggerFactory.getLogger(SqliteMessageStoreImpl.class);
 
-    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS")
-            .withZone(ZoneOffset.UTC);
-
-    private static final Logger logger = LoggerFactory.getLogger(H2DbMessageStoreImpl.class);
-
-    private static final int PAYLOAD_BYTE_SIZE_THRESHOLD = 200;
-    /**
-     * The error with code 22003 is thrown when a value is out of range when
-     * converting to another data type.
-     */
-    private static final int NUMERIC_VALUE_OUT_OF_RANGE_1 = 22003;
-    /**
-     * The error with code 22004 is thrown when a value is out of range when
-     * converting to another column's data type.
-     */
-    private static final int NUMERIC_VALUE_OUT_OF_RANGE_2 = 22004;
-
-    private H2DbService dbService;
+    private SqliteDbServiceImpl dbService;
     private final Calendar utcCalendar;
 
     private final String tableName;
@@ -94,34 +70,32 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private final String sqlDeleteDroppedMessages;
     private final String sqlDeleteConfirmedMessages;
     private final String sqlDeletePublishedMessages;
+    private final String sqlDeleteMessage;
 
     // package level constructor to be invoked only by the factory
-    public H2DbMessageStoreImpl(final H2DbService dbService, final String table)
-            throws KuraStoreException {
+    public SqliteMessageStoreImpl(final SqliteDbServiceImpl dbService, final String table) throws KuraStoreException {
         // do not make this static as it may not be thread safe
         this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.dbService = dbService;
         this.tableName = table;
-
         this.sanitizedTableName = sanitizeSql(table);
 
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
-                + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
-                + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
+                + " (id INTEGER PRIMARY KEY AUTOINCREMENT, topic VARCHAR, qos INTEGER, retain BOOLEAN, "
+                + "createdOn DATETIME, publishedOn DATETIME, publishedMessageId INTEGER, confirmedOn DATETIME, "
+                + "payload BLOB, priority INTEGER, sessionId VARCHAR, droppedOn DATETIME);";
         this.sqlCreateIndex = "CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
-                + this.sanitizedTableName + " (publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC, qos);";
+                + this.sanitizedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);";
         this.sqlMessageCount = "SELECT COUNT(*) FROM " + this.sanitizedTableName + ";";
-        this.sqlResetId = ALTER_TABLE + this.sanitizedTableName + " ALTER COLUMN id RESTART WITH 1;";
+        this.sqlResetId = UPDATE + " sqlite_sequence SET seq = 0 WHERE name = " + this.sanitizedTableName + ";";
 
         this.sqlStore = "INSERT INTO " + this.sanitizedTableName
-                + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, smallPayload, largePayload, priority, "
-                + "sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, "
+                + "sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         this.sqlGetMessage = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, "
-                + "smallPayload, largePayload, priority, sessionId, droppedOn FROM " + this.sanitizedTableName
-                + " WHERE id = ?";
+                + "payload, priority, sessionId, droppedOn FROM " + this.sanitizedTableName + " WHERE id = ?";
         this.sqlGetNextMessage = "SELECT a.id, a.topic, a.qos, a.retain, a.createdOn, a.publishedOn, "
-                + "a.publishedMessageId, a.confirmedOn, a.smallPayload, a.largePayload, a.priority, a.sessionId, a.droppedOn FROM "
+                + "a.publishedMessageId, a.confirmedOn, a.payload, a.priority, a.sessionId, a.droppedOn FROM "
                 + this.sanitizedTableName + " AS a JOIN (SELECT id, publishedOn FROM " + this.sanitizedTableName
                 + " ORDER BY publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC LIMIT 1) AS b "
                 + "WHERE a.id = b.id AND b.publishedOn IS NULL;";
@@ -142,11 +116,12 @@ public class H2DbMessageStoreImpl implements MessageStore {
         this.sqlDropAllInFlightMessages = UPDATE + this.sanitizedTableName
                 + " SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;";
         this.sqlDeleteDroppedMessages = DELETE_FROM + this.sanitizedTableName
-                + " WHERE droppedOn <= DATEADD('ss', -?, ?) AND droppedOn IS NOT NULL;";
+                + " WHERE droppedOn <= ? AND droppedOn IS NOT NULL;";
         this.sqlDeleteConfirmedMessages = DELETE_FROM + this.sanitizedTableName
-                + " WHERE confirmedOn <= DATEADD('ss', -?, ?) AND confirmedOn IS NOT NULL;";
+                + " WHERE confirmedOn <= ? AND confirmedOn IS NOT NULL;";
         this.sqlDeletePublishedMessages = DELETE_FROM + this.sanitizedTableName
-                + " WHERE qos = 0 AND publishedOn <= DATEADD('ss', -?, ?) AND publishedOn IS NOT NULL;";
+                + " WHERE qos = 0 AND publishedOn <= ? AND publishedOn IS NOT NULL;";
+        this.sqlDeleteMessage = DELETE_FROM + this.sanitizedTableName + " WHERE id = ?;";
 
         execute(this.sqlCreateTable);
         execute(this.sqlCreateIndex);
@@ -161,6 +136,18 @@ public class H2DbMessageStoreImpl implements MessageStore {
         return "\"" + sanitizedName + "\"";
     }
 
+    // ----------------------------------------------------------
+    //
+    // Start/Stop, ServiceId
+    //
+    // ----------------------------------------------------------
+
+    // ----------------------------------------------------------
+    //
+    // Message APIs
+    //
+    // ----------------------------------------------------------
+
     @Override
     public synchronized int getMessageCount() throws KuraStoreException {
 
@@ -170,7 +157,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 if (rs.next()) {
                     return rs.getInt(1);
                 } else {
-                    throw new SQLException("Empty result set");
+                    return -1;
                 }
             }
         }, "Cannot get message count");
@@ -186,40 +173,25 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         validate(topic);
 
-        try {
-            return storeInternal(topic, payload, qos, retain, priority);
-        } catch (KuraStoreException e) {
-            // Try to reset the sequence generator and store the message again.
-            Throwable cause = e.getCause();
-            if (cause instanceof SQLException) {
-                SQLException sqle = (SQLException) cause;
-                int errorCode = sqle.getErrorCode();
-                if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
-                        || errorCode == ErrorCode.SEQUENCE_EXHAUSTED) {
-                    logger.warn("Identity generator limit exceeded. Resetting it...");
-                    resetIdentityGenerator();
-                    return storeInternal(topic, payload, qos, retain, priority);
-                } else {
-                    throw e;
-                }
-            } else {
-                throw e;
-            }
+        final long id = storeInternal(topic, payload, qos, retain, priority);
+
+        if (id > Integer.MAX_VALUE) {
+            this.execute(this.sqlDeleteMessage, id);
+            resetIdentityGenerator();
+            return (int) storeInternal(topic, payload, qos, retain, priority);
         }
+
+        return (int) id;
+
     }
 
     private void validate(String topic) throws KuraStoreException {
-        if (this.dbService == null) {
-            throw new KuraStoreException("DbService instance not attached");
-        }
         if (topic == null || topic.trim().length() == 0) {
             throw new KuraStoreException(null, "topic must be not null and not empty");
         }
-
     }
 
-    private synchronized int storeInternal(String topic, byte[] payload, int qos, boolean retain,
-            int priority)
+    private synchronized long storeInternal(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
         if (topic == null || topic.trim().length() == 0) {
             throw new IllegalArgumentException(TOPIC_ELEMENT);
@@ -229,7 +201,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         return withConnection(c -> {
 
-            int result = -1;
+            long result = -1;
 
             // store message
             try (PreparedStatement pstmt = c.prepareStatement(this.sqlStore, new String[] { "id" })) {
@@ -240,23 +212,16 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 pstmt.setTimestamp(5, null); // publishedOn
                 pstmt.setInt(6, -1); // publishedMessageId
                 pstmt.setTimestamp(7, null); // confirmedOn
-
-                // smallPayload (=8) vs. largePayload (=9)
-                if (isNull(payload) || payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
-                    pstmt.setBytes(8, payload);
-                    pstmt.setNull(9, Types.BLOB);
-                } else {
-                    pstmt.setNull(8, Types.VARBINARY);
-                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);
+                if (payload != null) {
+                    pstmt.setBinaryStream(8, new ByteArrayInputStream(payload), payload.length);
                 }
-
-                pstmt.setInt(10, priority); // priority
-                pstmt.setString(11, null); // sessionId
-                pstmt.setTimestamp(12, null); // droppedOn
+                pstmt.setInt(9, priority); // priority
+                pstmt.setString(10, null); // sessionId
+                pstmt.setTimestamp(11, null); // droppedOn
                 pstmt.execute();
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
-                    result = rs.getInt(1);
+                    result = rs.getLong(1);
                 }
             }
 
@@ -275,7 +240,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 stmt.setInt(1, msgId);
                 try (final ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return Optional.of(buildStoredMessage(rs));
+                        return Optional.of(buildStoredMessage(rs, true));
                     } else {
                         return Optional.empty();
                     }
@@ -291,7 +256,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
             try (PreparedStatement stmt = c.prepareStatement(this.sqlGetNextMessage);
                     ResultSet rs = stmt.executeQuery()) {
                 if (rs != null && rs.next()) {
-                    return Optional.of(buildStoredMessage(rs));
+                    return Optional.of(buildStoredMessage(rs, true));
                 } else {
                     return Optional.empty();
                 }
@@ -358,17 +323,15 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
     @Override
     public synchronized void deleteStaleMessages(int purgeAge) throws KuraStoreException {
-
-        final String now = TIMESTAMP_FORMATTER.format(Instant.now());
-
+        final long timestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(purgeAge);
         // Delete dropped messages (published with QoS > 0)
-        executeDeleteMessagesQuery(this.sqlDeleteDroppedMessages, now, purgeAge);
+        execute(this.sqlDeleteDroppedMessages, timestamp);
 
         // Delete stale confirmed messages (published with QoS > 0)
-        executeDeleteMessagesQuery(this.sqlDeleteConfirmedMessages, now, purgeAge);
+        execute(this.sqlDeleteConfirmedMessages, timestamp);
 
         // Delete stale published messages with QoS == 0
-        executeDeleteMessagesQuery(this.sqlDeletePublishedMessages, now, purgeAge);
+        execute(this.sqlDeletePublishedMessages, timestamp);
     }
 
     // ------------------------------------------------------------------
@@ -410,33 +373,12 @@ public class H2DbMessageStoreImpl implements MessageStore {
         }, "Cannot list messages");
     }
 
-    private synchronized void execute(String sql, Integer... params) throws KuraStoreException {
+    private synchronized void execute(String sql, Object... params) throws KuraStoreException {
         withConnection(c -> {
             try (final PreparedStatement stmt = c.prepareStatement(sql)) {
                 for (int i = 0; i < params.length; i++) {
-                    stmt.setInt(1 + i, params[i]);
+                    stmt.setObject(1 + i, params[i]);
                 }
-                stmt.execute();
-                c.commit();
-                return null;
-            }
-        }, "Cannot execute query");
-    }
-
-    private synchronized void executeDeleteMessagesQuery(String sql, String timestamp, int purgeAge)
-            throws KuraStoreException {
-
-        /*
-         * H2 v2.0.202 does not more support ? parameter in dateAndTime fields
-         * so the timestamp is directly copied into the sql string
-         */
-        final String sqlWithTimestamp = sql.replace("DATEADD('ss', -?, ?)",
-                "DATEADD('SECOND', -?, TIMESTAMP '" + timestamp + "')");
-
-        withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(sqlWithTimestamp)) {
-                stmt.setInt(1, purgeAge);
-
                 stmt.execute();
                 c.commit();
                 return null;
@@ -458,36 +400,22 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {
         List<StoredMessage> messages = new ArrayList<>();
         while (rs.next()) {
-            messages.add(buildStoredMessageNoPayload(rs));
+            messages.add(buildStoredMessage(rs, false));
         }
         return messages;
     }
 
-    private StoredMessage buildStoredMessageNoPayload(ResultSet rs) throws SQLException {
-        StoredMessage.Builder builder = buildStoredMessageBuilder(rs);
-        return builder.build();
-    }
-
-    private StoredMessage buildStoredMessage(ResultSet rs) throws SQLException {
-        StoredMessage.Builder builder = buildStoredMessageBuilder(rs);
-
-        byte[] payload = rs.getBytes("smallPayload");
-        if (payload == null) {
-            payload = rs.getBytes("largePayload");
-        }
-
-        builder = builder.withPayload(payload);
-        return builder.build();
-    }
-
-    private StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs) throws SQLException {
+    private StoredMessage buildStoredMessage(ResultSet rs, final boolean includePayload) throws SQLException {
         StoredMessage.Builder builder = new StoredMessage.Builder(rs.getInt("id"))
-                .withTopic(rs.getString(TOPIC_ELEMENT))
-                .withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
+                .withTopic(rs.getString(TOPIC_ELEMENT)).withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
                 .withCreatedOn(rs.getTimestamp("createdOn", this.utcCalendar))
                 .withPublishedOn(rs.getTimestamp("publishedOn", this.utcCalendar))
                 .withConfirmedOn(rs.getTimestamp("confirmedOn", this.utcCalendar)).withPriority(rs.getInt("priority"))
                 .withDroppedOn(rs.getTimestamp("droppedOn"));
+
+        if (includePayload) {
+            builder = builder.withPayload(rs.getBytes("payload"));
+        }
 
         final String sessionId = rs.getString("sessionId");
 
@@ -496,17 +424,17 @@ public class H2DbMessageStoreImpl implements MessageStore {
                     .withDataTransportToken(new DataTransportToken(rs.getInt("publishedMessageId"), sessionId));
         }
 
-        return builder;
+        return builder.build();
     }
 
-    private <T> T withConnection(final H2DbService.ConnectionCallable<T> callable, final String exceptionMessage)
+    private <T> T withConnection(final ConnectionCallable<T> callable, final String exceptionMessage)
             throws KuraStoreException {
         if (this.dbService == null) {
             throw new KuraStoreException("DbService instance not attached");
         }
 
-        try {
-            return this.dbService.withConnection(callable);
+        try (final Connection conn = this.dbService.getConnection()) {
+            return callable.call(conn);
         } catch (final Exception e) {
             throw new KuraStoreException(e, exceptionMessage);
         }
@@ -515,6 +443,11 @@ public class H2DbMessageStoreImpl implements MessageStore {
     @Override
     public void close() {
         // nothing to close
+    }
+
+    private interface ConnectionCallable<T> {
+
+        public T call(Connection c) throws SQLException;
     }
 
 }

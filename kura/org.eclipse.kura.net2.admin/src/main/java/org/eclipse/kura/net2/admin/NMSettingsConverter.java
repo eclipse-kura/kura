@@ -95,16 +95,7 @@ public class NMSettingsConverter {
         } else if (ip4Status.equals(KuraInterfaceStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", iface);
             if (dnsServers.isPresent()) {
-                List<UInt32> uintDnsServers = new ArrayList<>();
-                for (String dnsServer : dnsServers.get()) {
-                    try {
-                        UInt32 uintDnsServer = convertIp4(dnsServer);
-                        uintDnsServers.add(uintDnsServer);
-                    } catch (UnknownHostException e) {
-                        logger.warn("Cannot convert dns server \"{}\" because: ", dnsServer, e);
-                    }
-                }
-                settings.put("dns", new Variant<>(uintDnsServers, "au"));
+                settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
                 settings.put("ignore-auto-dns", new Variant<>(true));
             }
             Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
@@ -171,19 +162,6 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static UInt32 convertIp4(String ipAddrString) throws UnknownHostException {
-        InetAddress address = InetAddress.getByName(ipAddrString);
-        byte[] addrBytes = address.getAddress();
-
-        long result = 0;
-        result = result << 8 | (addrBytes[3] & 0xFF);
-        result = result << 8 | (addrBytes[2] & 0xFF);
-        result = result << 8 | (addrBytes[1] & 0xFF);
-        result = result << 8 | (addrBytes[0] & 0xFF);
-
-        return new UInt32(result);
-    }
-
     private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
@@ -209,6 +187,32 @@ public class NMSettingsConverter {
         connectionMap.put("interface-name", new Variant<>(iface));
 
         return connectionMap;
+    }
+
+    private static List<UInt32> convertIp4(List<String> ipAddrList) {
+        List<UInt32> uint32Addresses = new ArrayList<>();
+        for (String address : ipAddrList) {
+            try {
+                UInt32 uint32Addr = convertIp4(address);
+                uint32Addresses.add(uint32Addr);
+            } catch (UnknownHostException e) {
+                logger.warn("Cannot convert ip address \"{}\" because: ", address, e);
+            }
+        }
+        return uint32Addresses;
+    }
+
+    private static UInt32 convertIp4(String ipAddrString) throws UnknownHostException {
+        InetAddress address = InetAddress.getByName(ipAddrString);
+        byte[] addrBytes = address.getAddress();
+
+        long result = 0;
+        result = result << 8 | (addrBytes[3] & 0xFF);
+        result = result << 8 | (addrBytes[2] & 0xFF);
+        result = result << 8 | (addrBytes[1] & 0xFF);
+        result = result << 8 | (addrBytes[0] & 0xFF);
+
+        return new UInt32(result);
     }
 
     private static Map<String, String> initWifiModeConverter() {

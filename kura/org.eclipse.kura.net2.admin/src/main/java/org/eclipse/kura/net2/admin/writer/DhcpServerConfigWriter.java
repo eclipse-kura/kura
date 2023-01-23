@@ -213,7 +213,7 @@ public class DhcpServerConfigWriter {
     }
 
     private IP4Address getIP4Address() throws UnknownHostException {
-        Optional<String> address = this.networkProperties.getOpt(String.class, "net.interface.%s.config.address",
+        Optional<String> address = this.networkProperties.getOpt(String.class, "net.interface.%s.config.ip4.address",
                 this.interfaceName);
         if (address.isPresent()) {
             return (IP4Address) IPAddress.parseHostAddress(address.get());

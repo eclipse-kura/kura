@@ -80,7 +80,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
 
     private LinuxNetworkUtil linuxNetworkUtil;
 
-//    private Map<String, Object> properties = new HashMap<>();
     private NetworkProperties networkProperties;
 
     // ----------------------------------------------------------------
@@ -192,45 +191,43 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
             return;
         }
 
-//        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
-//                                                                                           // compatibility
-//        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
-        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(receivedProperties);
-//
-//        try {
-//            for (final String interfaceName : interfaces) {
-//                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
-//                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
-//                                                                      // the system?
-//                if (NetInterfaceType.MODEM.equals(type)) {
-//                    setModemPppNumber(modifiedProps, interfaceName);
-//                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
-//                }
-//            }
-//
-//            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
-//            mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
+        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
+                                                                                           // compatibility
+        final Set<String> interfaces = getNetworkInterfaceNamesInConfig(modifiedProps);
 
-//            decryptPasswordProperties(modifiedProps);
-//            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
-        this.networkProperties = new NetworkProperties(receivedProperties);
+        try {
+            for (final String interfaceName : interfaces) {
+                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
+                // at least only if the type is not in the properties
+                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
+                                                                      // the system?
+                if (NetInterfaceType.MODEM.equals(type)) {
+                    setModemPppNumber(modifiedProps, interfaceName);
+                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
+                }
+            }
 
-        // networkManager.applyConfiguration
-        writeDhcpServerConfiguration(interfaces);
+            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
+            mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
-//            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
-        // management
-        // of the modifiedprops...
-        this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(receivedProperties));
+            decryptAndConvertPasswordProperties(modifiedProps);
+            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
-//        if (changed) {
-//            this.configurationService.snapshot();
-//        }
-//        } catch (
-//
-//        KuraException e) {
-//            logger.error("Failed to apply network configuration", e);
-//        }
+            // networkManager.applyConfiguration
+            writeDhcpServerConfiguration(interfaces);
+
+            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
+            // management
+            // of the modifiedprops...
+
+            if (changed) {
+                this.configurationService.snapshot();
+            }
+        } catch (
+
+        KuraException e) {
+            logger.error("Failed to apply network configuration", e);
+        }
     }
 
     private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
@@ -312,19 +309,19 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         }
     }
 
-    private String decryptPassword(String password) throws KuraException {
-        if (password.isEmpty()) {
-            return "";
+    private Password decryptPassword(String password) throws KuraException {
+        String decryptedPassword = "";
+        if (!password.isEmpty()) {
+            if (isEncrypted(password)) {
+                decryptedPassword = new String(this.cryptoService.decryptAes(password.toCharArray()));
+            } else {
+                decryptedPassword = password;
+            }
         }
-
-        if (isEncrypted(password)) {
-            return new String(this.cryptoService.decryptAes(password.toCharArray()));
-        } else {
-            return password;
-        }
+        return new Password(decryptedPassword);
     }
 
-    private void decryptPasswordProperties(Map<String, Object> modifiedProps) throws KuraException {
+    private void decryptAndConvertPasswordProperties(Map<String, Object> modifiedProps) throws KuraException {
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
             if (prop.getKey().contains("passphrase") || prop.getKey().contains("password")) {
 
@@ -344,7 +341,6 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        logger.info("I'm here!!!!");
         return new ComponentConfigurationImpl(PID, getDefinition(),
                 this.networkProperties.getProperties());
     }

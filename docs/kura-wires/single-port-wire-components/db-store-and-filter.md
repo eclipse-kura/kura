@@ -4,7 +4,7 @@ This tutorial will present how to use Wire Record Store and Wire Record Query co
 
 The Wire Record Store component allows the wire graphs to interact with a persistend Wire Record store implementation, for example a SQL database. It stores in a user-defined collection all the envelopes received by the component.
 
-The DB Filter component, instead, can run a custom query on the attached store and emit the result on the wire.
+The Wire Record Query component, instead, can run a custom query on the attached store and emit the result on the wire.
 
 !!! note
     The Wire Record Store and Wire Record Query components have been introduced in Kura 5.3.0 as a replacement of the Db Store and Db Filter, that have been deprecated.
@@ -26,7 +26,7 @@ The Wire Record Store component can be configured as follows:
 The Wire Record Query component can be configured as follows:
 
 - **Query**: Query to be executed. The query syntax depends on the Queryable Wire Record Store implementation.
-- **Cache Expiration Interval (Seconds)**: This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity interval in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.
+- **Cache Expiration Interval (Seconds)**: This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity interval in seconds. When cache expires, it will cause a new query execution. The query will be executed for every trigger received if the value is set to 0.
 - **QueryableWireRecordStoreProvider Target Filter** : Specifies, as an OSGi target filter, the pid of the of the Queryable Wire Record Store instance to be used.
 - **Emit On Empty Result** : Defines the behavior of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted.
 
@@ -62,14 +62,14 @@ The following procedure will create a wire graph that collects data from a simul
     - **Record Collection Name**: WR_data
     - **Maximum Record Collection Size**: 10000
     - **Cleanup Records Keep**: 0
-    - **WireRecordStoreProvider Target Filter** : the DB Service pid to be used
+    - **WireRecordStoreProvider Target Filter** : the Wire Record Store Provider pid to be used
 9.  Add a new **Publisher** component and configure the chosen cloud platform stack in **cloud.service.pid** option
 10. Add **Logger** component
 11. Add another instance of **Timer**
 12. Add a new Wire Record Query component named **DBFilter** component and configure it as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
     - **Query**: SELECT (CASE WHEN “light” < 200 THEN 1 ELSE 0 END) AS “led” FROM “WR_data” ORDER BY TIMESTAMP DESC LIMIT 1;
     - **Cache Expiration Interval (Seconds)**: 0
-    - **QueryableWireRecordStoreProvider Target Filter** : the DB Service pid to be used
+    - **QueryableWireRecordStoreProvider Target Filter** : the Queryable Wire Record Store Provider pid to be used
 13. Add another **Asset** with the OPC-UA Driver, configured as shown in the following image. Be sure that all the channels are set to WRITE.
     ![WireAsset Opcua Example Write Mode](./images/opcua-wire-asset-config-write.png)
 

@@ -38,20 +38,22 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
 
     private static final long serialVersionUID = -4188750359099902616L;
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImplFacade.class);
+
     private static Optional<Boolean> isNet2 = Optional.empty();
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
-        return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
 
-        // if (isNet2()) {
-        // return
-        // org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
-        // } else {
-        // return
-        // org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
-        // }
+        logger.info("IS NET2? {}", isNet2());
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+        } else {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+            // return
+            // org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+        }
     }
 
     @Override

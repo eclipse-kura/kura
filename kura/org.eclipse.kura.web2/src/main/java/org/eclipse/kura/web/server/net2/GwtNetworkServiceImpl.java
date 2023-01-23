@@ -18,12 +18,12 @@ import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.NetConfig;
-import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.eclipse.kura.web.server.net2.configuration.NetworkConfigurationServiceAdapter;
+import org.eclipse.kura.web.server.net2.status.NetworkStatusServiceAdapter;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -36,18 +36,24 @@ import org.slf4j.LoggerFactory;
 
 public class GwtNetworkServiceImpl {
 
+    private GwtNetworkServiceImpl() {
+
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
 
     public static List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
         try {
             NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
 
             List<GwtNetInterfaceConfig> result = new LinkedList<>();
             for (String ifname : configuration.getNetInterfaces()) {
                 GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifname);
-                // TODO: use the status service to complete the properties
-                // e.g. status.getGwtNetInterfaceConfig
+                GwtNetInterfaceConfig gwtStatus = status.getGwtNetInterfaceConfig(ifname);
+
+                gwtConfig.getProperties().putAll(gwtStatus.getProperties());
                 result.add(gwtConfig);
             }
 

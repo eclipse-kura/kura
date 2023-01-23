@@ -19,10 +19,15 @@ import java.util.Optional;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
+import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
+import org.eclipse.kura.net.wifi.WifiCiphers;
+import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -31,29 +36,22 @@ import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtModemPdpType;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
+import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Adapter to convert {@link NetworkConfigurationService} properties to GWT
- * configuration objects, namely:
- * 
- * <ul>
- * <li>GwtNetInterfaceConfig</li>
- * <li>GwtFirewallOpenPortEntry</li>
- * <li>GwtWifiHotspotEntry</li>
- * <li>GwtModemPdpEntry</li>
- * <li>GwtFirewallPortForwardEntry</li>
- * <li>GwtFirewallNatEntry</li>
- * <li>GwtWifiChannelFrequency</li>
- * </ul>
+ * Adapter to convert {@link NetworkConfigurationService} properties to a
+ * {@link GwtNetInterfaceConfig} object.
  *
  */
 public class NetworkConfigurationServiceAdapter {
@@ -66,11 +64,13 @@ public class NetworkConfigurationServiceAdapter {
 
     public NetworkConfigurationServiceAdapter() throws GwtKuraException, KuraException {
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
-        logger.info("Is the ConfigurationService null? {}", configurationService == null);
-        logger.info(NETWORK_CONFIGURATION_SERVICE_PID);
+        logger.debug("Is the ConfigurationService null? {}", configurationService == null);
+        logger.debug(NETWORK_CONFIGURATION_SERVICE_PID);
+
         ComponentConfiguration config = configurationService
                 .getComponentConfiguration(NETWORK_CONFIGURATION_SERVICE_PID);
-        logger.info("Is the config null? {}", config == null);
+        logger.debug("Is the config null? {}", config == null);
+
         this.properties = new NetworkConfigurationServiceProperties(config.getConfigurationProperties());
     }
 
@@ -81,19 +81,16 @@ public class NetworkConfigurationServiceAdapter {
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
         GwtNetInterfaceConfig gwtConfig = createGwtNetInterfaceConfig(ifname);
 
-        setStateProperties(gwtConfig, ifname);
-
         setCommonProperties(gwtConfig, ifname);
         setIpv4Properties(gwtConfig, ifname);
         setIpv4DhcpClientProperties(gwtConfig, ifname);
         setIpv4DhcpServerProperties(gwtConfig, ifname);
         setRouterMode(gwtConfig, ifname);
-
-        // TODO: adhoc wifi mode is missing: fetch from status
-        // TODO: pairwiseCiphers and groupCiphers need to be get from status
         setWifiMasterProperties(gwtConfig, ifname);
         setWifiInfraProperties(gwtConfig, ifname);
         setModemProperties(gwtConfig, ifname);
+
+        logger.debug("GWT Network Configuration for interface {}:\n{}\n", ifname, gwtConfig.getProperties());
 
         return gwtConfig;
     }
@@ -110,27 +107,19 @@ public class NetworkConfigurationServiceAdapter {
         return new GwtNetInterfaceConfig();
     }
 
-    // TODO: this will be retrieved by the STATE part
-    private void setStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        gwtConfig.setHwState(NA);
-        gwtConfig.setHwAddress(NA); // MAC address
-        gwtConfig.setHwDriver(NA);
-        gwtConfig.setHwDriverVersion(NA);
-        gwtConfig.setHwFirmware(NA);
-        // gwtConfig.setHwMTU(99);
-        gwtConfig.setHwUsbDevice(NA);
-        gwtConfig.setHwSerial(NA);
-        gwtConfig.setHwRssi(NA);
-    }
-
     private void setCommonProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
         gwtConfig.setName(ifname);
         gwtConfig.setHwName(ifname);
         gwtConfig.setHwType(this.properties.getType(ifname));
+
+        String wifiMode = getWifiMode(this.properties.getWifiMode(ifname));
+        if (gwtConfig instanceof GwtWifiNetInterfaceConfig) {
+            ((GwtWifiNetInterfaceConfig) gwtConfig).setWirelessMode(wifiMode);
+        }
     }
 
     private void setIpv4Properties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        gwtConfig.setStatus(this.properties.getIp4Status(ifname));
+        gwtConfig.setStatus(getIp4Status(this.properties.getIp4Status(ifname)));
         gwtConfig.setIpAddress(this.properties.getIp4Address(ifname));
         gwtConfig.setSubnetMask(this.properties.getIp4Netmask(ifname));
         gwtConfig.setGateway(this.properties.getIp4Gateway(ifname));
@@ -174,20 +163,20 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     private void setWifiMasterProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        Optional<String> masterMode = this.properties.getWifiMasterMode(ifname);
+        String wifiMode = getWifiMode(this.properties.getWifiMode(ifname));
 
-        if (masterMode.isPresent()) {
+        if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())
+                && gwtConfig instanceof GwtWifiNetInterfaceConfig) {
             GwtWifiConfig gwtWifiConfig = new GwtWifiConfig();
 
             // common wifi properties
 
-            gwtWifiConfig.setWirelessMode(masterMode.get());
+            gwtWifiConfig.setWirelessMode(getWifiMode(this.properties.getWifiMasterMode(ifname)));
             gwtWifiConfig.setWirelessSsid(this.properties.getWifiMasterSsid(ifname));
             gwtWifiConfig.setDriver(this.properties.getWifiMasterDriver(ifname));
             gwtWifiConfig.setSecurity(getWifiSecurityType(this.properties.getWifiMasterSecurityType(ifname)));
-            // TODO: get from status
-            // gwtWifiConfig.setPairwiseCiphers(NA);
-            // gwtWifiConfig.setGroupCiphers(NA);
+            gwtWifiConfig.setPairwiseCiphers(getWifiCiphers(this.properties.getWifiInfraPairwiseCiphers(ifname)));
+            gwtWifiConfig.setGroupCiphers(getWifiCiphers(this.properties.getWifiMasterGroupCiphers(ifname)));
             gwtWifiConfig.setIgnoreSSID(this.properties.getWifiMasterIgnoreSsid(ifname));
             gwtWifiConfig.setPassword(new String(this.properties.getWifiMasterPassphrase(ifname).getPassword()));
             gwtWifiConfig.setChannels(getWifiChannels(this.properties.getWifiMasterChannel(ifname)));
@@ -202,42 +191,79 @@ public class NetworkConfigurationServiceAdapter {
             gwtConfig.setHwRssi(NA);
             gwtConfig.setHwDriver(this.properties.getWifiMasterDriver(ifname));
             ((GwtWifiNetInterfaceConfig) gwtConfig).setAccessPointWifiConfig(gwtWifiConfig);
+            logger.info("GWT Wifi Master Configuration for interface {}:\n{}\n", ifname, gwtWifiConfig.getProperties());
         }
     }
 
     private void setWifiInfraProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        Optional<String> infraMode = this.properties.getWifiInfraMode(ifname);
+        String wifiMode = getWifiMode(this.properties.getWifiInfraMode(ifname));
 
-        if (infraMode.isPresent()) {
+        if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name())
+                && gwtConfig instanceof GwtWifiNetInterfaceConfig) {
             GwtWifiConfig gwtWifiConfig = new GwtWifiConfig();
 
             // common wifi properties
 
-            gwtWifiConfig.setWirelessMode(infraMode.get());
+            gwtWifiConfig.setWirelessMode(getWifiMode(this.properties.getWifiInfraMode(ifname)));
             gwtWifiConfig.setWirelessSsid(this.properties.getWifiInfraSsid(ifname));
             gwtWifiConfig.setDriver(this.properties.getWifiInfraDriver(ifname));
             gwtWifiConfig.setSecurity(getWifiSecurityType(this.properties.getWifiInfraSecurityType(ifname)));
-            // TODO: get from status
-            // gwtWifiConfig.setPairwiseCiphers(NA);
-            // gwtWifiConfig.setGroupCiphers(NA);
+            gwtWifiConfig.setPairwiseCiphers(getWifiCiphers(this.properties.getWifiMasterPairwiseCiphers(ifname)));
+            gwtWifiConfig.setGroupCiphers(getWifiCiphers(this.properties.getWifiInfraGroupCiphers(ifname)));
             gwtWifiConfig.setIgnoreSSID(this.properties.getWifiInfraIgnoreSsid(ifname));
             gwtWifiConfig.setPassword(new String(this.properties.getWifiInfraPassphrase(ifname).getPassword()));
             gwtWifiConfig.setChannels(getWifiChannels(this.properties.getWifiInfraChannel(ifname)));
 
             // wifi infra specific properties
 
-            gwtWifiConfig.setBgscanModule(getBgScanType(this.properties.getWifiInfraBgscan(ifname)));
-            // TODO: get from status
-            // gwtWifiConfig.setBgscanRssiThreshold(99);
-            // gwtWifiConfig.setBgscanShortInterval(99);
-            // gwtWifiConfig.setBgscanLongInterval(99);
-
+            setBgScanProperties(gwtWifiConfig, this.properties.getWifiInfraBgscan(ifname));
             gwtWifiConfig.setPingAccessPoint(this.properties.getWifiInfraPingAP(ifname));
 
             gwtConfig.setHwRssi(NA);
             gwtConfig.setHwDriver(this.properties.getWifiInfraDriver(ifname));
             ((GwtWifiNetInterfaceConfig) gwtConfig).setStationWifiConfig(gwtWifiConfig);
+            logger.debug("GWT Wifi Infra Configuration for interface {}:\n{}\n", ifname, gwtWifiConfig.getProperties());
         }
+    }
+
+    private String getIp4Status(Optional<String> ip4Status) {
+        if (ip4Status.isPresent()) {
+            if (ip4Status.get().equals(NetInterfaceStatus.netIPv4StatusEnabledLAN.name())) {
+                return GwtNetIfStatus.netIPv4StatusEnabledLAN.name();
+            }
+
+            if (ip4Status.get().equals(NetInterfaceStatus.netIPv4StatusEnabledWAN.name())) {
+                return GwtNetIfStatus.netIPv4StatusEnabledWAN.name();
+            }
+
+            if (ip4Status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only.name())) {
+                return GwtNetIfStatus.netIPv4StatusL2Only.name();
+            }
+
+            if (ip4Status.get().equals(NetInterfaceStatus.netIPv4StatusUnmanaged.name())) {
+                return GwtNetIfStatus.netIPv4StatusUnmanaged.name();
+            }
+        }
+
+        return GwtNetIfStatus.netIPv4StatusDisabled.name();
+    }
+
+    private String getWifiMode(Optional<String> wifiMode) {
+        if (wifiMode.isPresent()) {
+            if (wifiMode.get().equals(WifiMode.MASTER.name())) {
+                return GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
+            }
+
+            if (wifiMode.get().equals(WifiMode.INFRA.name())) {
+                return GwtWifiWirelessMode.netWifiWirelessModeStation.name();
+            }
+
+            if (wifiMode.get().equals(WifiMode.ADHOC.name())) {
+                return GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name();
+            }
+        }
+
+        return GwtWifiWirelessMode.netWifiWirelessModeDisabled.name();
     }
 
     private String getWifiSecurityType(Optional<String> securityType) {
@@ -262,18 +288,47 @@ public class NetworkConfigurationServiceAdapter {
         return GwtWifiSecurity.netWifiSecurityNONE.name();
     }
 
-    private String getBgScanType(Optional<String> bgScan) {
-        if (bgScan.isPresent()) {
-            if (bgScan.get().equals(WifiBgscanModule.SIMPLE.name())) {
-                return GwtWifiBgscanModule.netWifiBgscanMode_SIMPLE.name();
+    private String getWifiCiphers(Optional<String> pairwiseCiphers) {
+        if (pairwiseCiphers.isPresent()) {
+            if (pairwiseCiphers.get().equals(WifiCiphers.CCMP.name())) {
+                return GwtWifiCiphers.netWifiCiphers_CCMP.name();
             }
 
-            if (bgScan.get().equals(WifiBgscanModule.LEARN.name())) {
-                return GwtWifiBgscanModule.netWifiBgscanMode_LEARN.name();
+            if (pairwiseCiphers.get().equals(WifiCiphers.TKIP.name())) {
+                return GwtWifiCiphers.netWifiCiphers_TKIP.name();
+            }
+
+            if (pairwiseCiphers.get().equals(WifiCiphers.CCMP_TKIP.name())) {
+                return GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name();
             }
         }
 
-        return GwtWifiBgscanModule.netWifiBgscanMode_NONE.name();
+        return GwtWifiCiphers.netWifiCiphers_NONE.name();
+    }
+
+    private void setBgScanProperties(GwtWifiConfig gwtWifiConfig, Optional<String> bgScan) {
+        String bgScanMode = GwtWifiBgscanModule.netWifiBgscanMode_NONE.name();
+
+        if (bgScan.isPresent()) {
+            String[] bgScanParameters = bgScan.get().split(":");
+
+            if (bgScanParameters.length == 4) {
+
+                if (bgScanParameters[0].equals(WifiBgscanModule.SIMPLE.name())) {
+                    bgScanMode = GwtWifiBgscanModule.netWifiBgscanMode_SIMPLE.name();
+                }
+
+                if (bgScanParameters[0].equals(WifiBgscanModule.LEARN.name())) {
+                    bgScanMode = GwtWifiBgscanModule.netWifiBgscanMode_LEARN.name();
+                }
+
+                gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(bgScanParameters[1]));
+                gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(bgScanParameters[2]));
+                gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(bgScanParameters[3]));
+            }
+        }
+
+        gwtWifiConfig.setBgscanModule(bgScanMode);
     }
 
     private List<Integer> getWifiChannels(String channelValue) {
@@ -323,25 +378,7 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     private void setModemProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        if (this.properties.getModemEnabled(ifname)) {
-            // TODO: get from status
-            // gwtModemConfig.setHwSerial(imei);
-            // gwtModemConfig.setHwRssi(Integer.toString(rssi));
-            // gwtModemConfig.setHwICCID(iccid);
-            // gwtModemConfig.setHwIMSI(imsi);
-            // gwtModemConfig.setHwRegistration(registration.name());
-            // gwtModemConfig.setHwPLMNID(plmnid);
-            // gwtModemConfig.setHwNetwork(network);
-            // gwtModemConfig.setHwRadio(radio);
-            // gwtModemConfig.setHwBand(band);
-            // gwtModemConfig.setHwLAC(lac);
-            // gwtModemConfig.setHwCI(ci);
-            // gwtModemConfig.setModel(sModel);
-            // gwtModemConfig.setGpsSupported(gpsSupported);
-            // gwtModemConfig.setHwFirmware(firmwareVersion);
-            //
-            // gwtModemConfig.setHwState(NetInterfaceState.DISCONNECTED.name());
-
+        if (this.properties.getModemEnabled(ifname) && gwtConfig instanceof GwtModemInterfaceConfig) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
 
             gwtModemConfig.setDialString(this.properties.getModemDialString(ifname));
@@ -359,13 +396,27 @@ public class NetworkConfigurationServiceAdapter {
             gwtModemConfig.setLcpEchoFailure(this.properties.getModemIpcEchoFailure(ifname));
             gwtModemConfig.setGpsEnabled(this.properties.getModemGpsEnabled(ifname));
             gwtModemConfig.setDiversityEnabled(this.properties.getModemDiversityEnabled(ifname));
-
             gwtModemConfig.setPdpType(getModemPdpType(this.properties.getModemPdpType(ifname)));
             gwtModemConfig.setApn(this.properties.getModemApn(ifname));
+            gwtModemConfig.setHwState(getModemConnectionState(this.properties.getModemConnectionStatus(ifname)));
             // Those properties are not in configuration, what are those?
             // gwtModemConfig.setProfileID();
             // gwtModemConfig.setDataCompression();
             // gwtModemConfig.setHeaderCompression();
+
+            // copy properties from IPv4 Config
+            gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+            gwtModemConfig.setIpAddress(gwtConfig.getIpAddress());
+            gwtModemConfig.setSubnetMask(gwtConfig.getSubnetMask());
+            gwtModemConfig.setGateway(gwtConfig.getGateway());
+            gwtModemConfig.setStatus(gwtConfig.getStatus());
+
+            gwtModemConfig.setModemId(this.properties.getUsbProductName(ifname));
+            gwtModemConfig.setManufacturer(this.properties.getUsbVendorName(ifname));
+            gwtModemConfig.setModel(this.properties.getUsbProductId(ifname));
+            gwtModemConfig.setHwUsbDevice(this.properties.getUsbDevicePath(ifname));
+
+            logger.debug("GWT Modem Configuration for interface {}:\n{}\n", ifname, gwtModemConfig.getProperties());
         }
     }
 
@@ -403,6 +454,24 @@ public class NetworkConfigurationServiceAdapter {
         }
 
         return GwtModemPdpType.netModemPdpUnknown;
+    }
+
+    private String getModemConnectionState(Optional<String> connectionStatus) {
+        if (connectionStatus.isPresent()) {
+            if (connectionStatus.get().equals(ModemConnectionStatus.CONNECTED.name())) {
+                return NetInterfaceState.ACTIVATED.name();
+            }
+
+            if (connectionStatus.get().equals(ModemConnectionStatus.CONNECTING.name())) {
+                return NetInterfaceState.IP_CONFIG.name();
+            }
+
+            if (connectionStatus.get().equals(ModemConnectionStatus.DISCONNECTED.name())) {
+                return NetInterfaceState.DISCONNECTED.name();
+            }
+        }
+
+        return NetInterfaceState.UNKNOWN.name();
     }
 
 }

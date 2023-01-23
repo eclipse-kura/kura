@@ -24,6 +24,8 @@ public class NetworkConfigurationServiceProperties {
 
     private final Map<String, Object> properties;
 
+    private static final String NA = "N/A";
+
     public NetworkConfigurationServiceProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
@@ -54,8 +56,8 @@ public class NetworkConfigurationServiceProperties {
         return (String) this.properties.get(String.format(NET_INTERFACE_TYPE, ifname));
     }
 
-    public String getWifiMode(String ifname) {
-        return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MODE, ifname));
+    public Optional<String> getWifiMode(String ifname) {
+        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MODE, ifname)));
     }
 
     public boolean getNatEnabled(String ifname) {
@@ -72,8 +74,8 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP4_GATEWAY = "net.interface.%s.config.ip4.gateway";
     private static final String NET_INTERFACE_CONFIG_IP4_DNS_SERVERS = "net.interface.%s.config.ip4.dnsServers";
 
-    public String getIp4Status(String ifname) {
-        return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname));
+    public Optional<String> getIp4Status(String ifname) {
+        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
     }
 
     public String getIp4Address(String ifname) {
@@ -164,6 +166,7 @@ public class NetworkConfigurationServiceProperties {
         return (boolean) this.properties.get(String.format(NET_INTERFACE_CONFIG_DHCP_CLIENT_ENABLED, ifname));
     }
 
+
     /*
      * WiFi Master (Access Point) properties
      */
@@ -176,6 +179,8 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL = "net.interface.%s.config.wifi.master.channel";
     private static final String NET_INTERFACE_CONFIG_WIFI_MASTER_RADIO_MODE = "net.interface.%s.config.wifi.master.radioMode";
     private static final String NET_INTERFACE_CONFIG_WIFI_MASTER_IGNORE_SSID = "net.interface.%s.config.wifi.master.ignoreSSID";
+    private static final String NET_INTERFACE_CONFIG_WIFI_MASTER_PAIRWISE_CIPHERS = "net.interface.%s.config.wifi.master.pairwiseCiphers";
+    private static final String NET_INTERFACE_CONFIG_WIFI_MASTER_GROUP_CIPHERS = "net.interface.%s.config.wifi.master.groupCiphers";
 
     public String getWifiMasterDriver(String ifname) {
         return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_DRIVER, ifname),
@@ -183,8 +188,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Password getWifiMasterPassphrase(String ifname) {
-        return (Password) this.properties
-                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname), new Password(""));
+        return getPasswordFromProperty(this.properties
+                .get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname)));
     }
 
     public String getWifiMasterSsid(String ifname) {
@@ -208,13 +213,23 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getWifiMasterRadioMode(String ifname) {
-        return Optional.ofNullable(
-                (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_RADIO_MODE, ifname)));
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_RADIO_MODE, ifname)));
     }
 
     public boolean getWifiMasterIgnoreSsid(String ifname) {
         return (boolean) this.properties
                 .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_IGNORE_SSID, ifname), false);
+    }
+
+    public Optional<String> getWifiMasterPairwiseCiphers(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PAIRWISE_CIPHERS, ifname)));
+    }
+
+    public Optional<String> getWifiMasterGroupCiphers(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_GROUP_CIPHERS, ifname)));
     }
 
     /*
@@ -230,6 +245,8 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PING_AP = "net.interface.%s..config.wifi.infra.pingAccessPoint";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_DRIVER = "net.interface.%s.config.wifi.infra.driver";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_SECURITY_TYPE = "net.interface.%s..config.wifi.infra.securityType";
+    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS = "net.interface.%s.config.wifi.infra.pairwiseCiphers";
+    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_GROUP_CIPHERS = "net.interface.%s.config.wifi.infra.groupCiphers";
 
     public String getWifiInfraSsid(String ifname) {
         return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_SSID, ifname));
@@ -241,13 +258,13 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getWifiInfraBgscan(String ifname) {
-        return Optional.ofNullable(
-                (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_BGSCAN, ifname)));
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_BGSCAN, ifname)));
     }
 
     public Password getWifiInfraPassphrase(String ifname) {
-        return (Password) this.properties
-                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname), new Password(""));
+        return getPasswordFromProperty(this.properties
+                .get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname)));
     }
 
     public boolean getWifiInfraIgnoreSsid(String ifname) {
@@ -256,8 +273,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getWifiInfraMode(String ifname) {
-        return Optional.ofNullable(
-                (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_MODE, ifname)));
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_MODE, ifname)));
     }
 
     public boolean getWifiInfraPingAP(String ifname) {
@@ -270,8 +287,18 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getWifiInfraSecurityType(String ifname) {
-        return Optional.ofNullable(
-                (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_SECURITY_TYPE, ifname)));
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_SECURITY_TYPE, ifname)));
+    }
+    
+    public Optional<String> getWifiInfraPairwiseCiphers(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS, ifname)));
+    }
+
+    public Optional<String> getWifiInfraGroupCiphers(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_GROUP_CIPHERS, ifname)));
     }
 
     /*
@@ -296,6 +323,13 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_DIAL_STRING = "net.interface.%s.config.dialString";
     private static final String NET_INTERFACE_CONFIG_HOLDOFF = "net.interface.%s.config.holdoff";
     private static final String NET_INTERFACE_CONFIG_PPP_NUM = "net.interface.%s.config.pppNum";
+    private static final String NET_INTERFACE_CONFIG_CONNECTION_STATUS = "net.interface.%s.config.connection.status";
+    private static final String NET_INTERFACE_USB_PRODUCT_NAME = "net.interface.%s.usb.product.name";
+    private static final String NET_INTERFACE_USB_VENDOR_ID = "net.interface.%s.usb.vendor.id";
+    private static final String NET_INTERFACE_USB_VENDOR_NAME = "net.interface.%s.usb.vendor.name";
+    private static final String NET_INTERFACE_USB_BUS_NUMBER = "net.interface.%s.usb.busNumber";
+    private static final String NET_INTERFACE_USB_PRODUCT_ID = "net.interface.%s.usb.product.id";
+    private static final String NET_INTERFACE_USB_DEVICE_PATH = "net.interface.%s.usb.devicePath";
 
     public boolean getModemEnabled(String ifname) {
         return (boolean) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_ENABLED, ifname), false);
@@ -310,8 +344,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Password getModemPassword(String ifname) {
-        return (Password) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_PASSWORD, ifname),
-                new Password(""));
+        return getPasswordFromProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_PASSWORD, ifname)));
     }
 
     public Optional<String> getModemPdpType(String ifname) {
@@ -323,7 +356,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getModemAuthType(String ifname) {
-        return Optional.ofNullable((String) this.properties.get(String.format(NET_INTERFACE_CONFIG_AUTH_TYPE, ifname)));
+        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_AUTH_TYPE, ifname)));
     }
 
     public int getModemIpcEchoInterval(String ifname) {
@@ -369,6 +402,66 @@ public class NetworkConfigurationServiceProperties {
 
     public int getModemPppNum(String ifname) {
         return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_PPP_NUM, ifname), 0);
+    }
+
+    public Optional<String> getModemConnectionStatus(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_CONNECTION_STATUS, ifname)));
+    }
+
+    public String getUsbProductName(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_PRODUCT_NAME, ifname), NA);
+    }
+
+    public String getUsbVendorId(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_VENDOR_ID, ifname), NA);
+    }
+
+    public String getUsbVendorName(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_VENDOR_NAME, ifname), NA);
+    }
+
+    public String getUsbBusNumber(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_BUS_NUMBER, ifname), NA);
+    }
+
+    public String getUsbProductId(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_PRODUCT_ID, ifname), NA);
+    }
+
+    public String getUsbDevicePath(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_USB_DEVICE_PATH, ifname), NA);
+    }
+
+    /**
+     * Password properties of the NetworkConfigurationService can be empty strings.
+     * This method deals with that.
+     */
+    private Password getPasswordFromProperty(Object potentialStringPassword) {
+        Optional<String> password = getNonEmptyStringProperty(potentialStringPassword);
+
+        if (password.isPresent()) {
+            return new Password(password.get());
+        }
+
+        if (potentialStringPassword instanceof Password) {
+            return (Password) potentialStringPassword;
+        }
+
+        return new Password("");
+    }
+
+    /**
+     * Properties of the NetworkConfigurationService might be empty strings.
+     * This method return an empty Optional if the property is null, not a string,
+     * or and empty string.
+     */
+    private Optional<String> getNonEmptyStringProperty(Object property) {
+        if (property instanceof String && !((String) property).isEmpty()) {
+            return Optional.of((String) property);
+        }
+
+        return Optional.empty();
     }
 
 }

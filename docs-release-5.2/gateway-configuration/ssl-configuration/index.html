@@ -2793,13 +2793,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="key-pair-generation">Key Pair Generation</h2>
 <p>The keys may be generated using specific software, such as <a href="https://www.openssl.org" target="_blank">OpenSSL</a> or <a href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html" target="_blank">Keytool</a>. This section describes how to use OpenSSL to generate a couple of private and public keys.</p>
 <p>The private key may be created using the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>openssl genrsa -out certsDirectory/certs/certificate.key <span class="m">1024</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>certsDirectory/certs/certificate.key<span class="w"> </span><span class="m">1024</span>
 </code></pre></div>
 <p>This command creates a new, 1024-bit private key in the specified path. This key is used to generate a Certificate Signing Request (CSR) file, which is used by a CA to authenticate the certificate's creator. A CSR file is created with OpenSSL using the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>openssl req -new -key certsDirectory/certs/certificate.key -out certsDirectory/crl/certificate.csr
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>certsDirectory/certs/certificate.key<span class="w"> </span>-out<span class="w"> </span>certsDirectory/crl/certificate.csr
 </code></pre></div>
 <p>If the user is creating their own certificate chain, the CSR file may be signed using a personal CA. This process may be accomplished using OpenSSL with the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>openssl ca -config certsDirectory/openssl.cnf -days <span class="m">3650</span> -keyfile certsDirectory/ca/ca.key -cert certsDirectory/ca/ca.pem -out certsDirectory/certs/certificate.pem -infiles certsDirectory/crl/certificate.csr
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>openssl<span class="w"> </span>ca<span class="w"> </span>-config<span class="w"> </span>certsDirectory/openssl.cnf<span class="w"> </span>-days<span class="w"> </span><span class="m">3650</span><span class="w"> </span>-keyfile<span class="w"> </span>certsDirectory/ca/ca.key<span class="w"> </span>-cert<span class="w"> </span>certsDirectory/ca/ca.pem<span class="w"> </span>-out<span class="w"> </span>certsDirectory/certs/certificate.pem<span class="w"> </span>-infiles<span class="w"> </span>certsDirectory/crl/certificate.csr
 </code></pre></div>
 <p>The parameters are defined as follows:</p>
 <ul>
@@ -2824,7 +2824,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The private key may not be placed into the Kura Gateway Administration Console without a format conversion.</p>
 </div>
 <p>OpenSSL offers the following command to convert the input private key to a non-encrypted PKCS#8 format that may be processed by the Kura code:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>openssl pkcs8 -topk8 -inform PEM -outform PEM -in inPrivateKey.key -out outKey.pem -nocrypt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>openssl<span class="w"> </span>pkcs8<span class="w"> </span>-topk8<span class="w"> </span>-inform<span class="w"> </span>PEM<span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-in<span class="w"> </span>inPrivateKey.key<span class="w"> </span>-out<span class="w"> </span>outKey.pem<span class="w"> </span>-nocrypt
 </code></pre></div>
 
               

@@ -3088,15 +3088,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>Local backends path</strong>: mandatory</li>
 </ul>
 <p>The typical command used to start the Triton Server is like this:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tritonserver --model-repository<span class="o">=</span>&lt;model_repository_path&gt; <span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>--backend-directory<span class="o">=</span>&lt;backend_repository_path&gt; <span class="se">\</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>--backend-config<span class="o">=</span>&lt;backend_config&gt; <span class="se">\</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>--http-port<span class="o">=</span>&lt;http_port&gt; <span class="se">\</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>--grpc-port<span class="o">=</span>&lt;grpc_port&gt; <span class="se">\</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>--metrics-port<span class="o">=</span>&lt;metrics_port&gt; <span class="se">\</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>--model-control-mode<span class="o">=</span>explicit <span class="se">\</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>--load-model<span class="o">=</span>&lt;model_name_1&gt; <span class="se">\</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>--load-model<span class="o">=</span>&lt;model_name_2&gt; <span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tritonserver<span class="w"> </span>--model-repository<span class="o">=</span>&lt;model_repository_path&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>--backend-directory<span class="o">=</span>&lt;backend_repository_path&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>--backend-config<span class="o">=</span>&lt;backend_config&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>--http-port<span class="o">=</span>&lt;http_port&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>--grpc-port<span class="o">=</span>&lt;grpc_port&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>--metrics-port<span class="o">=</span>&lt;metrics_port&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>--model-control-mode<span class="o">=</span>explicit<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>--load-model<span class="o">=</span>&lt;model_name_1&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>--load-model<span class="o">=</span>&lt;model_name_2&gt;<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>...
 </code></pre></div>
 <h3 id="configuration-for-a-local-triton-server-running-in-a-docker-container-with-triton-server-service-component-deprecated-since-520">Configuration for a local Triton Server running in a Docker container with Triton Server Service component [deprecated since 5.2.0]</h3>
@@ -3108,14 +3108,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>Inference Models</strong>: \&lt;mandatory&gt;. The models have to be already present on the filesystem.</li>
 </ul>
 <p>In order to correctly load the models at runtime, configure the server with the <code>--model-control-mode=explicit</code> option. The typical command used for running the docker container is as follows. Note the forward of the ports to not interfere with Kura.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker run --rm <span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>-p4000:8000 <span class="se">\</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>-p4001:8001 <span class="se">\</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>-p4002:8002 <span class="se">\</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>--shm-size<span class="o">=</span>150m <span class="se">\</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>-v path/to/models:/models <span class="se">\</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>nvcr.io/nvidia/tritonserver:<span class="o">[</span>version<span class="o">]</span> <span class="se">\</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>tritonserver --model-repository<span class="o">=</span>/models --model-control-mode<span class="o">=</span>explicit
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>-p4000:8000<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>-p4001:8001<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>-p4002:8002<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>--shm-size<span class="o">=</span>150m<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>-v<span class="w"> </span>path/to/models:/models<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>nvcr.io/nvidia/tritonserver:<span class="o">[</span>version<span class="o">]</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>tritonserver<span class="w"> </span>--model-repository<span class="o">=</span>/models<span class="w"> </span>--model-control-mode<span class="o">=</span>explicit
 </code></pre></div>
 <h3 id="configuration-for-a-remote-triton-server-with-triton-server-service-component-deprecated-since-520">Configuration for a remote Triton Server with Triton Server Service component [deprecated since 5.2.0]</h3>
 <p>When the Nvidia™ Triton Server is running on a remote server, the following configuration is needed:</p>
@@ -3154,10 +3154,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>└── config.pbtxt
 </code></pre></div>
 <p>Compress the model into a zip archive with the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zip -vr tf_autoencoder_fp32.zip tf_autoencoder_fp32/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zip<span class="w"> </span>-vr<span class="w"> </span>tf_autoencoder_fp32.zip<span class="w"> </span>tf_autoencoder_fp32/
 </code></pre></div>
 <p>then encrypt it with the AES 256 algorithm using the following <code>gpg</code> command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpg<span class="w"> </span>--armor<span class="w"> </span>--symmetric<span class="w"> </span>--cipher-algo<span class="w"> </span>AES256<span class="w"> </span>tf_autoencoder_fp32.zip
 </code></pre></div>
 <p>The resulting archive <code>tf_autoencoder_fp32.zip.asc</code> can be transferred to the <em>Local Model Repository Path</em> on the target machine and will be decrypted by Kura.</p>
 

@@ -2792,23 +2792,23 @@ To obtain the hardware clock synchronization  the directive rtcsync could be use
 </ul>
 <p>Two example configuration are shown below.</p>
 <h2 id="nts-secure-configuration-example">NTS Secure <a href="https://fedoramagazine.org/secure-ntp-with-nts">configuration example</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>server time.cloudflare.com iburst nts
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>server nts.sth1.ntp.se iburst nts
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>server nts.sth2.ntp.se iburst nts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>server<span class="w"> </span>time.cloudflare.com<span class="w"> </span>iburst<span class="w"> </span>nts
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>server<span class="w"> </span>nts.sth1.ntp.se<span class="w"> </span>iburst<span class="w"> </span>nts
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>server<span class="w"> </span>nts.sth2.ntp.se<span class="w"> </span>iburst<span class="w"> </span>nts
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>sourcedir /etc/chrony/sources.d
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>sourcedir<span class="w"> </span>/etc/chrony/sources.d
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>driftfile /var/lib/chrony/chrony.drift
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>driftfile<span class="w"> </span>/var/lib/chrony/chrony.drift
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>logdir /var/log/chrony
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>logdir<span class="w"> </span>/var/log/chrony
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>maxupdateskew <span class="m">100</span>.0
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>maxupdateskew<span class="w"> </span><span class="m">100</span>.0
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>rtcsync
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>makestep <span class="m">1</span> -1
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>makestep<span class="w"> </span><span class="m">1</span><span class="w"> </span>-1
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>leapsectz right/UTC
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>leapsectz<span class="w"> </span>right/UTC
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -2821,14 +2821,14 @@ To obtain the hardware clock synchronization  the directive rtcsync could be use
 This would disable the time checks until the clock is updated for the first time, assuming the first update corrects the clock and later checks can work with correct time.</p>
 <h2 id="simple-configuration-example">Simple <a href="https://git.tuxfamily.org/chrony/chrony.git/tree/examples/chrony.conf.example1">configuration example</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Use public NTP servers from the pool.ntp.org project.</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pool pool.ntp.org iburst
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pool<span class="w"> </span>pool.ntp.org<span class="w"> </span>iburst
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Record the rate at which the system clock gains/losses time.</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>driftfile /var/lib/chrony/drift
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>driftfile<span class="w"> </span>/var/lib/chrony/drift
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Allow the system clock to be stepped in the first three updates</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># if its offset is larger than 1 second.</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>makestep <span class="m">1</span> -1
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>makestep<span class="w"> </span><span class="m">1</span><span class="w"> </span>-1
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Enable kernel synchronization of the real-time clock (RTC).</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>rtcsync

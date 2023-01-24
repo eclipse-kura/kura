@@ -2973,13 +2973,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The following steps should be performed on the device, this guide is based on Kura 3.1.0 version and has been tested on a Raspberry PI 3.</p>
 <h4 id="7-create-a-java-keystore-on-the-device">7.  Create a Java keystore on the device.</h4>
 <p>The first step for using the device keys obtained at the previous step is to create a new Java keystore containing the Root Certificate used by the Amazon IoT platform, this can be done executing the following commands on the device:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo mkdir /opt/eclipse/kura/security
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>/opt/eclipse/kura/security
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span> /opt/eclipse/kura/security
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>/opt/eclipse/kura/security
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl https://www.amazontrust.com/repository/AmazonRootCA1.pem &gt; /tmp/root-CA.pem
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>https://www.amazontrust.com/repository/AmazonRootCA1.pem<span class="w"> </span>&gt;<span class="w"> </span>/tmp/root-CA.pem
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo keytool -import -trustcacerts -alias aws -file /tmp/root-CA.pem -keystore cacerts.ks -storepass changeit
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>keytool<span class="w"> </span>-import<span class="w"> </span>-trustcacerts<span class="w"> </span>-alias<span class="w"> </span>aws<span class="w"> </span>-file<span class="w"> </span>/tmp/root-CA.pem<span class="w"> </span>-keystore<span class="w"> </span>cacerts.ks<span class="w"> </span>-storepass<span class="w"> </span>changeit
 </code></pre></div></p>
 <p>If the last command reports that the certificate already exist in the system-wide store type <code>yes</code> to proceed. The code above will generate a new keystore with <code>changeit</code> as password, change it if needed.</p>
 <h4 id="8-configure-the-ssl-parameters-using-the-kura-web-ui">8.  Configure the SSL parameters using the Kura Web UI.</h4>
@@ -3001,7 +3001,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 <li>
 <p>The private key needs to be converted to the PKCS8 format, this step can be performed executing the following command on a Linux or OSX based machine:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>openssl pkcs8 -topk8 -inform PEM -outform PEM -in xxxxxxxxxx-private.pem.key -out outKey.pem -nocrypt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>openssl<span class="w"> </span>pkcs8<span class="w"> </span>-topk8<span class="w"> </span>-inform<span class="w"> </span>PEM<span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-in<span class="w"> </span>xxxxxxxxxx-private.pem.key<span class="w"> </span>-out<span class="w"> </span>outKey.pem<span class="w"> </span>-nocrypt
 </code></pre></div>
 <p>where <code>xxxxxxxxxx-private.pem.key</code> is the file containing the private key downloaded at step 4.</p>
 </li>
@@ -3019,16 +3019,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p><strong>Kura 3.2.0 only</strong> - manually import device certificate and private key into keystore.</p>
 <p>On the host machine, open a terminal window in the folder containing the files downloaded at step 5 and execute the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>openssl pkcs12 -export -in xxxxxxxxxx-certificate.pem.crt -inkey xxxxxxxxxx-private.pem.key -name aws-ssl -out aws-ssl.p12
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>openssl<span class="w"> </span>pkcs12<span class="w"> </span>-export<span class="w"> </span>-in<span class="w"> </span>xxxxxxxxxx-certificate.pem.crt<span class="w"> </span>-inkey<span class="w"> </span>xxxxxxxxxx-private.pem.key<span class="w"> </span>-name<span class="w"> </span>aws-ssl<span class="w"> </span>-out<span class="w"> </span>aws-ssl.p12
 </code></pre></div>
 <p>where <code>xxxxxxxxxx-certificate.pem.crt</code> is the original certificate downloaded from AWS and <code>xxxxxxxxxx-private.pem.key</code> is the private key.</p>
 <p>The command will ask for a password, define a new password.</p>
 <p>Copy the obtained <code>aws-ssl.p12</code> file to the device into the <code>/tmp</code> folder using scp:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>scp ./aws-ssl.p12 pi@&lt;device-address&gt;:/tmp
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>scp<span class="w"> </span>./aws-ssl.p12<span class="w"> </span>pi@&lt;device-address&gt;:/tmp
 </code></pre></div>
 <p>Replacing <code>&lt;device-address&gt;</code> with the hostname or ip address of the device.</p>
 <p>Open a ssh connection to the device and enter the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo keytool -importkeystore -deststorepass changeit -destkeystore /opt/eclipse/kura/security/cacerts.ks -srckeystore /tmp/aws-ssl.p12 -srcstoretype PKCS12
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>keytool<span class="w"> </span>-importkeystore<span class="w"> </span>-deststorepass<span class="w"> </span>changeit<span class="w"> </span>-destkeystore<span class="w"> </span>/opt/eclipse/kura/security/cacerts.ks<span class="w"> </span>-srckeystore<span class="w"> </span>/tmp/aws-ssl.p12<span class="w"> </span>-srcstoretype<span class="w"> </span>PKCS12
 </code></pre></div>
 <p>The command will ask for a password, enter the password defined when creating the <code>aws-ssl.p12</code> file.</p>
 <p>Restart Kura to reload the keystore.</p>

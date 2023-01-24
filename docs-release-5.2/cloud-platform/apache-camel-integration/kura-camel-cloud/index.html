@@ -2684,21 +2684,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The interface with the Kura application is the Camel <code>vm</code> component. Information set "upstream" from the Kura application can be received by the Camel cloud service instance of the following endpoint <code>vm:camel:example</code>. Where <code>camel</code> is the application id and <code>example</code> is the topic.</p>
 <p>The following code snippet writes out all of the Kura payload structure received on this topic to the logger system:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&lt;routes</span> <span class="na">xmlns=</span><span class="s">&quot;http://camel.apache.org/schema/spring&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&lt;routes</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">&quot;http://camel.apache.org/schema/spring&quot;</span><span class="nt">&gt;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  <span class="nt">&lt;route</span> <span class="na">id=</span><span class="s">&quot;camel-example-topic&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nt">&lt;from</span> <span class="na">uri=</span><span class="s">&quot;vm:camel:example&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="nt">&lt;split&gt;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      <span class="nt">&lt;simple&gt;</span>${body.metrics().entrySet()}<span class="nt">&lt;/simple&gt;</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>      <span class="nt">&lt;setHeader</span> <span class="na">headerName=</span><span class="s">&quot;item&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="nt">&lt;simple&gt;</span>${body.key()}<span class="nt">&lt;/simple&gt;</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>      <span class="nt">&lt;/setHeader&gt;</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>      <span class="nt">&lt;setBody&gt;</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="nt">&lt;simple&gt;</span>${body.value()}<span class="nt">&lt;/simple&gt;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>      <span class="nt">&lt;/setBody&gt;</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>      <span class="nt">&lt;toD</span> <span class="na">uri=</span><span class="s">&quot;log:kura.data.${header.item}&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="nt">&lt;/split&gt;</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>  <span class="nt">&lt;/route&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&lt;route</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;camel-example-topic&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&lt;from</span><span class="w"> </span><span class="na">uri=</span><span class="s">&quot;vm:camel:example&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&lt;split&gt;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="nt">&lt;simple&gt;</span>${body.metrics().entrySet()}<span class="nt">&lt;/simple&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">&lt;setHeader</span><span class="w"> </span><span class="na">headerName=</span><span class="s">&quot;item&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="nt">&lt;simple&gt;</span>${body.key()}<span class="nt">&lt;/simple&gt;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nt">&lt;/setHeader&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="nt">&lt;setBody&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="nt">&lt;simple&gt;</span>${body.value()}<span class="nt">&lt;/simple&gt;</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">      </span><span class="nt">&lt;/setBody&gt;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="nt">&lt;toD</span><span class="w"> </span><span class="na">uri=</span><span class="s">&quot;log:kura.data.${header.item}&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&lt;/split&gt;</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span><span class="nt">&lt;/route&gt;</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="nt">&lt;/routes&gt;</span>
 </code></pre></div>

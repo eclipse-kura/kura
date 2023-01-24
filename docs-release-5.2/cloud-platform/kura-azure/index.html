@@ -2850,22 +2850,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="get-azure-iot-hub-information">Get Azure IoT Hub information</h2>
 <p>In order to properly configure Kura to connect to IoT Hub, some information are needed. You will need the hostname of the Azure IoT Hub, referred below as <code>{iothubhostname}</code>, the Id and the SAS Token of the device, referred as <code>{device_id}</code> and <code>{device_SAS_token}</code>.
 The hostname is listed on the "Overview" tab on the IoT Hub main page, while the device ID is shown on the "Device Explorer" tab. Finally, the SAS token can be generated using the iothub-explorer application that can be found <a href="https://github.com/Azure/iothub-explorer">here</a>. To install the application, type on a shell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>npm install -g iothub-explorer
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>iothub-explorer
 </code></pre></div>
 <p>Then start a new session on your IoT Hub instance (it will expire in 1 hour):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>iothub-explorer login <span class="s2">&quot;{your-connection-string}&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>iothub-explorer<span class="w"> </span>login<span class="w"> </span><span class="s2">&quot;{your-connection-string}&quot;</span>
 </code></pre></div>
 <p>where <code>{your-connection-string}</code> is the connection string of your IoT Hub instance. It can be found on the "Shared access policies" tab under "Settings". Select the "iothubowner" policy and a tab will appear with the "Connection string—primary key" option.
 Then list your devices:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>iothub-explorer list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>iothub-explorer<span class="w"> </span>list
 </code></pre></div>
 <p>and get the SAS token for the <code>{device-name}</code> device:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>iothub-explorer sas-token <span class="o">{</span>device-name<span class="o">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>iothub-explorer<span class="w"> </span>sas-token<span class="w"> </span><span class="o">{</span>device-name<span class="o">}</span>
 </code></pre></div>
 <p>Be aware that the SAS token will expire in 1 hour by default, but using "-d" option it is possible to set a custom expiration time.</p>
 <h3 id="ssl-certificates">SSL certificates</h3>
 <p>In order to connect to your IoT Hub instance, Kura should trust the remote broker through a SSL certificate. The simpler way to get the IotHub certificate is to run the following command on a shell:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>openssl s_client -showcerts -tls1 -connect <span class="o">{</span>iothubhostname<span class="o">}</span>:8883
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-showcerts<span class="w"> </span>-tls1<span class="w"> </span>-connect<span class="w"> </span><span class="o">{</span>iothubhostname<span class="o">}</span>:8883
 </code></pre></div>
 <p>The result is the SSL certificate chain. Copy <strong>all</strong> the certificates in the format:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>-----BEGIN CERTIFICATE-----

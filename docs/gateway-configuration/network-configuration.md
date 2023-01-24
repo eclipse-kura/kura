@@ -146,7 +146,7 @@ Name                                                             | Type      | D
 `net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection
 `net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
 `net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
-`net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 
 ### Cellular Modem properties
 

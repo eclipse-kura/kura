@@ -1874,7 +1874,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <li class="md-nav__item">
       <a href="../single-port-wire-components/db-store-and-filter/" class="md-nav__link">
-        DB Store and Filter
+        Wire Record Store and Query
       </a>
     </li>
   
@@ -2894,8 +2894,8 @@ Each <strong>WireRecord</strong> contains a set of key-value pairs, called prope
 <li><strong>Timer</strong> ticks every x seconds and starts the graph;</li>
 <li><strong>Publisher</strong> publishes every message received from a Wire (Wire Message). It is configurable in order to use a specific Cloud Service;</li>
 <li><strong>Subscriber</strong> subscribes to a configurable topic via a specific Cloud Service. It receives a message from a Cloud Platform, wraps it as a Wire Message and sends it through the connected wires to the other components that are part of the Wire Graph;</li>
-<li><strong>DB Store</strong> allows the storage of Wire Messages into a specific database (DB) table. It has rules for message cleanup and retention;</li>
-<li><strong>DB Filter</strong>, allows the filtering of messages residing in a DB via a proper SQL query. The corresponding messages are sent as Wire Messages to the connected Wire Components;</li>
+<li><strong>Wire Record Store</strong> allows the storage of Wire Messages into a specific stored collection. It has rules for message cleanup and retention;</li>
+<li><strong>Wire Record Query</strong>, allows the filtering of messages residing in a store via a specific query. The corresponding messages are sent as Wire Messages to the connected Wire Components;</li>
 <li><strong>Logger</strong> logs the received messages;</li>
 <li><strong>Asset</strong> ​allows the definition of Wire Channels that will be used to communicate with a field device through the associated Driver instance.</li>
 </ul>

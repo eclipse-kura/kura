@@ -13,7 +13,7 @@
     
     
       
-        <title>DB Store and Filter - Eclipse Kura™ Documentation</title>
+        <title>Wire Record Store and Query - Eclipse Kura™ Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#db-store-and-filter" class="md-skip">
+        <a href="#wire-record-store-and-wire-record-query" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              DB Store and Filter
+              Wire Record Store and Query
             
           </span>
         </div>
@@ -1817,12 +1817,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          DB Store and Filter
+          Wire Record Store and Query
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        DB Store and Filter
+        Wire Record Store and Query
       </a>
       
         
@@ -2828,23 +2828,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
 
 
-<h1 id="db-store-and-filter">DB Store and Filter</h1>
-<p>This tutorial will present how to use DB Store and DB Filter components in Wires using the OPC-UA simulated server already used in <a href="../../../connect-field-devices/opcua-driver/">OPC-UA Application</a>.</p>
-<p>The DB Store component allows the wire graphs to interact with the database provided by Kura. It stores in a user-defined table all the envelopes received by the component. The component can be configured as follows:</p>
+<h1 id="wire-record-store-and-wire-record-query">Wire Record Store and Wire Record Query</h1>
+<p>This tutorial will present how to use Wire Record Store and Wire Record Query components and provide an example based on the OPC-UA simulated server already used in <a href="../../../connect-field-devices/opcua-driver/">OPC-UA Application</a>.</p>
+<p>The Wire Record Store component allows the wire graphs to interact with a persistend Wire Record store implementation, for example a SQL database. It stores in a user-defined collection all the envelopes received by the component.</p>
+<p>The Wire Record Query component, instead, can run a custom query on the attached store and emit the result on the wire.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Wire Record Store and Wire Record Query components have been introduced in Kura 5.3.0 as a replacement of the Db Store and Db Filter, that have been deprecated.</p>
+<p>The reason of the deprecation is the fact that Db Store and Db Filter only support databases that provide a JDBC interface. Moreover, the old Db Store interacts with the database using a set of hardcoded SQL queries.
+This fact makes it difficult to use it with different databases since the syntax of the queries is usually database-specific.</p>
+<p>The new components use the <code>org.eclipse.kura.wire.store.provider.WireRecordStoreProvider</code> and <code>org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider</code> APIs introduced in 5.3.0 allowing to use them with generic data store implementations.</p>
+<p>Please note that Wire Record Query component is not portable by nature, since it allows to execute an arbitrary user defined query. The new APIs allows to use it with non-JDBC data stores.</p>
+</div>
+<p>The Wire Record Store component can be configured as follows:</p>
 <ul>
-<li><strong>table.name</strong>: the name of the table to be created.</li>
-<li><strong>maximum.table.size</strong>: the size of the table.</li>
-<li><strong>cleanup.records.keep</strong>: the number of records in the table to keep while performing a cleanup operation.</li>
-<li><strong>DbService Target Filter</strong> : the database instance to be used.</li>
+<li><strong>Record Collection Name</strong>: The name of the record collection that should be used. The implementation of the collection depends on the Wire Record Store implementation, if it is a SQL database, the collection will likely be a table.</li>
+<li><strong>Maximum Record Collection Size</strong>: The maximum number of records that is possible to store in the collection.</li>
+<li><strong>Cleanup Records Keep</strong>: The number of records in the collection to keep while performing a cleanup operation (if set to 0 all the records will be deleted). The cleanup operation is performed when a new record is inserted and the current size of the record collection is greater than the configured <strong>Maximum Record Collection Size</strong>.</li>
+<li><strong>WireRecordStoreProvider Target Filter</strong> : Specifies, as an OSGi target filter, the pid of the of the Wire Record Store instance to be used.</li>
 </ul>
-<p>The DB Filter component, instead, can run a custom SQL query on the Kura database. It can be configured as follows:</p>
+<p>The Wire Record Query component can be configured as follows:</p>
 <ul>
-<li><strong>sql.view</strong>: SQL to be executed to build a view.</li>
-<li><strong>cache.expiration.interval</strong>: cache validity in seconds. When the cache expires, a new read in the database will be performed.</li>
-<li><strong>DbService Target Filter</strong> : the database instance to be used.</li>
-<li><strong>emit.empty.result</strong> : defines if the envelope should be emitted even if the query return an empty result.</li>
+<li><strong>Query</strong>: Query to be executed. The query syntax depends on the Queryable Wire Record Store implementation.</li>
+<li><strong>Cache Expiration Interval (Seconds)</strong>: This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity interval in seconds. When cache expires, it will cause a new query execution. The query will be executed for every trigger received if the value is set to 0.</li>
+<li><strong>QueryableWireRecordStoreProvider Target Filter</strong> : Specifies, as an OSGi target filter, the pid of the of the Queryable Wire Record Store instance to be used.</li>
+<li><strong>Emit On Empty Result</strong> : Defines the behavior of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted.</li>
 </ul>
-<p>The following procedure will create a wire graph that collects data from a simulated OPC-UA Server, stores it in a table in the database, using the DB Store component, and publishes it in the cloud platform. Moreover, the DB Filter is used to read from the database and write data to the OPC-UA Server based on the values read.</p>
+<p>The following procedure will create a wire graph that collects data from a simulated OPC-UA Server, stores it in a table in the database, using the Wire Record Store component, and publishes it in the cloud platform. Moreover, the Wire Record Query component is used to read from the database and write data to the OPC-UA Server based on the values read.</p>
 <h2 id="configure-opc-ua-server-simulator">Configure OPC-UA server simulator</h2>
 <ol>
 <li>Download the <a href="https://s3.amazonaws.com/kura-resources/opcua_demo_server.dp">OPC-UA server simulator</a> bundle and install it on your Kura instance. It will create a simulated OPC-UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).</li>
@@ -2877,21 +2887,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <img alt="WireAsset Opcua Example Read Mode" src="../images/opcua-wire-asset-config-read.png" /></p>
 </li>
 <li>
-<p>Add a new <strong>DBStore</strong> component and configure it as follows:</p>
+<p>Add a new Wire Record Store named <strong>DBStore</strong> component and configure it as follows:</p>
 <ul>
-<li><strong>table.name</strong>: WR_data</li>
-<li><strong>maximum.table.size</strong>: 10000</li>
-<li><strong>cleanup.records.keep</strong>: 0</li>
-<li><strong>DbService Target Filter</strong> : the DB Service pid to be used</li>
+<li><strong>Record Collection Name</strong>: WR_data</li>
+<li><strong>Maximum Record Collection Size</strong>: 10000</li>
+<li><strong>Cleanup Records Keep</strong>: 0</li>
+<li><strong>WireRecordStoreProvider Target Filter</strong> : the Wire Record Store Provider pid to be used</li>
 </ul>
 </li>
 <li>Add a new <strong>Publisher</strong> component and configure the chosen cloud platform stack in <strong>cloud.service.pid</strong> option</li>
 <li>Add <strong>Logger</strong> component</li>
 <li>Add another instance of <strong>Timer</strong></li>
-<li>Add a new <strong>DBFilter</strong> component and configure it as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.<ul>
-<li><strong>sql.view</strong>: SELECT (CASE WHEN “light” &lt; 200 THEN 1 ELSE 0 END) AS “led” FROM “WR_data” ORDER BY TIMESTAMP DESC LIMIT 1;</li>
-<li><strong>cache.expiration.interval</strong>: 0</li>
-<li><strong>DbService Target Filter</strong> : the DB Service pid to be used</li>
+<li>Add a new Wire Record Query component named <strong>DBFilter</strong> component and configure it as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.<ul>
+<li><strong>Query</strong>: SELECT (CASE WHEN “light” &lt; 200 THEN 1 ELSE 0 END) AS “led” FROM “WR_data” ORDER BY TIMESTAMP DESC LIMIT 1;</li>
+<li><strong>Cache Expiration Interval (Seconds)</strong>: 0</li>
+<li><strong>QueryableWireRecordStoreProvider Target Filter</strong> : the Queryable Wire Record Store Provider pid to be used</li>
 </ul>
 </li>
 <li>
@@ -2899,7 +2909,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <img alt="WireAsset Opcua Example Write Mode" src="../images/opcua-wire-asset-config-write.png" /></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Be aware that the <strong>sql.view</strong> syntax can vary accordingly to the SQL dialect used by the database. For example, the MySQL dialect doesn't allow to surrond the table or columns names with double-quotes. In the H2DB, this is mandatory instead.</p>
+<p>Be aware that the <strong>Query</strong> syntax can vary accordingly to the dialect used by the database. For example, the MySQL dialect doesn't allow to surround the table or columns names with double-quotes. In the H2DB, this is mandatory instead.</p>
 </div>
 </li>
 <li>

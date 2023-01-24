@@ -1863,7 +1863,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <li class="md-nav__item">
       <a href="../../kura-wires/single-port-wire-components/db-store-and-filter/" class="md-nav__link">
-        DB Store and Filter
+        Wire Record Store and Query
       </a>
     </li>
   
@@ -2845,6 +2845,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h1 id="data-service-configuration">Data Service Configuration</h1>
 <p>The <strong>DataService</strong> provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. The DataService delegates to the MqttDataTransport service the implementation of the transport protocol that is used to interact with the remote server.</p>
 <p>The DataService also adds the capability of storing published messages in a persistent store function and sending them over the wire at a later time. The purpose of this feature is to relieve service users from implementing their own persistent store. Service users may publish messages independently on the DataService connection status.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Starting from Kura 5.3.0, the DataService allows to bind to custom persistent stores. A custom persistent store can be defined by creating an implementation the new <code>org.eclipse.kura.message.store.provider.MessageStoreProvider</code> service interface and registering it as an OSGi service.</p>
+</div>
 <p>In order to overcome the potential latencies introduced by buffering messages, the DataService allows a priority level to be assigned to​ each published message. Depending on the store configuration, there are certain guarantees that stored messages are not lost due to sudden crashes or power outages.</p>
 <p>To use this service, select the <strong>DataService</strong> option located in the <strong>Cloud Connections</strong> area as shown in the screen capture below.</p>
 <p><img alt="Data Service" src="../images/data-service.png" /></p>
@@ -2866,7 +2870,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>disconnect.quiesce-timeout</strong>: allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.</p>
 </li>
 <li>
-<p><strong>store.db.service.pid</strong>: The Kura Service PID of the database instance to be used. The PID of the default instance is org.eclipse.kura.db.H2DbService.</p>
+<p><strong>store.db.service.pid</strong>: The Kura Service PID of the persistent store instance to be used. The PID of the default instance is org.eclipse.kura.db.H2DbService. The target service must implement <code>org.eclipse.kura.message.store.provider.MessageStoreProvider</code>.</p>
 </li>
 <li>
 <p><strong>store.housekeeper-interval</strong>: defines the interval in seconds used to run the Data Store housekeeper task.</p>

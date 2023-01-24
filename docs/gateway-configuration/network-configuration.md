@@ -130,7 +130,7 @@ Name                                                             | Type     | De
 `net.interface.<interface>.config.wifi.master.radioMode`	     | String	| Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC
 `net.interface.<interface>.config.wifi.master.ignoreSSID`	     | Boolean	| Specify if the SSID broadcast is ignored
 `net.interface.<interface>.config.wifi.master.groupCiphers`    | String   | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
-`net.interface.<interface>.config.wifi.master.pairwiseCiphers` | String   | Pairwise ciphers, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.master.pairwiseCiphers` | String   | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 
 ### WiFi Infra (Station Mode) properties
 

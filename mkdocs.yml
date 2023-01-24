@@ -92,7 +92,7 @@ nav:
       - Introduction: kura-wires/introduction.md
       - Assets as Wire Components: kura-wires/assets-as-wire-components.md
       - Single Port Wire Components:
-        - DB Store and Filter: kura-wires/single-port-wire-components/db-store-and-filter.md
+        - Wire Record Store and Query: kura-wires/single-port-wire-components/db-store-and-filter.md
         - FIFO Component: kura-wires/single-port-wire-components/fifo-component.md
         - AI Wire Component: kura-wires/single-port-wire-components/ai-wire-component.md
       - Multiport Wire Components:

@@ -41,8 +41,8 @@ The following components are distributed with Kura:
 - **Timer** ticks every x seconds and starts the graph;
 - **Publisher** publishes every message received from a Wire (Wire Message). It is configurable in order to use a specific Cloud Service;
 - **Subscriber** subscribes to a configurable topic via a specific Cloud Service. It receives a message from a Cloud Platform, wraps it as a Wire Message and sends it through the connected wires to the other components that are part of the Wire Graph;
-- **DB Store** allows the storage of Wire Messages into a specific database (DB) table. It has rules for message cleanup and retention;
-- **DB Filter**, allows the filtering of messages residing in a DB via a proper SQL query. The corresponding messages are sent as Wire Messages to the connected Wire Components;
+- **Wire Record Store** allows the storage of Wire Messages into a specific stored collection. It has rules for message cleanup and retention;
+- **Wire Record Query**, allows the filtering of messages residing in a store via a specific query. The corresponding messages are sent as Wire Messages to the connected Wire Components;
 - **Logger** logs the received messages;
 - **Asset** ​allows the definition of Wire Channels that will be used to communicate with a field device through the associated Driver instance.
 

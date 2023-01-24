@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -81,58 +81,58 @@ public class DataServiceOptions {
         this.properties = Collections.unmodifiableMap(properties);
     }
 
-    int getStoreHousekeeperInterval() {
+    public int getStoreHousekeeperInterval() {
         return (int) this.properties.getOrDefault(STORE_HOUSEKEEPER_INTERVAL_PROP_NAME,
                 STORE_HOUSEKEEPER_INTERVAL_DEFAULT);
     }
 
-    int getStorePurgeAge() {
+    public int getStorePurgeAge() {
         return (int) this.properties.getOrDefault(STORE_PURGE_AGE_PROP_NAME, STORE_PURGE_AGE_DEFAULT);
     }
 
-    int getStoreCapacity() {
+    public int getStoreCapacity() {
         return (int) this.properties.getOrDefault(STORE_CAPACITY_PROP_NAME, STORE_CAPACITY_DEFAULT);
     }
 
-    boolean isPublishInFlightMessages() {
+    public boolean isPublishInFlightMessages() {
         return (boolean) this.properties.getOrDefault(REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME,
                 REPUBLISH_IN_FLIGHT_MSGS_DEFAULT);
     }
 
-    int getMaxInFlightMessages() {
+    public int getMaxInFlightMessages() {
         return (int) this.properties.getOrDefault(MAX_IN_FLIGHT_MSGS_PROP_NAME, MAX_IN_FLIGHT_MSGS_DEFAULT);
     }
 
-    int getInFlightMessagesCongestionTimeout() {
+    public int getInFlightMessagesCongestionTimeout() {
         return (int) this.properties.getOrDefault(IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME,
                 IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT);
     }
 
-    boolean isAutoConnect() {
+    public boolean isAutoConnect() {
         return (boolean) this.properties.getOrDefault(AUTOCONNECT_PROP_NAME, AUTOCONNECT_PROP_DEFAULT);
     }
 
-    int getConnectDelay() {
+    public int getConnectDelay() {
         return (int) this.properties.getOrDefault(CONNECT_DELAY_PROP_NAME, CONNECT_DELAY_DEFAULT);
     }
 
-    int getDisconnectDelay() {
+    public int getDisconnectDelay() {
         return (int) this.properties.getOrDefault(DISCONNECT_DELAY_PROP_NAME, DISCONNECT_DELAY_DEFAULT);
     }
 
-    boolean isRateLimitEnabled() {
+    public boolean isRateLimitEnabled() {
         return (boolean) this.properties.getOrDefault(RATE_LIMIT_ENABLE_PROP_NAME, RATE_LIMIT_ENABLE_DEFAULT);
     }
 
-    int getRateLimitAverageRate() {
+    public int getRateLimitAverageRate() {
         return (int) this.properties.getOrDefault(RATE_LIMIT_AVERAGE_RATE_PROP_NAME, RATE_LIMIT_AVERAGE_RATE_DEFAULT);
     }
 
-    int getRateLimitBurstSize() {
+    public int getRateLimitBurstSize() {
         return (int) this.properties.getOrDefault(RATE_LIMIT_BURST_SIZE_PROP_NAME, RATE_LIMIT_BURST_SIZE_DEFAULT);
     }
 
-    long getRateLimitTimeUnit() {
+    public long getRateLimitTimeUnit() {
         String timeUnitString = (String) this.properties.getOrDefault(RATE_LIMIT_TIME_UNIT_PROP_NAME,
                 RATE_LIMIT_TIME_UNIT_DEFAULT);
         TimeUnit timeUnit;
@@ -154,31 +154,31 @@ public class DataServiceOptions {
         return timeUnit.toNanos(1);
     }
 
-    String getDbServiceInstancePid() {
+    public String getDbServiceInstancePid() {
         return (String) this.properties.getOrDefault(STORE_DB_SERVICE_INSTANCE_PROP_NAME, DB_SERVICE_INSTANCE_DEFAULT);
     }
 
-    String getKuraServicePid() {
+    public String getKuraServicePid() {
         return (String) this.properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
-    boolean isConnectionRecoveryEnabled() {
+    public boolean isConnectionRecoveryEnabled() {
         return (boolean) this.properties.getOrDefault(RECOVERY_ENABLE_PROP_NAME, RECOVERY_ENABLE_DEFAULT);
     }
 
-    int getRecoveryMaximumAllowedFailures() {
+    public int getRecoveryMaximumAllowedFailures() {
         return (int) this.properties.getOrDefault(RECOVERY_MAX_FAILURES_PROP_NAME, RECOVERY_MAX_FAILURES_DEFAULT);
     }
 
-    int getCriticalComponentTimeout() {
+    public int getCriticalComponentTimeout() {
         return getConnectDelay() * CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER;
     }
 
-    boolean isConnectionScheduleEnabled() {
+    public boolean isConnectionScheduleEnabled() {
         return (boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_ENABLED, CONNECTION_SCHEDULE_ENABLED_DEFAULT);
     }
 
-    Optional<CronExpression> getConnectionScheduleExpression() {
+    public Optional<CronExpression> getConnectionScheduleExpression() {
         try {
             return Optional.of(new CronExpression((String) this.properties.get(CONNECTION_SCHECULE_EXPRESSION)));
         } catch (final Exception e) {
@@ -187,18 +187,18 @@ public class DataServiceOptions {
         }
     }
 
-    long getConnectionScheduleDisconnectDelay() {
+    public long getConnectionScheduleDisconnectDelay() {
         return (long) this.properties.getOrDefault(CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS,
                 CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT);
     }
 
-    Boolean isConnectionSchedulePriorityOverrideEnabled() {
+    public boolean isConnectionSchedulePriorityOverrideEnabled() {
         return (Boolean) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT) && isConnectionScheduleEnabled()
                 && getConnectionScheduleExpression().isPresent();
     }
 
-    int getConnectionSchedulePriorityOverridePriority() {
+    public int getConnectionSchedulePriorityOverridePriority() {
 
         return (Integer) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT);

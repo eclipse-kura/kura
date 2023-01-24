@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -36,10 +37,17 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.message.store.provider.MessageStore;
+import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
+import org.eclipse.kura.wire.store.provider.WireRecordStore;
+import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.DeleteDbFiles;
@@ -47,7 +55,9 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
+public class H2DbServiceImpl
+        implements H2DbService, MessageStoreProvider, WireRecordStoreProvider, ConfigurableComponent,
+        QueryableWireRecordStoreProvider {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
@@ -370,7 +380,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             executeInternal("SET TRACE_LEVEL_FILE 0");
         }
 
-        // Set the maximum length for which a lob is created inline, regardless of the connection string.
+        // Set the maximum length for which a lob is created inline, regardless of the
+        // connection string.
         if (configuration.isInMemory()) {
             executeInternal("SET MAX_LENGTH_INPLACE_LOB " + MAX_LENGTH_INPLACE_LOB_VALUE);
         }
@@ -598,5 +609,23 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                 lock.unlock();
             }
         }
+    }
+
+    @Override
+    public MessageStore openMessageStore(String name, int capacity) throws KuraStoreException {
+
+        return new H2DbMessageStoreImpl(this, name, capacity);
+    }
+
+    @Override
+    public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
+
+        return new H2DbWireRecordStoreImpl(this, name);
+    }
+
+    @Override
+    public List<WireRecord> performQuery(String query) throws KuraStoreException {
+
+        return H2DbQueryableWireRecordStoreImpl.performQuery(this, query);
     }
 }

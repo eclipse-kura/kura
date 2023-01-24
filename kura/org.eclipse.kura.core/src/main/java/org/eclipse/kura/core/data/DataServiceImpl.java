@@ -39,7 +39,8 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.data.store.DbDataStore;
+import org.eclipse.kura.core.data.store.MessageStoreState;
+import org.eclipse.kura.core.db.H2DbMessageStoreImpl;
 import org.eclipse.kura.core.internal.data.TokenBucket;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
@@ -47,6 +48,8 @@ import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.message.store.StoredMessage;
+import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
@@ -77,7 +80,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private DataServiceOptions dataServiceOptions;
 
     private DataTransportService dataTransportService;
-    private H2DbService dbService;
     private DataServiceListenerS dataServiceListeners;
 
     protected ScheduledExecutorService connectionMonitorExecutor;
@@ -86,7 +88,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     // A dedicated executor for the publishing task
     private ExecutorService publisherExecutor;
 
-    private DataStore store;
+    private MessageStoreState store;
 
     private Map<DataTransportToken, Integer> inFlightMsgIds;
 
@@ -104,7 +106,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private final AtomicBoolean publisherEnabled = new AtomicBoolean();
 
-    private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
+    private ServiceTracker<Object, Object> dbServiceTracker;
     private ComponentContext componentContext;
 
     private WatchdogService watchdogService;
@@ -136,8 +138,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         createThrottle();
         submitPublishingWork();
 
-        this.store = new DbDataStore(pid);
-
         restartDbServiceTracker(this.dataServiceOptions.getDbServiceInstancePid());
 
         this.dataServiceListeners = new DataServiceListenerS(componentContext);
@@ -156,32 +156,43 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             final Filter filter = FrameworkUtil
                     .createFilter("(" + ConfigurationService.KURA_SERVICE_PID + "=" + kuraServicePid + ")");
             this.dbServiceTracker = new ServiceTracker<>(this.componentContext.getBundleContext(), filter,
-                    new ServiceTrackerCustomizer<H2DbService, H2DbService>() {
+                    new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
-                        public H2DbService addingService(ServiceReference<H2DbService> reference) {
-                            logger.info("H2DbService instance found");
-                            H2DbService contextDbService = DataServiceImpl.this.componentContext.getBundleContext()
+                        public Object addingService(ServiceReference<Object> reference) {
+                            logger.info("Message store instance found");
+                            Object service = DataServiceImpl.this.componentContext
+                                    .getBundleContext()
                                     .getService(reference);
-                            setH2DbService(contextDbService);
-                            return contextDbService;
+
+                            if (service instanceof MessageStoreProvider) {
+                                setMessageStoreProvider((MessageStoreProvider) service);
+                            } else if (service instanceof H2DbService) {
+                                setH2DbService((H2DbService) service);
+                            } else {
+                                DataServiceImpl.this.componentContext
+                                        .getBundleContext().ungetService(reference);
+                                return null;
+                            }
+
+                            return service;
                         }
 
                         @Override
-                        public void modifiedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                            logger.info("H2DbService instance updated, recreating table if needed...");
+                        public void modifiedService(ServiceReference<Object> reference,
+                                Object service) {
+                            logger.info("Message store instance updated, recreating table if needed...");
                             synchronized (DataServiceImpl.this) {
                                 DataServiceImpl.this.store.update(
-                                        DataServiceImpl.this.dataServiceOptions.getStoreHousekeeperInterval(),
-                                        DataServiceImpl.this.dataServiceOptions.getStorePurgeAge(),
-                                        DataServiceImpl.this.dataServiceOptions.getStoreCapacity());
+                                        DataServiceImpl.this.dataServiceOptions);
                             }
                         }
 
                         @Override
-                        public void removedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                            logger.info("H2DbService instance removed");
-                            unsetH2DbService(DataServiceImpl.this.dbService);
+                        public void removedService(ServiceReference<Object> reference,
+                                Object service) {
+                            logger.info("Message store instance removed");
+                            unsetMessageStoreProvider();
                             DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                         }
                     });
@@ -200,24 +211,26 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private synchronized void startDbStore() {
         try {
-            this.store.start(this.dbService, this.dataServiceOptions.getStoreHousekeeperInterval(),
-                    this.dataServiceOptions.getStorePurgeAge(), this.dataServiceOptions.getStoreCapacity());
-
             // The initial list of in-flight messages
-            List<DataMessage> inFlightMsgs = this.store.allInFlightMessagesNoPayload();
+            List<StoredMessage> inFlightMsgs = this.store.getMessageStore().getInFlightMessages();
 
             // The map associating a DataTransportToken with a message ID
             this.inFlightMsgIds = new ConcurrentHashMap<>();
 
             if (inFlightMsgs != null) {
-                for (DataMessage message : inFlightMsgs) {
+                for (StoredMessage message : inFlightMsgs) {
 
-                    DataTransportToken token = new DataTransportToken(message.getPublishedMessageId(),
-                            message.getSessionId());
-                    this.inFlightMsgIds.put(token, message.getId());
+                    final Optional<DataTransportToken> token = message.getDataTransportToken();
+
+                    if (!token.isPresent()) {
+                        logger.warn("In-flight message has no associated DataTransportToken");
+                        continue;
+                    }
+
+                    this.inFlightMsgIds.put(token.get(), message.getId());
 
                     logger.debug("Restored in-fligh messages from store. Topic: {}, ID: {}, MQTT message ID: {}",
-                            new Object[] { message.getTopic(), message.getId(), message.getPublishedMessageId() });
+                            message.getTopic(), message.getId(), token.get().getMessageId());
                 }
             }
         } catch (KuraStoreException e) {
@@ -239,9 +252,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         final String currentDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
 
         if (oldDbServicePid.equals(currentDbServicePid)) {
-            if (this.dbService != null) {
-                this.store.update(this.dataServiceOptions.getStoreHousekeeperInterval(),
-                        this.dataServiceOptions.getStorePurgeAge(), this.dataServiceOptions.getStoreCapacity());
+            if (this.store != null) {
+                this.store.update(this.dataServiceOptions);
             }
         } else {
             restartDbServiceTracker(currentDbServicePid);
@@ -276,7 +288,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         this.dataTransportService.removeDataTransportListener(this);
 
-        this.store.stop();
+        this.store.shutdown();
 
         stopDbServiceTracker();
     }
@@ -295,16 +307,26 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.dataTransportService = null;
     }
 
-    public synchronized void setH2DbService(H2DbService dbService) {
-        this.dbService = dbService;
+    public synchronized void setMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
+        this.store = new MessageStoreState(messageStoreProvider, this.dataServiceOptions);
         startDbStore();
         signalPublisher();
     }
 
-    public synchronized void unsetH2DbService(H2DbService dbService) {
-        this.dbService = null;
+    public synchronized void unsetMessageStoreProvider() {
         disconnect();
-        this.store.stop();
+        this.store.shutdown();
+        this.store = null;
+    }
+
+    public synchronized void setH2DbService(H2DbService dbService) {
+        setMessageStoreProvider((name, capacity) -> new H2DbMessageStoreImpl(
+                dbService, name,
+                capacity));
+    }
+
+    public synchronized void unsetH2DbService(H2DbService dbService) {
+        unsetMessageStoreProvider();
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
@@ -370,7 +392,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
                         + "this may cause duplicate messages.");
                 try {
-                    this.store.unpublishAllInFlighMessages();
+                    this.store.getMessageStore().unpublishAllInFlighMessages();
                     this.inFlightMsgIds.clear();
                 } catch (KuraStoreException e) {
                     logger.error("Failed to unpublish in-flight messages", e);
@@ -378,7 +400,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } else {
                 logger.info("New session established. Dropping all in-flight messages.");
                 try {
-                    this.store.dropAllInFlightMessages();
+                    this.store.getMessageStore().dropAllInFlightMessages();
                     this.inFlightMsgIds.clear();
                 } catch (KuraStoreException e) {
                     logger.error("Failed to drop in-flight messages", e);
@@ -463,18 +485,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     token.getMessageId());
         } else {
 
-            DataMessage confirmedMessage = null;
+            Optional<StoredMessage> confirmedMessage = Optional.empty();
             try {
                 logger.info("Confirmed message ID: {} to store", messageId);
-                this.store.confirmed(messageId);
-                confirmedMessage = this.store.get(messageId);
+                this.store.getMessageStore().markAsConfirmed(messageId);
+                confirmedMessage = this.store.getMessageStore().get(messageId);
             } catch (KuraStoreException e) {
                 logger.error("Cannot confirm message to store", e);
             }
 
             // Notify the listeners
-            if (confirmedMessage != null) {
-                String topic = confirmedMessage.getTopic();
+            if (confirmedMessage.isPresent()) {
+                String topic = confirmedMessage.get().getTopic();
                 this.dataServiceListeners.onMessageConfirmed(messageId, topic);
             } else {
                 logger.error("Confirmed Message with ID {} could not be loaded from the DataStore.", messageId);
@@ -491,8 +513,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void connect() throws KuraConnectException {
         shutdownAutoConnectStrategy();
-        if (this.dbService == null) {
-            throw new KuraConnectException("H2DbService instance not attached, not connecting");
+        if (this.store == null) {
+            throw new KuraConnectException("Message store instance not attached, not connecting");
         }
 
         if (!this.dataTransportService.isConnected()) {
@@ -540,29 +562,29 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
-        DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
+        int id = this.store.getMessageStore().store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 
         signalPublisher();
 
-        return dataMsg.getId();
+        return id;
     }
 
     @Override
     public List<Integer> getUnpublishedMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.store.allUnpublishedMessagesNoPayload();
+        List<StoredMessage> messages = this.store.getMessageStore().getUnpublishedMessages();
         return buildMessageIds(messages, topicRegex);
     }
 
     @Override
     public List<Integer> getInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.store.allInFlightMessagesNoPayload();
+        List<StoredMessage> messages = this.store.getMessageStore().getInFlightMessages();
         return buildMessageIds(messages, topicRegex);
     }
 
     @Override
     public List<Integer> getDroppedInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<DataMessage> messages = this.store.allDroppedInFlightMessagesNoPayload();
+        List<StoredMessage> messages = this.store.getMessageStore().getDroppedMessages();
         return buildMessageIds(messages, topicRegex);
     }
 
@@ -644,8 +666,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             + DataServiceImpl.this.dataServiceOptions.getKuraServicePid());
                     boolean connected = false;
                     try {
-                        if (DataServiceImpl.this.dbService == null) {
-                            logger.warn("H2DbService instance not attached, not connecting");
+                        if (DataServiceImpl.this.store == null) {
+                            logger.warn("Message store instance not attached, not connecting");
                             return;
                         }
                         logger.info("Connecting...");
@@ -743,7 +765,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     // It's very important that the publishInternal and messageConfirmed methods are
     // synchronized
-    private synchronized void publishInternal(DataMessage message) throws KuraException {
+    private synchronized void publishInternal(StoredMessage message) throws KuraException {
 
         String topic = message.getTopic();
         byte[] payload = message.getPayload();
@@ -753,10 +775,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic, message.getPriority());
 
-        DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos, retain);
+        DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos,
+                retain);
 
         if (token == null) {
-            DataServiceImpl.this.store.published(msgId);
+            DataServiceImpl.this.store.getMessageStore().markAsPublished(msgId);
             logger.debug("Published message with ID: {}", msgId);
         } else {
 
@@ -768,17 +791,17 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             }
 
             DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
-            DataServiceImpl.this.store.published(msgId, token.getMessageId(), token.getSessionId());
+            DataServiceImpl.this.store.getMessageStore().markAsPublished(msgId, token);
             logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
         }
     }
 
-    private List<Integer> buildMessageIds(List<DataMessage> messages, String topicRegex) {
+    private List<Integer> buildMessageIds(List<StoredMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
         List<Integer> ids = new ArrayList<>();
 
         if (messages != null) {
-            for (DataMessage message : messages) {
+            for (StoredMessage message : messages) {
                 String topic = message.getTopic();
                 if (topicPattern.matcher(topic).matches()) {
                     ids.add(message.getId());
@@ -821,17 +844,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 if (DataServiceImpl.this.dataTransportService.isConnected()) {
                     try {
-                        DataMessage message = DataServiceImpl.this.store.getNextMessage();
+                        final Optional<StoredMessage> message = DataServiceImpl.this.store.getMessageStore()
+                                .getNextMessage();
 
-                        if (message != null) {
-                            checkInFlightMessages(message);
+                        if (message.isPresent()) {
+                            checkInFlightMessages(message.get());
 
                             if (DataServiceImpl.this.dataServiceOptions.isRateLimitEnabled()
-                                    && message.getPriority() >= 5) {
-                                messagePublished = publishMessageTokenBucket(message);
+                                    && message.get().getPriority() >= 5) {
+                                messagePublished = publishMessageTokenBucket(message.get());
                                 sleepingTime = DataServiceImpl.this.throttle.getTokenWaitTime();
                             } else {
-                                publishMessageUnbound(message);
+                                publishMessageUnbound(message.get());
                                 messagePublished = true;
                             }
                         }
@@ -854,7 +878,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             logger.debug("Exited publisher loop.");
         }
 
-        private void checkInFlightMessages(DataMessage message) throws KuraTooManyInflightMessagesException {
+        private void checkInFlightMessages(StoredMessage message) throws KuraTooManyInflightMessagesException {
             if (message.getQos() > 0 && DataServiceImpl.this.inFlightMsgIds
                     .size() >= DataServiceImpl.this.dataServiceOptions.getMaxInFlightMessages()) {
                 logger.warn("The configured maximum number of in-flight messages has been reached");
@@ -885,13 +909,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             }
         }
 
-        private void publishMessageUnbound(DataMessage message) throws KuraException {
+        private void publishMessageUnbound(StoredMessage message) throws KuraException {
             publishInternal(message);
             // Notify the listeners
             DataServiceImpl.this.dataServiceListeners.onMessagePublished(message.getId(), message.getTopic());
         }
 
-        private boolean publishMessageTokenBucket(DataMessage message) throws KuraException {
+        private boolean publishMessageTokenBucket(StoredMessage message) throws KuraException {
             boolean tokenAvailable = DataServiceImpl.this.throttle.getToken();
 
             if (tokenAvailable) {
@@ -954,10 +978,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     @Override
-    public DataMessage getNextMessage() {
-        DataMessage message = null;
+    public Optional<StoredMessage> getNextMessage() {
+        Optional<StoredMessage> message = Optional.empty();
         try {
-            message = DataServiceImpl.this.store.getNextMessage();
+            message = DataServiceImpl.this.store.getMessageStore().getNextMessage();
         } catch (Exception e) {
             logger.error("Probably an unrecoverable exception", e);
         }

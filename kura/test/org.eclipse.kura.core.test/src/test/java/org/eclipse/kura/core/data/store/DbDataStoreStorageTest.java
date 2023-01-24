@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,8 +27,10 @@ import java.sql.Statement;
 import java.util.Arrays;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.core.data.DataMessage;
+import org.eclipse.kura.core.db.H2DbMessageStoreImpl;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.message.store.StoredMessage;
+import org.eclipse.kura.message.store.provider.MessageStore;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,20 +48,20 @@ public class DbDataStoreStorageTest {
     private byte[] payload;
     private Exception occurredException = null;
 
-    private DbDataStore dataStore;
-    private DataMessage message;
+    private MessageStore dataStore;
+    private int messageId;
 
     /*
      * Scenarios
      */
-    
+
     @Test
     public void shouldStoreNullPayload() {
         givenNullPayload();
         givenDbDataStore(10000, 10000, 10);
-        
+
         whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
-        
+
         thenNoExceptionsOccurred();
         thenStoredMessageIs(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
     }
@@ -155,7 +158,7 @@ public class DbDataStoreStorageTest {
     /*
      * Given
      */
-    
+
     private void givenNullPayload() {
         this.payload = null;
     }
@@ -176,9 +179,9 @@ public class DbDataStoreStorageTest {
 
     private void givenDbDataStore(int houseKeeperInterval, int purgeAge, int capacity) {
         H2DbService h2Service = new MockH2DbService();
-        this.dataStore = new DbDataStore(TABLE_NAME);
+
         try {
-            this.dataStore.start(h2Service, houseKeeperInterval, purgeAge, capacity);
+            this.dataStore = new H2DbMessageStoreImpl(h2Service, TABLE_NAME, capacity);
         } catch (KuraStoreException e) {
             this.occurredException = e;
         }
@@ -190,7 +193,7 @@ public class DbDataStoreStorageTest {
 
     private void whenStore(String topic, byte[] payload, int qos, boolean retain, int priority) {
         try {
-            this.message = this.dataStore.store(topic, payload, qos, retain, priority);
+            this.messageId = this.dataStore.store(topic, payload, qos, retain, priority);
         } catch (KuraStoreException e) {
             this.occurredException = e;
         }
@@ -199,7 +202,7 @@ public class DbDataStoreStorageTest {
     private void whenOverflowingIds() {
         try {
             for (int i = 0; i < H2_MAX_ID_VALUE + 1; i++) {
-                this.message = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+                this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
                 Class.forName("org.h2.Driver");
                 Connection c = DriverManager.getConnection("jdbc:h2:mem:testdb;", "sa", "");
@@ -216,9 +219,9 @@ public class DbDataStoreStorageTest {
 
             }
 
-            this.message = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
-            this.message = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
-            this.message = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+            this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+            this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
+            this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
         } catch (KuraStoreException | SQLException | ClassNotFoundException e) {
             this.occurredException = e;
         }
@@ -233,11 +236,20 @@ public class DbDataStoreStorageTest {
     }
 
     private void thenStoredMessageIs(String topic, byte[] payload, int qos, boolean retain, int priority) {
-        assertEquals(topic, this.message.getTopic());
-        assertTrue(Arrays.equals(payload, this.message.getPayload()));
-        assertEquals(qos, this.message.getQos());
-        assertEquals(retain, this.message.isRetain());
-        assertEquals(priority, this.message.getPriority());
+        StoredMessage message;
+        try {
+            message = this.dataStore.get(this.messageId)
+                    .orElseThrow(() -> new IllegalStateException("no message with the given id"));
+        } catch (KuraStoreException e1) {
+            fail("Unable to retrieve last message");
+            throw new IllegalStateException();
+        }
+
+        assertEquals(topic, message.getTopic());
+        assertTrue(Arrays.equals(payload, message.getPayload()));
+        assertEquals(qos, message.getQos());
+        assertEquals(retain, message.isRetain());
+        assertEquals(priority, message.getPriority());
 
         // also inspect the database
         try {
@@ -249,7 +261,7 @@ public class DbDataStoreStorageTest {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                if (rs.getInt("id") == this.message.getId()) {
+                if (rs.getInt("id") == message.getId()) {
                     String rowTopic = rs.getString("topic");
                     int rowQos = rs.getInt("qos");
                     boolean rowRetain = rs.getBoolean("retain");
@@ -261,7 +273,7 @@ public class DbDataStoreStorageTest {
                     assertEquals(qos, rowQos);
                     assertEquals(retain, rowRetain);
                     assertEquals(priority, rowPriority);
-                    if (this.message.getPayload().length < 200) {
+                    if (message.getPayload().length < 200) {
                         assertTrue(Arrays.equals(payload, smallPayload));
                         assertNull(largePayload);
                     } else {
@@ -282,7 +294,7 @@ public class DbDataStoreStorageTest {
     }
 
     private void thenLastIdIsCorrect() {
-        assertEquals(3, this.message.getId());
+        assertEquals(3, this.messageId);
     }
 
     /*

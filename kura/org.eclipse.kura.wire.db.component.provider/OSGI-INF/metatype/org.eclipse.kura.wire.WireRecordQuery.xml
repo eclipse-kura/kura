@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.WireRecordQuery"
+         name="Wire Record Query" 
+         description="A wire component that allows to perform queries on Queryable Wire Record Store instances and emit the result on the Wires.">
+
+        <AD id="query"
+            name="Query"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="SELECT * FROM &quot;WR_data&quot; LIMIT 10;"
+            description="Query to be executed. The query syntax depends on the Queryable Wire Record Store implementation.">
+        </AD>
+        
+        <AD id="cache.expiration.interval"
+            name="Cache Expiration Interval (Seconds)"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            min="0"
+            description="This component is capable of maintaining a cache of the records produced by the last query execution and emitting its contents on the Wire until it expires. This value specifies the cache validity in seconds. When cache expires, it will cause a new read in the database. A database read will be performed for every trigger received if the value is set to 0.">
+        </AD>
+        
+        <AD id="QueryableWireRecordStoreProvider.target"
+            name="QueryableWireRecordStoreProvider Target Filter"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="(kura.service.pid=org.eclipse.kura.db.H2DbService)"
+            description="Specifies, as an OSGi target filter, the pid of the of the Queryable Wire Record Store instance to be used.">
+        </AD>
+            
+        <AD id="emit.on.empty.result"
+            name="Emit On Empty Result"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Defines the behavior of the component if the result of the performed query is empty. If set to true, an empty envelope will be emitted in this case, if set to false no envelopes will be emitted."/>
+
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.WireRecordQuery" factoryPid="org.eclipse.kura.wire.WireRecordQuery">
+        <Object ocdref="org.eclipse.kura.wire.WireRecordQuery"/>
+    </Designate>
+</MetaData>

@@ -3160,17 +3160,17 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>Comma-separated list of the interface names in the device</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.type</code></td>
+<td><code>net.interface.&lt;interface&gt;.type</code></td>
 <td>String</td>
 <td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.mode</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.mode</code></td>
 <td>String</td>
 <td>For wifi interfaces, specify the modality; possible values are INFRA and MASTER</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.nat.enabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.nat.enabled</code></td>
 <td>Boolean</td>
 <td>Enable the NAT feature</td>
 </tr>
@@ -3187,27 +3187,27 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.ip4.status</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
 <td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.ip4.address</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.address</code></td>
 <td>String</td>
 <td>The IPv4 address assigned to the network interface</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.ip4.prefix</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.prefix</code></td>
 <td>Short</td>
 <td>The IPv4 netmask assigned to the network interface</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.ip4.gateway</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.gateway</code></td>
 <td>String</td>
 <td>The IPv4 address of the default gateway</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.ip4.dnsServers</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.dnsServers</code></td>
 <td>String</td>
 <td>Comma-separated list of dns servers</td>
 </tr>
@@ -3224,37 +3224,37 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.enabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.enabled</code></td>
 <td>Boolean</td>
 <td>Specify if the DHCP server is enabled</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.rangeStart</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeStart</code></td>
 <td>String</td>
 <td>First IP address available for clients</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.rangeEnd</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeEnd</code></td>
 <td>String</td>
 <td>Last IP address available for clients</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.defaultLeaseTime</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.defaultLeaseTime</code></td>
 <td>Integer</td>
 <td>The default lease time</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.maxLeaseTime</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.maxLeaseTime</code></td>
 <td>Integer</td>
 <td>The maximum lease time</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.prefix</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.prefix</code></td>
 <td>Short</td>
 <td>The netmask for the available IP addresses</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpServer4.passDns</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.passDns</code></td>
 <td>Boolean</td>
 <td>Specify if the DNS server addresses has to be passed through DHCP</td>
 </tr>
@@ -3271,7 +3271,7 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dhcpClient4.enabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpClient4.enabled</code></td>
 <td>Boolean</td>
 <td>Specify if the DHCP client is enabled</td>
 </tr>
@@ -3288,44 +3288,54 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.driver</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.driver</code></td>
 <td>String</td>
 <td>The driver used for the connection</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.passphrase</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.passphrase</code></td>
 <td>Password</td>
 <td>The password for the access point</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.ssid</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.ssid</code></td>
 <td>String</td>
 <td>The SSID of the access point</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.securityType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.securityType</code></td>
 <td>String</td>
 <td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.mode</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.mode</code></td>
 <td>String</td>
 <td>The mode of the wireless connection; for the access point mode set it to MASTER</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.channel</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.channel</code></td>
 <td>String</td>
 <td>The channel to be used for the access point</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.radioMode</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.radioMode</code></td>
 <td>String</td>
 <td>Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.master.ignoreSSID</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.ignoreSSID</code></td>
 <td>Boolean</td>
 <td>Specify if the SSID broadcast is ignored</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.groupCiphers</code></td>
+<td>String</td>
+<td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.pairwiseCiphers</code></td>
+<td>String</td>
+<td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
 </tr>
 </tbody>
 </table>
@@ -3340,49 +3350,59 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.ssid</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ssid</code></td>
 <td>String</td>
 <td>The SSID of the wireless network to connect to</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.channel</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.channel</code></td>
 <td>String</td>
 <td>The channel of the wireless network to connect to</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.bgscan</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
 <td>String</td>
-<td>Set the background scans; possible values are None, Simple and Learn</td>
+<td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.passphrase</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.passphrase</code></td>
 <td>Password</td>
 <td>The password for the wireless network</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.ignoreSSID</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ignoreSSID</code></td>
 <td>Boolean</td>
 <td>Specify if a scan for SSID is required before attempting to associate</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.mode</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.mode</code></td>
 <td>String</td>
 <td>The mode of the wireless connection; for station mode set to INFRA</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.pingAccessPoint</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
 <td>Boolean</td>
 <td>Enable pinging the access point after connection is established</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.driver</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
 <td>String</td>
 <td>The driver used for the connection</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.wifi.infra.securityType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.securityType</code></td>
 <td>String</td>
 <td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.groupCiphers</code></td>
+<td>String</td>
+<td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pairwiseCiphers</code></td>
+<td>String</td>
+<td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
 </tr>
 </tbody>
 </table>
@@ -3397,84 +3417,94 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.enabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.enabled</code></td>
 <td>Boolean</td>
 <td>Enable the interface</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.idle</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
 <td>Integer</td>
 <td>The idle option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.password</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.username</code></td>
+<td>String</td>
+<td>The username used for the connection</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.password</code></td>
 <td>Password</td>
 <td>The password used for the connection</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.pdpType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
 <td>String</td>
 <td>The PdP type; possible values are IP, PPP and IPv6</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.maxFail</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
 <td>Integer</td>
 <td>The maxfail option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.authType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
 <td>String</td>
 <td>The authentication type; possible values are None, Auto, CHAP and PAP</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.lpcEchoInterval</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
 <td>Integer</td>
 <td>The lcp-echo-interval option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.activeFilter</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
 <td>String</td>
 <td>The active-filter option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.lpcEchoFailure</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
 <td>Integer</td>
 <td>The lcp-echo-failure option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.diversityEnabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
 <td>Boolean</td>
 <td>Enable the LTE diversity antenna</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.resetTimeout</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.resetTimeout</code></td>
 <td>Integer</td>
 <td>The modem reset timeout in minutes</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.gpsEnabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.gpsEnabled</code></td>
 <td>Boolean</td>
 <td>Enable the GPS device in the modem if available</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.persist</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
 <td>Boolean</td>
 <td>The persist option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.apn</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.apn</code></td>
 <td>String</td>
 <td>The modem Access Point Name</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.dialString</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
 <td>String</td>
 <td>The dial string used for connecting to the APN</td>
 </tr>
 <tr>
-<td><code>net.interface.\&lt;interface\&gt;.config.holdoff</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
 <td>Integer</td>
 <td>The holdoff option of the PPP daemon (in seconds)</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
+<td>Integer</td>
+<td>Assigned ppp interface number</td>
 </tr>
 </tbody>
 </table>

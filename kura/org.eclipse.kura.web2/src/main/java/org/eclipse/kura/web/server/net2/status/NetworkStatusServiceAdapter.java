@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.server.net2.status;
 
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 public class NetworkStatusServiceAdapter {
@@ -27,6 +28,9 @@ public class NetworkStatusServiceAdapter {
         GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfig();
 
         setCommonStateProperties(gwtConfig, ifname);
+        if (gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) {
+            setIpv4StateProperties(gwtConfig, ifname);
+        }
         setModemStateProperties(gwtConfig, ifname);
 
         return gwtConfig;
@@ -42,6 +46,10 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setHwUsbDevice(NA);
         gwtConfig.setHwSerial(NA);
         gwtConfig.setHwRssi(NA);
+    }
+
+    private void setIpv4StateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
+        // fetch ip address, mask, gateway, dns
     }
 
     private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
@@ -63,6 +71,8 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setHwFirmware(NA); // firmware version
             gwtModemConfig.setConnectionType("PPP"); // PPP or DirectIP
             // gwtModemConfig.setNetworkTechnology(); // HSPDA/EVMO/...
+
+            // fetch ip, mask etc from ipv4 config
         }
     }
 

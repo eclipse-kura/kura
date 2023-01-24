@@ -45,8 +45,6 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
 
-        logger.info("IS NET2? {}", isNet2());
-
         if (isNet2()) {
             return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
         } else {

@@ -191,7 +191,8 @@ public class NetworkConfigurationServiceAdapter {
             gwtConfig.setHwRssi(NA);
             gwtConfig.setHwDriver(this.properties.getWifiMasterDriver(ifname));
             ((GwtWifiNetInterfaceConfig) gwtConfig).setAccessPointWifiConfig(gwtWifiConfig);
-            logger.info("GWT Wifi Master Configuration for interface {}:\n{}\n", ifname, gwtWifiConfig.getProperties());
+            logger.debug("GWT Wifi Master Configuration for interface {}:\n{}\n", ifname,
+                    gwtWifiConfig.getProperties());
         }
     }
 
@@ -404,11 +405,12 @@ public class NetworkConfigurationServiceAdapter {
             // gwtModemConfig.setDataCompression();
             // gwtModemConfig.setHeaderCompression();
 
+            // TODO: remove this
             // copy properties from IPv4 Config
             gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-            gwtModemConfig.setIpAddress(gwtConfig.getIpAddress());
-            gwtModemConfig.setSubnetMask(gwtConfig.getSubnetMask());
-            gwtModemConfig.setGateway(gwtConfig.getGateway());
+            gwtModemConfig.setIpAddress("10.200.12.12");
+            gwtModemConfig.setSubnetMask("255.255.255.0");
+            gwtModemConfig.setGateway("10.200.12.1");
             gwtModemConfig.setStatus(gwtConfig.getStatus());
 
             gwtModemConfig.setModemId(this.properties.getUsbProductName(ifname));

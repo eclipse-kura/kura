@@ -15,7 +15,6 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.db.BaseDbService"/>
-      <provide interface="org.eclipse.kura.message.store.provider.MessageStoreProvider"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl"/>
    <reference bind="setDebugShell" cardinality="1..1" interface="org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell" name="SqliteDebugShell" policy="static"/>

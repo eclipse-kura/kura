@@ -37,11 +37,11 @@ public class NetworkStatusServiceAdapter {
         // TODO init status services here
     }
 
-    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname, String iftype) {
+    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname, String iftype, String ipConfigMode) {
         GwtNetInterfaceConfig gwtConfig = createGwtNetInterfaceConfig(iftype);
 
         setCommonStateProperties(gwtConfig, ifname);
-        setIpv4DhcpClientProperties(gwtConfig);
+        setIpv4DhcpClientProperties(gwtConfig, ipConfigMode);
         setModemStateProperties(gwtConfig, ifname);
 
         return gwtConfig;
@@ -71,8 +71,8 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setHwRssi(NA);
     }
 
-    private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig) {
-        if (isDhcpClient(gwtConfig)) {
+    private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig, String ipConfigMode) {
+        if (isDhcpClient(ipConfigMode)) {
             // fetch ip address, mask, gateway, dns
             gwtConfig.setIpAddress("192.168.2.10");
             gwtConfig.setGateway("192.168.2.1");
@@ -81,15 +81,8 @@ public class NetworkStatusServiceAdapter {
         }
     }
 
-    private boolean isDhcpClient(GwtNetInterfaceConfig gwtConfig) {
-        String mode = gwtConfig.getConfigMode();
-        String routerMode = gwtConfig.getRouterMode();
-        
-        boolean isDhcp = mode != null && mode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-        boolean isNotDhcpServer = routerMode != null && (routerMode.equals(GwtNetRouterMode.netRouterNat.name())
-                || routerMode.equals(GwtNetRouterMode.netRouterOff.name()));
-
-        return isDhcp && isNotDhcpServer;
+    private boolean isDhcpClient(String ipConfigMode) {
+        return ipConfigMode != null && ipConfigMode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
     }
 
     private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {

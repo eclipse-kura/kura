@@ -99,8 +99,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public String getIp4DnsServers(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname),
-                "");
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname), "");
     }
 
     /*

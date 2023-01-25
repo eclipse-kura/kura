@@ -90,20 +90,21 @@ public class NetworkConfigurationServiceAdapter {
         setWifiInfraProperties(gwtConfig, ifname);
         setModemProperties(gwtConfig, ifname);
 
-        logger.debug("GWT Network Configuration for interface {}:\n{}\n", ifname, gwtConfig.getProperties());
-
         return gwtConfig;
     }
 
     private GwtNetInterfaceConfig createGwtNetInterfaceConfig(String ifname) {
         if (this.properties.getType(ifname).equals(NetInterfaceType.WIFI.name())) {
+            logger.debug("{} is of type WIFI.", ifname);
             return new GwtWifiNetInterfaceConfig();
         }
 
         if (this.properties.getType(ifname).equals(NetInterfaceType.MODEM.name())) {
+            logger.debug("{} is of type MODEM.", ifname);
             return new GwtModemInterfaceConfig();
         }
 
+        logger.debug("{} is not of type WIFI nor MODEM.", ifname);
         return new GwtNetInterfaceConfig();
     }
 
@@ -123,8 +124,6 @@ public class NetworkConfigurationServiceAdapter {
         gwtConfig.setIpAddress(this.properties.getIp4Address(ifname));
         gwtConfig.setSubnetMask(this.properties.getIp4Netmask(ifname));
         gwtConfig.setGateway(this.properties.getIp4Gateway(ifname));
-        // TODO: maybe manipulate to insert \n like in previous networking
-        gwtConfig.setReadOnlyDnsServers(this.properties.getIp4DnsServers(ifname));
         gwtConfig.setDnsServers(this.properties.getIp4DnsServers(ifname));
     }
 
@@ -379,7 +378,7 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     private void setModemProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        if (this.properties.getModemEnabled(ifname) && gwtConfig instanceof GwtModemInterfaceConfig) {
+        if (gwtConfig instanceof GwtModemInterfaceConfig) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
 
             gwtModemConfig.setDialString(this.properties.getModemDialString(ifname));
@@ -400,23 +399,11 @@ public class NetworkConfigurationServiceAdapter {
             gwtModemConfig.setPdpType(getModemPdpType(this.properties.getModemPdpType(ifname)));
             gwtModemConfig.setApn(this.properties.getModemApn(ifname));
             gwtModemConfig.setHwState(getModemConnectionState(this.properties.getModemConnectionStatus(ifname)));
-            // Those properties are not in configuration, what are those?
-            // gwtModemConfig.setProfileID();
-            // gwtModemConfig.setDataCompression();
-            // gwtModemConfig.setHeaderCompression();
-
-            // TODO: remove this
-            // copy properties from IPv4 Config
-            gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-            gwtModemConfig.setIpAddress("10.200.12.12");
-            gwtModemConfig.setSubnetMask("255.255.255.0");
-            gwtModemConfig.setGateway("10.200.12.1");
-            gwtModemConfig.setStatus(gwtConfig.getStatus());
-
             gwtModemConfig.setModemId(this.properties.getUsbProductName(ifname));
             gwtModemConfig.setManufacturer(this.properties.getUsbVendorName(ifname));
             gwtModemConfig.setModel(this.properties.getUsbProductId(ifname));
             gwtModemConfig.setHwUsbDevice(this.properties.getUsbDevicePath(ifname));
+            gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
 
             logger.debug("GWT Modem Configuration for interface {}:\n{}\n", ifname, gwtModemConfig.getProperties());
         }

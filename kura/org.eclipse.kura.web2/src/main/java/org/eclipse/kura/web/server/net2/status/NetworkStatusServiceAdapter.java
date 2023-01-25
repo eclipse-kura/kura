@@ -12,20 +12,32 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.status;
 
+import java.util.Arrays;
+
+import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * Adapter to convert status-related properties to a
+ * {@link GwtNetInterfaceConfig} object.
+ *
+ */
 public class NetworkStatusServiceAdapter {
 
     private static final String NA = "N/A";
+    private static final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
 
     public NetworkStatusServiceAdapter() {
         // TODO init status services here
     }
 
-    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
-        GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfig();
+    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname, String iftype) {
+        GwtNetInterfaceConfig gwtConfig = createGwtNetInterfaceConfig(iftype);
 
         setCommonStateProperties(gwtConfig, ifname);
         if (gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) {
@@ -34,6 +46,18 @@ public class NetworkStatusServiceAdapter {
         setModemStateProperties(gwtConfig, ifname);
 
         return gwtConfig;
+    }
+
+    private GwtNetInterfaceConfig createGwtNetInterfaceConfig(String iftype) {
+        if (iftype.equals(NetInterfaceType.WIFI.name())) {
+            return new GwtWifiNetInterfaceConfig();
+        }
+
+        if (iftype.equals(NetInterfaceType.MODEM.name())) {
+            return new GwtModemInterfaceConfig();
+        }
+
+        return new GwtNetInterfaceConfig();
     }
 
     private void setCommonStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
@@ -50,6 +74,7 @@ public class NetworkStatusServiceAdapter {
 
     private void setIpv4StateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
         // fetch ip address, mask, gateway, dns
+        // set readonly dns servers if in dhcp client mode (if here, then last is true)
     }
 
     private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
@@ -57,22 +82,24 @@ public class NetworkStatusServiceAdapter {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
 
             gwtModemConfig.setHwSerial(NA); // imei
-            // gwtModemConfig.setHwRssi(Integer.toString(rssi));
+            gwtModemConfig.setHwRssi(NA); // Integer.toString(rssi)
             gwtModemConfig.setHwICCID(NA);
             gwtModemConfig.setHwIMSI(NA);
             gwtModemConfig.setHwRegistration(NA);
             gwtModemConfig.setHwPLMNID(NA);
-            // gwtModemConfig.setHwNetwork(network);
-            // gwtModemConfig.setHwRadio(radio);
+            gwtModemConfig.setHwNetwork(NA);
+            gwtModemConfig.setHwRadio(NA);
             gwtModemConfig.setHwBand(NA);
-            // gwtModemConfig.setHwLAC(lac);
-            // gwtModemConfig.setHwCI(ci);
+            gwtModemConfig.setHwLAC(NA);
+            gwtModemConfig.setHwCI(NA);
             gwtModemConfig.setGpsSupported(false);
             gwtModemConfig.setHwFirmware(NA); // firmware version
             gwtModemConfig.setConnectionType("PPP"); // PPP or DirectIP
-            // gwtModemConfig.setNetworkTechnology(); // HSPDA/EVMO/...
+            gwtModemConfig.setNetworkTechnology(Arrays.asList(NA)); // HSPDA/EVMO/...
 
-            // fetch ip, mask etc from ipv4 config
+            gwtModemConfig.setIpAddress("10.10.10.10");
+            gwtModemConfig.setSubnetMask("255.255.255.0");
+            gwtModemConfig.setGateway("10.10.10.1");
         }
     }
 

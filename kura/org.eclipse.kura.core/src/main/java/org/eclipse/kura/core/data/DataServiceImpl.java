@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
+import org.eclipse.kura.KuraStoreCapacityReachedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -49,6 +50,7 @@ import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.StoredMessage;
+import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
@@ -320,9 +322,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     public synchronized void setH2DbService(H2DbService dbService) {
-        setMessageStoreProvider((name, capacity) -> new H2DbMessageStoreImpl(
-                dbService, name,
-                capacity));
+        setMessageStoreProvider(name -> new H2DbMessageStoreImpl(
+                dbService, name));
     }
 
     public synchronized void unsetH2DbService(H2DbService dbService) {
@@ -562,12 +563,32 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
-        int id = this.store.getMessageStore().store(topic, payload, qos, retain, priority);
-        logger.info("Stored message on topic: {}, priority: {}", topic, priority);
+        final MessageStore currentStore = this.store.getMessageStore();
+        final int messageId;
+
+        synchronized (currentStore) {
+            // Priority 0 are used for life-cycle messages like birth and death
+            // certificates.
+            // Priority 1 are used for remove management by Cloudlet applications.
+            // For those messages, bypass the maximum message count check of the DB cache.
+            // We want to publish those message even if the DB is full, so allow their
+            // storage.
+            if (priority != 0 && priority != 1) {
+                int count = currentStore.getMessageCount();
+                logger.debug("Store message count: {}", count);
+                if (count >= this.dataServiceOptions.getStoreCapacity()) {
+                    logger.error("Store capacity exceeded");
+                    throw new KuraStoreCapacityReachedException("Store capacity exceeded");
+                }
+            }
+
+            messageId = currentStore.store(topic, payload, qos, retain, priority);
+            logger.info("Stored message on topic: {}, priority: {}", topic, priority);
+        }
 
         signalPublisher();
 
-        return id;
+        return messageId;
     }
 
     @Override

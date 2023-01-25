@@ -61,8 +61,7 @@ public class MessageStoreState {
             return this.messageStore.get();
         }
 
-        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid(),
-                this.options.getStoreCapacity());
+        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid());
 
         this.messageStore = Optional.of(result);
 

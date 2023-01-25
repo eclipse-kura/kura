@@ -36,11 +36,6 @@ public interface MessageStore {
      * Inserts a new message in the store. The implementation must set the value of
      * the <code>createdOn</code> message parameter to the current time.
      * <br>
-     * This method must throw a {@link KuraStoreException} if the number of messages
-     * in the store is greater or equal than the value of the <code>capacity</code>
-     * parameter that has been provided to the
-     * {@link MessageStoreProvider#openMessageStore(String, int)} call that created
-     * this store.
      * 
      * @param topic    the value of the <code>topic</code> parameter.
      * @param payload  topic the value of the <code>payload</code> parameter.
@@ -118,6 +113,16 @@ public interface MessageStore {
     public Optional<StoredMessage> get(int msgId) throws KuraStoreException;
 
     /**
+     * Returns the number of messages currently in the store.
+     * This should include all messages, regardless of the value of their
+     * parameters.
+     * 
+     * @return the message count.
+     * @throws KuraStoreException
+     */
+    public int getMessageCount() throws KuraStoreException;
+
+    /**
      * Returns the list of messages whose <code>publishedOn</code> parameter is not
      * set.
      * <br>
@@ -179,7 +184,7 @@ public interface MessageStore {
      * <ul>
      * <li>The value of the <code>QoS</code> parameter is greater than 0.</li>
      * <li>The <code>publishedOn</code> parameter is set.</li>
-     * <li>The <code>publishedOn</code> parameter is not set.</li>
+     * <li>The <code>confirmedOn</code> parameter is not set.</li>
      * </ul>
      * 
      * @throws KuraStoreException

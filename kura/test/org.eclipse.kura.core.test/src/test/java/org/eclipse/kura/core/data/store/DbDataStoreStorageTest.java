@@ -58,7 +58,7 @@ public class DbDataStoreStorageTest {
     @Test
     public void shouldStoreNullPayload() {
         givenNullPayload();
-        givenDbDataStore(10000, 10000, 10);
+        givenDbDataStore(10000, 10000);
 
         whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
@@ -69,7 +69,7 @@ public class DbDataStoreStorageTest {
     @Test
     public void shouldStoreSmallPayload() {
         givenSmallPayload();
-        givenDbDataStore(10000, 10000, 10);
+        givenDbDataStore(10000, 10000);
 
         whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
@@ -80,7 +80,7 @@ public class DbDataStoreStorageTest {
     @Test
     public void shouldStoreLargePayload() {
         givenLargePayload();
-        givenDbDataStore(10000, 10000, 10);
+        givenDbDataStore(10000, 10000);
 
         whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
@@ -89,41 +89,9 @@ public class DbDataStoreStorageTest {
     }
 
     @Test
-    public void highPriorityMessagesStoredEvenWhenCapacityExceeded() {
-        givenSmallPayload();
-        givenDbDataStore(10000, 10000, 0);
-
-        whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_HIGH);
-
-        thenNoExceptionsOccurred();
-        thenStoredMessageIs(TOPIC, this.payload, QOS2, true, PRIORITY_HIGH);
-    }
-
-    @Test
-    public void mediumPriorityMessagesStoredEvenWhenCapacityExceeded() {
-        givenSmallPayload();
-        givenDbDataStore(10000, 10000, 0);
-
-        whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_MEDIUM);
-
-        thenNoExceptionsOccurred();
-        thenStoredMessageIs(TOPIC, this.payload, QOS2, true, PRIORITY_MEDIUM);
-    }
-
-    @Test
-    public void lowPriorityMessagesAreNotStoredWhenCapacityExceeded() {
-        givenSmallPayload();
-        givenDbDataStore(10000, 10000, 0);
-
-        whenStore(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
-
-        thenStoreCapacityExceededException();
-    }
-
-    @Test
     public void idsAreResetIfOverflown() {
         givenSmallPayload();
-        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE, H2_MAX_ID_VALUE);
+        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE);
 
         whenOverflowingIds();
 
@@ -134,7 +102,7 @@ public class DbDataStoreStorageTest {
     @Test
     public void storeWithPriority0ShouldUpdateDbEvenIfDbIsFull() {
         givenSmallPayload();
-        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE, 0);
+        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE);
 
         whenStore(TOPIC, this.payload, QOS0, true, PRIORITY_HIGH);
 
@@ -144,7 +112,7 @@ public class DbDataStoreStorageTest {
     @Test
     public void storeWithPriority1ShouldUpdateDbEvenIfDbIsFull() {
         givenSmallPayload();
-        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE, 0);
+        givenDbDataStore(H2_MAX_ID_VALUE, H2_MAX_ID_VALUE);
 
         whenStore(TOPIC, this.payload, QOS1, true, PRIORITY_MEDIUM);
 
@@ -177,11 +145,11 @@ public class DbDataStoreStorageTest {
         }
     }
 
-    private void givenDbDataStore(int houseKeeperInterval, int purgeAge, int capacity) {
+    private void givenDbDataStore(int houseKeeperInterval, int purgeAge) {
         H2DbService h2Service = new MockH2DbService();
 
         try {
-            this.dataStore = new H2DbMessageStoreImpl(h2Service, TABLE_NAME, capacity);
+            this.dataStore = new H2DbMessageStoreImpl(h2Service, TABLE_NAME);
         } catch (KuraStoreException e) {
             this.occurredException = e;
         }

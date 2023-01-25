@@ -84,7 +84,7 @@ public class DataServiceImplTest {
         // the actual invocation
         svc.setMessageStoreProvider(messageStoreProviderMock);
 
-        verify(messageStoreProviderMock, times(1)).openMessageStore("foo", capacity);
+        verify(messageStoreProviderMock, times(1)).openMessageStore("foo");
 
         Map<DataTransportToken, Integer> ifMsgs = (Map<DataTransportToken, Integer>) TestUtil.getFieldValue(svc,
                 "inFlightMsgIds");
@@ -560,7 +560,7 @@ public class DataServiceImplTest {
             List<StoredMessage> inFlight,
             List<StoredMessage> dropped) throws KuraStoreException {
 
-        when(messageStoreProviderMock.openMessageStore(Mockito.any(), Mockito.anyInt()))
+        when(messageStoreProviderMock.openMessageStore(Mockito.any()))
                 .thenReturn(messageStoreMock);
 
         when(messageStoreMock.getUnpublishedMessages()).thenReturn(unpublished);

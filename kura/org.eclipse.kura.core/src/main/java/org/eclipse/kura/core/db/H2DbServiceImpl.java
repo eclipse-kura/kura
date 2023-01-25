@@ -612,9 +612,9 @@ public class H2DbServiceImpl
     }
 
     @Override
-    public MessageStore openMessageStore(String name, int capacity) throws KuraStoreException {
+    public MessageStore openMessageStore(String name) throws KuraStoreException {
 
-        return new H2DbMessageStoreImpl(this, name, capacity);
+        return new H2DbMessageStoreImpl(this, name);
     }
 
     @Override

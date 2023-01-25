@@ -27,10 +27,9 @@ public interface MessageStoreProvider {
     /**
      * Opens or creates a {@link MessageStore} instance with the given name.
      * 
-     * @param name     the store name.
-     * @param capacity the maximum message count that is possible to store.
-     * @return
+     * @param name the store name.
+     * @return the opened {@link MessageStore}
      * @throws KuraStoreException
      */
-    public MessageStore openMessageStore(String name, int capacity) throws KuraStoreException;
+    public MessageStore openMessageStore(String name) throws KuraStoreException;
 }

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 
-import org.eclipse.kura.KuraStoreCapacityReachedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.db.H2DbService;
@@ -65,7 +64,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
     private H2DbService dbService;
     private final Calendar utcCalendar;
-    private int capacity;
 
     private final String tableName;
     private final String sanitizedTableName;
@@ -90,13 +88,13 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private final String sqlDeletePublishedMessages;
 
     // package level constructor to be invoked only by the factory
-    public H2DbMessageStoreImpl(final H2DbService dbService, final String table, final int capacity)
+    public H2DbMessageStoreImpl(final H2DbService dbService, final String table)
             throws KuraStoreException {
         // do not make this static as it may not be thread safe
         this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.dbService = dbService;
         this.tableName = table;
-        this.capacity = capacity;
+
         this.sanitizedTableName = sanitizeSql(table);
 
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
@@ -155,19 +153,8 @@ public class H2DbMessageStoreImpl implements MessageStore {
         return "\"" + sanitizedName + "\"";
     }
 
-    // ----------------------------------------------------------
-    //
-    // Start/Stop, ServiceId
-    //
-    // ----------------------------------------------------------
-
-    // ----------------------------------------------------------
-    //
-    // Message APIs
-    //
-    // ----------------------------------------------------------
-
-    private synchronized int getMessageCount() throws KuraStoreException {
+    @Override
+    public synchronized int getMessageCount() throws KuraStoreException {
 
         return withConnection(c -> {
             try (final PreparedStatement stmt = c.prepareStatement(this.sqlMessageCount);
@@ -175,7 +162,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 if (rs.next()) {
                     return rs.getInt(1);
                 } else {
-                    return -1;
+                    throw new SQLException("Empty result set");
                 }
             }
         }, "Cannot get message count");
@@ -189,7 +176,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
     public synchronized int store(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
 
-        validate(topic, priority);
+        validate(topic);
 
         try {
             return storeInternal(topic, payload, qos, retain, priority);
@@ -212,7 +199,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
         }
     }
 
-    private void validate(String topic, int priority) throws KuraStoreException {
+    private void validate(String topic) throws KuraStoreException {
         if (this.dbService == null) {
             throw new KuraStoreException("DbService instance not attached");
         }
@@ -220,20 +207,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
             throw new IllegalArgumentException(TOPIC_ELEMENT);
         }
 
-        // Priority 0 are used for life-cycle messages like birth and death
-        // certificates.
-        // Priority 1 are used for remove management by Cloudlet applications.
-        // For those messages, bypass the maximum message count check of the DB cache.
-        // We want to publish those message even if the DB is full, so allow their
-        // storage.
-        if (priority != 0 && priority != 1) {
-            int count = getMessageCount();
-            logger.debug("Store message count: {}", count);
-            if (count >= this.capacity) {
-                logger.error("Store capacity exceeded");
-                throw new KuraStoreCapacityReachedException("Store capacity exceeded");
-            }
-        }
     }
 
     private synchronized int storeInternal(String topic, byte[] payload, int qos, boolean retain,

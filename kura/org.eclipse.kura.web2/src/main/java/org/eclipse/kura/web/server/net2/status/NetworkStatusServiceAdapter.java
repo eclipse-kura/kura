@@ -18,6 +18,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,7 @@ public class NetworkStatusServiceAdapter {
         GwtNetInterfaceConfig gwtConfig = createGwtNetInterfaceConfig(iftype);
 
         setCommonStateProperties(gwtConfig, ifname);
-        if (gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name())) {
-            setIpv4StateProperties(gwtConfig, ifname);
-        }
+        setIpv4DhcpClientProperties(gwtConfig);
         setModemStateProperties(gwtConfig, ifname);
 
         return gwtConfig;
@@ -72,9 +71,25 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setHwRssi(NA);
     }
 
-    private void setIpv4StateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        // fetch ip address, mask, gateway, dns
-        // set readonly dns servers if in dhcp client mode (if here, then last is true)
+    private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig) {
+        if (isDhcpClient(gwtConfig)) {
+            // fetch ip address, mask, gateway, dns
+            gwtConfig.setIpAddress("192.168.2.10");
+            gwtConfig.setGateway("192.168.2.1");
+            gwtConfig.setSubnetMask("255.255.255.0");
+            gwtConfig.setReadOnlyDnsServers("8.8.8.8");
+        }
+    }
+
+    private boolean isDhcpClient(GwtNetInterfaceConfig gwtConfig) {
+        String mode = gwtConfig.getConfigMode();
+        String routerMode = gwtConfig.getRouterMode();
+        
+        boolean isDhcp = mode != null && mode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+        boolean isNotDhcpServer = routerMode != null && (routerMode.equals(GwtNetRouterMode.netRouterNat.name())
+                || routerMode.equals(GwtNetRouterMode.netRouterOff.name()));
+
+        return isDhcp && isNotDhcpServer;
     }
 
     private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
@@ -97,6 +112,7 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setConnectionType("PPP"); // PPP or DirectIP
             gwtModemConfig.setNetworkTechnology(Arrays.asList(NA)); // HSPDA/EVMO/...
 
+            // this is a duplication because the GwtModemInterfaceConfig is poorly designed
             gwtModemConfig.setIpAddress("10.10.10.10");
             gwtModemConfig.setSubnetMask("255.255.255.0");
             gwtModemConfig.setGateway("10.10.10.1");

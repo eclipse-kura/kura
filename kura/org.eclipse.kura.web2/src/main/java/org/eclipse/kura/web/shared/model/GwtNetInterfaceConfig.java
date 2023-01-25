@@ -25,12 +25,6 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
     private static final long serialVersionUID = 7079533925979145804L;
 
-    public GwtNetInterfaceConfig() {
-        setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
-        setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-        setRouterMode(GwtNetRouterMode.netRouterOff.name());
-    }
-
     public String getName() {
         return get("name");
     }

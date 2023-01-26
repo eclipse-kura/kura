@@ -77,6 +77,7 @@
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>
         <module>org.eclipse.kura.net.admin</module>
+        <module>org.eclipse.kura.net.configuration</module>
         <module>org.eclipse.kura.net2.admin</module>
         <module>org.eclipse.kura.net.admin.firewall</module>
         <module>org.eclipse.kura.protocol.modbus</module>

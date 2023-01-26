@@ -26,7 +26,7 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <graalvm.version>21.3.2</graalvm.version>
+        <graalvm.version>21.3.5</graalvm.version>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.wire.script.tools.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -69,6 +69,16 @@
                                 <artifactItem>
                                     <groupId>org.graalvm.truffle</groupId>
                                     <artifactId>truffle-api</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.graalvm.regex</groupId>
+                                    <artifactId>regex</artifactId>
+                                    <version>${graalvm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.graalvm.sdk</groupId>
+                                    <artifactId>launcher-common</artifactId>
                                     <version>${graalvm.version}</version>
                                 </artifactItem>
                             </artifactItems>

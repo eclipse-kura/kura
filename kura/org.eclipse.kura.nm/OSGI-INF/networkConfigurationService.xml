@@ -14,7 +14,7 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" immediate="true" modified="update" name="org.eclipse.kura.net.admin.NetworkConfigurationService">
-   <implementation class="org.eclipse.kura.net2.admin.NetworkConfigurationService"/>
+   <implementation class="org.eclipse.kura.nm.configuration.NMConfigurationServiceImpl"/>
    <property name="service.pid" value="org.eclipse.kura.net.admin.NetworkConfigurationService"/>
    <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static" unbind="unsetNetworkService"/>
    <service>

@@ -1,5 +1,8 @@
 package org.eclipse.kura.net2.admin;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum KuraInterfaceStatus {
 
     DISABLED,
@@ -8,6 +11,13 @@ public enum KuraInterfaceStatus {
     ENABLEDLAN,
     ENABLEDWAN,
     UNKNOWN;
+
+    private static final List<KuraInterfaceStatus> ENABLED_STATUS = Arrays.asList(KuraInterfaceStatus.ENABLEDLAN,
+            KuraInterfaceStatus.ENABLEDWAN, KuraInterfaceStatus.L2ONLY);
+
+    public static Boolean isEnabled(KuraInterfaceStatus status) {
+        return ENABLED_STATUS.contains(status);
+    }
 
     public static KuraInterfaceStatus fromString(String status) {
         switch (status) {

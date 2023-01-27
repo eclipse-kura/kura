@@ -12,37 +12,36 @@
  *******************************************************************************/
 package org.eclipse.kura.net2.admin;
 
-import java.util.Arrays;
-import java.util.List;
-
 public enum NMDeviceEnable {
 
     DISABLED,
     UNMANAGED,
     ENABLED;
 
-    private static final List<KuraInterfaceStatus> ENABLED_STATUS = Arrays.asList(KuraInterfaceStatus.ENABLEDLAN,
-            KuraInterfaceStatus.ENABLEDWAN, KuraInterfaceStatus.L2ONLY);
+    public static NMDeviceEnable fromKuraInterfaceStatus(KuraInterfaceStatus ip4Status, KuraInterfaceStatus ip6Status) {
+        Boolean ip4Enabled = KuraInterfaceStatus.isEnabled(ip4Status);
+        Boolean ip4Disabled = ip4Status == KuraInterfaceStatus.DISABLED;
+        Boolean ip4Unmanaged = ip4Status == KuraInterfaceStatus.UNMANAGED;
+        Boolean ip4Unknown = ip4Status == KuraInterfaceStatus.UNKNOWN;
 
-    public static NMDeviceEnable fromKuraInterfaceStatus(KuraInterfaceStatus ip4status, KuraInterfaceStatus ip6status) {
-        Boolean ip4enabled = ENABLED_STATUS.contains(ip4status);
-        Boolean ip6enabled = ENABLED_STATUS.contains(ip6status);
+        Boolean ip6Enabled = KuraInterfaceStatus.isEnabled(ip6Status);
+        Boolean ip6Disabled = ip6Status == KuraInterfaceStatus.DISABLED;
+        Boolean ip6Unmanaged = ip6Status == KuraInterfaceStatus.UNMANAGED;
+        Boolean ip6Unknown = ip6Status == KuraInterfaceStatus.UNKNOWN;
 
-        if ((ip4enabled && ip6enabled) || (ip4enabled && ip6status == KuraInterfaceStatus.DISABLED)
-                || (ip4status == KuraInterfaceStatus.DISABLED && ip6enabled)) {
+        if ((ip4Enabled && ip6Enabled) || (ip4Enabled && ip6Disabled) || (ip4Disabled && ip6Enabled)) {
             return ENABLED;
         }
 
-        if (ip4status == KuraInterfaceStatus.UNMANAGED && ip6status == KuraInterfaceStatus.UNMANAGED) {
+        if (ip4Unmanaged && ip6Unmanaged) {
             return UNMANAGED;
         }
 
-        if ((ip4status == KuraInterfaceStatus.UNMANAGED && ip6status != KuraInterfaceStatus.UNMANAGED)
-                || (ip4status != KuraInterfaceStatus.UNMANAGED && ip6status == KuraInterfaceStatus.UNMANAGED)) {
+        if ((ip4Unmanaged && !ip6Unmanaged) || (!ip4Unmanaged && ip6Unmanaged)) {
             throw new IllegalArgumentException("ip4 and ip6 status should be both UNMANAGED");
         }
 
-        if (ip4status == KuraInterfaceStatus.UNKNOWN || ip6status == KuraInterfaceStatus.UNKNOWN) {
+        if (ip4Unknown || ip6Unknown) {
             throw new IllegalArgumentException("ip4 and ip6 status should not be UNKNOWN");
         }
 

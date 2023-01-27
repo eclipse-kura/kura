@@ -123,7 +123,14 @@ public class NMDbusConnector {
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
             NetworkProperties properties) throws DBusException {
+        List<String> availableInterfaces = getAllDeviceInterfaceNames();
+
         for (String iface : configuredInterfaces) {
+            if (!availableInterfaces.contains(iface)) {
+                logger.debug("Configured device \"{}\" not available on the system. Ignoring configuration.", iface);
+                continue;
+            }
+
             Device device = getDeviceByIpIface(iface);
             NMDeviceType deviceType = getDeviceType(device);
 
@@ -211,6 +218,18 @@ public class NMDbusConnector {
         List<Device> devices = new ArrayList<>();
         for (DBusPath path : devicePaths) {
             devices.add(dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class));
+        }
+
+        return devices;
+    }
+
+    private List<String> getAllDeviceInterfaceNames() throws DBusException {
+        List<DBusPath> devicePaths = nm.GetAllDevices();
+
+        List<String> devices = new ArrayList<>();
+        for (DBusPath path : devicePaths) {
+            Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Properties.class);
+            devices.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
         }
 
         return devices;

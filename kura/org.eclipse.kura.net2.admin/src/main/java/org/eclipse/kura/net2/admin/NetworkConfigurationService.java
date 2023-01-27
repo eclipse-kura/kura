@@ -152,7 +152,7 @@ public class NetworkConfigurationService implements SelfConfiguringComponent {
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
 
         try {
-            this.nmDbusConnector = NMDbusConnector.createInstance();
+            this.nmDbusConnector = NMDbusConnector.getInstance();
             this.nmDbusConnector.checkPermissions();
         } catch (DBusException e) {
             // TODO Auto-generated catch block

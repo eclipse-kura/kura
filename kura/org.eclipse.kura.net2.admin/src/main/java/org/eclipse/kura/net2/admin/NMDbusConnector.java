@@ -114,8 +114,15 @@ public class NMDbusConnector {
 
         NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
-        // Handle configured devices
         List<String> configuredInterfaces = properties.getStringList("net.interfaces");
+        manageConfiguredInterfaces(configuredInterfaces, properties);
+
+        List<Device> availableInterfaces = getAllDevices();
+        manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+    }
+
+    private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
+            NetworkProperties properties) throws DBusException {
         for (String iface : configuredInterfaces) {
             Device device = getDeviceByIpIface(iface);
             NMDeviceType deviceType = getDeviceType(device);
@@ -161,10 +168,10 @@ public class NMDbusConnector {
                 }
             }
         }
+    }
 
-        // Handle not configured devices
-        List<Device> availableInterfaces = getAllDevices();
-
+    private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,
+            List<Device> availableInterfaces) throws DBusException {
         for (Device device : availableInterfaces) {
             NMDeviceType deviceType = getDeviceType(device);
             String ipInterface = getDeviceIpInterface(device);

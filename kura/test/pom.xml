@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -902,7 +902,7 @@
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
         <module>org.eclipse.kura.net.admin.test</module>
-        <module>org.eclipse.kura.net2.admin.test</module>
+        <module>org.eclipse.kura.nm.test</module>
         <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>

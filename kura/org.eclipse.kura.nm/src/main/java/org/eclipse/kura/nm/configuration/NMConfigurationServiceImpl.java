@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net2.admin;
+package org.eclipse.kura.nm.configuration;
 
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
-import org.eclipse.kura.net2.admin.event.NetworkConfigurationChangeEvent;
-import org.eclipse.kura.net2.admin.writer.DhcpServerConfigWriter;
+import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -47,9 +47,9 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetworkConfigurationService implements SelfConfiguringComponent {
+public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NMConfigurationServiceImpl.class);
 
     private static final String PREFIX = "net.interface.";
     private static final String NET_INTERFACES = "net.interfaces";

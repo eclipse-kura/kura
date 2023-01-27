@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net2.admin.writer;
+package org.eclipse.kura.nm.configuration.writer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,7 +34,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
-import org.eclipse.kura.net2.admin.NetworkProperties;
+import org.eclipse.kura.nm.configuration.NetworkProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

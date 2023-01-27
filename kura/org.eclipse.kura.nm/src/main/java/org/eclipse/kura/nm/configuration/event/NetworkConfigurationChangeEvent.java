@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net2.admin.event;
+package org.eclipse.kura.nm.configuration.event;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package org.eclipse.kura.net2.admin.monitor;
+package org.eclipse.kura.nm.configuration.monitor;
 
 import java.util.HashMap;
 import java.util.Map;

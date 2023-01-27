@@ -23,12 +23,12 @@
 		<version>5.3.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>org.eclipse.kura.net2.admin</artifactId>
+	<artifactId>org.eclipse.kura.nm</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.net.admin.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.nm.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 </project>

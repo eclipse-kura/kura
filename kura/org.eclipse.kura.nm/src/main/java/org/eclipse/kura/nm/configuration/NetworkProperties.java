@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net2.admin;
+package org.eclipse.kura.nm.configuration;
 
 import java.util.ArrayList;
 import java.util.List;

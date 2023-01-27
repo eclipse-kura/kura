@@ -686,7 +686,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     @Override
     public void onConfigurationUpdated() {
 
-        // The SSL service was update, build a new socket connection and close the current SSL client session
+        // The SSL service was updated, build a new socket connection and close the current SSL client session
         if (this.mqttClient != null && isSSL(this.mqttClient.getServerURI())) {
             closeMqttClient();
         }

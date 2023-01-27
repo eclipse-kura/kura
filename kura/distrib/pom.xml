@@ -40,6 +40,8 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
+        <kura.network.provider>kura-networking</kura.network.provider>
+        <!-- kura-networking or network-manager-->
 
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
@@ -396,8 +398,13 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.net2.admin</artifactId>
-                                    <version>${org.eclipse.kura.net2.admin.version}</version>
+                                    <artifactId>org.eclipse.kura.nm</artifactId>
+                                    <version>${org.eclipse.kura.nm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.net.configuration</artifactId>
+                                    <version>${org.eclipse.kura.net.configuration.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -731,7 +738,8 @@
                                 <move file="target/plugins/org.eclipse.kura.localization.resources.jar" tofile="target/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.net2.admin.jar" tofile="target/plugins/org.eclipse.kura.net2.admin_${org.eclipse.kura.net2.admin.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.nm.jar" tofile="target/plugins/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.net.configuration.jar" tofile="target/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.firewall.jar" tofile="target/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false" />
@@ -1138,7 +1146,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
+                                        <property name="network.provider" value="${kura.network.provider}" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1323,7 +1331,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="kura-network" />
+                                        <property name="network.provider" value="${kura.network.provider}" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1509,7 +1517,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="kura-network" />
+                                        <property name="network.provider" value="${kura.network.provider}" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1789,7 +1797,7 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="kura-network" />
+                                        <property name="network.provider" value="${kura.network.provider}" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>

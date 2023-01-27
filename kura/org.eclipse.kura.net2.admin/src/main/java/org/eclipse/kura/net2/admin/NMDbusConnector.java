@@ -129,7 +129,8 @@ public class NMDbusConnector {
 
             KuraInterfaceStatus ip4Status = KuraInterfaceStatus
                     .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
-            KuraInterfaceStatus ip6Status = KuraInterfaceStatus.DISABLED; // TBD
+            KuraInterfaceStatus ip6Status = ip4Status == KuraInterfaceStatus.UNMANAGED ? KuraInterfaceStatus.UNMANAGED
+                    : KuraInterfaceStatus.DISABLED; // Temporary solution while we wait to add ipv6 support.
             NMDeviceEnable deviceStatus = NMDeviceEnable.fromKuraInterfaceStatus(ip4Status, ip6Status);
 
             if (!SUPPORTED_DEVICES.contains(deviceType) || !SUPPORTED_STATUSES.contains(ip4Status)

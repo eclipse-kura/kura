@@ -11,9 +11,6 @@ This quickstart has been tested using the latest Raspberry Pi OS 32 bit images w
 
 For additional details on OS compatibility refer to the [Kura&trade; release notes](https://websites.eclipseprojects.io/kura/downloads.php).
 
-!!! warning
-    Please note that, at the time of this writing, only 32 bit OS image is supported.
-
 ## Enable SSH Access
 
 The ssh server is disabled by default on Raspbian images released after November 2016,

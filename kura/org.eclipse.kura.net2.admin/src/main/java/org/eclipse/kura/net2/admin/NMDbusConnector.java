@@ -52,6 +52,8 @@ public class NMDbusConnector {
     private DBusConnection dbusConnection;
     private NetworkManager nm;
 
+    private Map<String, Object> cachedConfiguration = null;
+
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
@@ -95,6 +97,19 @@ public class NMDbusConnector {
     }
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
+        doApply(networkConfiguration);
+        this.cachedConfiguration = networkConfiguration;
+    }
+
+    public synchronized void apply() throws DBusException {
+        if (Objects.isNull(this.cachedConfiguration)) {
+            logger.warn("No cached network configuration found.");
+            return;
+        }
+        doApply(this.cachedConfiguration);
+    }
+
+    private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
         NetworkProperties properties = new NetworkProperties(networkConfiguration);

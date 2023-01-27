@@ -34,11 +34,24 @@ public class NetworkProperties {
 
     public <T> Optional<T> getOpt(Class<T> clazz, String key, Object... args) {
         String formattedKey = String.format(key, args);
-        if (this.properties.containsKey(formattedKey)) {
-            return Optional.of(clazz.cast(this.properties.get(formattedKey)));
-        } else {
+
+        if (!this.properties.containsKey(formattedKey)) {
             return Optional.empty();
         }
+
+        Object rawValue = this.properties.get(formattedKey);
+        if (Objects.isNull(rawValue)) {
+            return Optional.empty();
+        }
+
+        if (clazz == String.class) {
+            String value = String.class.cast(rawValue);
+            if (value.isEmpty()) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(clazz.cast(rawValue));
     }
 
     public List<String> getStringList(String key, Object... args) {

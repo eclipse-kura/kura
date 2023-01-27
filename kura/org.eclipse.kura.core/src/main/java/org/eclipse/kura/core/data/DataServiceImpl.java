@@ -989,7 +989,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void stopConnectionTask() {
-        disconnect();
         stopConnectionMonitorTask();
     }
 

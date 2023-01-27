@@ -69,7 +69,8 @@ public enum NMDeviceState {
             return NMDeviceState.NM_DEVICE_STATE_DEACTIVATING;
         case 120:
             return NMDeviceState.NM_DEVICE_STATE_FAILED;
+        default:
+            return NMDeviceState.NM_DEVICE_STATE_UNKNOWN;
         }
-        return NM_DEVICE_STATE_UNKNOWN;
     }
 }

@@ -37,9 +37,9 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
+import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
-import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.component.ComponentContext;
@@ -129,8 +129,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             logger.debug("Received null properties...");
         } else {
             logger.debug("Properties... {}", properties);
-            // for now apply the configuration in any case. Is the property the best
-            // approach to manage the incremental updates?
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(properties)));
             update(this.networkProperties.getProperties());
         }
@@ -140,15 +138,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         logger.debug("Deactivate NetworkConfigurationService...");
     }
 
-    protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
-        // Do be done with NM...
-        if (isUsbPort(interfaceName)) {
-            return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
-        } else {
-            return this.linuxNetworkUtil.getType(interfaceName);
-        }
-    }
-
     public synchronized void update(Map<String, Object> receivedProperties) {
         logger.debug("Update NetworkConfigurationService...");
         if (receivedProperties == null) {
@@ -156,20 +145,20 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             return;
         }
 
-        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties); // for backward
-                                                                                           // compatibility
+        final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
         final Set<String> interfaces = AbstractNetworkConfigurationService
                 .getNetworkInterfaceNamesInConfig(modifiedProps);
 
         try {
             for (final String interfaceName : interfaces) {
-                NetInterfaceType type = getNetworkTypeFromSystem(interfaceName);
-                // at least only if the type is not in the properties
-                setInterfaceType(modifiedProps, interfaceName, type); // do we need to retrieve the interface type from
-                                                                      // the system?
-                if (NetInterfaceType.MODEM.equals(type)) {
+                Optional<NetInterfaceType> interfaceTypeProperty = AbstractNetworkConfigurationService
+                        .getNetworkTypeFromProperties(interfaceName, modifiedProps);
+                if (interfaceTypeProperty.isEmpty()) {
+                    interfaceTypeProperty = Optional.of(getNetworkTypeFromSystem(interfaceName));
+                    setInterfaceType(modifiedProps, interfaceName, interfaceTypeProperty.get());
+                }
+                if (NetInterfaceType.MODEM.equals(interfaceTypeProperty.get())) {
                     setModemPppNumber(modifiedProps, interfaceName);
-                    setModemUsbDeviceProperties(modifiedProps, interfaceName);
                 }
             }
 
@@ -182,18 +171,27 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             // networkManager.applyConfiguration
             writeDhcpServerConfiguration(interfaces);
 
-            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps)); // not sure about the
-            // management
-            // of the modifiedprops...
+            this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
 
             if (changed) {
                 this.configurationService.snapshot();
             }
-        } catch (
-
-        KuraException e) {
+        } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);
         }
+    }
+
+    protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
+        // Do be done with NM...
+        if (isUsbPort(interfaceName)) {
+            return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
+        } else {
+            return this.linuxNetworkUtil.getType(interfaceName);
+        }
+    }
+
+    private boolean isUsbPort(String interfaceName) {
+        return interfaceName.split("\\.")[0].matches(MODEM_PORT_REGEX);
     }
 
     private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
@@ -239,31 +237,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PREFIX).append(interfaceName).append(".config.pppNum");
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
-        modifiedProps.put(sb.toString(), pppNum);
+        modifiedProps.put(String.format(PREFIX + "%s.config.pppNum", interfaceName), pppNum);
     }
 
     protected void setInterfaceType(Map<String, Object> modifiedProps, String interfaceName, NetInterfaceType type) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PREFIX).append(interfaceName).append(".type");
-        modifiedProps.put(sb.toString(), type.toString());
-    }
-
-    protected void setModemUsbDeviceProperties(Map<String, Object> modifiedProps, String interfaceName) {
-        // Can we use the NM?
-        Optional<ModemDevice> modemOptional = this.networkService.getModemDevice(interfaceName);
-        if (modemOptional.isPresent() && modemOptional.get() instanceof UsbModemDevice) {
-            String prefix = PREFIX + interfaceName + ".";
-            UsbModemDevice usbModemDevice = (UsbModemDevice) modemOptional.get();
-            modifiedProps.put(prefix + "usb.vendor.id", usbModemDevice.getVendorId());
-            modifiedProps.put(prefix + "usb.vendor.name", usbModemDevice.getManufacturerName());
-            modifiedProps.put(prefix + "usb.product.id", usbModemDevice.getProductId());
-            modifiedProps.put(prefix + "usb.product.name", usbModemDevice.getProductName());
-            modifiedProps.put(prefix + "usb.busNumber", usbModemDevice.getUsbBusNumber());
-            modifiedProps.put(prefix + "usb.devicePath", usbModemDevice.getUsbDevicePath());
-        }
+        modifiedProps.put(String.format(PREFIX + "%s.type", interfaceName), type.toString());
     }
 
     private boolean isEncrypted(String password) {
@@ -334,10 +313,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         return usbPort.orElse(netInterface.getName());
     }
 
-    private void writeDhcpServerConfiguration(Set<String> interfaceNames) { // do we
-                                                                            // need the
-                                                                            // modified
-                                                                            // properties?
+    private void writeDhcpServerConfiguration(Set<String> interfaceNames) {
         interfaceNames.forEach(interfaceName -> {
             if (isDhcpServerValid(interfaceName)) {
                 DhcpServerConfigWriter dhcpServerConfigWriter = new DhcpServerConfigWriter(interfaceName,
@@ -361,8 +337,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         if (type.isPresent() && (NetInterfaceType.ETHERNET.equals(type.get())
                 || NetInterfaceType.WIFI.equals(type.get()))
-                && Boolean.TRUE
-                        .equals(isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
+                && (isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
                 && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
             isValid = true;
         }
@@ -377,10 +352,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         } else {
             return Optional.empty();
         }
-    }
-
-    private boolean isUsbPort(String interfaceName) {
-        return interfaceName.split("\\.")[0].matches(MODEM_PORT_REGEX);
     }
 
     private Map<String, Object> migrateModemConfigs(final Map<String, Object> properties) {
@@ -407,7 +378,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                     "net.interface.%s.usb.devicePath",
                     existingInterfaceName);
 
-            if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
+            if (usbBusNumber.isEmpty() || usbDevicePath.isEmpty()) {
                 logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
                 continue;
             }

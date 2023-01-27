@@ -639,12 +639,12 @@ public class AbstractNetworkConfigurationService {
 
     public static Optional<NetInterfaceType> getNetworkTypeFromProperties(final String interfaceName,
             final Map<String, Object> properties) {
-        Optional<NetInterfaceType> type = Optional.empty();
-        Object typeString = properties.get(String.format("net.interface.%s.type", interfaceName));
-        if (typeString != null) {
-            type = Optional.of(NetInterfaceType.valueOf((String) typeString));
+        Optional<NetInterfaceType> interfaceType = Optional.empty();
+        Object interfaceTypeString = properties.get(String.format("net.interface.%s.type", interfaceName));
+        if (interfaceTypeString != null) {
+            interfaceType = Optional.of(NetInterfaceType.valueOf((String) interfaceTypeString));
         }
-        return type;
+        return interfaceType;
     }
 
 }

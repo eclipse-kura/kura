@@ -39,6 +39,7 @@ import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
 import org.eclipse.kura.usb.UsbService;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -260,8 +261,8 @@ public class NetworkConfigurationServiceTest {
         EventAdmin eventAdminMock = mock(EventAdmin.class);
         this.networkConfigurationService.setEventAdmin(eventAdminMock);
 
-        UsbService usbServiceMock = mock(UsbService.class);
-        this.networkConfigurationService.setUsbService(usbServiceMock);
+//        UsbService usbServiceMock = mock(UsbService.class);
+//        this.networkConfigurationService.setUsbService(usbServiceMock);
 
         NetworkService networkServiceMock = mock(NetworkService.class);
         when(networkServiceMock.getModemPppInterfaceName("1-4")).thenReturn("ppp3");
@@ -336,7 +337,7 @@ public class NetworkConfigurationServiceTest {
     }
 
     private void thenComponentDefinitionHasBasicProperties() {
-        assertEquals(NetworkConfigurationService.PID, this.configuration.getPid());
+        assertEquals(AbstractNetworkConfigurationService.PID, this.configuration.getPid());
         assertNotNull(this.properties);
         assertEquals(1, this.retrievedProperties.size());
         assertNotNull(this.ocd);

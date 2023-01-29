@@ -40,7 +40,7 @@ final class CloudPublisherOptions {
      * Instantiates a new cloud publisher options.
      *
      * @param properties
-     *                       the properties
+     *            the properties
      */
     CloudPublisherOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -84,8 +84,7 @@ final class CloudPublisherOptions {
         return Optional.of(property);
     }
 
-    Boolean getRemoveBodyPropertyFromMetrics() {
-        final Object propertyRaw = this.properties.get(CONF_REMOVE_BODY_PROPERTY);
-        return (Boolean) propertyRaw;
+    boolean getRemoveBodyPropertyFromMetrics() {
+        return (boolean) this.properties.getOrDefault(CONF_REMOVE_BODY_PROPERTY, false);
     }
 }

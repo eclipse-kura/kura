@@ -54,7 +54,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="If Set body from envelope property is not an empty value, the publisher will remove from the message metrics the property added in the message body.">
+            description="Set true to remove the metric that is sent as body of the message.">
         </AD>
     </OCD>
     

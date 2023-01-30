@@ -51,10 +51,8 @@ public class GwtNetworkServiceImpl {
             List<GwtNetInterfaceConfig> result = new LinkedList<>();
             for (String ifname : configuration.getNetInterfaces()) {
                 GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifname);
-                GwtNetInterfaceConfig gwtStatus = status.getGwtNetInterfaceConfig(ifname, gwtConfig.getHwType(),
-                        gwtConfig.getConfigMode());
+                status.fillWithStatusProperties(ifname, gwtConfig);
 
-                gwtConfig.getProperties().putAll(gwtStatus.getProperties());
                 logger.debug("GWT Network Configuration for interface {}:\n{}\n", ifname, gwtConfig.getProperties());
 
                 result.add(gwtConfig);
@@ -62,6 +60,15 @@ public class GwtNetworkServiceImpl {
 
             return result;
         } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static void updateNetInterfaceConfigurations(GwtNetInterfaceConfig config) throws GwtKuraException {
+        try {
+            NetworkConfigurationServiceAdapter adapter = new NetworkConfigurationServiceAdapter();
+            adapter.updateConfiguration(config);
+        } catch (GwtKuraException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }

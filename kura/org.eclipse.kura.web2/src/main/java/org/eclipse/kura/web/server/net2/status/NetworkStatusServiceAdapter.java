@@ -18,7 +18,6 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,52 +31,45 @@ public class NetworkStatusServiceAdapter {
 
     private static final String NA = "N/A";
     private static final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
+    private GwtNetInterfaceConfig gwtConfig;
+    private String ifname;
 
     public NetworkStatusServiceAdapter() {
         // TODO init status services here
     }
 
-    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname, String iftype, String ipConfigMode) {
-        GwtNetInterfaceConfig gwtConfig = createGwtNetInterfaceConfig(iftype);
+    public GwtNetInterfaceConfig fillWithStatusProperties(String ifname, GwtNetInterfaceConfig gwtConfigToUpdate) {
+        this.gwtConfig = gwtConfigToUpdate;
+        this.ifname = ifname;
 
-        setCommonStateProperties(gwtConfig, ifname);
-        setIpv4DhcpClientProperties(gwtConfig, ipConfigMode);
-        setModemStateProperties(gwtConfig, ifname);
+        setCommonStateProperties();
+        setIpv4DhcpClientProperties();
+        setModemStateProperties();
 
         return gwtConfig;
     }
 
-    private GwtNetInterfaceConfig createGwtNetInterfaceConfig(String iftype) {
-        if (iftype.equals(NetInterfaceType.WIFI.name())) {
-            return new GwtWifiNetInterfaceConfig();
-        }
-
-        if (iftype.equals(NetInterfaceType.MODEM.name())) {
-            return new GwtModemInterfaceConfig();
-        }
-
-        return new GwtNetInterfaceConfig();
+    private void setCommonStateProperties() {
+        this.gwtConfig.setHwState(NA);
+        this.gwtConfig.setHwAddress(NA); // MAC address
+        this.gwtConfig.setHwDriver(NA);
+        this.gwtConfig.setHwDriverVersion(NA);
+        this.gwtConfig.setHwFirmware(NA);
+        this.gwtConfig.setHwMTU(99);
+        this.gwtConfig.setHwUsbDevice(NA);
+        this.gwtConfig.setHwSerial(NA);
+        this.gwtConfig.setHwRssi(NA);
     }
 
-    private void setCommonStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        gwtConfig.setHwState(NA);
-        gwtConfig.setHwAddress(NA); // MAC address
-        gwtConfig.setHwDriver(NA);
-        gwtConfig.setHwDriverVersion(NA);
-        gwtConfig.setHwFirmware(NA);
-        gwtConfig.setHwMTU(99);
-        gwtConfig.setHwUsbDevice(NA);
-        gwtConfig.setHwSerial(NA);
-        gwtConfig.setHwRssi(NA);
-    }
+    private void setIpv4DhcpClientProperties() {
+        String ipConfigMode = gwtConfig.getConfigMode();
 
-    private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig, String ipConfigMode) {
         if (isDhcpClient(ipConfigMode)) {
             // fetch ip address, mask, gateway, dns
-            gwtConfig.setIpAddress("192.168.2.10");
-            gwtConfig.setGateway("192.168.2.1");
-            gwtConfig.setSubnetMask("255.255.255.0");
-            gwtConfig.setReadOnlyDnsServers("8.8.8.8");
+            this.gwtConfig.setIpAddress("192.168.2.10");
+            this.gwtConfig.setGateway("192.168.2.1");
+            this.gwtConfig.setSubnetMask("255.255.255.0");
+            this.gwtConfig.setReadOnlyDnsServers("8.8.8.8");
         }
     }
 
@@ -85,9 +77,9 @@ public class NetworkStatusServiceAdapter {
         return ipConfigMode != null && ipConfigMode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
     }
 
-    private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, String ifname) {
-        if (gwtConfig instanceof GwtModemInterfaceConfig) {
-            GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
+    private void setModemStateProperties() {
+        if (this.gwtConfig instanceof GwtModemInterfaceConfig) {
+            GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) this.gwtConfig;
 
             gwtModemConfig.setHwSerial(NA); // imei
             gwtModemConfig.setHwRssi(NA); // Integer.toString(rssi)

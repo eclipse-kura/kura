@@ -31,13 +31,10 @@ import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implements GwtNetworkService {
 
     private static final long serialVersionUID = -4188750359099902616L;
-    private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImplFacade.class);
 
     private static Optional<Boolean> isNet2 = Optional.empty();
 
@@ -48,9 +45,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         if (isNet2()) {
             return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
         } else {
-            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
-            // return
-            // org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
+            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
         }
     }
 
@@ -60,7 +55,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
+            org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.updateNetInterfaceConfigurations(config);
         } else {
             org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateNetInterfaceConfigurations(config);
         }
@@ -149,11 +144,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        if (isNet2()) {
-            // TODO
-        } else {
-            org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallOpenPorts(entries);
-        }
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallOpenPorts(entries);
     }
 
     @Override
@@ -161,11 +152,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        if (isNet2()) {
-            // TODO
-        } else {
-            org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallPortForwards(entries);
-        }
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallPortForwards(entries);
     }
 
     @Override
@@ -173,11 +160,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        if (isNet2()) {
-            // TODO
-        } else {
-            org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallNATs(entries);
-        }
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallNATs(entries);
     }
 
     @Override

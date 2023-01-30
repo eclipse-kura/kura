@@ -37,11 +37,10 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
-import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.usb.UsbDevice;
-import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -62,9 +61,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
     private ConfigurationService configurationService;
+    private DhcpServerMonitor dhcpServerMonitor;
 
     private LinuxNetworkUtil linuxNetworkUtil;
-
     private NetworkProperties networkProperties;
 
     // ----------------------------------------------------------------
@@ -125,6 +124,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         logger.debug("Activate NetworkConfigurationService...");
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
+        this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
         if (properties == null) {
             logger.debug("Received null properties...");
         } else {
@@ -136,6 +136,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
+        this.dhcpServerMonitor.stop();
+        this.dhcpServerMonitor.clear();
     }
 
     public synchronized void update(Map<String, Object> receivedProperties) {
@@ -144,6 +146,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             logger.debug("Received null properties...");
             return;
         }
+
+        this.dhcpServerMonitor.stop();
+        this.dhcpServerMonitor.clear();
 
         final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
         final Set<String> interfaces = AbstractNetworkConfigurationService
@@ -170,6 +175,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             // networkManager.applyConfiguration
             writeDhcpServerConfiguration(interfaces);
+            this.dhcpServerMonitor.start();
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
 
@@ -320,9 +326,13 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                         this.networkProperties);
                 try {
                     dhcpServerConfigWriter.writeConfiguration();
+                    this.dhcpServerMonitor.putDhcpServerInterfaceConfiguration(interfaceName, true);
                 } catch (UnknownHostException | KuraException e) {
                     logger.error("Failed to write DHCP Server configuration", e);
+                    this.dhcpServerMonitor.putDhcpServerInterfaceConfiguration(interfaceName, false);
                 }
+            } else {
+                this.dhcpServerMonitor.putDhcpServerInterfaceConfiguration(interfaceName, false);
             }
         });
     }

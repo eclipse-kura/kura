@@ -50,12 +50,12 @@ public class DhcpServerConfigWriter {
         this.networkProperties = properties;
     }
 
-    protected String getConfigFilename(String interfaceName) {
-        return DhcpServerManager.getConfigFilename(interfaceName);
+    protected String getConfigFilename() {
+        return DhcpServerManager.getConfigFilename(this.interfaceName);
     }
 
     public void writeConfiguration() throws KuraException, UnknownHostException {
-        String dhcpConfigFileName = getConfigFilename(this.interfaceName);
+        String dhcpConfigFileName = getConfigFilename();
         String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
         logger.debug("Writing DHCP Server configuration for {} in {}", interfaceName, dhcpConfigFileName);
 

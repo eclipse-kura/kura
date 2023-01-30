@@ -62,7 +62,7 @@ public class NMConfigurationServiceImplTest {
     private Event event;
 
     @Test
-    public void eventPostedAfterActivationTest() throws InterruptedException, KuraException {
+    public void shouldPostEventAfterActivationTest() throws InterruptedException, KuraException {
         givenPropertiesWithModifiedInterfaces();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -70,7 +70,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void eventPostedAfterUpdateTest() throws InterruptedException, KuraException {
+    public void shouldPostEventAfterUpdateTest() throws InterruptedException, KuraException {
         givenPropertiesWithModifiedInterfaces();
         givenNetworkConfigurationService();
         whenServiceIsUpdated();
@@ -78,7 +78,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void modifiedInterfacesPropertyIsRemoved() throws InterruptedException, KuraException {
+    public void shouldRemovedModifiedInterfacesProperty() throws InterruptedException, KuraException {
         givenPropertiesWithModifiedInterfaces();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -86,7 +86,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void getDefinitionHasBasicPropertiesTest() throws KuraException {
+    public void componentDefinitionShouldHaveBasicPropertiesTest() throws KuraException {
         givenPropertiesWithoutInterfaces();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -95,7 +95,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void getDefinitionHasInterfaceTypesTest() throws KuraException {
+    public void componentDefinitionShouldHaveInterfaceTypesTest() throws KuraException {
         givenFullProperties();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -104,7 +104,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void getDefinitionHasCorrectNumberOfPropertiesTest() throws KuraException {
+    public void componentDefinitionShouldHaveCorrectNumberOfPropertiesTest() throws KuraException {
         givenFullProperties();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -113,7 +113,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void getDefinitionHasCorrectPropertiesTest() throws KuraException {
+    public void componentDefinitionShouldHaveCorrectPropertiesTest() throws KuraException {
         givenFullProperties();
         givenNetworkConfigurationService();
         whenServiceIsActivated();
@@ -122,7 +122,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void checkWanInterfacesTest() throws KuraException {
+    public void shouldCheckForWanInterfacesTest() throws KuraException {
         givenNetworkConfigurationService();
         whenServiceIsActivatedWithOneWanInterface();
         whenServiceIsUpdatedWithTwoWanInterface();

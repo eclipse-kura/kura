@@ -158,7 +158,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             for (final String interfaceName : interfaces) {
                 Optional<NetInterfaceType> interfaceTypeProperty = AbstractNetworkConfigurationService
                         .getNetworkTypeFromProperties(interfaceName, modifiedProps);
-                if (interfaceTypeProperty.isEmpty()) {
+                if (!interfaceTypeProperty.isPresent()) {
                     interfaceTypeProperty = Optional.of(getNetworkTypeFromSystem(interfaceName));
                     setInterfaceType(modifiedProps, interfaceName, interfaceTypeProperty.get());
                 }
@@ -388,7 +388,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                     "net.interface.%s.usb.devicePath",
                     existingInterfaceName);
 
-            if (usbBusNumber.isEmpty() || usbDevicePath.isEmpty()) {
+            if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
                 logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
                 continue;
             }

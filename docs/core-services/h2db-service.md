@@ -83,6 +83,22 @@ A database instance is identified by its **Kura service PID**. The PID for the d
 
 The built-in components that use database functionalities allow to specify which instance to use in their configuration. These components are the **DataService** component of the cloud stack, the **DbWireRecordFilter** and **DbWireRecordStore** wire components. The configuration of each component contains a property that allows to specify the service PID of the desired instance.
 
+### Usage through Wires
+
+It is possible to store and extract Wire Records into/from a H2 database instance using the **Wire Record Store** and **Wire Record Query** wire components.
+
+When a Wire Record is received by a **Wire Record Store** attached to a H2 based database instance, the data will be stored in a table whose name is current value of the **Record Collection Name** configuration parameter of the Wire Component.
+
+Each property contained in a Wire Record will be appended to a column with the same name as the property key, a new column will be created if it not already exists.
+
+!!! note
+    Storing wire record properties with the FLOAT data type using the **Wire Record Store** is not recommended since the type information will be lost. Values inserted as FLOAT using the **Wire Record Store** will be retrieved as DOUBLE using the **Wire Record Query** component.
+
+!!! warning
+    It is not recommended to store Wire Records having properties with the same key and different value type.
+    If the value type changes, the target column will be dropped and recreated with the type derived from the last received record. All existing data in the target column will be lost.
+    The purpose of this is to allow changing the type of a column with a Wire Graph configuration update.
+
 ### Enabling the TCP Server
 
 !!! danger

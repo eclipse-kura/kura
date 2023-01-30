@@ -62,7 +62,7 @@ public interface TestTarget {
                     c.commit();
                 }
 
-                ((MessageStoreProvider) dbService).openMessageStore(collection, 10).store("foo", null, 1, false, 1);
+                ((MessageStoreProvider) dbService).openMessageStore(collection).store("foo", null, 1, false, 1);
             } catch (Exception e) {
                 throw new IllegalStateException("cannot set next message id", e);
             }

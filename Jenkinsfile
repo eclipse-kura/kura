@@ -51,7 +51,7 @@ node {
                                 -Dsonar.jacoco.reportPaths='target/jacoco/' \
                                 -Dsonar.java.binaries='target/' \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
-                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java'''
+                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/resources/org/freedesktop/*'''
                         }
                     }
                 }

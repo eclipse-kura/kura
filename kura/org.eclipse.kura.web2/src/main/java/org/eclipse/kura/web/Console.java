@@ -50,8 +50,7 @@ import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
 import org.eclipse.kura.web.server.GwtKeystoreServiceImpl;
 import org.eclipse.kura.web.server.GwtLogServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
-import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
-import org.eclipse.kura.web.server.GwtPackageServiceImpl;
+import org.eclipse.kura.web.server.GwtNetworkServiceImplFacade;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
@@ -62,6 +61,7 @@ import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtUserServiceImpl;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
@@ -389,7 +389,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         final SecurityHandler sessionExpirationHandler = new SessionExpirationSecurityHandler();
         final SecurityHandler sessionLockedSecurityHandler = new SessionLockedSecurityHandler();
 
-        // default session handler requires an authenticated session and handles session expiration, handles session
+        // default session handler requires an authenticated session and handles session
+        // expiration, handles session
         // lock
         final SecurityHandler defaultHandler = chain(baseHandler, sessionAuthHandler, sessionLockedSecurityHandler,
                 sessionExpirationHandler);
@@ -397,20 +398,24 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         final RoutingSecurityHandler routingHandler = new RoutingSecurityHandler(
                 defaultHandler.sendErrorOnFailure(401));
 
-        // exception on authentication paths, allow access without authenticaton but create a session
+        // exception on authentication paths, allow access without authenticaton but
+        // create a session
         routingHandler.addRouteHandler(
                 p -> this.authenticationPaths.contains(p)
                         || this.loginServlets.stream().anyMatch(r -> r.path.contentEquals(p)),
                 chain(baseHandler, new CreateSessionSecurityHandler()));
 
-        // exception on event paths, activity on these paths does not count towards session expiration
+        // exception on event paths, activity on these paths does not count towards
+        // session expiration
         routingHandler.addRouteHandler(eventPaths::contains,
                 chain(baseHandler, sessionAuthHandler).sendErrorOnFailure(401));
 
-        // exception on admin console path, redirect to login page on failure instead of sending 401 status
+        // exception on admin console path, redirect to login page on failure instead of
+        // sending 401 status
         routingHandler.addRouteHandler(CONSOLE_PATH::equals, defaultHandler.redirectOnFailure(AUTH_PATH));
 
-        // exception on login session and xsrf path, like default but without locked session checking
+        // exception on login session and xsrf path, like default but without locked
+        // session checking
         routingHandler.addRouteHandler(
                 Arrays.asList(LOGIN_MODULE_PATH + SESSION, LOGIN_MODULE_PATH + "/xsrf")::contains,
                 chain(baseHandler, sessionAuthHandler, sessionExpirationHandler));
@@ -468,7 +473,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImplFacade(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 this.sessionContext);

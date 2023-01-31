@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -269,7 +269,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         String nl = "<br />";
         String tab = "&nbsp&nbsp&nbsp&nbsp";
 
-        GwtNetworkServiceImpl gwtNetworkService = new GwtNetworkServiceImpl();
+        GwtNetworkServiceImplFacade gwtNetworkService = new GwtNetworkServiceImplFacade();
 
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 

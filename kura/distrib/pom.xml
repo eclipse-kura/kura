@@ -1634,6 +1634,11 @@
                     <name>buildAll</name>
                 </property>
             </activation>
+
+            <properties>
+                <docker.imagename>base-kura-docker-x86_64-nn</docker.imagename>
+            </properties>
+
             <build>
                 <resources>
                     <resource>
@@ -1716,6 +1721,141 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                          <execution>
+                            <phase>package</phase>
+                            <configuration>
+                              <target>
+                                <copy todir="${basedir}/target/">
+                                  <fileset file="${project.basedir}/src/main/resources/Dockerfile"/>
+                                </copy>
+                                <exec executable="docker" dir="${basedir}/target/" failonerror="true">
+                                    <arg value="build"/>
+                                    <arg value="-t"/>
+                                    <arg value="${docker.imagename}:${project.version}"/>
+                                    <arg value="-t"/>
+                                    <arg value="${docker.imagename}:${maven.build.timestamp}"/>
+                                    <arg value="-t"/>
+                                    <arg value="${docker.imagename}-x86_64:${project.version}"/>
+                                    <arg value="-t"/>
+                                    <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                    <arg value="."/>
+                                </exec>
+                              </target>
+                            </configuration>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                      </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>docker-ubi8-x86_64-nn</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.imagename>kura-ubi8-x86_64</docker.imagename>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                          <execution>
+                            <phase>compile</phase>
+                            <configuration>
+                              <target>
+                                <exec executable="docker" dir="${project.basedir}/src/main/resources/" failonerror="true">
+                                  <arg value="build"/>
+                                  <arg value="--build-arg"/>
+                                  <arg value="BASE-IMAGE-KURA=${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}:${project.version}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}:${maven.build.timestamp}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}-x86_64:${project.version}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="."/>
+                                </exec>
+                              </target>
+                            </configuration>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                      </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>docker-alpine-x86_64-nn</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.imagename>kura-alpine-x86_64-nn</docker.imagename>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                          <execution>
+                            <phase>compile</phase>
+                            <configuration>
+                              <target>
+                                <exec executable="docker" dir="${project.basedir}/src/main/resources/" failonerror="true">
+                                  <arg value="build"/>
+                                  <arg value="--build-arg"/>
+                                  <arg value="BASE-IMAGE-KURA=${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}:${project.version}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}:${maven.build.timestamp}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}-x86_64:${project.version}"/>
+                                  <arg value="-t"/>
+                                  <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="."/>
+                                </exec>
+                              </target>
+                            </configuration>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                      </plugin>
                 </plugins>
             </build>
         </profile>

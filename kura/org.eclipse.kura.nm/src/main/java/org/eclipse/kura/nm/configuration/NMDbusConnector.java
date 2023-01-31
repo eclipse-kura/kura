@@ -96,6 +96,23 @@ public class NMDbusConnector {
         logger.info("NM Version: {}", nmVersion);
     }
 
+    public synchronized List<String> getInterfaces() throws DBusException {
+        List<Device> availableDevices = getAllDevices();
+
+        List<String> supportedDeviceNames = new ArrayList<>();
+        for (Device device : availableDevices) {
+            NMDeviceType deviceType = getDeviceType(device);
+            if (SUPPORTED_DEVICES.contains(deviceType)) {
+                Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                        Properties.class);
+                supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
+            }
+
+        }
+
+        return supportedDeviceNames;
+    }
+
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         doApply(networkConfiguration);
         this.cachedConfiguration = networkConfiguration;

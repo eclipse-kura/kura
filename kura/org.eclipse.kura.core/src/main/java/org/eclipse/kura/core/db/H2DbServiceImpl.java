@@ -44,6 +44,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
@@ -614,18 +615,23 @@ public class H2DbServiceImpl
     @Override
     public MessageStore openMessageStore(String name) throws KuraStoreException {
 
-        return new H2DbMessageStoreImpl(this, name);
+        return new H2DbMessageStoreImpl(this::withConnectionAdapter, name);
     }
 
     @Override
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
 
-        return new H2DbWireRecordStoreImpl(this, name);
+        return new H2DbWireRecordStoreImpl(this::withConnectionAdapter, name);
     }
 
     @Override
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
-        return H2DbQueryableWireRecordStoreImpl.performQuery(this, query);
+        return H2DbQueryableWireRecordStoreImpl.performQuery(this::withConnectionAdapter, query);
+    }
+
+    private <T> T withConnectionAdapter(final SQLFunction<Connection, T> callable) throws SQLException {
+
+        return this.withConnection(callable::call);
     }
 }

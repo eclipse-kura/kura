@@ -33,6 +33,7 @@ import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Journ
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
@@ -317,19 +318,26 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     @Override
     public MessageStore openMessageStore(String name) throws KuraStoreException {
 
-        return new SqliteMessageStoreImpl(this, name);
+        return new SqliteMessageStoreImpl(this::withConnection, name);
     }
 
     @Override
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
 
-        return new SqliteWireRecordStoreImpl(this, name);
+        return new SqliteWireRecordStoreImpl(this::withConnection, name);
     }
 
     @Override
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
-        return SqliteQueryableWireRecordStoreImpl.performQuery(this, query);
+        return SqliteQueryableWireRecordStoreImpl.performQuery(this::withConnection, query);
+    }
+
+    private <T> T withConnection(final SQLFunction<Connection, T> callable) throws SQLException {
+
+        try (final Connection conn = this.getConnection()) {
+            return callable.call(conn);
+        }
     }
 
 }

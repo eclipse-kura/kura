@@ -51,7 +51,7 @@ node {
                                 -Dsonar.jacoco.reportPaths='target/jacoco/' \
                                 -Dsonar.java.binaries='target/' \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
-                                -Dsonar.projectName=kura \
+                                -Dsonar.projectKey=org.eclipse.kura:kura \
                                 -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java'''
                         }
                     }

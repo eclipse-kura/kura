@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.kura.configuration.Password;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -145,8 +146,9 @@ public class NMSettingsConverter {
 
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
 
-        String psk = props.get(String.class, "net.interface.%s.config.wifi.%s.passphrase", iface,
-                propMode.toLowerCase());
+        String psk = props
+                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", iface, propMode.toLowerCase())
+                .toString();
         String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));

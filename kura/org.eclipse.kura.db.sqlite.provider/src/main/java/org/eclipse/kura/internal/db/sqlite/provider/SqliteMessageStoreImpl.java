@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.db.sqlite.provider;
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -213,7 +212,7 @@ public class SqliteMessageStoreImpl implements MessageStore {
                 pstmt.setInt(6, -1); // publishedMessageId
                 pstmt.setTimestamp(7, null); // confirmedOn
                 if (payload != null) {
-                    pstmt.setBinaryStream(8, new ByteArrayInputStream(payload), payload.length);
+                    pstmt.setBytes(8, payload);
                 }
                 pstmt.setInt(9, priority); // priority
                 pstmt.setString(10, null); // sessionId

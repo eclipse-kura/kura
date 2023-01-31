@@ -34,7 +34,7 @@ import org.mockito.Mockito;
 
 public class DhcpServerConfigWriterTest {
 
-    MockedStatic<DhcpServerManager> dhcpServerMock;
+    private static MockedStatic<DhcpServerManager> dhcpServerMock;
     private DhcpServerConfigWriter writer;
     private String interfaceName;
     private String dhcpServerConfigFileName;
@@ -43,6 +43,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldReturnDhcpConfigFileName() {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithEmptyProperties();
         whenDhcpServerFileNameRetrived();
         thenDhcpServerFileNameIsCorrect();
@@ -50,6 +51,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldWriteDhcpConfigurationFileTest() throws UnknownHostException, KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithDefaultProperties();
         whenWriteDhcpConfigFile();
         thenDhcpConfigFileExists();
@@ -57,22 +59,23 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldWriteCorrectDhcpdConfigurationFileTest() throws KuraException, IOException {
-        givenDhcpConfigWriterWithDefaultProperties();
         givenDhcpdTool();
+        givenDhcpConfigWriterWithDefaultProperties();
         whenWriteDhcpConfigFile();
         thenDhcpdConfigFileIsCorrect();
     }
 
     @Test
     public void shouldWriteCorrectUdhcpdConfigurationFileTest() throws KuraException, IOException {
-        givenDhcpConfigWriterWithDefaultProperties();
         givenUdhcpdTool();
+        givenDhcpConfigWriterWithDefaultProperties();
         whenWriteDhcpConfigFile();
         thenUdhcpdConfigFileIsCorrect();
     }
 
     @Test
     public void shouldThrowUnknownHostExceptionWithoutAddressTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutAddress();
         whenWriteDhcpConfigFile();
         thenUnknownHostExceptionIsCaught();
@@ -80,6 +83,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldThrowKuraExceptionWithoutDefaultLeaseTimeTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutDefaultLeaseTime();
         whenWriteDhcpConfigFile();
         thenKuraExceptionIsCaught();
@@ -87,6 +91,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldThrowKuraExceptionWithoutMaxLeaseTimeTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutMaxLeaseTime();
         whenWriteDhcpConfigFile();
         thenKuraExceptionIsCaught();
@@ -94,6 +99,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldThrowKuraExceptionWithoutPrefixTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutPrefix();
         whenWriteDhcpConfigFile();
         thenKuraExceptionIsCaught();
@@ -101,6 +107,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldThrowKuraExceptionWithoutRangeStartTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutRangeStart();
         whenWriteDhcpConfigFile();
         thenUnknownHostExceptionIsCaught();
@@ -108,6 +115,7 @@ public class DhcpServerConfigWriterTest {
 
     @Test
     public void shouldThrowKuraExceptionWithoutRangeStopTest() throws KuraException {
+        givenDhcpdTool();
         givenDhcpConfigWriterWithoutRangeStop();
         whenWriteDhcpConfigFile();
         thenUnknownHostExceptionIsCaught();
@@ -123,12 +131,12 @@ public class DhcpServerConfigWriterTest {
     }
 
     private void givenDhcpdTool() {
-        this.dhcpServerMock = Mockito.mockStatic(DhcpServerManager.class);
+        dhcpServerMock = Mockito.mockStatic(DhcpServerManager.class);
         dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.DHCPD);
     }
 
     private void givenUdhcpdTool() {
-        this.dhcpServerMock = Mockito.mockStatic(DhcpServerManager.class);
+        dhcpServerMock = Mockito.mockStatic(DhcpServerManager.class);
         dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.UDHCPD);
     }
 
@@ -349,8 +357,8 @@ public class DhcpServerConfigWriterTest {
         if (dhcpConfigFile.exists()) {
             dhcpConfigFile.delete();
         }
-        if (this.dhcpServerMock != null) {
-            this.dhcpServerMock.close();
+        if (dhcpServerMock != null) {
+            dhcpServerMock.close();
         }
     }
 

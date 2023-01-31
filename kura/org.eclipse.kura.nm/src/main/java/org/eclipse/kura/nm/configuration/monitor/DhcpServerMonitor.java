@@ -30,13 +30,17 @@ public class DhcpServerMonitor {
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerMonitor.class);
 
     private Map<String, Boolean> dhcpServerInterfaceConfiguration;
-    private DhcpServerManager dhcpServerManager;
+    protected DhcpServerManager dhcpServerManager;
     private ScheduledExecutorService worker;
     private ScheduledFuture<?> handle;
 
     public DhcpServerMonitor(CommandExecutorService commandExecutorService) {
         this.dhcpServerInterfaceConfiguration = new ConcurrentHashMap<>();
-        this.dhcpServerManager = new DhcpServerManager(commandExecutorService);
+        setDhcpServerManager(new DhcpServerManager(commandExecutorService));
+    }
+
+    protected void setDhcpServerManager(DhcpServerManager dhcpServerManager) {
+        this.dhcpServerManager = dhcpServerManager;
     }
 
     public void start() {

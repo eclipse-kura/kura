@@ -1,0 +1,68 @@
+package org.freedesktop.networkmanager.device;
+
+import java.util.List;
+import java.util.Map;
+import org.freedesktop.dbus.DBusPath;
+import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.messages.DBusSignal;
+import org.freedesktop.dbus.types.Variant;
+
+/**
+ * Auto-generated class.
+ */
+@DBusInterfaceName("org.freedesktop.NetworkManager.Device.WifiP2P")
+@DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
+@DBusProperty(name = "Peers", type = WifiP2P.PropertyPeersType.class, access = Access.READ)
+public interface WifiP2P extends DBusInterface {
+
+
+    public void StartFind(Map<String, Variant<?>> options);
+    public void StopFind();
+
+
+    public static interface PropertyPeersType extends TypeRef<List<DBusPath>> {
+
+
+
+
+    }
+
+    public static class PeerAdded extends DBusSignal {
+
+        private final DBusPath peer;
+
+        public PeerAdded(String _path, DBusPath _peer) throws DBusException {
+            super(_path, _peer);
+            this.peer = _peer;
+        }
+
+
+        public DBusPath getPeer() {
+            return peer;
+        }
+
+
+    }
+
+    public static class PeerRemoved extends DBusSignal {
+
+        private final DBusPath peer;
+
+        public PeerRemoved(String _path, DBusPath _peer) throws DBusException {
+            super(_path, _peer);
+            this.peer = _peer;
+        }
+
+
+        public DBusPath getPeer() {
+            return peer;
+        }
+
+
+    }
+}

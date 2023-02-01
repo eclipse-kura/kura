@@ -43,10 +43,11 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
-    private static final List<NMDeviceType> SUPPORTED_DEVICES = Arrays.asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
-            NMDeviceType.NM_DEVICE_TYPE_WIFI);
-    private static final List<KuraInterfaceStatus> SUPPORTED_STATUSES = Arrays.asList(KuraInterfaceStatus.DISABLED,
-            KuraInterfaceStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLEDWAN, KuraInterfaceStatus.UNMANAGED);
+    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays
+            .asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI);
+    private static final List<KuraInterfaceStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(
+            KuraInterfaceStatus.DISABLED, KuraInterfaceStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLEDWAN,
+            KuraInterfaceStatus.UNMANAGED);
 
     private static NMDbusConnector instance;
     private DBusConnection dbusConnection;
@@ -97,20 +98,11 @@ public class NMDbusConnector {
     }
 
     public synchronized List<String> getInterfaces() throws DBusException {
-        List<Device> availableDevices = getAllDevices();
+        // In the future we will filter out supported status device types here
+        // so that the filtering logic is not implemented in the GUI
+        // if STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType) then...
 
-        List<String> supportedDeviceNames = new ArrayList<>();
-        for (Device device : availableDevices) {
-            NMDeviceType deviceType = getDeviceType(device);
-            if (SUPPORTED_DEVICES.contains(deviceType)) {
-                Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                        Properties.class);
-                supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
-            }
-
-        }
-
-        return supportedDeviceNames;
+        return getAllDeviceInterfaceNames();
     }
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
@@ -157,8 +149,9 @@ public class NMDbusConnector {
                     : KuraInterfaceStatus.DISABLED; // Temporary solution while we wait to add ipv6 support.
             NMDeviceEnable deviceStatus = NMDeviceEnable.fromKuraInterfaceStatus(ip4Status, ip6Status);
 
-            if (!SUPPORTED_DEVICES.contains(deviceType) || !SUPPORTED_STATUSES.contains(ip4Status)
-                    || !SUPPORTED_STATUSES.contains(ip6Status)) {
+            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
+                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
+                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
                 logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", iface,
                         deviceType, ip4Status, ip6Status);
                 continue;
@@ -201,7 +194,7 @@ public class NMDbusConnector {
             NMDeviceType deviceType = getDeviceType(device);
             String ipInterface = getDeviceIpInterface(device);
 
-            if (!SUPPORTED_DEVICES.contains(deviceType)) {
+            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
                 logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
                 continue;
             }

@@ -45,6 +45,8 @@ public class ConnectionPoolManager {
         config.setConnectionTimeout(ACTIVE_CONNECTION_WAIT_TIMEOUT);
         config.setAutoCommit(false);
         config.setAllowPoolSuspension(true);
+        config.setIdleTimeout(0);
+        config.setMaxLifetime(0);
 
         this.sqliteDataSource = sqliteDataSource;
         this.hikariDatasource = new HikariDataSource(config);

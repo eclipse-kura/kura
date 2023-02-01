@@ -41,6 +41,7 @@ import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.usb.UsbDevice;
+import org.freedesktop.dbus.exceptions.DBusException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -65,6 +66,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private LinuxNetworkUtil linuxNetworkUtil;
     private NetworkProperties networkProperties;
+
+    private NMDbusConnector nmDbusConnector;
 
     // ----------------------------------------------------------------
     //
@@ -125,6 +128,15 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
+
+        try {
+            this.nmDbusConnector = NMDbusConnector.getInstance();
+            this.nmDbusConnector.checkPermissions();
+        } catch (DBusException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         if (properties == null) {
             logger.debug("Received null properties...");
         } else {
@@ -136,6 +148,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
+        this.nmDbusConnector.closeConnection();
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
     }
@@ -173,7 +186,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             decryptAndConvertPasswordProperties(modifiedProps);
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
-            // networkManager.applyConfiguration
+            try {
+                this.nmDbusConnector.apply(modifiedProps);
+            } catch (DBusException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             writeDhcpServerConfiguration(interfaces);
             this.dhcpServerMonitor.start();
 
@@ -211,8 +229,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             Set<String> allNetworkInterfaces;
             try {
                 allNetworkInterfaces = this.networkService.getNetworkInterfaces().stream()
-                        .map(this::probeNetInterfaceConfigName)
-                        .collect(Collectors.toSet());
+                        .map(this::probeNetInterfaceConfigName).collect(Collectors.toSet());
             } catch (KuraException e) {
                 logger.warn("failed to retrieve network interface names", e);
                 return changed;
@@ -237,8 +254,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private Set<String> getWanInterfaces(final Map<String, Object> properties) {
         return AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(properties).stream()
-                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
-                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
+                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN.name()
+                        .equals(properties.get(PREFIX + p + ".config.ip4.status")))
                 .collect(Collectors.toSet());
     }
 
@@ -306,8 +323,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(
-                this.networkProperties.getProperties());
+        final Set<String> interfaceNamesInConfig = AbstractNetworkConfigurationService
+                .getNetworkInterfaceNamesInConfig(this.networkProperties.getProperties());
 
         final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
 
@@ -345,8 +362,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
         Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
 
-        if (type.isPresent() && (NetInterfaceType.ETHERNET.equals(type.get())
-                || NetInterfaceType.WIFI.equals(type.get()))
+        if (type.isPresent()
+                && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
                 && (isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
                 && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
             isValid = true;
@@ -382,11 +399,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             String prefix = PREFIX + existingInterfaceName + ".";
 
             final Optional<String> usbBusNumber = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.busNumber",
-                    existingInterfaceName);
+                    "net.interface.%s.usb.busNumber", existingInterfaceName);
             final Optional<String> usbDevicePath = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.devicePath",
-                    existingInterfaceName);
+                    "net.interface.%s.usb.devicePath", existingInterfaceName);
 
             if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
                 logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);

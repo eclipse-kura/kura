@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,18 +18,11 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable {
 
     private static final String ROUTER_DNS_PASS = "routerDnsPass";
     private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
     private static final long serialVersionUID = 7079533925979145804L;
-
-    public GwtNetInterfaceConfig() {
-        setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
-        setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-        setRouterMode(GwtNetRouterMode.netRouterOff.name());
-    }
 
     public String getName() {
         return get("name");

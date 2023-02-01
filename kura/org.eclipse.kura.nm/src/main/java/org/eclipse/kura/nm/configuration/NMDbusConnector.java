@@ -49,6 +49,10 @@ public class NMDbusConnector {
             KuraInterfaceStatus.DISABLED, KuraInterfaceStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLEDWAN,
             KuraInterfaceStatus.UNMANAGED);
 
+    private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
+            NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
+            NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_GENERIC);
+
     private static NMDbusConnector instance;
     private DBusConnection dbusConnection;
     private NetworkManager nm;
@@ -98,11 +102,20 @@ public class NMDbusConnector {
     }
 
     public synchronized List<String> getInterfaces() throws DBusException {
-        // In the future we will filter out supported status device types here
-        // so that the filtering logic is not implemented in the GUI
-        // if STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType) then...
+        List<Device> availableDevices = getAllDevices();
 
-        return getAllDeviceInterfaceNames();
+        List<String> supportedDeviceNames = new ArrayList<>();
+        for (Device device : availableDevices) {
+            NMDeviceType deviceType = getDeviceType(device);
+            if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+                Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                        Properties.class);
+                supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
+            }
+
+        }
+
+        return supportedDeviceNames;
     }
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {

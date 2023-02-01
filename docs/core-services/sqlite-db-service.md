@@ -60,7 +60,7 @@ The SQLite DB provides the following configuration parameters:
 
 ### Selecting a database instance for existing components
 
-A database instance is identified by its **Kura service PID**. The PID for instances created using the Web UI is the string entered in the Name field at step 2 of the previous section.
+A database instance is identified by its **Kura service PID**. The PID for instances created using the Web UI is the string entered in the **Name** field at step 2 of the previous section.
 
 The built-in components that use database functionalities allow to specify which instance to use in their configuration. These components are the **DataService** component of the cloud stack, the **Wire Record Store** and **Wire Record Query** wire components. The configuration of each component contains a property that allows to specify the Kura Service PID of the desired instance.
 
@@ -71,9 +71,9 @@ The built-in components that use database functionalities allow to specify which
 
 It is possible to store and extract Wire Records into/from a SQLite database instance using the **Wire Record Store** and **Wire Record Query** wire components.
 
-When a Wire Record is received by a **Wire Record Store** attached to a SQLite based database instance, the data will be stored in a table whose name is current value of the **Record Collection Name** configuration parameter of the Wire Component.
+When a Wire Record is received by a **Wire Record Store** attached to a SQLite based database instance, the data will be stored in a table whose name is the current value of the **Record Collection Name** configuration parameter of the Wire Component.
 
-Each property contained in a Wire Record will be appended to a column with the same name as the property key, a new column will be created if it not already exists.
+Each property contained in a Wire Record will be appended to a column with the same name as the property key. A new column will be created if it doesn't already exists.
 
 Since it is not possible to establish a one to one mapping between [SQLite storage classes](https://www.sqlite.org/datatype3.html) and the data types available on the Wires, the implementation will assign a custom type name to the created columns in order to keep track of the inserted Wire Record property type.
 

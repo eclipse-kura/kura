@@ -20,6 +20,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.net.NetInterface;
+import org.eclipse.kura.net.NetInterfaceAddress;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -116,6 +118,26 @@ public class NMDbusConnector {
         }
 
         return supportedDeviceNames;
+    }
+
+    public synchronized NetInterface<NetInterfaceAddress> getInterfaceStatus(String interfaceName)
+            throws DBusException {
+        Device device = getDeviceByIpIface(interfaceName);
+        NMDeviceType deviceType = getDeviceType(device);
+        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                Properties.class);
+        Optional<Connection> connection = getAppliedConnection(device);
+
+        if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+            logger.warn("Device \"{}\" of type \"{}\" currently not supported", interfaceName, deviceType);
+            return null;
+        }
+
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+            return NMStatusConverter.buildEthernetStatus(interfaceName, device, deviceProperties, connection);
+        }
+
+        return null;
     }
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {

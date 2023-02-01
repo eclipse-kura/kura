@@ -156,6 +156,13 @@
             <contains string="${build.name}" substring="nvidia-jetson-nano" />
         </condition>
 
+        <condition property="is.network.manager">
+            <contains string="${network.provider}" substring="network-manager" />
+        </condition>
+        <condition property="is.kura.network">
+            <contains string="${network.provider}" substring="kura-network" />
+        </condition>
+        	
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
         <copy file="src/main/osgi/equinox_3.16.0/configuration/config.ini"
@@ -261,7 +268,9 @@
         <antcall target="linux-systemd-config" />
         <antcall target="ai-wire-config" />
         <antcall target="nvidia-triton-server-config" />
-
+        <antcall target="linux-kura-network-config" />
+        <antcall target="linux-network-manager-config" />
+    	
         <!-- Add mToolkit to config.ini -->
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1655,6 +1664,22 @@ fi]]>
         </propertyfile>
     </target>
 
+    <target name="linux-kura-network-config" if="is.kura.network" depends="linux-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+        </propertyfile>
+    </target>
+
+    <target name="linux-network-manager-config" if="is.network.manager" depends="linux-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar@5:start" />
+        </propertyfile>
+    </target>
+	
     <target name="linux-sysv-config" if="is.sysv" depends="linux-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1734,6 +1759,24 @@ fi]]>
         </zip>
     </target>
 
+    <target name="linux-kura-network-jars" if="is.kura.network">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
+    </target>
+
+    <target name="linux-network-manager-jars" if="is.network.manager">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
+    </target>
+	
     <target name="linux-sysv-jars" if="is.sysv" depends="linux-jars">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">

@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
@@ -303,8 +304,8 @@ public class DhcpServerConfigWriterTest {
     }
 
     private void thenDhcpdConfigFileIsCorrect() throws IOException {
-        Path dhcpConfigFilePath = Path.of("/tmp/dhcpd-eth0.conf");
-        String content = Files.readString(dhcpConfigFilePath);
+        File dhcpConfigFile = new File("/tmp/dhcpd-eth0.conf");
+        String content = FileUtils.readFileToString(dhcpConfigFile, "UTF-8");
         String expectedContent = "# enabled? true\n"
                 + "# prefix: 24\n"
                 + "# pass DNS? true\n"
@@ -324,8 +325,8 @@ public class DhcpServerConfigWriterTest {
     }
 
     private void thenUdhcpdConfigFileIsCorrect() throws IOException {
-        Path dhcpConfigFilePath = Path.of("/tmp/dhcpd-eth0.conf");
-        String content = Files.readString(dhcpConfigFilePath);
+        File dhcpConfigFile = new File("/tmp/dhcpd-eth0.conf");
+        String content = FileUtils.readFileToString(dhcpConfigFile, "UTF-8");
         String expectedContent = "start 192.168.0.111\n"
                 + "end 192.168.0.120\n"
                 + "interface eth0\n"

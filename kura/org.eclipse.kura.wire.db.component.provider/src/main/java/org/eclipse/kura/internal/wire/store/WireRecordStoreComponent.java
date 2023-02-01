@@ -212,7 +212,11 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State unsetWireRecordStoreProvider(WireRecordStoreProvider wireRecordStoreProvider) {
-            return new Unsatisfied().setOptions(this.options);
+            if (this.provider == wireRecordStoreProvider) {
+                return new Unsatisfied().setOptions(this.options);
+            } else {
+                return this;
+            }
         }
 
         @Override

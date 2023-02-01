@@ -52,7 +52,7 @@ public class NMStatusConverter {
         ethInterface.setMTU(mtu.intValue());
 
         String hwAddress = properties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
-        ethInterface.setHardwareAddress(hwAddress.getBytes());
+        ethInterface.setHardwareAddress(getMacAddressBytes(hwAddress));
 
         if (connection.isPresent()) {
             Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
@@ -69,6 +69,18 @@ public class NMStatusConverter {
 
         return ethInterface;
 
+    }
+
+    private static byte[] getMacAddressBytes(String macAddress) {
+        String[] macAddressParts = macAddress.split(":");
+
+        byte[] macAddressBytes = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            Integer hex = Integer.parseInt(macAddressParts[i], 16);
+            macAddressBytes[i] = hex.byteValue();
+        }
+
+        return macAddressBytes;
     }
 
     private static EnumMap<NMDeviceState, NetInterfaceState> initDeviceStateConverter() {

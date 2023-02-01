@@ -108,9 +108,7 @@ public final class SqlMessageStoreHelper {
                 pstmt.setTimestamp(5, null); // publishedOn
                 pstmt.setInt(6, -1); // publishedMessageId
                 pstmt.setTimestamp(7, null); // confirmedOn
-                if (payload != null) {
-                    pstmt.setBytes(8, payload);
-                }
+                pstmt.setBytes(8, payload); // payload
                 pstmt.setInt(9, priority); // priority
                 pstmt.setString(10, null); // sessionId
                 pstmt.setTimestamp(11, null); // droppedOn

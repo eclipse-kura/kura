@@ -1,4 +1,4 @@
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm.status;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -9,6 +9,7 @@ import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.nm.configuration.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;

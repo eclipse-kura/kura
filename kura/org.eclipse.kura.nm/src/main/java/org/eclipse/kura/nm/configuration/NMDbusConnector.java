@@ -127,7 +127,14 @@ public class NMDbusConnector {
         NMDeviceType deviceType = getDeviceType(device);
         Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
-        Optional<Connection> connection = getAppliedConnection(device);
+
+        DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Ip4Config");
+        Properties ip4configProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(),
+                Properties.class);
+
+        DBusPath dhcp4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Dhcp4Config");
+        Properties dhcp4configProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, dhcp4configPath.getPath(),
+                Properties.class);
 
         if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
             logger.warn("Device \"{}\" of type \"{}\" currently not supported", interfaceName, deviceType);
@@ -135,7 +142,8 @@ public class NMDbusConnector {
         }
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            return NMStatusConverter.buildEthernetStatus(interfaceName, device, deviceProperties, connection);
+            return NMStatusConverter.buildEthernetStatus(interfaceName, device, deviceProperties, ip4configProperties,
+                    dhcp4configProperties);
         }
 
         return null;

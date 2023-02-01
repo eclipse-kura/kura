@@ -1,8 +1,7 @@
 package org.eclipse.kura.nm.status;
 
+import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
@@ -12,9 +11,7 @@ import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.nm.configuration.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
-import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +20,7 @@ public class NMStatusConverter {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusConverter.class);
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
     private static final EnumMap<NMDeviceState, NetInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
 
@@ -31,41 +29,43 @@ public class NMStatusConverter {
     }
 
     public static NetInterface<NetInterfaceAddress> buildEthernetStatus(String interfaceName, Device device,
-            Properties properties, Optional<Connection> connection) {
+            Properties deviceProperties, Properties ip4ConfigProperties, Properties dhcp4ConfigProperties) {
         EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
 
         ethInterface.setVirtual(false);
         ethInterface.setLoopback(false);
-        ethInterface.setAutoConnect(properties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
-        ethInterface.setFirmwareVersion(properties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
-        ethInterface.setDriver(properties.Get(NM_DEVICE_BUS_NAME, "Driver"));
-        ethInterface.setDriverVersion(properties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
+        ethInterface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
+        ethInterface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
+        ethInterface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
+        ethInterface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(properties.Get(NM_DEVICE_BUS_NAME, "State"));
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
         ethInterface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
         ethInterface.setUp(NMDeviceState.isConnected(deviceState));
         ethInterface.setLinkUp(NMDeviceState.isConnected(deviceState));
 
         ethInterface.setPointToPoint(false); // TBD
 
-        UInt32 mtu = properties.Get(NM_DEVICE_BUS_NAME, "Mtu");
+        UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
         ethInterface.setMTU(mtu.intValue());
 
-        String hwAddress = properties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
+        String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
         ethInterface.setHardwareAddress(getMacAddressBytes(hwAddress));
 
-        if (connection.isPresent()) {
-            Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
+        NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
 
-            NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
-            // WIP
-            address.setAddress(null);
-            address.setBroadcast(null);
-            address.setGateway(null);
-            address.setNetworkPrefixLength((short) 0);
-            address.setNetmask(null);
-            address.setDnsServers(null);
-        }
+        String gateway = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
+        // WIP
+
+        address.setAddress(null);
+        address.setBroadcast(null);
+        address.setGateway(null);
+        address.setNetworkPrefixLength((short) 0);
+        address.setNetmask(null);
+        address.setDnsServers(null);
+
+        // WIP: Grab all addresses
+        ethInterface.setNetInterfaceAddresses(Arrays.asList(address));
 
         return ethInterface;
 

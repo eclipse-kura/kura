@@ -2,6 +2,7 @@ package org.eclipse.kura.nm.status;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -33,13 +34,27 @@ public class NMStatusServiceImpl implements NetworkStatusService {
 
     @Override
     public List<NetInterface<NetInterfaceAddress>> getNetworkStatus() {
-        // TODO Auto-generated method stub
-        return null;
+        List<String> availableInterfaces = getInterfaceNames();
+
+        List<NetInterface<NetInterfaceAddress>> interfaceStatuses = new ArrayList<>();
+        for (String iface : availableInterfaces) {
+            NetInterface<NetInterfaceAddress> status = getNetworkStatus(iface);
+            if (Objects.nonNull(status)) {
+                interfaceStatuses.add(status);
+            }
+        }
+
+        return interfaceStatuses;
     }
 
     @Override
     public NetInterface<NetInterfaceAddress> getNetworkStatus(String interfaceName) {
-        // TODO Auto-generated method stub
+        try {
+            return this.nmDbusConnector.getInterfaceStatus(interfaceName);
+        } catch (DBusException e) {
+            logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
+        }
+
         return null;
     }
 

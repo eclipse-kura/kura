@@ -187,9 +187,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private synchronized int storeInternal(String topic, byte[] payload, int qos, boolean retain,
             int priority)
             throws KuraStoreException {
-        if (topic == null || topic.trim().length() == 0) {
-            throw new IllegalArgumentException(TOPIC_ELEMENT);
-        }
 
         final Timestamp now = new Timestamp(new Date().getTime());
 
@@ -300,7 +297,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
     }
 
     private StoredMessage buildStoredMessage(ResultSet rs) throws SQLException {
-        StoredMessage.Builder builder = buildStoredMessageBuilder(rs);
+        StoredMessage.Builder builder = this.helper.buildStoredMessageBuilder(rs, false);
 
         byte[] payload = rs.getBytes("smallPayload");
         if (payload == null) {
@@ -309,25 +306,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         builder = builder.withPayload(payload);
         return builder.build();
-    }
-
-    private StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs) throws SQLException {
-        StoredMessage.Builder builder = new StoredMessage.Builder(rs.getInt("id"))
-                .withTopic(rs.getString(TOPIC_ELEMENT))
-                .withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
-                .withCreatedOn(rs.getTimestamp("createdOn", this.utcCalendar))
-                .withPublishedOn(rs.getTimestamp("publishedOn", this.utcCalendar))
-                .withConfirmedOn(rs.getTimestamp("confirmedOn", this.utcCalendar)).withPriority(rs.getInt("priority"))
-                .withDroppedOn(rs.getTimestamp("droppedOn"));
-
-        final String sessionId = rs.getString("sessionId");
-
-        if (sessionId != null) {
-            builder = builder
-                    .withDataTransportToken(new DataTransportToken(rs.getInt("publishedMessageId"), sessionId));
-        }
-
-        return builder;
     }
 
     @Override

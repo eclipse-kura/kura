@@ -251,8 +251,11 @@ public class SqlWireRecordStoreHelper {
         try (final Statement stmt = c.createStatement();
                 final ResultSet rset = stmt
                         .executeQuery(this.queries.getSqlRowCount())) {
-            rset.next();
-            return rset.getInt(1);
+            if (rset.next()) {
+                return rset.getInt(1);
+            } else {
+                throw new SQLException("result set is empty");
+            }
         }
     }
 

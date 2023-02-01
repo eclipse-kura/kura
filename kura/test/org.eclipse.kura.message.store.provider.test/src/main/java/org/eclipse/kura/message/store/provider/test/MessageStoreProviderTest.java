@@ -61,6 +61,23 @@ public class MessageStoreProviderTest {
     }
 
     @Test
+    public void shouldGetMessageCountEmpty() throws KuraStoreException {
+        givenMessageStore();
+
+        thenMessageCountIs(0);
+    }
+
+    @Test
+    public void shouldGetMessageCountNonEmpty() throws KuraStoreException {
+        givenMessageStore();
+
+        whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
+        whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
+
+        thenMessageCountIs(2);
+    }
+
+    @Test
     public void shouldStoreNullPayload() throws KuraStoreException {
         givenMessageStore();
 
@@ -638,6 +655,10 @@ public class MessageStoreProviderTest {
 
     private void thenLastMessageIdIs(final int value) {
         assertEquals(value, (int) this.messageIds.get(this.messageIds.size() - 1));
+    }
+
+    private void thenMessageCountIs(final int expectedCount) throws KuraStoreException {
+        assertEquals(expectedCount, this.messageStore.getMessageCount());
     }
 
     private void thenNoExceptionIsThrown() {

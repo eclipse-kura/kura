@@ -71,13 +71,12 @@ public final class SqlMessageStoreHelper {
 
     public int getMessageCount() throws KuraStoreException {
 
-        return this.connectionProvider.withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(this.queries.getSqlMessageCount());
-                    final ResultSet rs = stmt.executeQuery()) {
+        return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(), (c, stmt) -> {
+            try (final ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 } else {
-                    return -1;
+                    throw new SQLException("result set is empty");
                 }
             }
         }, "Cannot get message count");
@@ -91,9 +90,7 @@ public final class SqlMessageStoreHelper {
 
     public long store(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
-        if (topic == null || topic.trim().length() == 0) {
-            throw new IllegalArgumentException(TOPIC_ELEMENT);
-        }
+        validate(topic);
 
         final Timestamp now = new Timestamp(new Date().getTime());
 
@@ -133,39 +130,37 @@ public final class SqlMessageStoreHelper {
 
     public Optional<StoredMessage> get(int msgId) throws KuraStoreException {
 
-        return get(msgId, rs -> buildStoredMessage(rs, true));
+        return get(msgId, rs -> buildStoredMessageBuilder(rs, true).build());
     }
 
     public Optional<StoredMessage> get(int msgId, final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
-        return this.connectionProvider.withConnection(c -> {
-            try (PreparedStatement stmt = c.prepareStatement(this.queries.getSqlGetMessage())) {
-                stmt.setInt(1, msgId);
-                try (final ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return Optional.of(messageBuilder.call(rs));
-                    } else {
-                        return Optional.empty();
-                    }
+        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetMessage(), (c, stmt) -> {
+            stmt.setInt(1, msgId);
+            try (final ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(messageBuilder.call(rs));
+                } else {
+                    return Optional.empty();
                 }
             }
+
         }, "Cannot get message by ID: " + msgId);
     }
 
     public Optional<StoredMessage> getNextMessage() throws KuraStoreException {
 
-        return getNextMessage(rs -> buildStoredMessage(rs, true));
+        return getNextMessage(rs -> buildStoredMessageBuilder(rs, true).build());
 
     }
 
     public Optional<StoredMessage> getNextMessage(final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
-        return this.connectionProvider.withConnection(c -> {
-            try (PreparedStatement stmt = c.prepareStatement(this.queries.getSqlGetNextMessage());
-                    ResultSet rs = stmt.executeQuery()) {
-                if (rs != null && rs.next()) {
+        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetNextMessage(), (c, stmt) -> {
+            try (final ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
                     return Optional.of(messageBuilder.call(rs));
                 } else {
                     return Optional.empty();
@@ -177,17 +172,17 @@ public final class SqlMessageStoreHelper {
     public void markAsPublished(int msgId, DataTransportToken token) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        this.connectionProvider.withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(this.queries.getSqlSetPublishedQoS1())) {
-                stmt.setTimestamp(1, now, this.utcCalendar); // timestamp
-                stmt.setInt(2, token.getMessageId());
-                stmt.setString(3, token.getSessionId());
-                stmt.setInt(4, msgId);
+        this.connectionProvider.withPreparedStatement(this.queries.getSqlSetPublishedQoS1(), (c, stmt) -> {
 
-                stmt.execute();
-                c.commit();
-                return null;
-            }
+            stmt.setTimestamp(1, now, this.utcCalendar);
+            stmt.setInt(2, token.getMessageId());
+            stmt.setString(3, token.getSessionId());
+            stmt.setInt(4, msgId);
+
+            stmt.execute();
+            c.commit();
+            return null;
+
         }, "Cannot update timestamp");
 
     }
@@ -238,46 +233,43 @@ public final class SqlMessageStoreHelper {
     public void updateTimestamp(String sql, Integer... msgIds) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
-        this.connectionProvider.withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(sql)) {
-                stmt.setTimestamp(1, now, this.utcCalendar); // timestamp
+        this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
+            stmt.setTimestamp(1, now, this.utcCalendar); // timestamp
 
-                for (int i = 0; i < msgIds.length; i++) {
-                    stmt.setInt(2 + i, msgIds[i]); // messageId
-                }
-                stmt.execute();
-                c.commit();
-                return null;
+            for (int i = 0; i < msgIds.length; i++) {
+                stmt.setInt(2 + i, msgIds[i]); // messageId
             }
+            stmt.execute();
+            c.commit();
+            return null;
+
         }, "Cannot update timestamp");
     }
 
     public List<StoredMessage> listMessages(String sql, Integer... params) throws KuraStoreException {
-        return this.connectionProvider.withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(sql)) {
-                if (params != null) {
-                    for (int i = 0; i < params.length; i++) {
-                        stmt.setInt(2 + i, params[i]); // timeInterval
-                    }
+        return this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    stmt.setInt(2 + i, params[i]); // timeInterval
                 }
+            }
 
-                try (final ResultSet rs = stmt.executeQuery()) {
-                    return buildStoredMessagesNoPayload(rs);
-                }
+            try (final ResultSet rs = stmt.executeQuery()) {
+                return buildStoredMessagesNoPayload(rs);
             }
         }, "Cannot list messages");
     }
 
     public void execute(String sql, Object... params) throws KuraStoreException {
-        this.connectionProvider.withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(sql)) {
-                for (int i = 0; i < params.length; i++) {
-                    stmt.setObject(1 + i, params[i]);
-                }
-                stmt.execute();
-                c.commit();
-                return null;
+        this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
+
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(1 + i, params[i]);
             }
+            stmt.execute();
+            c.commit();
+            return null;
+
         }, "Cannot execute query");
     }
 
@@ -286,21 +278,16 @@ public final class SqlMessageStoreHelper {
         logger.debug("Index {} created, order is {}", indexname, order);
     }
 
-    // ------------------------------------------------------------------
-    //
-    // Private Methods: Connection Management
-    //
-    // ------------------------------------------------------------------
-
     public List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {
         List<StoredMessage> messages = new ArrayList<>();
         while (rs.next()) {
-            messages.add(buildStoredMessage(rs, false));
+            messages.add(buildStoredMessageBuilder(rs, false).build());
         }
         return messages;
     }
 
-    public StoredMessage buildStoredMessage(ResultSet rs, final boolean includePayload) throws SQLException {
+    public StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs, final boolean includePayload)
+            throws SQLException {
         StoredMessage.Builder builder = new StoredMessage.Builder(rs.getInt("id"))
                 .withTopic(rs.getString(TOPIC_ELEMENT)).withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
                 .withCreatedOn(rs.getTimestamp("createdOn", this.utcCalendar))
@@ -319,7 +306,7 @@ public final class SqlMessageStoreHelper {
                     .withDataTransportToken(new DataTransportToken(rs.getInt("publishedMessageId"), sessionId));
         }
 
-        return builder.build();
+        return builder;
     }
 
     public SqlMessageStoreQueries getQueries() {

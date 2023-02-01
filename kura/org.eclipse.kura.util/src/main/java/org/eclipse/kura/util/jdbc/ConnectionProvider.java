@@ -13,6 +13,7 @@
 package org.eclipse.kura.util.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.eclipse.kura.KuraStoreException;
@@ -28,4 +29,16 @@ public interface ConnectionProvider {
             throw new KuraStoreException(e, message);
         }
     }
+
+    public default <T> T withPreparedStatement(final String sql,
+            final SQLBiFunction<Connection, PreparedStatement, T> task, final String message)
+            throws KuraStoreException {
+
+        return this.withConnection(c -> {
+            try (final PreparedStatement s = c.prepareStatement(sql)) {
+                return task.call(c, s);
+            }
+        }, message);
+    }
+
 }

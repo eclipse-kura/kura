@@ -630,6 +630,7 @@ public class H2DbServiceImpl
         return H2DbQueryableWireRecordStoreImpl.performQuery(this::withConnectionAdapter, query);
     }
 
+    @SuppressWarnings("restriction")
     private <T> T withConnectionAdapter(final SQLFunction<Connection, T> callable) throws SQLException {
 
         return this.withConnection(callable::call);

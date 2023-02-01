@@ -333,6 +333,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         return SqliteQueryableWireRecordStoreImpl.performQuery(this::withConnection, query);
     }
 
+    @SuppressWarnings("restriction")
     private <T> T withConnection(final SQLFunction<Connection, T> callable) throws SQLException {
 
         try (final Connection conn = this.getConnection()) {

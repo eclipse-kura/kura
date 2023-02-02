@@ -39,9 +39,7 @@ import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
-import org.eclipse.kura.nm.configuration.NMConfigurationServiceImpl;
-import org.eclipse.kura.usb.UsbService;
+import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -128,6 +126,17 @@ public class NMConfigurationServiceImplTest {
         whenServiceIsUpdatedWithTwoWanInterface();
         thenOldWanIntefaceIsDisabled();
         thenSnapshotIsTaken();
+    }
+
+    @Test
+    public void shouldMigratePppInterfaceNames() throws KuraException {
+        givenPropertiesWithPppInterfaceNames();
+        givenNetworkConfigurationService();
+        whenServiceIsActivated();
+        thenPropertiesNumberIsCorrect();
+        thenPppInterfaceNamesAreReplaced();
+        thenPropertiesNotContainPppNames();
+        thenNetInterfacesPropertyIsCorrect();
     }
 
     private void givenPropertiesWithModifiedInterfaces() {
@@ -248,6 +257,37 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.1-4.config.pdpType", "IP");
     }
 
+    private void givenPropertiesWithPppInterfaceNames() {
+        this.properties.clear();
+        this.properties.put("net.interfaces", "enp5s0,lo,eno1,wlp1s0,ppp3");
+        this.properties.put("net.interface.ppp3.config.resetTimeout", 5);
+        this.properties.put("net.interface.ppp3.config.ip4.prefix", -1);
+        this.properties.put("net.interface.ppp3.config.idle", 95);
+        this.properties.put("net.interface.ppp3.config.ip4.address", "");
+        this.properties.put("net.interface.ppp3.config.enabled", false);
+        this.properties.put("net.interface.ppp3.config.ip4.status", "netIPv4StatusDisabled");
+        this.properties.put("net.interface.ppp3.config.ip6.status", "netIPv6StatusDisabled");
+        this.properties.put("net.interface.ppp3.config.ip4.gateway", "");
+        this.properties.put("net.interface.ppp3.config.password", "");
+        this.properties.put("net.interface.ppp3.config.activeFilter", "inbound");
+        this.properties.put("net.interface.ppp3.config.dhcpClient6.enabled", false);
+        this.properties.put("net.interface.ppp3.config.lcpEchoFailure", 0);
+        this.properties.put("net.interface.ppp3.config.ipAddress", "");
+        this.properties.put("net.interface.ppp3.config.persist", true);
+        this.properties.put("net.interface.ppp3.config.diversityEnabled", false);
+        this.properties.put("net.interface.ppp3.config.authType", "NONE");
+        this.properties.put("net.interface.ppp3.config.ip4.dnsServers", "");
+        this.properties.put("net.interface.ppp3.config.dhcpClient4.enabled", false);
+        this.properties.put("net.interface.ppp3.config.ip6.dnsServers", "");
+        this.properties.put("net.interface.ppp3.type", "MODEM");
+        this.properties.put("net.interface.ppp3.config.gpsEnabled", false);
+        this.properties.put("net.interface.ppp3.config.maxFail", 5);
+        this.properties.put("net.interface.ppp3.config.lcpEchoInterval", 0);
+        this.properties.put("net.interface.ppp3.config.pdpType", "IP");
+        this.properties.put("net.interface.eno1.config.ip4.gateway", "");
+        this.properties.put("net.interface.wlp1s0.config.ip4.dnsServers", "");
+    }
+
     private void givenNetworkConfigurationService() throws KuraException {
         ComponentContext componentContextMock = mock(ComponentContext.class);
         BundleContext bundleCtxMock = mock(BundleContext.class);
@@ -262,16 +302,12 @@ public class NMConfigurationServiceImplTest {
         EventAdmin eventAdminMock = mock(EventAdmin.class);
         this.networkConfigurationService.setEventAdmin(eventAdminMock);
 
-//        UsbService usbServiceMock = mock(UsbService.class);
-//        this.networkConfigurationService.setUsbService(usbServiceMock);
-
         NetworkService networkServiceMock = mock(NetworkService.class);
         when(networkServiceMock.getModemPppInterfaceName("1-4")).thenReturn("ppp3");
+        when(networkServiceMock.getModemUsbPort("ppp3")).thenReturn("1-4");
         EthernetInterfaceImpl<NetInterfaceAddress> eth0 = new EthernetInterfaceImpl<>("eth0");
-//        EthernetInterfaceImpl<NetInterfaceAddress> eth1 = new EthernetInterfaceImpl<>("eth1");
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
         interfaces.add(eth0);
-//        interfaces.add(eth1);
         when(networkServiceMock.getNetworkInterfaces()).thenReturn(interfaces);
         this.networkConfigurationService.setNetworkService(networkServiceMock);
 
@@ -338,7 +374,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     private void thenComponentDefinitionHasBasicProperties() {
-        assertEquals(AbstractNetworkConfigurationService.PID, this.configuration.getPid());
+        assertEquals(NetworkConfigurationServiceCommon.PID, this.configuration.getPid());
         assertNotNull(this.properties);
         assertEquals(1, this.retrievedProperties.size());
         assertNotNull(this.ocd);
@@ -653,6 +689,30 @@ public class NMConfigurationServiceImplTest {
 
     private void thenSnapshotIsTaken() throws KuraException {
         verify(this.configurationServiceMock).snapshot();
+    }
+
+    private void thenPropertiesNumberIsCorrect() {
+        assertEquals(33, this.event.getPropertyNames().length);
+    }
+
+    private void thenPppInterfaceNamesAreReplaced() {
+        for (String propertyName : this.event.getPropertyNames()) {
+            System.out.println(propertyName);
+            assertTrue(propertyName.startsWith("net.interface.1-4") || propertyName.startsWith("net.interface.eno1")
+                    || propertyName.startsWith("net.interface.wlp1s0") || propertyName.startsWith("net.interface.lo")
+                    || propertyName.startsWith("net.interface.enp5s0")
+                    || propertyName.equals("net.interfaces") || propertyName.equals("event.topics"));
+        }
+    }
+
+    private void thenPropertiesNotContainPppNames() {
+        for (String propertyName : this.event.getPropertyNames()) {
+            assertFalse(propertyName.startsWith("net.interface.ppp"));
+        }
+    }
+
+    private void thenNetInterfacesPropertyIsCorrect() {
+        assertEquals("enp5s0,lo,eno1,wlp1s0,1-4", this.event.getProperty("net.interfaces"));
     }
 
     private static NetInterfaceType guessNetworkType(final String interfaceName) {

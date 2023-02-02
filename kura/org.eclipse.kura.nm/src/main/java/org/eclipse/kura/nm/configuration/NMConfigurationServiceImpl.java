@@ -367,7 +367,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private Map<String, Object> migrateModemConfigs(final Map<String, Object> properties) {
 
-        final Map<String, Object> result = new HashMap<>(properties);
+        Map<String, Object> result = new HashMap<>(properties);
         final Set<String> interfaceNames = NetworkConfigurationServiceCommon
                 .getNetworkInterfaceNamesInConfig(properties);
         final Set<String> resultInterfaceNames = new HashSet<>();
@@ -379,25 +379,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             }
 
             logger.info("migrating configuration for interface: {}...", existingInterfaceName);
-
-            String prefix = PREFIX + existingInterfaceName + ".";
-
-            final Optional<String> usbBusNumber = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.busNumber",
-                    existingInterfaceName);
-            final Optional<String> usbDevicePath = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.devicePath",
-                    existingInterfaceName);
-
-            if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
-                logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
-                continue;
-            }
-
-            final String migratedInterfaceName = usbBusNumber.get() + "-" + usbDevicePath.get();
+            final String migratedInterfaceName = this.networkService.getModemUsbPort(existingInterfaceName);
 
             logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
-            fillProperties(migratedInterfaceName, prefix, result);
+            result = replaceModemPropertyKeys(migratedInterfaceName, existingInterfaceName, result);
             resultInterfaceNames.add(migratedInterfaceName);
 
             logger.info("migrating configuration for interface: {}...done", existingInterfaceName);
@@ -408,25 +393,28 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         return result;
     }
 
-    private void fillProperties(String migratedInterfaceName, String prefix, Map<String, Object> result) {
+    private Map<String, Object> replaceModemPropertyKeys(String migratedInterfaceName, String existingInterfaceName,
+            Map<String, Object> properties) {
+        Map<String, Object> result = new HashMap<>();
         final String migratedPrefix = PREFIX + migratedInterfaceName + ".";
+        final String existingPrefix = PREFIX + existingInterfaceName + ".";
 
-        for (final Entry<String, Object> e : this.networkProperties.getProperties().entrySet()) {
+        for (final Entry<String, Object> e : properties.entrySet()) {
             final String key = e.getKey();
 
-            if (key.startsWith(prefix)) {
-                final String suffix = key.substring(prefix.length());
+            if (key.startsWith(existingPrefix)) {
+                final String suffix = key.substring(existingPrefix.length());
                 final String migratedPropertyKey = migratedPrefix + suffix;
+                final Object existingProperty = properties.get(migratedPropertyKey);
 
-                final Object existingProperty = this.networkProperties.getProperties().get(migratedPropertyKey);
-
-                if (existingProperty != null) {
-                    result.put(migratedPropertyKey, existingProperty);
-                } else {
+                if (existingProperty == null) {
                     result.put(migratedPropertyKey, e.getValue());
                 }
+            } else {
+                result.put(key, e.getValue());
             }
         }
+        return result;
     }
 
     private static Map<String, Object> discardModifiedNetworkInterfaces(final Map<String, Object> properties) {

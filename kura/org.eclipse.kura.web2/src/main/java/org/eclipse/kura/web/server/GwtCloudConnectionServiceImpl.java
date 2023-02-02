@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
@@ -89,7 +88,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtCertificatesServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GwtCloudConnectionServiceImpl.class);
 
     @Override
     public List<GwtCloudEntry> findCloudEntries() throws GwtKuraException {
@@ -265,7 +264,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
                     CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
 
-            return (Void) null;
+            return null;
         });
     }
 
@@ -278,22 +277,21 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         ServiceLocator.applyToServiceOptionally(ConfigurationService.class, cs -> {
             cs.deleteFactoryConfiguration(pid, true);
 
-            return (Void) null;
+            return null;
         });
     }
 
     private static void requireIsPubSubFactory(final String factoryPid) throws GwtKuraException {
-        final boolean isPubSub = ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class, scr -> {
-            return scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
-                final Map<String, Object> properties = c.properties;
+        final boolean isPubSub = ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
+                scr -> scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
+                    final Map<String, Object> properties = c.properties;
 
-                if (properties == null) {
-                    return false;
-                }
+                    if (properties == null) {
+                        return false;
+                    }
 
-                return Objects.equals(factoryPid, properties.get("service.pid")) && pubSubToGwt(c) != null;
-            });
-        });
+                    return Objects.equals(factoryPid, properties.get("service.pid")) && pubSubToGwt(c) != null;
+                }));
 
         if (!isPubSub) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
@@ -502,7 +500,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
         checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
+        request.getSession(false);
 
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);
@@ -573,9 +571,6 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     @Override
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
 
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudService.class, null);

@@ -36,7 +36,7 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.configuration.AbstractNetworkConfigurationService;
+import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
@@ -151,12 +151,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         this.dhcpServerMonitor.clear();
 
         final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
-        final Set<String> interfaces = AbstractNetworkConfigurationService
+        final Set<String> interfaces = NetworkConfigurationServiceCommon
                 .getNetworkInterfaceNamesInConfig(modifiedProps);
 
         try {
             for (final String interfaceName : interfaces) {
-                Optional<NetInterfaceType> interfaceTypeProperty = AbstractNetworkConfigurationService
+                Optional<NetInterfaceType> interfaceTypeProperty = NetworkConfigurationServiceCommon
                         .getNetworkTypeFromProperties(interfaceName, modifiedProps);
                 if (!interfaceTypeProperty.isPresent()) {
                     interfaceTypeProperty = Optional.of(getNetworkTypeFromSystem(interfaceName));
@@ -236,7 +236,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private Set<String> getWanInterfaces(final Map<String, Object> properties) {
-        return AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(properties).stream()
+        return NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(properties).stream()
                 .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
                         .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
                 .collect(Collectors.toSet());
@@ -292,21 +292,21 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(AbstractNetworkConfigurationService.PID,
-                AbstractNetworkConfigurationService.getDefinition(this.networkProperties.getProperties()),
+        return new ComponentConfigurationImpl(NetworkConfigurationServiceCommon.PID,
+                NetworkConfigurationServiceCommon.getDefinition(this.networkProperties.getProperties()),
                 this.networkProperties.getProperties());
     }
 
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
-        final Set<String> interfaces = AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(source);
-        interfaces.addAll(AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(dest));
+        final Set<String> interfaces = NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(source);
+        interfaces.addAll(NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(dest));
 
         dest.putAll(source);
         dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
     }
 
     private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(
+        final Set<String> interfaceNamesInConfig = NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(
                 this.networkProperties.getProperties());
 
         final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
@@ -339,7 +339,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private boolean isDhcpServerValid(String interfaceName) {
         boolean isValid = false;
-        Optional<NetInterfaceType> type = AbstractNetworkConfigurationService
+        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon
                 .getNetworkTypeFromProperties(interfaceName, this.networkProperties.getProperties());
         Optional<Boolean> isDhcpServerEnabled = this.networkProperties.getOpt(Boolean.class,
                 "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
@@ -367,7 +367,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private Map<String, Object> migrateModemConfigs(final Map<String, Object> properties) {
 
         final Map<String, Object> result = new HashMap<>(properties);
-        final Set<String> interfaceNames = AbstractNetworkConfigurationService
+        final Set<String> interfaceNames = NetworkConfigurationServiceCommon
                 .getNetworkInterfaceNamesInConfig(properties);
         final Set<String> resultInterfaceNames = new HashSet<>();
 

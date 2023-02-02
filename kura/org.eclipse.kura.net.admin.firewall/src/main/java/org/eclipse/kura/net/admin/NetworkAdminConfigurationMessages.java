@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -48,8 +48,7 @@ public class NetworkAdminConfigurationMessages {
             }
         } catch (MissingResourceException mre) {
             // log the failure to load a message bundle
-            logger.warn("Could not find Messages Bundle for Locale {}", locale);
-            mre.printStackTrace();
+            logger.warn("Could not find Messages Bundle for Locale " + locale, mre);
         }
 
         return message;

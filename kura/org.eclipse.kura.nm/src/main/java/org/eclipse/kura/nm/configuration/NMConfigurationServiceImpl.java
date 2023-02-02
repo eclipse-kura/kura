@@ -293,7 +293,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
         return new ComponentConfigurationImpl(NetworkConfigurationServiceCommon.PID,
-                NetworkConfigurationServiceCommon.getDefinition(this.networkProperties.getProperties()),
+                NetworkConfigurationServiceCommon.getDefinition(this.networkProperties.getProperties(),
+                        Optional.empty()),
                 this.networkProperties.getProperties());
     }
 

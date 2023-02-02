@@ -13,6 +13,7 @@
 package org.eclipse.kura.net.configuration;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +27,7 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,7 @@ public class NetworkConfigurationServiceCommon {
         // Do nothing...
     }
 
-    public static Tocd getDefinition(Map<String, Object> properties)
+    public static Tocd getDefinition(Map<String, Object> properties, Optional<List<UsbNetDevice>> usbNetDevices)
             throws KuraException {
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
@@ -83,6 +85,9 @@ public class NetworkConfigurationServiceCommon {
                 if (type.get() == NetInterfaceType.LOOPBACK) {
                     getLoopbackDefinition(objectFactory, tocd, ifaceName);
                 } else if (type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI) {
+                    if (usbNetDevices.isPresent()) {
+                        getUsbDeviceDefinition(usbNetDevices.get(), objectFactory, tocd, ifaceName);
+                    }
                     getInterfaceCommonDefinition(objectFactory, tocd, ifaceName);
                     getDnsDefinition(objectFactory, tocd, ifaceName);
                     getWifiDefinition(type.get(), objectFactory, tocd, ifaceName);
@@ -560,6 +565,73 @@ public class NetworkConfigurationServiceCommon {
         tad.setDescription(
                 NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_ADDRESS));
         tocd.addAD(tad);
+    }
+
+    private static void getUsbDeviceDefinition(List<UsbNetDevice> usbNetDevices, ObjectFactory objectFactory, Tocd tocd,
+            String ifaceName) {
+        if (usbNetDevices != null) {
+            Optional<UsbNetDevice> usbNetDeviceOptional = usbNetDevices.stream()
+                    .filter(usbNetDevice -> usbNetDevice.getInterfaceName().equals(ifaceName)).findFirst();
+            if (usbNetDeviceOptional.isPresent()) {
+                // found a match - add the read only fields?
+                Tad tad;
+                tad = objectFactory.createTad();
+                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.port").toString());
+                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.port").toString());
+                tad.setType(Tscalar.STRING);
+                tad.setCardinality(0);
+                tad.setRequired(false);
+                tad.setDefault("");
+                tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PORT));
+                tocd.addAD(tad);
+
+                tad = objectFactory.createTad();
+                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manufacturer").toString());
+                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manfacturer").toString());
+                tad.setType(Tscalar.STRING);
+                tad.setCardinality(0);
+                tad.setRequired(false);
+                tad.setDefault("");
+                tad.setDescription(
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER));
+                tocd.addAD(tad);
+
+                tad = objectFactory.createTad();
+                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product").toString());
+                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product").toString());
+                tad.setType(Tscalar.STRING);
+                tad.setCardinality(0);
+                tad.setRequired(false);
+                tad.setDefault("");
+                tad.setDescription(
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT));
+                tocd.addAD(tad);
+
+                tad = objectFactory.createTad();
+                tad.setId(
+                        new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manufacturer.id").toString());
+                tad.setName(
+                        new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manfacturer.id").toString());
+                tad.setType(Tscalar.STRING);
+                tad.setCardinality(0);
+                tad.setRequired(false);
+                tad.setDefault("");
+                tad.setDescription(
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER_ID));
+                tocd.addAD(tad);
+
+                tad = objectFactory.createTad();
+                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product.id").toString());
+                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product.id").toString());
+                tad.setType(Tscalar.STRING);
+                tad.setCardinality(0);
+                tad.setRequired(false);
+                tad.setDefault("");
+                tad.setDescription(
+                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT_ID));
+                tocd.addAD(tad);
+            }
+        }
     }
 
     public static Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {

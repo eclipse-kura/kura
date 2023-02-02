@@ -1669,6 +1669,8 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar@5" />
         </propertyfile>
     </target>
 
@@ -1765,6 +1767,9 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

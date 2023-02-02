@@ -92,7 +92,7 @@ public class DbComponentsTestBase {
                 TimeUnit.SECONDS);
 
         WireTestUtil.createFactoryConfiguration(configurationService, BaseDbService.class, dbServicePid,
-                this.storeTestTarget.factoryPid(), this.storeTestTarget.getConfigurationForPid(dbServicePid));
+                this.storeTestTarget.factoryPid(), this.storeTestTarget.getConfigurationForDatabase(dbServicePid));
 
         final WireGraphService wireGraphService = WireTestUtil.trackService(WireGraphService.class, Optional.empty())
                 .get(30, TimeUnit.SECONDS);
@@ -152,6 +152,14 @@ public class DbComponentsTestBase {
     protected void givenFilterWithConfig(final Object... args)
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         givenComponentWithConfig(this.testFilterPid, collectArgsToMap(args, Function.identity()));
+    }
+
+    protected void whenDatabaseIsReconfigured()
+            throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
+        WireTestUtil
+                .updateComponentConfiguration(this.configurationService, dbServicePid,
+                        this.storeTestTarget.getConfigurationForDatabase(System.nanoTime() + ""))
+                .get(30, TimeUnit.SECONDS);
     }
 
     protected void givenComponentWithConfig(final String pid, final Map<String, Object> properties)

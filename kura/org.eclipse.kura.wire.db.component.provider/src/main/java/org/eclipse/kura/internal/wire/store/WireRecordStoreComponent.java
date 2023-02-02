@@ -58,30 +58,30 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
-        logger.debug("Activating DB Wire Record Store...");
+        logger.debug("Activating Wire Record Store Component...");
 
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
         updateState(s -> s.setOptions(new WireRecordStoreComponentOptions(properties)));
 
-        logger.debug("Activating DB Wire Record Store... Done");
+        logger.debug("Activating Wire Record Store Component... Done");
     }
 
     public synchronized void updated(final Map<String, Object> properties) {
-        logger.debug("Updating DB Wire Record Store...");
+        logger.debug("Updating Wire Record Store Component...");
 
         updateState(s -> s.setOptions(new WireRecordStoreComponentOptions(properties)));
 
-        logger.debug("Updating DB Wire Record Store... Done");
+        logger.debug("Updating Wire Record Store Component... Done");
     }
 
     protected void deactivate() {
-        logger.debug("Deactivating DB Wire Record Store...");
+        logger.debug("Deactivating Wire Record Store Component...");
 
         this.state.shutdown();
 
-        logger.debug("Deactivating DB Wire Record Store... Done");
+        logger.debug("Deactivating Wire Record Store Component... Done");
     }
 
     @Override
@@ -221,6 +221,16 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public void store(final List<WireRecord> records) throws KuraStoreException {
+            try {
+                storeInternal(records);
+            } catch (final Exception e) {
+                logger.warn("failed to store records, attempting to reopen store...");
+                shutdown();
+                storeInternal(records);
+            }
+        }
+
+        private void storeInternal(final List<WireRecord> records) throws KuraStoreException {
             final WireRecordStore currentStore = getWireRecordStore();
 
             if (currentStore.getSize() >= options.getMaximumStoreSize()) {

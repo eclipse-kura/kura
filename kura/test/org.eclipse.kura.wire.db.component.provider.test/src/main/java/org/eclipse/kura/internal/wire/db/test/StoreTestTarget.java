@@ -12,7 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.db.test;
 
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public interface StoreTestTarget {
@@ -22,7 +27,7 @@ public interface StoreTestTarget {
 
     public String factoryPid();
 
-    public Map<String, Object> getConfigurationForPid(final String pid);
+    public Map<String, Object> getConfigurationForDatabase(final String name);
 
     public class H2 implements StoreTestTarget {
 
@@ -32,9 +37,9 @@ public interface StoreTestTarget {
         }
 
         @Override
-        public Map<String, Object> getConfigurationForPid(String pid) {
+        public Map<String, Object> getConfigurationForDatabase(String name) {
 
-            return Collections.singletonMap("db.connector.url", "jdbc:h2:mem:testdb-" + pid);
+            return Collections.singletonMap("db.connector.url", "jdbc:h2:mem:testdb-" + name);
         }
 
         @Override
@@ -56,9 +61,17 @@ public interface StoreTestTarget {
         }
 
         @Override
-        public Map<String, Object> getConfigurationForPid(String pid) {
+        public Map<String, Object> getConfigurationForDatabase(String name) {
+            final Map<String, Object> properties = new HashMap<>();
 
-            return Collections.emptyMap();
+            properties.put("db.mode", "PERSISTED");
+            try {
+                properties.put("db.path", Files.createTempDirectory(null).toFile().getPath() + "/" + name);
+            } catch (IOException e) {
+                fail("unable to create temporary directory");
+            }
+
+            return properties;
         }
     }
 }

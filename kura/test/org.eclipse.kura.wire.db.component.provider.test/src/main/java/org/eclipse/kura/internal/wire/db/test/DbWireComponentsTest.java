@@ -196,6 +196,18 @@ public class DbWireComponentsTest extends DbComponentsTestBase {
         thenFilterEmitsEnvelopeWithProperty(0, 1, "foo", TypedValues.newIntegerValue(5));
     }
 
+    @Test
+    public void shouldSupportStoreReconfiguration()
+            throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(23));
+
+        whenDatabaseIsReconfigured();
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(24));
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\";");
+
+        thenFilterEmitsEnvelopeWithProperty("foo", TypedValues.newIntegerValue(24));
+    }
+
     @Parameters(name = "{0} with {1}")
     public static Collection<Object[]> targets() {
         return Arrays.asList(new Object[][] {

@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.db;
 
 import static java.util.Objects.isNull;
+import static org.eclipse.kura.util.jdbc.JdbcUtil.getFirstColumnValue;
 
 import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
@@ -39,8 +40,6 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 public class H2DbMessageStoreImpl implements MessageStore {
-
-    private static final String TOPIC_ELEMENT = "topic";
 
     private static final String UPDATE = "UPDATE ";
 
@@ -192,7 +191,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         return this.helper.getConnectionProvider().withConnection(c -> {
 
-            int result = -1;
+            final int result;
 
             // store message
             try (PreparedStatement pstmt = c.prepareStatement(this.helper.getQueries().getSqlStore(),
@@ -217,11 +216,11 @@ public class H2DbMessageStoreImpl implements MessageStore {
                 pstmt.setInt(10, priority); // priority
                 pstmt.setString(11, null); // sessionId
                 pstmt.setTimestamp(12, null); // droppedOn
+
                 pstmt.execute();
-                ResultSet rs = pstmt.getGeneratedKeys();
-                if (rs.next()) {
-                    result = rs.getInt(1);
-                }
+
+                result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getInt);
+
             }
 
             c.commit();

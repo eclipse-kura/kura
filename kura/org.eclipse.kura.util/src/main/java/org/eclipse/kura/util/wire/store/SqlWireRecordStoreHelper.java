@@ -30,6 +30,7 @@ import java.util.function.UnaryOperator;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
+import org.eclipse.kura.util.jdbc.JdbcUtil;
 import org.eclipse.kura.wire.WireRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -251,11 +252,8 @@ public class SqlWireRecordStoreHelper {
         try (final Statement stmt = c.createStatement();
                 final ResultSet rset = stmt
                         .executeQuery(this.queries.getSqlRowCount())) {
-            if (rset.next()) {
-                return rset.getInt(1);
-            } else {
-                throw new SQLException("result set is empty");
-            }
+            return JdbcUtil.getFirstColumnValue(() -> stmt
+                    .executeQuery(this.queries.getSqlRowCount()), ResultSet::getInt);
         }
     }
 

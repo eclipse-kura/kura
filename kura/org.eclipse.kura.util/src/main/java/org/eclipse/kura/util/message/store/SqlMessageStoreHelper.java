@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.util.message.store;
 
+import static org.eclipse.kura.util.jdbc.JdbcUtil.getFirstColumnValue;
+import static org.eclipse.kura.util.jdbc.JdbcUtil.getFirstColumnValueOrEmpty;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,15 +74,9 @@ public final class SqlMessageStoreHelper {
 
     public int getMessageCount() throws KuraStoreException {
 
-        return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(), (c, stmt) -> {
-            try (final ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                } else {
-                    throw new SQLException("result set is empty");
-                }
-            }
-        }, "Cannot get message count");
+        return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(),
+                (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getInt), "Cannot get message count");
+
     }
 
     protected void validate(String topic) throws KuraStoreException {
@@ -96,27 +93,25 @@ public final class SqlMessageStoreHelper {
 
         return this.connectionProvider.withConnection(c -> {
 
-            long result = -1;
+            final long result;
 
-            // store message
             try (PreparedStatement pstmt = c.prepareStatement(this.queries.getSqlStore(),
                     new String[] { "id" })) {
-                pstmt.setString(1, topic); // topic
-                pstmt.setInt(2, qos); // qos
-                pstmt.setBoolean(3, retain); // retain
-                pstmt.setTimestamp(4, now, this.utcCalendar); // createdOn
-                pstmt.setTimestamp(5, null); // publishedOn
-                pstmt.setInt(6, -1); // publishedMessageId
-                pstmt.setTimestamp(7, null); // confirmedOn
-                pstmt.setBytes(8, payload); // payload
-                pstmt.setInt(9, priority); // priority
-                pstmt.setString(10, null); // sessionId
-                pstmt.setTimestamp(11, null); // droppedOn
+
+                pstmt.setString(1, topic);
+                pstmt.setInt(2, qos);
+                pstmt.setBoolean(3, retain);
+                pstmt.setTimestamp(4, now, this.utcCalendar);
+                pstmt.setTimestamp(5, null);
+                pstmt.setInt(6, -1);
+                pstmt.setTimestamp(7, null);
+                pstmt.setBytes(8, payload);
+                pstmt.setInt(9, priority);
+                pstmt.setString(10, null);
+                pstmt.setTimestamp(11, null);
                 pstmt.execute();
-                ResultSet rs = pstmt.getGeneratedKeys();
-                if (rs.next()) {
-                    result = rs.getLong(1);
-                }
+
+                result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getLong);
             }
 
             c.commit();
@@ -136,13 +131,8 @@ public final class SqlMessageStoreHelper {
 
         return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetMessage(), (c, stmt) -> {
             stmt.setInt(1, msgId);
-            try (final ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(messageBuilder.call(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
+
+            return getFirstColumnValueOrEmpty(stmt::executeQuery, (rs, i) -> messageBuilder.call(rs));
 
         }, "Cannot get message by ID: " + msgId);
     }
@@ -156,15 +146,9 @@ public final class SqlMessageStoreHelper {
     public Optional<StoredMessage> getNextMessage(final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
-        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetNextMessage(), (c, stmt) -> {
-            try (final ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(messageBuilder.call(rs));
-                } else {
-                    return Optional.empty();
-                }
-            }
-        }, "Cannot get message next message");
+        return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetNextMessage(),
+                (c, stmt) -> getFirstColumnValueOrEmpty(stmt::executeQuery, (rs, i) -> messageBuilder.call(rs)),
+                "Cannot get message next message");
     }
 
     public void markAsPublished(int msgId, DataTransportToken token) throws KuraStoreException {
@@ -194,17 +178,17 @@ public final class SqlMessageStoreHelper {
     }
 
     public List<StoredMessage> getUnpublishedMessages() throws KuraStoreException {
-        // Order by priority, createdOn
+
         return listMessages(this.queries.getSqlAllUnpublishedMessages());
     }
 
     public List<StoredMessage> getInFlightMessages() throws KuraStoreException {
-        // Order by priority, createdOn
+
         return listMessages(this.queries.getSqlAllInFlightMessages());
     }
 
     public synchronized List<StoredMessage> getDroppedMessages() throws KuraStoreException {
-        // Order by priority, createdOn
+
         return listMessages(this.queries.getSqlAllDroppedInFlightMessages());
     }
 
@@ -218,13 +202,11 @@ public final class SqlMessageStoreHelper {
 
     public void deleteStaleMessages(int purgeAge) throws KuraStoreException {
         final long timestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(purgeAge);
-        // Delete dropped messages (published with QoS > 0)
+
         execute(this.queries.getSqlDeleteDroppedMessages(), timestamp);
 
-        // Delete stale confirmed messages (published with QoS > 0)
         execute(this.queries.getSqlDeleteConfirmedMessages(), timestamp);
 
-        // Delete stale published messages with QoS == 0
         execute(this.queries.getSqlDeletePublishedMessages(), timestamp);
     }
 
@@ -232,10 +214,10 @@ public final class SqlMessageStoreHelper {
         final Timestamp now = new Timestamp(new Date().getTime());
 
         this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
-            stmt.setTimestamp(1, now, this.utcCalendar); // timestamp
+            stmt.setTimestamp(1, now, this.utcCalendar);
 
             for (int i = 0; i < msgIds.length; i++) {
-                stmt.setInt(2 + i, msgIds[i]); // messageId
+                stmt.setInt(2 + i, msgIds[i]);
             }
             stmt.execute();
             c.commit();
@@ -248,7 +230,7 @@ public final class SqlMessageStoreHelper {
         return this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
-                    stmt.setInt(2 + i, params[i]); // timeInterval
+                    stmt.setInt(2 + i, params[i]);
                 }
             }
 
@@ -264,6 +246,7 @@ public final class SqlMessageStoreHelper {
             for (int i = 0; i < params.length; i++) {
                 stmt.setObject(1 + i, params[i]);
             }
+
             stmt.execute();
             c.commit();
             return null;

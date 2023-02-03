@@ -1634,11 +1634,6 @@
                     <name>buildAll</name>
                 </property>
             </activation>
-
-            <properties>
-                <docker.imagename>base-kura-docker-x86_64-nn</docker.imagename>
-            </properties>
-
             <build>
                 <resources>
                     <resource>
@@ -1680,10 +1675,10 @@
                                         <property name="build.name" value="docker-x86_64-nn" />
                                         <property name="target.device" value="docker-x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="ubuntu" />
+                                        <property name="kura.os.version" value="ubuntu" /> <!-- TODO -->
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
+                                        <property name="os.base" value="debian" /> <!-- TODO:  -->
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1729,19 +1724,13 @@
                             <phase>package</phase>
                             <configuration>
                               <target>
-                                <copy todir="${basedir}/target/">
-                                  <fileset file="${project.basedir}/src/main/resources/Dockerfile"/>
-                                </copy>
-                                <exec executable="docker" dir="${basedir}/target/" failonerror="true">
+                                <copy todir="${project.build.directory}" file="${project.basedir}/src/main/resources/docker-x86_64-nn/Dockerfile" />
+                                <exec executable="docker" dir="${project.build.directory}" failonerror="true">
                                     <arg value="build"/>
                                     <arg value="-t"/>
-                                    <arg value="${docker.imagename}:${project.version}"/>
+                                    <arg value="base-kura-docker:${project.version}"/>
                                     <arg value="-t"/>
-                                    <arg value="${docker.imagename}:${maven.build.timestamp}"/>
-                                    <arg value="-t"/>
-                                    <arg value="${docker.imagename}-x86_64:${project.version}"/>
-                                    <arg value="-t"/>
-                                    <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                    <arg value="base-kura-docker-x86_64:${project.version}"/>
                                     <arg value="."/>
                                 </exec>
                               </target>
@@ -1764,7 +1753,7 @@
                 </property>
             </activation>
             <properties>
-                <docker.imagename>kura-ubi8-x86_64</docker.imagename>
+                
             </properties>
             <build>
                 <resources>
@@ -1779,21 +1768,17 @@
                         <version>3.0.0</version>
                         <executions>
                           <execution>
-                            <phase>compile</phase>
+                            <phase>package</phase>
                             <configuration>
                               <target>
-                                <exec executable="docker" dir="${project.basedir}/src/main/resources/" failonerror="true">
+                                <exec executable="docker" dir="${project.basedir}/src/main/resources/docker-ubi8-x86_64-nn" failonerror="true">
                                   <arg value="build"/>
                                   <arg value="--build-arg"/>
-                                  <arg value="BASE-IMAGE-KURA=${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}"/>
                                   <arg value="-t"/>
-                                  <arg value="${docker.imagename}:${project.version}"/>
+                                  <arg value="kura-ubi8:${project.version}"/>
                                   <arg value="-t"/>
-                                  <arg value="${docker.imagename}:${maven.build.timestamp}"/>
-                                  <arg value="-t"/>
-                                  <arg value="${docker.imagename}-x86_64:${project.version}"/>
-                                  <arg value="-t"/>
-                                  <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="kura-ubi8-x86_64:${project.version}"/>
                                   <arg value="."/>
                                 </exec>
                               </target>
@@ -1815,9 +1800,6 @@
                     <name>buildAll</name>
                 </property>
             </activation>
-            <properties>
-                <docker.imagename>kura-alpine-x86_64-nn</docker.imagename>
-            </properties>
             <build>
                 <resources>
                     <resource>
@@ -1831,21 +1813,17 @@
                         <version>3.0.0</version>
                         <executions>
                           <execution>
-                            <phase>compile</phase>
+                            <phase>package</phase>
                             <configuration>
                               <target>
-                                <exec executable="docker" dir="${project.basedir}/src/main/resources/" failonerror="true">
+                                <exec executable="docker" dir="${project.basedir}/src/main/resources/docker-alpine-x86_64-nn" failonerror="true">
                                   <arg value="build"/>
                                   <arg value="--build-arg"/>
-                                  <arg value="BASE-IMAGE-KURA=${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}"/>
                                   <arg value="-t"/>
-                                  <arg value="${docker.imagename}:${project.version}"/>
+                                  <arg value="kura-alpine:${project.version}"/>
                                   <arg value="-t"/>
-                                  <arg value="${docker.imagename}:${maven.build.timestamp}"/>
-                                  <arg value="-t"/>
-                                  <arg value="${docker.imagename}-x86_64:${project.version}"/>
-                                  <arg value="-t"/>
-                                  <arg value="${docker.imagename}-x86_64:${maven.build.timestamp}"/>
+                                  <arg value="kura-alpine-x86_64:${project.version}"/>
                                   <arg value="."/>
                                 </exec>
                               </target>

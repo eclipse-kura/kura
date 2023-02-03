@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server.net2.configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +44,24 @@ public class NetworkConfigurationServiceProperties {
     }
 
     /*
+     * Interface names
+     */
+
+    private static final String NET_INTERFACES = "net.interfaces";
+
+    public List<String> getNetworkInterfaces() {
+        List<String> ifnames = new LinkedList<>();
+
+        String netInterfaces = (String) this.properties.get(NET_INTERFACES);
+        String[] interfaces = netInterfaces.split(",");
+        for (String name : interfaces) {
+            ifnames.add(name.trim());
+        }
+
+        return ifnames;
+    }
+
+    /*
      * Common properties
      */
 
@@ -50,8 +69,8 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String NET_INTERFACE_CONFIG_NAT_ENABLED = "net.interface.%s.config.nat.enabled";
 
-    public String getType(String ifname) {
-        return (String) this.properties.get(String.format(NET_INTERFACE_TYPE, ifname));
+    public Optional<String> getType(String ifname) {
+        return Optional.of((String) this.properties.get(String.format(NET_INTERFACE_TYPE, ifname)));
     }
 
     public void setType(String ifname, String type) {

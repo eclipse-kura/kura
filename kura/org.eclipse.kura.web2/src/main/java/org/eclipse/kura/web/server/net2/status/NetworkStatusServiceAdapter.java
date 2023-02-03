@@ -42,15 +42,12 @@ public class NetworkStatusServiceAdapter {
 
     private final NetworkStatusService networkStatusService;
 
-    private List<String> ifnames;
-
     public NetworkStatusServiceAdapter() throws GwtKuraException {
         this.networkStatusService = ServiceLocator.getInstance().getService(NetworkStatusService.class);
-        this.ifnames = this.networkStatusService.getInterfaceNames();
     }
 
     public List<String> getNetInterfaces() {
-        return this.ifnames;
+        return this.networkStatusService.getInterfaceNames();
     }
 
     public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(GwtNetInterfaceConfig gwtConfigToUpdate) {

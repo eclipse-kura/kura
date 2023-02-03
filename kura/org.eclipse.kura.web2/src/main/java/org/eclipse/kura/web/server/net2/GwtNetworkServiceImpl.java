@@ -49,7 +49,7 @@ public class GwtNetworkServiceImpl {
             NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
 
             List<GwtNetInterfaceConfig> result = new LinkedList<>();
-            for (String ifname : configuration.getNetInterfaces()) {
+            for (String ifname : status.getNetInterfaces()) {
                 GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifname);
                 status.fillWithStatusProperties(gwtConfig);
 

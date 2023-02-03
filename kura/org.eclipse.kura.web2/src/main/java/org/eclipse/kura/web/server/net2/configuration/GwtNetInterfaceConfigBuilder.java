@@ -20,6 +20,7 @@ import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
@@ -50,22 +51,29 @@ public class GwtNetInterfaceConfigBuilder {
 
     public GwtNetInterfaceConfig build() {
         setCommonProperties();
-        setIpv4Properties();
-        setIpv4DhcpClientProperties();
-        setIpv4DhcpServerProperties();
-        setRouterMode();
-        setWifiProperties();
-        setModemProperties();
+
+        if (this.properties.getNetworkInterfaces().contains(ifname)) {
+            setIpv4Properties();
+            setIpv4DhcpClientProperties();
+            setIpv4DhcpServerProperties();
+            setRouterMode();
+            setWifiProperties();
+            setModemProperties();
+        } else {
+            this.gwtConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
+        }
 
         return this.gwtConfig;
     }
 
     private GwtNetInterfaceConfig createGwtNetInterfaceConfigSubtype() {
-        if (this.properties.getType(this.ifname).equals(NetInterfaceType.WIFI.name())) {
+        Optional<String> ifType = this.properties.getType(this.ifname);
+
+        if (ifType.isPresent() && ifType.get().equals(NetInterfaceType.WIFI.name())) {
             return new GwtWifiNetInterfaceConfig();
         }
 
-        if (this.properties.getType(this.ifname).equals(NetInterfaceType.MODEM.name())) {
+        if (ifType.isPresent() && ifType.get().equals(NetInterfaceType.MODEM.name())) {
             return new GwtModemInterfaceConfig();
         }
 
@@ -75,7 +83,11 @@ public class GwtNetInterfaceConfigBuilder {
     private void setCommonProperties() {
         this.gwtConfig.setName(this.ifname);
         this.gwtConfig.setHwName(this.ifname);
-        this.gwtConfig.setHwType(this.properties.getType(this.ifname));
+
+        Optional<String> ifType = this.properties.getType(this.ifname);
+        if (ifType.isPresent()) {
+            this.gwtConfig.setHwType(ifType.get());
+        }
 
         if (this.gwtConfig instanceof GwtWifiNetInterfaceConfig) {
             String wifiMode = EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMode(this.ifname));

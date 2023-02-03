@@ -43,7 +43,6 @@ public class ConnectionPoolManager {
         config.setDataSource(sqliteDataSource);
         config.setMaximumPoolSize(maxConnectionCount);
         config.setConnectionTimeout(ACTIVE_CONNECTION_WAIT_TIMEOUT);
-        config.setAutoCommit(false);
         config.setAllowPoolSuspension(true);
         config.setIdleTimeout(0);
         config.setMaxLifetime(0);
@@ -67,8 +66,6 @@ public class ConnectionPoolManager {
 
         try {
             try (final Connection conn = this.sqliteDataSource.getConnection()) {
-                conn.setAutoCommit(false);
-
                 consumer.accept(conn);
             }
 

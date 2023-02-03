@@ -60,8 +60,14 @@ public class H2DbWireRecordStoreImpl implements WireRecordStore {
                         + " ON " + sanitizedTableName + " (TIMESTAMP DESC);")
                 .build();
 
-        this.helper = new SqlWireRecordStoreHelper(provider, tableName, queries, this::getJdbcType,
-                this::sanitizeSql);
+        this.helper = SqlWireRecordStoreHelper.builder() //
+                .withConnectionProvider(provider) //
+                .withTableName(tableName) //
+                .withQueries(queries) //
+                .withSqlTypeMapper(this::getJdbcType) //
+                .withSanitizer(this::sanitizeSql) //
+                .withExplicitCommitEnabled(true) //
+                .build();
 
         this.helper.createTable();
         this.helper.createTimestampIndex();

@@ -100,7 +100,6 @@ public interface TestTarget {
                 try (final Connection c = dbService.getConnection(); final Statement stmt = c.createStatement()) {
                     stmt.executeUpdate(
                             "UPDATE sqlite_sequence SET seq = " + value + " WHERE name = \"" + collection + "\";");
-                    c.commit();
                 }
 
             } catch (Exception e) {

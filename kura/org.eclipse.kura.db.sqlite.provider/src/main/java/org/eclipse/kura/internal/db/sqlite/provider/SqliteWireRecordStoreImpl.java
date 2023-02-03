@@ -58,7 +58,14 @@ public class SqliteWireRecordStoreImpl implements WireRecordStore {
                         + " ON " + sanitizedTableName + " (TIMESTAMP DESC);")
                 .build();
 
-        this.helper = new SqlWireRecordStoreHelper(provider, tableName, queries, this::getJdbcType, this::sanitizeSql);
+        this.helper = SqlWireRecordStoreHelper.builder() //
+                .withConnectionProvider(provider) //
+                .withTableName(tableName) //
+                .withQueries(queries) //
+                .withSqlTypeMapper(this::getJdbcType) //
+                .withSanitizer(this::sanitizeSql) //
+                .withExplicitCommitEnabled(false) //
+                .build();
 
         this.helper.createTable();
         this.helper.createTimestampIndex();

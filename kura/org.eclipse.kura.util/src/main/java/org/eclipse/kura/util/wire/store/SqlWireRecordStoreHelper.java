@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.util.wire.store;
 
+import static java.util.Objects.requireNonNull;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -48,16 +50,17 @@ public class SqlWireRecordStoreHelper {
     private final SqlWireRecordStoreQueries queries;
     private final Function<TypedValue<?>, Optional<String>> sqlTypeMapper;
     private final UnaryOperator<String> sanitizer;
+    private final boolean isExplicitCommitEnabled;
 
-    public SqlWireRecordStoreHelper(final ConnectionProvider connectionProvider, final String tableName,
-            final SqlWireRecordStoreQueries queries, Function<TypedValue<?>, Optional<String>> sqlTypeMapper,
-            UnaryOperator<String> sanitizer) {
-        this.tableName = tableName;
-        this.sanitizedTableName = sanitizer.apply(tableName);
-        this.connectionProvider = connectionProvider;
-        this.queries = queries;
-        this.sqlTypeMapper = sqlTypeMapper;
-        this.sanitizer = sanitizer;
+    private SqlWireRecordStoreHelper(final Builder builder) {
+        this.tableName = requireNonNull(builder.tableName);
+        this.sanitizer = requireNonNull(builder.sanitizer);
+        this.connectionProvider = requireNonNull(builder.connectionProvider);
+        this.queries = requireNonNull(builder.queries);
+        this.sqlTypeMapper = requireNonNull(builder.sqlTypeMapper);
+        this.isExplicitCommitEnabled = builder.isExplicitCommitEnabled;
+
+        this.sanitizedTableName = builder.sanitizer.apply(tableName);
     }
 
     public void createTable() throws KuraStoreException {
@@ -202,7 +205,11 @@ public class SqlWireRecordStoreHelper {
             }
 
             stmt.execute();
-            connection.commit();
+
+            if (isExplicitCommitEnabled) {
+                connection.commit();
+            }
+
             logger.debug("Stored typed value");
         }
 
@@ -261,7 +268,10 @@ public class SqlWireRecordStoreHelper {
                 setParameterValue(stmt, 1 + i, params[i]);
             }
             stmt.execute();
-            c.commit();
+
+            if (isExplicitCommitEnabled) {
+                c.commit();
+            }
         }
     }
 
@@ -273,4 +283,56 @@ public class SqlWireRecordStoreHelper {
     public interface SqlTypeMapper {
         public Optional<String> getMappedType(final TypedValue<?> value);
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private String tableName;
+        private ConnectionProvider connectionProvider;
+        private SqlWireRecordStoreQueries queries;
+        private Function<TypedValue<?>, Optional<String>> sqlTypeMapper;
+        private UnaryOperator<String> sanitizer;
+        private boolean isExplicitCommitEnabled;
+
+        private Builder() {
+        }
+
+        public Builder withTableName(String tableName) {
+            this.tableName = tableName;
+            return this;
+        }
+
+        public Builder withConnectionProvider(ConnectionProvider connectionProvider) {
+            this.connectionProvider = connectionProvider;
+            return this;
+        }
+
+        public Builder withQueries(SqlWireRecordStoreQueries queries) {
+            this.queries = queries;
+            return this;
+        }
+
+        public Builder withSqlTypeMapper(Function<TypedValue<?>, Optional<String>> sqlTypeMapper) {
+            this.sqlTypeMapper = sqlTypeMapper;
+            return this;
+        }
+
+        public Builder withSanitizer(UnaryOperator<String> sanitizer) {
+            this.sanitizer = sanitizer;
+            return this;
+        }
+
+        public Builder withExplicitCommitEnabled(boolean isExplicitCommitEnabled) {
+            this.isExplicitCommitEnabled = isExplicitCommitEnabled;
+            return this;
+        }
+
+        public SqlWireRecordStoreHelper build() {
+            return new SqlWireRecordStoreHelper(this);
+        }
+    }
+
 }

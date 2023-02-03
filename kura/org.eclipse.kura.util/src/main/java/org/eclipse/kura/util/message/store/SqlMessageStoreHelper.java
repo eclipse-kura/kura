@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.util.message.store;
 
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.util.jdbc.JdbcUtil.getFirstColumnValue;
 import static org.eclipse.kura.util.jdbc.JdbcUtil.getFirstColumnValueOrEmpty;
 
@@ -39,14 +40,15 @@ public final class SqlMessageStoreHelper {
 
     private final ConnectionProvider connectionProvider;
     private final Calendar utcCalendar;
-
     private final SqlMessageStoreQueries queries;
+    private final boolean isExplicitCommitEnabled;
 
-    public SqlMessageStoreHelper(final ConnectionProvider connectionProvider,
-            final SqlMessageStoreQueries queries) {
+    private SqlMessageStoreHelper(Builder builder) {
+        this.connectionProvider = requireNonNull(builder.connectionProvider);
+        this.queries = requireNonNull(builder.queries);
+        this.isExplicitCommitEnabled = builder.isExplicitCommitEnabled;
+
         this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        this.connectionProvider = connectionProvider;
-        this.queries = queries;
     }
 
     public void createTable() throws KuraStoreException {
@@ -102,7 +104,9 @@ public final class SqlMessageStoreHelper {
                 result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getLong);
             }
 
-            c.commit();
+            if (isExplicitCommitEnabled) {
+                c.commit();
+            }
 
             return result;
         }, "Cannot store message");
@@ -150,7 +154,10 @@ public final class SqlMessageStoreHelper {
             stmt.setInt(4, msgId);
 
             stmt.execute();
-            c.commit();
+
+            if (isExplicitCommitEnabled) {
+                c.commit();
+            }
             return null;
 
         }, "Cannot update timestamp");
@@ -208,7 +215,10 @@ public final class SqlMessageStoreHelper {
                 stmt.setInt(2 + i, msgIds[i]);
             }
             stmt.execute();
-            c.commit();
+
+            if (isExplicitCommitEnabled) {
+                c.commit();
+            }
             return null;
 
         }, "Cannot update timestamp");
@@ -236,7 +246,10 @@ public final class SqlMessageStoreHelper {
             }
 
             stmt.execute();
-            c.commit();
+
+            if (isExplicitCommitEnabled) {
+                c.commit();
+            }
             return null;
 
         }, "Cannot execute query");
@@ -279,6 +292,39 @@ public final class SqlMessageStoreHelper {
 
     public ConnectionProvider getConnectionProvider() {
         return connectionProvider;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private ConnectionProvider connectionProvider;
+        private SqlMessageStoreQueries queries;
+        private boolean isExplicitCommitEnabled;
+
+        private Builder() {
+        }
+
+        public Builder withConnectionProvider(ConnectionProvider connectionProvider) {
+            this.connectionProvider = connectionProvider;
+            return this;
+        }
+
+        public Builder withQueries(SqlMessageStoreQueries queries) {
+            this.queries = queries;
+            return this;
+        }
+
+        public Builder withExplicitCommitEnabled(boolean isExplicitCommitEnabled) {
+            this.isExplicitCommitEnabled = isExplicitCommitEnabled;
+            return this;
+        }
+
+        public SqlMessageStoreHelper build() {
+            return new SqlMessageStoreHelper(this);
+        }
     }
 
 }

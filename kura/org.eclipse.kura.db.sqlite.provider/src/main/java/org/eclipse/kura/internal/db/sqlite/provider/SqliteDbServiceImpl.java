@@ -112,7 +112,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
 
     private static class DbState {
 
-        private static final String DEFRAG_STATEMENT = "END TRANSACTION; VACUUM;";
+        private static final String DEFRAG_STATEMENT = "VACUUM;";
 
         private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
 

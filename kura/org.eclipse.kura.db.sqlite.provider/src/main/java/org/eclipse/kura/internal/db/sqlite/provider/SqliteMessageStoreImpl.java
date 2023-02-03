@@ -101,7 +101,12 @@ public class SqliteMessageStoreImpl implements MessageStore {
                         + " ON " + this.sanitizedTableName + " (droppedOn DESC);")
                 .build();
 
-        this.helper = new SqlMessageStoreHelper(provider, queries);
+        this.helper = SqlMessageStoreHelper.builder() //
+                .withConnectionProvider(provider) //
+                .withQueries(queries) //
+                .withExplicitCommitEnabled(false) //
+                .build();
+
         this.helper.createTable();
         this.helper.createIndexes();
     }

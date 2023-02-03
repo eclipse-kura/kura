@@ -139,7 +139,11 @@ public class H2DbMessageStoreImpl implements MessageStore {
                         + " ON " + this.sanitizedTableName + " (droppedOn DESC);")
                 .build();
 
-        this.helper = new SqlMessageStoreHelper(provider, queries);
+        this.helper = SqlMessageStoreHelper.builder()
+                .withConnectionProvider(provider)
+                .withQueries(queries)
+                .withExplicitCommitEnabled(true)
+                .build();
 
         this.helper.createTable();
         this.helper.createIndexes();

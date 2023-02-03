@@ -697,7 +697,6 @@ public class NMConfigurationServiceImplTest {
 
     private void thenPppInterfaceNamesAreReplaced() {
         for (String propertyName : this.event.getPropertyNames()) {
-            System.out.println(propertyName);
             assertTrue(propertyName.startsWith("net.interface.1-4") || propertyName.startsWith("net.interface.eno1")
                     || propertyName.startsWith("net.interface.wlp1s0") || propertyName.startsWith("net.interface.lo")
                     || propertyName.startsWith("net.interface.enp5s0")

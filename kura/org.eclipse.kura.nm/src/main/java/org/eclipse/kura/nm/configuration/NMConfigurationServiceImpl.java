@@ -54,7 +54,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final String NET_INTERFACES = "net.interfaces";
     private static final String MODIFIED_INTERFACE_NAMES = "modified.interface.names";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
-    private static final Pattern PPP_INTERFACE = Pattern.compile("ppp[0-9]+");
+    private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
 
     private NetworkService networkService;
     private EventAdmin eventAdmin;

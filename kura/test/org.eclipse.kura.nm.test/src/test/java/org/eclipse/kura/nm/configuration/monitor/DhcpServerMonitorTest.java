@@ -30,9 +30,10 @@ public class DhcpServerMonitorTest {
     private DhcpServerMonitor monitor;
     private CommandExecutorService cesMock;
     private DhcpServerManager managerMock;
+    private Object lock = new Object();
 
     @Test
-    public void shouldStartDhcpServerTest() throws KuraException {
+    public void shouldStartDhcpServerTest() throws KuraException, InterruptedException {
         givenDhcpdServerMonitorDisabled();
         whenEnabledInterfaceIsAdded();
         whenDhcpServerMonitorIsStarted();
@@ -40,7 +41,7 @@ public class DhcpServerMonitorTest {
     }
 
     @Test
-    public void shouldStopDhcpServerTest() throws KuraException {
+    public void shouldStopDhcpServerTest() throws KuraException, InterruptedException {
         givenDhcpdServerMonitorEnabled();
         whenDisabledInterfaceIsAdded();
         whenDhcpServerMonitorIsStarted();
@@ -87,23 +88,21 @@ public class DhcpServerMonitorTest {
         this.monitor.start();
     }
 
-    private void thenDhcpServerIsStarted() throws KuraException {
-        waitFor(1);
+    private void thenDhcpServerIsStarted() throws KuraException, InterruptedException {
+        waitForSeconds(1);
         verify(this.managerMock, atLeast(1)).isRunning("wlan0");
         verify(this.managerMock).enable("wlan0");
     }
 
-    private void thenDhcpServerIsStopped() throws KuraException {
-        waitFor(1);
+    private void thenDhcpServerIsStopped() throws KuraException, InterruptedException {
+        waitForSeconds(1);
         verify(this.managerMock, atLeast(1)).isRunning("eth0");
         verify(this.managerMock).disable("eth0");
     }
 
-    private void waitFor(int timeout) {
-        try {
-            Thread.sleep(timeout * 1000);
-        } catch (InterruptedException e) {
-            // do nothing...
+    private void waitForSeconds(int timeout) throws InterruptedException {
+        synchronized (this.lock) {
+            this.lock.wait(timeout * 1000);
         }
     }
 }

@@ -1,16 +1,22 @@
 package org.eclipse.kura.nm.status;
 
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
+import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.nm.configuration.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,17 +58,46 @@ public class NMStatusConverter {
         String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
         ethInterface.setHardwareAddress(getMacAddressBytes(hwAddress));
 
+        // Address informations
         NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
 
         String gateway = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        // WIP
+        try {
+            IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
+            address.setGateway(ipGateway);
+        } catch (UnknownHostException e) {
+            logger.debug("Could not retrieve gateway address {} due to:", gateway, e);
+        }
 
-        address.setAddress(null);
+        List<Map<String, Variant<?>>> addressData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+        for (Map<String, Variant<?>> data : addressData) {
+            String addressStr = String.class.cast(data.get("address").getValue());
+            UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
+            try {
+                IPAddress ipAddress = IPAddress.parseHostAddress(addressStr);
+                address.setAddress(ipAddress);
+            } catch (UnknownHostException e) {
+                logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
+            }
+            address.setNetworkPrefixLength(prefix.shortValue());
+        }
+
+        List<IPAddress> dnsServers = new ArrayList<>();
+        List<Map<String, Variant<?>>> nameserverData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
+        for (Map<String, Variant<?>> data : nameserverData) {
+            String addressStr = String.class.cast(data.get("address").getValue());
+            try {
+                IPAddress ipAddress = IPAddress.parseHostAddress(addressStr);
+                dnsServers.add(ipAddress);
+            } catch (UnknownHostException e) {
+                logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
+            }
+        }
+        address.setDnsServers(dnsServers);
+
+        // WIP
         address.setBroadcast(null);
-        address.setGateway(null);
-        address.setNetworkPrefixLength((short) 0);
         address.setNetmask(null);
-        address.setDnsServers(null);
 
         // WIP: Grab all addresses
         ethInterface.setNetInterfaceAddresses(Arrays.asList(address));

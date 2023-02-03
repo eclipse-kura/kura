@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("restriction")
 public class H2DbMessageStoreImpl implements MessageStore {
 
+    private static final String CREATE_INDEX_IF_NOT_EXISTS = "CREATE INDEX IF NOT EXISTS ";
+
     private static final String UPDATE = "UPDATE ";
 
     private static final String DELETE_FROM = "DELETE FROM ";
@@ -90,8 +92,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
                         + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
                         + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER,"
                         + " sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);")
-                .withSqlCreateIndex("CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
-                        + this.sanitizedTableName + " (publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC, qos);")
                 .withSqlMessageCount("SELECT COUNT(*) FROM " + this.sanitizedTableName + ";")
                 .withSqlStore("INSERT INTO " + this.sanitizedTableName
                         + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, smallPayload, largePayload, priority, "
@@ -129,11 +129,20 @@ public class H2DbMessageStoreImpl implements MessageStore {
                                 + " WHERE confirmedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND confirmedOn IS NOT NULL;")
                 .withSqlDeletePublishedMessages(DELETE_FROM + this.sanitizedTableName
                         + " WHERE qos = 0 AND publishedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND publishedOn IS NOT NULL;")
+                .withSqlCreateNextMessageIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_nextMsg")
+                        + " ON " + this.sanitizedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
+                .withSqlCreatePublishedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_PUBLISHEDON")
+                        + " ON " + this.sanitizedTableName + " (publishedOn DESC);")
+                .withSqlCreateConfirmedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_CONFIRMEDON")
+                        + " ON " + this.sanitizedTableName + " (confirmedOn DESC);")
+                .withSqlCreateDroppedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_DROPPEDON")
+                        + " ON " + this.sanitizedTableName + " (droppedOn DESC);")
                 .build();
 
-        this.helper = new SqlMessageStoreHelper(provider, tableName, queries,
-                this::sanitizeSql);
-        this.helper.createTableAndIndexes();
+        this.helper = new SqlMessageStoreHelper(provider, queries);
+
+        this.helper.createTable();
+        this.helper.createIndexes();
     }
 
     private String sanitizeSql(final String string) {
@@ -232,21 +241,17 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
     @Override
     public synchronized Optional<StoredMessage> get(int msgId) throws KuraStoreException {
-
         return this.helper.get(msgId, this::buildStoredMessage);
     }
 
     @Override
     public synchronized Optional<StoredMessage> getNextMessage() throws KuraStoreException {
-
         return this.helper.getNextMessage(this::buildStoredMessage);
     }
 
     @Override
     public synchronized void markAsPublished(int msgId, DataTransportToken token) throws KuraStoreException {
-
         this.helper.markAsPublished(msgId, token);
-
     }
 
     @Override

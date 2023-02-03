@@ -23,6 +23,7 @@ public class SqlWireRecordStoreQueries {
     private final String sqlDeleteRangeTable;
     private final String sqlInsertRecord;
     private final String sqlTruncateTable;
+    private final String sqlCreateTimestampIndex;
 
     private SqlWireRecordStoreQueries(Builder builder) {
         this.sqlAddColumn = requireNonNull(builder.sqlAddColumn);
@@ -32,6 +33,7 @@ public class SqlWireRecordStoreQueries {
         this.sqlDeleteRangeTable = requireNonNull(builder.sqlDeleteRangeTable);
         this.sqlInsertRecord = requireNonNull(builder.sqlInsertRecord);
         this.sqlTruncateTable = requireNonNull(builder.sqlTruncateTable);
+        this.sqlCreateTimestampIndex = requireNonNull(builder.sqlCreateTimestampIndex);
     }
 
     public String getSqlAddColumn() {
@@ -62,6 +64,10 @@ public class SqlWireRecordStoreQueries {
         return sqlTruncateTable;
     }
 
+    public String getSqlCreateTimestampIndex() {
+        return sqlCreateTimestampIndex;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -75,6 +81,7 @@ public class SqlWireRecordStoreQueries {
         private String sqlDeleteRangeTable;
         private String sqlInsertRecord;
         private String sqlTruncateTable;
+        private String sqlCreateTimestampIndex;
 
         public Builder withSqlAddColumn(String sqlAddColumn) {
             this.sqlAddColumn = sqlAddColumn;
@@ -108,6 +115,11 @@ public class SqlWireRecordStoreQueries {
 
         public Builder withSqlTruncateTable(String sqlTruncateTable) {
             this.sqlTruncateTable = sqlTruncateTable;
+            return this;
+        }
+
+        public Builder withSqlCreateTimestampIndex(String sqlCreateTimestampIndex) {
+            this.sqlCreateTimestampIndex = sqlCreateTimestampIndex;
             return this;
         }
 

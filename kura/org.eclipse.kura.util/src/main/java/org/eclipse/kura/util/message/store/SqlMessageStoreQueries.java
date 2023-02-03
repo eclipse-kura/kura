@@ -17,7 +17,6 @@ import static java.util.Objects.requireNonNull;
 public final class SqlMessageStoreQueries {
 
     private final String sqlCreateTable;
-    private final String sqlCreateIndex;
     private final String sqlMessageCount;
     private final String sqlStore;
     private final String sqlGetMessage;
@@ -33,10 +32,13 @@ public final class SqlMessageStoreQueries {
     private final String sqlDeleteDroppedMessages;
     private final String sqlDeleteConfirmedMessages;
     private final String sqlDeletePublishedMessages;
+    private final String sqlCreateNextMessageIndex;
+    private final String sqlCreatePublishedOnIndex;
+    private final String sqlCreateConfirmedOnIndex;
+    private final String sqlCreateDroppedOnIndex;
 
     private SqlMessageStoreQueries(Builder builder) {
         this.sqlCreateTable = requireNonNull(builder.sqlCreateTable);
-        this.sqlCreateIndex = requireNonNull(builder.sqlCreateIndex);
         this.sqlMessageCount = requireNonNull(builder.sqlMessageCount);
         this.sqlStore = requireNonNull(builder.sqlStore);
         this.sqlGetMessage = requireNonNull(builder.sqlGetMessage);
@@ -52,14 +54,14 @@ public final class SqlMessageStoreQueries {
         this.sqlDeleteDroppedMessages = requireNonNull(builder.sqlDeleteDroppedMessages);
         this.sqlDeleteConfirmedMessages = requireNonNull(builder.sqlDeleteConfirmedMessages);
         this.sqlDeletePublishedMessages = requireNonNull(builder.sqlDeletePublishedMessages);
+        this.sqlCreateNextMessageIndex = requireNonNull(builder.sqlCreateIndex);
+        this.sqlCreatePublishedOnIndex = requireNonNull(builder.sqlCreatePublishedOnIndex);
+        this.sqlCreateConfirmedOnIndex = requireNonNull(builder.sqlCreateConfirmedOnIndex);
+        this.sqlCreateDroppedOnIndex = requireNonNull(builder.sqlCreateDroppedOnIndex);
     }
 
     public String getSqlCreateTable() {
         return sqlCreateTable;
-    }
-
-    public String getSqlCreateIndex() {
-        return sqlCreateIndex;
     }
 
     public String getSqlMessageCount() {
@@ -122,6 +124,22 @@ public final class SqlMessageStoreQueries {
         return sqlDeletePublishedMessages;
     }
 
+    public String getSqlCreateNextMessageIndex() {
+        return sqlCreateNextMessageIndex;
+    }
+
+    public String getSqlCreatePublishedOnIndex() {
+        return sqlCreatePublishedOnIndex;
+    }
+
+    public String getSqlCreateConfirmedOnIndex() {
+        return sqlCreateConfirmedOnIndex;
+    }
+
+    public String getSqlCreateDroppedOnIndex() {
+        return sqlCreateDroppedOnIndex;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -145,14 +163,13 @@ public final class SqlMessageStoreQueries {
         private String sqlDeleteDroppedMessages;
         private String sqlDeleteConfirmedMessages;
         private String sqlDeletePublishedMessages;
+        private String sqlCreateNextMessageIndex;
+        private String sqlCreatePublishedOnIndex;
+        private String sqlCreateConfirmedOnIndex;
+        private String sqlCreateDroppedOnIndex;
 
         public Builder withSqlCreateTable(String sqlCreateTable) {
             this.sqlCreateTable = sqlCreateTable;
-            return this;
-        }
-
-        public Builder withSqlCreateIndex(String sqlCreateIndex) {
-            this.sqlCreateIndex = sqlCreateIndex;
             return this;
         }
 
@@ -228,6 +245,26 @@ public final class SqlMessageStoreQueries {
 
         public Builder withSqlDeletePublishedMessages(String sqlDeletePublishedMessages) {
             this.sqlDeletePublishedMessages = sqlDeletePublishedMessages;
+            return this;
+        }
+
+        public Builder withSqlCreateNextMessageIndex(String sqlCreateIndex) {
+            this.sqlCreateIndex = sqlCreateIndex;
+            return this;
+        }
+
+        public Builder withSqlCreatePublishedOnIndex(String sqlCreatePublishedOnIndex) {
+            this.sqlCreatePublishedOnIndex = sqlCreatePublishedOnIndex;
+            return this;
+        }
+
+        public Builder withSqlCreateConfirmedOnIndex(String sqlCreateConfirmedOnIndex) {
+            this.sqlCreateConfirmedOnIndex = sqlCreateConfirmedOnIndex;
+            return this;
+        }
+
+        public Builder withSqlCreateDroppedOnIndex(String sqlCreateDroppedOnIndex) {
+            this.sqlCreateDroppedOnIndex = sqlCreateDroppedOnIndex;
             return this;
         }
 

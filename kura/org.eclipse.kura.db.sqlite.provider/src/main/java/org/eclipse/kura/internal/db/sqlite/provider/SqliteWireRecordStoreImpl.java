@@ -42,7 +42,7 @@ public class SqliteWireRecordStoreImpl implements WireRecordStore {
 
     public SqliteWireRecordStoreImpl(final ConnectionProvider provider, final String tableName)
             throws KuraStoreException {
-        final String sanitizedTableName = sanitizeSqlTableAndColumnName(tableName);
+        final String sanitizedTableName = sanitizeSql(tableName);
 
         final SqlWireRecordStoreQueries queries = SqlWireRecordStoreQueries.builder()
                 .withSqlAddColumn("ALTER TABLE " + sanitizedTableName + " ADD COLUMN {0} {1};")
@@ -53,12 +53,15 @@ public class SqliteWireRecordStoreImpl implements WireRecordStore {
                         + sanitizedTableName + " ORDER BY ID ASC LIMIT {0});")
                 .withSqlDropColumn("ALTER TABLE " + sanitizedTableName + " DROP COLUMN {0};")
                 .withSqlInsertRecord("INSERT INTO " + sanitizedTableName + " ({0}) VALUES ({1});")
-                .withSqlTruncateTable("TRUNCATE TABLE " + sanitizedTableName + ";").build();
+                .withSqlTruncateTable("TRUNCATE TABLE " + sanitizedTableName + ";")
+                .withSqlCreateTimestampIndex("CREATE INDEX IF NOT EXISTS " + sanitizeSql(tableName + "_TIMESTAMP")
+                        + " ON " + sanitizedTableName + " (TIMESTAMP DESC);")
+                .build();
 
-        this.helper = new SqlWireRecordStoreHelper(provider, tableName, queries, this::getJdbcType,
-                this::sanitizeSqlTableAndColumnName);
+        this.helper = new SqlWireRecordStoreHelper(provider, tableName, queries, this::getJdbcType, this::sanitizeSql);
 
         this.helper.createTable();
+        this.helper.createTimestampIndex();
     }
 
     @Override
@@ -81,7 +84,7 @@ public class SqliteWireRecordStoreImpl implements WireRecordStore {
         // nothing to shutdown
     }
 
-    private String sanitizeSqlTableAndColumnName(final String string) {
+    private String sanitizeSql(final String string) {
         final String sanitizedName = string.replace("\"", "\"\"");
         return "\"" + sanitizedName + "\"";
     }

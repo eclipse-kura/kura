@@ -26,6 +26,8 @@ import org.eclipse.kura.util.message.store.SqlMessageStoreQueries;
 @SuppressWarnings("restriction")
 public class SqliteMessageStoreImpl implements MessageStore {
 
+    private static final String CREATE_INDEX_IF_NOT_EXISTS = "CREATE INDEX IF NOT EXISTS ";
+
     private static final String UPDATE = "UPDATE ";
 
     private static final String DELETE_FROM = "DELETE FROM ";
@@ -55,8 +57,6 @@ public class SqliteMessageStoreImpl implements MessageStore {
                         + " (id INTEGER PRIMARY KEY AUTOINCREMENT, topic VARCHAR, qos INTEGER, retain BOOLEAN, "
                         + "createdOn DATETIME, publishedOn DATETIME, publishedMessageId INTEGER, confirmedOn DATETIME, "
                         + "payload BLOB, priority INTEGER, sessionId VARCHAR, droppedOn DATETIME);")
-                .withSqlCreateIndex("CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
-                        + this.sanitizedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
                 .withSqlMessageCount("SELECT COUNT(*) FROM " + this.sanitizedTableName + ";")
                 .withSqlStore("INSERT INTO " + this.sanitizedTableName
                         + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, "
@@ -91,11 +91,19 @@ public class SqliteMessageStoreImpl implements MessageStore {
                         DELETE_FROM + this.sanitizedTableName + " WHERE confirmedOn <= ? AND confirmedOn IS NOT NULL;")
                 .withSqlDeletePublishedMessages(DELETE_FROM + this.sanitizedTableName
                         + " WHERE qos = 0 AND publishedOn <= ? AND publishedOn IS NOT NULL;")
+                .withSqlCreateNextMessageIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_nextMsg")
+                        + " ON " + this.sanitizedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
+                .withSqlCreatePublishedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_PUBLISHEDON")
+                        + " ON " + this.sanitizedTableName + " (publishedOn DESC);")
+                .withSqlCreateConfirmedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_CONFIRMEDON")
+                        + " ON " + this.sanitizedTableName + " (confirmedOn DESC);")
+                .withSqlCreateDroppedOnIndex(CREATE_INDEX_IF_NOT_EXISTS + sanitizeSql(this.tableName + "_DROPPEDON")
+                        + " ON " + this.sanitizedTableName + " (droppedOn DESC);")
                 .build();
 
-        this.helper = new SqlMessageStoreHelper(provider, tableName, queries, this::sanitizeSql);
-        this.helper.createTableAndIndexes();
-
+        this.helper = new SqlMessageStoreHelper(provider, queries);
+        this.helper.createTable();
+        this.helper.createIndexes();
     }
 
     private String sanitizeSql(final String string) {
@@ -135,13 +143,11 @@ public class SqliteMessageStoreImpl implements MessageStore {
 
     @Override
     public synchronized Optional<StoredMessage> get(int msgId) throws KuraStoreException {
-
         return this.helper.get(msgId);
     }
 
     @Override
     public synchronized Optional<StoredMessage> getNextMessage() throws KuraStoreException {
-
         return this.helper.getNextMessage();
     }
 

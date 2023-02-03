@@ -26,50 +26,38 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class SqlMessageStoreHelper {
 
     private static final String TOPIC_ELEMENT = "topic";
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlMessageStoreHelper.class);
-
     private final ConnectionProvider connectionProvider;
     private final Calendar utcCalendar;
 
-    private final String tableName;
-    private final UnaryOperator<String> sanitizer;
-    private final String sanitizedTableName;
     private final SqlMessageStoreQueries queries;
 
-    public SqlMessageStoreHelper(final ConnectionProvider connectionProvider, final String table,
-            final SqlMessageStoreQueries queries,
-            final UnaryOperator<String> sanitizer) {
+    public SqlMessageStoreHelper(final ConnectionProvider connectionProvider,
+            final SqlMessageStoreQueries queries) {
         this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.connectionProvider = connectionProvider;
-        this.tableName = table;
         this.queries = queries;
-        this.sanitizer = sanitizer;
-        this.sanitizedTableName = sanitizer.apply(tableName);
     }
 
-    public void createTableAndIndexes() throws KuraStoreException {
+    public void createTable() throws KuraStoreException {
         execute(this.queries.getSqlCreateTable());
-        execute(this.queries.getSqlCreateIndex());
+    }
 
-        createIndex(this.sanitizer.apply(this.tableName + "_PUBLISHEDON"), this.sanitizedTableName,
-                "(PUBLISHEDON DESC)");
-        createIndex(this.sanitizer.apply(this.tableName + "_CONFIRMEDON"), this.sanitizedTableName,
-                "(CONFIRMEDON DESC)");
-        createIndex(this.sanitizer.apply(this.tableName + "_DROPPEDON"), this.sanitizedTableName, "(DROPPEDON DESC)");
+    public void createIndexes() throws KuraStoreException {
+        execute(this.queries.getSqlCreateNextMessageIndex());
+        execute(this.queries.getSqlCreatePublishedOnIndex());
+        execute(this.queries.getSqlCreateConfirmedOnIndex());
+        execute(this.queries.getSqlCreateDroppedOnIndex());
     }
 
     public int getMessageCount() throws KuraStoreException {
@@ -252,11 +240,6 @@ public final class SqlMessageStoreHelper {
             return null;
 
         }, "Cannot execute query");
-    }
-
-    public void createIndex(String indexname, String table, String order) throws KuraStoreException {
-        execute("CREATE INDEX IF NOT EXISTS " + indexname + " ON " + table + " " + order + ";");
-        logger.debug("Index {} created, order is {}", indexname, order);
     }
 
     public List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {

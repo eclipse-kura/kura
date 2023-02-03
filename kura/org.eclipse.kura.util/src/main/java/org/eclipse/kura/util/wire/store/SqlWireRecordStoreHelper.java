@@ -62,9 +62,16 @@ public class SqlWireRecordStoreHelper {
 
     public void createTable() throws KuraStoreException {
         this.connectionProvider.withConnection(c -> {
-            this.createTable(c);
+            execute(c, this.queries.getSqlCreateTable());
             return null;
         }, "failed to create table");
+    }
+
+    public void createTimestampIndex() throws KuraStoreException {
+        this.connectionProvider.withConnection(c -> {
+            execute(c, this.queries.getSqlCreateTimestampIndex());
+            return null;
+        }, "failed to create index");
     }
 
     public void truncate(final int noOfRecordsToKeep) throws KuraStoreException {
@@ -103,7 +110,7 @@ public class SqlWireRecordStoreHelper {
                     insertRecord(c, r);
                 } catch (final SQLException e) {
                     logger.info("Reconciling table and columns");
-                    createTable(c);
+                    execute(c, this.queries.getSqlCreateTable());
                     createColumns(c, r);
                     insertRecord(c, r);
                 }
@@ -111,15 +118,6 @@ public class SqlWireRecordStoreHelper {
 
             return null;
         }, "failed to insert records");
-    }
-
-    private void createTable(final Connection c) throws SQLException {
-        execute(c, this.queries.getSqlCreateTable());
-        createIndex(c, sanitizer.apply(tableName + "_TIMESTAMP"), sanitizedTableName, "(TIMESTAMP DESC)");
-    }
-
-    public void createIndex(final Connection c, String indexname, String table, String order) throws SQLException {
-        execute(c, "CREATE INDEX IF NOT EXISTS " + indexname + " ON " + table + " " + order + ";");
     }
 
     public void createColumns(final Connection c, final WireRecord wireRecord) throws SQLException {

@@ -74,8 +74,7 @@ public class NMStatusConverter {
             String addressStr = String.class.cast(data.get("address").getValue());
             UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
             try {
-                IPAddress ipAddress = IPAddress.parseHostAddress(addressStr);
-                address.setAddress(ipAddress);
+                address.setAddress(IPAddress.parseHostAddress(addressStr));
             } catch (UnknownHostException e) {
                 logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
             }
@@ -87,8 +86,7 @@ public class NMStatusConverter {
         for (Map<String, Variant<?>> data : nameserverData) {
             String addressStr = String.class.cast(data.get("address").getValue());
             try {
-                IPAddress ipAddress = IPAddress.parseHostAddress(addressStr);
-                dnsServers.add(ipAddress);
+                dnsServers.add(IPAddress.parseHostAddress(addressStr));
             } catch (UnknownHostException e) {
                 logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
             }
@@ -97,14 +95,10 @@ public class NMStatusConverter {
 
         // Hardcode netmask for testing WIP
         try {
-            IPAddress ipAddress = IPAddress.parseHostAddress("255.255.255.0");
-            address.setNetmask(ipAddress);
+            address.setNetmask(IPAddress.parseHostAddress(new String("255.255.255.0")));
         } catch (UnknownHostException e) {
-            logger.debug("Could not retrieve ip address {} due to:", "255.255.255.0", e);
+            logger.warn("Could not retrieve ip address {} due to:", "255.255.255.0", e);
         }
-
-        // WIP
-        address.setNetmask(null);
 
         // WIP: Grab all addresses
         ethInterface.setNetInterfaceAddresses(Arrays.asList(address));

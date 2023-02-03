@@ -66,7 +66,7 @@ public class NMStatusConverter {
             IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
             address.setGateway(ipGateway);
         } catch (UnknownHostException e) {
-            logger.debug("Could not retrieve gateway address {} due to:", gateway, e);
+            logger.debug("Could not retrieve gateway address \"{}\" due to:", gateway, e);
         }
 
         List<Map<String, Variant<?>>> addressData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
@@ -75,10 +75,11 @@ public class NMStatusConverter {
             UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
             try {
                 address.setAddress(IPAddress.parseHostAddress(addressStr));
+                address.setNetworkPrefixLength(prefix.shortValue());
+                address.setNetmask(IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
             } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
+                logger.debug("Could not retrieve ip address due to:", e);
             }
-            address.setNetworkPrefixLength(prefix.shortValue());
         }
 
         List<IPAddress> dnsServers = new ArrayList<>();
@@ -88,23 +89,36 @@ public class NMStatusConverter {
             try {
                 dnsServers.add(IPAddress.parseHostAddress(addressStr));
             } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve ip address {} due to:", addressStr, e);
+                logger.debug("Could not retrieve ip address \"{}\" due to:", addressStr, e);
             }
         }
         address.setDnsServers(dnsServers);
-
-        // Hardcode netmask for testing WIP
-        try {
-            address.setNetmask(IPAddress.parseHostAddress(new String("255.255.255.0")));
-        } catch (UnknownHostException e) {
-            logger.warn("Could not retrieve ip address {} due to:", "255.255.255.0", e);
-        }
 
         // WIP: Grab all addresses
         ethInterface.setNetInterfaceAddresses(Arrays.asList(address));
 
         return ethInterface;
 
+    }
+
+    private static String getNetmaskStringFrom(int prefix) {
+        if (prefix >= 1 && prefix <= 32) {
+            int mask = ~((1 << 32 - prefix) - 1);
+            return dottedQuad(mask);
+        } else {
+            throw new IllegalArgumentException("prefix is invalid: " + Integer.toString(prefix));
+        }
+    }
+
+    private static String dottedQuad(int ip) {
+        String[] items = new String[4];
+        for (int i = 3; i >= 0; i--) {
+            int value = ip & 0xFF;
+            items[i] = Integer.toString(value);
+            ip = ip >>> 8;
+        }
+
+        return String.join(".", items);
     }
 
     private static byte[] getMacAddressBytes(String macAddress) {

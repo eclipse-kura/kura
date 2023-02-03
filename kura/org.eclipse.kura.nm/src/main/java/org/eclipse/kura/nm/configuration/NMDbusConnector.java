@@ -33,6 +33,7 @@ import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
+import org.freedesktop.networkmanager.device.Generic;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +140,17 @@ public class NMDbusConnector {
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
+            Generic genericDevice = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(), Generic.class);
+            Properties genericDeviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    genericDevice.getObjectPath(), Properties.class);
+            String genericDeviceType = genericDeviceProperties.Get("org.freedesktop.NetworkManager.Device.Generic",
+                    "TypeDescription");
+            if (genericDeviceType.equals("loopback")) {
+                logger.info("Found loopback inteface: {}", interfaceName);
+                // TODO return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties,
+                // ip4configProperties);
+            }
         }
 
         return null;

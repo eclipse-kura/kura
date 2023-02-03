@@ -16,7 +16,6 @@ import org.eclipse.kura.nm.configuration.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +32,8 @@ public class NMStatusConverter {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetInterface<NetInterfaceAddress> buildEthernetStatus(String interfaceName, Device device,
-            Properties deviceProperties, Properties ip4ConfigProperties, Properties dhcp4ConfigProperties) {
+    public static NetInterface<NetInterfaceAddress> buildEthernetStatus(String interfaceName,
+            Properties deviceProperties, Properties ip4ConfigProperties) {
         EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
 
         ethInterface.setVirtual(false);

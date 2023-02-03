@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.configuration;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
@@ -24,17 +22,16 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 /**
- * Adapter to retrieve {@link NetworkConfigurationService} properties and
+ * Adapter to retrieve NetworkConfigurationService properties and
  * convert them to a {@link GwtNetInterfaceConfig} object, and viceversa.
  *
  */
 public class NetworkConfigurationServiceAdapter {
 
     private static final String NETWORK_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-    private static final String NET_INTERFACES = "net.interfaces";
+
 
     private final ConfigurationService configurationService;
-    private final List<String> ifnames;
     private final Map<String, Object> netConfServProperties;
 
     public NetworkConfigurationServiceAdapter() throws GwtKuraException, KuraException {
@@ -42,29 +39,13 @@ public class NetworkConfigurationServiceAdapter {
         ComponentConfiguration config = configurationService
                 .getComponentConfiguration(NETWORK_CONFIGURATION_SERVICE_PID);
         this.netConfServProperties = config.getConfigurationProperties();
-
-        String netInterfaces = (String) this.netConfServProperties.get(NET_INTERFACES);
-        String[] interfaces = netInterfaces.split(",");
-        this.ifnames = new ArrayList<>();
-        for (String name : interfaces) {
-            this.ifnames.add(name.trim());
-        }
-    }
-
-    /**
-     * 
-     * @return the list of interface names currently configured in the
-     *         {@link org.eclipse.kura.net.admin.NetworkConfigurationService}
-     */
-    public List<String> getNetInterfaces() {
-        return this.ifnames;
     }
 
     /**
      * 
      * @param ifname
      * @return a new {@link GwtNetInterfaceConfig} with properties read from the
-     *         {@link org.eclipse.kura.net.admin.NetworkConfigurationService}
+     *         NetworkConfigurationService
      */
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
         return new GwtNetInterfaceConfigBuilder(this.netConfServProperties).forInterface(ifname).build();

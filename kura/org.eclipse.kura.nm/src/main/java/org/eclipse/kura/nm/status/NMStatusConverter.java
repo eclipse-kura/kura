@@ -106,7 +106,7 @@ public class NMStatusConverter {
             Properties deviceProperties, Properties ip4ConfigProperties) {
         LoopbackInterfaceImpl<NetInterfaceAddress> loInterface = new LoopbackInterfaceImpl<>(interfaceName);
 
-        loInterface.setVirtual(false);
+        loInterface.setVirtual(true);
         loInterface.setLoopback(true);
         loInterface.setPointToPoint(false);
 

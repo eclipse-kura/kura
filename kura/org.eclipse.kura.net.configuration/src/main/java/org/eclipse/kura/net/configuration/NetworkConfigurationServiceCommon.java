@@ -26,6 +26,7 @@ import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.slf4j.Logger;
@@ -649,6 +650,13 @@ public class NetworkConfigurationServiceCommon {
             interfaceType = Optional.of(NetInterfaceType.valueOf((String) interfaceTypeString));
         }
         return interfaceType;
+    }
+
+    public static Set<String> getWanInterfacesInConfig(final Map<String, Object> properties) {
+        return getNetworkInterfaceNamesInConfig(properties).stream()
+                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
+                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
+                .collect(Collectors.toSet());
     }
 
 }

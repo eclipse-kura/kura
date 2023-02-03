@@ -279,8 +279,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
             final Map<String, Object> newProperties) {
-        final Set<String> oldWanInterfaces = getWanInterfaces(oldProperties);
-        final Set<String> newWanInterfaces = getWanInterfaces(newProperties);
+        final Set<String> oldWanInterfaces = NetworkConfigurationServiceCommon.getWanInterfacesInConfig(oldProperties);
+        final Set<String> newWanInterfaces = NetworkConfigurationServiceCommon.getWanInterfacesInConfig(newProperties);
 
         boolean changed = false;
 
@@ -310,13 +310,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
 
         return changed;
-    }
-
-    private Set<String> getWanInterfaces(final Map<String, Object> properties) {
-        return NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(properties).stream()
-                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
-                        .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
-                .collect(Collectors.toSet());
     }
 
     private void executeVisitors(NetworkConfiguration networkConfiguration) throws KuraException {

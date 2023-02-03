@@ -48,8 +48,7 @@ public class NetworkConfigurationMessages {
             }
         } catch (MissingResourceException mre) {
             // log the failure to load a message bundle
-            logger.warn("Could not find Messages Bundle for Locale {}", locale);
-            mre.printStackTrace();
+            logger.warn("Could not find Messages Bundle for Locale " + locale, mre);
         }
 
         return message;

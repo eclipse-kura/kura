@@ -147,7 +147,6 @@ public class NMDbusConnector {
             String genericDeviceType = genericDeviceProperties.Get("org.freedesktop.NetworkManager.Device.Generic",
                     "TypeDescription");
             if (genericDeviceType.equals("loopback")) {
-                logger.info("Found loopback inteface: {}", interfaceName);
                 return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
             }
         }

@@ -50,6 +50,7 @@
 						<configuration>
 							<target>
 								<delete dir="src/main/resources/archetype-resources/target-definition" />
+								<mkdir dir="src/main/resources/archetype-resources/target-definition"/>
 								<copy todir="src/main/resources/archetype-resources/target-definition">
 									<fileset dir="../../../distrib/target/staging/target-definition" />
 								</copy>

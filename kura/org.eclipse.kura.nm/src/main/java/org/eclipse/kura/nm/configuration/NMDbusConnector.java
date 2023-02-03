@@ -148,8 +148,7 @@ public class NMDbusConnector {
                     "TypeDescription");
             if (genericDeviceType.equals("loopback")) {
                 logger.info("Found loopback inteface: {}", interfaceName);
-                // TODO return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties,
-                // ip4configProperties);
+                return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
             }
         }
 

@@ -17,13 +17,12 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 
 /**
- * Adapter to retrieve {@link NetworkConfigurationService} properties and
+ * Adapter to retrieve NetworkConfigurationService properties and
  * convert them to a {@link GwtNetInterfaceConfig} object, and viceversa.
  *
  */
@@ -46,7 +45,7 @@ public class NetworkConfigurationServiceAdapter {
      * 
      * @param ifname
      * @return a new {@link GwtNetInterfaceConfig} with properties read from the
-     *         {@link org.eclipse.kura.net.admin.NetworkConfigurationService}
+     *         NetworkConfigurationService
      */
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
         return new GwtNetInterfaceConfigBuilder(this.netConfServProperties).forInterface(ifname).build();

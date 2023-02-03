@@ -78,7 +78,7 @@ public class NetworkStatusServiceAdapter {
             gwtConfig.setHwState(networkInterface.getState().name());
         }
         if (networkInterface.getType() != null) {
-            gwtConfig.setHwState(networkInterface.getType().name());
+            gwtConfig.setHwType(networkInterface.getType().name());
         }
         gwtConfig.setHwAddress(NetUtil.hardwareAddressToString(networkInterface.getHardwareAddress()));
         gwtConfig.setHwName(networkInterface.getName());

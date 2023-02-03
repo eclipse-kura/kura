@@ -162,6 +162,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private void setBgScanProperties(GwtWifiConfig gwtWifiConfig, String gwtBgScanModule) {
         if (gwtBgScanModule != null) {
             StringBuilder bgScanProperty = new StringBuilder();
+
             bgScanProperty.append(gwtBgScanModule);
             bgScanProperty.append(":");
             bgScanProperty.append(gwtWifiConfig.getBgscanShortInterval());

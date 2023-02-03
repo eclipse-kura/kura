@@ -144,6 +144,7 @@ public class GwtNetInterfaceConfigBuilder {
             if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
                 setWifiMasterProperties();
             }
+
             if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name())) {
                 setWifiInfraProperties();
             }

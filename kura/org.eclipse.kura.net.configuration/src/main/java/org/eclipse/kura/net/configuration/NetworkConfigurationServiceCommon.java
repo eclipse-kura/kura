@@ -38,13 +38,9 @@ public class NetworkConfigurationServiceCommon {
     public static final String PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
 
     private static final String PREFIX = "net.interface.";
-    private static final String CONFIG_IP4_PREFIX = ".config.ip4.prefix";
-    private static final String CONFIG_IP4_ADDRESS = ".config.ip4.address";
-    private static final String CONFIG_DRIVER = ".config.driver";
-    private static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
-    private static final String CONFIG_MTU = ".config.mtu";
     private static final String NET_INTERFACES = "net.interfaces";
     private static final Pattern COMMA = Pattern.compile(",");
+    private static ObjectFactory objectFactory = new ObjectFactory();
 
     private NetworkConfigurationServiceCommon() {
         // Do nothing...
@@ -52,22 +48,16 @@ public class NetworkConfigurationServiceCommon {
 
     public static Tocd getDefinition(Map<String, Object> properties, Optional<List<UsbNetDevice>> usbNetDevices)
             throws KuraException {
-        ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
 
         tocd.setName("NetworkConfigurationService");
         tocd.setId(PID);
         tocd.setDescription("Network Configuration Service");
 
-        Tad tad = objectFactory.createTad();
-        tad.setId(NET_INTERFACES);
-        tad.setName(NET_INTERFACES);
-        tad.setType(Tscalar.STRING);
+        Tad tad = buildAttributeDefinition(NET_INTERFACES, NetworkConfigurationPropertyNames.PLATFORM_INTERFACES,
+                Tscalar.STRING);
         tad.setCardinality(10000);
         tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
         tocd.addAD(tad);
 
         // Get the network interfaces on the platform
@@ -84,14 +74,14 @@ public class NetworkConfigurationServiceCommon {
                 }
 
                 if (type.get() == NetInterfaceType.LOOPBACK) {
-                    getLoopbackDefinition(objectFactory, tocd, ifaceName);
+                    getLoopbackDefinition(tocd, ifaceName);
                 } else if (type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI) {
                     if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), objectFactory, tocd, ifaceName);
+                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
                     }
-                    getInterfaceCommonDefinition(objectFactory, tocd, ifaceName);
-                    getDnsDefinition(objectFactory, tocd, ifaceName);
-                    getWifiDefinition(type.get(), objectFactory, tocd, ifaceName);
+                    getInterfaceCommonDefinition(tocd, ifaceName);
+                    getDnsDefinition(tocd, ifaceName);
+                    getWifiDefinition(type.get(), tocd, ifaceName);
                 }
             }
         } catch (Exception e) {
@@ -101,536 +91,226 @@ public class NetworkConfigurationServiceCommon {
         return tocd;
     }
 
-    private static void getWifiDefinition(NetInterfaceType type, ObjectFactory objectFactory, Tocd tocd,
+    private static void getWifiDefinition(NetInterfaceType type, Tocd tocd,
             String ifaceName) {
         if (type == NetInterfaceType.WIFI) {
-            getWifiCommonDefinition(objectFactory, tocd, ifaceName);
-            getWifiInfraDefinition(objectFactory, tocd, ifaceName);
-            getWifiMasterDefinition(objectFactory, tocd, ifaceName);
+            getWifiCommonDefinition(tocd, ifaceName);
+            getWifiInfraDefinition(tocd, ifaceName);
+            getWifiMasterDefinition(tocd, ifaceName);
         }
     }
 
-    private static void getWifiMasterDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
+    private static void getWifiMasterDefinition(Tocd tocd, String ifaceName) {
         // MASTER
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.ssid").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.ssid").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SSID));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.ssid", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SSID, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.broadcast").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.broadcast").toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_BROADCAST_ENABLED));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.broadcast", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_BROADCAST_ENABLED, Tscalar.BOOLEAN));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.hardwareMode")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.hardwareMode")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.hardwareMode", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.radioMode").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.radioMode").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.radioMode", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_RADIO_MODE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.securityType")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.securityType")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SECURITY_TYPE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.securityType", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_SECURITY_TYPE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.passphrase")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.passphrase")
-                .toString());
-        tad.setType(Tscalar.PASSWORD);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages
-                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_PASSPHRASE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.passphrase", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_PASSPHRASE, Tscalar.PASSWORD));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.channel").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.master.channel").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_CHANNEL));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.channel", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_CHANNEL, Tscalar.STRING));
     }
 
-    private static void getWifiInfraDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
+    private static void getWifiInfraDefinition(Tocd tocd, String ifaceName) {
         // INFRA
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.ssid").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.ssid").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SSID));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.ssid", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SSID, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.hardwareMode")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.hardwareMode")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.hardwareMode", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.radioMode").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.radioMode").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.radioMode", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_RADIO_MODE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.securityType")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.securityType")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SECURITY_TYPE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.securityType", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SECURITY_TYPE, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.passphrase").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.passphrase").toString());
-        tad.setType(Tscalar.PASSWORD);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages
-                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PASSPHRASE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.passphrase", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PASSPHRASE, Tscalar.PASSWORD));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.pairwiseCiphers")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.pairwiseCiphers")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.pairwiseCiphers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.groupCiphers")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.groupCiphers")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_GROUP_CIPHERS));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.groupCiphers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_GROUP_CIPHERS, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.channel").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.infra.channel").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_CHANNEL));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.channel", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_CHANNEL, Tscalar.STRING));
+
     }
 
-    private static void getWifiCommonDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
+    private static void getWifiCommonDefinition(Tocd tocd, String ifaceName) {
         // Common
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".wifi.capabilities").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".wifi.capabilities").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.WIFI_CAPABILITIES));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.wifi.capabilities", ifaceName),
+                NetworkConfigurationPropertyNames.WIFI_CAPABILITIES, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.mode").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.wifi.mode").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WIFI_MODE));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.mode", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MODE, Tscalar.STRING));
     }
 
-    private static void getDnsDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+    private static void getDnsDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
         // DNS and WINS
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dnsServers").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dnsServers").toString());
-        tad.setType(Tscalar.STRING);
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.dnsServers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_DNS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_DNS_SERVERS));
         tocd.addAD(tad);
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.winsServers").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.winsServers").toString());
-        tad.setType(Tscalar.STRING);
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.winsServers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WINS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_WINS_SERVERS));
         tocd.addAD(tad);
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.enabled").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.enabled").toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_ENABLED));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.enabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_ENABLED, Tscalar.BOOLEAN));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.defaultLeaseTime")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.defaultLeaseTime")
-                .toString());
-        tad.setType(Tscalar.INTEGER);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.defaultLeaseTime", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME, Tscalar.INTEGER));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.maxLeaseTime")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.maxLeaseTime")
-                .toString());
-        tad.setType(Tscalar.INTEGER);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_MAX_LEASE_TIME));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.maxLeaseTime", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_MAX_LEASE_TIME, Tscalar.INTEGER));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.prefix").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.prefix").toString());
-        tad.setType(Tscalar.SHORT);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages
-                        .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PREFIX));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.prefix", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PREFIX, Tscalar.SHORT));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.rangeStart")
-                .toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.rangeStart")
-                .toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_START));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.rangeStart", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_START, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.rangeEnd").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.rangeEnd").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_END));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.rangeEnd", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_RANGE_END, Tscalar.STRING));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.passDns").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpServer4.passDns").toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PASS_DNS));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpServer4.passDns", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_PASS_DNS, Tscalar.BOOLEAN));
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.nat.enabled").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.nat.enabled").toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_NAT_ENABLED));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.nat.enabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_NAT_ENABLED, Tscalar.BOOLEAN));
     }
 
-    private static void getInterfaceCommonDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+    private static void getInterfaceCommonDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
-        addMtuDefinition(objectFactory, tocd, ifaceName);
-        addAutoconnectDefinition(objectFactory, tocd, ifaceName);
+        addMtuDefinition(tocd, ifaceName);
+        addAutoconnectDefinition(tocd, ifaceName);
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpClient4.enabled").toString());
-        tad.setName(
-                new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpClient4.enabled").toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
+        tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dhcpClient4.enabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_CLIENT_ENABLED, Tscalar.BOOLEAN);
         tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages
-                .getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_CLIENT_ENABLED));
         tocd.addAD(tad);
 
-        addIp4AddressDefinition(objectFactory, tocd, ifaceName);
-        addIp4PrefixDefinition(objectFactory, tocd, ifaceName);
+        addIp4AddressDefinition(tocd, ifaceName);
+        addIp4PrefixDefinition(tocd, ifaceName);
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.ip4.gateway").toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.ip4.gateway").toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY));
-        tocd.addAD(tad);
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.ip4.gateway", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY, Tscalar.STRING));
     }
 
-    private static void getLoopbackDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        addMtuDefinition(objectFactory, tocd, ifaceName);
-        addAutoconnectDefinition(objectFactory, tocd, ifaceName);
-        addDriverDefinition(objectFactory, tocd, ifaceName);
-        addIp4AddressDefinition(objectFactory, tocd, ifaceName);
-        addIp4PrefixDefinition(objectFactory, tocd, ifaceName);
+    private static void getLoopbackDefinition(Tocd tocd, String ifaceName) {
+        addMtuDefinition(tocd, ifaceName);
+        addAutoconnectDefinition(tocd, ifaceName);
+        addDriverDefinition(tocd, ifaceName);
+        addIp4AddressDefinition(tocd, ifaceName);
+        addIp4PrefixDefinition(tocd, ifaceName);
     }
 
-    private static void addDriverDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_DRIVER));
-        tocd.addAD(tad);
+    private static void addDriverDefinition(Tocd tocd, String ifaceName) {
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.driver", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_DRIVER, Tscalar.STRING));
     }
 
-    private static void addAutoconnectDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
+    private static void addAutoconnectDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.autoconnect", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_AUTOCONNECT, Tscalar.BOOLEAN);
         tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_AUTOCONNECT));
         tocd.addAD(tad);
     }
 
-    private static void addMtuDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_MTU).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_MTU).toString());
-        tad.setType(Tscalar.INTEGER);
-        tad.setCardinality(0);
+    private static void addMtuDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.mtu", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MTU, Tscalar.INTEGER);
         tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_MTU));
         tocd.addAD(tad);
     }
 
-    private static void addIp4PrefixDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
-        tad.setType(Tscalar.SHORT);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_PREFIX));
-        tocd.addAD(tad);
+    private static void addIp4PrefixDefinition(Tocd tocd, String ifaceName) {
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.ip4.prefix", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_PREFIX, Tscalar.SHORT));
     }
 
-    private static void addIp4AddressDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.CONFIG_IPV4_ADDRESS));
-        tocd.addAD(tad);
+    private static void addIp4AddressDefinition(Tocd tocd, String ifaceName) {
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.ip4.address", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_ADDRESS, Tscalar.STRING));
     }
 
-    private static void getUsbDeviceDefinition(List<UsbNetDevice> usbNetDevices, ObjectFactory objectFactory, Tocd tocd,
+    private static void getUsbDeviceDefinition(List<UsbNetDevice> usbNetDevices, Tocd tocd,
             String ifaceName) {
         if (usbNetDevices != null) {
             Optional<UsbNetDevice> usbNetDeviceOptional = usbNetDevices.stream()
                     .filter(usbNetDevice -> usbNetDevice.getInterfaceName().equals(ifaceName)).findFirst();
             if (usbNetDeviceOptional.isPresent()) {
                 // found a match - add the read only fields?
-                Tad tad;
-                tad = objectFactory.createTad();
-                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.port").toString());
-                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.port").toString());
-                tad.setType(Tscalar.STRING);
-                tad.setCardinality(0);
-                tad.setRequired(false);
-                tad.setDefault("");
-                tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PORT));
-                tocd.addAD(tad);
+                tocd.addAD(buildAttributeDefinition(
+                        String.format(PREFIX + "%s.usb.port", ifaceName),
+                        NetworkConfigurationPropertyNames.USB_PORT, Tscalar.STRING));
 
-                tad = objectFactory.createTad();
-                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manufacturer").toString());
-                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manfacturer").toString());
-                tad.setType(Tscalar.STRING);
-                tad.setCardinality(0);
-                tad.setRequired(false);
-                tad.setDefault("");
-                tad.setDescription(
-                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER));
-                tocd.addAD(tad);
+                tocd.addAD(buildAttributeDefinition(
+                        String.format(PREFIX + "%s.usb.manufacturer", ifaceName),
+                        NetworkConfigurationPropertyNames.USB_MANUFACTURER, Tscalar.STRING));
 
-                tad = objectFactory.createTad();
-                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product").toString());
-                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product").toString());
-                tad.setType(Tscalar.STRING);
-                tad.setCardinality(0);
-                tad.setRequired(false);
-                tad.setDefault("");
-                tad.setDescription(
-                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT));
-                tocd.addAD(tad);
+                tocd.addAD(buildAttributeDefinition(
+                        String.format(PREFIX + "%s.usb.product", ifaceName),
+                        NetworkConfigurationPropertyNames.USB_PRODUCT, Tscalar.STRING));
 
-                tad = objectFactory.createTad();
-                tad.setId(
-                        new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manufacturer.id").toString());
-                tad.setName(
-                        new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.manfacturer.id").toString());
-                tad.setType(Tscalar.STRING);
-                tad.setCardinality(0);
-                tad.setRequired(false);
-                tad.setDefault("");
-                tad.setDescription(
-                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_MANUFACTURER_ID));
-                tocd.addAD(tad);
+                tocd.addAD(buildAttributeDefinition(
+                        String.format(PREFIX + "%s.usb.manufacturer.id", ifaceName),
+                        NetworkConfigurationPropertyNames.USB_MANUFACTURER_ID, Tscalar.STRING));
 
-                tad = objectFactory.createTad();
-                tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product.id").toString());
-                tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(".usb.product.id").toString());
-                tad.setType(Tscalar.STRING);
-                tad.setCardinality(0);
-                tad.setRequired(false);
-                tad.setDefault("");
-                tad.setDescription(
-                        NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.USB_PRODUCT_ID));
-                tocd.addAD(tad);
+                tocd.addAD(buildAttributeDefinition(
+                        String.format(PREFIX + "%s.usb.product.id", ifaceName),
+                        NetworkConfigurationPropertyNames.USB_PRODUCT_ID, Tscalar.STRING));
             }
         }
     }
@@ -657,6 +337,20 @@ public class NetworkConfigurationServiceCommon {
                 .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN
                         .name().equals(properties.get(PREFIX + p + ".config.ip4.status")))
                 .collect(Collectors.toSet());
+    }
+
+    private static Tad buildAttributeDefinition(String propertyName, NetworkConfigurationPropertyNames messageId,
+            Tscalar type) {
+        Tad tad = objectFactory.createTad();
+        tad.setId(propertyName);
+        tad.setName(propertyName);
+        tad.setType(type);
+        tad.setCardinality(0);
+        tad.setRequired(false);
+        tad.setDefault("");
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(messageId));
+        return tad;
     }
 
 }

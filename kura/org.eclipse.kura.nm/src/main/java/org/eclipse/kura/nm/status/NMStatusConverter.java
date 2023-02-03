@@ -95,8 +95,15 @@ public class NMStatusConverter {
         }
         address.setDnsServers(dnsServers);
 
+        // Hardcode netmask for testing WIP
+        try {
+            IPAddress ipAddress = IPAddress.parseHostAddress("255.255.255.0");
+            address.setBroadcast(ipAddress);
+        } catch (UnknownHostException e) {
+            logger.debug("Could not retrieve ip address {} due to:", "255.255.255.0", e);
+        }
+
         // WIP
-        address.setBroadcast(null);
         address.setNetmask(null);
 
         // WIP: Grab all addresses

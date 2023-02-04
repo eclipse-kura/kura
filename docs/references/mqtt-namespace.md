@@ -324,213 +324,423 @@ The screen capture that follows shows an example administration application wher
 
 When one such service is selected, a form is dynamically generated based on the metadata provided in the service OCD. This form includes logic to handle different attribute types, validate acceptable value ranges, and render optional values as drop-downs. When the form is submitted, the new values are communicated to the device through an MQTT resource update message.
 
+### Remote OSGi DeploymentAdmin Interactions via MQTT
+
+An application is installed in the gateway to allow for the remote
+management of the deployment packages installed in the OSGi container.
+
+For information about the OSGi Deployment Admin Service, please refer to
+the [OSGi Service Platform Service Compendium 4.3
+Specifications](http://www.osgi.org/Specifications/HomePage).
+
+The **app_id** for the remote deployment service of an MQTT application
+is “**DEPLOY-V2**”. It allows to perform the following operations:
+
+* Download, install and uninstall OSGi Deployment Packages
+* Download and execute system updates based on shell scripts
+* Get the list of bundles currently in the runtime
+* Start and stop bundles
+
+#### DEPLOY-V2
+
+##### Download and Install Messages
+
+The download request allows to download and optionally install a software package.
+The installation procedure will be performed after the download completes if the **dp.install** metric is set to `true`. If the metric is set to `false`, the installation step will not be performed.
+
+The package type must be specified using the **dp.install.system.update** request metric, the supported types are the following:
+
+* **OSGi Deployment Package**: An OSGi deployment package. Selected with **dp.install.system.update** = `false`.
+* **Executable Shell Script**: A shell script that applies a system level update. Selected with **dp.install.system.update** = `true`.
+
+The device will report the download progress and result of the installation to the cloud platform by sending asynchronous [download notification messages](#unsolicited-messages-for-download-progress) and [install notification messages](#unsolicited-messages-for-install-progress).
+
+The completion notification logic differs depending on the package type.
+
+* **OSGi Deployment Package**: The completion notification will be sent immediately after that the Deployment Package is installed on the system.
+
+* **Executable Shell Script**: The completion notification will **not** be sent immediately after that the shell script is executed, but is determined by the execution of an additional _verifier script_. The verifier script will be executed at **next framework startup**. A [install notification message](#unsolicited-messages-for-install-progress) will be sent afterwards, with 
+**dp.install.status** = `COMPLETED` if the exit status is 0 or  **dp.install.status** = `FAILED` otherwise. This is based on the assumption that a system level update will typically require a device restart.
+
+  The _verifier script_ can be provided in the following ways:
+
+  * By specifying a download URL as the value of the **dp.install.verifier.uri** request metric. In this case the framework will download the verifier script from the provided URL.
+
+  * By installing it during the execution of the main shell script. In this case the file must be placed in the `/opt/eclipse/kura/data/persistance/verification` directory. The installed verifier file name must have the `${name}-${version}.sh_verifier.sh` structure where `${name}` and `${version}` must be replaced with the values of the **dp.name** and **dp.version** request metrics.
+
+!!! warning
+    As said above, in case of **Executable Shell Script**, the completion notification will **not** be sent if the verifier script is not provided and/or the framework is not restarted.
+
+Request:
+
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/download**
+
+*  Payload:
+
+    *  metrics:
+        *  **dp.job.id** (Long). Mandatory.
+            Represents a unique Job ID for the download.
+        *  **dp.uri** (String). Mandatory.
+            Represents the URI of the deployment package.
+        *  **dp.name** (String). Mandatory.
+            The value of the header DeploymentPackage-SymbolicName in the
+            DP MANIFEST.
+        *  **dp.version** (String). Mandatory.
+            The value of the header DeploymentPackage-Version in the DP MANIFEST.
+            The file will be saved in the temporary directory as
+            <dp.name>-<dp.version>.jar possibly overwriting an existing file.
+        *  **dp.download.protocol** (String) Mandatory.
+            Specifies the protocol to be used to download the
+            bundles/shell scripts. Must be set to HTTP or HTTPS.
+        *  **dp.download.block.size** (Integer). Optional
+            (if not specified by the cloud platform, it is estimated by the
+                device, depending on the total file size. In this case it is
+                fixed at 1% of the total file size).
+            The size in kBi of the blocks used to download the DP.
+        *  **dp.download.block.delay** (Integer). Optional (default: 0).
+            Delay in ms between block transfers.
+        *  **dp.download.notify.block.size** (Integer). Optional
+            (if not specified by the cloud platform, it is estimated by the
+                device, depending on the total file size. In this case it is
+                fixed at 5% of the total file size).
+            The size in kBi between the notification messages sent to the cloud
+            platform.
+        *  **dp.download.timeout** (Integer). Optional (default: 60000).
+            The timeout in seconds for each block that has to be downloaded.
+        *  **dp.download.resume** (Bool). Optional (default: true).
+            Resume download transfer if supported by the server.
+        *  **dp.download.force** (Bool). Optional (default: true).
+            Specifies if the download forces to download again the file,
+            if already exists on target device.
+        *  **dp.download.username** (String). Optional.
+            Username for password protected download. No authentication will be
+            tried if username is not present.
+        *  **dp.download.password** (String). Optional.
+            Password for password protected download. No authentication will be
+            tried if password is not present
+        *  **dp.download.hash** (String). Optional.
+            The algorithm and value of the hash of the file used to verify the
+            integrity of the download. The format is of this property is:
+            {algorithm}:{hash value}
+        *  **dp.install** (Bool). Optional (default: true).
+            Whether the package should be immediately installed after being
+            downloaded.
+        *  **dp.install.system.update** (Bool). Optional (default: false).
+            Sets whether or not this is a system update, rather than a
+            bundle/package update.
+        *  **dp.install.verifier.uri** (String). Optional.
+            The verifier script URI to run after the installation of the system
+            update.
+        *  **dp.reboot** (Bool). Optional (default: false).
+            Whether the system should be rebooted as part of the package
+            installation process.
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+            Delay after which the device will be rebooted. Only meaningful if
+            dp.reboot==true.
+
+Response:
+
+The client will reply immediately with an appropriate response.code.
+If the platform retries the request but the download is in progress, the client
+will reply that the request is already in progress with a 500 error code.
+If the DP has already been downloaded, the client will reply that the request
+has been accepted. If the dp.download.force flag is set to true, the client will
+start the download from the beginning, if false the device will proceed with the
+installation.
+
+Payload: no application-specific metrics or body.
+
+Request:
+
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/download**
+*  Payload: no application-specific metrics or body.
+
+Response:
+
+*  Payload:
+    *  metrics:
+        *  **dp.http.transfer.size** (Integer).
+            The size in kBi of the DP being downloaded
+        *  **dp.http.transfer.progress** (Integer).
+            The estimated progress of the download in percentage (0-100%).
+            Do not rely on this indicator to detect the download completion.
+        *  **dp.http.transfer.status** (String).
+            An enum specifying the download status
+            (IN_PROGRESS, COMPLETED, FAILED...).
+        *  **job.id** (Long) Optional.
+            The ID of the job to notify status
+
+Request:
+
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/DEL/download**
+*  Payload: no application-specific metrics or body.
+
+Response:
+
+*  Response Payload:
+    *  Nothing application-specific beyond the response code. Unsolicited messages
+    will report the status of the cancel operation.
+
+###### Unsolicited messages for download progress
+
+The client will start downloading the DP and will compute the size of the
+transfer from the HTTP header. This size will be used to estimate the download
+progress using the request parameter dp.download.block.size.
+Next, the client will report the download progress to the platform by
+publishing, with QoS==2, one or more unsolicited messages. If HTTP header is
+not available, the device will report 50% as dp.download.progress for all the
+download processes.
+The value of requester.client.id is one of the last downloads or install
+request received.
+
+Download Notification:
+
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/download**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
+            The ID of the job to notify status
+        *  **dp.download.size** (Integer).
+            The size in kBi of the DP being downloaded
+        *  **dp.download.progress** (Integer).
+            The estimated progress of the download in percentage (0-100%).
+            Do not rely on this indicator to detect the download completion.
+        *  **dp.download.status** (String).
+            An enum specifying the download status (IN_PROGRESS, COMPLETED,
+                FAILED, CANCELLED...).
+        *  **dp.download.error.message** (String).
+            In case of FAILED status, this metric will contain information
+            about the error.
+        *  **dp.download.index** (Integer).
+            The index of the file that is currently downloaded. This is supposed
+            to support multiple file downloads.
+
+##### Install Messages
+
+Request:
+
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/install**
+*  Payload:
+    *  metrics:
+        *  **dp.name** (String). Mandatory.
+            The value of the header DeploymentPackage-SymbolicName in the DP
+            MANIFEST.
+        *  **dp.version** (String). Mandatory.
+            The value of the header DeploymentPackage-Version in the DP
+            MANIFEST. The basename of the DP file will to install is derived as
+            <dp.name>-<dp.version>.jar. The file is assumed to reside in the
+            temporary directory.
+        *  **dp.install.system.update** (Bool). Mandatory.
+            Specifies if the specified resource is a system update or not.
+            It can be applied to the system immediately or after a system reboot.
+        *  **dp.install.verifier.uri** (String). Optional.
+            The verifier script URI to run after the installation of the system
+            update.
+        *  **dp.reboot** (Bool). Optional (default: false).
+            Whether the system should be rebooted as part of the package
+            installation process. There might be DPs requiring a
+            post-installation (from the standpoint of the OSGi Deployment Admin)
+            step requiring a system reboot. Note that the post-install phase is
+            not handled by the Deployment Admin. The installation in this case
+            is complete (and can fail) after the reboot.
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+            Delay after which the device will be rebooted. Only meaningful if
+            dp.reboot==true.
+
+!!! note
+    This operation can be retried. Anyway, if it fails once it's likely to fail again.
+
+Response:
+
+*  Payload: Nothing application-specific beyond the response code. Unsolicited
+            messages will report the status of the install operation.
+
+Request:
+
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/GET/install**
+*  Payload: no application-specific metrics or body.
+
+Response:
+
+*  Payload:
+    *  metrics:
+        *  **dp.install.status** (String).
+            An enum specifying the install status
+            *  **IDLE**
+            *  **INSTALLING BUNDLE**
+        *  **dp.name** (String). Optional.
+            If installing: the value of the header DeploymentPackage-SymbolicName
+            in the DP MANIFEST.
+        *  **dp.version** (String). Optional.
+            If installing: the value of the header DeploymentPackage-Version
+            in the DP MANIFEST.
 
 
-## Remote OSGi DeploymentAdmin Interactions via MQTT
+###### Unsolicited messages for install progress
 
-An application is installed in the gateway to allow for the remote management of the deployment packages installed in the OSGi container.
+If the value of **dp.install** in the original download request is true the client will start installing the DP.
+Due to the limitations of the OSGi DeploymentAdmin, it's not possible to have feedback on the install progress.
+However, these operations should normally complete in a few seconds, even for an upgrade.
+Otherwise (dp.install==false), the platform can request the installation of an already downloaded package through the following message:
 
-For information about the OSGi Deployment Admin Service, please refer to the [OSGi Service Platform Service R7 Specifications](http://docs.osgi.org/specification/osgi.core/7.0.0/).
+Install notification:
 
-The **app_id** for the remote deployment service of an MQTT application is “**DEPLOY-V2**”. The resources it manages are the packages deployed in the OSGi container. Deployment packages are represented in XML format.
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/install**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
+            The ID of the job to notify status
+        *  **dp.name** (String).
+            The name of the package that is installing.
+        *  **dp.install.progress** (Integer).
+            The estimated progress of the install in percentage (0-100%). Due
+            to limitations of the OSGi DeploymentAdmin, it's not possible to
+            have a linear progress. It will go from 0% to 100% in one step. Do
+            not rely on this indicator to detect the download completion.
+        *  **dp.install.status** (String).
+            An enum specifying the install status (IN_PROGRESS, COMPLETED,
+                FAILED...).
+        *  **dp.install.error.message** (String) Optional.
+            In case of FAILED status, this metric will contain information
+            about the error.
 
-The following XML message is an example of a service deployment:
 
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+##### Uninstall Messages
 
-<packages>
-  <package>
-    <name>esf</name>
-    <version>1.0.0</version>
-    <bundles>
-      <bundle>
-        <name>org.hsqldb.hsqldb</name>
-        <version>2.2.9</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.linux</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>javax.bluetooth</name>
-        <version>2.1.1</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.protocol.modbus</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>org.apache.commons.net</name>
-        <version>3.1.0.v201205071737</version>
-      </bundle>
-      <bundle>
-        <name>javax.usb.api</name>
-        <version>1.0.2</version>
-      </bundle>
-      <bundle>
-        <name>org.apache.servicemix.bundles.protobuf-java</name>
-        <version>2.4.1.1</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.protocol.pcn</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>javax.usb.common</name>
-        <version>1.0.2</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.core</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.api</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.kura.web</name>
-        <version>1.0.0.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>javax.comm</name>
-        <version>2.2.0</version>
-      </bundle>
-      <bundle>
-        <name>org.eclipse.paho.mqtt-client</name>
-        <version>1.0.1.SNAPSHOT</version>
-      </bundle>
-      <bundle>
-        <name>edc-client</name>
-        <version>2.1.0.SNAPSHOT</version>
-      </bundle>
-    </bundles>
-  </package>
-</packages>
-```
+Request:
 
-The deployment package XML message is comprised of the following package elements:
+*  Request Topic:
+    *  **$EDC/[account_name]/[client_id]/DEPLOY-V2/EXEC/uninstall**
+*  Payload:
+    *  metrics:
+        *  **dp.name** (String). Mandatory.
+            The value of the header DeploymentPackage-SymbolicName in the DP
+            MANIFEST.
+        *  **job.id** (Long) Mandatory.
+            The ID of the job to notify status
+        *  **dp.version** (String). Mandatory.
+            The value of the header DeploymentPackage-Version in the DP
+            MANIFEST. The basename of the DP file will to install is derived
+            as <dp.name>-<dp.version>.jar. The file is assumed to reside in the
+            temporary directory.
+        *  **dp.reboot** (Bool). Optional (default: false).
+            Whether the system should be rebooted as part of the package
+            uninstall process.
+        *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
+            Delay after which the device will be rebooted. Only meaningful if
+            dp.reboot==true.
 
-* Symbolic name
+Response:
+The client will reply immediately with an appropriate response.code. If the platform retries the request but the uninstall operation is in progress, the client will reply that the request is already in progress with a 500 error code. At the end of the uninstall operation, an unsolicited message is sent to the cloud platform to report the operation status. If a reboot was requested in the received uninstall request, it will be executed with the specified delay.
 
-* Version
+###### Unsolicited messages for uninstall progress
 
-* Bundles that are managed by the deployment package along with their symbolic name and version
+Uninstall notification:
 
-The “DEPLOY-V2” application supports the *read*, *start/stop*, and *install/uninstall* resource operations as described in the following sections.
+*  **$EDC/account_name/requester.client.id/DEPLOY-V2/NOTIFY/client-id/uninstall**
+*  Payload:
+    *  metrics:
+        *  **job.id** (Long).
+            The ID of the job to notify status
+        *  **dp.name** (String).
+            The name of the package that is uninstalling.
+        *  **dp.uninstall.progress** (Integer).
+            The estimated progress of the install in percentage (0-100%).
+            Due to limitations of the OSGi DeploymentAdmin, it's not possible
+            to have a linear progress. It will go from 0% to 100% in one step.
+            Do not rely on this indicator to detect the download completion.
+        *  **dp.uninstall.status** (String).
+            An enum specifying the uninstall status (IN_PROGRESS, COMPLETED,
+                FAILED...).
+        *  **dp.uninstall.error.message** (String) Optional.
+            In case of FAILED status, this metric will contain information
+            about the error.
 
-### Read All Deployment Packages
 
-This operation provides the deployment packages installed in the OSGi framework.
-
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/GET/packages**
-  
-* Request Payload:
-    * Nothing application-specific beyond the request ID and requester client ID
-  
-* Response Payload:
-    * Installed deployment packages serialized in XML format
-
-### Install a Deployment Package
-
-This operation installs a deployment package in the OSGi framework.
-
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/EXEC/install**
-  
-* Request Payload:
-    * The following application-specific properties in addition to the request ID and requester client ID:
-        * A **deploy.url** property that provides the URL to be used by the receiving application to download the deployment package.
-        * Alternatively, the deployment package is present in a body property of the MQTT payload. The **deploy.filename** property provides the filename of the deployment package on the receiving device.
-    
-* Response Payload:
-    * **deploy.pkg.name** provides the symbolic name of the deployment package
-    * **deploy.pkg.version** provides the version of the deployment package
-
-### Uninstall a Deployment Package
-
-This operation uninstalls a deployment package.
-
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/EXEC/uninstall**
-  
-* Request Payload:
-    * **deploy.pkg.name** provides the symbolic name of the deployment package
-  
-* Response Payload:
-    * Nothing application-specific beyond the response code
-
-### Read All Bundles
+##### Read All Bundles
 
 This operation provides all the bundles installed in the OSGi framework.
 
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/GET/bundles**
-  
-* Request Payload:
-    * Nothing application-specific beyond the request ID and requester client ID
-  
-* Response Payload:
-    * Installed bundles serialized in XML format
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/GET/bundles**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
+        client ID
+*  Response Payload:
+    *  Installed bundles serialized in XML format
 
 The following XML message is an example of a bundle:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <bundles>
-   <bundle>
-     <name>org.eclipse.osgi</name>
-     <version>3.8.1.v20120830-144521</version>
-     <id>0</id>
-     <state>ACTIVE</state>
-   </bundle>
-   <bundle>
-     <name>org.eclipse.equinox.cm</name>
-     <version>1.0.400.v20120522-1841</version>
-     <id>1</id>
-     <state>ACTIVE</state>
-   </bundle>
+    <bundle>
+        <name>org.eclipse.osgi</name>
+        <version>3.8.1.v20120830-144521</version>
+        <id>0</id>
+        <state>ACTIVE</state>
+    </bundle>
+    <bundle>
+        <name>org.eclipse.equinox.cm</name>
+        <version>1.0.400.v20120522-1841</version>
+        <id>1</id>
+        <state>ACTIVE</state>
+    </bundle>
 </bundles>
 ```
 
 The bundle XML message is comprised of the following bundle elements:
 
-* Symbolic name
+*  Symbolic name
+*  Version
+*  ID
+*  State
 
-* Version
-
-* ID
-
-* State
-
-### Start a Bundle
+##### Start a Bundle
 
 This operation starts a bundle identified by its ID.
 
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/EXEC/start/bundle_id**
-  
-* Request Payload:
-    * Nothing application-specific beyond the request ID and requester client ID
-  
-* Response Payload:
-    * Nothing application-specific beyond the response code
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/EXEC/start/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
+        client ID
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
-### Stop a Bundle
+##### Stop a Bundle
 
 This operation stops a bundle identified by its ID.
 
-* Request Topic:
-    * **$EDC/account_name/client_id/DEPLOY-V2/EXEC/stop/bundle_id**
-  
-* Request Payload:
-    * Nothing application-specific beyond the request ID and requester client ID
-  
-* Response Payload:
-    * Nothing application-specific beyond the response code
+*  Request Topic:
+    *  **$EDC/account_name/client_id/DEPLOY-V2/EXEC/stop/bundle_id**
+*  Request Payload:
+    *  Nothing application-specific beyond the request ID and requester
+        client ID
+*  Response Payload:
+    *  Nothing application-specific beyond the response code
 
+#### Example Management Web Application
 
+The previously described read, start/stop, and install/uninstall resources can be used to implement a remote management application. An example of such application is Eclipse Kapua.
+In particular it is possible to use the download and install resources from the following sections in Kapua console:
+
+* **Devices section**:
+
+Selecting the **Devices** section, a target device, and then clicking on the **Install** button in the **Packages** tab will allow to send download and install requests.
+
+![device_packages](images/kapua_device_packages.png)
+
+* **Batch Jobs section**
+
+It is possible to create a batch job with the **Package Download / Install** definition to perform a download / install request on a set of target devices.
+
+![package_install_job](images/kapua_package_install_job.png)
 
 ## Remote Gateway Inventory via MQTT
 

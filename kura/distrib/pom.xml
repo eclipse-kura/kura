@@ -1630,9 +1630,7 @@
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <build>
                 <resources>
@@ -1675,10 +1673,10 @@
                                         <property name="build.name" value="docker-x86_64-nn" />
                                         <property name="target.device" value="docker-x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="ubuntu" /> <!-- TODO -->
+                                        <property name="kura.os.version" value="linux" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" /> <!-- TODO:  -->
+                                        <property name="os.base" value="linux-generic" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1721,12 +1719,15 @@
                         <version>3.0.0</version>
                         <executions>
                           <execution>
+							<id>docker-x86_64-nn-build-container</id>
                             <phase>package</phase>
                             <configuration>
                               <target>
                                 <copy todir="${project.build.directory}" file="${project.basedir}/src/main/resources/docker-x86_64-nn/Dockerfile" />
                                 <exec executable="docker" dir="${project.build.directory}" failonerror="true">
                                     <arg value="build"/>
+                                    <arg value="--build-arg"/>
+                                    <arg value="Path_To_Installer=kura_${project.version}_docker-x86_64-nn.sh"/>
                                     <arg value="-t"/>
                                     <arg value="base-kura-docker:${project.version}"/>
                                     <arg value="-t"/>
@@ -1735,9 +1736,6 @@
                                 </exec>
                               </target>
                             </configuration>
-                            <goals>
-                              <goal>run</goal>
-                            </goals>
                           </execution>
                         </executions>
                       </plugin>
@@ -1748,9 +1746,7 @@
         <profile>
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
                 
@@ -1796,9 +1792,6 @@
         <profile>
             <id>docker-alpine-x86_64-nn</id>
             <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
             </activation>
             <build>
                 <resources>

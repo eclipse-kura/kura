@@ -1,3 +1,5 @@
 FROM scratch as builder
 
-COPY . /kura-install
+ARG Path_To_Installer=.
+
+COPY $Path_To_Installer /kura-install

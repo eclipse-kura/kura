@@ -50,9 +50,10 @@ public class NetworkStatusServiceAdapter {
         return this.networkStatusService.getInterfaceNames();
     }
 
-    public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(GwtNetInterfaceConfig gwtConfigToUpdate) {
-        NetInterface<NetInterfaceAddress> networkInterface = this.networkStatusService
-                .getNetworkStatus(gwtConfigToUpdate.getName());
+    public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(String ifname,
+            GwtNetInterfaceConfig gwtConfigToUpdate) {
+
+        NetInterface<NetInterfaceAddress> networkInterface = this.networkStatusService.getNetworkStatus(ifname);
 
         if (networkInterface != null) {
             setCommonStateProperties(gwtConfigToUpdate, networkInterface);
@@ -63,6 +64,8 @@ public class NetworkStatusServiceAdapter {
 
             return Optional.of(gwtConfigToUpdate);
         }
+
+        logger.debug("No status information retrieved for interface '{}'.", ifname);
 
         return Optional.empty();
     }

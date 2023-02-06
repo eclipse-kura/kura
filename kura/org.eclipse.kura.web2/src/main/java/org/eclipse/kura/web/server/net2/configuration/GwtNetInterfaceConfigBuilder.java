@@ -50,9 +50,8 @@ public class GwtNetInterfaceConfigBuilder {
     }
 
     public GwtNetInterfaceConfig build() {
-        setCommonProperties();
-
         if (this.properties.getNetworkInterfaces().contains(ifname)) {
+            setCommonProperties();
             setIpv4Properties();
             setIpv4DhcpClientProperties();
             setIpv4DhcpServerProperties();
@@ -61,6 +60,8 @@ public class GwtNetInterfaceConfigBuilder {
             setModemProperties();
         } else {
             this.gwtConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
+            this.gwtConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+            this.gwtConfig.setRouterMode(GwtNetRouterMode.netRouterOff.name());
         }
 
         return this.gwtConfig;

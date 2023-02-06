@@ -70,7 +70,7 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_NAT_ENABLED = "net.interface.%s.config.nat.enabled";
 
     public Optional<String> getType(String ifname) {
-        return Optional.of((String) this.properties.get(String.format(NET_INTERFACE_TYPE, ifname)));
+        return Optional.ofNullable((String) this.properties.get(String.format(NET_INTERFACE_TYPE, ifname)));
     }
 
     public void setType(String ifname, String type) {

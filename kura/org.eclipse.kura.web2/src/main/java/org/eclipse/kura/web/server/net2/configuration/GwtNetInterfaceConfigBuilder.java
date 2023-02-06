@@ -20,7 +20,6 @@ import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
-import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
@@ -51,17 +50,12 @@ public class GwtNetInterfaceConfigBuilder {
 
     public GwtNetInterfaceConfig build() {
         setCommonProperties();
-
-        if (this.properties.getNetworkInterfaces().contains(ifname)) {
-            setIpv4Properties();
-            setIpv4DhcpClientProperties();
-            setIpv4DhcpServerProperties();
-            setRouterMode();
-            setWifiProperties();
-            setModemProperties();
-        } else {
-            this.gwtConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
-        }
+        setIpv4Properties();
+        setIpv4DhcpClientProperties();
+        setIpv4DhcpServerProperties();
+        setRouterMode();
+        setWifiProperties();
+        setModemProperties();
 
         return this.gwtConfig;
     }

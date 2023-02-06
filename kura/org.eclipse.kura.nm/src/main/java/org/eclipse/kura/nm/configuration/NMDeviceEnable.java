@@ -20,16 +20,16 @@ public enum NMDeviceEnable {
 
     public static NMDeviceEnable fromKuraInterfaceStatus(KuraInterfaceStatus ip4Status, KuraInterfaceStatus ip6Status) {
         Boolean ip4Enabled = KuraInterfaceStatus.isEnabled(ip4Status);
-        Boolean ip4Disabled = ip4Status == KuraInterfaceStatus.DISABLED;
-        Boolean ip4Unmanaged = ip4Status == KuraInterfaceStatus.UNMANAGED;
-        Boolean ip4Unknown = ip4Status == KuraInterfaceStatus.UNKNOWN;
+        boolean ip4Disabled = ip4Status == KuraInterfaceStatus.DISABLED;
+        boolean ip4Unmanaged = ip4Status == KuraInterfaceStatus.UNMANAGED;
+        boolean ip4Unknown = ip4Status == KuraInterfaceStatus.UNKNOWN;
 
         Boolean ip6Enabled = KuraInterfaceStatus.isEnabled(ip6Status);
-        Boolean ip6Disabled = ip6Status == KuraInterfaceStatus.DISABLED;
-        Boolean ip6Unmanaged = ip6Status == KuraInterfaceStatus.UNMANAGED;
-        Boolean ip6Unknown = ip6Status == KuraInterfaceStatus.UNKNOWN;
+        boolean ip6Disabled = ip6Status == KuraInterfaceStatus.DISABLED;
+        boolean ip6Unmanaged = ip6Status == KuraInterfaceStatus.UNMANAGED;
+        boolean ip6Unknown = ip6Status == KuraInterfaceStatus.UNKNOWN;
 
-        if ((ip4Enabled && ip6Enabled) || (ip4Enabled && ip6Disabled) || (ip4Disabled && ip6Enabled)) {
+        if (ip4Enabled && ip6Enabled || ip4Enabled && ip6Disabled || ip4Disabled && ip6Enabled) {
             return ENABLED;
         }
 
@@ -37,7 +37,7 @@ public enum NMDeviceEnable {
             return UNMANAGED;
         }
 
-        if ((ip4Unmanaged && !ip6Unmanaged) || (!ip4Unmanaged && ip6Unmanaged)) {
+        if (ip4Unmanaged && !ip6Unmanaged || !ip4Unmanaged && ip6Unmanaged) {
             throw new IllegalArgumentException("ip4 and ip6 status should be both UNMANAGED");
         }
 

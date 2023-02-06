@@ -216,10 +216,10 @@ public class NMSettingsConverter {
         byte[] addrBytes = address.getAddress();
 
         long result = 0;
-        result = result << 8 | (addrBytes[3] & 0xFF);
-        result = result << 8 | (addrBytes[2] & 0xFF);
-        result = result << 8 | (addrBytes[1] & 0xFF);
-        result = result << 8 | (addrBytes[0] & 0xFF);
+        result = result << 8 | addrBytes[3] & 0xFF;
+        result = result << 8 | addrBytes[2] & 0xFF;
+        result = result << 8 | addrBytes[1] & 0xFF;
+        result = result << 8 | addrBytes[0] & 0xFF;
 
         return new UInt32(result);
     }

@@ -58,8 +58,8 @@ public class NMDbusConnector {
             NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_GENERIC);
 
     private static NMDbusConnector instance;
-    private DBusConnection dbusConnection;
-    private NetworkManager nm;
+    private final DBusConnection dbusConnection;
+    private final NetworkManager nm;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -87,18 +87,18 @@ public class NMDbusConnector {
     }
 
     public void closeConnection() {
-        dbusConnection.disconnect();
+        this.dbusConnection.disconnect();
     }
 
     public void checkPermissions() {
-        Map<String, String> getPermissions = nm.GetPermissions();
+        Map<String, String> getPermissions = this.nm.GetPermissions();
         for (Entry<String, String> entry : getPermissions.entrySet()) {
             logger.info("Permission for {}: {}", entry.getKey(), entry.getValue());
         }
     }
 
     public void checkVersion() throws DBusException {
-        Properties nmProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
+        Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
 
         String nmVersion = nmProperties.Get(NM_BUS_NAME, "Version");
 
@@ -112,7 +112,7 @@ public class NMDbusConnector {
         for (Device device : availableDevices) {
             NMDeviceType deviceType = getDeviceType(device);
             if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                         Properties.class);
                 supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
             }
@@ -126,11 +126,11 @@ public class NMDbusConnector {
             throws DBusException {
         Device device = getDeviceByIpIface(interfaceName);
         NMDeviceType deviceType = getDeviceType(device);
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Ip4Config");
-        Properties ip4configProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(),
+        Properties ip4configProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(),
                 Properties.class);
 
         if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
@@ -141,8 +141,9 @@ public class NMDbusConnector {
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(), Generic.class);
-            Properties genericDeviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME,
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Generic.class);
+            Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
             String genericDeviceType = genericDeviceProperties.Get("org.freedesktop.NetworkManager.Device.Generic",
                     "TypeDescription");
@@ -227,10 +228,10 @@ public class NMDbusConnector {
                     logger.info("Current settings: {}", connection.get().GetSettings());
 
                     connection.get().Update(newConnectionSettings);
-                    nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
+                    this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                             new DBusPath(device.getObjectPath()), new DBusPath("/"));
                 } else {
-                    nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
+                    this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
                             new DBusPath("/"));
                 }
             }
@@ -272,22 +273,23 @@ public class NMDbusConnector {
     }
 
     private List<Device> getAllDevices() throws DBusException {
-        List<DBusPath> devicePaths = nm.GetAllDevices();
+        List<DBusPath> devicePaths = this.nm.GetAllDevices();
 
         List<Device> devices = new ArrayList<>();
         for (DBusPath path : devicePaths) {
-            devices.add(dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class));
+            devices.add(this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class));
         }
 
         return devices;
     }
 
     private List<String> getAllDeviceInterfaceNames() throws DBusException {
-        List<DBusPath> devicePaths = nm.GetAllDevices();
+        List<DBusPath> devicePaths = this.nm.GetAllDevices();
 
         List<String> devices = new ArrayList<>();
         for (DBusPath path : devicePaths) {
-            Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Properties.class);
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                    Properties.class);
             devices.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
         }
 
@@ -295,43 +297,43 @@ public class NMDbusConnector {
     }
 
     private NMDeviceState getDeviceState(Device device) throws DBusException {
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         return NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
     }
 
     private void setDeviceManaged(Device device, Boolean manage) throws DBusException {
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         deviceProperties.Set(NM_DEVICE_BUS_NAME, "Managed", manage);
     }
 
     private Boolean isDeviceManaged(Device device) throws DBusException {
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, "Managed");
     }
 
     private NMDeviceType getDeviceType(Device device) throws DBusException {
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         return NMDeviceType.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DeviceType"));
     }
 
     private String getDeviceIpInterface(Device device) throws DBusException {
-        Properties deviceProperties = dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
     }
 
     private Device getDeviceByIpIface(String iface) throws DBusException {
-        DBusPath ifaceDevicePath = nm.GetDeviceByIpIface(iface);
-        return dbusConnection.getRemoteObject(NM_BUS_NAME, ifaceDevicePath.getPath(), Device.class);
+        DBusPath ifaceDevicePath = this.nm.GetDeviceByIpIface(iface);
+        return this.dbusConnection.getRemoteObject(NM_BUS_NAME, ifaceDevicePath.getPath(), Device.class);
     }
 
     private Optional<Connection> getAppliedConnection(Device dev) throws DBusException {
@@ -343,7 +345,8 @@ public class NMDbusConnector {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 
             DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
-            return Optional.of(dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
+            return Optional
+                    .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();

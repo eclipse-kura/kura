@@ -133,8 +133,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.nmDbusConnector = NMDbusConnector.getInstance();
             this.nmDbusConnector.checkPermissions();
         } catch (DBusException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Cannot initialize NMDbusConnector due to: ", e);
         }
 
         if (properties == null) {

@@ -43,7 +43,6 @@ public class SqliteMessageStoreImpl implements MessageStore {
 
     private final SqlMessageStoreHelper helper;
 
-    // package level constructor to be invoked only by the factory
     public SqliteMessageStoreImpl(final ConnectionProvider provider, final String table) throws KuraStoreException {
 
         this.tableName = table;

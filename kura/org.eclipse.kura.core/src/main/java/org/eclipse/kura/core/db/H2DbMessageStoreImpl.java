@@ -75,10 +75,9 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
     private SqlMessageStoreHelper helper;
 
-    // package level constructor to be invoked only by the factory
     public H2DbMessageStoreImpl(final ConnectionProvider provider, final String table)
             throws KuraStoreException {
-        // do not make this static as it may not be thread safe
+
         this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         this.tableName = table;
 
@@ -169,7 +168,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
         try {
             return storeInternal(topic, payload, qos, retain, priority);
         } catch (KuraStoreException e) {
-            // Try to reset the sequence generator and store the message again.
+
             Throwable cause = e.getCause();
             if (cause instanceof SQLException) {
                 SQLException sqle = (SQLException) cause;
@@ -206,18 +205,16 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
             final int result;
 
-            // store message
             try (PreparedStatement pstmt = c.prepareStatement(this.helper.getQueries().getSqlStore(),
                     new String[] { "id" })) {
-                pstmt.setString(1, topic); // topic
-                pstmt.setInt(2, qos); // qos
-                pstmt.setBoolean(3, retain); // retain
-                pstmt.setTimestamp(4, now, this.utcCalendar); // createdOn
-                pstmt.setTimestamp(5, null); // publishedOn
-                pstmt.setInt(6, -1); // publishedMessageId
-                pstmt.setTimestamp(7, null); // confirmedOn
+                pstmt.setString(1, topic);
+                pstmt.setInt(2, qos);
+                pstmt.setBoolean(3, retain);
+                pstmt.setTimestamp(4, now, this.utcCalendar);
+                pstmt.setTimestamp(5, null);
+                pstmt.setInt(6, -1);
+                pstmt.setTimestamp(7, null);
 
-                // smallPayload (=8) vs. largePayload (=9)
                 if (isNull(payload) || payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
                     pstmt.setBytes(8, payload);
                     pstmt.setNull(9, Types.BLOB);
@@ -226,9 +223,9 @@ public class H2DbMessageStoreImpl implements MessageStore {
                     pstmt.setBinaryStream(9, new ByteArrayInputStream(payload), payload.length);
                 }
 
-                pstmt.setInt(10, priority); // priority
-                pstmt.setString(11, null); // sessionId
-                pstmt.setTimestamp(12, null); // droppedOn
+                pstmt.setInt(10, priority);
+                pstmt.setString(11, null);
+                pstmt.setTimestamp(12, null);
 
                 pstmt.execute();
 
@@ -272,7 +269,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
     @Override
     public synchronized List<StoredMessage> getUnpublishedMessages() throws KuraStoreException {
-        // Order by priority, createdOn
         return this.helper.getUnpublishedMessages();
     }
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
@@ -35,34 +36,34 @@ public class NMStatusConverter {
     }
 
     public static NetInterface<NetInterfaceAddress> buildEthernetStatus(String interfaceName,
-            Properties deviceProperties, Properties ip4ConfigProperties) {
+            Properties deviceProperties, Optional<Properties> ip4configProperties) {
         EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
 
         ethInterface.setVirtual(false);
         ethInterface.setLoopback(false);
         ethInterface.setPointToPoint(false); // TBD
 
-        setIP4Status(ethInterface, deviceProperties, ip4ConfigProperties);
+        setIP4Status(ethInterface, deviceProperties, ip4configProperties);
 
         return ethInterface;
 
     }
 
     public static NetInterface<NetInterfaceAddress> buildLoopbackStatus(String interfaceName,
-            Properties deviceProperties, Properties ip4ConfigProperties) {
+            Properties deviceProperties, Optional<Properties> ip4configProperties) {
         LoopbackInterfaceImpl<NetInterfaceAddress> loInterface = new LoopbackInterfaceImpl<>(interfaceName);
 
         loInterface.setVirtual(true);
         loInterface.setLoopback(true);
         loInterface.setPointToPoint(false);
 
-        setIP4Status(loInterface, deviceProperties, ip4ConfigProperties);
+        setIP4Status(loInterface, deviceProperties, ip4configProperties);
 
         return loInterface;
     }
 
     private static void setIP4Status(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties,
-            Properties ip4ConfigProperties) {
+            Optional<Properties> ip4configProperties) {
         iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
         iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
         iface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
@@ -80,9 +81,14 @@ public class NMStatusConverter {
 
         List<NetInterfaceAddress> addressList = new ArrayList<>();
 
-        String gateway = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        List<Map<String, Variant<?>>> addressData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
-        List<Map<String, Variant<?>>> nameserverData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
+        if (!ip4configProperties.isPresent()) {
+            return;
+        }
+
+        String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
+        List<Map<String, Variant<?>>> addressData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "NameserverData");
         for (Map<String, Variant<?>> data : addressData) {
             NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
 

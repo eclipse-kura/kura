@@ -195,8 +195,13 @@ public final class SqlMessageStoreHelper {
         updateTimestamp(this.queries.getSqlDropAllInFlightMessages());
     }
 
-    public void deleteStaleMessages(int purgeAge) throws KuraStoreException {
-        final long timestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(purgeAge);
+    public void deleteStaleMessages(int purgeAgeSeconds) throws KuraStoreException {
+        final long timestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(purgeAgeSeconds);
+
+        deleteStaleMessages(timestamp);
+    }
+
+    public void deleteStaleMessages(final Object timestamp) throws KuraStoreException {
 
         execute(this.queries.getSqlDeleteDroppedMessages(), timestamp);
 

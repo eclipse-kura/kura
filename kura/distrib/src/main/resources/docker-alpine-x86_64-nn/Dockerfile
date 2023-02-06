@@ -9,7 +9,7 @@ ARG BASE_IMAGE_KURA='kura-base:latest'
 
 COPY bin/ /usr/local/bin/
 
-COPY --from=${BASE_IMAGE_KURA} /kura-install/ /kura-install
+COPY --from=${BASE_IMAGE_KURA} /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-install
 
 ENV \
   JAVA_HOME=/usr/lib/jvm/default-jvm \
@@ -18,37 +18,31 @@ ENV \
 
 
 
-RUN chmod a+x -R /usr/local/bin
-
-RUN apk update
-
-RUN apk --no-cache add openjdk8 bash zip curl gcompat procps unzip gzip tar
-RUN apk --no-cache add dos2unix openssl net-tools which busybox-extras
-RUN apk --no-cache add bluez bluez-deprecated chrony eudev glib psmisc socat
-
-RUN /kura-install/kura_*_docker-x86_64-nn_installer.sh
-
-RUN chmod a+rw -R /opt/eclipse
-RUN find /opt/eclipse -type d | xargs chmod a+x && \
+RUN chmod a+x -R /usr/local/bin && \
+    apk update && \
+    apk --no-cache add openjdk8 bash zip curl gcompat procps unzip gzip tar && \
+    apk --no-cache add dos2unix openssl net-tools which busybox-extras && \
+    apk --no-cache add bluez bluez-deprecated chrony eudev glib psmisc socat && \
+    /kura-install/kura_*_docker-x86_64-nn_installer.sh && \
+    chmod a+rw -R /opt/eclipse && \
+    find /opt/eclipse -type d | xargs chmod a+x && \
     chmod a+rwx /var/log && \
     `# Test for the existence of the entry point` \
-    test -x "${KURA_DIR}/bin/start_kura.sh"
-  
-RUN chmod a+x /usr/local/bin/* && \
+    test -x "${KURA_DIR}/bin/start_kura.sh"&& \
+    chmod a+x /usr/local/bin/* && \
     cd /root && \
-    rm -Rf /context /kura /root/.m2 && \
+    rm -Rf /context /kura /root/.m2 /kura-install && \
     install -m 0777 -d "${KURA_DIR}/data" && \
     ln -s /bin/bash /usr/bin/bash && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
-    PATH=$PATH":/usr/lib/jvm/java-1.8-openjdk/bin"
-    
-RUN unpack-kura
-RUN sed -i "s/\-printf \'\%P.n\'//g" /usr/local/bin/dp-install
-RUN dp-install "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp"
-RUN add-config-ini "felix.fileinstall.disableNio2=true"
-RUN add-config-ini "felix.fileinstall.dir=/load"
-RUN pack-kura
+    PATH=$PATH":/usr/lib/jvm/java-1.8-openjdk/bin" && \
+    unpack-kura && \
+    sed -i "s/\-printf \'\%P.n\'//g" /usr/local/bin/dp-install && \
+    dp-install "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp" && \
+    add-config-ini "felix.fileinstall.disableNio2=true" && \
+    add-config-ini "felix.fileinstall.dir=/load" && \
+    pack-kura
 
 EXPOSE 443
 

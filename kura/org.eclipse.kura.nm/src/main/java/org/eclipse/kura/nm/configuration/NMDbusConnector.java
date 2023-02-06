@@ -130,8 +130,12 @@ public class NMDbusConnector {
                 Properties.class);
 
         DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Ip4Config");
-        Properties ip4configProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(),
-                Properties.class);
+        Optional<Properties> ip4configProperties = Optional.empty();
+
+        if (!ip4configPath.getPath().equals("/")) {
+            ip4configProperties = Optional
+                    .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(), Properties.class));
+        }
 
         if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
             logger.warn("Device \"{}\" of type \"{}\" currently not supported", interfaceName, deviceType);

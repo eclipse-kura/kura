@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.LoopbackInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
@@ -39,64 +40,9 @@ public class NMStatusConverter {
 
         ethInterface.setVirtual(false);
         ethInterface.setLoopback(false);
-        ethInterface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
-        ethInterface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
-        ethInterface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
-        ethInterface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
-
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        ethInterface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
-        ethInterface.setUp(NMDeviceState.isConnected(deviceState));
-        ethInterface.setLinkUp(NMDeviceState.isConnected(deviceState));
-
         ethInterface.setPointToPoint(false); // TBD
 
-        UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
-        ethInterface.setMTU(mtu.intValue());
-
-        String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
-        ethInterface.setHardwareAddress(getMacAddressBytes(hwAddress));
-
-        List<NetInterfaceAddress> addressList = new ArrayList<>();
-
-        String gateway = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        List<Map<String, Variant<?>>> addressData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
-        List<Map<String, Variant<?>>> nameserverData = ip4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
-        for (Map<String, Variant<?>> data : addressData) {
-            NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
-
-            try {
-                IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
-                address.setGateway(ipGateway);
-            } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve gateway address \"{}\" due to:", gateway, e);
-            }
-
-            String addressStr = String.class.cast(data.get("address").getValue());
-            UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
-            try {
-                address.setAddress(IPAddress.parseHostAddress(addressStr));
-                address.setNetworkPrefixLength(prefix.shortValue());
-                address.setNetmask(IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
-            } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve ip address due to:", e);
-            }
-
-            List<IPAddress> dnsServers = new ArrayList<>();
-            for (Map<String, Variant<?>> dns : nameserverData) {
-                String dnsAddressStr = String.class.cast(dns.get("address").getValue());
-                try {
-                    dnsServers.add(IPAddress.parseHostAddress(dnsAddressStr));
-                } catch (UnknownHostException e) {
-                    logger.debug("Could not retrieve ip address \"{}\" due to:", dnsAddressStr, e);
-                }
-            }
-            address.setDnsServers(dnsServers);
-
-            addressList.add(address);
-        }
-
-        ethInterface.setNetInterfaceAddresses(addressList);
+        setIP4Status(ethInterface, deviceProperties, ip4ConfigProperties);
 
         return ethInterface;
 
@@ -110,20 +56,27 @@ public class NMStatusConverter {
         loInterface.setLoopback(true);
         loInterface.setPointToPoint(false);
 
-        loInterface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
-        loInterface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
-        loInterface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
-        loInterface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
+        setIP4Status(loInterface, deviceProperties, ip4ConfigProperties);
+
+        return loInterface;
+    }
+
+    private static void setIP4Status(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties,
+            Properties ip4ConfigProperties) {
+        iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
+        iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
+        iface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
+        iface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        loInterface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
-        loInterface.setUp(NMDeviceState.isConnected(deviceState));
+        iface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
+        iface.setUp(NMDeviceState.isConnected(deviceState));
 
         UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
-        loInterface.setMTU(mtu.intValue());
+        iface.setMTU(mtu.intValue());
 
         String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
-        loInterface.setHardwareAddress(getMacAddressBytes(hwAddress));
+        iface.setHardwareAddress(getMacAddressBytes(hwAddress));
 
         List<NetInterfaceAddress> addressList = new ArrayList<>();
 
@@ -164,9 +117,7 @@ public class NMStatusConverter {
             addressList.add(address);
         }
 
-        loInterface.setNetInterfaceAddresses(addressList);
-
-        return loInterface;
+        iface.setNetInterfaceAddresses(addressList);
     }
 
     private static String getNetmaskStringFrom(int prefix) {

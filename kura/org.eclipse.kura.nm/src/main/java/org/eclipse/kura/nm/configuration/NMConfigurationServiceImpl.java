@@ -188,8 +188,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             try {
                 this.nmDbusConnector.apply(modifiedProps);
             } catch (DBusException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error("Couldn't apply network configuration settings due to: ", e);
             }
             writeDhcpServerConfiguration(interfaces);
             this.dhcpServerMonitor.start();

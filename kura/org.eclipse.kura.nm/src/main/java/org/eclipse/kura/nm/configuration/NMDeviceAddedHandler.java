@@ -22,6 +22,7 @@ public class NMDeviceAddedHandler implements DBusSigHandler<NetworkManager.Devic
 
     private static final Logger logger = LoggerFactory.getLogger(NMDeviceAddedHandler.class);
 
+    @Override
     public void handle(NetworkManager.DeviceAdded s) {
         try {
             NMDbusConnector nm = NMDbusConnector.getInstance();

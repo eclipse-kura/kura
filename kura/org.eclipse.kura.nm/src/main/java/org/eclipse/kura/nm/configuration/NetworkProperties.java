@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class NetworkProperties {
 
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
     public NetworkProperties(Map<String, Object> rawProperties) {
         this.properties = Objects.requireNonNull(rawProperties);

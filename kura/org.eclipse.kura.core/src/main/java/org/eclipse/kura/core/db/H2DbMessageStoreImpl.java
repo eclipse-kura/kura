@@ -155,7 +155,7 @@ public class H2DbMessageStoreImpl implements MessageStore {
     @Override
     public synchronized int getMessageCount() throws KuraStoreException {
 
-        return this.helper.getMessageCount();
+        return (int) this.helper.getMessageCount();
     }
 
     public synchronized int store(String topic, byte[] payload, int qos, boolean retain, int priority)
@@ -185,6 +185,10 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
                 || errorCode == ErrorCode.SEQUENCE_EXHAUSTED || errorCode == ErrorCode.DUPLICATE_KEY_1) {
+
+            if (this.helper.getMessageCount() >= Integer.MAX_VALUE) {
+                throw new KuraStoreException("Table size is greater or equal than integer max value");
+            }
 
             final int freeId = this.helper.getConnectionProvider().withPreparedStatement(this.sqlGetFreeId,
                     (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getInt), "failed to get free ID");

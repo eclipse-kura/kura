@@ -118,7 +118,7 @@ public class SqliteMessageStoreImpl implements MessageStore {
     @Override
     public synchronized int getMessageCount() throws KuraStoreException {
 
-        return this.helper.getMessageCount();
+        return (int) this.helper.getMessageCount();
     }
 
     @Override
@@ -131,6 +131,11 @@ public class SqliteMessageStoreImpl implements MessageStore {
 
         if (id > Integer.MAX_VALUE) {
             this.helper.execute(this.sqlDeleteMessage, id);
+
+            if (this.helper.getMessageCount() >= Integer.MAX_VALUE) {
+                throw new KuraStoreException("Table size is greater or equal than integer max value");
+            }
+
             this.helper.execute(this.sqlResetId);
             return (int) this.helper.store(topic, payload, qos, retain, priority);
         }

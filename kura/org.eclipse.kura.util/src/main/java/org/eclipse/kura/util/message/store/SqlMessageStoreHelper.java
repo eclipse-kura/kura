@@ -62,10 +62,10 @@ public final class SqlMessageStoreHelper {
         execute(this.queries.getSqlCreateDroppedOnIndex());
     }
 
-    public int getMessageCount() throws KuraStoreException {
+    public long getMessageCount() throws KuraStoreException {
 
         return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(),
-                (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getInt), "Cannot get message count");
+                (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getLong), "Cannot get message count");
 
     }
 

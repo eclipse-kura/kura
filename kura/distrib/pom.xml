@@ -1631,6 +1631,9 @@
             <id>docker-x86_64-nn</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>buildAllContainers</name>
+                </property>
             </activation>
             <build>
                 <resources>
@@ -1747,6 +1750,9 @@
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>buildAllContainers</name>
+                </property>
             </activation>
             <properties>
                 
@@ -1792,6 +1798,10 @@
         <profile>
             <id>docker-alpine-x86_64-nn</id>
             <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>buildAllContainers</name>
+                </property>
             </activation>
             <build>
                 <resources>

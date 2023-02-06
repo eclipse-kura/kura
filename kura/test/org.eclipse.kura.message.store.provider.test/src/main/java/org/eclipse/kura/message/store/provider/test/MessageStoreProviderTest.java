@@ -96,14 +96,30 @@ public class MessageStoreProviderTest {
     }
 
     @Test
-    public void shouldResetIdentityGenerator() throws KuraStoreException {
+    public void shouldResetIdentityGeneratorWithNoStoredMessages() throws KuraStoreException {
         givenMessageStore();
+
         givenLastMessageId(Integer.MAX_VALUE);
 
         whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
 
         thenNoExceptionIsThrown();
         thenLastMessageIdIs(1);
+    }
+
+    @Test
+    public void shouldResetIdentityGeneratorWithSomeMessages() throws KuraStoreException {
+        givenMessageStore();
+
+        whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
+        whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
+
+        givenLastMessageId(Integer.MAX_VALUE);
+
+        whenMessageIsStored("testTopic", byteArray(1, 2, 3, 4), 1, true, 7);
+
+        thenNoExceptionIsThrown();
+        thenLastMessageIdIs(3);
     }
 
     @Test

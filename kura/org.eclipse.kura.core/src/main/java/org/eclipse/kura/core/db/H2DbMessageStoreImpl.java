@@ -35,8 +35,6 @@ import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.message.store.SqlMessageStoreHelper;
 import org.eclipse.kura.util.message.store.SqlMessageStoreQueries;
 import org.h2.api.ErrorCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 public class H2DbMessageStoreImpl implements MessageStore {
@@ -51,8 +49,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
             + "publishedMessageId, confirmedOn, priority, sessionId, droppedOn FROM ";
 
     private static final String ALTER_TABLE = "ALTER TABLE ";
-
-    private static final Logger logger = LoggerFactory.getLogger(H2DbMessageStoreImpl.class);
 
     private static final int PAYLOAD_BYTE_SIZE_THRESHOLD = 200;
     /**
@@ -71,7 +67,8 @@ public class H2DbMessageStoreImpl implements MessageStore {
     private final String tableName;
     private final String sanitizedTableName;
 
-    private final String sqlResetId;
+    private final String sqlSetNextId;
+    private final String sqlGetFreeId;
 
     private SqlMessageStoreHelper helper;
 
@@ -83,7 +80,9 @@ public class H2DbMessageStoreImpl implements MessageStore {
 
         this.sanitizedTableName = sanitizeSql(table);
 
-        this.sqlResetId = ALTER_TABLE + this.sanitizedTableName + " ALTER COLUMN id RESTART WITH 1;";
+        this.sqlSetNextId = ALTER_TABLE + this.sanitizedTableName + " ALTER COLUMN id RESTART WITH ?;";
+        this.sqlGetFreeId = "SELECT A.X FROM SYSTEM_RANGE(1, 2147483647) AS A LEFT OUTER JOIN "
+                + this.sanitizedTableName + " AS B ON A.X = B.ID WHERE B.ID IS NULL LIMIT 1";
 
         final SqlMessageStoreQueries queries = SqlMessageStoreQueries.builder()
                 .withSqlCreateTable("CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
@@ -159,7 +158,6 @@ public class H2DbMessageStoreImpl implements MessageStore {
         return this.helper.getMessageCount();
     }
 
-    @Override
     public synchronized int store(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
 
@@ -168,23 +166,34 @@ public class H2DbMessageStoreImpl implements MessageStore {
         try {
             return storeInternal(topic, payload, qos, retain, priority);
         } catch (KuraStoreException e) {
-
-            Throwable cause = e.getCause();
-            if (cause instanceof SQLException) {
-                SQLException sqle = (SQLException) cause;
-                int errorCode = sqle.getErrorCode();
-                if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
-                        || errorCode == ErrorCode.SEQUENCE_EXHAUSTED) {
-                    logger.warn("Identity generator limit exceeded. Resetting it...");
-                    this.helper.execute(this.sqlResetId);
-                    return storeInternal(topic, payload, qos, retain, priority);
-                } else {
-                    throw e;
-                }
-            } else {
-                throw e;
-            }
+            handleKuraStoreException(e);
+            return storeInternal(topic, payload, qos, retain, priority);
         }
+
+    }
+
+    private void handleKuraStoreException(final KuraStoreException e)
+            throws KuraStoreException {
+
+        final Throwable cause = e.getCause();
+
+        if (!(cause instanceof SQLException)) {
+            throw e;
+        }
+
+        final int errorCode = ((SQLException) cause).getErrorCode();
+
+        if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2
+                || errorCode == ErrorCode.SEQUENCE_EXHAUSTED || errorCode == ErrorCode.DUPLICATE_KEY_1) {
+
+            final int freeId = this.helper.getConnectionProvider().withPreparedStatement(this.sqlGetFreeId,
+                    (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getInt), "failed to get free ID");
+
+            this.helper.execute(this.sqlSetNextId, freeId);
+            return;
+        }
+
+        throw e;
     }
 
     private void validate(String topic) throws KuraStoreException {

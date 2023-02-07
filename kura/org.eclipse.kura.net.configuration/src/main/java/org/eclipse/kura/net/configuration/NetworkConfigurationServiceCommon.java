@@ -81,6 +81,7 @@ public class NetworkConfigurationServiceCommon {
                     }
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
+                    getDhcpServerDefinition(tocd, ifaceName);
                     getWifiDefinition(type.get(), tocd, ifaceName);
                 }
             }
@@ -191,6 +192,9 @@ public class NetworkConfigurationServiceCommon {
         tad.setCardinality(10000);
         tocd.addAD(tad);
 
+    }
+
+    private static void getDhcpServerDefinition(Tocd tocd, String ifaceName) {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.dhcpServer4.enabled", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_ENABLED, Tscalar.BOOLEAN));

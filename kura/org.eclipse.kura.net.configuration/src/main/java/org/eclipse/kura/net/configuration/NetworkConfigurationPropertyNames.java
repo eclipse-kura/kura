@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.configuration;
 
+import org.eclipse.kura.core.configuration.metatype.Tscalar;
+
 public enum NetworkConfigurationPropertyNames {
     PLATFORM_INTERFACES,
     CONFIG_MTU,
@@ -61,6 +63,24 @@ public enum NetworkConfigurationPropertyNames {
     CONFIG_WIFI_MASTER_IGNORE_SSID,
     CONFIG_WIFI_MASTER_PAIRWISE_CIPHERS,
     CONFIG_WIFI_MASTER_GROUP_CIPHERS,
+    CONFIG_MODEM_ENABLED,
+    CONFIG_MODEM_IDLE,
+    CONFIG_MODEM_USERNAME,
+    CONFIG_MODEM_PASSWORD,
+    CONFIG_MODEM_PDP_TYPE,
+    CONFIG_MODEM_MAX_FAIL,
+    CONFIG_MODEM_AUTH_TYPE,
+    CONFIG_MODEM_LPC_ECHO_INTERVAL,
+    CONFIG_MODEM_ACTIVE_FILTER,
+    CONFIG_MODEM_LPC_ECHO_FAILURE,
+    CONFIG_MODEM_DIVERSITY_ENABLED,
+    CONFIG_MODEM_RESET_TIMEOUT,
+    CONFIG_MODEM_GPS_ENABLED,
+    CONFIG_MODEM_PERSIST,
+    CONFIG_MODEM_APN,
+    CONFIG_MODEM_DIAL_STRING,
+    CONFIG_MODEM_HOLDOFF,
+    CONFIG_MODEM_PPP_NUM,
     USB_PORT,
     USB_MANUFACTURER,
     USB_PRODUCT,

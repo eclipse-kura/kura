@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,15 +26,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
+import org.eclipse.kura.message.store.provider.MessageStore;
+import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.util.jdbc.SQLFunction;
+import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
+import org.eclipse.kura.wire.store.provider.WireRecordStore;
+import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
-public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent {
+public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
+        WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceImpl.class);
 
@@ -102,7 +112,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
 
     private static class DbState {
 
-        private static final String DEFRAG_STATEMENT = "END TRANSACTION; VACUUM;";
+        private static final String DEFRAG_STATEMENT = "VACUUM;";
 
         private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
 
@@ -302,6 +312,32 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
             }
         } catch (SQLException e) {
             logger.error("Error during Connection closing", e);
+        }
+    }
+
+    @Override
+    public MessageStore openMessageStore(String name) throws KuraStoreException {
+
+        return new SqliteMessageStoreImpl(this::withConnection, name);
+    }
+
+    @Override
+    public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
+
+        return new SqliteWireRecordStoreImpl(this::withConnection, name);
+    }
+
+    @Override
+    public List<WireRecord> performQuery(String query) throws KuraStoreException {
+
+        return SqliteQueryableWireRecordStoreImpl.performQuery(this::withConnection, query);
+    }
+
+    @SuppressWarnings("restriction")
+    private <T> T withConnection(final SQLFunction<Connection, T> callable) throws SQLException {
+
+        try (final Connection conn = this.getConnection()) {
+            return callable.call(conn);
         }
     }
 

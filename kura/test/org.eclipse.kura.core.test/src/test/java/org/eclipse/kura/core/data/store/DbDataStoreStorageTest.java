@@ -31,6 +31,8 @@ import org.eclipse.kura.core.db.H2DbMessageStoreImpl;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
+import org.eclipse.kura.util.jdbc.ConnectionProvider;
+import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -145,11 +147,18 @@ public class DbDataStoreStorageTest {
         }
     }
 
+    @SuppressWarnings("restriction")
     private void givenDbDataStore(int houseKeeperInterval, int purgeAge) {
         H2DbService h2Service = new MockH2DbService();
 
         try {
-            this.dataStore = new H2DbMessageStoreImpl(h2Service, TABLE_NAME);
+            this.dataStore = new H2DbMessageStoreImpl(new ConnectionProvider() {
+
+                @Override
+                public <T> T withConnection(SQLFunction<Connection, T> task) throws SQLException {
+                    return h2Service.withConnection(task::call);
+                }
+            }, TABLE_NAME);
         } catch (KuraStoreException e) {
             this.occurredException = e;
         }

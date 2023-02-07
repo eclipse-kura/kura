@@ -9,12 +9,9 @@
  * 
  * Contributors:
  *  Eurotech
- ******************************************************************************/
-package org.eclipse.kura.core.db;
+ *******************************************************************************/
+package org.eclipse.kura.internal.db.sqlite.provider;
 
-import static java.util.Objects.isNull;
-
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,30 +24,36 @@ import org.eclipse.kura.util.wire.store.SqlQueryableWireRecordStoreHelper;
 import org.eclipse.kura.wire.WireRecord;
 
 @SuppressWarnings("restriction")
-public class H2DbQueryableWireRecordStoreImpl {
+public class SqliteQueryableWireRecordStoreImpl {
 
-    private H2DbQueryableWireRecordStoreImpl() {
+    private SqliteQueryableWireRecordStoreImpl() {
     }
 
     public static List<WireRecord> performQuery(final ConnectionProvider provider, final String query)
             throws KuraStoreException {
 
         return SqlQueryableWireRecordStoreHelper.performQuery(provider, query,
-                H2DbQueryableWireRecordStoreImpl::extractColumnResult);
+                SqliteQueryableWireRecordStoreImpl::extractColumnResult);
     }
 
     private static Optional<Object> extractColumnResult(final ResultSet rset, final ResultSetMetaData rmet, final int i)
             throws SQLException {
         Object dbExtractedData = rset.getObject(i);
 
-        if (isNull(dbExtractedData)) {
+        if (dbExtractedData == null) {
             return Optional.empty();
         }
 
-        if (dbExtractedData instanceof Blob) {
-            final Blob dbExtractedBlob = (Blob) dbExtractedData;
-            final int dbExtractedBlobLength = (int) dbExtractedBlob.length();
-            dbExtractedData = dbExtractedBlob.getBytes(1, dbExtractedBlobLength);
+        final String typeName = rmet.getColumnTypeName(i);
+
+        if ("INT".equals(typeName)) {
+            dbExtractedData = rset.getInt(i);
+        } else if ("BIGINT".equals(typeName)) {
+            dbExtractedData = rset.getLong(i);
+        } else if ("BOOLEAN".equals(typeName)) {
+            dbExtractedData = rset.getBoolean(i);
+        } else if ("BLOB".equals(typeName)) {
+            dbExtractedData = rset.getBytes(i);
         }
 
         return Optional.of(dbExtractedData);

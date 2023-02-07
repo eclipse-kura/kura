@@ -13,6 +13,8 @@
 package org.eclipse.kura.core.data;
 
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +57,8 @@ import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
+import org.eclipse.kura.util.jdbc.ConnectionProvider;
+import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.eclipse.kura.watchdog.WatchdogService;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -323,7 +327,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     public synchronized void setH2DbService(H2DbService dbService) {
         setMessageStoreProvider(name -> new H2DbMessageStoreImpl(
-                dbService, name));
+                new ConnectionProvider() {
+
+                    @Override
+                    public <T> T withConnection(final SQLFunction<Connection, T> task) throws SQLException {
+                        return dbService.withConnection(task::call);
+                    }
+                }, name));
     }
 
     public synchronized void unsetH2DbService(H2DbService dbService) {

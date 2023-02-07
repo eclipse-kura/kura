@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.db.test;
 
-public interface TestTarget {
+public interface WireComponentTestTarget {
 
-    public static final TestTarget DB_FILTER_AND_DB_STORE = new DbFilterStore();
-    public static final TestTarget WIRE_RECORD_QUERY_AND_WIRE_RECORD_STORE = new WireRecordQueryStore();
+    public static final WireComponentTestTarget DB_FILTER_AND_DB_STORE = new DbFilterStore();
+    public static final WireComponentTestTarget WIRE_RECORD_QUERY_AND_WIRE_RECORD_STORE = new WireRecordQueryStore();
 
     public String storeFactoryPid();
 
@@ -38,7 +38,7 @@ public interface TestTarget {
 
     public String storeReferenceKey();
 
-    public class WireRecordQueryStore implements TestTarget {
+    public class WireRecordQueryStore implements WireComponentTestTarget {
 
         @Override
         public String storeFactoryPid() {
@@ -89,9 +89,14 @@ public interface TestTarget {
         public String storeReferenceKey() {
             return "WireRecordStoreProvider.target";
         }
+
+        @Override
+        public String toString() {
+            return "Wire Record Query and Wire Record Store";
+        }
     }
 
-    public class DbFilterStore implements TestTarget {
+    public class DbFilterStore implements WireComponentTestTarget {
 
         @Override
         public String storeFactoryPid() {
@@ -141,6 +146,11 @@ public interface TestTarget {
         @Override
         public String storeReferenceKey() {
             return "BaseDbService.target";
+        }
+
+        @Override
+        public String toString() {
+            return "Db Store and Db Filter";
         }
 
     }

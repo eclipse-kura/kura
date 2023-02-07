@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -97,7 +97,6 @@ public class SqliteDbServiceTestBase {
     protected void whenQueryIsPerformed(final String query) {
         try (final Connection conn = dbService.getConnection(); final Statement statement = conn.createStatement()) {
             statement.executeUpdate(query);
-            conn.commit();
         } catch (final Exception e) {
             this.exception = Optional.of(e);
         }

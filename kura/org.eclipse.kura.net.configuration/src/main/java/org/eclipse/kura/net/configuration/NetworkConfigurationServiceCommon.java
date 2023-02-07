@@ -130,6 +130,10 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.master.channel", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_CHANNEL, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.ignoreSSID", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_IGNORE_SSID, Tscalar.BOOLEAN));
     }
 
     private static void getWifiInfraDefinition(Tocd tocd, String ifaceName) {
@@ -165,6 +169,18 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.channel", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_CHANNEL, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.bgscan", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_BGSCAN, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.pingAccessPoint", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PING_AP, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.ignoreSSID", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_IGNORE_SSID, Tscalar.BOOLEAN));
 
     }
 

@@ -250,13 +250,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         return changed;
     }
 
-    private Set<String> getWanInterfaces(final Map<String, Object> properties) {
-        return AbstractNetworkConfigurationService.getNetworkInterfaceNamesInConfig(properties).stream()
-                .filter(p -> NetInterfaceStatus.netIPv4StatusEnabledWAN.name()
-                        .equals(properties.get(PREFIX + p + ".config.ip4.status")))
-                .collect(Collectors.toSet());
-    }
-
     protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
         modifiedProps.put(String.format(PREFIX + "%s.config.pppNum", interfaceName), pppNum);
@@ -394,19 +387,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             }
 
             logger.info("migrating configuration for interface: {}...", existingInterfaceName);
-            String prefix = PREFIX + existingInterfaceName + ".";
-
-            final Optional<String> usbBusNumber = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.busNumber", existingInterfaceName);
-            final Optional<String> usbDevicePath = this.networkProperties.getOpt(String.class,
-                    "net.interface.%s.usb.devicePath", existingInterfaceName);
-
-            if (!usbBusNumber.isPresent() || !usbDevicePath.isPresent()) {
-                logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
-                continue;
-            }
-
-            final String migratedInterfaceName = usbBusNumber.get() + "-" + usbDevicePath.get();
+            final String migratedInterfaceName = this.networkService.getModemUsbPort(existingInterfaceName);
 
             logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
             result = replaceModemPropertyKeys(migratedInterfaceName, existingInterfaceName, result);

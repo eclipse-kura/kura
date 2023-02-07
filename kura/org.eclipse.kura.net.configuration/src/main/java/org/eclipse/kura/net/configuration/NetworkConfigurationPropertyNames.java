@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.net.configuration;
 
-import org.eclipse.kura.core.configuration.metatype.Tscalar;
-
 public enum NetworkConfigurationPropertyNames {
     PLATFORM_INTERFACES,
     CONFIG_MTU,
@@ -33,6 +31,7 @@ public enum NetworkConfigurationPropertyNames {
     CONFIG_IPV4_DHCP_SERVER_RANGE_END,
     CONFIG_IPV4_DHCP_SERVER_PASS_DNS,
     CONFIG_IPV4_DHCP_SERVER_NAT_ENABLED,
+    CONFIG_IPV4_STATUS,
     CONFIG_WIFI_MODE,
     CONFIG_WIFI_ADHOC_SSID,
     CONFIG_WIFI_ADHOC_HARDWARE_MODE,

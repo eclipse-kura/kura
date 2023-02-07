@@ -483,15 +483,15 @@ public class NetworkConfigurationServiceCommonTest {
                 adsConfigured++;
             }
         }
-        assertEquals(40, adsConfigured);
+        assertEquals(41, adsConfigured);
     }
 
     private void thenComponentDefinitionHasWifiProperties() {
-        assertEquals(39, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
+        assertEquals(40, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
     }
 
     private void thenComponentDefinitionHasModemProperties() {
-        assertEquals(26, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
+        assertEquals(27, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
 
 }

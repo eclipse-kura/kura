@@ -360,6 +360,7 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.ip4.gateway", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY, Tscalar.STRING));
+        addIp4StatusDefinition(tocd, ifaceName);
     }
 
     private static void getLoopbackDefinition(Tocd tocd, String ifaceName) {
@@ -368,6 +369,15 @@ public class NetworkConfigurationServiceCommon {
         addDriverDefinition(tocd, ifaceName);
         addIp4AddressDefinition(tocd, ifaceName);
         addIp4PrefixDefinition(tocd, ifaceName);
+        addIp4StatusDefinition(tocd, ifaceName);
+    }
+
+    private static void addIp4StatusDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.ip4.status", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_STATUS, Tscalar.STRING);
+        tad.setRequired(true);
+        tocd.addAD(tad);
     }
 
     private static void addDriverDefinition(Tocd tocd, String ifaceName) {

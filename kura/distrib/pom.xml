@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -398,6 +398,16 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.nm</artifactId>
+                                    <version>${org.eclipse.kura.nm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.net.configuration</artifactId>
+                                    <version>${org.eclipse.kura.net.configuration.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.net.admin.firewall</artifactId>
                                     <version>${org.eclipse.kura.net.admin.firewall.version}</version>
                                 </artifactItem>
@@ -728,6 +738,8 @@
                                 <move file="target/plugins/org.eclipse.kura.localization.resources.jar" tofile="target/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.nm.jar" tofile="target/plugins/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.net.configuration.jar" tofile="target/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.firewall.jar" tofile="target/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.modbus.jar" tofile="target/plugins/org.eclipse.kura.protocol.modbus_${org.eclipse.kura.protocol.modbus.version}.jar" failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.protocol.can.jar" tofile="target/plugins/org.eclipse.kura.protocol.can_${org.eclipse.kura.protocol.can.version}.jar" failonerror="false" />

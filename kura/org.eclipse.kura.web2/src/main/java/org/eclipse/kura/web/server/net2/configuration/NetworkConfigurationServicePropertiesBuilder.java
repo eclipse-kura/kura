@@ -129,9 +129,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiMasterGroupCiphers(this.ifname, Optional.ofNullable(gwtWifiConfig.getGroupCiphers()));
 
         // wifi master specific properties
-
         this.properties.setWifiMasterRadioMode(this.ifname,
                 EnumsParser.getWifiRadioMode(Optional.ofNullable(gwtWifiConfig.getRadioMode())));
+
     }
 
     private void setWifiInfraProperties() {

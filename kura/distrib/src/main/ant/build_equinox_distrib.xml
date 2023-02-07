@@ -162,7 +162,7 @@
         <condition property="is.kura.network">
             <contains string="${network.provider}" substring="kura-network" />
         </condition>
-        	
+
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
         <copy file="src/main/osgi/equinox_3.16.0/configuration/config.ini"
@@ -270,7 +270,7 @@
         <antcall target="nvidia-triton-server-config" />
         <antcall target="linux-kura-network-config" />
         <antcall target="linux-network-manager-config" />
-    	
+
         <!-- Add mToolkit to config.ini -->
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -797,6 +797,8 @@ fi]]>
         <antcall target="linux-redhat-jars" />
         <antcall target="linux-systemd-jars" />
         <antcall target="nvidia-jetson-nano-jars" />
+        <antcall target="linux-kura-network-jars" />
+        <antcall target="linux-network-manager-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1659,8 +1661,6 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar@4" />
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
         </propertyfile>
     </target>
 
@@ -1669,6 +1669,8 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar@5" />
         </propertyfile>
     </target>
 
@@ -1676,10 +1678,14 @@ fi]]>
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar@5:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar@5" />
+            <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar@5:start" />
         </propertyfile>
     </target>
-	
+
     <target name="linux-sysv-config" if="is.sysv" depends="linux-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1753,9 +1759,6 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>
 
@@ -1765,12 +1768,21 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>
 
     <target name="linux-network-manager-jars" if="is.network.manager">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />

@@ -359,7 +359,6 @@ public class NetworkConfigurationServiceCommon {
         addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
-        addDriverDefinition(tocd, ifaceName);
         addIp4AddressDefinition(tocd, ifaceName);
         addIp4PrefixDefinition(tocd, ifaceName);
         addIp4StatusDefinition(tocd, ifaceName);
@@ -379,12 +378,6 @@ public class NetworkConfigurationServiceCommon {
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_STATUS, Tscalar.STRING);
         tad.setRequired(true);
         tocd.addAD(tad);
-    }
-
-    private static void addDriverDefinition(Tocd tocd, String ifaceName) {
-        tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.driver", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_DRIVER, Tscalar.STRING));
     }
 
     private static void addAutoconnectDefinition(Tocd tocd, String ifaceName) {

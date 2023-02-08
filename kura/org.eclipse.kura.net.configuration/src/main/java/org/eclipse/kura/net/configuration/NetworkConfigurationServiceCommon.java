@@ -203,10 +203,6 @@ public class NetworkConfigurationServiceCommon {
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_BROADCAST_ENABLED, Tscalar.BOOLEAN));
 
         tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.wifi.master.hardwareMode", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE, Tscalar.STRING));
-
-        tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.master.radioMode", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_RADIO_MODE, Tscalar.STRING));
 
@@ -240,10 +236,6 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.ssid", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SSID, Tscalar.STRING));
-
-        tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.wifi.infra.hardwareMode", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE, Tscalar.STRING));
 
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.radioMode", ifaceName),
@@ -280,7 +272,6 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.ignoreSSID", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_IGNORE_SSID, Tscalar.BOOLEAN));
-
     }
 
     private static void getWifiCommonDefinition(Tocd tocd, String ifaceName) {

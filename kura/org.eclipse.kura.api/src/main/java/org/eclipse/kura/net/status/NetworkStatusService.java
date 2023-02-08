@@ -33,7 +33,7 @@ public interface NetworkStatusService {
      * 
      * @return a list containing the status of all the network interfaces
      */
-    public List<NetInterface<NetInterfaceAddress>> getNetworkStatus();
+    public List<NetInterface<? extends NetInterfaceAddress>> getNetworkStatus();
 
     /**
      * Return the {@link NetInterface} of the given network interface
@@ -41,7 +41,7 @@ public interface NetworkStatusService {
      * @param interfaceName the name of the network interface
      * @return the {@link NetInterface}
      */
-    public NetInterface<NetInterfaceAddress> getNetworkStatus(String interfaceName);
+    public NetInterface<? extends NetInterfaceAddress> getNetworkStatus(String interfaceName);
 
     /**
      * Return the names of the network interfaces detected in the system.

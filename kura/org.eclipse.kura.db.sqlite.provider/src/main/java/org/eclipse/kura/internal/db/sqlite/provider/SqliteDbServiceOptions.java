@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -102,7 +102,8 @@ class SqliteDbServiceOptions {
     }
 
     public boolean isPeriodicWalCheckpointEnabled() {
-        return this.journalMode == JournalMode.WAL && this.walCheckpointIntervalSeconds > 0;
+        return this.mode != Mode.IN_MEMORY && this.journalMode == JournalMode.WAL
+                && this.walCheckpointIntervalSeconds > 0;
     }
 
     public boolean isPeriodicDefragEnabled() {

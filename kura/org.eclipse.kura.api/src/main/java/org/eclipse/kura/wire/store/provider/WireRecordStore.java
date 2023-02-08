@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface WireRecordStore {
 
     /**
-     * Removes all records in the store except the oldest
+     * Removes all records in the store except the most recent
      * <code>noOfRecordsToKeep</code>.
      * 
      * @param noOfRecordsToKeep

@@ -39,7 +39,13 @@
       </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-      <directory>target-definition/equinox_3.11.1</directory>
+      <directory>target-definition/equinox_3.16.0</directory>
+      <includes>
+        <include>**/*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>target-definition/test-deps</directory>
       <includes>
         <include>**/*.xml</include>
       </includes>

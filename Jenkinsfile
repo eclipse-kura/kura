@@ -51,9 +51,22 @@ node {
                                 -Dsonar.jacoco.reportPaths='target/jacoco/' \
                                 -Dsonar.java.binaries='target/' \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
+                                -Dsonar.projectKey=org.eclipse.kura:kura \
                                 -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java'''
                         }
                     }
+                }
+            }
+        }
+    }
+
+    stage('quality-gate') {
+        // Sonar quality gate
+        timeout(time: 30, unit: 'MINUTES') {
+            withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                    error "Pipeline aborted due to sonar quality gate failure: ${qg.status}"
                 }
             }
         }

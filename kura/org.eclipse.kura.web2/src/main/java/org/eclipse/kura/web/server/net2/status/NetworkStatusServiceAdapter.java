@@ -53,7 +53,8 @@ public class NetworkStatusServiceAdapter {
     public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(String ifname,
             GwtNetInterfaceConfig gwtConfigToUpdate) {
 
-        NetInterface<NetInterfaceAddress> networkInterface = this.networkStatusService.getNetworkStatus(ifname);
+        NetInterface<? extends NetInterfaceAddress> networkInterface = this.networkStatusService
+                .getNetworkStatus(ifname);
 
         if (networkInterface != null) {
             setCommonStateProperties(gwtConfigToUpdate, networkInterface);
@@ -72,7 +73,7 @@ public class NetworkStatusServiceAdapter {
 
     @SuppressWarnings("restriction")
     private void setCommonStateProperties(GwtNetInterfaceConfig gwtConfig,
-            NetInterface<NetInterfaceAddress> networkInterface) {
+            NetInterface<? extends NetInterfaceAddress> networkInterface) {
 
         if (networkInterface.getState() != null) {
             gwtConfig.setHwState(networkInterface.getState().name());
@@ -95,7 +96,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig,
-            NetInterface<NetInterfaceAddress> networkInterface) {
+            NetInterface<? extends NetInterfaceAddress> networkInterface) {
 
         String ipConfigMode = gwtConfig.getConfigMode();
         if (isDhcpClient(ipConfigMode)) {
@@ -128,7 +129,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig,
-            NetInterface<NetInterfaceAddress> networkInterface) {
+            NetInterface<? extends NetInterfaceAddress> networkInterface) {
         if (gwtConfig instanceof GwtModemInterfaceConfig && networkInterface instanceof ModemInterface<?>) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
             ModemInterface<?> modemInterface = (ModemInterface<?>) networkInterface;

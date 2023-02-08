@@ -297,12 +297,12 @@ public class NetworkConfigurationServiceCommon {
     private static void getDnsDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
         // DNS and WINS
-        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.dnsServers", ifaceName),
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.dnsServers", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_DNS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);
 
-        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.winsServers", ifaceName),
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.winsServers", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WINS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);

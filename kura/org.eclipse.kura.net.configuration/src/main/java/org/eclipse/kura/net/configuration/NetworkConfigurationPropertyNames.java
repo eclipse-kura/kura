@@ -14,6 +14,7 @@ package org.eclipse.kura.net.configuration;
 
 public enum NetworkConfigurationPropertyNames {
     PLATFORM_INTERFACES,
+    CONFIG_TYPE,
     CONFIG_MTU,
     CONFIG_AUTOCONNECT,
     CONFIG_DRIVER,

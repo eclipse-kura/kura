@@ -43,7 +43,8 @@ public class NMStatusConverter {
         ethInterface.setLoopback(false);
         ethInterface.setPointToPoint(false); // TBD
 
-        setIP4Status(ethInterface, deviceProperties, ip4configProperties);
+        setDeviceStatus(ethInterface, deviceProperties);
+        setIP4Status(ethInterface, ip4configProperties);
 
         return ethInterface;
 
@@ -57,13 +58,13 @@ public class NMStatusConverter {
         loInterface.setLoopback(true);
         loInterface.setPointToPoint(false);
 
-        setIP4Status(loInterface, deviceProperties, ip4configProperties);
+        setDeviceStatus(loInterface, deviceProperties);
+        setIP4Status(loInterface, ip4configProperties);
 
         return loInterface;
     }
 
-    private static void setIP4Status(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties,
-            Optional<Properties> ip4configProperties) {
+    private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {
         iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
         iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
         iface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
@@ -78,12 +79,15 @@ public class NMStatusConverter {
 
         String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
         iface.setHardwareAddress(getMacAddressBytes(hwAddress));
+    }
 
-        List<NetInterfaceAddress> addressList = new ArrayList<>();
-
+    private static void setIP4Status(AbstractNetInterface<NetInterfaceAddress> iface,
+            Optional<Properties> ip4configProperties) {
         if (!ip4configProperties.isPresent()) {
             return;
         }
+
+        List<NetInterfaceAddress> addressList = new ArrayList<>();
 
         String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
         List<Map<String, Variant<?>>> addressData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "AddressData");

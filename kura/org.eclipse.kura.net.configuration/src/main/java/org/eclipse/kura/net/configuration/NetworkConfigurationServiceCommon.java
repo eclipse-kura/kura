@@ -345,6 +345,7 @@ public class NetworkConfigurationServiceCommon {
 
     private static void getInterfaceCommonDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
+        addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
 
@@ -364,12 +365,21 @@ public class NetworkConfigurationServiceCommon {
     }
 
     private static void getLoopbackDefinition(Tocd tocd, String ifaceName) {
+        addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
         addDriverDefinition(tocd, ifaceName);
         addIp4AddressDefinition(tocd, ifaceName);
         addIp4PrefixDefinition(tocd, ifaceName);
         addIp4StatusDefinition(tocd, ifaceName);
+    }
+
+    private static void addTypeDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.type", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_TYPE, Tscalar.STRING);
+        tad.setRequired(true);
+        tocd.addAD(tad);
     }
 
     private static void addIp4StatusDefinition(Tocd tocd, String ifaceName) {

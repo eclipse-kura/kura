@@ -453,7 +453,7 @@ public class NetworkConfigurationServiceImplTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(96, ads.size());
+        assertEquals(97, ads.size());
 
         int adsConfigured = 0;
         for (AD ad : ads) {
@@ -772,7 +772,7 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
         }
-        assertEquals(45, adsConfigured);
+        assertEquals(41, adsConfigured);
     }
 
     private static NetInterfaceType guessNetworkType(final String interfaceName) {

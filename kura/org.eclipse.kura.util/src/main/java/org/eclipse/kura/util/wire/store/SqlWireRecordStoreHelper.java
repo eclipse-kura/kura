@@ -155,7 +155,7 @@ public class SqlWireRecordStoreHelper {
         } else {
             final Optional<String> columnType = Optional.ofNullable(columnTypes.get(name));
 
-            if (!expectedType.equals(columnType)) {
+            if (columnType.isPresent() && !expectedType.get().equalsIgnoreCase(columnType.get())) {
 
                 logger.debug("changing column type: {} {}", name, expectedType.get());
 

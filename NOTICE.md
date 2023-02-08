@@ -194,12 +194,12 @@ This project leverages the following third party content.
 * maven/mavencentral/org.gwtproject/gwt-user/2.10.0, Apache-2.0 AND CC0-1.0, approved, #4958
 * maven/mavencentral/org.gwtbootstrap3/gwtbootstrap3/1.0.1, Apache-2.0 AND MIT AND OFL-1.1, approved, #2020
 * maven/mavencentral/org.xerial/sqlite-jdbc/3.39.3.0, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #3763
-* maven/mavencentral/org.graalvm.js/js/21.3.5, UPL-1.0 AND (LicenseRef-scancode-sunpro AND UPL-1.0) AND (GPL-2.0-only WITH Classpath-exception-2.0 AND UPL-1.0) AND (BSD-3-Clause AND UPL-1.0) AND (LicenseRef-scancode-x11-lucent AND MPL-2.0), restricted, #6714
+* maven/mavencentral/org.graalvm.js/js/21.3.5, UPL-1.0 AND (UPL-1.0 AND GPL-2.0-only WITH Classpath-exception-2.0) AND BSD-3-Clause AND MPL-2.0, approved, #6714
 * maven/mavencentral/org.graalvm.js/js-scriptengine/21.3.5, UPL-1.0, approved, #6715
 * maven/mavencentral/org.graalvm.js/js-launcher/21.3.5, UPL-1.0, approved, #6716
 * maven/mavencentral/org.graalvm.sdk/graal-sdk/21.3.5, UPL-1.0, approved, #6717
 * maven/mavencentral/org.graalvm.truffle/truffle-api/21.3.5, UPL-1.0, approved, #6718
-* maven/mavencentral/org.graalvm.regex/regex/21.3.5, UPL-1.0 AND (LicenseRef-scancode-unicode AND UPL-1.0), restricted, #6719
+* maven/mavencentral/org.graalvm.regex/regex/21.3.5, UPL-1.0 AND Unicode-TOU, approved, #6719
 * maven/mavencentral/org.graalvm.sdk/launcher-common/21.3.5, UPL-1.0, approved, #6720
 
 ### Additional Dependencies

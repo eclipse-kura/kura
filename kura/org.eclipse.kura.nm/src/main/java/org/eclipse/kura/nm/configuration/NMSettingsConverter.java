@@ -130,12 +130,17 @@ public class NMSettingsConverter {
                 props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
         Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
                 propMode.toLowerCase());
+        Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", iface,
+                propMode.toLowerCase());
 
         settings.put("mode", new Variant<>(mode));
         settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
         settings.put("band", new Variant<>(band));
         if (channel.isPresent()) {
             settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
+        }
+        if (hidden.isPresent()) {
+            settings.put("hidden", new Variant<>(hidden));
         }
 
         return settings;

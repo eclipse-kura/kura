@@ -31,6 +31,8 @@ import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
+import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,5 +179,30 @@ public class GwtNetworkServiceImpl {
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
+    }
+
+    public static List<GwtWifiChannelFrequency> findFrequencies(String interfaceName, GwtWifiRadioMode radioMode) {
+        List<GwtWifiChannelFrequency> result = new ArrayList<>();
+
+        final int startFreq_5GHz = 5000;
+        final int[] channels_5GHz = { 7, 8, 9, 10, 11, 12, 16, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58,
+                60, 62, 64, 68, 96, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 132, 134,
+                136, 138, 140, 142, 144, 149, 151, 153, 155, 157, 159, 161, 163, 165, 167, 169, 171, 173, 175, 177,
+                180, 182, 184, 187, 188, 189, 192, 196 };
+
+        final int startFreq_2_4GHz = 2408;
+        final int[] channels_2_4GHz = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+
+        for (int channelNumber : channels_2_4GHz) {
+            final int channelCenterFrequency = startFreq_2_4GHz + 5 * channelNumber - 1;
+            result.add(new GwtWifiChannelFrequency(channelNumber, channelCenterFrequency));
+        }
+
+        for (int channelNumber : channels_5GHz) {
+            final int channelCenterFrequency = startFreq_5GHz + 5 * channelNumber;
+            result.add(new GwtWifiChannelFrequency(channelNumber, channelCenterFrequency));
+        }
+
+        return result;
     }
 }

@@ -180,7 +180,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
 
         if (isNet2()) {
             // TODO
-            return new ArrayList<>();
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
         }

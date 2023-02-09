@@ -21,7 +21,7 @@ To use this service select the **ContainerOrchestrationService** option located 
 
 ## Creating your first container.
 
-To create a container, select the + icon (Create a new component) under **services**. A popup dialogue box will appear. In the field **Factory** select **org.eclipse.kura.container.provider.ContainerInstance** from the drop-down. Then, use the **Name** field to specify a name for the container.
+To create a container, select the `+` icon (Create a new component) under **services**. A popup dialogue box will appear. In the field **Factory** select **org.eclipse.kura.container.provider.ContainerInstance** from the drop-down. Then, use the **Name** field to specify a name for the container.
 
     !!! Note on the 'Name' feild.
         The name specified in this field will also be the name of the container when it is spun up by the orchestrator.

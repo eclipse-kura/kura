@@ -12,13 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.nm.common;
 
-public enum NMDeviceEnable {
+public enum KuraInterfaceStatus {
 
     DISABLED,
     UNMANAGED,
     ENABLED;
 
-    public static NMDeviceEnable fromKuraIpStatus(KuraIpStatus ip4Status, KuraIpStatus ip6Status) {
+    public static KuraInterfaceStatus fromKuraIpStatus(KuraIpStatus ip4Status, KuraIpStatus ip6Status) {
         Boolean ip4Enabled = KuraIpStatus.isEnabled(ip4Status);
         boolean ip4Disabled = ip4Status == KuraIpStatus.DISABLED;
         boolean ip4Unmanaged = ip4Status == KuraIpStatus.UNMANAGED;

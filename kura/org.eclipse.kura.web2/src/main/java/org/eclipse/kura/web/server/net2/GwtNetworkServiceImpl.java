@@ -54,9 +54,6 @@ public class GwtNetworkServiceImpl {
             for (String ifname : status.getNetInterfaces()) {
                 GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifname);
                 status.fillWithStatusProperties(ifname, gwtConfig);
-
-                logger.debug("GWT Network Configuration for interface {}:\n{}\n", ifname, gwtConfig.getProperties());
-
                 result.add(gwtConfig);
             }
 

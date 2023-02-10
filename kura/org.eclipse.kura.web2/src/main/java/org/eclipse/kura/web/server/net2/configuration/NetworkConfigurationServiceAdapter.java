@@ -20,6 +20,8 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapter to retrieve NetworkConfigurationService properties and
@@ -29,7 +31,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 public class NetworkConfigurationServiceAdapter {
 
     private static final String NETWORK_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-
+    private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceAdapter.class);
 
     private final ConfigurationService configurationService;
     private final Map<String, Object> netConfServProperties;
@@ -48,7 +50,13 @@ public class NetworkConfigurationServiceAdapter {
      *         NetworkConfigurationService
      */
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
-        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties).forInterface(ifname).build();
+        GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
+                .forInterface(ifname).build();
+
+        logger.debug("Created GWT Network Configuration for interface {}:\n\n{}\n\n", ifname,
+                gwtConfig.getProperties());
+
+        return gwtConfig;
     }
 
     /**
@@ -62,6 +70,8 @@ public class NetworkConfigurationServiceAdapter {
         NetworkConfigurationServicePropertiesBuilder builder = new NetworkConfigurationServicePropertiesBuilder(
                 gwtConfig);
         Map<String, Object> newProperties = builder.build();
+
+        logger.debug("Updating '{}' with properties:\n\n{}\n\n", NETWORK_CONFIGURATION_SERVICE_PID, newProperties);
 
         this.configurationService.updateConfiguration(NETWORK_CONFIGURATION_SERVICE_PID, newProperties);
     }

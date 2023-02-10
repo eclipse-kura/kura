@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.configuration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -311,14 +312,14 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_MODE, ifname), mode);
     }
 
-    public int getWifiMasterChannel(String ifname) {
-        String intString = (String) this.properties
-                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname), 1);
-        return Integer.parseInt(intString);
+    public List<Integer> getWifiMasterChannel(String ifname) {
+        return channelsStringAsIntList((String) this.properties
+                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname), ""));
     }
 
-    public void setWifiMasterChannel(String ifname, int channel) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname), channel);
+    public void setWifiMasterChannel(String ifname, List<Integer> channels) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname),
+                intListAsChannelsString(channels));
     }
 
     public Optional<String> getWifiMasterRadioMode(String ifname) {
@@ -388,14 +389,14 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_SSID, ifname), ssid);
     }
 
-    public int getWifiInfraChannel(String ifname) {
-        String intString = (String) this.properties
-                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname), 1);
-        return Integer.parseInt(intString);
+    public List<Integer> getWifiInfraChannel(String ifname) {
+        return channelsStringAsIntList((String) this.properties
+                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname), ""));
     }
 
-    public void setWifiInfraChannel(String ifname, int channel) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname), channel);
+    public void setWifiInfraChannel(String ifname, List<Integer> channels) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname),
+                intListAsChannelsString(channels));
     }
 
     public Optional<String> getWifiInfraBgscan(String ifname) {
@@ -751,6 +752,35 @@ public class NetworkConfigurationServiceProperties {
         }
 
         return Optional.empty();
+    }
+
+    private List<Integer> channelsStringAsIntList(String channelValue) {
+        List<Integer> channels = new ArrayList<>();
+
+        String[] split = channelValue.split(" ");
+
+        for (String channel : split) {
+            if (!channel.trim().isEmpty()) {
+                try {
+                    channels.add(Integer.parseInt(channel.trim()));
+                } catch (NumberFormatException e) {
+                    logger.error("Error parsing channel property '" + channelValue + "'", e);
+                }
+            }
+        }
+
+        return channels;
+    }
+
+    private String intListAsChannelsString(List<Integer> channels) {
+        StringBuilder result = new StringBuilder();
+
+        for (int channel : channels) {
+            result.append(channel);
+            result.append(" ");
+        }
+
+        return result.toString().trim();
     }
 
 }

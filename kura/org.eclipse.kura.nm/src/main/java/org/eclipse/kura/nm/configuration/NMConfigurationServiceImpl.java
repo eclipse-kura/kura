@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.usb.UsbDevice;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -134,7 +136,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         try {
             this.nmDbusConnector = NMDbusConnector.getInstance();
             this.nmDbusConnector.checkPermissions();
-        } catch (DBusException e) {
+        } catch (DBusExecutionException | DBusException e) {
             logger.error("Cannot initialize NMDbusConnector due to: ", e);
         }
 
@@ -149,7 +151,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
-        this.nmDbusConnector.closeConnection();
+        if (Objects.nonNull(this.nmDbusConnector)) {
+            this.nmDbusConnector.closeConnection();
+        }
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
     }
@@ -187,11 +191,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             decryptAndConvertPasswordProperties(modifiedProps);
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
-            try {
-                this.nmDbusConnector.apply(modifiedProps);
-            } catch (DBusException e) {
-                logger.error("Couldn't apply network configuration settings due to: ", e);
-            }
+            writeNetworkConfigurationSettings(modifiedProps);
             writeDhcpServerConfiguration(interfaces);
             this.dhcpServerMonitor.start();
 
@@ -302,9 +302,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(NetworkConfigurationServiceCommon.PID,
-                NetworkConfigurationServiceCommon.getDefinition(this.networkProperties.getProperties(),
-                        Optional.empty()),
+        return new ComponentConfigurationImpl(
+                NetworkConfigurationServiceCommon.PID, NetworkConfigurationServiceCommon
+                        .getDefinition(this.networkProperties.getProperties(), Optional.empty()),
                 this.networkProperties.getProperties());
     }
 
@@ -317,8 +317,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(
-                this.networkProperties.getProperties());
+        final Set<String> interfaceNamesInConfig = NetworkConfigurationServiceCommon
+                .getNetworkInterfaceNamesInConfig(this.networkProperties.getProperties());
 
         final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
 
@@ -328,6 +328,19 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             return netInterface.getName();
         }
         return usbPort.orElse(netInterface.getName());
+    }
+
+    private void writeNetworkConfigurationSettings(Map<String, Object> networkProperties) {
+        if (Objects.isNull(this.nmDbusConnector)) {
+            logger.error("Found null NMDbusConnector. Couldn't apply network configuration settings.");
+            return;
+        }
+
+        try {
+            this.nmDbusConnector.apply(networkProperties);
+        } catch (DBusExecutionException | DBusException e) {
+            logger.error("Couldn't apply network configuration settings due to: ", e);
+        }
     }
 
     private void writeDhcpServerConfiguration(Set<String> interfaceNames) {
@@ -350,8 +363,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private boolean isDhcpServerValid(String interfaceName) {
         boolean isValid = false;
-        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon
-                .getNetworkTypeFromProperties(interfaceName, this.networkProperties.getProperties());
+        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.getNetworkTypeFromProperties(interfaceName,
+                this.networkProperties.getProperties());
         Optional<Boolean> isDhcpServerEnabled = this.networkProperties.getOpt(Boolean.class,
                 "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
         Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);

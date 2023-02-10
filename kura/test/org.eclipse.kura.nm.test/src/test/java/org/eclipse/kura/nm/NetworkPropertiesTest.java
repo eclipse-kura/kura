@@ -215,6 +215,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKeyNull2", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptIsCalledWith("", String.class);
+        thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.of("test value"));
     }
 
@@ -307,6 +308,7 @@ public class NetworkPropertiesTest {
         givenMapWith("", "Empty String Test");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptStringListIsCalledWith("");
+        thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.of(Arrays.asList("Empty String Test")));
     }
 

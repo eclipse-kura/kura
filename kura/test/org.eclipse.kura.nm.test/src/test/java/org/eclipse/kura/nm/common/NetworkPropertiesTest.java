@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.eclipse.kura.nm.common.NetworkProperties;
 import org.freedesktop.dbus.errors.NotSupported;
 import org.junit.Test;
 

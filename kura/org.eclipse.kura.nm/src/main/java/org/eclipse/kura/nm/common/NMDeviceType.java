@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm.common;
 
 import org.freedesktop.dbus.types.UInt32;
 

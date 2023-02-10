@@ -10,11 +10,12 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm.common;
 
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.nm.common.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 

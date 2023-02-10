@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;

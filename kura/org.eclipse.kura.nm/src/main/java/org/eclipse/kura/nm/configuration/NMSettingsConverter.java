@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.common.KuraInterfaceStatus;
+import org.eclipse.kura.nm.common.NMDeviceType;
+import org.eclipse.kura.nm.common.NetworkProperties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;

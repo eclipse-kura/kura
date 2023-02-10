@@ -15,6 +15,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -33,6 +34,24 @@ public class NetworkProperties {
 
     public <T> T get(Class<T> clazz, String key, Object... args) {
         String formattedKey = String.format(key, args);
+
+        if (!this.properties.containsKey(formattedKey)) {
+            throw new NoSuchElementException(String.format("The \"%s\" key is missing.", formattedKey));
+        }
+
+        Object rawValue = this.properties.get(formattedKey);
+        if (Objects.isNull(rawValue)) {
+            throw new NoSuchElementException(String.format("The \"%s\" key contains a null value.", formattedKey));
+        }
+
+        if (clazz == String.class) {
+            String value = String.class.cast(rawValue);
+            if (value.isEmpty()) {
+                throw new NoSuchElementException(
+                        String.format("The \"%s\" key contains an empty string value.", formattedKey));
+            }
+        }
+
         return clazz.cast(this.properties.get(formattedKey));
     }
 
@@ -71,19 +90,14 @@ public class NetworkProperties {
     }
 
     public Optional<List<String>> getOptStringList(String key, Object... args) {
-        String formattedKey = String.format(key, args);
-        if (!this.properties.containsKey(formattedKey)) {
-            return Optional.empty();
-        }
-
-        String commaSeparatedString = get(String.class, key, args);
-        if (Objects.isNull(commaSeparatedString) || commaSeparatedString.isEmpty()) {
+        Optional<String> commaSeparatedString = getOpt(String.class, key, args);
+        if (!commaSeparatedString.isPresent() || commaSeparatedString.get().isEmpty()) {
             return Optional.empty();
         }
 
         List<String> stringList = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
-        comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
 
         return Optional.of(stringList);
     }

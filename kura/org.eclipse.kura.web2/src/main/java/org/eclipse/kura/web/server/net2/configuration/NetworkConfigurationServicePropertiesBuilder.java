@@ -131,8 +131,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiMasterSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
         this.properties.setWifiMasterPairwiseCiphers(this.ifname,
-                Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers()));
-        this.properties.setWifiMasterGroupCiphers(this.ifname, Optional.ofNullable(gwtWifiConfig.getGroupCiphers()));
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
+        this.properties.setWifiMasterGroupCiphers(this.ifname,
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getGroupCiphers())));
 
         // wifi master specific properties
         this.properties.setWifiMasterRadioMode(this.ifname,
@@ -156,8 +157,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiInfraSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
         this.properties.setWifiInfraPairwiseCiphers(this.ifname,
-                Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers()));
-        this.properties.setWifiInfraGroupCiphers(this.ifname, Optional.ofNullable(gwtWifiConfig.getGroupCiphers()));
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
+        this.properties.setWifiInfraGroupCiphers(this.ifname,
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getGroupCiphers())));
 
         // wifi infra specific properties
 

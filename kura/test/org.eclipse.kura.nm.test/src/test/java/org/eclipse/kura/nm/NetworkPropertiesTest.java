@@ -94,7 +94,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getShouldReturnStringWithEmptyString() {
+	public void getShouldWorkWithEmptyString() {
 		givenMapWith("Empty-String", "");
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetIsCalledWith("Empty-String", String.class);
@@ -121,7 +121,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getShouldReturnShort() {
+	public void getShouldWorkWithShort() {
 		givenMapWith("testKey1", Short.valueOf((short) 10));
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetIsCalledWith("testKey1", Short.class);
@@ -130,7 +130,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getShouldReturnInt() {
+	public void getShouldWorkWithInteger() {
 		givenMapWith("testKey1", Integer.valueOf(34));
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetIsCalledWith("testKey1", Integer.class);
@@ -139,7 +139,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getShouldReturnLong() {
+	public void getShouldWorkWithLong() {
 		givenMapWith("testKey1", Long.valueOf(23324234));
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetIsCalledWith("testKey1", Long.class);
@@ -148,7 +148,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getOptShouldReturnString() {
+	public void getOptShouldWorkWithString() {
 		givenMapWith("testKey1", "testString1");
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetOptIsCalledWith("testKey1", String.class);
@@ -157,7 +157,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getOptShouldReturnBoolean() {
+	public void getOptShouldWorkWithBoolean() {
 		givenMapWith("testKey1", true);
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetOptIsCalledWith("testKey1", Boolean.class);
@@ -166,7 +166,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getOptShouldReturnShort() {
+	public void getOptShouldWorkWithShort() {
 		givenMapWith("testKey1", (short) 42);
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetOptIsCalledWith("testKey1", Short.class);
@@ -175,7 +175,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getOptShouldReturnInteger() {
+	public void getOptShouldWorkWithInteger() {
 		givenMapWith("testKey1", (int) 42);
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetOptIsCalledWith("testKey1", Integer.class);
@@ -184,7 +184,7 @@ public class NetworkPropertiesTest {
 	}
 
 	@Test
-	public void getOptShouldReturnLong() {
+	public void getOptShouldWorkWithLong() {
 		givenMapWith("testKey1", (long) 4738758);
 		givenNetworkPropertiesBuiltWith(this.properties);
 		whenGetOptIsCalledWith("testKey1", Long.class);

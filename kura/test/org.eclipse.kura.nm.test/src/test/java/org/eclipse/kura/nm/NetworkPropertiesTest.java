@@ -418,15 +418,15 @@ public class NetworkPropertiesTest {
     }
 
     public void thenMapResultEquals(Map<String, Object> result) {
-        assertEquals(this.resultMap, result);
+        assertEquals(result, this.resultMap);
     }
 
     public void thenOptionalResultEquals(Optional<?> result) {
-        assertEquals(this.optResult, result);
+        assertEquals(result, this.optResult);
     }
 
     public void thenStringListResultEquals(List<String> result) {
-        assertEquals(this.stringListResult, result);
+        assertEquals(result, this.stringListResult);
     }
 
     public void thenANullPointerExceptionOccured() {

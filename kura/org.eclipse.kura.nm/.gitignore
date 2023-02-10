@@ -1,0 +1,14 @@
+lib/asm-9.2.jar
+lib/asm-analysis-9.2.jar
+lib/asm-commons-9.2.jar
+lib/asm-tree-9.2.jar
+lib/asm-util-9.2.jar
+lib/dbus-java-3.3.2.jar
+lib/jffi-1.3.9.jar
+lib/jnr-a64asm-1.0.0.jar
+lib/jnr-constants-0.10.3.jar
+lib/jnr-enxio-0.32.13.jar
+lib/jnr-ffi-2.2.11.jar
+lib/jnr-posix-3.1.15.jar
+lib/jnr-unixsocket-0.38.17.jar
+lib/jnr-x86asm-1.0.2.jar

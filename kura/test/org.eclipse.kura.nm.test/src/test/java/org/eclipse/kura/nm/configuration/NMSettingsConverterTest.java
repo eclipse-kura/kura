@@ -13,6 +13,8 @@
 package org.eclipse.kura.nm.configuration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -22,6 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.NMDeviceType;
+import org.eclipse.kura.nm.NetworkProperties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -39,40 +43,48 @@ public class NMSettingsConverterTest {
 
 	NetworkProperties networkProperties;
 
-	@Test(expected = IllegalArgumentException.class)
+	Boolean hasIllegalArgumentExceptionBeenThrown = false;
+	Boolean hasAGenericExecptionBeenThrown = false;
+
+	@Test
 	public void shouldThrowErrorWhenBuildSettingsWithEmptyMap() {
 		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, Optional.empty(), "wlan0",
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowErrorWhenBuildIpv4SettingsWithEmptyMap() {
 		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowErrorWhenBuildIpv6SettingsWithEmptyMap() {
 		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv6SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowErrorWhenBuild80211WirelessSettingsWithEmptyMap() {
 		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void shouldThrowErrorWhenBuild80211WirelessSecuritySettingsWithEmptyMap() {
 		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
 	@Test
@@ -83,6 +95,7 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusEnabledWAN");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -94,6 +107,7 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusEnabledWAN");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 
 	}
@@ -106,6 +120,7 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusEnabledLAN");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -117,6 +132,7 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusEnabledLAN");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -128,6 +144,7 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusUnmanaged");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -138,6 +155,7 @@ public class NMSettingsConverterTest {
 		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "infrastructure", true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -148,6 +166,7 @@ public class NMSettingsConverterTest {
 		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propMode", true, true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalMap();
 	}
 
@@ -164,6 +183,7 @@ public class NMSettingsConverterTest {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, Optional.empty(), "wlan0",
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		thenNoExceptionsHaveBeenThrown();
 		thenMapResultShouldEqualInternalBuildMap();
 	}
 
@@ -218,9 +238,9 @@ public class NMSettingsConverterTest {
 			internalComparatorMap.put("ignore-auto-dns", new Variant<>(true));
 			internalComparatorMap.put("ignore-auto-routes", new Variant<>(true));
 		} else if (netStatus.equals("netIPv4StatusEnabledWAN")) {
-			Optional<List<String>> dnsServers = Optional.of(List.of("1.1.1.1"));
+			Optional<List<String>> dnsServers = Optional.of(Arrays.asList("1.1.1.1"));
 			if (dnsServers.isPresent()) {
-				internalComparatorMap.put("dns", new Variant<>(List.of(new UInt32(16843009)), "au"));
+				internalComparatorMap.put("dns", new Variant<>(Arrays.asList(new UInt32(16843009)), "au"));
 				internalComparatorMap.put("ignore-auto-dns", new Variant<>(true));
 			}
 			Optional<String> gateway = Optional.of("192.168.0.1");
@@ -299,24 +319,53 @@ public class NMSettingsConverterTest {
 
 	public void whenBuildSettingsIsRunWithNetworkPropsAndIfaceString(NetworkProperties properties,
 			Optional<Connection> oldConnection, String iface, NMDeviceType deviceType) {
-		this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
+		try {
+			this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
+		} catch (IllegalArgumentException e) {
+			hasIllegalArgumentExceptionBeenThrown = true;
+		} catch (Exception e) {
+			hasAGenericExecptionBeenThrown = true;
+		}
 	}
 
 	public void whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(NetworkProperties props, String iface) {
-		this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
+		try {
+			this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
+		} catch (IllegalArgumentException e) {
+			hasIllegalArgumentExceptionBeenThrown = true;
+		} catch (Exception e) {
+			hasAGenericExecptionBeenThrown = true;
+		}
 	}
 
 	public void whenBuildIpv6SettingsIsRunWithNetworkPropsAndIfaceString(NetworkProperties props, String iface) {
-		this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
+		try {
+			this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
+		} catch (IllegalArgumentException e) {
+			hasIllegalArgumentExceptionBeenThrown = true;
+		} catch (Exception e) {
+			hasAGenericExecptionBeenThrown = true;
+		}
 	}
 
 	public void whenBuild80211WirelessSettingsIsRunWithNetworkPropsAndIfaceString(NetworkProperties props,
 			String iface) {
-		this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
+		try {
+			this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
+		} catch (IllegalArgumentException e) {
+			hasIllegalArgumentExceptionBeenThrown = true;
+		}
 	}
 
 	public void whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(NetworkProperties props,
 			String iface) {
+		try {
+
+		} catch (IllegalArgumentException e) {
+			hasIllegalArgumentExceptionBeenThrown = true;
+		} catch (Exception e) {
+			hasAGenericExecptionBeenThrown = true;
+		}
 		this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
 	}
 
@@ -328,6 +377,15 @@ public class NMSettingsConverterTest {
 
 	public void thenMapResultShouldEqualInternalBuildMap() {
 		assertEquals(this.internalComparatorAllSettingsMap, this.resultAllSettingsMap);
+	}
+	
+	public void thenIllegalArgumentExceptionHasBeenThrown() {
+		assertTrue(this.hasIllegalArgumentExceptionBeenThrown);
+	}
+	
+	public void thenNoExceptionsHaveBeenThrown() {
+		assertFalse(this.hasIllegalArgumentExceptionBeenThrown);
+		assertFalse(this.hasAGenericExecptionBeenThrown);
 	}
 
 }

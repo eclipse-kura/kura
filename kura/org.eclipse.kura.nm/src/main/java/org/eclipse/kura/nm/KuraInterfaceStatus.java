@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.common;
+package org.eclipse.kura.nm;
 
 public enum KuraInterfaceStatus {
 

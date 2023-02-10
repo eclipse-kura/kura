@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
-import org.eclipse.kura.nm.common.NetworkProperties;
+import org.eclipse.kura.nm.NetworkProperties;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.MockedStatic;

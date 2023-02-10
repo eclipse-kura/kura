@@ -19,7 +19,7 @@ import java.util.Objects;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.status.NetworkStatusService;
-import org.eclipse.kura.nm.common.NMDbusConnector;
+import org.eclipse.kura.nm.NMDbusConnector;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

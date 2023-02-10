@@ -27,7 +27,7 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
-import org.eclipse.kura.nm.common.NMDeviceState;
+import org.eclipse.kura.nm.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;

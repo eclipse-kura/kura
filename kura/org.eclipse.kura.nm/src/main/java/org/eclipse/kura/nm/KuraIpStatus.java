@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.common;
+package org.eclipse.kura.nm;
 
 import java.util.Arrays;
 import java.util.List;

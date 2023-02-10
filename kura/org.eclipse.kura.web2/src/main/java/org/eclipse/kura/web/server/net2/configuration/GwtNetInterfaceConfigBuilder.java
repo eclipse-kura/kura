@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -154,7 +156,11 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiMasterDriver(this.ifname));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiMasterIgnoreSsid(this.ifname));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiMasterPassphrase(this.ifname).getPassword()));
-        gwtWifiConfig.setChannels(this.properties.getWifiMasterChannel(this.ifname));
+        
+        List<Integer> channel = new ArrayList<>();
+        channel.add(this.properties.getWifiMasterChannel(this.ifname));
+        gwtWifiConfig.setChannels(channel);
+
         gwtWifiConfig.setWirelessMode(
                 EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMasterMode(this.ifname)));
         gwtWifiConfig.setSecurity(
@@ -188,7 +194,11 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiInfraDriver(this.ifname));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiInfraIgnoreSsid(this.ifname));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiInfraPassphrase(this.ifname).getPassword()));
-        gwtWifiConfig.setChannels(this.properties.getWifiInfraChannel(this.ifname));
+
+        List<Integer> channel = new ArrayList<>();
+        channel.add(this.properties.getWifiInfraChannel(this.ifname));
+        gwtWifiConfig.setChannels(channel);
+
         gwtWifiConfig
                 .setWirelessMode(EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiInfraMode(this.ifname)));
         gwtWifiConfig

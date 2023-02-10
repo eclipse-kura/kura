@@ -298,6 +298,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKeyNull", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptStringListIsCalledWith("testKeyNull");
+        thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.empty());
     }
 

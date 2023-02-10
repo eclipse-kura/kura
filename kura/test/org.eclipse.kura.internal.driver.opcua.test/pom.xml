@@ -30,6 +30,7 @@
 		<org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
 		<io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<io.netty.version>4.1.87.Final</io.netty.version>
 	</properties>
 
 	<dependencies>
@@ -156,6 +157,11 @@
 									<artifactId>stack-server</artifactId>
 									<version>${org.eclipse.milo.version}</version>
 								</artifactItem>
+								<artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-all</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
 							</artifactItems>
 						</configuration>
 						<goals>

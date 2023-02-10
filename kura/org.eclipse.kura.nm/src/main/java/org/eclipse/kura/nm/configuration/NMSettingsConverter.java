@@ -260,7 +260,7 @@ public class NMSettingsConverter {
 
         map.put("CCMP", Arrays.asList("ccmp"));
         map.put("TKIP", Arrays.asList("tkip"));
-        map.put("CCMP TKIP", Arrays.asList("tkip", "ccmp"));
+        map.put("CCMP_TKIP", Arrays.asList("tkip", "ccmp"));
 
         return map;
     }

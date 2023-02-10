@@ -18,7 +18,7 @@ public enum NMDeviceEnable {
     UNMANAGED,
     ENABLED;
 
-    public static NMDeviceEnable fromKuraInterfaceStatus(KuraIpStatus ip4Status, KuraIpStatus ip6Status) {
+    public static NMDeviceEnable fromKuraIpStatus(KuraIpStatus ip4Status, KuraIpStatus ip6Status) {
         Boolean ip4Enabled = KuraIpStatus.isEnabled(ip4Status);
         boolean ip4Disabled = ip4Status == KuraIpStatus.DISABLED;
         boolean ip4Unmanaged = ip4Status == KuraIpStatus.UNMANAGED;

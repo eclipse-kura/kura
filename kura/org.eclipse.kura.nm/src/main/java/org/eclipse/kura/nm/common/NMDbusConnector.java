@@ -50,9 +50,9 @@ public class NMDbusConnector {
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays
             .asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI);
-    private static final List<KuraInterfaceStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(
-            KuraInterfaceStatus.DISABLED, KuraInterfaceStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLEDWAN,
-            KuraInterfaceStatus.UNMANAGED);
+    private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(
+            KuraIpStatus.DISABLED, KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN,
+            KuraIpStatus.UNMANAGED);
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
@@ -198,10 +198,10 @@ public class NMDbusConnector {
             Device device = getDeviceByIpIface(iface);
             NMDeviceType deviceType = getDeviceType(device);
 
-            KuraInterfaceStatus ip4Status = KuraInterfaceStatus
+            KuraIpStatus ip4Status = KuraIpStatus
                     .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
-            KuraInterfaceStatus ip6Status = ip4Status == KuraInterfaceStatus.UNMANAGED ? KuraInterfaceStatus.UNMANAGED
-                    : KuraInterfaceStatus.DISABLED; // Temporary solution while we wait to add ipv6 support.
+            KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED
+                    : KuraIpStatus.DISABLED; // Temporary solution while we wait to add ipv6 support.
             NMDeviceEnable deviceStatus = NMDeviceEnable.fromKuraInterfaceStatus(ip4Status, ip6Status);
 
             if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)

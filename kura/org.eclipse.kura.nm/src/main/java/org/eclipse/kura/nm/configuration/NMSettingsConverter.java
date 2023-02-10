@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.nm.common.KuraInterfaceStatus;
+import org.eclipse.kura.nm.common.KuraIpStatus;
 import org.eclipse.kura.nm.common.NMDeviceType;
 import org.eclipse.kura.nm.common.NetworkProperties;
 import org.freedesktop.dbus.types.UInt32;
@@ -74,7 +74,7 @@ public class NMSettingsConverter {
 
         Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", iface);
 
-        KuraInterfaceStatus ip4Status = KuraInterfaceStatus
+        KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", iface));
 
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
@@ -93,10 +93,10 @@ public class NMSettingsConverter {
             settings.put("method", new Variant<>("auto"));
         }
 
-        if (ip4Status.equals(KuraInterfaceStatus.ENABLEDLAN)) {
+        if (ip4Status.equals(KuraIpStatus.ENABLEDLAN)) {
             settings.put("ignore-auto-dns", new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
-        } else if (ip4Status.equals(KuraInterfaceStatus.ENABLEDWAN)) {
+        } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", iface);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));

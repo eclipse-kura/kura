@@ -15,7 +15,7 @@ package org.eclipse.kura.nm.common;
 import java.util.Arrays;
 import java.util.List;
 
-public enum KuraInterfaceStatus {
+public enum KuraIpStatus {
 
     DISABLED,
     UNMANAGED,
@@ -24,32 +24,32 @@ public enum KuraInterfaceStatus {
     ENABLEDWAN,
     UNKNOWN;
 
-    private static final List<KuraInterfaceStatus> ENABLED_STATUS = Arrays.asList(KuraInterfaceStatus.ENABLEDLAN,
-            KuraInterfaceStatus.ENABLEDWAN, KuraInterfaceStatus.L2ONLY);
+    private static final List<KuraIpStatus> ENABLED_STATUS = Arrays.asList(KuraIpStatus.ENABLEDLAN,
+            KuraIpStatus.ENABLEDWAN, KuraIpStatus.L2ONLY);
 
-    public static Boolean isEnabled(KuraInterfaceStatus status) {
+    public static Boolean isEnabled(KuraIpStatus status) {
         return ENABLED_STATUS.contains(status);
     }
 
-    public static KuraInterfaceStatus fromString(String status) {
+    public static KuraIpStatus fromString(String status) {
         switch (status) {
         case "netIPv4StatusDisabled":
         case "netIPv6StatusDisabled":
-            return KuraInterfaceStatus.DISABLED;
+            return KuraIpStatus.DISABLED;
         case "netIPv4StatusUnmanaged":
         case "netIPv6StatusUnmanaged":
-            return KuraInterfaceStatus.UNMANAGED;
+            return KuraIpStatus.UNMANAGED;
         case "netIPv4StatusL2Only":
         case "netIPv6StatusL2Only":
-            return KuraInterfaceStatus.L2ONLY;
+            return KuraIpStatus.L2ONLY;
         case "netIPv4StatusEnabledLAN":
         case "netIPv6StatusEnabledLAN":
-            return KuraInterfaceStatus.ENABLEDLAN;
+            return KuraIpStatus.ENABLEDLAN;
         case "netIPv4StatusEnabledWAN":
         case "netIPv6StatusEnabledWAN":
-            return KuraInterfaceStatus.ENABLEDWAN;
+            return KuraIpStatus.ENABLEDWAN;
         default:
-            return KuraInterfaceStatus.UNKNOWN;
+            return KuraIpStatus.UNKNOWN;
 
         }
 

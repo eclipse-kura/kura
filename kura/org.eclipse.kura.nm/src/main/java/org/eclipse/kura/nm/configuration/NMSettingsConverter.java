@@ -143,7 +143,7 @@ public class NMSettingsConverter {
             settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
         }
         if (hidden.isPresent()) {
-            settings.put("hidden", new Variant<>(hidden));
+            settings.put("hidden", new Variant<>(hidden.get()));
         }
 
         return settings;

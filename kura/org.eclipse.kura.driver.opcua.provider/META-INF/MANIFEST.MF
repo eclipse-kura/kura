@@ -31,7 +31,6 @@ Service-Component: OSGI-INF/*.xml
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ClassPath: .,
  lib/guava.jar,
- lib/jsr305.jar,
  lib/sdk-client.jar,
  lib/sdk-core.jar,
  lib/stack-client.jar,

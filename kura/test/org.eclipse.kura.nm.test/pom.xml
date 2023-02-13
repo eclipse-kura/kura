@@ -31,6 +31,14 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
+    <dependencies>
+		<dependency>
+			<groupId>com.github.hypfvieh</groupId>
+			<artifactId>dbus-java</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+	</dependencies>
+
     <build>
         <plugins>
 			<plugin>

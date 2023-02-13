@@ -86,7 +86,57 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
-                                    <artifactId>netty-all</artifactId>
+                                    <artifactId>netty-codec</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-common</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-handler</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-buffer</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-resolver</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-unix-common</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-epoll</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-epoll</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-kqueue</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-kqueue</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
                                 <artifactItem>

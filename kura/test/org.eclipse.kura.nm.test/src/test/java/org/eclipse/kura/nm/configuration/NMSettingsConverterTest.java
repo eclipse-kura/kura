@@ -471,16 +471,16 @@ public class NMSettingsConverterTest {
 				new Password("test"));
 		internetNetworkPropertiesInstanciationMap.put(
 				String.format("net.interface.%s.config.wifi.%s.securityType", inter, propMode.toLowerCase()),
-				"SECURITY_WPA_WPA2"); // wpa
+				"SECURITY_WPA_WPA2");
 		if (groupEnabled) {
 			internetNetworkPropertiesInstanciationMap.put(
 					String.format("net.interface.%s.config.wifi.%s.groupCiphers", inter, propMode.toLowerCase()),
-					"CCMP"); // option
+					"CCMP");
 		}
 		if (ciphersEnabled) {
 			internetNetworkPropertiesInstanciationMap.put(
 					String.format("net.interface.%s.config.wifi.%s.pairwiseCiphers", inter, propMode.toLowerCase()),
-					"CCMP"); // ccmp
+					"CCMP");
 		}
 	}
 
@@ -594,7 +594,7 @@ public class NMSettingsConverterTest {
 
 		assertEquals(internalSsid, resultSsid);
 
-		// Remove ssid fields from Maps before comparison
+		// Remove SSID fields from Maps before comparison
 		this.internalComparatorMap.put("ssid", new Variant<>(""));
 		this.resultMap.put("ssid", new Variant<>(""));
 
@@ -613,7 +613,7 @@ public class NMSettingsConverterTest {
 			
 			assertEquals(internalSsid, resultSsid);
 		}
-		// Remove ssid fields from Maps before comparison
+		// Remove SSID fields from Maps before comparison
 		
 		
 		assertEquals(this.internalComparatorAllSettingsMap, this.resultAllSettingsMap);

@@ -38,4 +38,5 @@ Bundle-ClassPath: .,
  lib/netty-channel-fsm.jar,
  lib/strict-machine.jar,
  lib/netty-all.jar,
- lib/failureaccess.jar
+ lib/failureaccess.jar,
+ lib/bcprov-jdk18on.jar

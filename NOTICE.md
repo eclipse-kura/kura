@@ -212,6 +212,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.ow2.asm/asm-util/9.2, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/org.ow2.asm/asm/9.2, BSD-3-Clause, approved, CQ23635
 * maven/mavencentral/com.google.guava/guava/31.0-jre, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.google.guava/failureaccess/1.0, Apache-2.0, approved, CQ22654
 
 ### Additional Dependencies
 

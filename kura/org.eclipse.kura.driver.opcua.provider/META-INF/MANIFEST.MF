@@ -35,4 +35,5 @@ Bundle-ClassPath: .,
  lib/sdk-core.jar,
  lib/stack-client.jar,
  lib/stack-core.jar,
- lib/netty-all.jar
+ lib/netty-all.jar,
+ lib/failureaccess.jar

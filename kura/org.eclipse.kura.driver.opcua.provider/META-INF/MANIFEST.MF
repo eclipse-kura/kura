@@ -35,5 +35,4 @@ Bundle-ClassPath: .,
  lib/sdk-core.jar,
  lib/stack-client.jar,
  lib/stack-core.jar,
- lib/bsd-parser-gson.jar,
  lib/netty-all.jar

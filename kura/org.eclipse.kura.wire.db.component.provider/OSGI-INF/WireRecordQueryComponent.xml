@@ -41,6 +41,6 @@
            policy="dynamic"
            bind="bindQueryableWireRecordStoreProvider"
            unbind="unbindQueryableWireRecordStoreProvider"
-           cardinality="1..1"
+           cardinality="0..1"
            interface="org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider"/>
 </scr:component>

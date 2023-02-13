@@ -54,6 +54,20 @@ public class NetworkConfigurationServiceCommonTest {
         thenComponentDefinitionHasCorrectProperties();
     }
 
+    @Test
+    public void componentDefinitionShouldHaveWifiPropertiesTest() throws KuraException {
+        givenFullProperties();
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasWifiProperties();
+    }
+
+    @Test
+    public void componentDefinitionShouldHaveModemPropertiesTest() throws KuraException {
+        givenFullProperties();
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasModemProperties();
+    }
+
     private void givenPropertiesWithoutInterfaces() {
         this.properties.clear();
         this.properties.put("net.interfaces", "");
@@ -183,7 +197,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(71, this.ads.size());
+        assertEquals(110, this.ads.size());
     }
 
     private void thenComponentDefinitionHasCorrectProperties() {
@@ -470,6 +484,14 @@ public class NetworkConfigurationServiceCommonTest {
             }
         }
         assertEquals(40, adsConfigured);
+    }
+
+    private void thenComponentDefinitionHasWifiProperties() {
+        assertEquals(39, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
+    }
+
+    private void thenComponentDefinitionHasModemProperties() {
+        assertEquals(28, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
 
 }

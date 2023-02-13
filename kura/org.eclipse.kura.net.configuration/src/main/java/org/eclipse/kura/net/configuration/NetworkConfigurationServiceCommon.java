@@ -73,15 +73,36 @@ public class NetworkConfigurationServiceCommon {
                     continue;
                 }
 
-                if (type.get() == NetInterfaceType.LOOPBACK) {
-                    getLoopbackDefinition(tocd, ifaceName);
-                } else if (type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI) {
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
-                    getInterfaceCommonDefinition(tocd, ifaceName);
-                    getDnsDefinition(tocd, ifaceName);
-                    getWifiDefinition(type.get(), tocd, ifaceName);
+                switch (type.get()) {
+                    case LOOPBACK:
+                        getLoopbackDefinition(tocd, ifaceName);
+                        break;
+                    case ETHERNET:
+                        if (usbNetDevices.isPresent()) {
+                            getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
+                        }
+                        getInterfaceCommonDefinition(tocd, ifaceName);
+                        getDnsDefinition(tocd, ifaceName);
+                        getDhcpServerDefinition(tocd, ifaceName);
+                        break;
+                    case WIFI:
+                        if (usbNetDevices.isPresent()) {
+                            getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
+                        }
+                        getInterfaceCommonDefinition(tocd, ifaceName);
+                        getDnsDefinition(tocd, ifaceName);
+                        getDhcpServerDefinition(tocd, ifaceName);
+                        getWifiDefinition(tocd, ifaceName);
+                        break;
+                    case MODEM:
+                        if (usbNetDevices.isPresent()) {
+                            getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
+                        }
+                        getInterfaceCommonDefinition(tocd, ifaceName);
+                        getDnsDefinition(tocd, ifaceName);
+                        getModemDefinition(tocd, ifaceName);
+                        break;
+                    default:
                 }
             }
         } catch (Exception e) {
@@ -91,13 +112,84 @@ public class NetworkConfigurationServiceCommon {
         return tocd;
     }
 
-    private static void getWifiDefinition(NetInterfaceType type, Tocd tocd,
-            String ifaceName) {
-        if (type == NetInterfaceType.WIFI) {
-            getWifiCommonDefinition(tocd, ifaceName);
-            getWifiInfraDefinition(tocd, ifaceName);
-            getWifiMasterDefinition(tocd, ifaceName);
-        }
+    private static void getModemDefinition(Tocd tocd, String ifaceName) {
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.enabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_ENABLED, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.idle", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_IDLE, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.username", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_USERNAME, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.password", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_PASSWORD, Tscalar.PASSWORD));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.pdpType", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_PDP_TYPE, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.maxFail", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_MAX_FAIL, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.authType", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_AUTH_TYPE, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.lpcEchoInterval", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_LPC_ECHO_INTERVAL, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.activeFilter", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_ACTIVE_FILTER, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.lpcEchoFailure", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_LPC_ECHO_FAILURE, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.diversityEnabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_DIVERSITY_ENABLED, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.resetTimeout", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_RESET_TIMEOUT, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.gpsEnabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_GPS_ENABLED, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.persist", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_PERSIST, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.apn", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_APN, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.dialString", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_DIAL_STRING, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.holdoff", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_HOLDOFF, Tscalar.INTEGER));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.pppNum", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_PPP_NUM, Tscalar.STRING));
+    }
+
+    private static void getWifiDefinition(Tocd tocd, String ifaceName) {
+        getWifiCommonDefinition(tocd, ifaceName);
+        getWifiInfraDefinition(tocd, ifaceName);
+        getWifiMasterDefinition(tocd, ifaceName);
     }
 
     private static void getWifiMasterDefinition(Tocd tocd, String ifaceName) {
@@ -109,10 +201,6 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.master.broadcast", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_BROADCAST_ENABLED, Tscalar.BOOLEAN));
-
-        tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.wifi.master.hardwareMode", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_HARDWARE_MODE, Tscalar.STRING));
 
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.master.radioMode", ifaceName),
@@ -129,6 +217,18 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.master.channel", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_CHANNEL, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.ignoreSSID", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_IGNORE_SSID, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.pairwiseCiphers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_PAIRWISE_CIPHERS, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.master.groupCiphers", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_MASTER_GROUP_CIPHERS, Tscalar.STRING));
     }
 
     private static void getWifiInfraDefinition(Tocd tocd, String ifaceName) {
@@ -136,10 +236,6 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.ssid", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_SSID, Tscalar.STRING));
-
-        tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.wifi.infra.hardwareMode", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_HARDWARE_MODE, Tscalar.STRING));
 
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.wifi.infra.radioMode", ifaceName),
@@ -165,6 +261,17 @@ public class NetworkConfigurationServiceCommon {
                 String.format(PREFIX + "%s.config.wifi.infra.channel", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_CHANNEL, Tscalar.STRING));
 
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.bgscan", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_BGSCAN, Tscalar.STRING));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.pingAccessPoint", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_PING_AP, Tscalar.BOOLEAN));
+
+        tocd.addAD(buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.wifi.infra.ignoreSSID", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_IGNORE_SSID, Tscalar.BOOLEAN));
     }
 
     private static void getWifiCommonDefinition(Tocd tocd, String ifaceName) {
@@ -181,16 +288,19 @@ public class NetworkConfigurationServiceCommon {
     private static void getDnsDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
         // DNS and WINS
-        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.dnsServers", ifaceName),
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.dnsServers", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_DNS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);
 
-        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.winsServers", ifaceName),
+        tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.winsServers", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WINS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);
 
+    }
+
+    private static void getDhcpServerDefinition(Tocd tocd, String ifaceName) {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.dhcpServer4.enabled", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_DHCP_SERVER_ENABLED, Tscalar.BOOLEAN));
@@ -226,6 +336,7 @@ public class NetworkConfigurationServiceCommon {
 
     private static void getInterfaceCommonDefinition(Tocd tocd, String ifaceName) {
         Tad tad;
+        addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
 
@@ -241,20 +352,32 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.ip4.gateway", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY, Tscalar.STRING));
+        addIp4StatusDefinition(tocd, ifaceName);
     }
 
     private static void getLoopbackDefinition(Tocd tocd, String ifaceName) {
+        addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
-        addDriverDefinition(tocd, ifaceName);
         addIp4AddressDefinition(tocd, ifaceName);
         addIp4PrefixDefinition(tocd, ifaceName);
+        addIp4StatusDefinition(tocd, ifaceName);
     }
 
-    private static void addDriverDefinition(Tocd tocd, String ifaceName) {
-        tocd.addAD(buildAttributeDefinition(
-                String.format(PREFIX + "%s.config.driver", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_DRIVER, Tscalar.STRING));
+    private static void addTypeDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.type", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_TYPE, Tscalar.STRING);
+        tad.setRequired(true);
+        tocd.addAD(tad);
+    }
+
+    private static void addIp4StatusDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(
+                String.format(PREFIX + "%s.config.ip4.status", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_STATUS, Tscalar.STRING);
+        tad.setRequired(true);
+        tocd.addAD(tad);
     }
 
     private static void addAutoconnectDefinition(Tocd tocd, String ifaceName) {

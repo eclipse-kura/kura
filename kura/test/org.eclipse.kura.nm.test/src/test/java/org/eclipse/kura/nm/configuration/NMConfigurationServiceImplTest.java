@@ -394,7 +394,7 @@ public class NMConfigurationServiceImplTest {
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertEquals(105, this.retrievedProperties.size());
         assertNotNull(this.ads);
-        assertEquals(71, this.ads.size());
+        assertEquals(110, this.ads.size());
     }
 
     private void thenComponentDefinitionHasCorrectProperties() {

@@ -91,6 +91,7 @@ public class GwtNetInterfaceConfigBuilder {
 
     private void setIpv4Properties() {
         this.gwtConfig.setStatus(EnumsParser.getGwtNetIfStatus(this.properties.getIp4Status(this.ifname)));
+        this.gwtConfig.setWanPriority(this.properties.getIp4WanPriority(ifname));
         this.gwtConfig.setIpAddress(this.properties.getIp4Address(this.ifname));
         this.gwtConfig.setSubnetMask(this.properties.getIp4Netmask(this.ifname));
         this.gwtConfig.setGateway(this.properties.getIp4Gateway(this.ifname));

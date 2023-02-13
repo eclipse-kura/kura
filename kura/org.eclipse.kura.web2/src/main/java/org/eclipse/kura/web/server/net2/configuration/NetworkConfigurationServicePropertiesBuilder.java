@@ -60,6 +60,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private void setIpv4Properties() {
         this.properties.setIp4Status(this.ifname,
                 EnumsParser.getNetInterfaceStatus(Optional.ofNullable(this.gwtConfig.getStatus())));
+        this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
         this.properties.setIp4Address(this.ifname, this.gwtConfig.getIpAddress());
         this.properties.setIp4Netmask(this.ifname, this.gwtConfig.getSubnetMask());
         this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());

@@ -14,7 +14,6 @@ package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -34,8 +33,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implements GwtNetworkService {
 
     private static final long serialVersionUID = -4188750359099902616L;
-
-    private static Optional<Boolean> isNet2 = Optional.empty();
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
@@ -222,17 +219,12 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         }
     }
 
-    private static boolean isNet2() {
-        if (isNet2.isPresent()) {
-            return isNet2.get();
-        }
-
+    @Override
+    public boolean isNet2() {
         try {
             ServiceLocator.getInstance().getService(NetworkAdminService.class);
-            isNet2 = Optional.of(false);
             return false;
         } catch (GwtKuraException networkAdminServiceNotFound) {
-            isNet2 = Optional.of(true);
             return true;
         }
     }

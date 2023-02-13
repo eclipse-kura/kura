@@ -44,6 +44,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("status", status);
     }
 
+    public int getWanPriority() {
+        return get("priority");
+    }
+
+    public void setWanPriority(int priority) {
+        set("priority", priority);
+    }
+
     public GwtNetIfConfigMode getConfigModeEnum() {
         return GwtNetIfConfigMode.valueOf(getConfigMode());
     }

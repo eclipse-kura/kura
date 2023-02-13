@@ -55,6 +55,14 @@
                                     <b:ListBox b:id="status" ui:field="status" />
                                 </g:FlowPanel>
                             </b:FormGroup>
+                            
+                            <b:FormGroup>
+                                <b:FormLabel for="priority" ui:field="labelPriority"></b:FormLabel>
+                                <util:HelpButton ui:field="priorityHelp" />
+                                <g:FlowPanel>
+                                    <b:IntegerBox b:id="priority" ui:field="priority" />
+                                </g:FlowPanel>
+                            </b:FormGroup>
 
                             <b:FormGroup>
                                 <b:FormLabel for="configure" ui:field="labelConfigure"></b:FormLabel>

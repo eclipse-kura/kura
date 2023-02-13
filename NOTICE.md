@@ -136,7 +136,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.milo/bsd-parser-core/0.2.4, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/bsd-parser-gson/0.2.4, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/sdk-client/0.2.4, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/sdk-core/0.2.4, EPL-2.0, approved, iot.milo

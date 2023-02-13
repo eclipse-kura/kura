@@ -180,7 +180,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.platform/org.eclipse.osgi/3.16.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
 * maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
-* maven/mavencentral/org.jooq/jool/0.9.10, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
 * maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979

@@ -40,6 +40,7 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
+import org.eclipse.kura.nm.NMDbusConnector;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -291,8 +292,10 @@ public class NMConfigurationServiceImplTest {
     private void givenNetworkConfigurationService() throws KuraException {
         ComponentContext componentContextMock = mock(ComponentContext.class);
         BundleContext bundleCtxMock = mock(BundleContext.class);
+        NMDbusConnector nmDbusConnectorMock = mock(NMDbusConnector.class);
         when(componentContextMock.getBundleContext()).thenReturn(bundleCtxMock);
-        this.networkConfigurationService = new NMConfigurationServiceImpl() {
+        this.networkConfigurationService = new NMConfigurationServiceImpl(nmDbusConnectorMock) {
+
             @Override
             protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
                 return guessNetworkType(interfaceName);
@@ -699,8 +702,8 @@ public class NMConfigurationServiceImplTest {
         for (String propertyName : this.event.getPropertyNames()) {
             assertTrue(propertyName.startsWith("net.interface.1-4") || propertyName.startsWith("net.interface.eno1")
                     || propertyName.startsWith("net.interface.wlp1s0") || propertyName.startsWith("net.interface.lo")
-                    || propertyName.startsWith("net.interface.enp5s0")
-                    || propertyName.equals("net.interfaces") || propertyName.equals("event.topics"));
+                    || propertyName.startsWith("net.interface.enp5s0") || propertyName.equals("net.interfaces")
+                    || propertyName.equals("event.topics"));
         }
     }
 

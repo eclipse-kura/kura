@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.internal.driver.opcua;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,14 +37,16 @@ import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.milo.opcua.sdk.client.AddressSpace;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
-import org.eclipse.milo.opcua.sdk.client.api.AddressSpace;
+import org.eclipse.milo.opcua.stack.core.NamespaceTable;
+import org.eclipse.milo.opcua.stack.core.channel.EncodingLimits;
+import org.eclipse.milo.opcua.stack.core.serialization.SerializationContext;
+import org.eclipse.milo.opcua.stack.core.types.DataTypeManager;
+import org.eclipse.milo.opcua.stack.core.types.DefaultDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
-import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.IdType;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
 import org.junit.Test;
@@ -152,7 +153,7 @@ public class OpcUaDriverTest {
         // needed for runSafe()
         TestUtil.setFieldValue(svc, "options", options);
 
-        OpcUaClient clientMock = mock(OpcUaClient.class);
+        OpcUaClient clientMock = createClientMock();
 
         ConnectionManager manager = new ConnectionManager(clientMock, options, (a, b) -> {
         }, new ListenerRegistrationRegistry(), new ListenerRegistrationRegistry());
@@ -161,16 +162,6 @@ public class OpcUaDriverTest {
 
         AddressSpace asMock = mock(AddressSpace.class);
         when(clientMock.getAddressSpace()).thenReturn(asMock);
-
-        doAnswer(invocation -> {
-            NodeId nodeId = invocation.getArgument(0, NodeId.class);
-
-            assertEquals(1, ((UInteger) nodeId.getIdentifier()).intValue());
-            assertEquals(1, nodeId.getNamespaceIndex().intValue());
-            assertEquals(IdType.Numeric, nodeId.getType());
-
-            return null; // cause exception later on
-        }).when(asMock).createVariableNode(any());
 
         List<ChannelRecord> records = new ArrayList<>();
         ChannelRecord record = ChannelRecord.createReadRecord("ch1", DataType.BOOLEAN);
@@ -187,10 +178,36 @@ public class OpcUaDriverTest {
         assertEquals(ChannelFlag.FAILURE, record.getChannelStatus().getChannelFlag());
     }
 
+    private OpcUaClient createClientMock() {
+        NamespaceTable namespaceTable = new NamespaceTable();
+        DataTypeManager dataTypeManager = DefaultDataTypeManager.createAndInitialize(namespaceTable);
+
+        OpcUaClient clientMock = mock(OpcUaClient.class);
+        Mockito.when(clientMock.getStaticSerializationContext()).thenReturn(new SerializationContext() {
+
+            @Override
+            public NamespaceTable getNamespaceTable() {
+                return namespaceTable;
+            }
+
+            @Override
+            public EncodingLimits getEncodingLimits() {
+                return EncodingLimits.DEFAULT;
+            }
+
+            @Override
+            public DataTypeManager getDataTypeManager() {
+                return dataTypeManager;
+            }
+        });
+        return clientMock;
+    }
+
     @Test
     public void testReadInvalidReadResult() throws ConnectionException, NoSuchFieldException, InterruptedException,
             ExecutionException, TimeoutException {
-        // test read where the successful read result renders empty typed value due to format exception
+        // test read where the successful read result renders empty typed value due to
+        // format exception
 
         OpcUaDriver svc = new OpcUaDriver();
 
@@ -248,7 +265,7 @@ public class OpcUaDriverTest {
         // needed for runSafe()
         TestUtil.setFieldValue(svc, "options", options);
 
-        OpcUaClient clientMock = mock(OpcUaClient.class);
+        OpcUaClient clientMock = createClientMock();
 
         ConnectionManager manager = new ConnectionManager(clientMock, options, (a, b) -> {
         }, new ListenerRegistrationRegistry(), new ListenerRegistrationRegistry());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ package org.eclipse.kura.internal.driver.opcua;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -32,9 +31,7 @@ import org.eclipse.kura.internal.driver.opcua.request.TreeListenParams;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
-import org.eclipse.milo.opcua.stack.core.types.structured.ReferenceDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,28 +74,19 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
 
         final List<ListenRequest> requests = new ArrayList<>();
 
-        final TreeVisit visit = visitSubtree(subtreeParams, (path, n) -> {
-            if (n.getNodeClass() != NodeClass.Variable) {
-                return;
-            }
-
-            final Optional<NodeId> nodeId = n.getNodeId().local();
+        final TreeVisit visit = visitSubtree(subtreeParams, (path, nodeId) -> {
 
             if (logger.isTraceEnabled()) {
                 logger.trace("found variable node: {} {}", path, nodeId);
             }
 
-            if (!nodeId.isPresent()) {
-                return;
-            }
-
-            ReadValueId readValueId = new ReadValueId(nodeId.get(), subtreeParams.getReadValueId().getAttributeId(),
+            final ReadValueId readValueId = new ReadValueId(nodeId, subtreeParams.getReadValueId().getAttributeId(),
                     null, null);
 
             final ListenParams nodeParams = new SubtreeNodeListenParams(readValueId, subtreeParams);
 
             final String channelName = this.channelNameFormat == ChannelNameFormat.BROWSE_PATH ? path
-                    : nodeId.get().toParseableString();
+                    : nodeId.toParseableString();
 
             requests.add(new ListenRequest(nodeParams, ChannelRecord.createReadRecord(channelName, DataType.STRING),
                     listener));
@@ -164,7 +152,7 @@ public class SubtreeSubscriptionManager implements ListenerRegistrationRegistry.
     }
 
     private TreeVisit visitSubtree(final SingleNodeListenParams rootParams,
-            final BiConsumer<String, ReferenceDescription> visitor) {
+            final BiConsumer<String, NodeId> visitor) {
         final TreeVisit visit = new TreeVisit(this.client, rootParams.getReadValueId().getNodeId(), visitor);
 
         visit.run();

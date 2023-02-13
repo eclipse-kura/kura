@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,11 +22,13 @@ import java.util.function.BiConsumer;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NamespaceTable;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.BrowseDirection;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.BrowseResultMask;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
@@ -43,14 +45,16 @@ class TreeVisit {
         CANCELLED
     }
 
+    private static final NamespaceTable NAMESPACE_TABLE = new NamespaceTable();
+
     private static final Logger logger = LoggerFactory.getLogger(TreeVisit.class);
     private static final int BROWSE_RESULT_MASK = BrowseResultMask.BrowseName.getValue()
             | BrowseResultMask.TypeDefinition.getValue() | BrowseResultMask.NodeClass.getValue();
-    private static final ExpandedNodeId FOLDER_TYPE_EXPANDED_NODEID = new ExpandedNodeId(Identifiers.FolderType,
-            "http://opcfoundation.org/UA/", 0);
+    private static final ExpandedNodeId FOLDER_TYPE_EXPANDED_NODEID = new ExpandedNodeId(UShort.valueOf(0),
+            "http://opcfoundation.org/UA/", (UInteger) Identifiers.FolderType.getIdentifier());
 
     private final NodeId rootId;
-    private final BiConsumer<String, ReferenceDescription> visitor;
+    private final BiConsumer<String, NodeId> visitor;
     private final OpcUaClient client;
 
     private CompletableFuture<Void> future;
@@ -58,7 +62,7 @@ class TreeVisit {
     private volatile State state = State.PENDING;
 
     public TreeVisit(final OpcUaClient client, final NodeId rootId,
-            final BiConsumer<String, ReferenceDescription> visitor) {
+            final BiConsumer<String, NodeId> visitor) {
         this.rootId = rootId;
         this.visitor = visitor;
         this.client = client;
@@ -78,15 +82,7 @@ class TreeVisit {
                 return CompletableFuture.completedFuture(null);
             }
 
-            final String path = rootPath + '/' + ref.getBrowseName().getName();
-
-            this.visitor.accept(path, ref);
-
-            final Optional<NodeId> nodeId = ref.getNodeId().local();
-
-            if (nodeId.isPresent() && FOLDER_TYPE_EXPANDED_NODEID.equals(ref.getTypeDefinition())) {
-                childrenVisits.add(visitSubtree(nodeId.get(), path));
-            }
+            processRef(rootPath, childrenVisits, ref);
         }
 
         if (continuationPoint.isNotNull()) {
@@ -100,6 +96,25 @@ class TreeVisit {
                 logger.debug("finished to visit {}", rootPath);
             }
             return CompletableFuture.allOf(childrenVisits.toArray(new CompletableFuture<?>[childrenVisits.size()]));
+        }
+    }
+
+    private void processRef(final String rootPath, final List<CompletableFuture<Void>> childrenVisits,
+            final ReferenceDescription ref) {
+        final String path = rootPath + '/' + ref.getBrowseName().getName();
+
+        final Optional<NodeId> nodeId = ref.getNodeId().toNodeId(NAMESPACE_TABLE);
+
+        if (!nodeId.isPresent()) {
+            return;
+        }
+
+        if (ref.getNodeClass() == NodeClass.Variable) {
+            this.visitor.accept(path, nodeId.get());
+        }
+
+        if (FOLDER_TYPE_EXPANDED_NODEID.equals(ref.getTypeDefinition())) {
+            childrenVisits.add(visitSubtree(nodeId.get(), path));
         }
     }
 

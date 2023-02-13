@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -47,17 +49,23 @@ import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfigBuilder;
 import org.eclipse.milo.opcua.stack.core.UaException;
-import org.eclipse.milo.opcua.stack.core.application.CertificateManager;
-import org.eclipse.milo.opcua.stack.core.application.CertificateValidator;
-import org.eclipse.milo.opcua.stack.core.application.DefaultCertificateManager;
-import org.eclipse.milo.opcua.stack.core.application.DefaultCertificateValidator;
+import org.eclipse.milo.opcua.stack.core.security.DefaultTrustListManager;
+import org.eclipse.milo.opcua.stack.core.security.TrustListManager;
+import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
+import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateValidator;
+import org.eclipse.milo.opcua.stack.server.security.ServerCertificateValidator;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpcUaDriverTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpcUaDriverTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
@@ -69,7 +77,7 @@ public class OpcUaDriverTest {
     private static OpcUaServer server;
 
     @BeforeClass
-    public static void setup() throws KuraException, UaException {
+    public static void setup() throws KuraException, UaException, IOException {
         startServer();
 
         try {
@@ -81,20 +89,29 @@ public class OpcUaDriverTest {
         }
     }
 
-    private static void startServer() throws UaException {
-        CertificateManager certificateManager = new DefaultCertificateManager();
-        CertificateValidator certificateValidator = new DefaultCertificateValidator(new File("/tmp"));
-        List<String> bindAddresses = new ArrayList<>();
-        bindAddresses.add("localhost");
-        List<String> endpointAddresses = new ArrayList<>();
-        endpointAddresses.add("localhost");
-        OpcUaServerConfig config = new OpcUaServerConfigBuilder().setBindPort(12685).setApplicationUri("opcsvr")
-                .setBindAddresses(bindAddresses).setEndpointAddresses(endpointAddresses).setServerName("opcsvr")
-                .setApplicationName(LocalizedText.english("opcsvr")).setCertificateManager(certificateManager)
+    private static void startServer() throws UaException, IOException {
+        TrustListManager trustListManager = new DefaultTrustListManager(new File("/tmp"));
+        ServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(trustListManager);
+        final EndpointConfiguration endpointConfiguration = EndpointConfiguration.newBuilder()
+                .setTransportProfile(TransportProfile.TCP_UASC_UABINARY)
+                .setBindAddress("localhost")
+                .setHostname("localhost")
+                .setPath("/opcsvr")
+                .setBindPort(12685)
+                .addTokenPolicy(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)
+                .build();
+
+        logger.info("starting test server with endpoint {}", endpointConfiguration.getEndpointUrl());
+
+        OpcUaServerConfig config = new OpcUaServerConfigBuilder().setApplicationUri("opcsvr")
+                .setApplicationName(LocalizedText.english("opcsvr")).setCertificateValidator(certificateValidator)
                 .setCertificateValidator(certificateValidator)
-                .setUserTokenPolicies(Arrays.asList(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)).build();
+                .setEndpoints(Collections.singleton(endpointConfiguration))
+                .build();
+
         server = new OpcUaServer(config);
-        server.getNamespaceManager().registerAndAdd(TestNamespace.NAMESPACE_URI, idx -> new TestNamespace(server, idx));
+        final TestNamespace testNamespace = new TestNamespace(server);
+        server.getAddressSpaceManager().register(testNamespace);
         server.startup();
     }
 

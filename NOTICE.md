@@ -136,10 +136,10 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.milo/sdk-client/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/sdk-core/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-client/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-core/0.2.4, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/sdk-client/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/sdk-core/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/stack-client/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/stack-core/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.app/1.5.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.bidi/1.3.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.cm/1.4.400, EPL-2.0, approved, eclipse.platform

@@ -36,10 +36,6 @@ public class NMSettingsConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(NMSettingsConverter.class);
 
-    private static final Map<String, String> WIFI_MODE_CONVERTER = initWifiModeConverter();
-    private static final Map<String, String> WIFI_BAND_CONVERTER = initWifiBandConverter();
-    private static final Map<String, List<String>> WIFI_CIPHER_CONVERTER = initWifiCipherConverter();
-    private static final Map<String, String> WIFI_KEYMGMT_CONVERTER = initWifiKeyMgmtConverter();
     private static final Map<NMDeviceType, String> DEVICE_TYPE_CONVERTER = initDeviceTypeConverter();
 
     private NMSettingsConverter() {
@@ -127,9 +123,9 @@ public class NMSettingsConverter {
 
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
 
-        String mode = WIFI_MODE_CONVERTER.get(propMode);
+        String mode = wifiModeConvert(propMode);
         String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
-        String band = WIFI_BAND_CONVERTER.get(
+        String band = wifiBandConvert(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
         Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
                 propMode.toLowerCase());
@@ -157,7 +153,7 @@ public class NMSettingsConverter {
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", iface, propMode.toLowerCase())
                 .toString();
-        String keyMgmt = WIFI_KEYMGMT_CONVERTER.get(
+        String keyMgmt = wifiKeyMgmtConvert(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));
         settings.put("key-mgmt", new Variant<>(keyMgmt));
@@ -165,14 +161,14 @@ public class NMSettingsConverter {
         Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", iface,
                 propMode.toLowerCase());
         if (group.isPresent()) {
-            List<String> nmGroup = WIFI_CIPHER_CONVERTER.get(group.get());
+            List<String> nmGroup = wifiCipherConvert(group.get());
             settings.put("group", new Variant<>(nmGroup, "as"));
         }
 
         Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface,
                 propMode.toLowerCase());
         if (pairwise.isPresent()) {
-            List<String> nmPairwise = WIFI_CIPHER_CONVERTER.get(pairwise.get());
+            List<String> nmPairwise = wifiCipherConvert(pairwise.get());
             settings.put("pairwise", new Variant<>(nmPairwise, "as"));
         }
 
@@ -232,49 +228,60 @@ public class NMSettingsConverter {
         return new UInt32(result);
     }
 
-    private static Map<String, String> initWifiModeConverter() {
-        Map<String, String> map = new HashMap<>();
-
-        map.put("INFRA", "infrastructure");
-        map.put("MASTER", "ap");
-
-        return map;
+    private static String wifiModeConvert(String kuraMode) {
+        switch (kuraMode) {
+        case "INFRA":
+            return "infrastructure";
+        case "MASTER":
+            return "ap";
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi mode \"%s\"", kuraMode));
+        }
     }
 
-    private static Map<String, String> initWifiBandConverter() {
-        Map<String, String> map = new HashMap<>();
-
-        map.put("RADIO_MODE_80211a", "a");
-        map.put("RADIO_MODE_80211b", "bg");
-        map.put("RADIO_MODE_80211g", "bg");
-        map.put("RADIO_MODE_80211nHT20", "bg"); // TBD
-        map.put("RADIO_MODE_80211nHT40below", "bg"); // TBD
-        map.put("RADIO_MODE_80211nHT40above", "bg"); // TBD
-        map.put("RADIO_MODE_80211_AC", "a"); // TBD
-
-        return map;
+    private static String wifiBandConvert(String kuraBand) {
+        switch (kuraBand) {
+        case "RADIO_MODE_80211a":
+        case "RADIO_MODE_80211_AC":
+            return "a";
+        case "RADIO_MODE_80211b":
+        case "RADIO_MODE_80211g":
+            return "bg";
+        case "RADIO_MODE_80211nHT20":
+        case "RADIO_MODE_80211nHT40below":
+        case "RADIO_MODE_80211nHT40above":
+            return "bg"; // TBD
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi band \"%s\"", kuraBand));
+        }
     }
 
-    private static Map<String, List<String>> initWifiCipherConverter() {
-        Map<String, List<String>> map = new HashMap<>();
-
-        map.put("CCMP", Arrays.asList("ccmp"));
-        map.put("TKIP", Arrays.asList("tkip"));
-        map.put("CCMP_TKIP", Arrays.asList("tkip", "ccmp"));
-
-        return map;
+    private static List<String> wifiCipherConvert(String kuraCipher) {
+        switch (kuraCipher) {
+        case "CCMP":
+            return Arrays.asList("ccmp");
+        case "TKIP":
+            return Arrays.asList("tkip");
+        case "CCMP_TKIP":
+            return Arrays.asList("tkip", "ccmp");
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi cipher \"%s\"", kuraCipher));
+        }
     }
 
-    private static Map<String, String> initWifiKeyMgmtConverter() {
-        Map<String, String> map = new HashMap<>();
-
-        map.put("NONE", "none");
-        map.put("SECURITY_WEP", "none");
-        map.put("SECURITY_WPA", "wpa-psk");
-        map.put("SECURITY_WPA2", "wpa-psk");
-        map.put("SECURITY_WPA_WPA2", "wpa-psk");
-
-        return map;
+    private static String wifiKeyMgmtConvert(String kuraSecurityType) {
+        switch (kuraSecurityType) {
+        case "NONE":
+        case "SECURITY_WEP":
+            return "none";
+        case "SECURITY_WPA":
+        case "SECURITY_WPA2":
+        case "SECURITY_WPA_WPA2":
+            return "wpa-psk";
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Unsupported WiFi key management \"%s\"", kuraSecurityType));
+        }
     }
 
     private static Map<NMDeviceType, String> initDeviceTypeConverter() {

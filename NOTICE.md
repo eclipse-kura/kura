@@ -214,6 +214,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.google.guava/guava/31.0-jre, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.guava/failureaccess/1.0, Apache-2.0, approved, CQ22654
 * maven/mavencentral/com.digitalpetri.fsm/strict-machine/0.6, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.digitalpetri.netty/netty-channel-fsm/0.8, Apache-2.0, approved, #6168
 
 ### Additional Dependencies
 

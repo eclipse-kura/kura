@@ -35,6 +35,7 @@ Bundle-ClassPath: .,
  lib/sdk-core.jar,
  lib/stack-client.jar,
  lib/stack-core.jar,
+ lib/netty-channel-fsm.jar,
  lib/strict-machine.jar,
  lib/netty-all.jar,
  lib/failureaccess.jar

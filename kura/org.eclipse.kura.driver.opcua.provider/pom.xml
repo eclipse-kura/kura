@@ -34,6 +34,7 @@
         <com.google.guava.version>31.0-jre</com.google.guava.version>
         <io.netty.version>4.1.86.Final</io.netty.version>
         <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
+        <com.digitalpetri.netty.netty-channel-fsm.version>0.8</com.digitalpetri.netty.netty-channel-fsm.version>
         <com.digitalpetri.fsm.strict-machine.version>0.6</com.digitalpetri.fsm.strict-machine.version>
         <com.google.guava.failureaccess.version>1.0</com.google.guava.failureaccess.version>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -91,6 +92,11 @@
                                     <groupId>com.digitalpetri.fsm</groupId>
                                     <artifactId>strict-machine</artifactId>
                                     <version>${com.digitalpetri.fsm.strict-machine.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.digitalpetri.netty</groupId>
+                                    <artifactId>netty-channel-fsm</artifactId>
+                                    <version>${com.digitalpetri.netty.netty-channel-fsm.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

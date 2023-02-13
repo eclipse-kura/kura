@@ -122,6 +122,18 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         this.configurationService = configurationService;
     }
 
+    public NMConfigurationServiceImpl() {
+        try {
+            this.nmDbusConnector = NMDbusConnector.getInstance();
+        } catch (DBusExecutionException | DBusException e) {
+            logger.error("Cannot initialize NMDbusConnector due to: ", e);
+        }
+    }
+
+    public NMConfigurationServiceImpl(NMDbusConnector nmDbusConnector) {
+        this.nmDbusConnector = Objects.requireNonNull(nmDbusConnector);
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -133,11 +145,14 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
 
-        try {
-            this.nmDbusConnector = NMDbusConnector.getInstance();
-            this.nmDbusConnector.checkPermissions();
-        } catch (DBusExecutionException | DBusException e) {
-            logger.error("Cannot initialize NMDbusConnector due to: ", e);
+        if (Objects.nonNull(this.nmDbusConnector)) {
+            try {
+                this.nmDbusConnector.checkPermissions();
+            } catch (DBusExecutionException e) {
+                logger.error("Cannot check NetworkManager permissions due to: ", e);
+            }
+        } else {
+            logger.warn("Detected null NMDbusConnector, some network configuration functionalities will not work.");
         }
 
         if (properties == null) {

@@ -36,8 +36,6 @@ public class NMSettingsConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(NMSettingsConverter.class);
 
-    private static final Map<NMDeviceType, String> DEVICE_TYPE_CONVERTER = initDeviceTypeConverter();
-
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -181,7 +179,7 @@ public class NMSettingsConverter {
 
         if (!connection.isPresent()) {
             connectionMap = createConnectionSettings(iface);
-            connectionMap.put("type", new Variant<>(DEVICE_TYPE_CONVERTER.get(deviceType)));
+            connectionMap.put("type", new Variant<>(connectionTypeConvert(deviceType)));
         } else {
             Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
             for (String key : connectionSettings.get("connection").keySet()) {
@@ -284,14 +282,17 @@ public class NMSettingsConverter {
         }
     }
 
-    private static Map<NMDeviceType, String> initDeviceTypeConverter() {
-        Map<NMDeviceType, String> map = new HashMap<>();
-
-        map.put(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, "802-3-ethernet");
-        map.put(NMDeviceType.NM_DEVICE_TYPE_WIFI, "802-11-wireless");
+    private static String connectionTypeConvert(NMDeviceType deviceType) {
+        switch (deviceType) {
+        case NM_DEVICE_TYPE_ETHERNET:
+            return "802-3-ethernet";
+        case NM_DEVICE_TYPE_WIFI:
+            return "802-11-wireless";
         // ... WIP
-
-        return map;
+        default:
+            throw new IllegalArgumentException(String
+                    .format("Unsupported connection type conversion from NMDeviceType \"%\"", deviceType.toString()));
+        }
     }
 
 }

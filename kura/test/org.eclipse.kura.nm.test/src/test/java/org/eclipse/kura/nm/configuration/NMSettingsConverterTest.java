@@ -162,8 +162,8 @@ public class NMSettingsConverterTest {
 	@Test
 	public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMap() {
 		givenEmptyMaps();
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propMode", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propMode", true, true);
+		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
+		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenNoExceptionsHaveBeenThrown();
@@ -178,8 +178,8 @@ public class NMSettingsConverterTest {
 				"netIPv4StatusUnmanaged");
 		givenValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "INFRA", true);
 		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "infrastructure", true);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propMode", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propMode", true, true);
+		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
+		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, Optional.empty(), "wlan0",
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
@@ -322,8 +322,10 @@ public class NMSettingsConverterTest {
 		try {
 			this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			hasIllegalArgumentExceptionBeenThrown = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
 		}
 	}
@@ -332,8 +334,10 @@ public class NMSettingsConverterTest {
 		try {
 			this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			hasIllegalArgumentExceptionBeenThrown = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
 		}
 	}
@@ -342,8 +346,10 @@ public class NMSettingsConverterTest {
 		try {
 			this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			hasIllegalArgumentExceptionBeenThrown = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
 		}
 	}
@@ -353,8 +359,10 @@ public class NMSettingsConverterTest {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			hasIllegalArgumentExceptionBeenThrown = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
 		}
 	}
@@ -364,8 +372,10 @@ public class NMSettingsConverterTest {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			hasIllegalArgumentExceptionBeenThrown = true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
 		}
 	}
@@ -377,12 +387,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	public void thenMapResultFromWifiSettingsShouldEqualInternalMapForWifiSettings() {
-		//Workaround to compare String.getBytes()
+		//Workaround to compare String.getBytes(StandardCharsets.UTF_8)
 		
 		String  internalSsid = new String((byte[]) internalComparatorMap.get("ssid").getValue(), StandardCharsets.UTF_8);
 		String resultSsid = new String((byte[]) this.resultMap.get("ssid").getValue(), StandardCharsets.UTF_8);
 
-		//.getBytes(StandardCharsets.UTF_8)
 		assertEquals(internalSsid, resultSsid);
 		
 		//Remove ssid fields from Maps before comparison

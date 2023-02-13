@@ -698,7 +698,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 }
             }
 
-            if (this.priority.isEnabled() && this.isNet2) {
+            if (this.isNet2) {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
             }
 
@@ -727,7 +727,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
     private void refreshForm() {
         this.status.setEnabled(true);
-        this.priority.setEnabled(true);
+        this.priority.setEnabled(false);
         this.configure.setEnabled(true);
         this.ip.setEnabled(true);
         this.subnet.setEnabled(true);
@@ -750,7 +750,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK) {
             // loopback interface should not be editable
             this.status.setEnabled(false);
-            this.priority.setEnabled(false);
             this.configure.setEnabled(false);
             this.ip.setEnabled(false);
             this.subnet.setEnabled(false);
@@ -790,6 +789,10 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     this.renew.setEnabled(false);
                 }
             }
+        }
+
+        if (this.status.getSelectedValue().equals(VMSGS.netIPv4StatusEnabledWAN())) {
+            this.priority.setEnabled(true);
         }
 
         // Show read-only dns field when DHCP is selected and there are no

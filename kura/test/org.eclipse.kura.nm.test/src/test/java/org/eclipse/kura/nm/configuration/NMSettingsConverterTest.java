@@ -45,15 +45,15 @@ public class NMSettingsConverterTest {
 
 	Boolean hasIllegalArgumentExceptionBeenThrown = false;
 	Boolean hasAGenericExecptionBeenThrown = false;
-	
-	String netInterface; 
+
+	String netInterface;
 	String kuraIP4Status;
+	Boolean KuraDhcpStatus;
 
 	@Test
 	public void buildSettingsShouldThrowWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0",
-				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
 		thenIllegalArgumentExceptionHasBeenThrown();
 	}
 
@@ -87,10 +87,15 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForWan() {
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true, "netIPv4StatusEnabledWAN");
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusEnabledWAN");
+		givenDhcpStatus(true);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+
 		givenValidBuildIpv4ConfigWithDhcpEnabled();
 		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToWan("wlan0");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 		thenNoExceptionsHaveBeenThrown();
@@ -99,7 +104,17 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndEnabledForWan() {
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusEnabledWAN");
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusEnabledWAN");
+		givenDhcpStatus(false);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan("wlan0");
@@ -112,7 +127,13 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForLan() {
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true, "netIPv4StatusEnabledLAN");
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusEnabledLAN");
+		givenDhcpStatus(true);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+
 		givenValidBuildIpv4ConfigWithDhcpEnabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan("wlan0");
@@ -124,7 +145,17 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndEnabledForLan() {
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusEnabledLAN");
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusEnabledLAN");
+		givenDhcpStatus(false);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan("wlan0");
@@ -136,7 +167,17 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndUnmanaged() {
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusUnmanaged");
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusUnmanaged");
+		givenDhcpStatus(false);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -147,8 +188,14 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSettingsShouldWorkWhenGivenExpectedMapAndSetToInfraAndWithChannelField() {
-		givenValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "testssid", "INFRA", true, false);
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "testssid", "infrastructure", true,
+		givenNetInterface("wlan0");
+		
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+		
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "ssidtest", "infrastructure", true,
 				false);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -172,11 +219,23 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusUnmanaged");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
-		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+		
 		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
 				true, false);
 		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
@@ -196,12 +255,24 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedLan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
-		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+		
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+
 		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
 				true, false);
 		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
@@ -221,12 +292,24 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedWan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
-		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+		
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+		
 		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
 				true, false);
 		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
@@ -246,12 +329,25 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedLan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
-		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID",	true);
+		
 		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
 				true, true);
 		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
@@ -271,12 +367,25 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedWan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
-		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID",	true);
+		
 		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
 				true, true);
 		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
@@ -296,8 +405,15 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusUnmanaged");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -313,8 +429,15 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusManagedLan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
@@ -331,8 +454,15 @@ public class NMSettingsConverterTest {
 
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusManagedWan");
+		givenDhcpStatus(false);
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
+		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
+
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
@@ -345,28 +475,25 @@ public class NMSettingsConverterTest {
 	}
 
 	// given
-	
-	public void givenNetInterface(String netInterface){
+
+	public void givenNetInterface(String netInterface) {
 		this.netInterface = netInterface;
 	}
-	
-	public void givenIP4Status(String kuraIP4Status){
+
+	public void givenIP4Status(String kuraIP4Status) {
 		this.kuraIP4Status = kuraIP4Status;
+	}
+
+	public void givenDhcpStatus(Boolean KuraDhcpStatus) {
+		this.KuraDhcpStatus = KuraDhcpStatus;
 	}
 
 	public void givenNetworkPropsCreatedWithTheMap(Map<String, Object> properties) {
 		this.networkProperties = new NetworkProperties(properties);
 	}
 
-	public void givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(String inter, Boolean dhcpStatus,
-			String netStatus) {
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.dhcpClient4.enabled",
-				dhcpStatus);
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.status", netStatus);
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.address", "192.168.0.12");
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.prefix", (short) 25);
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.dnsServers", "1.1.1.1");
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.gateway", "192.168.0.1");
+	public void givenMapWith(String key, Object value) {
+		this.internetNetworkPropertiesInstanciationMap.put(key, value);
 	}
 
 	public void givenExpectedValidWifiConfigurationSetToLan(String inter) {
@@ -385,6 +512,7 @@ public class NMSettingsConverterTest {
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
 
 		Optional<List<String>> dnsServers = Optional.of(Arrays.asList("1.1.1.1"));
+
 		if (dnsServers.isPresent()) {
 			internalMethodHashMap.put("dns", new Variant<>(Arrays.asList(new UInt32(16843009)), "au"));
 			internalMethodHashMap.put("ignore-auto-dns", new Variant<>(true));
@@ -428,28 +556,6 @@ public class NMSettingsConverterTest {
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
 		internalMethodHashMap.put("method", new Variant<>("disabled"));
 		this.internalComparatorAllSettingsMap.put("ipv6", internalMethodHashMap);
-	}
-
-	public void givenValid80211WirelessSettingsWithTheFollowingParameters(String inter, String ssid, String propMode,
-			Boolean channelEnabled, Boolean isHidden) {
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.wifi.mode", inter),
-				propMode);
-		internetNetworkPropertiesInstanciationMap
-				.put(String.format("net.interface.%s.config.wifi.%s.ssid", inter, propMode.toLowerCase()), ssid);
-		internetNetworkPropertiesInstanciationMap.put(
-				String.format("net.interface.%s.config.wifi.%s.radioMode", inter, propMode.toLowerCase()),
-				"RADIO_MODE_80211a");
-		if (channelEnabled) {
-			internetNetworkPropertiesInstanciationMap
-					.put(String.format("net.interface.%s.config.wifi.%s.channel", inter, propMode.toLowerCase()), "10");
-		}
-
-		if (isHidden) {
-			internetNetworkPropertiesInstanciationMap.put(
-					String.format("net.interface.%s.config.wifi.%s.ignoreSSID", inter, propMode.toLowerCase()),
-					isHidden);
-		}
-
 	}
 
 	public void givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(String inter, String ssid,
@@ -525,8 +631,8 @@ public class NMSettingsConverterTest {
 
 	// when
 
-	public void whenBuildSettingsIsRunWith(NetworkProperties properties,
-			Optional<Connection> oldConnection, String iface, NMDeviceType deviceType) {
+	public void whenBuildSettingsIsRunWith(NetworkProperties properties, Optional<Connection> oldConnection,
+			String iface, NMDeviceType deviceType) {
 		try {
 			this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
 		} catch (IllegalArgumentException e) {
@@ -562,8 +668,7 @@ public class NMSettingsConverterTest {
 		}
 	}
 
-	public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props,
-			String iface) {
+	public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
 		} catch (IllegalArgumentException e) {
@@ -575,8 +680,7 @@ public class NMSettingsConverterTest {
 		}
 	}
 
-	public void whenBuild80211WirelessSecuritySettingsIsRunWith(NetworkProperties props,
-			String iface) {
+	public void whenBuild80211WirelessSecuritySettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
 		} catch (IllegalArgumentException e) {

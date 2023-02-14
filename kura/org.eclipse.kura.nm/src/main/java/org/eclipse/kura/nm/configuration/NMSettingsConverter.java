@@ -36,6 +36,10 @@ public class NMSettingsConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(NMSettingsConverter.class);
 
+    private static final String NM_SETTINGS_CONNECTION = "connection";
+    private static final String NM_SETTINGS_IPV4_METHOD = "method";
+    private static final String NM_SETTINGS_IPV6_METHOD = "method";
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -45,7 +49,7 @@ public class NMSettingsConverter {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
         Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
-        newConnectionSettings.put("connection", connectionMap);
+        newConnectionSettings.put(NM_SETTINGS_CONNECTION, connectionMap);
 
         Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, iface);
         Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, iface);
@@ -72,7 +76,7 @@ public class NMSettingsConverter {
                 .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", iface));
 
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
-            settings.put("method", new Variant<>("manual"));
+            settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("manual"));
 
             String address = props.get(String.class, "net.interface.%s.config.ip4.address", iface);
             Short prefix = props.get(Short.class, "net.interface.%s.config.ip4.prefix", iface);
@@ -84,7 +88,7 @@ public class NMSettingsConverter {
             List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
             settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
         } else {
-            settings.put("method", new Variant<>("auto"));
+            settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("auto"));
         }
 
         if (ip4Status.equals(KuraIpStatus.ENABLEDLAN)) {
@@ -111,7 +115,7 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         // Disabled for now
-        settings.put("method", new Variant<>("disabled"));
+        settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("disabled"));
 
         return settings;
     }
@@ -182,8 +186,8 @@ public class NMSettingsConverter {
             connectionMap.put("type", new Variant<>(connectionTypeConvert(deviceType)));
         } else {
             Map<String, Map<String, Variant<?>>> connectionSettings = connection.get().GetSettings();
-            for (String key : connectionSettings.get("connection").keySet()) {
-                connectionMap.put(key, connectionSettings.get("connection").get(key));
+            for (String key : connectionSettings.get(NM_SETTINGS_CONNECTION).keySet()) {
+                connectionMap.put(key, connectionSettings.get(NM_SETTINGS_CONNECTION).get(key));
             }
         }
 

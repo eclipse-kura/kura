@@ -173,7 +173,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
+    public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 

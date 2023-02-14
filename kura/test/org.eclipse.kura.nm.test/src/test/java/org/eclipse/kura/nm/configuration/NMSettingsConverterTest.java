@@ -94,12 +94,11 @@ public class NMSettingsConverterTest {
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 
-		givenValidBuildIpv4ConfigWithDhcpEnabled();
-		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+
+		thenResultingMapContains("method", "auto");
 	}
 
 	@Test
@@ -107,21 +106,22 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusEnabledWAN");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToWan("wlan0");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+		thenResultingMapContains("method", "manual");
+		thenResultingMapContains("address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingMapContains("dns", new Variant<>(Arrays.asList(new UInt32(16843009)), "au").getValue());
+		thenResultingMapContains("ignore-auto-dns", true);
+		thenResultingMapContains("gateway", "192.168.0.1");
 
 	}
 
@@ -130,17 +130,16 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusEnabledLAN");
 		givenDhcpStatus(true);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
-
-		givenValidBuildIpv4ConfigWithDhcpEnabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToLan("wlan0");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+		thenResultingMapContains("method", "auto");
+		thenResultingMapContains("ignore-auto-dns", true);
+		thenResultingMapContains("ignore-auto-routes", true);
 	}
 
 	@Test
@@ -148,21 +147,21 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusEnabledLAN");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToLan("wlan0");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+		thenResultingMapContains("method", "manual");
+		thenResultingMapContains("address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingMapContains("ignore-auto-dns", true);
+		thenResultingMapContains("ignore-auto-routes", true);
 	}
 
 	@Test
@@ -170,84 +169,98 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusUnmanaged");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+		thenResultingMapContains("method", "manual");
+		thenResultingMapContains("address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
 	}
 
 	@Test
 	public void build80211WirelessSettingsShouldWorkWhenGivenExpectedMapAndSetToInfraAndWithChannelField() {
 		givenNetInterface("wlan0");
-		
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-		
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "ssidtest", "infrastructure", true,
-				false);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
-		thenNoExceptionsHaveBeenThrown();
-		thenMapResultFromWifiSettingsShouldEqualInternalMapForWifiSettings();
+	
+		thenNoExceptionsHaveBeenThrown();		
+		thenResultingMapContains("mode", "infrastructure");
+		thenResultingMapContainsBytes("ssid", "ssidtest");
+		thenResultingMapContains("band", "a");
+		thenResultingMapContains("channel", new UInt32(Short.parseShort("10")));
 	}
 
 	@Test
 	public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMap() {
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters("wlan0", "ssidtest", "propmode", true, true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters("wlan0", "ssidtest", "propmode", true,
-				true);
+		givenNetInterface("wlan0");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+		
 		whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalMap();
+		thenResultingMapContains("psk", new Password("test").toString());
+		thenResultingMapContains("key-mgmt", "wpa-psk");
+		thenResultingMapContains("group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingMapContains("pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiUnmanged() {
-
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusUnmanaged");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-		
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, false);
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
-				true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+		thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+		thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+		thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+		thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+		thenResultingBuildAllMapContains("802-11-wireless-security", "psk", new Password("test").toString());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-psk");
+		thenResultingBuildAllMapContains("802-11-wireless-security", "group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
@@ -256,35 +269,42 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedLan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToLan(netInterface);
-		
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, false);
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
-				true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");
+		
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+		thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+		thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+		thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+		thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+		thenResultingBuildAllMapContains("802-11-wireless-security", "psk", new Password("test").toString());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-psk");
+		thenResultingBuildAllMapContains("802-11-wireless-security", "group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
@@ -293,35 +313,41 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedWan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToWan(netInterface);
-		
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-		
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, false);
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
-				true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+		thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+		thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+		thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+		thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+		thenResultingBuildAllMapContains("802-11-wireless-security", "psk", new Password("test").toString());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-psk");
+		thenResultingBuildAllMapContains("802-11-wireless-security", "group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
@@ -330,148 +356,162 @@ public class NMSettingsConverterTest {
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedLan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToLan(netInterface);
-		
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID",	true);
-		
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
-				true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID", true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");		
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+		thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+		thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+		thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+		thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+		thenResultingBuildAllMapContains("802-11-wireless", "hidden", true);
+		thenResultingBuildAllMapContains("802-11-wireless-security", "psk", new Password("test").toString());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-psk");
+		thenResultingBuildAllMapContains("802-11-wireless-security", "group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
-
 		givenNetInterface("wlan0");
 		givenIP4Status("netIPv4StatusManagedWan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToWan(netInterface);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ssid", "ssidtest");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.radioMode", "RADIO_MODE_80211a");
 		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.channel", "10");
-		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID",	true);
-		
-		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
-		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true,
-				true);
-		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure",
-				true, true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.ignoreSSID", true);
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.mode", "INFRA");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.passphrase",new Password("test"));
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.securityType","SECURITY_WPA_WPA2");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.groupCiphers", "CCMP");
+		givenMapWith("net.interface." + this.netInterface + ".config.wifi.infra.pairwiseCiphers", "CCMP");
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+		thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+		thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+		thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+		thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+		thenResultingBuildAllMapContains("802-11-wireless", "hidden", true);
+		thenResultingBuildAllMapContains("802-11-wireless-security", "psk", new Password("test").toString());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-psk");
+		thenResultingBuildAllMapContains("802-11-wireless-security", "group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+		thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
 	}
 
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndUnmanaged() {
-
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusUnmanaged");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-3-ethernet");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
 	}
 
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndLan() {
-
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusManagedLan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToLan(netInterface);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-3-ethernet");
+		
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+		
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
 	}
 
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsEthernetAndWan() {
-
 		givenNetInterface("eth0");
 		givenIP4Status("netIPv4StatusManagedWan");
 		givenDhcpStatus(false);
-
 		givenMapWith("net.interface." + this.netInterface + ".config.dhcpClient4.enabled", this.KuraDhcpStatus);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.status", this.kuraIP4Status);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.address", "192.168.0.12");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.prefix", (short) 25);
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.dnsServers", "1.1.1.1");
 		givenMapWith("net.interface." + this.netInterface + ".config.ip4.gateway", "192.168.0.1");
-
-		givenValidBuildIpv4ConfigWithDhcpDisabled();
-		givenValidBuildIpv6Config();
-		givenExpectedValidWifiConfigurationSetToWan(netInterface);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-		givenExpectedBuildAllConnectionField(netInterface, "802-3-ethernet");
+
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), netInterface,
 				NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+
 		thenNoExceptionsHaveBeenThrown();
-		thenMapResultShouldEqualInternalBuildMap();
+		thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+		thenResultingBuildAllMapContains("ipv4", "method", "manual");
+		thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+		thenResultingBuildAllMapContains("connection", "id", "kura-" + this.netInterface + "-connection");
+		thenResultingBuildAllMapContains("connection", "interface-name", this.netInterface);
+		thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
 	}
 
 	// given
@@ -494,139 +534,6 @@ public class NMSettingsConverterTest {
 
 	public void givenMapWith(String key, Object value) {
 		this.internetNetworkPropertiesInstanciationMap.put(key, value);
-	}
-
-	public void givenExpectedValidWifiConfigurationSetToLan(String inter) {
-
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("ignore-auto-dns", new Variant<>(true));
-		internalMethodHashMap.put("ignore-auto-routes", new Variant<>(true));
-
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-
-	}
-
-	public void givenExpectedValidWifiConfigurationSetToWan(String inter) {
-
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		Optional<List<String>> dnsServers = Optional.of(Arrays.asList("1.1.1.1"));
-
-		if (dnsServers.isPresent()) {
-			internalMethodHashMap.put("dns", new Variant<>(Arrays.asList(new UInt32(16843009)), "au"));
-			internalMethodHashMap.put("ignore-auto-dns", new Variant<>(true));
-		}
-
-		Optional<String> gateway = Optional.of("192.168.0.1");
-		if (gateway.isPresent()) {
-			internalMethodHashMap.put("gateway", new Variant<>(gateway.get()));
-		}
-
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-
-	}
-
-	public void givenValidBuildIpv4ConfigWithDhcpEnabled() {
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("method", new Variant<>("auto"));
-
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-		this.internalComparatorAllSettingsMap.put("ipv4", internalMethodHashMap);
-	}
-
-	public void givenValidBuildIpv4ConfigWithDhcpDisabled() {
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("method", new Variant<>("manual"));
-
-		Map<String, Variant<?>> addressEntry = new HashMap<>();
-		addressEntry.put("address", new Variant<>("192.168.0.12"));
-		addressEntry.put("prefix", new Variant<>(new UInt32(25)));
-
-		List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
-		internalMethodHashMap.put("address-data", new Variant<>(addressData, "aa{sv}"));
-
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-		this.internalComparatorAllSettingsMap.put("ipv4", internalMethodHashMap);
-	}
-
-	public void givenValidBuildIpv6Config() {
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-		internalMethodHashMap.put("method", new Variant<>("disabled"));
-		this.internalComparatorAllSettingsMap.put("ipv6", internalMethodHashMap);
-	}
-
-	public void givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(String inter, String ssid,
-			String propMode, Boolean channelEnabled, Boolean isHidden) {
-
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("mode", new Variant<>(propMode));
-		internalMethodHashMap.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
-		internalMethodHashMap.put("band", new Variant<>("a"));
-
-		if (channelEnabled) {
-			internalMethodHashMap.put("channel", new Variant<>(new UInt32(Short.parseShort("10"))));
-		}
-
-		if (isHidden) {
-			internalMethodHashMap.put("hidden", new Variant<>(isHidden));
-		}
-
-		this.internalComparatorAllSettingsMap.put("802-11-wireless", internalMethodHashMap);
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-	}
-
-	public void givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(String inter, String ssid,
-			String propMode, Boolean groupEnabled, Boolean ciphersEnabled) {
-		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.wifi.mode", propMode);
-		internetNetworkPropertiesInstanciationMap.put(
-				"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".passphrase",
-				new Password("test"));
-		internetNetworkPropertiesInstanciationMap.put(
-				"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".securityType",
-				"SECURITY_WPA_WPA2");
-		if (groupEnabled) {
-			internetNetworkPropertiesInstanciationMap
-					.put("net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".groupCiphers", "CCMP");
-		}
-		if (ciphersEnabled) {
-			internetNetworkPropertiesInstanciationMap.put(
-					"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".pairwiseCiphers", "CCMP");
-		}
-	}
-
-	public void givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(String inter, String ssid,
-			String propMode, Boolean groupEnabled, Boolean ciphersEnabled) {
-
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("psk", new Variant<>(new Password("test").toString()));
-		internalMethodHashMap.put("key-mgmt", new Variant<>("wpa-psk"));
-
-		if (groupEnabled) {
-			internalMethodHashMap.put("group", new Variant<>(Arrays.asList("ccmp"), "as"));
-		}
-
-		if (ciphersEnabled) {
-			internalMethodHashMap.put("pairwise", new Variant<>(Arrays.asList("ccmp"), "as"));
-		}
-
-		this.internalComparatorAllSettingsMap.put("802-11-wireless-security", internalMethodHashMap);
-		this.internalComparatorMap.putAll(internalMethodHashMap);
-
-	}
-
-	public void givenExpectedBuildAllConnectionField(String inter, String interfaceType) {
-		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
-
-		internalMethodHashMap.put("id", new Variant<>(String.format("kura-%s-connection", inter)));
-		internalMethodHashMap.put("interface-name", new Variant<>(inter));
-		internalMethodHashMap.put("type", new Variant<>(interfaceType));
-
-		this.internalComparatorAllSettingsMap.put("connection", internalMethodHashMap);
 	}
 
 	// when
@@ -693,6 +600,35 @@ public class NMSettingsConverterTest {
 	}
 
 	// then
+
+	public void thenResultingMapContains(String key, Object value) {
+		assertEquals(value, this.resultMap.get(key).getValue());
+	}
+	
+	public void thenResultingMapContainsBytes(String key, Object value) {
+		assertEquals(value, new String((byte[]) this.resultMap.get(key).getValue(), StandardCharsets.UTF_8));
+	}
+
+	public void thenResultingBuildAllMapContains(String key, String subKey, Object value) {
+		assertEquals(value, this.resultAllSettingsMap.get(key).get(subKey).getValue());
+	}
+	
+	public void thenResultingBuildAllMapContainsBytes(String key, String subKey, Object value) {
+		assertEquals(value, new String((byte[]) this.resultAllSettingsMap.get(key).get(subKey).getValue(), StandardCharsets.UTF_8));
+	}
+
+	public Object buildAddressDataWith(String ipAddr, UInt32 prefix) {
+
+		Map<String, Variant<?>> addressEntry = new HashMap<>();
+		addressEntry.put("address", new Variant<>(ipAddr));
+		addressEntry.put("prefix", new Variant<>(prefix));
+
+		List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
+
+		Variant<?> dataVarient = new Variant<>(addressData, "aa{sv}");
+
+		return dataVarient.getValue();
+	}
 
 	public void thenMapResultShouldEqualInternalMap() {
 		assertEquals(this.internalComparatorMap, this.resultMap);

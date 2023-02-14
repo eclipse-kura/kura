@@ -355,7 +355,7 @@ public class NMDbusConnector {
         try {
             Map<String, Map<String, Variant<?>>> connectionSettings = dev.GetAppliedConnection(new UInt32(0))
                     .getConnection();
-            String uuid = String.valueOf(connectionSettings.get("connection").get("uuid")).replaceAll("\\[|\\]", "");
+            String uuid = String.valueOf(connectionSettings.get("connection").get("uuid").getValue());
 
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 

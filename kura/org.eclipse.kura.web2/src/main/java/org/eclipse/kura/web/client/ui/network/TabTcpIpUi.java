@@ -433,7 +433,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipPriority()));
             }
         });
-        this.status.addMouseOutHandler(event -> resetHelp());
+        this.priority.addMouseOutHandler(event -> resetHelp());
+        this.priority.addValueChangeHandler(valChangeEvent -> setDirty(true));
     }
 
     private void initDHCPLeaseField() {

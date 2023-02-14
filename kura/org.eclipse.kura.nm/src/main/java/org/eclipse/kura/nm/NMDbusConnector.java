@@ -46,13 +46,23 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_GENERIC_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device.Generic";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
+
+    private static final String NM_PROPERTY_VERSION = "Version";
+
+    private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
+    private static final String NM_DEVICE_PROPERTY_MANAGED = "Managed";
+    private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";
+    private static final String NM_DEVICE_PROPERTY_STATE = "State";
+    private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
+
+    private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays
             .asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI);
-    private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(
-            KuraIpStatus.DISABLED, KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN,
-            KuraIpStatus.UNMANAGED);
+    private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
+            KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
@@ -101,7 +111,7 @@ public class NMDbusConnector {
     public void checkVersion() throws DBusException {
         Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
 
-        String nmVersion = nmProperties.Get(NM_BUS_NAME, "Version");
+        String nmVersion = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
 
         logger.info("NM Version: {}", nmVersion);
     }
@@ -115,7 +125,7 @@ public class NMDbusConnector {
             if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
                 Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                         Properties.class);
-                supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
+                supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE));
             }
 
         }
@@ -130,7 +140,7 @@ public class NMDbusConnector {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Ip4Config");
+        DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_IP4CONFIG);
         Optional<Properties> ip4configProperties = Optional.empty();
 
         if (!ip4configPath.getPath().equals("/")) {
@@ -150,8 +160,8 @@ public class NMDbusConnector {
                     Generic.class);
             Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
-            String genericDeviceType = genericDeviceProperties.Get("org.freedesktop.NetworkManager.Device.Generic",
-                    "TypeDescription");
+            String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
+                    NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION);
             if (genericDeviceType.equals("loopback")) {
                 return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
             }
@@ -295,7 +305,7 @@ public class NMDbusConnector {
         for (DBusPath path : devicePaths) {
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
                     Properties.class);
-            devices.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface"));
+            devices.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE));
         }
 
         return devices;
@@ -305,35 +315,35 @@ public class NMDbusConnector {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        return NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        return NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
     }
 
     private void setDeviceManaged(Device device, Boolean manage) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        deviceProperties.Set(NM_DEVICE_BUS_NAME, "Managed", manage);
+        deviceProperties.Set(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED, manage);
     }
 
     private Boolean isDeviceManaged(Device device) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        return deviceProperties.Get(NM_DEVICE_BUS_NAME, "Managed");
+        return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED);
     }
 
     private NMDeviceType getDeviceType(Device device) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        return NMDeviceType.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DeviceType"));
+        return NMDeviceType.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
     }
 
     private String getDeviceIpInterface(Device device) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        return deviceProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
+        return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }
 
     private Device getDeviceByIpIface(String iface) throws DBusException {

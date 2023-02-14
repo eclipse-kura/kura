@@ -291,7 +291,7 @@ public class NMSettingsConverter {
         // ... WIP
         default:
             throw new IllegalArgumentException(String
-                    .format("Unsupported connection type conversion from NMDeviceType \"%\"", deviceType.toString()));
+                    .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
     }
 

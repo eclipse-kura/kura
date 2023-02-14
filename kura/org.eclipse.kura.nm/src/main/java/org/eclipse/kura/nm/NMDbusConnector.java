@@ -229,7 +229,7 @@ public class NMDbusConnector {
             } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
                 setDeviceManaged(device, false);
             } else { // NMDeviceEnable.ENABLED
-                if (!isDeviceManaged(device)) {
+                if (Boolean.FALSE.equals(isDeviceManaged(device))) {
                     setDeviceManaged(device, true);
                 }
 
@@ -264,7 +264,7 @@ public class NMDbusConnector {
                 continue;
             }
 
-            if (!isDeviceManaged(device)) {
+            if (Boolean.FALSE.equals(isDeviceManaged(device))) {
                 setDeviceManaged(device, true);
             }
 
@@ -277,7 +277,7 @@ public class NMDbusConnector {
 
     private void disable(Device device) throws DBusException {
         NMDeviceState deviceState = getDeviceState(device);
-        if (NMDeviceState.isConnected(deviceState)) {
+        if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             device.Disconnect();
         }
 

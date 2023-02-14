@@ -349,18 +349,13 @@ public class NMSettingsConverterTest {
 
 	public void givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(String inter, Boolean dhcpStatus,
 			String netStatus) {
-		internetNetworkPropertiesInstanciationMap
-				.put(String.format("net.interface.%s.config.dhcpClient4.enabled", inter), dhcpStatus);
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.ip4.status", inter),
-				netStatus);
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.ip4.address", inter),
-				"192.168.0.12");
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.ip4.prefix", inter),
-				(short) 25);
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.ip4.dnsServers", inter),
-				"1.1.1.1");
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.ip4.gateway", inter),
-				"192.168.0.1");
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.dhcpClient4.enabled",
+				dhcpStatus);
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.status", netStatus);
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.address", "192.168.0.12");
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.prefix", (short) 25);
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.dnsServers", "1.1.1.1");
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.ip4.gateway", "192.168.0.1");
 	}
 
 	public void givenExpectedValidWifiConfigurationSetToLan(String inter) {
@@ -469,23 +464,20 @@ public class NMSettingsConverterTest {
 
 	public void givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(String inter, String ssid,
 			String propMode, Boolean groupEnabled, Boolean ciphersEnabled) {
-		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.wifi.mode", inter),
-				propMode);
+		internetNetworkPropertiesInstanciationMap.put("net.interface." + inter + ".config.wifi.mode", propMode);
 		internetNetworkPropertiesInstanciationMap.put(
-				String.format("net.interface.%s.config.wifi.%s.passphrase", inter, propMode.toLowerCase()),
+				"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".passphrase",
 				new Password("test"));
 		internetNetworkPropertiesInstanciationMap.put(
-				String.format("net.interface.%s.config.wifi.%s.securityType", inter, propMode.toLowerCase()),
+				"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".securityType",
 				"SECURITY_WPA_WPA2");
 		if (groupEnabled) {
-			internetNetworkPropertiesInstanciationMap.put(
-					String.format("net.interface.%s.config.wifi.%s.groupCiphers", inter, propMode.toLowerCase()),
-					"CCMP");
+			internetNetworkPropertiesInstanciationMap
+					.put("net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".groupCiphers", "CCMP");
 		}
 		if (ciphersEnabled) {
 			internetNetworkPropertiesInstanciationMap.put(
-					String.format("net.interface.%s.config.wifi.%s.pairwiseCiphers", inter, propMode.toLowerCase()),
-					"CCMP");
+					"net.interface." + inter + ".config.wifi." + propMode.toLowerCase() + ".pairwiseCiphers", "CCMP");
 		}
 	}
 

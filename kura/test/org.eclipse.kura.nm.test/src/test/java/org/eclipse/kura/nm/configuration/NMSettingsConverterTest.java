@@ -140,8 +140,8 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSettingsShouldWorkWhenGivenExpectedMapAndSetToInfraAndWithChannelField() {
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "INFRA", true, false);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "infrastructure", true, false);
+		givenValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "testssid", "INFRA", true, false);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters("wlan0", "testssid", "infrastructure", true, false);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenNoExceptionsHaveBeenThrown();
@@ -150,8 +150,8 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMap() {
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters("wlan0", "ssidtest", "propmode", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters("wlan0", "ssidtest", "propmode", true, true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenNoExceptionsHaveBeenThrown();
@@ -167,10 +167,10 @@ public class NMSettingsConverterTest {
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, false);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true, false);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true,
+		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true, false);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true,
 				true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
@@ -189,10 +189,10 @@ public class NMSettingsConverterTest {
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, false);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true, false);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true,
+		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true, false);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true,
 				true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
@@ -211,10 +211,10 @@ public class NMSettingsConverterTest {
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, false);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true, false);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true,
+		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true, false);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true,
 				true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
@@ -233,10 +233,10 @@ public class NMSettingsConverterTest {
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true, true);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true,
+		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true, true);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true,
 				true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
@@ -255,10 +255,10 @@ public class NMSettingsConverterTest {
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
-		givenValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true, true);
-		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "INFRA", true, true);
-		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(netInterface, "ssidtest", "infrastructure", true,
+		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true, true);
+		givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, true);
+		givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(netInterface, "ssidtest", "infrastructure", true,
 				true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		givenExpectedBuildAllConnectionField(netInterface, "802-11-wireless");
@@ -346,7 +346,7 @@ public class NMSettingsConverterTest {
 
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
 
-		givenValidBuildIpv4Config(dhcpStatus);
+		givenValidBuildIpv4ConfigWithDhcpStatusSetTo(dhcpStatus);
 		givenValidBuildIpv6Config();
 		if (netStatus.equals("netIPv4StatusEnabledLAN")) {
 			internalMethodHashMap.put("ignore-auto-dns", new Variant<>(true));
@@ -367,7 +367,7 @@ public class NMSettingsConverterTest {
 
 	}
 
-	public void givenValidBuildIpv4Config(boolean dhcpStatus) {
+	public void givenValidBuildIpv4ConfigWithDhcpStatusSetTo(boolean dhcpStatus) {
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
 		if (!dhcpStatus) {
 			internalMethodHashMap.put("method", new Variant<>("manual"));
@@ -392,7 +392,7 @@ public class NMSettingsConverterTest {
 		this.internalComparatorAllSettingsMap.put("ipv6", internalMethodHashMap);
 	}
 
-	public void givenValid80211WirelessSettingsWithInterfaceNameAndSsid(String inter, String ssid, String propMode,
+	public void givenValid80211WirelessSettingsWithTheFollowingParameters(String inter, String ssid, String propMode,
 			Boolean channelEnabled, Boolean isHidden) {
 		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.wifi.mode", inter),
 				propMode);
@@ -413,7 +413,7 @@ public class NMSettingsConverterTest {
 		
 	}
 
-	public void givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid(String inter, String ssid,
+	public void givenExpectedValid80211WirelessSettingsWithTheFollowingParameters(String inter, String ssid,
 			String propMode, Boolean channelEnabled, Boolean isHidden) {
 
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();
@@ -434,7 +434,7 @@ public class NMSettingsConverterTest {
 		this.internalComparatorMap.putAll(internalMethodHashMap);
 	}
 
-	public void givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid(String inter, String ssid,
+	public void givenValid80211WirelessSecuritySettingsWithTheFollowingParameters(String inter, String ssid,
 			String propMode, Boolean groupEnabled, Boolean ciphersEnabled) {
 		internetNetworkPropertiesInstanciationMap.put(String.format("net.interface.%s.config.wifi.mode", inter),
 				propMode);
@@ -456,7 +456,7 @@ public class NMSettingsConverterTest {
 		}
 	}
 
-	public void givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid(String inter, String ssid,
+	public void givenExpected80211WirelessSecuritySettingsWithTheFollowingParameters(String inter, String ssid,
 			String propMode, Boolean groupEnabled, Boolean ciphersEnabled) {
 
 		Map<String, Variant<?>> internalMethodHashMap = new HashMap<>();

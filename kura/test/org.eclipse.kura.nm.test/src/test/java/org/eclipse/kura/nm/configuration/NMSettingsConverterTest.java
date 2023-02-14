@@ -33,13 +33,13 @@ import org.junit.Test;
 
 public class NMSettingsConverterTest {
 
-	Map<String, Variant<?>> internalComparatorMap;
+	Map<String, Variant<?>> internalComparatorMap = new HashMap<>();
 	Map<String, Variant<?>> resultMap;
 
-	Map<String, Map<String, Variant<?>>> internalComparatorAllSettingsMap;
-	Map<String, Map<String, Variant<?>>> resultAllSettingsMap;
+	Map<String, Map<String, Variant<?>>> internalComparatorAllSettingsMap = new HashMap<>();
+	Map<String, Map<String, Variant<?>>> resultAllSettingsMap = new HashMap<>();
 
-	Map<String, Object> internetNetworkPropertiesInstanciationMap;
+	Map<String, Object> internetNetworkPropertiesInstanciationMap = new HashMap<>();
 
 	NetworkProperties networkProperties;
 
@@ -48,7 +48,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildSettingsShouldThrowWhenGivenEmptyMap() {
-		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, Optional.empty(), "wlan0",
 				NMDeviceType.NM_DEVICE_TYPE_WIFI);
@@ -57,7 +56,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldThrowWhenGivenEmptyMap() {
-		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenIllegalArgumentExceptionHasBeenThrown();
@@ -65,7 +63,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv6SettingsShouldThrowErrorWhenWhenGivenEmptyMap() {
-		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv6SettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenIllegalArgumentExceptionHasBeenThrown();
@@ -73,7 +70,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSettingsShouldThrowErrorWhenGivenEmptyMap() {
-		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenIllegalArgumentExceptionHasBeenThrown();
@@ -81,7 +77,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSecuritySettingsShouldThrowWhenGivenEmptyMap() {
-		givenEmptyMaps();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWithNetworkPropsAndIfaceString(this.networkProperties, "wlan0");
 		thenIllegalArgumentExceptionHasBeenThrown();
@@ -89,7 +84,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForWan() {
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true, "netIPv4StatusEnabledWAN");
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true,
 				"netIPv4StatusEnabledWAN");
@@ -101,7 +95,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndEnabledForWan() {
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusEnabledWAN");
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false,
 				"netIPv4StatusEnabledWAN");
@@ -114,7 +107,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForLan() {
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true, "netIPv4StatusEnabledLAN");
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", true,
 				"netIPv4StatusEnabledLAN");
@@ -126,7 +118,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndEnabledForLan() {
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusEnabledLAN");
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false,
 				"netIPv4StatusEnabledLAN");
@@ -138,7 +129,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndUnmanaged() {
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false, "netIPv4StatusUnmanaged");
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus("wlan0", false,
 				"netIPv4StatusUnmanaged");
@@ -150,7 +140,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSettingsShouldWorkWhenGivenExpectedMapAndSetToInfraAndWithChannelField() {
-		givenEmptyMaps();
 		givenValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "INFRA", true, false);
 		givenExpectedValid80211WirelessSettingsWithInterfaceNameAndSsid("wlan0", "testssid", "infrastructure", true, false);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -161,7 +150,6 @@ public class NMSettingsConverterTest {
 
 	@Test
 	public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMap() {
-		givenEmptyMaps();
 		givenValid80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
 		givenExpected80211WirelessSecuritySettingsWithInterfaceNameAndSsid("wlan0", "ssidtest", "propmode", true, true);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -171,12 +159,11 @@ public class NMSettingsConverterTest {
 	}
 
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsWiFi() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiUnmanged() {
 		
 		String netInterface = "wlan0";
 		String kuraNetType = "netIPv4StatusUnmanaged";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -194,12 +181,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsWiFiLan() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLan() {
 		
 		String netInterface = "wlan0";
 		String kuraNetType = "netIPv4StatusManagedLan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -217,12 +203,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsWiFiWan() {
+	public void buildSettingsShouldWorkWithExpectedConfiguredForInputsWiFiWan() {
 		
 		String netInterface = "wlan0";
 		String kuraNetType = "netIPv4StatusManagedWan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -240,12 +225,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsWiFiLanAndHiddenSsid() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLanAndHiddenSsid() {
 		
 		String netInterface = "wlan0";
 		String kuraNetType = "netIPv4StatusManagedLan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -263,12 +247,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsWiFiWanAndHiddenSsid() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
 		
 		String netInterface = "wlan0";
 		String kuraNetType = "netIPv4StatusManagedWan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -286,12 +269,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsEthernetAndUnmanaged() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndUnmanaged() {
 		
 		String netInterface = "eth0";
 		String kuraNetType = "netIPv4StatusUnmanaged";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -304,12 +286,11 @@ public class NMSettingsConverterTest {
 	}
 	
 	@Test
-	public void buildSettingsShouldWorkWithExpectedInputsEthernetAndLan() {
+	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndLan() {
 		
 		String netInterface = "eth0";
 		String kuraNetType = "netIPv4StatusManagedLan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -327,7 +308,6 @@ public class NMSettingsConverterTest {
 		String netInterface = "eth0";
 		String kuraNetType = "netIPv4StatusManagedWan";
 		
-		givenEmptyMaps();
 		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
 		givenExpectedValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false,
 				kuraNetType);
@@ -340,14 +320,6 @@ public class NMSettingsConverterTest {
 	}
 
 	// given
-
-	public void givenEmptyMaps() {
-		internalComparatorMap = new HashMap<>();
-		resultMap = new HashMap<>();
-		internalComparatorAllSettingsMap = new HashMap<>();
-		resultAllSettingsMap = new HashMap<>();
-		internetNetworkPropertiesInstanciationMap = new HashMap<>();
-	}
 
 	public void givenNetworkPropsCreatedWithTheMap(Map<String, Object> properties) {
 		this.networkProperties = new NetworkProperties(properties);

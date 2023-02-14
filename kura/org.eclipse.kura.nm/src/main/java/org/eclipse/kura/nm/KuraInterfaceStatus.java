@@ -37,7 +37,7 @@ public enum KuraInterfaceStatus {
             return UNMANAGED;
         }
 
-        if (ip4Unmanaged && !ip6Unmanaged || !ip4Unmanaged && ip6Unmanaged) {
+        if (ip4Unmanaged || ip6Unmanaged) { // && (ip4Status != ip6Status)
             throw new IllegalArgumentException("ip4 and ip6 status should be both UNMANAGED");
         }
 

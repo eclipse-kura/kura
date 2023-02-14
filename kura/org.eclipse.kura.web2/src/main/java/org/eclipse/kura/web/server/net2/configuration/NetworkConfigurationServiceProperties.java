@@ -98,6 +98,7 @@ public class NetworkConfigurationServiceProperties {
      */
 
     private static final String NET_INTERFACE_CONFIG_IP4_STATUS = "net.interface.%s.config.ip4.status";
+    private static final String NET_INTERFACE_CONFIG_IP4_WAN_PRIORITY = "net.interface.%s.config.ip4.wan.priority";
     private static final String NET_INTERFACE_CONFIG_IP4_ADDRESS = "net.interface.%s.config.ip4.address";
     private static final String NET_INTERFACE_CONFIG_IP4_NETMASK = "net.interface.%s.config.ip4.prefix";
     private static final String NET_INTERFACE_CONFIG_IP4_GATEWAY = "net.interface.%s.config.ip4.gateway";
@@ -109,6 +110,14 @@ public class NetworkConfigurationServiceProperties {
 
     public void setIp4Status(String ifname, String status) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname), status);
+    }
+
+    public int getIp4WanPriority(String ifname) {
+        return (Integer) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_WAN_PRIORITY, ifname), 0);
+    }
+
+    public void setIp4WanPriority(String ifname, int priority) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_WAN_PRIORITY, ifname), priority);
     }
 
     public String getIp4Address(String ifname) {

@@ -205,50 +205,55 @@ public class NMDbusConnector {
                 continue;
             }
 
-            Device device = getDeviceByIpIface(iface);
-            NMDeviceType deviceType = getDeviceType(device);
+            manageConfiguredInterface(iface, properties);
+        }
+    }
 
-            KuraIpStatus ip4Status = KuraIpStatus
-                    .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
-            KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED
-                    : KuraIpStatus.DISABLED; // Temporary solution while we wait to add ipv6 support.
-            KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
+    private synchronized void manageConfiguredInterface(String iface, NetworkProperties properties)
+            throws DBusException {
+        Device device = getDeviceByIpIface(iface);
+        NMDeviceType deviceType = getDeviceType(device);
 
-            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
-                logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", iface,
-                        deviceType, ip4Status, ip6Status);
-                continue;
+        KuraIpStatus ip4Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
+        // Temporary solution while we wait to add complete IPv6 support
+        KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
+
+        if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
+            logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", iface,
+                    deviceType, ip4Status, ip6Status);
+            return;
+        }
+
+        logger.info("Settings iface \"{}\":{}", iface, deviceType);
+
+        if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
+            disable(device);
+        } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
+            setDeviceManaged(device, false);
+        } else { // NMDeviceEnable.ENABLED
+            if (Boolean.FALSE.equals(isDeviceManaged(device))) {
+                setDeviceManaged(device, true);
             }
 
-            logger.info("Settings iface \"{}\":{}", iface, deviceType);
+            Optional<Connection> connection = getAppliedConnection(device);
+            Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
+                    connection, iface, deviceType);
 
-            if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-                disable(device);
-            } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
-                setDeviceManaged(device, false);
-            } else { // NMDeviceEnable.ENABLED
-                if (Boolean.FALSE.equals(isDeviceManaged(device))) {
-                    setDeviceManaged(device, true);
-                }
+            logger.info("New settings: {}", newConnectionSettings);
 
-                Optional<Connection> connection = getAppliedConnection(device);
-                Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter
-                        .buildSettings(properties, connection, iface, deviceType);
+            if (connection.isPresent()) {
+                logger.info("Current settings: {}", connection.get().GetSettings());
 
-                logger.info("New settings: {}", newConnectionSettings);
-
-                if (connection.isPresent()) {
-                    logger.info("Current settings: {}", connection.get().GetSettings());
-
-                    connection.get().Update(newConnectionSettings);
-                    this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
-                            new DBusPath(device.getObjectPath()), new DBusPath("/"));
-                } else {
-                    this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
-                            new DBusPath("/"));
-                }
+                connection.get().Update(newConnectionSettings);
+                this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
+                        new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            } else {
+                this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
+                        new DBusPath("/"));
             }
         }
     }

@@ -23,6 +23,136 @@ public class NMDeviceWifiCapabilitiesTest {
         thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_NONE);
     }
 
+    @Test
+    public void fromUInt32WorksWithCipherWEP40() {
+        givenValue(0x00000001);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_WEP40);
+    }
+
+    @Test
+    public void fromUInt32WorksWithCipherWEP104() {
+        givenValue(0x00000002);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_WEP104);
+    }
+
+    @Test
+    public void fromUInt32WorksWithCipherTKIP() {
+        givenValue(0x00000004);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_TKIP);
+    }
+
+    @Test
+    public void fromUInt32WorksWithCipherCCMP() {
+        givenValue(0x00000008);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_CCMP);
+    }
+
+    @Test
+    public void fromUInt32WorksWithWPA() {
+        givenValue(0x00000010);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_WPA);
+    }
+
+    @Test
+    public void fromUInt32WorksWithRSN() {
+        givenValue(0x00000020);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_RSN);
+    }
+
+    @Test
+    public void fromUInt32WorksWithAP() {
+        givenValue(0x00000040);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_AP);
+    }
+
+    @Test
+    public void fromUInt32WorksWithADHOC() {
+        givenValue(0x00000080);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_ADHOC);
+    }
+
+    @Test
+    public void fromUInt32WorksWithFreqValid() {
+        givenValue(0x00000100);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_VALID);
+    }
+
+    @Test
+    public void fromUInt32WorksWithFreq2GHZ() {
+        givenValue(0x00000200);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_2GHZ);
+    }
+
+    @Test
+    public void fromUInt32WorksWithFreq5GHZ() {
+        givenValue(0x00000400);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_5GHZ);
+    }
+
+    @Test
+    public void fromUInt32WorksWithMesh() {
+        givenValue(0x00001000);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_MESH);
+    }
+
+    @Test
+    public void fromUInt32WorksWithIBSSRSN() {
+        givenValue(0x00002000);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenCapabilitiesSizeIs(1);
+        thenCapabilitiesContains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_IBSS_RSN);
+    }
+
     private void givenValue(int intValue) {
         this.value = new UInt32(intValue);
     }

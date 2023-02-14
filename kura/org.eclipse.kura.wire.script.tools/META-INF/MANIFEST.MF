@@ -23,4 +23,5 @@ Bundle-ClassPath: .,
  lib/js-launcher.jar,
  lib/js-scriptengine.jar,
  lib/launcher-common.jar,
- lib/truffle-api.jar
+ lib/truffle-api.jar,
+ lib/regex.jar

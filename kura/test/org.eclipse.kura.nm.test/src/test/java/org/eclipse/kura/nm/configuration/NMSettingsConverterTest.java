@@ -600,7 +600,6 @@ public class NMSettingsConverterTest {
 	}
 
 	// then
-
 	public void thenResultingMapContains(String key, Object value) {
 		assertEquals(value, this.resultMap.get(key).getValue());
 	}
@@ -617,59 +616,6 @@ public class NMSettingsConverterTest {
 		assertEquals(value, new String((byte[]) this.resultAllSettingsMap.get(key).get(subKey).getValue(), StandardCharsets.UTF_8));
 	}
 
-	public Object buildAddressDataWith(String ipAddr, UInt32 prefix) {
-
-		Map<String, Variant<?>> addressEntry = new HashMap<>();
-		addressEntry.put("address", new Variant<>(ipAddr));
-		addressEntry.put("prefix", new Variant<>(prefix));
-
-		List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
-
-		Variant<?> dataVarient = new Variant<>(addressData, "aa{sv}");
-
-		return dataVarient.getValue();
-	}
-
-	public void thenMapResultShouldEqualInternalMap() {
-		assertEquals(this.internalComparatorMap, this.resultMap);
-	}
-
-	public void thenMapResultFromWifiSettingsShouldEqualInternalMapForWifiSettings() {
-		// Workaround to compare String.getBytes(StandardCharsets.UTF_8)
-
-		String internalSsid = new String((byte[]) internalComparatorMap.get("ssid").getValue(), StandardCharsets.UTF_8);
-		String resultSsid = new String((byte[]) this.resultMap.get("ssid").getValue(), StandardCharsets.UTF_8);
-
-		assertEquals(internalSsid, resultSsid);
-
-		// Remove SSID fields from Maps before comparison
-		this.internalComparatorMap.put("ssid", new Variant<>(""));
-		this.resultMap.put("ssid", new Variant<>(""));
-
-		assertEquals(this.internalComparatorMap, this.resultMap);
-	}
-
-	public void thenMapResultShouldEqualInternalBuildMap() {
-
-		// Workaround to compare String.getBytes(StandardCharsets.UTF_8)
-		if (this.internalComparatorAllSettingsMap.containsKey("802-11-wireless")) {
-			String internalSsid = new String(
-					(byte[]) internalComparatorAllSettingsMap.get("802-11-wireless").get("ssid").getValue(),
-					StandardCharsets.UTF_8);
-			String resultSsid = new String(
-					(byte[]) this.resultAllSettingsMap.get("802-11-wireless").get("ssid").getValue(),
-					StandardCharsets.UTF_8);
-
-			internalComparatorAllSettingsMap.get("802-11-wireless").put("ssid", new Variant<>("wpa-psk"));
-			resultAllSettingsMap.get("802-11-wireless").put("ssid", new Variant<>("wpa-psk"));
-
-			assertEquals(internalSsid, resultSsid);
-		}
-		// Remove SSID fields from Maps before comparison
-
-		assertEquals(this.internalComparatorAllSettingsMap, this.resultAllSettingsMap);
-	}
-
 	public void thenIllegalArgumentExceptionHasBeenThrown() {
 		assertTrue(this.hasIllegalArgumentExceptionBeenThrown);
 	}
@@ -679,4 +625,17 @@ public class NMSettingsConverterTest {
 		assertFalse(this.hasAGenericExecptionBeenThrown);
 	}
 
+	//helper classes
+	public Object buildAddressDataWith(String ipAddr, UInt32 prefix) {
+		
+		Map<String, Variant<?>> addressEntry = new HashMap<>();
+		addressEntry.put("address", new Variant<>(ipAddr));
+		addressEntry.put("prefix", new Variant<>(prefix));
+		
+		List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
+		
+		Variant<?> dataVarient = new Variant<>(addressData, "aa{sv}");
+		
+		return dataVarient.getValue();
+	}
 }

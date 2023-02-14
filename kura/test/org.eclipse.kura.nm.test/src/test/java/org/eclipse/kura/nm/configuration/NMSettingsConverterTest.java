@@ -45,6 +45,9 @@ public class NMSettingsConverterTest {
 
 	Boolean hasIllegalArgumentExceptionBeenThrown = false;
 	Boolean hasAGenericExecptionBeenThrown = false;
+	
+	String netInterface; 
+	String kuraIP4Status;
 
 	@Test
 	public void buildSettingsShouldThrowWhenGivenEmptyMap() {
@@ -167,10 +170,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiUnmanged() {
 
-		String netInterface = "wlan0";
-		String kuraNetType = "netIPv4StatusUnmanaged";
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusUnmanaged");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenValid80211WirelessSettingsWithTheFollowingParameters(netInterface, "ssidtest", "INFRA", true, false);
@@ -191,10 +194,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLan() {
 
-		String netInterface = "wlan0";
-		String kuraNetType = "netIPv4StatusManagedLan";
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusManagedLan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
@@ -216,10 +219,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedConfiguredForInputsWiFiWan() {
 
-		String netInterface = "wlan0";
-		String kuraNetType = "netIPv4StatusManagedWan";
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusManagedWan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
@@ -241,10 +244,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLanAndHiddenSsid() {
 
-		String netInterface = "wlan0";
-		String kuraNetType = "netIPv4StatusManagedLan";
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusManagedLan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
@@ -266,10 +269,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
 
-		String netInterface = "wlan0";
-		String kuraNetType = "netIPv4StatusManagedWan";
+		givenNetInterface("wlan0");
+		givenIP4Status("netIPv4StatusManagedWan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
@@ -291,10 +294,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndUnmanaged() {
 
-		String netInterface = "eth0";
-		String kuraNetType = "netIPv4StatusUnmanaged";
+		givenNetInterface("eth0");
+		givenIP4Status("netIPv4StatusUnmanaged");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -308,10 +311,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndLan() {
 
-		String netInterface = "eth0";
-		String kuraNetType = "netIPv4StatusManagedLan";
+		givenNetInterface("eth0");
+		givenIP4Status("netIPv4StatusManagedLan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToLan(netInterface);
@@ -326,10 +329,10 @@ public class NMSettingsConverterTest {
 	@Test
 	public void buildSettingsShouldWorkWithExpectedInputsEthernetAndWan() {
 
-		String netInterface = "eth0";
-		String kuraNetType = "netIPv4StatusManagedWan";
+		givenNetInterface("eth0");
+		givenIP4Status("netIPv4StatusManagedWan");
 
-		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraNetType);
+		givenValidWifiConfigurationWithInterfaceNameAndDhcpBoolAndNetStatus(netInterface, false, kuraIP4Status);
 		givenValidBuildIpv4ConfigWithDhcpDisabled();
 		givenValidBuildIpv6Config();
 		givenExpectedValidWifiConfigurationSetToWan(netInterface);
@@ -342,6 +345,14 @@ public class NMSettingsConverterTest {
 	}
 
 	// given
+	
+	public void givenNetInterface(String netInterface){
+		this.netInterface = netInterface;
+	}
+	
+	public void givenIP4Status(String kuraIP4Status){
+		this.kuraIP4Status = kuraIP4Status;
+	}
 
 	public void givenNetworkPropsCreatedWithTheMap(Map<String, Object> properties) {
 		this.networkProperties = new NetworkProperties(properties);

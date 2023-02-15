@@ -2972,7 +2972,102 @@ It can be installed following the instructions provided <a href="../../administr
 <li><strong>value type</strong>: the Java type of the channel value.</li>
 <li><strong>node.id</strong>: The node id of the variable node to be used, the format of the node id depends on the value of the <strong>node.id.type</strong> property.</li>
 <li><strong>node.namespace.index</strong>: The namespace index of the variable node to be used.</li>
-<li><strong>node.id.type</strong>: The type of the node id (see the <a href="#node-id-types">Node Id types</a> section)</li>
+<li>
+<p><strong>opcua.type</strong>: The OPC-UA built-in type of the attribute to be read/written. If set to DEFINED_BY_JAVA_TYPE (default), the driver will attempt to determine the OPC-UA type basing on the <strong>value type</strong> parameter value. If the read/write operation fails, it may be necessary to use one of the other values of this configuration parameter to explicitly select the type.</p>
+<p>This parameter also lists the OPC-UA types currently supported by the driver.</p>
+<p>Not all <strong>value type</strong> and <strong>opcua.type</strong> combinations are valid, the allowed ones are the following:</p>
+<table>
+<thead>
+<tr>
+<th><strong>opcua.type</strong></th>
+<th>Allowed <strong>value.type</strong>s</th>
+<th>Recommended <strong>value.type</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BOOLEAN</td>
+<td>BOOLEAN</td>
+<td>BOOLEAN</td>
+</tr>
+<tr>
+<td>SBYTE</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>INT16</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>INT32</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>INT64</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>LONG</td>
+</tr>
+<tr>
+<td>BYTE</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>UINT16</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>UINT32</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>LONG</td>
+</tr>
+<tr>
+<td>UINT64</td>
+<td>INTEGER, LONG, FLOAT, DOUBLE, STRING</td>
+<td>STRING</td>
+</tr>
+<tr>
+<td>FLOAT</td>
+<td>FLOAT, STRING</td>
+<td>FLOAT</td>
+</tr>
+<tr>
+<td>DOUBLE</td>
+<td>DOUBLE, STRING</td>
+<td>DOUBLE</td>
+</tr>
+<tr>
+<td>STRING</td>
+<td>STRING</td>
+<td>STRING</td>
+</tr>
+<tr>
+<td>BYTE_STRING</td>
+<td>BYTE_ARRAY</td>
+<td>BYTE_ARRAY</td>
+</tr>
+<tr>
+<td>BYTE_ARRAY</td>
+<td>BYTE_ARRAY</td>
+<td>BYTE_ARRAY</td>
+</tr>
+<tr>
+<td>SBYTE_ARRAY</td>
+<td>BYTE_ARRAY</td>
+<td>BYTE_ARRAY</td>
+</tr>
+</tbody>
+</table>
+<p>Using a non allowed <strong>value.type</strong>  will result in read/write operation failures.
+It should be noted that there is not a one to one match between the <strong>opcua.type</strong> and Java <strong>value.type</strong>. It is recommended to compare the allowed ranges for numeric types specified in <a href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.1.2/">OPC-UA Reference</a> and <a href="https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html">Java reference</a> for selecting the best match.</p>
+</li>
+<li>
+<p><strong>node.id.type</strong>: The type of the node id (see the <a href="#node-id-types">Node Id types</a> section)</p>
+</li>
 <li><strong>attribute</strong>: The attribute of the referenced variable node.</li>
 </ul>
 <p>If the <strong>listen</strong> flag is enabled for an OPC-UA channel, the driver will request the server to send notifications if it detects changes in the referenced attribute value.</p>

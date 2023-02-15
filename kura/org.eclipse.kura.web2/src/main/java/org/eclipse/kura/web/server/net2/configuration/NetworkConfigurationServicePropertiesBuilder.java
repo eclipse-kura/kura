@@ -31,10 +31,12 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
 
-    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig) {
+    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig,
+            Map<String, Object> currentNetConfServProps) {
         this.gwtConfig = gwtConfig;
-        this.properties = new NetworkConfigurationServiceProperties();
+        this.properties = new NetworkConfigurationServiceProperties(currentNetConfServProps);
         this.ifname = this.gwtConfig.getName();
+        this.properties.addNetworkInterfaceIfNotPresent(ifname);
     }
 
     public Map<String, Object> build() {

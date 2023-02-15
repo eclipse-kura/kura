@@ -60,7 +60,7 @@ public class NetworkConfigurationServiceAdapter {
      */
     public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException {
         NetworkConfigurationServicePropertiesBuilder builder = new NetworkConfigurationServicePropertiesBuilder(
-                gwtConfig);
+                gwtConfig, this.netConfServProperties);
         Map<String, Object> newProperties = builder.build();
 
         this.configurationService.updateConfiguration(NETWORK_CONFIGURATION_SERVICE_PID, newProperties);

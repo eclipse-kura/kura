@@ -89,9 +89,6 @@ public class NetworkStatusServiceAdapter {
         if (networkInterface.getUsbDevice() != null) {
             gwtConfig.setHwUsbDevice(networkInterface.getUsbDevice().getUsbDevicePath());
         }
-
-        logger.debug("GWT common state properties for interface {}:\\n{}\\n", gwtConfig.getName(),
-                gwtConfig.getProperties());
     }
 
     private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig,

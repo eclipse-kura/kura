@@ -79,8 +79,16 @@ public class NMStatusConverter {
     public static NetInterface<NetInterfaceAddress> buildWirelessStatus(String interfaceName,
             Properties deviceProperties, Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
             List<Properties> accessPointsProperties) {
-        // TODO Auto-generated method stub
-        return null;
+        EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
+
+        ethInterface.setVirtual(false);
+        ethInterface.setLoopback(false);
+        ethInterface.setPointToPoint(false); // TBD
+
+        setDeviceStatus(ethInterface, deviceProperties);
+        setIP4Status(ethInterface, ip4configProperties);
+
+        return ethInterface;
     }
 
     private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {

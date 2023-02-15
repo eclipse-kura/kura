@@ -23,10 +23,15 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.LoopbackInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
+import org.eclipse.kura.core.net.WifiInterfaceAddressImpl;
+import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
+import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
@@ -39,6 +44,7 @@ public class NMStatusConverter {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusConverter.class);
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
     private static final EnumMap<NMDeviceState, NetInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
@@ -79,16 +85,42 @@ public class NMStatusConverter {
     public static NetInterface<NetInterfaceAddress> buildWirelessStatus(String interfaceName,
             Properties deviceProperties, Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
             List<Properties> accessPointsProperties) {
-        EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
+        WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface = new WifiInterfaceImpl<>(interfaceName);
 
-        ethInterface.setVirtual(false);
-        ethInterface.setLoopback(false);
-        ethInterface.setPointToPoint(false); // TBD
+        wifiInterface.setVirtual(false);
+        wifiInterface.setLoopback(false);
+        wifiInterface.setPointToPoint(false); // TBD
 
-        setDeviceStatus(ethInterface, deviceProperties);
-        setIP4Status(ethInterface, ip4configProperties);
+        // setDeviceStatus(wifiInterface, deviceProperties);
+        setWifiIP4Status(wifiInterface, ip4configProperties, wirelessDeviceProperties, accessPointsProperties);
 
-        return ethInterface;
+        return null;
+    }
+
+    private static void setWifiIP4Status(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
+            Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
+            List<Properties> accessPointsProperties) {
+        if (!ip4configProperties.isPresent()) {
+            return;
+        }
+
+        List<WifiInterfaceAddress> addressList = new ArrayList<>();
+
+        String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
+        List<Map<String, Variant<?>>> addressesData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "AddressData");
+        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "NameserverData");
+        for (Map<String, Variant<?>> addressData : addressesData) {
+            WifiInterfaceAddressImpl address = new WifiInterfaceAddressImpl();
+
+            setIP4AddressInfo(address, addressData, gateway, nameserverData);
+            setWifiAddressInfo(address, wirelessDeviceProperties, accessPointsProperties);
+
+            addressList.add(address);
+        }
+
+        wifiInterface.setNetInterfaceAddresses(addressList);
     }
 
     private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {
@@ -161,6 +193,32 @@ public class NMStatusConverter {
             }
         }
         address.setDnsServers(dnsServers);
+    }
+
+    private static void setWifiAddressInfo(WifiInterfaceAddressImpl address, Properties wirelessDeviceProperties,
+            List<Properties> accessPointsProperties) {
+        NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
+        UInt32 bitrate = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Bitrate");
+
+        address.setBitrate(bitrate.longValue());
+        address.setMode(wifiModeConverter(mode));
+        address.setWifiAccessPoint(null); // TODO
+    }
+
+    private static WifiMode wifiModeConverter(NM80211Mode mode) {
+        switch (mode) {
+        case NM_802_11_MODE_UNKNOWN:
+            return WifiMode.UNKNOWN;
+        case NM_802_11_MODE_ADHOC:
+            return WifiMode.ADHOC;
+        case NM_802_11_MODE_INFRA:
+            return WifiMode.INFRA;
+        case NM_802_11_MODE_AP:
+            return WifiMode.MASTER;
+        case NM_802_11_MODE_MESH:
+        default:
+            return WifiMode.UNKNOWN;
+        }
     }
 
     private static String getNetmaskStringFrom(int prefix) {

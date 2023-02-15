@@ -14,10 +14,13 @@ package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
@@ -29,10 +32,12 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
+import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -46,6 +51,13 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
+
+    private static final List<NMDeviceWifiCapabilities> CONVERTIBLE_CAPABILITIES = Arrays.asList(
+            NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_NONE, NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_WEP40,
+            NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_WEP104,
+            NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_TKIP,
+            NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_CCMP, NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_WPA,
+            NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_RSN);
 
     private static final EnumMap<NMDeviceState, NetInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
 
@@ -93,6 +105,7 @@ public class NMStatusConverter {
 
         // setDeviceStatus(wifiInterface, deviceProperties);
         setWifiIP4Status(wifiInterface, ip4configProperties, wirelessDeviceProperties, accessPointsProperties);
+        setWifiCapabilities(wifiInterface, wirelessDeviceProperties);
 
         return null;
     }
@@ -121,6 +134,51 @@ public class NMStatusConverter {
         }
 
         wifiInterface.setNetInterfaceAddresses(addressList);
+    }
+
+    private static void setWifiCapabilities(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
+            Properties wirelessDeviceProperties) {
+        List<NMDeviceWifiCapabilities> nmCapabilities = NMDeviceWifiCapabilities
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
+
+        Set<Capability> kuraCapabilities = nmCapabilitiesConvert(nmCapabilities);
+
+        wifiInterface.setCapabilities(kuraCapabilities);
+    }
+
+    private static Set<Capability> nmCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {
+        List<Capability> kuraCapabilities = new ArrayList<>();
+        for (NMDeviceWifiCapabilities nmCapability : nmCapabilities) {
+
+            if (CONVERTIBLE_CAPABILITIES.contains(nmCapability)) {
+                kuraCapabilities.add(nmCapabilitiesConvert(nmCapability));
+            }
+
+        }
+
+        return new HashSet<>(kuraCapabilities);
+    }
+
+    private static Capability nmCapabilitiesConvert(NMDeviceWifiCapabilities nmCapability) {
+        switch (nmCapability) {
+        case NM_WIFI_DEVICE_CAP_NONE:
+            return Capability.NONE;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP40:
+            return Capability.CIPHER_WEP40;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP104:
+            return Capability.CIPHER_WEP104;
+        case NM_WIFI_DEVICE_CAP_CIPHER_TKIP:
+            return Capability.CIPHER_TKIP;
+        case NM_WIFI_DEVICE_CAP_CIPHER_CCMP:
+            return Capability.CIPHER_CCMP;
+        case NM_WIFI_DEVICE_CAP_WPA:
+            return Capability.WPA;
+        case NM_WIFI_DEVICE_CAP_RSN:
+            return Capability.RSN;
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Non convertiblle NMDeviceWifiCapabilities \"%s\"", nmCapability));
+        }
     }
 
     private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {

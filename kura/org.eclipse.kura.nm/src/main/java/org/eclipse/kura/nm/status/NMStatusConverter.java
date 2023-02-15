@@ -258,6 +258,12 @@ public class NMStatusConverter {
         kuraAccessPoint.setFrequency(frequency.longValue());
 
         // WIP
+        // channel
+        // bitrate
+        // strength
+        // wpasecurity
+        // rsnsecurity
+        // capabilities
 
         return kuraAccessPoint;
     }

@@ -201,11 +201,11 @@ public class NMStatusConverter {
         UInt32 bitrate = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Bitrate");
 
         address.setBitrate(bitrate.longValue());
-        address.setMode(wifiModeConverter(mode));
+        address.setMode(wifiModeConvert(mode));
         address.setWifiAccessPoint(null); // TODO
     }
 
-    private static WifiMode wifiModeConverter(NM80211Mode mode) {
+    private static WifiMode wifiModeConvert(NM80211Mode mode) {
         switch (mode) {
         case NM_802_11_MODE_UNKNOWN:
             return WifiMode.UNKNOWN;

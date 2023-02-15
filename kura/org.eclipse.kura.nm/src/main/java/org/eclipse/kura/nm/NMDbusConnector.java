@@ -35,6 +35,7 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +166,16 @@ public class NMDbusConnector {
             if (genericDeviceType.equals("loopback")) {
                 return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
             }
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+            Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Wireless.class);
+            Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    wirelessDevice.getObjectPath(), Properties.class);
+
+            List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
+
+            return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
+                    wirelessDeviceProperties, accessPoints);
         }
 
         return null;
@@ -314,6 +325,21 @@ public class NMDbusConnector {
         }
 
         return devices;
+    }
+
+    private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
+        List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
+
+        List<Properties> accessPointProperties = new ArrayList<>();
+
+        for (DBusPath path : accessPointPaths) {
+            Properties apProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                    Properties.class);
+            accessPointProperties.add(apProperties);
+
+        }
+
+        return accessPointProperties;
     }
 
     private NMDeviceState getDeviceState(Device device) throws DBusException {

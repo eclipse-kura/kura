@@ -194,4 +194,11 @@ public class NMStatusConverter {
         return map;
     }
 
+    public static NetInterface<NetInterfaceAddress> buildWirelessStatus(String interfaceName,
+            Properties deviceProperties, Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
+            List<Properties> accessPointsProperties) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

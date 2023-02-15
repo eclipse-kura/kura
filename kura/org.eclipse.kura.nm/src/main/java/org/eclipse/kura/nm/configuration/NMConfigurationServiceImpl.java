@@ -252,13 +252,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             for (final String intf : newWanInterfaces) {
                 if (!allNetworkInterfaces.contains(intf)) {
-                    logger.info(
-                            "A new interface has been enabled for WAN and interface {} is also enabled for WAN but it is not currently available."
-                                    + " Disabling it to avoid potentially unwanted multiple interfaces enabled for WAN.",
+                    logger.info("A new interface has been enabled for WAN and interface {} is also enabled for WAN",
                             intf);
-                    newProperties.put(PREFIX + intf + ".config.ip4.status",
-                            NetInterfaceStatus.netIPv4StatusDisabled.name());
-
                     changed = true;
                 }
             }

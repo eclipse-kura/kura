@@ -117,44 +117,50 @@ public class NMStatusConverter {
         List<NetInterfaceAddress> addressList = new ArrayList<>();
 
         String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        List<Map<String, Variant<?>>> addressData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+        List<Map<String, Variant<?>>> addressesData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "AddressData");
         List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
                 "NameserverData");
-        for (Map<String, Variant<?>> data : addressData) {
+        for (Map<String, Variant<?>> addressData : addressesData) {
             NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
 
-            try {
-                IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
-                address.setGateway(ipGateway);
-            } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve gateway address \"{}\" due to:", gateway, e);
-            }
-
-            String addressStr = String.class.cast(data.get("address").getValue());
-            UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
-            try {
-                address.setAddress(IPAddress.parseHostAddress(addressStr));
-                address.setNetworkPrefixLength(prefix.shortValue());
-                address.setNetmask(IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
-            } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve ip address due to:", e);
-            }
-
-            List<IPAddress> dnsServers = new ArrayList<>();
-            for (Map<String, Variant<?>> dns : nameserverData) {
-                String dnsAddressStr = String.class.cast(dns.get("address").getValue());
-                try {
-                    dnsServers.add(IPAddress.parseHostAddress(dnsAddressStr));
-                } catch (UnknownHostException e) {
-                    logger.debug("Could not retrieve ip address \"{}\" due to:", dnsAddressStr, e);
-                }
-            }
-            address.setDnsServers(dnsServers);
+            setIP4AddressInfo(address, addressData, gateway, nameserverData);
 
             addressList.add(address);
         }
 
         iface.setNetInterfaceAddresses(addressList);
+    }
+
+    private static void setIP4AddressInfo(NetInterfaceAddressImpl address, Map<String, Variant<?>> addressData,
+            String gateway, List<Map<String, Variant<?>>> nameserverData) {
+        try {
+            IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
+            address.setGateway(ipGateway);
+        } catch (UnknownHostException e) {
+            logger.debug("Could not retrieve gateway address \"{}\" due to:", gateway, e);
+        }
+
+        String addressStr = String.class.cast(addressData.get("address").getValue());
+        UInt32 prefix = UInt32.class.cast(addressData.get("prefix").getValue());
+        try {
+            address.setAddress(IPAddress.parseHostAddress(addressStr));
+            address.setNetworkPrefixLength(prefix.shortValue());
+            address.setNetmask(IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
+        } catch (UnknownHostException e) {
+            logger.debug("Could not retrieve ip address due to:", e);
+        }
+
+        List<IPAddress> dnsServers = new ArrayList<>();
+        for (Map<String, Variant<?>> dns : nameserverData) {
+            String dnsAddressStr = String.class.cast(dns.get("address").getValue());
+            try {
+                dnsServers.add(IPAddress.parseHostAddress(dnsAddressStr));
+            } catch (UnknownHostException e) {
+                logger.debug("Could not retrieve ip address \"{}\" due to:", dnsAddressStr, e);
+            }
+        }
+        address.setDnsServers(dnsServers);
     }
 
     private static String getNetmaskStringFrom(int prefix) {

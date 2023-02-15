@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
@@ -43,42 +44,42 @@ public class NMSettingsConverterTest {
 
 	NetworkProperties networkProperties;
 
-	Boolean hasIllegalArgumentExceptionBeenThrown = false;
+	Boolean hasNoSuchElementExceptionBeenThrown = false;
 	Boolean hasAGenericExecptionBeenThrown = false;
 
 	@Test
 	public void buildSettingsShouldThrowWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
-		thenIllegalArgumentExceptionHasBeenThrown();
+		thenNoSuchElementExceptionThrown();
 	}
 
 	@Test
 	public void buildIpv4SettingsShouldThrowWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-		thenIllegalArgumentExceptionHasBeenThrown();
+		thenNoSuchElementExceptionThrown();
 	}
 
 	@Test
 	public void buildIpv6SettingsShouldThrowErrorWhenWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
-		thenIllegalArgumentExceptionHasBeenThrown();
+		thenNoSuchElementExceptionThrown();
 	}
 
 	@Test
 	public void build80211WirelessSettingsShouldThrowErrorWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
-		thenIllegalArgumentExceptionHasBeenThrown();
+		thenNoSuchElementExceptionThrown();
 	}
 
 	@Test
 	public void build80211WirelessSecuritySettingsShouldThrowWhenGivenEmptyMap() {
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 		whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
-		thenIllegalArgumentExceptionHasBeenThrown();
+		thenNoSuchElementExceptionThrown();
 	}
 
 	@Test
@@ -487,9 +488,9 @@ public class NMSettingsConverterTest {
 			String iface, NMDeviceType deviceType) {
 		try {
 			this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			e.printStackTrace();
-			hasIllegalArgumentExceptionBeenThrown = true;
+			hasNoSuchElementExceptionBeenThrown = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
@@ -499,9 +500,9 @@ public class NMSettingsConverterTest {
 	public void whenBuildIpv4SettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			e.printStackTrace();
-			hasIllegalArgumentExceptionBeenThrown = true;
+			hasNoSuchElementExceptionBeenThrown = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
@@ -511,9 +512,9 @@ public class NMSettingsConverterTest {
 	public void whenBuildIpv6SettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			e.printStackTrace();
-			hasIllegalArgumentExceptionBeenThrown = true;
+			hasNoSuchElementExceptionBeenThrown = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
@@ -523,9 +524,9 @@ public class NMSettingsConverterTest {
 	public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			e.printStackTrace();
-			hasIllegalArgumentExceptionBeenThrown = true;
+			hasNoSuchElementExceptionBeenThrown = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
@@ -535,9 +536,9 @@ public class NMSettingsConverterTest {
 	public void whenBuild80211WirelessSecuritySettingsIsRunWith(NetworkProperties props, String iface) {
 		try {
 			this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
-		} catch (IllegalArgumentException e) {
+		} catch (NoSuchElementException e) {
 			e.printStackTrace();
-			hasIllegalArgumentExceptionBeenThrown = true;
+			hasNoSuchElementExceptionBeenThrown = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			hasAGenericExecptionBeenThrown = true;
@@ -564,12 +565,12 @@ public class NMSettingsConverterTest {
 		assertEquals(value, new String((byte[]) this.resultAllSettingsMap.get(key).get(subKey).getValue(), StandardCharsets.UTF_8));
 	}
 
-	public void thenIllegalArgumentExceptionHasBeenThrown() {
-		assertTrue(this.hasIllegalArgumentExceptionBeenThrown);
+	public void thenNoSuchElementExceptionThrown() {
+		assertTrue(this.hasNoSuchElementExceptionBeenThrown);
 	}
 
 	public void thenNoExceptionsHaveBeenThrown() {
-		assertFalse(this.hasIllegalArgumentExceptionBeenThrown);
+		assertFalse(this.hasNoSuchElementExceptionBeenThrown);
 		assertFalse(this.hasAGenericExecptionBeenThrown);
 	}
 

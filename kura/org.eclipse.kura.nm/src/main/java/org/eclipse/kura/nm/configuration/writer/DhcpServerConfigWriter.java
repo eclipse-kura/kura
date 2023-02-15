@@ -34,7 +34,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
-import org.eclipse.kura.nm.configuration.NetworkProperties;
+import org.eclipse.kura.nm.NetworkProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

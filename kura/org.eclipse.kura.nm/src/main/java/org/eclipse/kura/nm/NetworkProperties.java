@@ -10,18 +10,19 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm.configuration;
+package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class NetworkProperties {
 
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
     public NetworkProperties(Map<String, Object> rawProperties) {
         this.properties = Objects.requireNonNull(rawProperties);
@@ -33,16 +34,47 @@ public class NetworkProperties {
 
     public <T> T get(Class<T> clazz, String key, Object... args) {
         String formattedKey = String.format(key, args);
+
+        if (!this.properties.containsKey(formattedKey)) {
+            throw new NoSuchElementException(String.format("The \"%s\" key is missing.", formattedKey));
+        }
+
+        Object rawValue = this.properties.get(formattedKey);
+        if (Objects.isNull(rawValue)) {
+            throw new NoSuchElementException(String.format("The \"%s\" key contains a null value.", formattedKey));
+        }
+
+        if (clazz == String.class) {
+            String value = String.class.cast(rawValue);
+            if (value.isEmpty()) {
+                throw new NoSuchElementException(
+                        String.format("The \"%s\" key contains an empty string value.", formattedKey));
+            }
+        }
+
         return clazz.cast(this.properties.get(formattedKey));
     }
 
     public <T> Optional<T> getOpt(Class<T> clazz, String key, Object... args) {
         String formattedKey = String.format(key, args);
-        if (this.properties.containsKey(formattedKey)) {
-            return Optional.of(clazz.cast(this.properties.get(formattedKey)));
-        } else {
+
+        if (!this.properties.containsKey(formattedKey)) {
             return Optional.empty();
         }
+
+        Object rawValue = this.properties.get(formattedKey);
+        if (Objects.isNull(rawValue)) {
+            return Optional.empty();
+        }
+
+        if (clazz == String.class) {
+            String value = String.class.cast(rawValue);
+            if (value.isEmpty()) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(clazz.cast(rawValue));
     }
 
     public List<String> getStringList(String key, Object... args) {
@@ -58,11 +90,15 @@ public class NetworkProperties {
     }
 
     public Optional<List<String>> getOptStringList(String key, Object... args) {
-        String formattedKey = String.format(key, args);
-        if (this.properties.containsKey(formattedKey)) {
-            return Optional.of(getStringList(formattedKey, args));
-        } else {
+        Optional<String> commaSeparatedString = getOpt(String.class, key, args);
+        if (!commaSeparatedString.isPresent() || commaSeparatedString.get().isEmpty()) {
             return Optional.empty();
         }
+
+        List<String> stringList = new ArrayList<>();
+        Pattern comma = Pattern.compile(",");
+        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+
+        return Optional.of(stringList);
     }
 }

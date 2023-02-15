@@ -25,6 +25,33 @@ The OPC UA Driver channel configuration is composed of the following parameters:
  - **value type**: the Java type of the channel value.
  - **node.id**: The node id of the variable node to be used, the format of the node id depends on the value of the **node.id.type** property.
  - **node.namespace.index**: The namespace index of the variable node to be used.
+ - **opcua.type**: The OPC-UA built-in type of the attribute to be read/written. If set to DEFINED_BY_JAVA_TYPE (default), the driver will attempt to determine the OPC-UA type basing on the **value type** parameter value. If the read/write operation fails, it may be necessary to use one of the other values of this configuration parameter to explicitly select the type.
+
+    This parameter also lists the OPC-UA types currently supported by the driver.
+
+    Not all **value type** and **opcua.type** combinations are valid, the allowed ones are the following:
+
+    | **opcua.type** | Allowed **value.type**s | Recommended **value.type** |
+    |-|-|-|
+    | BOOLEAN | BOOLEAN | BOOLEAN |
+    | SBYTE | INTEGER, LONG, FLOAT, DOUBLE, STRING | INTEGER |
+    | INT16 | INTEGER, LONG, FLOAT, DOUBLE, STRING | INTEGER |
+    | INT32 | INTEGER, LONG, FLOAT, DOUBLE, STRING | INTEGER |
+    | INT64 | INTEGER, LONG, FLOAT, DOUBLE, STRING | LONG |
+    | BYTE | INTEGER, LONG, FLOAT, DOUBLE, STRING | INTEGER |
+    | UINT16 | INTEGER, LONG, FLOAT, DOUBLE, STRING | INTEGER |
+    | UINT32 | INTEGER, LONG, FLOAT, DOUBLE, STRING | LONG |
+    | UINT64 | INTEGER, LONG, FLOAT, DOUBLE, STRING | STRING |
+    | FLOAT | FLOAT, STRING | FLOAT |
+    | DOUBLE | DOUBLE, STRING | DOUBLE |
+    | STRING | STRING | STRING |
+    | BYTE_STRING | BYTE_ARRAY | BYTE_ARRAY |
+    | BYTE_ARRAY | BYTE_ARRAY | BYTE_ARRAY |
+    | SBYTE_ARRAY | BYTE_ARRAY | BYTE_ARRAY |
+
+    Using a non allowed **value.type**  will result in read/write operation failures.
+    It should be noted that there is not a one to one match between the **opcua.type** and Java **value.type**. It is recommended to compare the allowed ranges for numeric types specified in [OPC-UA Reference](https://reference.opcfoundation.org/v104/Core/docs/Part6/5.1.2/) and [Java reference](https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html) for selecting the best match.
+
  - **node.id.type**: The type of the node id (see the [Node Id types](#node-id-types) section)
  - **attribute**: The attribute of the referenced variable node.
 

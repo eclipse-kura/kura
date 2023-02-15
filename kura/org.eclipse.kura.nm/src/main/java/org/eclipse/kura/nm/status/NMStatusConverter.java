@@ -229,7 +229,12 @@ public class NMStatusConverter {
         address.setMode(wifiModeConvert(mode));
 
         if (mode == NM80211Mode.NM_802_11_MODE_AP) {
-            // address.setWifiAccessPoint(accessPointsProperties); // TODO
+            if (accessPointsProperties.isEmpty()) {
+                logger.warn("No access point found for interface in MASTER mode.");
+                return;
+            }
+            // Only one AP should be available in MASTER mode
+            address.setWifiAccessPoint(accessPointConvert(accessPointsProperties.get(0)));
         } else {
             if (activeAccessPointProperties.isPresent()) {
                 address.setWifiAccessPoint(accessPointConvert(activeAccessPointProperties.get()));

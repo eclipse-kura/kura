@@ -467,7 +467,9 @@ public class NMSettingsConverterTest {
 		thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
 	}
 
-	// given
+	/*
+	 * Given
+	 */
 
 	public void givenNetworkPropsCreatedWithTheMap(Map<String, Object> properties) {
 		this.networkProperties = new NetworkProperties(properties);
@@ -477,7 +479,9 @@ public class NMSettingsConverterTest {
 		this.internetNetworkPropertiesInstanciationMap.put(key, value);
 	}
 
-	// when
+	/*
+	 * When
+	 */
 
 	public void whenBuildSettingsIsRunWith(NetworkProperties properties, Optional<Connection> oldConnection,
 			String iface, NMDeviceType deviceType) {
@@ -540,7 +544,10 @@ public class NMSettingsConverterTest {
 		}
 	}
 
-	// then
+	/*
+	 * Then
+	 */
+	
 	public void thenResultingMapContains(String key, Object value) {
 		assertEquals(value, this.resultMap.get(key).getValue());
 	}
@@ -566,7 +573,10 @@ public class NMSettingsConverterTest {
 		assertFalse(this.hasAGenericExecptionBeenThrown);
 	}
 
-	//helper classes
+	/*
+	 * Helper Methods
+	 */
+	
 	public Object buildAddressDataWith(String ipAddr, UInt32 prefix) {
 		
 		Map<String, Variant<?>> addressEntry = new HashMap<>();
@@ -575,8 +585,8 @@ public class NMSettingsConverterTest {
 		
 		List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
 		
-		Variant<?> dataVarient = new Variant<>(addressData, "aa{sv}");
+		Variant<?> dataVariant = new Variant<>(addressData, "aa{sv}");
 		
-		return dataVarient.getValue();
+		return dataVariant.getValue();
 	}
 }

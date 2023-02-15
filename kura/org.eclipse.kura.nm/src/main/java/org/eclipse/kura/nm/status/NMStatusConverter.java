@@ -110,77 +110,6 @@ public class NMStatusConverter {
         return null;
     }
 
-    private static void setWifiIP4Status(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
-            Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
-            List<Properties> accessPointsProperties) {
-        if (!ip4configProperties.isPresent()) {
-            return;
-        }
-
-        List<WifiInterfaceAddress> addressList = new ArrayList<>();
-
-        String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        List<Map<String, Variant<?>>> addressesData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
-                "AddressData");
-        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
-                "NameserverData");
-        for (Map<String, Variant<?>> addressData : addressesData) {
-            WifiInterfaceAddressImpl address = new WifiInterfaceAddressImpl();
-
-            setIP4AddressInfo(address, addressData, gateway, nameserverData);
-            setWifiAddressInfo(address, wirelessDeviceProperties, accessPointsProperties);
-
-            addressList.add(address);
-        }
-
-        wifiInterface.setNetInterfaceAddresses(addressList);
-    }
-
-    private static void setWifiCapabilities(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
-            Properties wirelessDeviceProperties) {
-        List<NMDeviceWifiCapabilities> nmCapabilities = NMDeviceWifiCapabilities
-                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
-
-        Set<Capability> kuraCapabilities = nmCapabilitiesConvert(nmCapabilities);
-
-        wifiInterface.setCapabilities(kuraCapabilities);
-    }
-
-    private static Set<Capability> nmCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {
-        List<Capability> kuraCapabilities = new ArrayList<>();
-        for (NMDeviceWifiCapabilities nmCapability : nmCapabilities) {
-
-            if (CONVERTIBLE_CAPABILITIES.contains(nmCapability)) {
-                kuraCapabilities.add(nmCapabilitiesConvert(nmCapability));
-            }
-
-        }
-
-        return new HashSet<>(kuraCapabilities);
-    }
-
-    private static Capability nmCapabilitiesConvert(NMDeviceWifiCapabilities nmCapability) {
-        switch (nmCapability) {
-        case NM_WIFI_DEVICE_CAP_NONE:
-            return Capability.NONE;
-        case NM_WIFI_DEVICE_CAP_CIPHER_WEP40:
-            return Capability.CIPHER_WEP40;
-        case NM_WIFI_DEVICE_CAP_CIPHER_WEP104:
-            return Capability.CIPHER_WEP104;
-        case NM_WIFI_DEVICE_CAP_CIPHER_TKIP:
-            return Capability.CIPHER_TKIP;
-        case NM_WIFI_DEVICE_CAP_CIPHER_CCMP:
-            return Capability.CIPHER_CCMP;
-        case NM_WIFI_DEVICE_CAP_WPA:
-            return Capability.WPA;
-        case NM_WIFI_DEVICE_CAP_RSN:
-            return Capability.RSN;
-        default:
-            throw new IllegalArgumentException(
-                    String.format("Non convertiblle NMDeviceWifiCapabilities \"%s\"", nmCapability));
-        }
-    }
-
     private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {
         iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
         iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
@@ -220,6 +149,42 @@ public class NMStatusConverter {
         }
 
         iface.setNetInterfaceAddresses(addressList);
+    }
+
+    private static void setWifiIP4Status(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
+            Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
+            List<Properties> accessPointsProperties) {
+        if (!ip4configProperties.isPresent()) {
+            return;
+        }
+
+        List<WifiInterfaceAddress> addressList = new ArrayList<>();
+
+        String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
+        List<Map<String, Variant<?>>> addressesData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "AddressData");
+        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
+                "NameserverData");
+        for (Map<String, Variant<?>> addressData : addressesData) {
+            WifiInterfaceAddressImpl address = new WifiInterfaceAddressImpl();
+
+            setIP4AddressInfo(address, addressData, gateway, nameserverData);
+            setWifiAddressInfo(address, wirelessDeviceProperties, accessPointsProperties);
+
+            addressList.add(address);
+        }
+
+        wifiInterface.setNetInterfaceAddresses(addressList);
+    }
+
+    private static void setWifiCapabilities(WifiInterfaceImpl<WifiInterfaceAddress> wifiInterface,
+            Properties wirelessDeviceProperties) {
+        List<NMDeviceWifiCapabilities> nmCapabilities = NMDeviceWifiCapabilities
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
+
+        Set<Capability> kuraCapabilities = nmCapabilitiesConvert(nmCapabilities);
+
+        wifiInterface.setCapabilities(kuraCapabilities);
     }
 
     private static void setIP4AddressInfo(NetInterfaceAddressImpl address, Map<String, Variant<?>> addressData,
@@ -276,6 +241,41 @@ public class NMStatusConverter {
         case NM_802_11_MODE_MESH:
         default:
             return WifiMode.UNKNOWN;
+        }
+    }
+
+    private static Set<Capability> nmCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {
+        List<Capability> kuraCapabilities = new ArrayList<>();
+        for (NMDeviceWifiCapabilities nmCapability : nmCapabilities) {
+
+            if (CONVERTIBLE_CAPABILITIES.contains(nmCapability)) {
+                kuraCapabilities.add(nmCapabilitiesConvert(nmCapability));
+            }
+
+        }
+
+        return new HashSet<>(kuraCapabilities);
+    }
+
+    private static Capability nmCapabilitiesConvert(NMDeviceWifiCapabilities nmCapability) {
+        switch (nmCapability) {
+        case NM_WIFI_DEVICE_CAP_NONE:
+            return Capability.NONE;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP40:
+            return Capability.CIPHER_WEP40;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP104:
+            return Capability.CIPHER_WEP104;
+        case NM_WIFI_DEVICE_CAP_CIPHER_TKIP:
+            return Capability.CIPHER_TKIP;
+        case NM_WIFI_DEVICE_CAP_CIPHER_CCMP:
+            return Capability.CIPHER_CCMP;
+        case NM_WIFI_DEVICE_CAP_WPA:
+            return Capability.WPA;
+        case NM_WIFI_DEVICE_CAP_RSN:
+            return Capability.RSN;
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Non convertiblle NMDeviceWifiCapabilities \"%s\"", nmCapability));
         }
     }
 

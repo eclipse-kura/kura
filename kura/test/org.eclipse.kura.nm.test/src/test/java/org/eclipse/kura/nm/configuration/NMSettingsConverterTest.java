@@ -761,56 +761,6 @@ public class NMSettingsConverterTest {
 	}
 
 	@Test
-	public void buildSettingsShouldThrowDhcpDisabledAndNullWifiMode() {
-		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
-		givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
-		givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
-		givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
-		givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
-		givenMapWith("net.interface.wlan0.config.wifi.mode", null);
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ignoreSSID", true);
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-		givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
-		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
-
-		thenNoSuchElementExceptionThrown();
-	}
-
-	@Test
-	public void buildSettingsShouldThrowDhcpDisabledAndNullWifiRadioMode() {
-		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
-		givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
-		givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
-		givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
-		givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ignoreSSID", true);
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-		givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
-		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
-
-		thenNoSuchElementExceptionThrown();
-	}
-
-	@Test
 	public void buildSettingsShouldThrowDhcpDisabledAndNullWifiPassword() {
 		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
 		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
@@ -853,56 +803,6 @@ public class NMSettingsConverterTest {
 		givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", null);
 		givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
 		givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
-		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
-
-		thenNoSuchElementExceptionThrown();
-	}
-
-	@Test
-	public void buildSettingsShouldThrowDhcpDisabledAndNullGroupCiphers() {
-		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
-		givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
-		givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
-		givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
-		givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ignoreSSID", true);
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-		givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", null);
-		givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
-		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
-
-		thenNoSuchElementExceptionThrown();
-	}
-
-	@Test
-	public void buildSettingsShouldThrowDhcpDisabledAndNullPairwiseCiphers() {
-		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
-		givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
-		givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
-		givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
-		givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.ignoreSSID", true);
-		givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-		givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
-		givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", null);
 		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
 		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);

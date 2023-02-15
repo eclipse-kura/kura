@@ -37,6 +37,7 @@ import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
+import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -222,7 +223,14 @@ public class NMStatusConverter {
 
         address.setBitrate(bitrate.longValue());
         address.setMode(wifiModeConvert(mode));
-        address.setWifiAccessPoint(null); // TODO
+
+        // WIP
+        if (mode == NM80211Mode.NM_802_11_MODE_AP) {
+            // address.setWifiAccessPoint(accessPointsProperties); // TODO
+        } else {
+            DBusPath connectedAP = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "ActiveAccessPoint");
+            // address.setWifiAccessPoint(connectedAP); // TODO
+        }
     }
 
     private static WifiMode wifiModeConvert(NM80211Mode mode) {

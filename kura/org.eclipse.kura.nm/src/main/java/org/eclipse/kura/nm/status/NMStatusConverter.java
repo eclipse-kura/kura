@@ -15,7 +15,6 @@ package org.eclipse.kura.nm.status;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +57,6 @@ public class NMStatusConverter {
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_TKIP,
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_CCMP, NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_WPA,
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_RSN);
-
-    private static final EnumMap<NMDeviceState, NetInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
 
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
@@ -117,7 +114,7 @@ public class NMStatusConverter {
         iface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        iface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
+        iface.setState(nmDeviceStateConvert(deviceState));
         iface.setUp(NMDeviceState.isConnected(deviceState));
 
         UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
@@ -275,7 +272,7 @@ public class NMStatusConverter {
             return Capability.RSN;
         default:
             throw new IllegalArgumentException(
-                    String.format("Non convertiblle NMDeviceWifiCapabilities \"%s\"", nmCapability));
+                    String.format("Non convertible NMDeviceWifiCapabilities \"%s\"", nmCapability));
         }
     }
 
@@ -311,24 +308,38 @@ public class NMStatusConverter {
         return macAddressBytes;
     }
 
-    private static EnumMap<NMDeviceState, NetInterfaceState> initDeviceStateConverter() {
-        EnumMap<NMDeviceState, NetInterfaceState> map = new EnumMap<>(NMDeviceState.class);
+    private static NetInterfaceState nmDeviceStateConvert(NMDeviceState state) {
+        switch (state) {
+        case NM_DEVICE_STATE_UNKNOWN:
+            return NetInterfaceState.UNKNOWN;
+        case NM_DEVICE_STATE_UNMANAGED:
+            return NetInterfaceState.UNMANAGED;
+        case NM_DEVICE_STATE_UNAVAILABLE:
+            return NetInterfaceState.UNAVAILABLE;
+        case NM_DEVICE_STATE_DISCONNECTED:
+            return NetInterfaceState.DISCONNECTED;
+        case NM_DEVICE_STATE_PREPARE:
+            return NetInterfaceState.PREPARE;
+        case NM_DEVICE_STATE_CONFIG:
+            return NetInterfaceState.CONFIG;
+        case NM_DEVICE_STATE_NEED_AUTH:
+            return NetInterfaceState.NEED_AUTH;
+        case NM_DEVICE_STATE_IP_CONFIG:
+            return NetInterfaceState.IP_CONFIG;
+        case NM_DEVICE_STATE_IP_CHECK:
+            return NetInterfaceState.IP_CHECK;
+        case NM_DEVICE_STATE_SECONDARIES:
+            return NetInterfaceState.SECONDARIES;
+        case NM_DEVICE_STATE_ACTIVATED:
+            return NetInterfaceState.ACTIVATED;
+        case NM_DEVICE_STATE_DEACTIVATING:
+            return NetInterfaceState.DEACTIVATING;
+        case NM_DEVICE_STATE_FAILED:
+            return NetInterfaceState.FAILED;
+        default:
+            throw new IllegalArgumentException(String.format("Non convertible NMDeviceState \"%s\"", state));
+        }
 
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNKNOWN, NetInterfaceState.UNKNOWN);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNMANAGED, NetInterfaceState.UNMANAGED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE, NetInterfaceState.UNAVAILABLE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NetInterfaceState.DISCONNECTED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_PREPARE, NetInterfaceState.PREPARE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_CONFIG, NetInterfaceState.CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH, NetInterfaceState.NEED_AUTH);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NetInterfaceState.IP_CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CHECK, NetInterfaceState.IP_CHECK);
-        map.put(NMDeviceState.NM_DEVICE_STATE_SECONDARIES, NetInterfaceState.SECONDARIES);
-        map.put(NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NetInterfaceState.ACTIVATED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING, NetInterfaceState.DEACTIVATING);
-        map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetInterfaceState.FAILED);
-
-        return map;
     }
 
 }

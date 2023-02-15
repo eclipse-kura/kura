@@ -76,6 +76,13 @@ public class NMStatusConverter {
         return loInterface;
     }
 
+    public static NetInterface<NetInterfaceAddress> buildWirelessStatus(String interfaceName,
+            Properties deviceProperties, Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
+            List<Properties> accessPointsProperties) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {
         iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
         iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
@@ -192,13 +199,6 @@ public class NMStatusConverter {
         map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetInterfaceState.FAILED);
 
         return map;
-    }
-
-    public static NetInterface<NetInterfaceAddress> buildWirelessStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
-            List<Properties> accessPointsProperties) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

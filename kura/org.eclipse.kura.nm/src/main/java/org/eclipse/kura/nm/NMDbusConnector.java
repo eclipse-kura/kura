@@ -174,8 +174,16 @@ public class NMDbusConnector {
 
             List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
 
+            DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(interfaceName, "ActiveAccessPoint");
+            Optional<Properties> activeAccessPoint = Optional.empty();
+
+            if (!activeAccessPointPath.getPath().equals("/")) {
+                activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        activeAccessPointPath.getPath(), Properties.class));
+            }
+
             return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
-                    wirelessDeviceProperties, accessPoints);
+                    wirelessDeviceProperties, activeAccessPoint, accessPoints);
         }
 
         return null;

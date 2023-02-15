@@ -11,8 +11,18 @@ public enum NM80211Mode {
     NM_802_11_MODE_MESH;
 
     public static NM80211Mode fromUInt32(UInt32 value) {
-        // TODO
-        return null;
+        switch (value.intValue()) {
+        case 1:
+            return NM80211Mode.NM_802_11_MODE_ADHOC;
+        case 2:
+            return NM80211Mode.NM_802_11_MODE_INFRA;
+        case 3:
+            return NM80211Mode.NM_802_11_MODE_AP;
+        case 4:
+            return NM80211Mode.NM_802_11_MODE_MESH;
+        case 0:
+        default:
+            return NM80211Mode.NM_802_11_MODE_UNKNOWN;
+        }
     }
-
 }

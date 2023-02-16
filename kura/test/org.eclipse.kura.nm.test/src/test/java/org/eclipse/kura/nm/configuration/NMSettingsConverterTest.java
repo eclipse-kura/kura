@@ -227,7 +227,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("mode", "infrastructure");
         thenResultingMapContainsBytes("ssid", "ssidtest");
         thenResultingMapContains("band", "bg");
-        thenResultingMapContains("channel", new UInt32(Short.parseShort("10")));
+        thenResultingMapContains("channel", new UInt32(10));
     }
 
     @Test
@@ -245,7 +245,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("mode", "infrastructure");
         thenResultingMapContainsBytes("ssid", "ssidtest");
         thenResultingMapContains("band", "bg");
-        thenResultingMapContains("channel", new UInt32(Short.parseShort("10")));
+        thenResultingMapContains("channel", new UInt32(10));
     }
 
     @Test

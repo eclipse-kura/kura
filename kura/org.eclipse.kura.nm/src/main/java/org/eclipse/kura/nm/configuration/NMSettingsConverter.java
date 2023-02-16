@@ -109,7 +109,8 @@ public class NMSettingsConverter {
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",
                     iface);
             if (wanPriority.isPresent()) {
-                settings.put("route-metric", new Variant<>(wanPriority.get()));
+                Long supportedByNM = wanPriority.get().longValue();
+                settings.put("route-metric", new Variant<>(supportedByNM));
             }
         } else {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip4Status);

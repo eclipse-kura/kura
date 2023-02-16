@@ -830,13 +830,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
@@ -845,13 +842,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
@@ -860,13 +854,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
@@ -875,13 +866,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
@@ -890,13 +878,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.buildConnectionSettings(connection, iface, deviceType);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
@@ -905,13 +890,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }

@@ -1,5 +1,8 @@
 package org.eclipse.kura.nm;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.freedesktop.dbus.types.UInt32;
 
 public enum NM80211ApSecurityFlags {
@@ -20,8 +23,8 @@ public enum NM80211ApSecurityFlags {
     NM_802_11_AP_SEC_KEY_MGMT_OWE_TM,
     NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192;
 
-    public static NM80211ApSecurityFlags fromUInt32(UInt32 value) {
+    public static List<NM80211ApSecurityFlags> fromUInt32(UInt32 value) {
         // TODO
-        return NM80211ApSecurityFlags.NM_802_11_AP_SEC_NONE;
+        return Arrays.asList(NM80211ApSecurityFlags.NM_802_11_AP_SEC_NONE);
     }
 }

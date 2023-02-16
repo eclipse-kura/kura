@@ -445,18 +445,26 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.priority.addMouseOutHandler(event -> resetHelp());
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
-            TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.NONE);
-            TabTcpIpUi.this.helpPriority.setText("");
 
             String inputText = TabTcpIpUi.this.priority.getText();
+            boolean isInvalidValue = false;
 
             if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
                 try {
-                    Integer.parseInt(inputText);
+                    if (Integer.parseInt(inputText) < -1) {
+                        isInvalidValue = true;
+                    }
                 } catch (NumberFormatException e) {
-                    TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.ERROR);
-                    TabTcpIpUi.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
+                    isInvalidValue = true;
                 }
+            }
+
+            if (isInvalidValue) {
+                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabTcpIpUi.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
+            } else {
+                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.NONE);
+                TabTcpIpUi.this.helpPriority.setText("");
             }
         });
     }

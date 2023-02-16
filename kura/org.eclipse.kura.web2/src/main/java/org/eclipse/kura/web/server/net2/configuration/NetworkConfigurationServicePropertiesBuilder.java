@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
@@ -30,10 +31,12 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
 
-    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig) {
+    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig,
+            Map<String, Object> currentNetConfServProps) {
         this.gwtConfig = gwtConfig;
-        this.properties = new NetworkConfigurationServiceProperties();
+        this.properties = new NetworkConfigurationServiceProperties(currentNetConfServProps);
         this.ifname = this.gwtConfig.getName();
+        this.properties.addNetworkInterfaceIfNotPresent(ifname);
     }
 
     public Map<String, Object> build() {
@@ -60,11 +63,24 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private void setIpv4Properties() {
         this.properties.setIp4Status(this.ifname,
                 EnumsParser.getNetInterfaceStatus(Optional.ofNullable(this.gwtConfig.getStatus())));
-        this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
-        this.properties.setIp4Address(this.ifname, this.gwtConfig.getIpAddress());
-        this.properties.setIp4Netmask(this.ifname, this.gwtConfig.getSubnetMask());
-        this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
-        this.properties.setIp4DnsServers(this.ifname, this.gwtConfig.getDnsServers());
+
+        boolean isDhcpClient = this.gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+        boolean isManual = !isDhcpClient;
+        boolean isWan = this.gwtConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
+
+        if (isWan) {
+            this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
+            this.properties.setIp4DnsServers(this.ifname, this.gwtConfig.getDnsServers());
+        }
+
+        if (isManual) {
+            this.properties.setIp4Address(this.ifname, this.gwtConfig.getIpAddress());
+            this.properties.setIp4Netmask(this.ifname, this.gwtConfig.getSubnetMask());
+        }
+
+        if (isManual && isWan) {
+            this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
+        }
     }
 
     private void setIpv4DhcpClientProperties() {

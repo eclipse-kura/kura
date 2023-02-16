@@ -13,7 +13,6 @@
 package org.eclipse.kura.web.server.net2.configuration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,10 +30,6 @@ public class NetworkConfigurationServiceProperties {
     private static final String NA = "N/A";
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceProperties.class);
 
-    public NetworkConfigurationServiceProperties() {
-        this.properties = new HashMap<>();
-    }
-
     public NetworkConfigurationServiceProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
@@ -49,16 +44,29 @@ public class NetworkConfigurationServiceProperties {
 
     private static final String NET_INTERFACES = "net.interfaces";
 
-    public List<String> getNetworkInterfaces() {
+    public void addNetworkInterfaceIfNotPresent(String ifname) {
         List<String> ifnames = new LinkedList<>();
 
         String netInterfaces = (String) this.properties.get(NET_INTERFACES);
         String[] interfaces = netInterfaces.split(",");
+
         for (String name : interfaces) {
             ifnames.add(name.trim());
         }
 
-        return ifnames;
+        if (!ifnames.contains(ifname)) {
+            ifnames.add(ifname);
+        }
+
+        StringBuilder result = new StringBuilder();
+
+        for (String name : ifnames) {
+            result.append(name);
+            result.append(",");
+        }
+        
+        String withoutTrailingComma = result.toString().substring(0, result.length() - 1);
+        this.properties.put(NET_INTERFACES, withoutTrailingComma);
     }
 
     /*

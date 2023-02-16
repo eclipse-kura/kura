@@ -56,9 +56,10 @@
                                 </g:FlowPanel>
                             </b:FormGroup>
                             
-                            <b:FormGroup>
+                            <b:FormGroup ui:field="groupPriority">
                                 <b:FormLabel for="priority" ui:field="labelPriority"></b:FormLabel>
                                 <util:HelpButton ui:field="priorityHelp" />
+                                <b:HelpBlock color="red" ui:field="helpPriority" />
                                 <g:FlowPanel>
                                     <b:IntegerBox b:id="priority" ui:field="priority" />
                                 </g:FlowPanel>

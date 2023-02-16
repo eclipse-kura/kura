@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -98,6 +99,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private boolean isNet2;
 
     @UiField
+    FormGroup groupPriority;
+    @UiField
     FormGroup groupIp;
     @UiField
     FormGroup groupSubnet;
@@ -120,6 +123,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     FormLabel labelGateway;
     @UiField
     FormLabel labelDns;
+
+    @UiField
+    HelpBlock helpPriority;
     @UiField
     HelpBlock helpIp;
     @UiField
@@ -308,7 +314,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.helpIp.setText(MSGS.netIPv4InvalidAddress());
             }
         }
-        if (this.groupIp.getValidationState().equals(ValidationState.ERROR)
+        if (this.groupPriority.getValidationState().equals(ValidationState.ERROR)
+                || this.groupIp.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupGateway.getValidationState().equals(ValidationState.ERROR)
                 || this.groupDns.getValidationState().equals(ValidationState.ERROR)) {
@@ -436,7 +443,22 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelp());
-        this.priority.addValueChangeHandler(valChangeEvent -> setDirty(true));
+        this.priority.addValueChangeHandler(valChangeEvent -> {
+            setDirty(true);
+            TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.NONE);
+            TabTcpIpUi.this.helpPriority.setText("");
+
+            String inputText = TabTcpIpUi.this.priority.getText();
+
+            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
+                try {
+                    Integer.parseInt(inputText);
+                } catch (NumberFormatException e) {
+                    TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.ERROR);
+                    TabTcpIpUi.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
+                }
+            }
+        });
     }
 
     private void initDHCPLeaseField() {
@@ -820,6 +842,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void resetValidations() {
+        this.groupPriority.setValidationState(ValidationState.NONE);
+        this.helpPriority.setText("");
         this.groupIp.setValidationState(ValidationState.NONE);
         this.helpIp.setText("");
         this.groupSubnet.setValidationState(ValidationState.NONE);

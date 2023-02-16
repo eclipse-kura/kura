@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.server.net2.configuration;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
@@ -69,7 +70,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
         boolean isWan = this.gwtConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
 
         if (isWan) {
-            this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
+            if (!Objects.isNull(this.gwtConfig.getWanPriority())) {
+                this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
+            }
+
             this.properties.setIp4DnsServers(this.ifname, this.gwtConfig.getDnsServers());
         }
 

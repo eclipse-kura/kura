@@ -425,8 +425,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void initPriorityField() {
-        this.priority.setValue(0);
-
         this.priority.addMouseOverHandler(event -> {
             if (TabTcpIpUi.this.isNet2 && TabTcpIpUi.this.priority.isEnabled()) {
                 TabTcpIpUi.this.helpText.clear();

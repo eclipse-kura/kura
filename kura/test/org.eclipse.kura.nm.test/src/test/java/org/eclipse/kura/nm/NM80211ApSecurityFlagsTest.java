@@ -163,6 +163,17 @@ public class NM80211ApSecurityFlagsTest {
         thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192);
     }
 
+    @Test
+    public void fromUInt32WorksWithMultipleFlags1() {
+        givenValue(0x00000003);
+
+        whenFromUInt32IsCalledWith(this.value);
+
+        thenFlagsSizeIs(2);
+        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP40);
+        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP104);
+    }
+
     private void givenValue(int intValue) {
         this.value = new UInt32(intValue);
     }

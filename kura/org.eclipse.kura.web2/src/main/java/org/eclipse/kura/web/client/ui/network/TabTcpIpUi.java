@@ -375,11 +375,15 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             @Override
             public void onSuccess(Boolean result) {
                 TabTcpIpUi.this.isNet2 = result;
-                TabTcpIpUi.this.labelPriority.setVisible(result);
-                TabTcpIpUi.this.priority.setVisible(result);
-                TabTcpIpUi.this.priorityHelp.setVisible(result);
+                initNet2FeaturesOnly(result);
             }
         });
+    }
+
+    private void initNet2FeaturesOnly(boolean isNet2) {
+        this.labelPriority.setVisible(isNet2);
+        this.priority.setVisible(isNet2);
+        this.priorityHelp.setVisible(isNet2);
     }
 
     private void initHelpButtons() {

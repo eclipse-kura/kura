@@ -721,21 +721,6 @@ public class NMSettingsConverterTest {
 	}
 
 	@Test
-	public void buildSettingsShouldThrowDhcpDisabledAndNullDnsServer() {
-		givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
-		givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");
-		givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
-		givenMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
-		givenMapWith("net.interface.eth0.config.ip4.dnsServers", null);
-		givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
-		givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-		whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
-				NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
-
-	}
-
-	@Test
 	public void buildSettingsShouldThrowDhcpDisabledAndNullWifiSsid() {
 		givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
 		givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");

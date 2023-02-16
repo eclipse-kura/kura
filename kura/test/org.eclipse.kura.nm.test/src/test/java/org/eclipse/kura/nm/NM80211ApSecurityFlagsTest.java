@@ -170,8 +170,8 @@ public class NM80211ApSecurityFlagsTest {
         whenFromUInt32IsCalledWith(this.value);
 
         thenFlagsSizeIs(2);
-        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP40);
-        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP104);
+        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_WEP40);
+        thenFlagsContains(NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_WEP104);
     }
 
     private void givenValue(int intValue) {

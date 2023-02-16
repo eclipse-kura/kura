@@ -201,6 +201,20 @@ This project leverages the following third party content.
 * maven/mavencentral/org.graalvm.truffle/truffle-api/21.3.5, UPL-1.0, approved, #6718
 * maven/mavencentral/org.graalvm.regex/regex/21.3.5, UPL-1.0 AND Unicode-TOU, approved, #6719
 * maven/mavencentral/org.graalvm.sdk/launcher-common/21.3.5, UPL-1.0, approved, #6720
+* maven/mavencentral/com.github.hypfvieh/dbus-java/3.3.2, MIT, approved, CQ23190
+* maven/mavencentral/com.github.jnr/jffi/1.3.9, Apache-2.0 OR LGPL-3.0-or-later, approved, CQ23196
+* maven/mavencentral/com.github.jnr/jnr-a64asm/1.0.0, Apache-2.0, approved, CQ22814
+* maven/mavencentral/com.github.jnr/jnr-constants/0.10.3, Apache-2.0, approved, CQ23193
+* maven/mavencentral/com.github.jnr/jnr-enxio/0.32.13, Apache-2.0, approved, CQ23194
+* maven/mavencentral/com.github.jnr/jnr-ffi/2.2.11, Apache-2.0, approved, CQ23192
+* maven/mavencentral/com.github.jnr/jnr-posix/3.1.15, EPL-2.0 OR GPL-2.0-only OR LGPL-2.1-only, approved, #2711
+* maven/mavencentral/com.github.jnr/jnr-unixsocket/0.38.17, Apache-2.0, approved, CQ23191
+* maven/mavencentral/com.github.jnr/jnr-x86asm/1.0.2, MIT, approved, CQ9094
+* maven/mavencentral/org.ow2.asm/asm-analysis/9.2, BSD-3-Clause, approved, clearlydefined
+* maven/mavencentral/org.ow2.asm/asm-commons/9.2, BSD-3-Clause, approved, clearlydefined
+* maven/mavencentral/org.ow2.asm/asm-tree/9.2, BSD-3-Clause, approved, clearlydefined
+* maven/mavencentral/org.ow2.asm/asm-util/9.2, BSD-3-Clause, approved, clearlydefined
+* maven/mavencentral/org.ow2.asm/asm/9.2, BSD-3-Clause, approved, CQ23635
 
 ### Additional Dependencies
 

@@ -200,7 +200,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
             }
 
-            final boolean changed = checkWanInterfaces(this.networkProperties.getProperties(), modifiedProps);
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
             decryptAndConvertPasswordProperties(modifiedProps);
@@ -211,10 +210,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.dhcpServerMonitor.start();
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
-
-            if (changed) {
-                this.configurationService.snapshot();
-            }
         } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);
         }
@@ -231,35 +226,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private boolean isUsbPort(String interfaceName) {
         return interfaceName.split("\\.")[0].matches(MODEM_PORT_REGEX);
-    }
-
-    private boolean checkWanInterfaces(final Map<String, Object> oldProperties,
-            final Map<String, Object> newProperties) {
-        final Set<String> oldWanInterfaces = NetworkConfigurationServiceCommon.getWanInterfacesInConfig(oldProperties);
-        final Set<String> newWanInterfaces = NetworkConfigurationServiceCommon.getWanInterfacesInConfig(newProperties);
-
-        boolean changed = false;
-
-        if (newWanInterfaces.stream().anyMatch(i -> !oldWanInterfaces.contains(i))) {
-            Set<String> allNetworkInterfaces;
-            try {
-                allNetworkInterfaces = this.networkService.getNetworkInterfaces().stream()
-                        .map(this::probeNetInterfaceConfigName).collect(Collectors.toSet());
-            } catch (KuraException e) {
-                logger.warn("failed to retrieve network interface names", e);
-                return changed;
-            }
-
-            for (final String intf : newWanInterfaces) {
-                if (!allNetworkInterfaces.contains(intf)) {
-                    logger.info("A new interface has been enabled for WAN and interface {} is also enabled for WAN",
-                            intf);
-                    changed = true;
-                }
-            }
-        }
-
-        return changed;
     }
 
     protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {

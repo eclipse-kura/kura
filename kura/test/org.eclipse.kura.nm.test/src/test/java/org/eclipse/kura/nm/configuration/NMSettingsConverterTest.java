@@ -816,7 +816,7 @@ public class NMSettingsConverterTest {
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenNoExceptionsHaveBeenThrown();
-        thenResultingMapContains("route-metric", new Variant<>(30).getValue());
+        thenResultingMapContains("route-metric", new Variant<>(new Long(30)).getValue());
     }
 
     @Test

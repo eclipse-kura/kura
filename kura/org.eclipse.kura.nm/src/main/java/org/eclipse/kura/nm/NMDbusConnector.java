@@ -225,7 +225,7 @@ public class NMDbusConnector {
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
             disable(device);
         } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
-            setDeviceManaged(device, false);
+            logger.info("Iface \"{}\" set as Kura UNMANAGED. Skipping configuration.", iface);
         } else { // NMDeviceEnable.ENABLED
             if (Boolean.FALSE.equals(isDeviceManaged(device))) {
                 setDeviceManaged(device, true);

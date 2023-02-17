@@ -20,22 +20,23 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.networkmanager.Device;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class NMDbusConnectorTest {
-	static final DBusConnection dbusConnection = Mockito.mock(DBusConnection.class, Mockito.RETURNS_SMART_NULLS);
-	static final NetworkManager mockedNetworkManager = Mockito.mock(NetworkManager.class);
-	static NMDbusConnector instanceNMDbusConnector;
+	DBusConnection dbusConnection = Mockito.mock(DBusConnection.class, Mockito.RETURNS_SMART_NULLS);
+	NetworkManager mockedNetworkManager = Mockito.mock(NetworkManager.class);
+	NMDbusConnector instanceNMDbusConnector;
 	DBusConnection dbusConnectionInternal;
 	
 	Boolean hasDBusExceptionBeenThrown = false;
 	
 	List<String> internalStringList;
 	
-	@BeforeClass
-	public static void setUpPersistantMocks() throws DBusException {
+	@Before
+	public void setUpPersistantMocks() throws DBusException {
 		givenBasicMockedDbusConnector();
 	}
 
@@ -97,10 +98,19 @@ public class NMDbusConnectorTest {
 		//check if nothing happened
 	}
 
-	public static void givenBasicMockedDbusConnector() throws DBusException {
-		when(NMDbusConnectorTest.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
-					.thenReturn(NMDbusConnectorTest.mockedNetworkManager);
-		NMDbusConnectorTest.instanceNMDbusConnector = NMDbusConnector.getInstance(NMDbusConnectorTest.dbusConnection);
+	public void givenBasicMockedDbusConnector() throws DBusException {
+		when(dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
+					.thenReturn(mockedNetworkManager);
+		
+		this.instanceNMDbusConnector = new  NMDbusConnector(this.dbusConnection){
+			
+			protected static synchronized NMDbusConnector getInstance(DBusConnection dbusConnection) throws DBusException {
+				instance = new NMDbusConnector(dbusConnection);
+				return instance;
+		    }
+		};
+	
+		NMDbusConnector.getInstance(this.dbusConnection);
 	}
 	
 	public void givenMockedPermissions() {
@@ -111,7 +121,7 @@ public class NMDbusConnectorTest {
 		tempPerms.put("test2", "testVal2");
 		tempPerms.put("test3", "testVal3");
 		
-		when(NMDbusConnectorTest.mockedNetworkManager.GetPermissions()).thenReturn(tempPerms);
+		when(mockedNetworkManager.GetPermissions()).thenReturn(tempPerms);
 		
 	}
 	
@@ -120,7 +130,7 @@ public class NMDbusConnectorTest {
 		Properties mockProps = Mockito.mock(org.freedesktop.dbus.interfaces.Properties.class);
 		when(mockProps.Get(eq("org.freedesktop.NetworkManager"), eq("Version"))).thenReturn("Mock-Version");
 		
-		Mockito.doReturn(mockProps).when(NMDbusConnectorTest.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"),  eq(Properties.class));
+		Mockito.doReturn(mockProps).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"),  eq(Properties.class));
 	}
 	
 	public void givenMockedDevices() throws DBusException {
@@ -142,30 +152,30 @@ public class NMDbusConnectorTest {
 		when(mockedProperties2.Get(eq("org.freedesktop.NetworkManager.Device"), eq("Interface"))).thenReturn("mockedDevice2");
 		
 		
-		when(NMDbusConnectorTest.mockedNetworkManager.GetAllDevices()).thenReturn(Arrays.asList(mockedPath1, mockedPath2));
+		when(this.mockedNetworkManager.GetAllDevices()).thenReturn(Arrays.asList(mockedPath1, mockedPath2));
 		
-		Mockito.doReturn(mockedDevice1).when(NMDbusConnectorTest.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path1"),  eq(Device.class));
-		Mockito.doReturn(mockedProperties1).when(NMDbusConnectorTest.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path1"),  eq(Properties.class));
+		Mockito.doReturn(mockedDevice1).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path1"),  eq(Device.class));
+		Mockito.doReturn(mockedProperties1).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path1"),  eq(Properties.class));
 
-		Mockito.doReturn(mockedDevice2).when(NMDbusConnectorTest.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path2"),  eq(Device.class));
-		Mockito.doReturn(mockedProperties2).when(NMDbusConnectorTest.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path2"),  eq(Properties.class));
+		Mockito.doReturn(mockedDevice2).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path2"),  eq(Device.class));
+		Mockito.doReturn(mockedProperties2).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/mock/device/path2"),  eq(Properties.class));
 	}
 	
 	public void whenGetDbusConnectionIsRun() {
-		this.dbusConnectionInternal = NMDbusConnectorTest.instanceNMDbusConnector.getDbusConnection();
+		this.dbusConnectionInternal = this.instanceNMDbusConnector.getDbusConnection();
 	}
 	
 	public void whenCloseConnectionIsRun() {
-		NMDbusConnectorTest.instanceNMDbusConnector.closeConnection();
+		this.instanceNMDbusConnector.closeConnection();
 	}
 	
 	public void whenCheckPermissionsIsRun() {
-		NMDbusConnectorTest.instanceNMDbusConnector.checkPermissions();
+		this.instanceNMDbusConnector.checkPermissions();
 	}
 	
 	public void whenCheckVersionIsRun() {
 		try {
-			NMDbusConnectorTest.instanceNMDbusConnector.checkVersion();
+			this.instanceNMDbusConnector.checkVersion();
 		} catch (DBusException e) {
 			hasDBusExceptionBeenThrown = true;
 		}
@@ -173,7 +183,7 @@ public class NMDbusConnectorTest {
 	
 	public void whenGetInterfaces() {
 		try {
-			internalStringList = NMDbusConnectorTest.instanceNMDbusConnector.getInterfaces();
+			internalStringList = this.instanceNMDbusConnector.getInterfaces();
 		} catch (DBusException e) {
 			hasDBusExceptionBeenThrown = true;
 		}
@@ -181,7 +191,7 @@ public class NMDbusConnectorTest {
 	
 	public void whenApply() {
 		try {
-			NMDbusConnectorTest.instanceNMDbusConnector.apply();
+			this.instanceNMDbusConnector.apply();
 		} catch (DBusException e) {
 			hasDBusExceptionBeenThrown = true;
 		}
@@ -189,7 +199,7 @@ public class NMDbusConnectorTest {
 	
 	public void whenApplyWithNetowrkConfig(Map<String,Object> networkConfig) {
 		try {
-			NMDbusConnectorTest.instanceNMDbusConnector.apply(networkConfig);
+			this.instanceNMDbusConnector.apply(networkConfig);
 		} catch (DBusException e) {
 			hasDBusExceptionBeenThrown = true;
 		}
@@ -200,19 +210,19 @@ public class NMDbusConnectorTest {
 	}
 	
 	public void thenGetDbusConnectionIsMockedConnection() {
-		assertEquals(NMDbusConnectorTest.dbusConnection, this.dbusConnectionInternal);
+		assertEquals(this.dbusConnection, this.dbusConnectionInternal);
 	}
 	
 	public void thenVerifyConnectionClosed() {
-		verify(NMDbusConnectorTest.dbusConnection, Mockito.atLeastOnce()).disconnect();
+		verify(this.dbusConnection, Mockito.atLeastOnce()).disconnect();
 	}
 	
 	public void thenVerifyCheckVersionIsRun() throws DBusException {
-		verify(NMDbusConnectorTest.dbusConnection, Mockito.atLeastOnce()).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), Mockito.any());
+		verify(this.dbusConnection, Mockito.atLeastOnce()).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), Mockito.any());
 	}
 	
 	public void thenVerifyCheckPermissionsRan() {
-		verify(NMDbusConnectorTest.mockedNetworkManager, Mockito.atLeastOnce()).GetPermissions();
+		verify(this.mockedNetworkManager, Mockito.atLeastOnce()).GetPermissions();
 	}
 	
 	public void thenReturnedStringListIs(List<String> list) {

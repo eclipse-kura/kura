@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 
 public class WifiInterfaceStatus extends NetworkInterfaceStatus {
 
@@ -146,6 +147,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public WifiInterfaceStatus build() {
+            this.withType(NetworkInterfaceType.WIFI);
             return new WifiInterfaceStatus(this);
         }
 

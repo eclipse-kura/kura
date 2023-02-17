@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
-import org.eclipse.kura.usb.UsbDevice;
+import org.eclipse.kura.usb.UsbNetDevice;
 
 public abstract class NetworkInterfaceStatus {
 
@@ -30,7 +30,7 @@ public abstract class NetworkInterfaceStatus {
     private final NetworkInterfaceState state;
     private final boolean autoConnect;
     private final int mtu;
-    private final Optional<UsbDevice> usbDevice;
+    private final Optional<UsbNetDevice> usbNetDevice;
     private final Optional<NetworkInterfaceIpAddressStatus<IP4Address>> interfaceIp4Addresses;
     private final Optional<NetworkInterfaceIpAddressStatus<IP6Address>> interfaceIp6Addresses;
 
@@ -45,7 +45,7 @@ public abstract class NetworkInterfaceStatus {
         this.state = builder.state;
         this.autoConnect = builder.autoConnect;
         this.mtu = builder.mtu;
-        this.usbDevice = builder.usbDevice;
+        this.usbNetDevice = builder.usbNetDevice;
         this.interfaceIp4Addresses = builder.interfaceIp4Addresses;
         this.interfaceIp6Addresses = builder.interfaceIp6Addresses;
     }
@@ -90,8 +90,8 @@ public abstract class NetworkInterfaceStatus {
         return this.mtu;
     }
 
-    public Optional<UsbDevice> getUsbDevice() {
-        return this.usbDevice;
+    public Optional<UsbNetDevice> getUsbNetDevice() {
+        return this.usbNetDevice;
     }
 
     public Optional<NetworkInterfaceIpAddressStatus<IP4Address>> getInterfaceIp4Addresses() {
@@ -115,7 +115,7 @@ public abstract class NetworkInterfaceStatus {
         private NetworkInterfaceState state = NetworkInterfaceState.UNKNOWN;
         private boolean autoConnect = false;
         private int mtu = 0;
-        private Optional<UsbDevice> usbDevice = Optional.empty();
+        private Optional<UsbNetDevice> usbNetDevice = Optional.empty();
         private Optional<NetworkInterfaceIpAddressStatus<IP4Address>> interfaceIp4Addresses = Optional.empty();
         private Optional<NetworkInterfaceIpAddressStatus<IP6Address>> interfaceIp6Addresses = Optional.empty();
 
@@ -129,7 +129,7 @@ public abstract class NetworkInterfaceStatus {
             return getThis();
         }
 
-        public T withType(NetworkInterfaceType type) {
+        protected T withType(NetworkInterfaceType type) {
             this.type = type;
             return getThis();
         }
@@ -169,8 +169,8 @@ public abstract class NetworkInterfaceStatus {
             return getThis();
         }
 
-        public T withUsbDevice(Optional<UsbDevice> usbDevice) {
-            this.usbDevice = usbDevice;
+        public T withUsbNetDevice(Optional<UsbNetDevice> usbNetDevice) {
+            this.usbNetDevice = usbNetDevice;
             return getThis();
         }
 

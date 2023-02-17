@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -29,6 +29,11 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusServiceImpl.class);
 
     private NMDbusConnector nmDbusConnector;
+    private NetworkService networkService;
+
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
+    }
 
     public void activate() throws DBusException {
         logger.debug("Activate NMStatusService...");
@@ -45,12 +50,12 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public List<NetInterface<NetInterfaceAddress>> getNetworkStatus() {
+    public List<NetworkInterfaceStatus> getNetworkStatus() {
         List<String> availableInterfaces = getInterfaceNames();
 
-        List<NetInterface<NetInterfaceAddress>> interfaceStatuses = new ArrayList<>();
+        List<NetworkInterfaceStatus> interfaceStatuses = new ArrayList<>();
         for (String iface : availableInterfaces) {
-            NetInterface<NetInterfaceAddress> status = getNetworkStatus(iface);
+            NetworkInterfaceStatus status = getNetworkStatus(iface);
             if (Objects.nonNull(status)) {
                 interfaceStatuses.add(status);
             }
@@ -60,9 +65,9 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public NetInterface<NetInterfaceAddress> getNetworkStatus(String interfaceName) {
+    public NetworkInterfaceStatus getNetworkStatus(String interfaceName) {
         try {
-            return this.nmDbusConnector.getInterfaceStatus(interfaceName);
+            return this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService);
         } catch (DBusException e) {
             logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
         }

@@ -355,7 +355,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             if (usbModem != null) {
                 for (NetInterface<?> netInterface : getInterfacesForUsbDevice(netInterfaces, usbModem.getUsbPort())) {
                     if (netInterface.getType() != NetInterfaceType.MODEM) {
-                        // there is a network interface associated with the modem that is not managed by the ppp driver
+                        // there is a network interface associated with the modem that is not managed by
+                        // the ppp driver
                         // this interface probably cannot be managed by Kura (e.g. a cdc_ncm interface)
                         // completely ignore this interface
                         netInterfaces.remove(netInterface);
@@ -491,7 +492,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         wifiInterface.setPointToPoint(false);
         wifiInterface.setUp(isUp);
         wifiInterface.setVirtual(isVirtual(interfaceName));
-        wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
+        getUsbNetDevice(interfaceName).ifPresent(wifiInterface::setUsbDevice);
         wifiInterface.setState(getState(interfaceName, isUp));
         wifiInterface.setNetInterfaceAddresses(getWifiNetInterfaceAddresses(interfaceName, isUp));
 
@@ -548,7 +549,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         netInterface.setPointToPoint(false);
         netInterface.setUp(isUp);
         netInterface.setVirtual(isVirtual(interfaceName));
-        netInterface.setUsbDevice(getUsbDevice(interfaceName));
+        getUsbNetDevice(interfaceName).ifPresent(netInterface::setUsbDevice);
         netInterface.setState(getState(interfaceName, isUp));
         netInterface.setNetInterfaceAddresses(getEthernetOrLoopbackNetInterfaceAddresses(interfaceName, isUp));
 
@@ -624,7 +625,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         if (modemInfo != null) {
             // Found one - see if we have some info for it.
             // Also check if we are getting more devices than expected.
-            // This can happen if all the modem resources cannot be removed from the OS or from Kura.
+            // This can happen if all the modem resources cannot be removed from the OS or
+            // from Kura.
             // In this case we did not receive an UsbDeviceRemovedEvent and we did not post
             // an ModemRemovedEvent. Should we do it here?
             installModemDriver(modemInfo);
@@ -816,7 +818,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         return wifiInterfaceAddresses;
     }
 
-    // It seems that this configuration is ignored, so add only a minimal configuration
+    // It seems that this configuration is ignored, so add only a minimal
+    // configuration
     private void addMinimalWifiInfraConfiguration(String interfaceName, WifiInterfaceAddressImpl wifiInterfaceAddress)
             throws KuraException {
         String currentSSID = this.linuxNetworkUtil.getSSID(interfaceName);
@@ -892,17 +895,24 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         }
     }
 
-    private UsbNetDevice getUsbDevice(String interfaceName) {
-        List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
-        if (usbNetDevices != null && !usbNetDevices.isEmpty()) {
-            for (UsbNetDevice usbNetDevice : usbNetDevices) {
-                if (usbNetDevice.getInterfaceName().equals(interfaceName)) {
-                    return usbNetDevice;
-                }
-            }
-        }
+//    private UsbNetDevice getUsbDevice(String interfaceName) {
+//        List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
+//        if (usbNetDevices != null && !usbNetDevices.isEmpty()) {
+//            for (UsbNetDevice usbNetDevice : usbNetDevices) {
+//                if (usbNetDevice.getInterfaceName().equals(interfaceName)) {
+//                    return usbNetDevice;
+//                }
+//            }
+//        }
+//
+//        return null;
+//    }
 
-        return null;
+    @Override
+    public Optional<UsbNetDevice> getUsbNetDevice(String interfaceName) {
+        List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
+        return usbNetDevices.stream().filter(usbDevice -> usbDevice.getInterfaceName().equals(interfaceName))
+                .findFirst();
     }
 
     @Override
@@ -1008,7 +1018,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
                 logger.info("ToggleModemTask :: modem has been toggled ...");
 
-                // will check if the modem is ready at next iteration and toggles again if needed
+                // will check if the modem is ready at next iteration and toggles again if
+                // needed
                 NetworkServiceImpl.this.executor.schedule(this, TOGGLE_MODEM_TASK_INTERVAL, TimeUnit.SECONDS);
 
             } catch (Exception e) {

@@ -22,6 +22,7 @@ import java.util.Set;
 import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 
 public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
@@ -312,22 +313,22 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withSupportedModes(EnumSet<ModemMode> supportedModes) {
+        public ModemInterfaceStatusBuilder withSupportedModes(Set<ModemMode> supportedModes) {
             this.supportedModes = supportedModes;
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withCurrentModes(EnumSet<ModemMode> currentModes) {
+        public ModemInterfaceStatusBuilder withCurrentModes(Set<ModemMode> currentModes) {
             this.currentModes = currentModes;
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withSupportedBands(EnumSet<ModemBand> supportedBands) {
+        public ModemInterfaceStatusBuilder withSupportedBands(Set<ModemBand> supportedBands) {
             this.supportedBands = supportedBands;
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withCurrentBands(EnumSet<ModemBand> currentBands) {
+        public ModemInterfaceStatusBuilder withCurrentBands(Set<ModemBand> currentBands) {
             this.currentBands = currentBands;
             return getThis();
         }
@@ -372,7 +373,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withAccessTechnologies(EnumSet<AccessTechnology> accessTechnologies) {
+        public ModemInterfaceStatusBuilder withAccessTechnologies(Set<AccessTechnology> accessTechnologies) {
             this.accessTechnologies = accessTechnologies;
             return getThis();
         }
@@ -414,6 +415,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public ModemInterfaceStatus build() {
+            this.withType(NetworkInterfaceType.MODEM);
             return new ModemInterfaceStatus(this);
         }
 

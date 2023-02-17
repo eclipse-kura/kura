@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.status.ethernet;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
-import org.eclipse.kura.net.status.NetworkInterfaceStatus.NetworkInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 
 public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
 
@@ -44,6 +44,7 @@ public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public EthernetInterfaceStatus build() {
+            this.withType(NetworkInterfaceType.ETHERNET);
             return new EthernetInterfaceStatus(this);
         }
 

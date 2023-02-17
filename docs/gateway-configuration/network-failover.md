@@ -8,5 +8,11 @@ As in picture below, the Kura UI allows defining multiple WAN interfaces. Each W
 
 Kura uses NetworkManager's implementation to achieve network failover (see [NetworkManager](https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3)). Lower values correspond to higher priority. Allowed values range from -1 to 2147483647. Value -1 means that the metric is chosen automatically based on the device type (see [NetworkManager DBUS properties](https://developer-old.gnome.org/NetworkManager/unstable/nm-settings-dbus.html)).
 
+The default URI used to perform the connectivity check may differ across operating systems. To set a specific URI edit `/etc/NetworkManager/NetworkManager.conf` (reference [NetworkManager](https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3)):
 
-
+```
+[connectivity]
+uri=http://network-test.debian.org/nm
+interval=...
+response=...
+```

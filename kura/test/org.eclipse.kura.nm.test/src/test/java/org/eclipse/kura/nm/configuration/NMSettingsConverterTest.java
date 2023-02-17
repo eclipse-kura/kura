@@ -794,6 +794,44 @@ public class NMSettingsConverterTest {
         thenNoSuchElementExceptionThrown();
     }
 
+    @Test
+    public void shouldSupportEmptyWanPriorityProperty() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("route-metric");
+    }
+
+    @Test
+    public void shouldPopulateWanPriorityProperty() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("route-metric", new Variant<>(new Long(30)).getValue());
+    }
+
+    @Test
+    public void shouldNotPopulateWanPriorityPropertyIfNotWAN() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("route-metric");
+    }
+
     /*
      * Given
      */
@@ -904,6 +942,10 @@ public class NMSettingsConverterTest {
 
     public void thenResultingMapContains(String key, Object value) {
         assertEquals(value, this.resultMap.get(key).getValue());
+    }
+
+    public void thenResultingMapNotContains(String key) {
+        assertFalse(this.resultMap.containsKey(key));
     }
 
     public void thenResultingMapContainsBytes(String key, Object value) {

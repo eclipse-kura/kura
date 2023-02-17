@@ -121,15 +121,6 @@ public class NMConfigurationServiceImplTest {
     }
 
     @Test
-    public void shouldCheckForWanInterfacesTest() throws KuraException {
-        givenNetworkConfigurationService();
-        whenServiceIsActivatedWithOneWanInterface();
-        whenServiceIsUpdatedWithTwoWanInterface();
-        thenOldWanIntefaceIsDisabled();
-        thenSnapshotIsTaken();
-    }
-
-    @Test
     public void shouldMigratePppInterfaceNames() throws KuraException {
         givenPropertiesWithPppInterfaceNames();
         givenNetworkConfigurationService();

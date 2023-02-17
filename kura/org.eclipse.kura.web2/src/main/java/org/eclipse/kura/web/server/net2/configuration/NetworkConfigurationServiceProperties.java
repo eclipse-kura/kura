@@ -120,8 +120,9 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname), status);
     }
 
-    public int getIp4WanPriority(String ifname) {
-        return (Integer) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_WAN_PRIORITY, ifname), 0);
+    public Optional<Integer> getIp4WanPriority(String ifname) {
+        return Optional.ofNullable(
+                (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_WAN_PRIORITY, ifname)));
     }
 
     public void setIp4WanPriority(String ifname, int priority) {

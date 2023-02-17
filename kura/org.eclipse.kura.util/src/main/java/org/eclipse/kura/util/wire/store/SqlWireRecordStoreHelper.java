@@ -146,7 +146,7 @@ public class SqlWireRecordStoreHelper {
 
         final String sqlColName = sanitizer.apply(name);
 
-        if (!columnTypes.containsKey(name)) {
+        if (!columnTypes.containsKey(name) && !columnTypes.containsKey(name.toLowerCase())) {
 
             logger.debug("creating new column: {} {}", name, expectedType.get());
             execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,

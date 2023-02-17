@@ -68,24 +68,24 @@ public class NMDbusConnector {
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
             NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
-    private static NMDbusConnector instance;
+    protected static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
     private final NetworkManager nm;
 
     private Map<String, Object> cachedConfiguration = null;
 
-    private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
+    protected NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, new NMDeviceAddedHandler());
     }
 
-    public static synchronized NMDbusConnector getInstance() throws DBusException {
+	public static synchronized NMDbusConnector getInstance() throws DBusException {
         return getInstance(DBusConnection.getConnection(DBusConnection.DEFAULT_SYSTEM_BUS_ADDRESS));
     }
 
-    public static synchronized NMDbusConnector getInstance(DBusConnection dbusConnection) throws DBusException {
+	protected static synchronized NMDbusConnector getInstance(DBusConnection dbusConnection) throws DBusException {
         if (Objects.isNull(instance)) {
             instance = new NMDbusConnector(dbusConnection);
         }

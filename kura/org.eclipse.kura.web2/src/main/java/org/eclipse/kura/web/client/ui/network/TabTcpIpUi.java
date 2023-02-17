@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -98,6 +99,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private boolean isNet2;
 
     @UiField
+    FormGroup groupPriority;
+    @UiField
     FormGroup groupIp;
     @UiField
     FormGroup groupSubnet;
@@ -120,6 +123,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     FormLabel labelGateway;
     @UiField
     FormLabel labelDns;
+
+    @UiField
+    HelpBlock helpPriority;
     @UiField
     HelpBlock helpIp;
     @UiField
@@ -308,7 +314,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.helpIp.setText(MSGS.netIPv4InvalidAddress());
             }
         }
-        if (this.groupIp.getValidationState().equals(ValidationState.ERROR)
+        if (this.groupPriority.getValidationState().equals(ValidationState.ERROR)
+                || this.groupIp.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupGateway.getValidationState().equals(ValidationState.ERROR)
                 || this.groupDns.getValidationState().equals(ValidationState.ERROR)) {
@@ -375,11 +382,15 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             @Override
             public void onSuccess(Boolean result) {
                 TabTcpIpUi.this.isNet2 = result;
-                TabTcpIpUi.this.labelPriority.setVisible(result);
-                TabTcpIpUi.this.priority.setVisible(result);
-                TabTcpIpUi.this.priorityHelp.setVisible(result);
+                initNet2FeaturesOnly(result);
             }
         });
+    }
+
+    private void initNet2FeaturesOnly(boolean isNet2) {
+        this.labelPriority.setVisible(isNet2);
+        this.priority.setVisible(isNet2);
+        this.priorityHelp.setVisible(isNet2);
     }
 
     private void initHelpButtons() {
@@ -425,8 +436,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void initPriorityField() {
-        this.priority.setValue(0);
-
         this.priority.addMouseOverHandler(event -> {
             if (TabTcpIpUi.this.isNet2 && TabTcpIpUi.this.priority.isEnabled()) {
                 TabTcpIpUi.this.helpText.clear();
@@ -434,7 +443,30 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelp());
-        this.priority.addValueChangeHandler(valChangeEvent -> setDirty(true));
+        this.priority.addValueChangeHandler(valChangeEvent -> {
+            setDirty(true);
+
+            String inputText = TabTcpIpUi.this.priority.getText();
+            boolean isInvalidValue = false;
+
+            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
+                try {
+                    if (Integer.parseInt(inputText) < -1) {
+                        isInvalidValue = true;
+                    }
+                } catch (NumberFormatException e) {
+                    isInvalidValue = true;
+                }
+            }
+
+            if (isInvalidValue) {
+                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabTcpIpUi.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
+            } else {
+                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.NONE);
+                TabTcpIpUi.this.helpPriority.setText("");
+            }
+        });
     }
 
     private void initDHCPLeaseField() {
@@ -818,6 +850,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void resetValidations() {
+        this.groupPriority.setValidationState(ValidationState.NONE);
+        this.helpPriority.setText("");
         this.groupIp.setValidationState(ValidationState.NONE);
         this.helpIp.setText("");
         this.groupSubnet.setValidationState(ValidationState.NONE);

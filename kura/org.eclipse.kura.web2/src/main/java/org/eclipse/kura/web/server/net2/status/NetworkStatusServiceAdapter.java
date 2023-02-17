@@ -87,7 +87,7 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setHwDriverVersion(networkInterfaceStatus.getDriverVersion());
         gwtConfig.setHwFirmware(networkInterfaceStatus.getFirmwareVersion());
         gwtConfig.setHwMTU(networkInterfaceStatus.getMtu());
-        networkInterfaceStatus.getUsbDevice()
+        networkInterfaceStatus.getUsbNetDevice()
                 .ifPresent(usbDevice -> gwtConfig.setHwUsbDevice(usbDevice.getUsbDevicePath()));
 
         logger.debug("GWT common state properties for interface {}:\\n{}\\n", gwtConfig.getName(),

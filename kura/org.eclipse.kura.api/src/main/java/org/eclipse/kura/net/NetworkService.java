@@ -18,7 +18,6 @@ import java.util.Optional;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
-import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.annotation.versioning.ProviderType;
 

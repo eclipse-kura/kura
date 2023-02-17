@@ -146,18 +146,19 @@ public class SqlWireRecordStoreHelper {
 
         final String sqlColName = sanitizer.apply(name);
 
-        if (!columnTypes.containsKey(name)) {
+        if (!columnTypes.containsKey(sqlColName)) {
 
-            logger.debug("creating new column: {} {}", name, expectedType.get());
+            logger.debug("creating new column: {} {}", sqlColName, expectedType.get());
             execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,
                     expectedType.get()));
 
         } else {
-            final Optional<String> columnType = Optional.ofNullable(columnTypes.get(name));
+            final Optional<String> columnType = Optional.ofNullable(columnTypes.get(sqlColName));
 
-            if (!expectedType.equals(columnType)) {
+            if (!expectedType.equals(columnType) && columnType.isPresent()) {
 
-                logger.debug("changing column type: {} {}", name, expectedType.get());
+                logger.debug("changing column {} type from {} to {}", sqlColName, columnType.get(),
+                        expectedType.get());
 
                 execute(c, MessageFormat.format(queries.getSqlDropColumn(), sqlColName));
                 execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,

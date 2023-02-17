@@ -146,7 +146,7 @@ public class SqlWireRecordStoreHelper {
 
         final String sqlColName = sanitizer.apply(name);
 
-        if (!columnTypes.containsKey(name) && !columnTypes.containsKey(name.toLowerCase())) {
+        if (!columnTypes.containsKey(name)) {
 
             logger.debug("creating new column: {} {}", name, expectedType.get());
             execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,
@@ -155,7 +155,7 @@ public class SqlWireRecordStoreHelper {
         } else {
             final Optional<String> columnType = Optional.ofNullable(columnTypes.get(name));
 
-            if (columnType.isPresent() && !expectedType.get().equalsIgnoreCase(columnType.get())) {
+            if (!expectedType.equals(columnType)) {
 
                 logger.debug("changing column type: {} {}", name, expectedType.get());
 

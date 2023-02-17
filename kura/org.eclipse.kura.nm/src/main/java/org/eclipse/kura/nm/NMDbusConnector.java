@@ -66,7 +66,7 @@ public class NMDbusConnector {
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
-            NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_GENERIC);
+            NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
@@ -155,16 +155,8 @@ public class NMDbusConnector {
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties);
-        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                    Generic.class);
-            Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                    genericDevice.getObjectPath(), Properties.class);
-            String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
-                    NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION);
-            if (genericDeviceType.equals("loopback")) {
-                return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
-            }
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
+            return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
         }
 
         return null;
@@ -341,7 +333,23 @@ public class NMDbusConnector {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
-        return NMDeviceType.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
+        NMDeviceType deviceType = NMDeviceType
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
+
+        // Workaround to identify Loopback interface for NM versions prior to 1.42
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Generic.class);
+            Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    genericDevice.getObjectPath(), Properties.class);
+            String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
+                    NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION);
+            if (genericDeviceType.equals("loopback")) {
+                return NMDeviceType.NM_DEVICE_TYPE_LOOPBACK;
+            }
+        }
+
+        return deviceType;
     }
 
     private String getDeviceIpInterface(Device device) throws DBusException {

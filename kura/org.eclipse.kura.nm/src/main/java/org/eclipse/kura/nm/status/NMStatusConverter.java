@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,8 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.nm.NM80211ApSecurityFlags;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
@@ -61,6 +64,14 @@ public class NMStatusConverter {
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_TKIP,
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_CIPHER_CCMP, NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_WPA,
             NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_RSN);
+
+    private static final List<NM80211ApSecurityFlags> CONVERTIBLE_FLAGS = Arrays.asList(
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_NONE, NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_WEP40,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_WEP104, NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_TKIP,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_PAIR_CCMP, NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP40,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_WEP104, NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_TKIP,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_GROUP_CCMP, NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_PSK,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_802_1X);
 
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
@@ -257,12 +268,22 @@ public class NMStatusConverter {
         UInt32 frequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
         kuraAccessPoint.setFrequency(frequency.longValue());
 
+        UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
+        kuraAccessPoint.setBitrate(Arrays.asList(maxBitrate.longValue()));
+
+        Byte strength = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
+        kuraAccessPoint.setStrength(strength.intValue());
+
+        List<NM80211ApSecurityFlags> wpaSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "WpaFlags"));
+        kuraAccessPoint.setWpaSecurity(nmWifiSecurityConvert(wpaSecurityFlags));
+
+        List<NM80211ApSecurityFlags> rsnSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "RsnFlags"));
+        kuraAccessPoint.setRsnSecurity(nmWifiSecurityConvert(rsnSecurityFlags));
+
         // WIP
         // channel
-        // bitrate
-        // strength
-        // wpasecurity
-        // rsnsecurity
         // capabilities
 
         return kuraAccessPoint;
@@ -281,6 +302,47 @@ public class NMStatusConverter {
         case NM_802_11_MODE_MESH:
         default:
             return WifiMode.UNKNOWN;
+        }
+    }
+
+    private static EnumSet<WifiSecurity> nmWifiSecurityConvert(List<NM80211ApSecurityFlags> nmSecurity) {
+        List<WifiSecurity> kuraWifiSecurity = new ArrayList<>();
+
+        for (NM80211ApSecurityFlags nmSecurityFlag : nmSecurity) {
+            if (CONVERTIBLE_FLAGS.contains(nmSecurityFlag)) {
+                kuraWifiSecurity.add(nmWifiSecurityConvert(nmSecurityFlag));
+            }
+        }
+
+        return EnumSet.copyOf(kuraWifiSecurity);
+    }
+
+    private static WifiSecurity nmWifiSecurityConvert(NM80211ApSecurityFlags nmSecurityFlag) {
+        switch (nmSecurityFlag) {
+        case NM_802_11_AP_SEC_NONE:
+            return WifiSecurity.NONE;
+        case NM_802_11_AP_SEC_PAIR_WEP40:
+            return WifiSecurity.PAIR_WEP40;
+        case NM_802_11_AP_SEC_PAIR_WEP104:
+            return WifiSecurity.PAIR_WEP104;
+        case NM_802_11_AP_SEC_PAIR_TKIP:
+            return WifiSecurity.PAIR_TKIP;
+        case NM_802_11_AP_SEC_PAIR_CCMP:
+            return WifiSecurity.PAIR_CCMP;
+        case NM_802_11_AP_SEC_GROUP_WEP40:
+            return WifiSecurity.GROUP_WEP40;
+        case NM_802_11_AP_SEC_GROUP_WEP104:
+            return WifiSecurity.GROUP_WEP104;
+        case NM_802_11_AP_SEC_GROUP_TKIP:
+            return WifiSecurity.GROUP_TKIP;
+        case NM_802_11_AP_SEC_GROUP_CCMP:
+            return WifiSecurity.GROUP_CCMP;
+        case NM_802_11_AP_SEC_KEY_MGMT_PSK:
+            return WifiSecurity.KEY_MGMT_PSK;
+        case NM_802_11_AP_SEC_KEY_MGMT_802_1X:
+            return WifiSecurity.KEY_MGMT_802_1X;
+        default:
+            throw new IllegalArgumentException("Cannot convert \"%s\" security flag");
         }
     }
 

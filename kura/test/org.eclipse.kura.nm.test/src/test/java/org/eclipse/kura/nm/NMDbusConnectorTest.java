@@ -42,6 +42,7 @@ public class NMDbusConnectorTest {
 
 	Boolean hasDBusExceptionBeenThrown = false;
 	Boolean hasNoSuchElementExceptionThrown = false;
+	Boolean hasNullPointerExceptionThrown = false;
 
 	List<String> internalStringList;
 	Map<String, Object> netConfig = new HashMap<>();
@@ -115,7 +116,7 @@ public class NMDbusConnectorTest {
 
 		whenApplyWithNetowrkConfig(null);
 
-		thenVerifyDBusExceptionIsThrown(); // TODO: add Guard to implimentation
+		thenNullPointerExceptionIsThrown();
 	}
 
 	@Test
@@ -316,8 +317,6 @@ public class NMDbusConnectorTest {
 
 		when(mockedDevice1.GetAppliedConnection(eq(new UInt32(0)))).thenReturn(mockedDevice1ConnectionTouple);
 
-		
-		
 		when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device"), eq("DeviceType")))
 				.thenReturn(new UInt32(14)); // 1 id Ethernet
 		when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device"), eq("State")))
@@ -427,6 +426,9 @@ public class NMDbusConnectorTest {
 		} catch (NoSuchElementException e) {
 			e.printStackTrace();
 			hasNoSuchElementExceptionThrown = true;
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			hasNullPointerExceptionThrown = true;
 		}
 	}
 
@@ -437,6 +439,10 @@ public class NMDbusConnectorTest {
 
 	public void thenVerifyDBusExceptionIsThrown() {
 		assertTrue(hasDBusExceptionBeenThrown);
+	}
+	
+	public void thenNullPointerExceptionIsThrown() {
+		assertTrue(hasNullPointerExceptionThrown);
 	}
 
 	public void thenVerifyNoSuchElementExceptionIsThrown() {

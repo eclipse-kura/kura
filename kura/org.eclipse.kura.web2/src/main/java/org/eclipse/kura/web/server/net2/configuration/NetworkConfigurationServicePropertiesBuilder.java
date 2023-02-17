@@ -31,12 +31,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
 
-    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig,
-            Map<String, Object> currentNetConfServProps) {
+    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig) {
         this.gwtConfig = gwtConfig;
-        this.properties = new NetworkConfigurationServiceProperties(currentNetConfServProps);
+        this.properties = new NetworkConfigurationServiceProperties();
         this.ifname = this.gwtConfig.getName();
-        this.properties.addNetworkInterfaceIfNotPresent(ifname);
     }
 
     public Map<String, Object> build() {
@@ -64,8 +62,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setIp4Status(this.ifname,
                 EnumsParser.getNetInterfaceStatus(Optional.ofNullable(this.gwtConfig.getStatus())));
 
-        boolean isDhcpClient = this.gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
-        boolean isManual = !isDhcpClient;
+        boolean isManual = this.gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
         boolean isWan = this.gwtConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
 
         if (isWan) {

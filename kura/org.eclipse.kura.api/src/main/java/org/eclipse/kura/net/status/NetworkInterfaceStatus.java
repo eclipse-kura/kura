@@ -17,7 +17,15 @@ import java.util.Optional;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.usb.UsbNetDevice;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * Abstract class that contains common properties to describe the status of a
+ * network interface. Specific interfaces, like ethernet or wifi, must extend
+ * this class.
+ *
+ */
+@ProviderType
 public abstract class NetworkInterfaceStatus {
 
     private final String name;
@@ -102,6 +110,11 @@ public abstract class NetworkInterfaceStatus {
         return this.interfaceIp6Addresses;
     }
 
+    /**
+     * Abstract builder for a {@link NetworkInterfaceStatus} object. The builders
+     * for specific interfaces, like ethernet or wifi, must extend this class.
+     * 
+     */
     public abstract static class NetworkInterfaceStatusBuilder<T extends NetworkInterfaceStatusBuilder<T>> {
 
         private static final String NA = "N/A";

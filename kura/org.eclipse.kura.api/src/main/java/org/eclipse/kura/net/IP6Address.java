@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
+import java.net.UnknownHostException;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,13 +28,21 @@ public class IP6Address extends IPAddress {
         super(addr, jnAddress);
     }
 
+    @Override
+    public IPAddress getNetmask(short prefix) throws UnknownHostException {
+        throw new UnsupportedOperationException("This method is not yet implemented.");
+    }
+
     /**
-     * Utility routine to check if the InetAddress is an IPv4 compatible IPv6 address.
+     * Utility routine to check if the InetAddress is an IPv4 compatible IPv6
+     * address.
      *
-     * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6 address; or false if address is IPv4
+     * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6
+     *         address; or false if address is IPv4
      *         address.
      */
     public boolean isIPv4CompatibleAddress() {
         return ((java.net.Inet6Address) this.javaNetAddress).isIPv4CompatibleAddress();
     }
+
 }

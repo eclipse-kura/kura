@@ -13,17 +13,27 @@
 package org.eclipse.kura.net.status;
 
 import org.eclipse.kura.net.IPAddress;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * This class describes an IP address with its prefix.
+ * It can be used for IPv4 or IPv6 addresses.
+ *
+ */
+@ProviderType
 public class NetworkInterfaceIpAddress<T extends IPAddress> {
 
     private final T address;
     private final short prefix;
-    private final T broadcast;
+
+    public NetworkInterfaceIpAddress(T address, short prefix) {
+        this.address = address;
+        this.prefix = prefix;
+    }
 
     public NetworkInterfaceIpAddress(T address, short prefix, T broadcast) {
         this.address = address;
         this.prefix = prefix;
-        this.broadcast = broadcast;
     }
 
     public T getAddress() {
@@ -32,10 +42,6 @@ public class NetworkInterfaceIpAddress<T extends IPAddress> {
 
     public short getPrefix() {
         return this.prefix;
-    }
-
-    public T getBroadcast() {
-        return this.broadcast;
     }
 
 }

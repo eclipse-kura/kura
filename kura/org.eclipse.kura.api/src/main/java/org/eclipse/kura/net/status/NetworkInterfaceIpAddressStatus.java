@@ -17,7 +17,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IPAddress;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * This class describes the IP address status of a network interface:
+ * a list of IP addresses, a gateway and a list of DNS servers address.
+ * It can be used for IPv4 or IPv6 addresses.
+ *
+ */
+@ProviderType
 public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
 
     private final List<NetworkInterfaceIpAddress<T>> addresses;

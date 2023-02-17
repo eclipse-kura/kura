@@ -118,8 +118,7 @@ public class NMStatusConverter {
             String addressStr = String.class.cast(data.get("address").getValue());
             UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
             NetworkInterfaceIpAddress<IP4Address> address = new NetworkInterfaceIpAddress<>(
-                    (IP4Address) IPAddress.parseHostAddress(addressStr), prefix.shortValue(),
-                    (IP4Address) IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
+                    (IP4Address) IPAddress.parseHostAddress(addressStr), prefix.shortValue());
             ip4AddressStatus.addAddress(address);
         }
     }
@@ -139,26 +138,6 @@ public class NMStatusConverter {
             NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
         String gateway = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
         ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
-    }
-
-    private static String getNetmaskStringFrom(int prefix) {
-        if (prefix >= 1 && prefix <= 32) {
-            int mask = ~((1 << 32 - prefix) - 1);
-            return dottedQuad(mask);
-        } else {
-            throw new IllegalArgumentException("prefix is invalid: " + Integer.toString(prefix));
-        }
-    }
-
-    private static String dottedQuad(int ip) {
-        String[] items = new String[4];
-        for (int i = 3; i >= 0; i--) {
-            int value = ip & 0xFF;
-            items[i] = Integer.toString(value);
-            ip = ip >>> 8;
-        }
-
-        return String.join(".", items);
     }
 
     private static byte[] getMacAddressBytes(String macAddress) {

@@ -216,7 +216,13 @@ public class NMDeviceTypeTest {
     @Test
     public void conversionWorksForTypeNull() {
         whenInt32StateIsPassed(new UInt32(32));
-        thenTypeShouldBeEqualTo(null);
+        thenTypeShouldBeEqualTo(NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+    }
+
+    @Test
+    public void conversionWorksForOutOfBounds() {
+        whenInt32StateIsPassed(new UInt32(6536));
+        thenTypeShouldBeEqualTo(NMDeviceType.NM_DEVICE_TYPE_UNKNOWN);
     }
 
     private void whenInt32StateIsPassed(UInt32 type) {

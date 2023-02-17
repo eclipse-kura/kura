@@ -47,12 +47,11 @@ public enum NMDeviceType {
     NM_DEVICE_TYPE_6LOWPAN,
     NM_DEVICE_TYPE_WIREGUARD,
     NM_DEVICE_TYPE_WIFI_P2P,
-    NM_DEVICE_TYPE_VRF;
+    NM_DEVICE_TYPE_VRF,
+    NM_DEVICE_TYPE_LOOPBACK;
 
     public static NMDeviceType fromUInt32(UInt32 type) {
         switch (type.intValue()) {
-        case 0:
-            return NM_DEVICE_TYPE_UNKNOWN;
         case 14:
             return NM_DEVICE_TYPE_GENERIC;
         case 1:
@@ -115,8 +114,11 @@ public enum NMDeviceType {
             return NM_DEVICE_TYPE_WIFI_P2P;
         case 31:
             return NM_DEVICE_TYPE_VRF;
+        case 32:
+            return NM_DEVICE_TYPE_LOOPBACK;
+        case 0:
         default:
-            return null;
+            return NM_DEVICE_TYPE_UNKNOWN;
         }
     }
 }

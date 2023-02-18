@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
+
     Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -1649,12 +1651,11 @@
                 </plugins>
             </build>
         </profile>
-        
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
                 <property>
-                    <name>buildAll</name>
+                    <name>buildAllContainers</name>
                 </property>
             </activation>
             <build>
@@ -1698,10 +1699,10 @@
                                         <property name="build.name" value="docker-x86_64-nn" />
                                         <property name="target.device" value="docker-x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="ubuntu" />
+                                        <property name="kura.os.version" value="linux" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
+                                        <property name="os.base" value="linux-generic" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1710,6 +1711,33 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                          <execution>
+                            <id>docker-x86_64-nn-base-container</id>
+                            <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            <configuration>
+                              <target>
+                                <copy todir="${project.build.directory}" file="${project.basedir}/src/main/resources/docker-x86_64-nn/Dockerfile" />
+                                <exec executable="docker" dir="${project.build.directory}" failonerror="true">
+                                    <arg value="build"/>
+                                    <arg value="-t"/>
+                                    <arg value="base-kura-docker:${project.version}"/>
+                                    <arg value="-t"/>
+                                    <arg value="base-kura-docker-x86_64:${project.version}"/>
+                                    <arg value="."/>
+                                </exec>
+                              </target>
+                            </configuration>
+                          </execution>
+                        </executions>
+                      </plugin>
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
@@ -1742,7 +1770,100 @@
                 </plugins>
             </build>
         </profile>
-
+        <profile>
+            <id>docker-ubi8-x86_64-nn</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>buildAllContainers</name>
+                </property>
+            </activation>
+            <properties>
+                
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                          <execution>
+                            <phase>package</phase>
+                            <configuration>
+                                <executable>docker</executable>
+                                <workingDirectory>${project.basedir}/src/main/resources/docker-ubi8-x86_64-nn</workingDirectory>
+                                <arguments>
+                                    <argument>build</argument>
+                                    <argument>--build-arg</argument>
+                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>-t</argument>
+                                    <argument>kura-ubi8:${project.version}</argument>
+                                    <argument>-t</argument>
+                                    <argument>kura-ubi8-x86_64:${project.version}</argument>
+                                    <argument>.</argument>
+                                </arguments>
+                            </configuration>
+                            <goals>
+                              <goal>exec</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                      </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-alpine-x86_64-nn</id>
+            <activation>
+                <property>
+                    <name>buildAllContainers</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                      <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                          <execution>
+                            <phase>package</phase>
+                            <configuration>
+                                <executable>docker</executable>
+                                <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                                <arguments>
+                                    <argument>build</argument>
+                                    <argument>--build-arg</argument>
+                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>-t</argument>
+                                    <argument>kura-alpine:${project.version}</argument>
+                                    <argument>-t</argument>
+                                    <argument>kura-alpine-x86_64:${project.version}</argument>
+                                    <argument>.</argument>
+                                </arguments>
+                            </configuration>
+                            <goals>
+                              <goal>exec</goal>
+                            </goals>
+                          </execution>
+                        </executions>
+                      </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>nvidia-jetson-nano</id>
             <activation>

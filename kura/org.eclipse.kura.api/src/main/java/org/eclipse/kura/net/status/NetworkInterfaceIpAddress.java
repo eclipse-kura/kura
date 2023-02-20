@@ -31,11 +31,6 @@ public class NetworkInterfaceIpAddress<T extends IPAddress> {
         this.prefix = prefix;
     }
 
-    public NetworkInterfaceIpAddress(T address, short prefix, T broadcast) {
-        this.address = address;
-        this.prefix = prefix;
-    }
-
     public T getAddress() {
         return this.address;
     }

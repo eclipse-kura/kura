@@ -895,19 +895,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         }
     }
 
-//    private UsbNetDevice getUsbDevice(String interfaceName) {
-//        List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();
-//        if (usbNetDevices != null && !usbNetDevices.isEmpty()) {
-//            for (UsbNetDevice usbNetDevice : usbNetDevices) {
-//                if (usbNetDevice.getInterfaceName().equals(interfaceName)) {
-//                    return usbNetDevice;
-//                }
-//            }
-//        }
-//
-//        return null;
-//    }
-
     @Override
     public Optional<UsbNetDevice> getUsbNetDevice(String interfaceName) {
         List<UsbNetDevice> usbNetDevices = this.usbService.getUsbNetDevices();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,15 @@
             required="false"
             default=""
             description="If set to a non empty value, the publisher will set the message body to the value of the provided STRING or BYTE_ARRAY metric.">
+        </AD>
+        
+        <AD id="remove.body.from.metrics"
+            name="Remove body envelope property from metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Set true to remove the metric that is sent as body of the message.">
         </AD>
     </OCD>
     

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ final class CloudPublisherOptions {
 
     private static final String CONF_POSITION = "publish.position";
     private static final String CONF_BODY_PROPERTY = "set.body.from.property";
+    private static final String CONF_REMOVE_BODY_PROPERTY = "remove.body.from.metrics";
 
     private final Map<String, Object> properties;
 
@@ -81,5 +82,9 @@ final class CloudPublisherOptions {
         }
 
         return Optional.of(property);
+    }
+
+    boolean getRemoveBodyPropertyFromMetrics() {
+        return (boolean) this.properties.getOrDefault(CONF_REMOVE_BODY_PROPERTY, false);
     }
 }

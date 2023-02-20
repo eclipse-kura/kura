@@ -639,6 +639,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../network-failover/" class="md-nav__link">
+        Network Failover
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ethernet-configuration/" class="md-nav__link">
         Ethernet Configuration
       </a>
@@ -3192,6 +3206,11 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
 </tr>
 <tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
+<td>Integer</td>
+<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+</tr>
+<tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.address</code></td>
 <td>String</td>
 <td>The IPv4 address assigned to the network interface</td>
@@ -3851,13 +3870,13 @@ Since the network configuration shown on the screen may not be synchronized with
       
       
         
-        <a href="../ethernet-configuration/" class="md-footer__link md-footer__link--next" aria-label="Next: Ethernet Configuration" rel="next">
+        <a href="../network-failover/" class="md-footer__link md-footer__link--next" aria-label="Next: Network Failover" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Ethernet Configuration
+              Network Failover
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -1,16 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
+
+import java.util.Objects;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -68,4 +70,25 @@ public class Sim {
     public ESimStatus geteSimStatus() {
         return this.eSimStatus;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.active, this.eSimStatus, this.eid, this.iccid, this.imsi, this.operatorName,
+                this.simType);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        Sim other = (Sim) obj;
+        return this.active == other.active && this.eSimStatus == other.eSimStatus && Objects.equals(this.eid, other.eid)
+                && Objects.equals(this.iccid, other.iccid) && Objects.equals(this.imsi, other.imsi)
+                && Objects.equals(this.operatorName, other.operatorName) && this.simType == other.simType;
+    }
+
 }

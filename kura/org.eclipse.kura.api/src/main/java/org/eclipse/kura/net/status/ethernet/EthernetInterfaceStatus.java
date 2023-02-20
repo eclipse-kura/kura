@@ -1,16 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.status.ethernet;
+
+import java.util.Objects;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
@@ -51,7 +53,7 @@ public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public EthernetInterfaceStatus build() {
-            this.withType(NetworkInterfaceType.ETHERNET);
+            withType(NetworkInterfaceType.ETHERNET);
             return new EthernetInterfaceStatus(this);
         }
 
@@ -59,6 +61,26 @@ public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
         public EthernetInterfaceStatusBuilder getThis() {
             return this;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(this.linkUp);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        EthernetInterfaceStatus other = (EthernetInterfaceStatus) obj;
+        return this.linkUp == other.linkUp;
     }
 
 }

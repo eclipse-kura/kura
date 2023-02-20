@@ -1,18 +1,20 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.status.wifi;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -151,6 +153,33 @@ public class WifiAccessPoint {
         public WifiAccessPoint build() {
             return new WifiAccessPoint(this);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(this.hardwareAddress);
+        result = prime * result
+                + Objects.hash(this.channel, this.frequency, this.maxBitrate, this.mode, this.rsnSecurity,
+                        this.signalQuality, this.ssid, this.wpaSecurity);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        WifiAccessPoint other = (WifiAccessPoint) obj;
+        return this.channel == other.channel && this.frequency == other.frequency
+                && Arrays.equals(this.hardwareAddress, other.hardwareAddress) && this.maxBitrate == other.maxBitrate
+                && this.mode == other.mode && Objects.equals(this.rsnSecurity, other.rsnSecurity)
+                && this.signalQuality == other.signalQuality && Objects.equals(this.ssid, other.ssid)
+                && Objects.equals(this.wpaSecurity, other.wpaSecurity);
     }
 
 }

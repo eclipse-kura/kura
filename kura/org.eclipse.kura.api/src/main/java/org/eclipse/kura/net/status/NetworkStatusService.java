@@ -14,6 +14,7 @@
 package org.eclipse.kura.net.status;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -34,12 +35,13 @@ public interface NetworkStatusService {
     public List<NetworkInterfaceStatus> getNetworkStatus();
 
     /**
-     * Return the {@link NetworkInterfaceStatus} of the given network interface.
+     * Return an optional {@link NetworkInterfaceStatus} of the given network
+     * interface. If the interface doesn't exist, an Empty value is returned.
      * 
      * @param interfaceName the name of the network interface
      * @return the {@link NetworkInterfaceStatus}
      */
-    public NetworkInterfaceStatus getNetworkStatus(String interfaceName);
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName);
 
     /**
      * Return the names of the network interfaces detected in the system.

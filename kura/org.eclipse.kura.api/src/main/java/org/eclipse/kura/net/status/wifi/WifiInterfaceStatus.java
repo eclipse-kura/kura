@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -116,7 +117,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
             return this;
         }
 
-        public WifiInterfaceStatusBuilder withSupportedRadioModes(EnumSet<WifiRadioMode> supportedRadioModes) {
+        public WifiInterfaceStatusBuilder withSupportedRadioModes(Set<WifiRadioMode> supportedRadioModes) {
             this.supportedRadioModes = supportedRadioModes;
             return this;
         }
@@ -154,7 +155,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public WifiInterfaceStatus build() {
-            this.withType(NetworkInterfaceType.WIFI);
+            withType(NetworkInterfaceType.WIFI);
             return new WifiInterfaceStatus(this);
         }
 
@@ -162,6 +163,36 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
         public WifiInterfaceStatusBuilder getThis() {
             return this;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + Objects.hash(this.activeWifiAccessPoint, this.availableWifiAccessPoints, this.capabilities,
+                        this.countryCode, this.mode, this.supportedBitrates, this.supportedChannels,
+                        this.supportedFrequencies, this.supportedRadioModes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        WifiInterfaceStatus other = (WifiInterfaceStatus) obj;
+        return Objects.equals(this.activeWifiAccessPoint, other.activeWifiAccessPoint)
+                && Objects.equals(this.availableWifiAccessPoints, other.availableWifiAccessPoints)
+                && Objects.equals(this.capabilities, other.capabilities)
+                && Objects.equals(this.countryCode, other.countryCode)
+                && this.mode == other.mode && Objects.equals(this.supportedBitrates, other.supportedBitrates)
+                && Objects.equals(this.supportedChannels, other.supportedChannels)
+                && Objects.equals(this.supportedFrequencies, other.supportedFrequencies)
+                && Objects.equals(this.supportedRadioModes, other.supportedRadioModes);
     }
 
 }

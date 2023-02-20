@@ -1,17 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.status;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
@@ -113,7 +115,7 @@ public abstract class NetworkInterfaceStatus {
     /**
      * Abstract builder for a {@link NetworkInterfaceStatus} object. The builders
      * for specific interfaces, like ethernet or wifi, must extend this class.
-     * 
+     *
      */
     public abstract static class NetworkInterfaceStatusBuilder<T extends NetworkInterfaceStatusBuilder<T>> {
 
@@ -202,6 +204,36 @@ public abstract class NetworkInterfaceStatus {
         public abstract T getThis();
 
         public abstract NetworkInterfaceStatus build();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(this.hardwareAddress);
+        result = prime * result + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
+                this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.name, this.state, this.type,
+                this.usbNetDevice, this.virtual);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        NetworkInterfaceStatus other = (NetworkInterfaceStatus) obj;
+        return this.autoConnect == other.autoConnect && Objects.equals(this.driver, other.driver)
+                && Objects.equals(this.driverVersion, other.driverVersion)
+                && Objects.equals(this.firmwareVersion, other.firmwareVersion)
+                && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+                && Objects.equals(this.interfaceIp4Addresses, other.interfaceIp4Addresses)
+                && Objects.equals(this.interfaceIp6Addresses, other.interfaceIp6Addresses) && this.mtu == other.mtu
+                && Objects.equals(this.name, other.name) && this.state == other.state && this.type == other.type
+                && Objects.equals(this.usbNetDevice, other.usbNetDevice) && this.virtual == other.virtual;
     }
 
 }

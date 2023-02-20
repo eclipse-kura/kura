@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,6 +14,7 @@ package org.eclipse.kura.net.status;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IPAddress;
@@ -34,6 +35,13 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
 
     public NetworkInterfaceIpAddressStatus() {
         this.addresses = new ArrayList<>();
+        this.gateway = Optional.empty();
+        this.dnsServerAddresses = new ArrayList<>();
+    }
+
+    public NetworkInterfaceIpAddressStatus(NetworkInterfaceIpAddress<T> address) {
+        this.addresses = new ArrayList<>();
+        this.addresses.add(address);
         this.gateway = Optional.empty();
         this.dnsServerAddresses = new ArrayList<>();
     }
@@ -60,6 +68,25 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
 
     public void addDnsServerAddress(T dnsServerAddress) {
         this.dnsServerAddresses.add(dnsServerAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.addresses, this.dnsServerAddresses, this.gateway);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        NetworkInterfaceIpAddressStatus<T> other = (NetworkInterfaceIpAddressStatus<T>) obj;
+        return Objects.equals(this.addresses, other.addresses)
+                && Objects.equals(this.dnsServerAddresses, other.dnsServerAddresses)
+                && Objects.equals(this.gateway, other.gateway);
     }
 
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -422,7 +423,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         @Override
         public ModemInterfaceStatus build() {
-            this.withType(NetworkInterfaceType.MODEM);
+            withType(NetworkInterfaceType.MODEM);
             return new ModemInterfaceStatus(this);
         }
 
@@ -430,6 +431,55 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         public ModemInterfaceStatusBuilder getThis() {
             return this;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims, this.bearers, this.ci,
+                        this.connectionStatus, this.connectionType, this.currentBands, this.currentModemCapabilities,
+                        this.currentModes, this.gpsSupported,
+                        this.hardwareRevision, this.imei, this.lac, this.manufacturer, this.model, this.modemDevice,
+                        this.operatorName, this.plmnid, this.ports, this.powerState,
+                        this.primaryPort, this.registrationStatus, this.rssi, this.serialNumber, this.signalQuality,
+                        this.simLocked, this.softwareRevision,
+                        this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        ModemInterfaceStatus other = (ModemInterfaceStatus) obj;
+        return Objects.equals(this.accessTechnologies, other.accessTechnologies)
+                && this.activeSimIndex == other.activeSimIndex
+                && Objects.equals(this.availableSims, other.availableSims)
+                && Objects.equals(this.bearers, other.bearers)
+                && Objects.equals(this.ci, other.ci) && this.connectionStatus == other.connectionStatus
+                && this.connectionType == other.connectionType && Objects.equals(this.currentBands, other.currentBands)
+                && Objects.equals(this.currentModemCapabilities, other.currentModemCapabilities)
+                && Objects.equals(this.currentModes, other.currentModes) && this.gpsSupported == other.gpsSupported
+                && Objects.equals(this.hardwareRevision, other.hardwareRevision)
+                && Objects.equals(this.imei, other.imei)
+                && Objects.equals(this.lac, other.lac) && Objects.equals(this.manufacturer, other.manufacturer)
+                && Objects.equals(this.model, other.model) && Objects.equals(this.modemDevice, other.modemDevice)
+                && Objects.equals(this.operatorName, other.operatorName) && Objects.equals(this.plmnid, other.plmnid)
+                && Objects.equals(this.ports, other.ports) && this.powerState == other.powerState
+                && Objects.equals(this.primaryPort, other.primaryPort)
+                && this.registrationStatus == other.registrationStatus
+                && this.rssi == other.rssi && Objects.equals(this.serialNumber, other.serialNumber)
+                && this.signalQuality == other.signalQuality && this.simLocked == other.simLocked
+                && Objects.equals(this.softwareRevision, other.softwareRevision)
+                && Objects.equals(this.supportedBands, other.supportedBands)
+                && Objects.equals(this.supportedModemCapabilities, other.supportedModemCapabilities)
+                && Objects.equals(this.supportedModes, other.supportedModes);
     }
 
 }

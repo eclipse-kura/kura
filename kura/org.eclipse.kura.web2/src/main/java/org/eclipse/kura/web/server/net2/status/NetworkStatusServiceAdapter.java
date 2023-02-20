@@ -59,13 +59,13 @@ public class NetworkStatusServiceAdapter {
     public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(String ifname,
             GwtNetInterfaceConfig gwtConfigToUpdate) {
 
-        NetworkInterfaceStatus networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifname);
+        Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifname);
 
-        if (networkInterfaceInfo != null) {
-            setCommonStateProperties(gwtConfigToUpdate, networkInterfaceInfo);
-            setIpv4DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo);
-            setWifiStateProperties(gwtConfigToUpdate, networkInterfaceInfo);
-            setModemStateProperties(gwtConfigToUpdate, networkInterfaceInfo);
+        if (networkInterfaceInfo.isPresent()) {
+            setCommonStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
+            setIpv4DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
+            setWifiStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
+            setModemStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
 
             return Optional.of(gwtConfigToUpdate);
         }

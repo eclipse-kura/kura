@@ -1,16 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
+
+import java.util.Objects;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -40,27 +42,48 @@ public class Bearer {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public boolean isConnected() {
-        return connected;
+        return this.connected;
     }
 
     public String getApn() {
-        return apn;
+        return this.apn;
     }
 
     public BearerIpType getIpType() {
-        return ipType;
+        return this.ipType;
     }
 
     public long getBytesTransmitted() {
-        return bytesTransmitted;
+        return this.bytesTransmitted;
     }
 
     public long getBytesReceived() {
-        return bytesReceived;
+        return this.bytesReceived;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.apn, this.bytesReceived, this.bytesTransmitted, this.connected, this.ipType,
+                this.name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        Bearer other = (Bearer) obj;
+        return Objects.equals(this.apn, other.apn) && this.bytesReceived == other.bytesReceived
+                && this.bytesTransmitted == other.bytesTransmitted && this.connected == other.connected
+                && this.ipType == other.ipType
+                && Objects.equals(this.name, other.name);
     }
 
 }

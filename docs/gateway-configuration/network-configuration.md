@@ -94,6 +94,7 @@ Name                                             | Type     | Description
 Name                                                | Type     | Description
 ----------------------------------------------------|----------|------------------------------------------
 `net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
+`net.interface.<interface>.config.ip4.wan.priority` | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details
 `net.interface.<interface>.config.ip4.address`    | String   | The IPv4 address assigned to the network interface
 `net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
 `net.interface.<interface>.config.ip4.gateway`    | String   | The IPv4 address of the default gateway

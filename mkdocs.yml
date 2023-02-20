@@ -13,6 +13,7 @@ nav:
       - Device Information: gateway-configuration/device-information.md
       - Network Configuration:
         - Network Configuration: gateway-configuration/network-configuration.md
+        - Network Failover: gateway-configuration/network-failover.md
         - Ethernet Configuration: gateway-configuration/ethernet-configuration.md
         - Wi-Fi Configuration: gateway-configuration/wifi-configuration.md
         - Cellular Configuration: gateway-configuration/cellular-configuration.md

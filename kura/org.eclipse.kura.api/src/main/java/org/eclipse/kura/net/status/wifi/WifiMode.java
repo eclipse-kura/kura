@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.status.wifi;
 
 /**
- * Modes of operation for wifi interfaces
+ * Modes of operation for WiFi interfaces
  */
 public enum WifiMode {
     /** Mode is unknown. */

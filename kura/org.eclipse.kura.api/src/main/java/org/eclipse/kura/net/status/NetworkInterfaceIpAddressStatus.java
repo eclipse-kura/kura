@@ -21,8 +21,8 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * This class describes the IP address status of a network interface:
- * a list of IP addresses, a gateway and a list of DNS servers address.
- * It can be used for IPv4 or IPv6 addresses.
+ * a list of IP addresses, an optional gateway and a list of DNS servers
+ * address. It can be used for IPv4 or IPv6 addresses.
  *
  */
 @ProviderType

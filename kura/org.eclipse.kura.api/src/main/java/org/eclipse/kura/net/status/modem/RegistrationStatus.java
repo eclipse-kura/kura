@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The registration status of a modem when connected to a mobile network.
+ *
+ */
 public enum RegistrationStatus {
 
     IDLE,

@@ -23,7 +23,14 @@ import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * Class that contains specific properties to describe the status of a
+ * Modem interface.
+ *
+ */
+@ProviderType
 public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
     private final String model;

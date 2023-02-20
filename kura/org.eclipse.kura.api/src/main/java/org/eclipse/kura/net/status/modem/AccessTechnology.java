@@ -12,6 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The specific technology types used when a modem is connected or registered to
+ * a network.
+ *
+ */
 public enum AccessTechnology {
 
     UNKNOWN,

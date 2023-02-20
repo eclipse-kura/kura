@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The type of Bearer or Context associated to a modem connection.
+ *
+ */
 public enum BearerIpType {
 
     NONE,

@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The radio bands supported by a modem when connected to a mobile network.
+ *
+ */
 public enum ModemBand {
     UNKNOWN,
     EGSM,

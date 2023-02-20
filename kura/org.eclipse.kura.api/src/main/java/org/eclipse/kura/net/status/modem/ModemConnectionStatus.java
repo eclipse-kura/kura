@@ -12,12 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The status of a modem.
+ *
+ */
 public enum ModemConnectionStatus {
     /** The modem is unavailable */
     FAILED,
-    /** The modem is in an unkown state. */
+    /** The modem is in an unknown state. */
     UNKNOWN,
-    /** The modem is being initialized. */
+    /** The modem is being initialised. */
     INITIALIZING,
     /** The modem is locked. */
     LOCKED,
@@ -27,9 +31,9 @@ public enum ModemConnectionStatus {
     DISABLING,
     /** The modem is enabling. */
     ENABLING,
-    /** The modem is enabled but not registerd to a network provider. */
+    /** The modem is enabled but not registered to a network provider. */
     ENABLED,
-    /** The modem is searching for a ntwork provider. */
+    /** The modem is searching for a network provider. */
     SEARCHING,
     /** The modem is registered to a network provider. */
     REGISTERED,

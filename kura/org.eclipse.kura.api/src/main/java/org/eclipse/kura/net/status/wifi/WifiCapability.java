@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.wifi;
 
+/**
+ * The capability of a WiFi interface.
+ *
+ */
 public enum WifiCapability {
     /** The device has no encryption/authentication capabilities */
     NONE,

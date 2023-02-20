@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The generic access mode a modem supports.
+ *
+ */
 public enum ModemMode {
     NONE,
     CS,

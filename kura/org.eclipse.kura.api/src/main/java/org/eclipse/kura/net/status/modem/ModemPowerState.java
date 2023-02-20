@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The power state of a modem.
+ *
+ */
 public enum ModemPowerState {
 
     UNKNOWN,

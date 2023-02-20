@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The type of a modem port.
+ *
+ */
 public enum ModemPortType {
 
     UNKNOWN,

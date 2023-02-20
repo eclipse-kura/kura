@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 20230 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,15 +10,11 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.net.status.modem;
-
 /**
- * The SIM (Subscriber Identity Module) type.
  *
  */
-public enum SimType {
-
-    UNKNOWN,
-    PHYSICAL,
-    ESIM;
-}
+/**
+ * Provides classes for describing the status of a Loopback interface.
+ *
+ */
+package org.eclipse.kura.net.status.loopback;

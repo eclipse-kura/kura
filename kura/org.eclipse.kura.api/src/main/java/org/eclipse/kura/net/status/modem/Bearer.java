@@ -12,6 +12,13 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * This class describes the Bearer or Context associated to a modem connection.
+ *
+ */
+@ProviderType
 public class Bearer {
 
     private final String name;

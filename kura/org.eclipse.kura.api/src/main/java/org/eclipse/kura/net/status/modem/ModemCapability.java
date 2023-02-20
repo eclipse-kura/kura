@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The generic access technologies families supported by a modem.
+ *
+ */
 public enum ModemCapability {
 
     /** The modem has no capabilities. */

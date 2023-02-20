@@ -14,7 +14,14 @@ package org.eclipse.kura.net.status.ethernet;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * Class that contains specific properties to describe the status of an
+ * Ethernet interface.
+ *
+ */
+@ProviderType
 public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
 
     private final boolean linkUp;

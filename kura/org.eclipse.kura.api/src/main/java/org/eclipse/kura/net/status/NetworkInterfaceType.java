@@ -12,11 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status;
 
+/**
+ * The type of a network interface.
+ *
+ */
 public enum NetworkInterfaceType {
 
     /** The device type is unknown. */
     UNKNOWN,
-    /** The device is wired Ethernet device. */
+    /** The device is a wired Ethernet device. */
     ETHERNET,
     /** The device is an 802.11 WiFi device. */
     WIFI,
@@ -24,7 +28,7 @@ public enum NetworkInterfaceType {
     UNUSED1,
     /** Unused */
     UNUSED2,
-    /** The device is Bluetooth device that provides PAN or DUN capabilities. */
+    /** The device is a Bluetooth device. */
     BT,
     /** The device is an OLPC mesh networking device. */
     OLPC_MESH,
@@ -32,8 +36,8 @@ public enum NetworkInterfaceType {
     WIMAX,
     /**
      * The device is a modem supporting one or more of analog telephone, CDMA/EVDO,
-     * GSM/UMTS/HSPA, or LTE
-     * standards to access a cellular or wireline data network.
+     * GSM/UMTS/HSPA, or LTE standards to access a cellular or wireline data
+     * network.
      */
     MODEM,
     /** The device is an IP-capable InfiniBand interface. */
@@ -42,11 +46,11 @@ public enum NetworkInterfaceType {
     BOND,
     /** The device is a VLAN interface. */
     VLAN,
-    /** The device is an ADSL device supporting PPPoE and PPPoATM protocols. */
+    /** The device is an ADSL device. */
     ADSL,
     /** The device is a bridge master interface. */
     BRIDGE,
-    /** generic support for unrecognized device types. */
+    /** This is a generic support for unrecognized device types. */
     GENERIC,
     /** The device is a team master interface. */
     TEAM,

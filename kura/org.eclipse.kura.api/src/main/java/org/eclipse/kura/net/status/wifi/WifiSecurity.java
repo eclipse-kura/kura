@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.status.wifi;
 
 /**
- * Flags describing the security capabilities of an access point.
+ * Flags describing the security capabilities of an Access Point.
  */
 public enum WifiSecurity {
     /** None */

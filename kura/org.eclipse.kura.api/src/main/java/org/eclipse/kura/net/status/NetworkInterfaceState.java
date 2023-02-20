@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.status;
 
 /**
- * The current state of a network interface.
+ * The state of a network interface.
  */
 public enum NetworkInterfaceState {
 

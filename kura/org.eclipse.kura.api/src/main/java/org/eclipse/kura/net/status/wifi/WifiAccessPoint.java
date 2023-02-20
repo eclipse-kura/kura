@@ -15,6 +15,15 @@ package org.eclipse.kura.net.status.wifi;
 import java.util.Collections;
 import java.util.Set;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * This class describes a Wifi Access Point.
+ * It can be used both for describing a detected AP after a WiFi scan when in
+ * Station mode and the provided AP when in Master (or Access Point) mode.
+ *
+ */
+@ProviderType
 public class WifiAccessPoint {
 
     private final String ssid;

@@ -21,7 +21,14 @@ import java.util.Set;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * Class that contains specific properties to describe the status of a
+ * WiFi interface.
+ *
+ */
+@ProviderType
 public class WifiInterfaceStatus extends NetworkInterfaceStatus {
 
     private final Set<WifiCapability> capabilities;

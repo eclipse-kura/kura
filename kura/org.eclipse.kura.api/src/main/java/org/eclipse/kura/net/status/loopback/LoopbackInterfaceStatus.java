@@ -14,7 +14,14 @@ package org.eclipse.kura.net.status.loopback;
 
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * Class that contains specific properties to describe the status of a
+ * Loopback interface.
+ *
+ */
+@ProviderType
 public class LoopbackInterfaceStatus extends NetworkInterfaceStatus {
 
     private LoopbackInterfaceStatus(LoopbackInterfaceStatusBuilder builder) {

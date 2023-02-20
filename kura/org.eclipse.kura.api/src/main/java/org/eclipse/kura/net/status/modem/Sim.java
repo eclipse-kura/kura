@@ -12,6 +12,14 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+import org.osgi.annotation.versioning.ProviderType;
+
+/**
+ * This class contains all relevant properties to describe a SIM (Subscriber
+ * Identity Module).
+ *
+ */
+@ProviderType
 public class Sim {
 
     private final boolean active;

@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.status.wifi;
 
 /**
- * Types of wifi radio modes
+ * Types of WiFi radio modes
  */
 public enum WifiRadioMode {
 

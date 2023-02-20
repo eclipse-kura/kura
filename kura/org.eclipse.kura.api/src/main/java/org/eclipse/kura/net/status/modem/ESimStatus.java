@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+/**
+ * The status of an ESIM.
+ *
+ */
 public enum ESimStatus {
 
     UNKNOWN,

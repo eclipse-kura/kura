@@ -1,6 +1,6 @@
 # Network Failover
 
-For devices configured to use NetworkManager, it is possible to configure multiple WAN interfaces and and a basic network failover functionality.
+For devices configured to use NetworkManager, it is possible to configure multiple WAN interfaces and a basic network failover functionality.
 
 As in the picture below, the Kura UI allows for multiple WAN interfaces to be defined. Each WAN interface can be configured with a **WAN Priority**. WAN Priority is used to determine which interface will be selected for primary WAN. In the case where the primary WAN interface loses connection, then the next highest priority interface is assigned.
 

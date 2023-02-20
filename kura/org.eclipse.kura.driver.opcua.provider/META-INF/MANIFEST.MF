@@ -50,4 +50,5 @@ Bundle-ClassPath: .,
  lib/netty-transport-native-kqueue.jar,
  lib/netty-transport-classes-kqueue.jar,
  lib/bcprov-jdk18on.jar,
- lib/bcpkix-jdk18on.jar
+ lib/bcpkix-jdk18on.jar,
+ lib/bcutil-jdk18on.jar

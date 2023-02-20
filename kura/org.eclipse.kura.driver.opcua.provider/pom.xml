@@ -159,6 +159,11 @@
                                     <artifactId>bcpkix-jdk18on</artifactId>
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcutil-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                         <goals>

@@ -259,7 +259,6 @@ public class NMStatusServiceImplTest {
         this.statuses.forEach(status -> {
             assertTrue(status.getName().equals("wlan0") || status.getName().equals("abcd0"));
         });
-
     }
 
     private void thenLoopbackInterfaceStatusIsRetrieved() {
@@ -268,11 +267,22 @@ public class NMStatusServiceImplTest {
     }
 
     private void thenRetrievedLoopbackInterfaceStatusHasFullProperties() throws UnknownHostException {
-        LoopbackInterfaceStatus ethStatus = (LoopbackInterfaceStatus) this.status.get();
-        assertEquals("lo", ethStatus.getName());
-        assertCommonProperties(ethStatus);
-        assertEquals(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "abcd0"),
-                ethStatus.getUsbNetDevice().get());
+        LoopbackInterfaceStatus loStatus = (LoopbackInterfaceStatus) this.status.get();
+        assertEquals("lo", loStatus.getName());
+        assertTrue(
+                Arrays.equals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, loStatus.getHardwareAddress()));
+        assertEquals("EthDriver", loStatus.getDriver());
+        assertEquals("EthDriverVersion", loStatus.getDriverVersion());
+        assertEquals("1234", loStatus.getFirmwareVersion());
+        assertTrue(loStatus.isVirtual());
+        assertEquals(NetworkInterfaceState.ACTIVATED, loStatus.getState());
+        assertTrue(loStatus.isAutoConnect());
+        assertEquals(1500, loStatus.getMtu());
+        assertTrue(loStatus.getInterfaceIp4Addresses().isPresent());
+        assertEquals(buildIp4Address(), loStatus.getInterfaceIp4Addresses().get());
+        assertTrue(loStatus.getInterfaceIp6Addresses().isPresent());
+        assertEquals(buildIp6Address(), loStatus.getInterfaceIp6Addresses().get());
+        assertFalse(loStatus.getUsbNetDevice().isPresent());
     }
 
     private void assertCommonProperties(NetworkInterfaceStatus networkStatus) throws UnknownHostException {
@@ -321,6 +331,7 @@ public class NMStatusServiceImplTest {
     private LoopbackInterfaceStatus buildLoopbackInterfaceStatus(String interfaceName) throws UnknownHostException {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
         buildCommonProperties(interfaceName, builder);
+        builder.withVirtual(true);
         return builder.build();
     }
 

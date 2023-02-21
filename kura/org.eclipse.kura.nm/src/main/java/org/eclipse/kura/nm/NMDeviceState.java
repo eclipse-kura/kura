@@ -73,4 +73,36 @@ public enum NMDeviceState {
             return NMDeviceState.NM_DEVICE_STATE_UNKNOWN;
         }
     }
+
+    public static UInt32 fromUInt32(NMDeviceState state) {
+        switch (state) {
+        case NM_DEVICE_STATE_UNMANAGED:
+            return new UInt32(10);
+        case NM_DEVICE_STATE_UNAVAILABLE:
+            return new UInt32(20);
+        case NM_DEVICE_STATE_DISCONNECTED:
+            return new UInt32(30);
+        case NM_DEVICE_STATE_PREPARE:
+            return new UInt32(40);
+        case NM_DEVICE_STATE_CONFIG:
+            return new UInt32(50);
+        case NM_DEVICE_STATE_NEED_AUTH:
+            return new UInt32(60);
+        case NM_DEVICE_STATE_IP_CONFIG:
+            return new UInt32(70);
+        case NM_DEVICE_STATE_IP_CHECK:
+            return new UInt32(80);
+        case NM_DEVICE_STATE_SECONDARIES:
+            return new UInt32(90);
+        case NM_DEVICE_STATE_ACTIVATED:
+            return new UInt32(100);
+        case NM_DEVICE_STATE_DEACTIVATING:
+            return new UInt32(110);
+        case NM_DEVICE_STATE_FAILED:
+            return new UInt32(120);
+        case NM_DEVICE_STATE_UNKNOWN:
+        default:
+            return new UInt32(0);
+        }
+    }
 }

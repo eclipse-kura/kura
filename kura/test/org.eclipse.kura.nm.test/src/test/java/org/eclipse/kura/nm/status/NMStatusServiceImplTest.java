@@ -10,8 +10,8 @@ import static org.mockito.Mockito.when;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
@@ -25,6 +25,8 @@ import org.eclipse.kura.net.status.NetworkInterfaceStatus.NetworkInterfaceStatus
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
+import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
@@ -44,24 +46,26 @@ public class NMStatusServiceImplTest {
     private NMDbusConnector nmDbusConnector;
     private NetworkService networkService;
     private Optional<NetworkInterfaceStatus> status;
+    private List<NetworkInterfaceStatus> statuses;
+    private List<String> interfaceNames;
 
     @Test
     public void shouldReturnEmptyIfInterfaceDoesNotExist() throws DBusException, UnknownHostException {
-        givenNMStatusServiceImpl();
+        givenNMStatusServiceImplWithNonExistingInterface();
         whenInterfaceStatusIsRetrieved("non-existing-interface");
         thenInterfaceStatusIsEmpty();
     }
 
     @Test
     public void shouldReturnExistingEthernetInterfaceStatus() throws DBusException, UnknownHostException {
-        givenNMStatusServiceImpl();
+        givenNMStatusServiceImplWithEthernetInterface();
         whenInterfaceStatusIsRetrieved("abcd0");
         thenInterfaceStatusIsReturned();
     }
 
     @Test
     public void shouldReturnFullEthernetInterfaceStatus() throws DBusException, UnknownHostException {
-        givenNMStatusServiceImpl();
+        givenNMStatusServiceImplWithEthernetInterface();
         whenInterfaceStatusIsRetrieved("abcd0");
         thenInterfaceStatusIsReturned();
         thenEthernetInterfaceStatusIsRetrieved();
@@ -70,35 +74,112 @@ public class NMStatusServiceImplTest {
 
     @Test
     public void shouldReturnExistingWiFiInterfaceStatus() throws DBusException, UnknownHostException {
-        givenNMStatusServiceImpl();
+        givenNMStatusServiceImplWithWifiInterface();
         whenInterfaceStatusIsRetrieved("wlan0");
         thenInterfaceStatusIsReturned();
     }
 
     @Test
     public void shouldReturnFullWifiInterfaceStatus() throws DBusException, UnknownHostException {
-        givenNMStatusServiceImpl();
+        givenNMStatusServiceImplWithWifiInterface();
         whenInterfaceStatusIsRetrieved("wlan0");
         thenInterfaceStatusIsReturned();
         thenWifiInterfaceStatusIsRetrieved();
         thenRetrievedWifiInterfaceStatusHasFullProperties();
     }
 
-    private void givenNMStatusServiceImpl() throws DBusException, UnknownHostException {
-        this.networkService = mock(NetworkService.class);
-        this.nmDbusConnector = mock(NMDbusConnector.class);
-        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.networkService))
-                .thenReturn(buildEthernetInterfaceStatus("abcd0"));
+    @Test
+    public void shouldReturnEmptyListIfInterfacesDoNotExist() throws DBusException, UnknownHostException {
+        givenNMStatusServiceImplWithoutInterfaces();
+        whenInterfaceStatusesAreRetrieved();
+        thenInterfaceStatusListIsEmpty();
+    }
+
+    @Test
+    public void shouldReturnExistingInterfaceStatuses() throws DBusException, UnknownHostException {
+        givenNMStatusServiceImplWithInterfaces();
+        whenInterfaceStatusesAreRetrieved();
+        thenInterfaceStatusListIsReturned();
+    }
+
+    @Test
+    public void shouldReturnEmptyInterfaceNameList() throws UnknownHostException, DBusException {
+        givenNMStatusServiceImplWithoutInterfaces();
+        whenInterfaceNameListIsRetrived();
+        thenInterfaceNameListIsEmpty();
+    }
+
+    @Test
+    public void shouldReturnInterfaceNameList() throws UnknownHostException, DBusException {
+        givenNMStatusServiceImplWithInterfaces();
+        whenInterfaceNameListIsRetrived();
+        thenInterfaceNameListIsNotEmpty();
+    }
+
+    @Test
+    public void shouldReturnExistingLoopbackInterfaceStatus() throws DBusException, UnknownHostException {
+        givenNMStatusServiceImplWithLoopbackInterface();
+        whenInterfaceStatusIsRetrieved("lo");
+        thenInterfaceStatusIsReturned();
+    }
+
+    @Test
+    public void shouldReturnFullLoopbackInterfaceStatus() throws DBusException, UnknownHostException {
+        givenNMStatusServiceImplWithLoopbackInterface();
+        whenInterfaceStatusIsRetrieved("lo");
+        thenInterfaceStatusIsReturned();
+        thenLoopbackInterfaceStatusIsRetrieved();
+        thenRetrievedLoopbackInterfaceStatusHasFullProperties();
+    }
+
+    private void givenNMStatusServiceImplWithNonExistingInterface() throws DBusException, UnknownHostException {
+        createTestObjects();
         when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", networkService))
                 .thenThrow(DBusException.class);
+    }
+
+    private void givenNMStatusServiceImplWithEthernetInterface() throws DBusException, UnknownHostException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.networkService))
+                .thenReturn(buildEthernetInterfaceStatus("abcd0"));
+    }
+
+    private void givenNMStatusServiceImplWithWifiInterface() throws DBusException, UnknownHostException {
+        createTestObjects();
         when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.networkService))
                 .thenReturn(buildWifiInterfaceStatus("wlan0"));
-        this.statusService = new NMStatusServiceImpl(this.nmDbusConnector);
-        this.statusService.setNetworkService(this.networkService);
+    }
+
+    private void givenNMStatusServiceImplWithoutInterfaces() throws DBusException, UnknownHostException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaces()).thenThrow(DBusException.class);
+    }
+
+    private void givenNMStatusServiceImplWithInterfaces() throws DBusException, UnknownHostException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaces()).thenReturn(Arrays.asList("abcd0", "wlan0"));
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.networkService))
+                .thenReturn(buildEthernetInterfaceStatus("abcd0"));
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.networkService))
+                .thenReturn(buildWifiInterfaceStatus("wlan0"));
+    }
+
+    private void givenNMStatusServiceImplWithLoopbackInterface() throws UnknownHostException, DBusException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaceStatus("lo", this.networkService))
+                .thenReturn(buildLoopbackInterfaceStatus("lo"));
     }
 
     private void whenInterfaceStatusIsRetrieved(String interfaceName) {
         this.status = this.statusService.getNetworkStatus(interfaceName);
+    }
+
+    private void whenInterfaceStatusesAreRetrieved() {
+        this.statuses = this.statusService.getNetworkStatus();
+    }
+
+    private void whenInterfaceNameListIsRetrived() {
+        this.interfaceNames = this.statusService.getInterfaceNames();
     }
 
     private void thenInterfaceStatusIsEmpty() {
@@ -155,6 +236,45 @@ public class NMStatusServiceImplTest {
         assertEquals(buildAP(), wifiStatus.getAvailableWifiAccessPoints().get(0));
     }
 
+    private void thenInterfaceStatusListIsEmpty() {
+        assertNotNull(this.statuses);
+        assertTrue(this.statuses.isEmpty());
+    }
+
+    private void thenInterfaceNameListIsEmpty() {
+        assertNotNull(this.interfaceNames);
+        assertTrue(this.interfaceNames.isEmpty());
+    }
+
+    private void thenInterfaceNameListIsNotEmpty() {
+        assertNotNull(this.interfaceNames);
+        assertFalse(this.interfaceNames.isEmpty());
+        assertEquals(2, this.interfaceNames.size());
+    }
+
+    private void thenInterfaceStatusListIsReturned() {
+        assertNotNull(this.statuses);
+        assertFalse(this.statuses.isEmpty());
+        assertEquals(2, this.statuses.size());
+        this.statuses.forEach(status -> {
+            assertTrue(status.getName().equals("wlan0") || status.getName().equals("abcd0"));
+        });
+
+    }
+
+    private void thenLoopbackInterfaceStatusIsRetrieved() {
+        assertTrue(this.status.get() instanceof LoopbackInterfaceStatus);
+        assertEquals(NetworkInterfaceType.LOOPBACK, this.status.get().getType());
+    }
+
+    private void thenRetrievedLoopbackInterfaceStatusHasFullProperties() throws UnknownHostException {
+        LoopbackInterfaceStatus ethStatus = (LoopbackInterfaceStatus) this.status.get();
+        assertEquals("lo", ethStatus.getName());
+        assertCommonProperties(ethStatus);
+        assertEquals(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "abcd0"),
+                ethStatus.getUsbNetDevice().get());
+    }
+
     private void assertCommonProperties(NetworkInterfaceStatus networkStatus) throws UnknownHostException {
         assertTrue(
                 Arrays.equals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, networkStatus.getHardwareAddress()));
@@ -195,6 +315,12 @@ public class NMStatusServiceImplTest {
         builder.withMode(WifiMode.INFRA);
         builder.withActiveWifiAccessPoint(Optional.of(buildAP()));
         builder.withAvailableWifiAccessPoints(Arrays.asList(buildAP()));
+        return builder.build();
+    }
+
+    private LoopbackInterfaceStatus buildLoopbackInterfaceStatus(String interfaceName) throws UnknownHostException {
+        LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
+        buildCommonProperties(interfaceName, builder);
         return builder.build();
     }
 
@@ -243,5 +369,12 @@ public class NMStatusServiceImplTest {
         builder.withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.GROUP_TKIP));
         builder.withRsnSecurity(EnumSet.of(WifiSecurity.GROUP_WEP104, WifiSecurity.KEY_MGMT_802_1X));
         return builder.build();
+    }
+
+    private void createTestObjects() {
+        this.networkService = mock(NetworkService.class);
+        this.nmDbusConnector = mock(NMDbusConnector.class);
+        this.statusService = new NMStatusServiceImpl(this.nmDbusConnector);
+        this.statusService.setNetworkService(this.networkService);
     }
 }

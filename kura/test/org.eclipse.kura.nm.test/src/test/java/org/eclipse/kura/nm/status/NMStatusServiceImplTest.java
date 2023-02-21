@@ -204,6 +204,8 @@ public class NMStatusServiceImplTest {
         assertEquals(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "abcd0"),
                 ethStatus.getUsbNetDevice().get());
         assertTrue(ethStatus.isLinkUp());
+        assertEquals(buildEthernetInterfaceStatus("abcd0"), ethStatus);
+        assertEquals(buildEthernetInterfaceStatus("abcd0").hashCode(), ethStatus.hashCode());
     }
 
     private void thenWifiInterfaceStatusIsRetrieved() {
@@ -234,6 +236,8 @@ public class NMStatusServiceImplTest {
         assertEquals(buildAP(), wifiStatus.getActiveWifiAccessPoint().get());
         assertEquals(1, wifiStatus.getAvailableWifiAccessPoints().size());
         assertEquals(buildAP(), wifiStatus.getAvailableWifiAccessPoints().get(0));
+        assertEquals(buildWifiInterfaceStatus("wlan0"), wifiStatus);
+        assertEquals(buildWifiInterfaceStatus("wlan0").hashCode(), wifiStatus.hashCode());
     }
 
     private void thenInterfaceStatusListIsEmpty() {
@@ -283,6 +287,8 @@ public class NMStatusServiceImplTest {
         assertTrue(loStatus.getInterfaceIp6Addresses().isPresent());
         assertEquals(buildIp6Address(), loStatus.getInterfaceIp6Addresses().get());
         assertFalse(loStatus.getUsbNetDevice().isPresent());
+        assertEquals(buildLoopbackInterfaceStatus("lo"), loStatus);
+        assertEquals(buildLoopbackInterfaceStatus("lo").hashCode(), loStatus.hashCode());
     }
 
     private void assertCommonProperties(NetworkInterfaceStatus networkStatus) throws UnknownHostException {
@@ -359,8 +365,8 @@ public class NMStatusServiceImplTest {
     private NetworkInterfaceIpAddressStatus<IP6Address> buildIp6Address() throws UnknownHostException {
         NetworkInterfaceIpAddress<IP6Address> ip6Address = new NetworkInterfaceIpAddress<IP6Address>(
                 (IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b5"), (short) 64);
-        NetworkInterfaceIpAddressStatus<IP6Address> ip6AddressStatus = new NetworkInterfaceIpAddressStatus<>(
-                ip6Address);
+        NetworkInterfaceIpAddressStatus<IP6Address> ip6AddressStatus = new NetworkInterfaceIpAddressStatus<>();
+        ip6AddressStatus.addAddress(ip6Address);
         ip6AddressStatus.setGateway((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6"));
         ip6AddressStatus
                 .addDnsServerAddress((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b7"));

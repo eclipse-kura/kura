@@ -21,13 +21,48 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 192.168.2.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
 ```
 
-The `metric` flag will correspond to the set **WAN Priority**.
+The `metric` flag will correspond to the set **WAN Priority**. *NetworkManager* will always prioritize lower metric routes.
 
-The default URI used to perform the connectivity check may differ across operating systems. To set a specific URI edit `/etc/NetworkManager/NetworkManager.conf` (reference [NetworkManager](https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3)):
+
+
+## Work Modalities
+
+The *NetworkManager* failover mechanism can work at two different levels:
+
+- by detecting disruptions at physical level;
+- by performing a **connectivity check** to an upstream URI.
+
+*NetworkManager* brings a network interface down when it detects the loss of its physical link. In such case, the next highest priority interface is selected as the main one.
+
+When the connectivity check fails, *NetworkManager* penalizes the metric of that interface in the routing table. *NetworkManager* continues to perform connectivity checks over all the other interfaces. As soon as the connectivity is restored over a previously failing interface, the metric is also restored to the original value and the routing table goes back to the original state.
+
+
+
+### Configuring the connectivity check
+
+The **connectivity check** is enabled by default in Kura and is configured to probe the connection to `http://network-test.debian.org/nm` every 60 seconds. To set a specific URI and a different interval edit `/etc/NetworkManager/conf.d/99kura-nm.conf` (reference [NetworkManager](https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3)):
 
 ```
 [connectivity]
 uri=http://network-test.debian.org/nm
-interval=...
-response=...
+interval=60
+response="NetworkManager is online"
 ```
+
+The **interval** minimun is 60 seconds, if missing it defaults to 300 seconds.
+
+The **response** should match what the **uri** is returning when probed. Some examples of web pages with *NetworkManager* responses:
+
+| URI | Response |
+| - | - |
+| `http://network-test.debian.org/nm` | `NetworkManager is online` |
+| `https://fedoraproject.org/static/hotspot.txt` | `OK` |
+| `http://nmcheck.gnome.org/check_network_status.txt` | `NetworkManager is online` |
+| `https://www.pkgbuild.com/check_network_status.txt` | `NetworkManager is online` |
+
+To **disable** the connectivity check feature:
+
+- remove the `[connectivity]` section from the configuration file; or
+- set `interval=0`; or
+- remove `uri`; or
+- set an empty URI, like `uri=`

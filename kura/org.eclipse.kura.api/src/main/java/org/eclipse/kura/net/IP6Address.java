@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
-import java.net.UnknownHostException;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,11 +24,6 @@ public class IP6Address extends IPAddress {
 
     IP6Address(byte[] addr, java.net.InetAddress jnAddress) {
         super(addr, jnAddress);
-    }
-
-    @Override
-    public IPAddress getNetmask(short prefix) throws UnknownHostException {
-        throw new UnsupportedOperationException("This method is not yet implemented.");
     }
 
     /**

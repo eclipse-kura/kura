@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
-import java.net.UnknownHostException;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,26 +24,6 @@ public class IP4Address extends IPAddress {
 
     IP4Address(byte[] addr, java.net.InetAddress jnAddress) {
         super(addr, jnAddress);
-    }
-
-    @Override
-    public IPAddress getNetmask(short prefix) throws UnknownHostException {
-        if (prefix >= 1 && prefix <= 32) {
-            int mask = ~((1 << 32 - prefix) - 1);
-            return IPAddress.parseHostAddress(dottedQuad(mask));
-        } else {
-            throw new IllegalArgumentException("prefix is invalid: " + Integer.toString(prefix));
-        }
-    }
-
-    private static String dottedQuad(int ip) {
-        String[] items = new String[4];
-        for (int i = 3; i >= 0; i--) {
-            int value = ip & 0xFF;
-            items[i] = Integer.toString(value);
-            ip = ip >>> 8;
-        }
-        return String.join(".", items);
     }
 
     @Override

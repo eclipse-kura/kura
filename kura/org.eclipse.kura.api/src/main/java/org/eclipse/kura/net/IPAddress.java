@@ -210,15 +210,6 @@ public abstract class IPAddress {
         return this.javaNetAddress.isSiteLocalAddress();
     }
 
-    /**
-     * Utility method to convert a prefix into a netmask address;
-     * 
-     * @param prefix a short value
-     * @return an IPAddress representing the netmask
-     * @throws UnknownHostException
-     */
-    public abstract IPAddress getNetmask(short prefix) throws UnknownHostException;
-
     @Override
     public int hashCode() {
         final int prime = 31;

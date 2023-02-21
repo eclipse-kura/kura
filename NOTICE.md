@@ -51,7 +51,6 @@ This project leverages the following third party content.
 * maven/mavencentral/com.github.docker-java/docker-java/3.2.12, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.github.hypfvieh/bluez-dbus-osgi/0.1.4, MIT, approved, clearlydefined
 * maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.google.code.findbugs/jsr305/3.0.1, Apache-2.0, approved, #20
 * maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
 * maven/mavencentral/com.google.guava/guava/25.0-jre, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined
@@ -137,12 +136,10 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.49.v20220914, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.milo/bsd-parser-core/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/bsd-parser-gson/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/sdk-client/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/sdk-core/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-client/0.2.4, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-core/0.2.4, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/sdk-client/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/sdk-core/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/stack-client/0.6.8, EPL-2.0, approved, iot.milo
+* maven/mavencentral/org.eclipse.milo/stack-core/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.app/1.5.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.bidi/1.3.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.cm/1.4.400, EPL-2.0, approved, eclipse.platform
@@ -180,7 +177,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.platform/org.eclipse.osgi/3.16.0, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
 * maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
-* maven/mavencentral/org.jooq/jool/0.9.10, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
 * maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979
@@ -215,6 +211,10 @@ This project leverages the following third party content.
 * maven/mavencentral/org.ow2.asm/asm-tree/9.2, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/org.ow2.asm/asm-util/9.2, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/org.ow2.asm/asm/9.2, BSD-3-Clause, approved, CQ23635
+* maven/mavencentral/com.google.guava/guava/31.0-jre, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.google.guava/failureaccess/1.0, Apache-2.0, approved, CQ22654
+* maven/mavencentral/com.digitalpetri.fsm/strict-machine/0.6, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.digitalpetri.netty/netty-channel-fsm/0.8, Apache-2.0, approved, #6168
 
 ### Additional Dependencies
 

@@ -31,11 +31,13 @@
 
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <com.google.guava.version>25.0-jre</com.google.guava.version>
+        <com.google.guava.version>31.0-jre</com.google.guava.version>
         <io.netty.version>4.1.86.Final</io.netty.version>
-        <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
-        <org.jooq.jool.version>0.9.10</org.jooq.jool.version>
-        <com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>
+        <org.eclipse.milo.version>0.6.8</org.eclipse.milo.version>
+        <com.digitalpetri.netty.netty-channel-fsm.version>0.8</com.digitalpetri.netty.netty-channel-fsm.version>
+        <com.digitalpetri.fsm.strict-machine.version>0.6</com.digitalpetri.fsm.strict-machine.version>
+        <com.google.guava.failureaccess.version>1.0</com.google.guava.failureaccess.version>
+        <org.bouncycastle.version>1.71</org.bouncycastle.version>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
@@ -58,14 +60,9 @@
                                     <version>${com.google.guava.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.milo</groupId>
-                                    <artifactId>bsd-parser-core</artifactId>
-                                    <version>${org.eclipse.milo.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.milo</groupId>
-                                    <artifactId>bsd-parser-gson</artifactId>
-                                    <version>${org.eclipse.milo.version}</version>
+                                    <groupId>com.google.guava</groupId>
+                                    <artifactId>failureaccess</artifactId>
+                                    <version>${com.google.guava.failureaccess.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.milo</groupId>
@@ -88,19 +85,84 @@
                                     <version>${org.eclipse.milo.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.jooq</groupId>
-                                    <artifactId>jool</artifactId>
-                                    <version>${org.jooq.jool.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>io.netty</groupId>
-                                    <artifactId>netty-all</artifactId>
+                                    <artifactId>netty-codec</artifactId>
                                     <version>${io.netty.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.google.code.findbugs</groupId>
-                                    <artifactId>jsr305</artifactId>
-                                    <version>${com.google.code.findbugs.jsr305.version}</version>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-common</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-handler</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-buffer</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-resolver</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-unix-common</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-epoll</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-epoll</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-native-kqueue</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.netty</groupId>
+                                    <artifactId>netty-transport-classes-kqueue</artifactId>
+                                    <version>${io.netty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.digitalpetri.fsm</groupId>
+                                    <artifactId>strict-machine</artifactId>
+                                    <version>${com.digitalpetri.fsm.strict-machine.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.digitalpetri.netty</groupId>
+                                    <artifactId>netty-channel-fsm</artifactId>
+                                    <version>${com.digitalpetri.netty.netty-channel-fsm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcprov-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcpkix-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcutil-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -27,18 +27,11 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/../..</kura.basedir>
-		<org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
-		<io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
+		<org.eclipse.milo.version>0.6.4</org.eclipse.milo.version>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-core</artifactId>
-			<version>${io.dropwizard.metrics.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.eclipse.milo</groupId>
 			<artifactId>sdk-client</artifactId>
@@ -126,11 +119,6 @@
 							<outputDirectory>${project.basedir}/lib</outputDirectory>
 							<stripVersion>true</stripVersion>
 							<artifactItems>
-								<artifactItem>
-									<groupId>io.dropwizard.metrics</groupId>
-									<artifactId>metrics-core</artifactId>
-									<version>${io.dropwizard.metrics.version}</version>
-								</artifactItem>
 								<artifactItem>
 									<groupId>org.eclipse.milo</groupId>
 									<artifactId>sdk-client</artifactId>

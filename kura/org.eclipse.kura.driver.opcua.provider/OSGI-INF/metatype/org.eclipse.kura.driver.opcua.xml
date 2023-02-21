@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 	
-	Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+	Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -158,8 +158,8 @@
 			type="Boolean" 
 			cardinality="0" 
 			required="true" 
-			default="false"
-			description="Specifies whether to enable or not server certificate verification" />
+			default="true"
+			description="Specifies whether to enable or not server certificate verification. If set to true, server certificate will be checked to be valid, not expired and trusted according to the certificates currently in the keystore. Server certificate SubjectAlternativeName will also be matched against server application URI. If set to false, no checks will be performed (This should be used for testing purposes only)." />
 		
 		<AD id="keystore.type" 
 			name="Keystore type"

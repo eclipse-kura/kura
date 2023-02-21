@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Kevin Herron and others
+ * Copyright (c) 2016, 2023 Kevin Herron and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,21 +23,19 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRank;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
-import org.eclipse.milo.opcua.sdk.server.api.AccessContext;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
-import org.eclipse.milo.opcua.sdk.server.api.MethodInvocationHandler;
+import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespace;
 import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
-import org.eclipse.milo.opcua.sdk.server.api.Namespace;
+import org.eclipse.milo.opcua.sdk.server.api.methods.MethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeContext;
-import org.eclipse.milo.opcua.sdk.server.nodes.ServerNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
@@ -55,17 +53,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.XmlElement;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
-import org.eclipse.milo.opcua.stack.core.util.FutureUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class TestNamespace implements Namespace {
+public class TestNamespace extends ManagedNamespace {
 
     public static final String NAMESPACE_URI = "urn:eclipse:milo:hello-world";
     public static final String IDENTIFIER_HELLO_WORLD = "HelloWorld";
@@ -114,42 +110,28 @@ public class TestNamespace implements Namespace {
     private final OpcUaServer server;
     private final UShort namespaceIndex;
 
-    public TestNamespace(OpcUaServer server, UShort namespaceIndex) {
+    public TestNamespace(OpcUaServer server) {
+        super(server, NAMESPACE_URI);
         this.server = server;
-        this.namespaceIndex = namespaceIndex;
+        this.namespaceIndex = server.getNamespaceTable().addUri(NAMESPACE_URI);
 
         subscriptionModel = new SubscriptionModel(server, this);
 
-        try {
-            // Create a "HelloWorld" folder and add it to the node manager
-            NodeId folderNodeId = new NodeId(namespaceIndex, IDENTIFIER_HELLO_WORLD);
+        NodeId folderNodeId = new NodeId(namespaceIndex, IDENTIFIER_HELLO_WORLD);
 
-            UaFolderNode folderNode = new UaFolderNode(server.getNodeMap(), folderNodeId,
-                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD),
-                    LocalizedText.english(IDENTIFIER_HELLO_WORLD));
+        UaFolderNode folderNode = new UaFolderNode(getNodeContext(), folderNodeId,
+                new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD),
+                LocalizedText.english(IDENTIFIER_HELLO_WORLD));
 
-            server.getNodeMap().addNode(folderNode);
+        getNodeManager().addNode(folderNode);
 
-            // Make sure our new folder shows up under the server's Objects folder
-            server.getUaNamespace().addReference(Identifiers.ObjectsFolder, Identifiers.Organizes, true,
-                    folderNodeId.expanded(), NodeClass.Object);
+        folderNode.addReference(new Reference(
+                Identifiers.ObjectsFolder,
+                Identifiers.Organizes,
+                folderNodeId.expanded(),
+                true));
 
-            // Add the rest of the nodes
-            addVariableNodes(folderNode);
-
-        } catch (UaException e) {
-            logger.error("Error adding nodes: {}", e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public UShort getNamespaceIndex() {
-        return namespaceIndex;
-    }
-
-    @Override
-    public String getNamespaceUri() {
-        return NAMESPACE_URI;
+        addVariableNodes(folderNode);
     }
 
     private void addVariableNodes(UaFolderNode rootNode) {
@@ -158,11 +140,11 @@ public class TestNamespace implements Namespace {
     }
 
     private void addArrayNodes(UaFolderNode rootNode) {
-        UaFolderNode arrayTypesFolder = new UaFolderNode(server.getNodeMap(),
+        UaFolderNode arrayTypesFolder = new UaFolderNode(getNodeContext(),
                 new NodeId(namespaceIndex, "HelloWorld/ArrayTypes"), new QualifiedName(namespaceIndex, "ArrayTypes"),
                 LocalizedText.english("ArrayTypes"));
 
-        server.getNodeMap().addNode(arrayTypesFolder);
+        getNodeManager().addNode(arrayTypesFolder);
         rootNode.addOrganizes(arrayTypesFolder);
 
         for (Object[] os : STATIC_ARRAY_NODES) {
@@ -175,10 +157,10 @@ public class TestNamespace implements Namespace {
             }
             Variant variant = new Variant(array);
 
-            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
+            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                     .setNodeId(new NodeId(namespaceIndex, name))
-                    .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-                    .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
+                    .setAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
+                    .setUserAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
                     .setBrowseName(new QualifiedName(namespaceIndex, name)).setDisplayName(LocalizedText.english(name))
                     .setDataType(typeId).setTypeDefinition(Identifiers.BaseDataVariableType)
                     .setValueRank(ValueRank.OneDimension.getValue()).setArrayDimensions(new UInteger[] { uint(0) })
@@ -186,17 +168,17 @@ public class TestNamespace implements Namespace {
 
             node.setValue(new DataValue(variant));
 
-            server.getNodeMap().addNode(node);
+            getNodeManager().addNode(node);
             arrayTypesFolder.addOrganizes(node);
         }
     }
 
     private void addScalarNodes(UaFolderNode rootNode) {
-        UaFolderNode scalarTypesFolder = new UaFolderNode(server.getNodeMap(),
+        UaFolderNode scalarTypesFolder = new UaFolderNode(getNodeContext(),
                 new NodeId(namespaceIndex, "HelloWorld/ScalarTypes"), new QualifiedName(namespaceIndex, "ScalarTypes"),
                 LocalizedText.english("ScalarTypes"));
 
-        server.getNodeMap().addNode(scalarTypesFolder);
+        getNodeManager().addNode(scalarTypesFolder);
         rootNode.addOrganizes(scalarTypesFolder);
 
         for (Object[] os : STATIC_SCALAR_NODES) {
@@ -204,40 +186,40 @@ public class TestNamespace implements Namespace {
             NodeId typeId = (NodeId) os[1];
             Variant variant = (Variant) os[2];
 
-            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
+            UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                     .setNodeId(new NodeId(namespaceIndex, name))
-                    .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-                    .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
+                    .setAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
+                    .setUserAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
                     .setBrowseName(new QualifiedName(namespaceIndex, name)).setDisplayName(LocalizedText.english(name))
                     .setDataType(typeId).setTypeDefinition(Identifiers.BaseDataVariableType).build();
 
             node.setValue(new DataValue(variant));
 
-            server.getNodeMap().addNode(node);
+            getNodeManager().addNode(node);
             scalarTypesFolder.addOrganizes(node);
         }
 
-        UaVariableNode largeIndex = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
+        UaVariableNode largeIndex = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
                 .setNodeId(new NodeId(namespaceIndex, UInteger.MAX))
-                .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-                .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
+                .setAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
+                .setUserAccessLevel(AccessLevel.toValue(AccessLevel.READ_WRITE))
                 .setBrowseName(new QualifiedName(namespaceIndex, "largeIndex"))
                 .setDisplayName(LocalizedText.english("largeIndex")).setDataType(Identifiers.Int32)
                 .setTypeDefinition(Identifiers.BaseDataVariableType).build();
 
         largeIndex.setValue(new DataValue(new Variant(1234)));
 
-        server.getNodeMap().addNode(largeIndex);
+        getNodeManager().addNode(largeIndex);
     }
 
     @Override
-    public CompletableFuture<List<Reference>> browse(AccessContext context, NodeId nodeId) {
-        ServerNode node = server.getNodeMap().get(nodeId);
+    public void browse(BrowseContext context, NodeId nodeId) {
+        UaNode node = getNodeManager().get(nodeId);
 
         if (node != null) {
-            return CompletableFuture.completedFuture(node.getReferences());
+            context.success(node.getReferences());
         } else {
-            return FutureUtils.failedFuture(new UaException(StatusCodes.Bad_NodeIdUnknown));
+            context.failure(new UaException(StatusCodes.Bad_NodeIdUnknown));
         }
     }
 
@@ -248,7 +230,7 @@ public class TestNamespace implements Namespace {
         List<DataValue> results = Lists.newArrayListWithCapacity(readValueIds.size());
 
         for (ReadValueId readValueId : readValueIds) {
-            ServerNode node = server.getNodeMap().get(readValueId.getNodeId());
+            UaNode node = getNodeManager().get(readValueId.getNodeId());
 
             if (node != null) {
                 DataValue value = node.readAttribute(new AttributeContext(context), readValueId.getAttributeId(),
@@ -260,7 +242,7 @@ public class TestNamespace implements Namespace {
             }
         }
 
-        context.complete(results);
+        context.success(results);
     }
 
     @Override
@@ -268,7 +250,7 @@ public class TestNamespace implements Namespace {
         List<StatusCode> results = Lists.newArrayListWithCapacity(writeValues.size());
 
         for (WriteValue writeValue : writeValues) {
-            ServerNode node = server.getNodeMap().get(writeValue.getNodeId());
+            UaNode node = getNodeManager().get(writeValue.getNodeId());
 
             if (node != null) {
                 try {
@@ -289,40 +271,44 @@ public class TestNamespace implements Namespace {
             }
         }
 
-        context.complete(results);
+        context.success(results);
     }
 
     @Override
-    public void onDataItemsCreated(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsCreated(dataItems);
-    }
-
-    @Override
-    public void onDataItemsModified(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsModified(dataItems);
-    }
-
-    @Override
-    public void onDataItemsDeleted(List<DataItem> dataItems) {
-        subscriptionModel.onDataItemsDeleted(dataItems);
-    }
-
-    @Override
-    public void onMonitoringModeChanged(List<MonitoredItem> monitoredItems) {
-        subscriptionModel.onMonitoringModeChanged(monitoredItems);
-    }
-
-    @Override
-    public Optional<MethodInvocationHandler> getInvocationHandler(NodeId methodId) {
-        Optional<ServerNode> node = server.getNodeMap().getNode(methodId);
+    protected Optional<MethodInvocationHandler> getInvocationHandler(NodeId objectId, NodeId methodId) {
+        Optional<UaNode> node = getNodeManager().getNode(methodId);
 
         return node.flatMap(n -> {
             if (n instanceof UaMethodNode) {
-                return ((UaMethodNode) n).getInvocationHandler();
+                return Optional.of(((UaMethodNode) n).getInvocationHandler());
             } else {
                 return Optional.empty();
             }
         });
+    }
+
+    @Override
+    public void onDataItemsCreated(List<DataItem> arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onDataItemsDeleted(List<DataItem> arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onDataItemsModified(List<DataItem> arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onMonitoringModeChanged(List<MonitoredItem> arg0) {
+        // TODO Auto-generated method stub
+
     }
 
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,8 +25,6 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.driver.opcua.auth.CertificateManager;
-import org.eclipse.kura.internal.driver.opcua.auth.ExternalKeystoreCertificateManager;
 import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
@@ -150,15 +148,13 @@ final class OpcUaOptions {
     /** The properties as associated */
     private final Map<String, Object> properties;
 
-    private CertificateManager certificateManager;
-
     /**
      * Instantiates a new OPCUA options.
      *
      * @param properties
-     *            the properties
+     *                   the properties
      * @throws NullPointerException
-     *             if any of the arguments is null
+     *                              if any of the arguments is null
      */
     OpcUaOptions(final Map<String, Object> properties, final CryptoService cryptoService) {
         requireNonNull(properties, "Properties cannot be null");
@@ -255,7 +251,7 @@ final class OpcUaOptions {
      *
      * @return the Keystore Password
      */
-    String getKeystorePassword() {
+    char[] getKeystorePassword() {
         String password = null;
         Password decryptedPassword;
         final Object keystorePass = this.properties.get(KEYSTORE_PASSWORD);
@@ -267,7 +263,7 @@ final class OpcUaOptions {
                 logger.error(e.getMessage(), e);
             }
         }
-        return password;
+        return password != null ? password.toCharArray() : null;
     }
 
     boolean isServerAuthenticationEnabled() {
@@ -362,14 +358,14 @@ final class OpcUaOptions {
             securityPolicy = (Integer) policy;
         }
         switch (securityPolicy) {
-        case 1:
-            return Basic128Rsa15;
-        case 2:
-            return Basic256;
-        case 3:
-            return Basic256Sha256;
-        default:
-            return None;
+            case 1:
+                return Basic128Rsa15;
+            case 2:
+                return Basic256;
+            case 3:
+                return Basic256Sha256;
+            default:
+                return None;
         }
     }
 
@@ -437,16 +433,6 @@ final class OpcUaOptions {
             return (Boolean) raw;
         }
         return false;
-    }
-
-    CertificateManager getCertificateManager() {
-
-        if (this.certificateManager == null) {
-            this.certificateManager = new ExternalKeystoreCertificateManager(getKeyStorePath(), getKeystoreType(),
-                    getKeystorePassword(), getKeystoreClientAlias(), isServerAuthenticationEnabled());
-        }
-
-        return this.certificateManager;
     }
 
     ChannelNameFormat getSubtreeSubscriptionChannelNameFormat() {

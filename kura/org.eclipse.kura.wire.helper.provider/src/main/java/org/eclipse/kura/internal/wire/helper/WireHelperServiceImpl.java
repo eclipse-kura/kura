@@ -144,6 +144,9 @@ public final class WireHelperServiceImpl implements WireHelperService {
             return null;
         }
 
+        if (wireComponentRef.getProperty(SERVICE_PID) instanceof java.util.ArrayList) {
+         throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,"The service PID of {} is an array. It should be a string. (Maybe two components with the same PID?)"
+        }
         final String servicePid = (String) wireComponentRef.getProperty(SERVICE_PID);
         final String kuraServicePid = (String) wireComponentRef.getProperty(KURA_SERVICE_PID);
         int receiverPortCount = getIntOrDefault(wireComponentRef.getProperty(RECEIVER_PORT_COUNT_PROP_NAME.value()),

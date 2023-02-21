@@ -121,4 +121,76 @@ public enum NMDeviceType {
             return NM_DEVICE_TYPE_UNKNOWN;
         }
     }
+
+    public static UInt32 fromUInt32(NMDeviceType type) {
+        switch (type) {
+        case NM_DEVICE_TYPE_GENERIC:
+            return new UInt32(14);
+        case NM_DEVICE_TYPE_ETHERNET:
+            return new UInt32(1);
+        case NM_DEVICE_TYPE_WIFI:
+            return new UInt32(2);
+        case NM_DEVICE_TYPE_UNUSED1:
+            return new UInt32(3);
+        case NM_DEVICE_TYPE_UNUSED2:
+            return new UInt32(4);
+        case NM_DEVICE_TYPE_BT:
+            return new UInt32(5);
+        case NM_DEVICE_TYPE_OLPC_MESH:
+            return new UInt32(6);
+        case NM_DEVICE_TYPE_WIMAX:
+            return new UInt32(7);
+        case NM_DEVICE_TYPE_MODEM:
+            return new UInt32(8);
+        case NM_DEVICE_TYPE_INFINIBAND:
+            return new UInt32(9);
+        case NM_DEVICE_TYPE_BOND:
+            return new UInt32(10);
+        case NM_DEVICE_TYPE_VLAN:
+            return new UInt32(11);
+        case NM_DEVICE_TYPE_ADSL:
+            return new UInt32(12);
+        case NM_DEVICE_TYPE_BRIDGE:
+            return new UInt32(13);
+        case NM_DEVICE_TYPE_TEAM:
+            return new UInt32(15);
+        case NM_DEVICE_TYPE_TUN:
+            return new UInt32(16);
+        case NM_DEVICE_TYPE_IP_TUNNEL:
+            return new UInt32(17);
+        case NM_DEVICE_TYPE_MACVLAN:
+            return new UInt32(18);
+        case NM_DEVICE_TYPE_VXLAN:
+            return new UInt32(19);
+        case NM_DEVICE_TYPE_VETH:
+            return new UInt32(20);
+        case NM_DEVICE_TYPE_MACSEC:
+            return new UInt32(21);
+        case NM_DEVICE_TYPE_DUMMY:
+            return new UInt32(22);
+        case NM_DEVICE_TYPE_PPP:
+            return new UInt32(23);
+        case NM_DEVICE_TYPE_OVS_INTERFACE:
+            return new UInt32(24);
+        case NM_DEVICE_TYPE_OVS_PORT:
+            return new UInt32(25);
+        case NM_DEVICE_TYPE_OVS_BRIDGE:
+            return new UInt32(26);
+        case NM_DEVICE_TYPE_WPAN:
+            return new UInt32(27);
+        case NM_DEVICE_TYPE_6LOWPAN:
+            return new UInt32(28);
+        case NM_DEVICE_TYPE_WIREGUARD:
+            return new UInt32(29);
+        case NM_DEVICE_TYPE_WIFI_P2P:
+            return new UInt32(30);
+        case NM_DEVICE_TYPE_VRF:
+            return new UInt32(31);
+        case NM_DEVICE_TYPE_LOOPBACK:
+            return new UInt32(32);
+        case NM_DEVICE_TYPE_UNKNOWN:
+        default:
+            return new UInt32(0);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package org.eclipse.kura.nm.status;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -234,6 +235,7 @@ public class NMStatusServiceImplTest {
         assertEquals(WifiMode.INFRA, wifiStatus.getMode());
         assertTrue(wifiStatus.getActiveWifiAccessPoint().isPresent());
         assertEquals(buildAP(), wifiStatus.getActiveWifiAccessPoint().get());
+        assertEqualAPProperties(wifiStatus.getActiveWifiAccessPoint().get());
         assertEquals(1, wifiStatus.getAvailableWifiAccessPoints().size());
         assertEquals(buildAP(), wifiStatus.getAvailableWifiAccessPoints().get(0));
         assertEquals(buildWifiInterfaceStatus("wlan0"), wifiStatus);
@@ -303,8 +305,10 @@ public class NMStatusServiceImplTest {
         assertEquals(1500, networkStatus.getMtu());
         assertTrue(networkStatus.getInterfaceIp4Addresses().isPresent());
         assertEquals(buildIp4Address(), networkStatus.getInterfaceIp4Addresses().get());
+        assertEqualsIp4AddressStatus(networkStatus.getInterfaceIp4Addresses().get());
         assertTrue(networkStatus.getInterfaceIp6Addresses().isPresent());
         assertEquals(buildIp6Address(), networkStatus.getInterfaceIp6Addresses().get());
+        assertEqualsIp6AddressStatus(networkStatus.getInterfaceIp6Addresses().get());
         assertTrue(networkStatus.getUsbNetDevice().isPresent());
     }
 
@@ -386,6 +390,56 @@ public class NMStatusServiceImplTest {
         builder.withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.GROUP_TKIP));
         builder.withRsnSecurity(EnumSet.of(WifiSecurity.GROUP_WEP104, WifiSecurity.KEY_MGMT_802_1X));
         return builder.build();
+    }
+
+    private void assertEqualAPProperties(WifiAccessPoint ap) {
+        assertEquals("MyCoolAP", ap.getSsid());
+        assertArrayEquals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, ap.getHardwareAddress());
+        assertEquals(5000L, ap.getFrequency());
+        assertEquals(7, ap.getChannel());
+        assertEquals(WifiMode.INFRA, ap.getMode());
+        assertEquals(54, ap.getMaxBitrate());
+        assertEquals(78, ap.getSignalQuality());
+        assertEquals(2, ap.getWpaSecurity().size());
+        assertEquals(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.GROUP_TKIP), ap.getWpaSecurity());
+        assertEquals(EnumSet.of(WifiSecurity.GROUP_WEP104, WifiSecurity.KEY_MGMT_802_1X), ap.getRsnSecurity());
+        assertEquals(2, ap.getRsnSecurity().size());
+    }
+
+    private void assertEqualsIp4AddressStatus(NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus)
+            throws UnknownHostException {
+        assertInterfaceIp4AddressEquals(ip4AddressStatus.getAddresses().get(0));
+        assertIp4AddressEquals(ip4AddressStatus.getDnsServerAddresses().get(0));
+        assertTrue(ip4AddressStatus.getGateway().isPresent());
+        assertEquals((IP4Address) IPAddress.parseHostAddress("172.16.2.1"), ip4AddressStatus.getGateway().get());
+    }
+
+    private void assertInterfaceIp4AddressEquals(NetworkInterfaceIpAddress<IP4Address> address)
+            throws UnknownHostException {
+        assertEquals(IP4Address.parseHostAddress("172.16.2.100"), address.getAddress());
+        assertEquals(16, address.getPrefix());
+    }
+
+    private void assertIp4AddressEquals(IP4Address address) throws UnknownHostException {
+        assertEquals(IPAddress.parseHostAddress("172.16.2.23"), address);
+    }
+
+    private void assertEqualsIp6AddressStatus(NetworkInterfaceIpAddressStatus<IP6Address> ip6AddressStatus)
+            throws UnknownHostException {
+        assertInterfaceIp6AddressEquals(ip6AddressStatus.getAddresses().get(0));
+        assertIp6AddressEquals(ip6AddressStatus.getDnsServerAddresses().get(0));
+        assertEquals((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6"),
+                ip6AddressStatus.getGateway().get());
+    }
+
+    private void assertInterfaceIp6AddressEquals(NetworkInterfaceIpAddress<IP6Address> address)
+            throws UnknownHostException {
+        assertEquals(IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b5"), address.getAddress());
+        assertEquals(64, address.getPrefix());
+    }
+
+    private void assertIp6AddressEquals(IP6Address address) throws UnknownHostException {
+        assertEquals(IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b7"), address);
     }
 
     private void createTestObjects() {

@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.apache.commons.net.util.SubnetUtils;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -202,8 +201,6 @@ public class NetworkStatusServiceAdapter {
                 wifiInterfaceInfo.getActiveWifiAccessPoint()
                         .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalQuality())));
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
-                // Should I add the active AccessPoint as a GwtWifiConfig?
-                // Should I add the list of available ap?
             }
         }
     }

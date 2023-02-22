@@ -1717,7 +1717,7 @@
                         <version>1.7</version>
                         <executions>
                           <execution>
-                            <id>docker-x86_64-nn-base-container</id>
+                            <id>docker-x86_64-nn-build-container</id>
                             <phase>package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1790,7 +1790,8 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
+                            <execution>
+                            <id>docker-ubi8-x86_64-nn-build-container</id>
                             <phase>package</phase>
                             <configuration>
                                 <executable>docker</executable>
@@ -1830,18 +1831,19 @@
                     </resource>
                 </resources>
                 <plugins>
-                      <plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
-                            <phase>package</phase>
-                            <configuration>
-                                <executable>docker</executable>
-                                <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
-                                <arguments>
-                                    <argument>build</argument>
+                            <execution>
+                                <id>docker-alpine-x86_64-nn-build-container</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                                    <arguments>
+                                        <argument>build</argument>
                                     <argument>--build-arg</argument>
                                     <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
                                     <argument>-t</argument>

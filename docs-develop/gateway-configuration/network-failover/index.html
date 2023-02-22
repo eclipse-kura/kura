@@ -476,9 +476,53 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Network Failover
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Network Failover
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#operating-modes" class="md-nav__link">
+    Operating modes
+  </a>
+  
+    <nav class="md-nav" aria-label="Operating modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-the-connectivity-check" class="md-nav__link">
+    Configuring the connectivity check
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2770,6 +2814,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#operating-modes" class="md-nav__link">
+    Operating modes
+  </a>
+  
+    <nav class="md-nav" aria-label="Operating modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuring-the-connectivity-check" class="md-nav__link">
+    Configuring the connectivity check
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2783,7 +2855,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="network-failover">Network Failover</h1>
-<p>For devices configured to use NetworkManager, it is possible to configure multiple WAN interfaces and a basic network failover functionality.</p>
+<p>For devices configured to use <a href="https://networkmanager.dev">NetworkManager</a>, it is possible to configure multiple WAN interfaces and a basic network failover functionality.</p>
 <p>As in the picture below, the Kura UI allows for multiple WAN interfaces to be defined. Each WAN interface can be configured with a <strong>WAN Priority</strong>. WAN Priority is used to determine which interface will be selected for primary WAN. In the case where the primary WAN interface loses connection, then the next highest priority interface is assigned.</p>
 <p><img alt="" src="../images/net-failover.png" /></p>
 <p>Kura uses NetworkManager's implementation to achieve network failover (see <a href="https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3">NetworkManager</a>). <strong>Lower values correspond to higher priority</strong>. Allowed values range from -1 to 2147483647. Value -1 means that the metric is chosen automatically based on the device type (see <a href="https://developer-old.gnome.org/NetworkManager/unstable/nm-settings-dbus.html">NetworkManager DBUS properties</a>).</p>
@@ -2797,13 +2869,57 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="m">172</span>.17.0.0<span class="w">      </span><span class="m">0</span>.0.0.0<span class="w">         </span><span class="m">255</span>.255.0.0<span class="w">     </span>U<span class="w">     </span><span class="m">0</span><span class="w">      </span><span class="m">0</span><span class="w">        </span><span class="m">0</span><span class="w"> </span>docker0
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="m">192</span>.168.2.0<span class="w">     </span><span class="m">0</span>.0.0.0<span class="w">         </span><span class="m">255</span>.255.255.0<span class="w">   </span>U<span class="w">     </span><span class="m">100</span><span class="w">    </span><span class="m">0</span><span class="w">        </span><span class="m">0</span><span class="w"> </span>eth0
 </code></pre></div>
-<p>The <code>metric</code> flag will correspond to the set <strong>WAN Priority</strong>.</p>
-<p>The default URI used to perform the connectivity check may differ across operating systems. To set a specific URI edit <code>/etc/NetworkManager/NetworkManager.conf</code> (reference <a href="https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3">NetworkManager</a>):</p>
+<p>The <code>metric</code> flag will correspond to the set <strong>WAN Priority</strong>. <em>NetworkManager</em> will always prioritize lower metric routes.</p>
+<h2 id="operating-modes">Operating modes</h2>
+<p>The <em>NetworkManager</em> failover mechanism can work at two different levels:</p>
+<ul>
+<li>by detecting disruptions at physical level (i.e. an ethernet cable that disconnects);</li>
+<li>by performing a <strong>connectivity check</strong> to an upstream URI.</li>
+</ul>
+<p><em>NetworkManager</em> brings a network interface down when it detects the loss of its physical link. In such case, the next highest priority interface is selected as the main one.</p>
+<p>When the connectivity check fails, <em>NetworkManager</em> penalizes the metric of that interface in the routing table. <em>NetworkManager</em> continues to perform connectivity checks over all the other interfaces. As soon as the connectivity is restored over a previously failing interface, the metric is also restored to the original value and the routing table goes back to the original state.</p>
+<h3 id="configuring-the-connectivity-check">Configuring the connectivity check</h3>
+<p>The <strong>connectivity check</strong> is enabled by default in Kura and is configured to probe the connection to <code>http://network-test.debian.org/nm</code> every 60 seconds. To set a specific URI and a different interval edit <code>/etc/NetworkManager/conf.d/99kura-nm.conf</code> (reference <a href="https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3">NetworkManager</a>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[connectivity]
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uri=http://network-test.debian.org/nm
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>interval=...
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>response=...
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>interval=60
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>response=&quot;NetworkManager is online&quot;
 </code></pre></div>
+<p>The minimun <strong>interval</strong> is 60 seconds, if no interval is specified it defaults to 300 seconds.</p>
+<p>The <strong>response</strong> should match what the URI is returning when probed. Some examples of web pages with <em>NetworkManager</em> responses:</p>
+<table>
+<thead>
+<tr>
+<th>URI</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://network-test.debian.org/nm</code></td>
+<td><code>NetworkManager is online</code></td>
+</tr>
+<tr>
+<td><code>https://fedoraproject.org/static/hotspot.txt</code></td>
+<td><code>OK</code></td>
+</tr>
+<tr>
+<td><code>http://nmcheck.gnome.org/check_network_status.txt</code></td>
+<td><code>NetworkManager is online</code></td>
+</tr>
+<tr>
+<td><code>https://www.pkgbuild.com/check_network_status.txt</code></td>
+<td><code>NetworkManager is online</code></td>
+</tr>
+</tbody>
+</table>
+<p>To <strong>disable</strong> the connectivity check feature:</p>
+<ul>
+<li>remove the <code>[connectivity]</code> section from the configuration file; or</li>
+<li>set <code>interval=0</code>; or</li>
+<li>remove <code>uri</code>; or</li>
+<li>set an empty URI, like <code>uri=</code></li>
+</ul>
 
               
             </article>

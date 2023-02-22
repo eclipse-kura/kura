@@ -1,3 +1,4 @@
+ARG base_image_version=latest
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 MAINTAINER Eclipse Kura Developers <kura-dev@eclipse.org>
@@ -5,7 +6,6 @@ LABEL maintainer="Eclipse Kura Developers <kura-dev@eclipse.org>" \
       io.k8s.description="Containerized version of the Eclipse Kura™ IoT gateway" \
       io.openshift.non-scalable=true
 
-ARG base_image_version=latest
 FROM base-kura-docker-x86_64:$base_image_version AS kura_base
 
 COPY bin/ /usr/local/bin/

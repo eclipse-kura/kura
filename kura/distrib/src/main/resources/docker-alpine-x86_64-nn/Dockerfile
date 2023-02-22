@@ -9,7 +9,7 @@ ARG BASE_IMAGE_KURA='kura-base:latest'
 
 COPY bin/ /usr/local/bin/
 
-COPY --from=${BASE_IMAGE_KURA} /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-install/
+COPY --from=$BASE_IMAGE_KURA /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-install/
 
 ENV \
   JAVA_HOME=/usr/lib/jvm/default-jvm \

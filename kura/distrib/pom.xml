@@ -1728,9 +1728,9 @@
                                 <exec executable="docker" dir="${project.build.directory}" failonerror="true">
                                     <arg value="build"/>
                                     <arg value="-t"/>
-                                    <arg value="base-kura-docker:${project.version}"/>
+                                    <arg value="base-kura-docker:${kura.build.version}"/>
                                     <arg value="-t"/>
-                                    <arg value="base-kura-docker-x86_64:${project.version}"/>
+                                    <arg value="base-kura-docker-x86_64:${kura.build.version}"/>
                                     <arg value="."/>
                                 </exec>
                               </target>
@@ -1799,11 +1799,11 @@
                                 <arguments>
                                     <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${kura.build.version}</argument>
                                     <argument>-t</argument>
-                                    <argument>kura-ubi8:${project.version}</argument>
+                                    <argument>kura-ubi8:${kura.build.version}</argument>
                                     <argument>-t</argument>
-                                    <argument>kura-ubi8-x86_64:${project.version}</argument>
+                                    <argument>kura-ubi8-x86_64:${kura.build.version}</argument>
                                     <argument>.</argument>
                                 </arguments>
                             </configuration>
@@ -1845,11 +1845,11 @@
                                     <arguments>
                                         <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${kura.build.version}</argument>
                                     <argument>-t</argument>
-                                    <argument>kura-alpine:${project.version}</argument>
+                                    <argument>kura-alpine:${kura.build.version}</argument>
                                     <argument>-t</argument>
-                                    <argument>kura-alpine-x86_64:${project.version}</argument>
+                                    <argument>kura-alpine-x86_64:${kura.build.version}</argument>
                                     <argument>.</argument>
                                 </arguments>
                             </configuration>

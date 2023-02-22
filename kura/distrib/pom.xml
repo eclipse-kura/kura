@@ -1552,7 +1552,7 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>${project.basedir}/src/main/resources/generic-arm32/99kura-nm.conf</src>
+                                            <src>${project.basedir}/src/main/resources/common/99kura-nm.conf</src>
                                             <dst>/etc/NetworkManager/conf.d/99kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>

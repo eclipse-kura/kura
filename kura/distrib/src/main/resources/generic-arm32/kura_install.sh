@@ -14,10 +14,10 @@
 
 INSTALL_DIR=/opt/eclipse
 
-#create known kura install location
+# create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
-#set up Kura init
+# set up kura init
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
 systemctl enable kura
@@ -35,12 +35,12 @@ if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
 fi
 
-#set up users and grant permissions to them
+# set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
-#set up default firewall configuration
+# set up default firewall configuration
 cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
 chmod 644 ${INSTALL_DIR}/kura/.data/iptables
 cp ${INSTALL_DIR}/kura/.data/iptables /etc/sysconfig/iptables
@@ -49,29 +49,28 @@ chmod 755 ${INSTALL_DIR}/kura/bin/firewall
 cp ${INSTALL_DIR}/kura/install/firewall.service /lib/systemd/system/firewall.service
 chmod 644 /lib/systemd/system/firewall.service
 sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
-systemctl daemon-reload
-systemctl enable firewall
 
-#copy snapshot_0.xml
+# copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
-#disable NTP service
+# disable NTP service
 if command -v timedatectl > /dev/null ;
   then
     timedatectl set-ntp false
 fi
 
-#disable asking NTP servers to the DHCP server
-#TODO
+# disable asking NTP servers to the DHCP server
+# TODO
 #sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
 
-# Prevent time sync services from starting
+# manage running services
+systemctl daemon-reload
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
-# Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony
 systemctl enable NetworkManager
+systemctl enable firewall
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
@@ -82,7 +81,7 @@ if [ ! -f /etc/cron.d/logrotate-kura ]; then
     echo "*/5 * * * * root /usr/sbin/logrotate --state /var/log/logrotate-kura.status /etc/logrotate-kura.conf" >> /etc/cron.d/logrotate-kura
 fi
 
-#set up systemd-tmpfiles
+# set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 
 # set up kura files permissions
@@ -92,11 +91,11 @@ chmod -R go-rwx /opt/eclipse
 chmod a+rx /opt/eclipse    
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
 
-# execute patch_sysctl.sh from installer install folder
-## TODO: what is this doing?
+# execute patch_sysctl.sh (required for disabling ipv6))
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
 
+# disables IPv6 on all network interfaces in the system if the "/sys/class/net" directory exists, or applies the system-wide configuration specified in the "/etc/sysctl.conf" file using the "sysctl -p" command otherwise.
 if ! [ -d /sys/class/net ]
 then
     sysctl -p || true

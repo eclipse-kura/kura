@@ -1728,9 +1728,9 @@
                                 <exec executable="docker" dir="${project.build.directory}" failonerror="true">
                                     <arg value="build"/>
                                     <arg value="-t"/>
-                                    <arg value="base-kura-docker:latest"/>
+                                    <arg value="base-kura-docker:${project.version}"/>
                                     <arg value="-t"/>
-                                    <arg value="base-kura-docker-x86_64:latest"/>
+                                    <arg value="base-kura-docker-x86_64:${project.version}"/>
                                     <arg value="."/>
                                 </exec>
                               </target>
@@ -1799,7 +1799,7 @@
                                 <arguments>
                                     <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>base_image_kura=base-kura-docker-x86_64:latest</argument>
+                                    <argument>base_image_kura=base-kura-docker-x86_64:${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-ubi8:${project.version}</argument>
                                     <argument>-t</argument>
@@ -1845,7 +1845,7 @@
                                     <arguments>
                                         <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>base_image_kura=base-kura-docker-x86_64:latest</argument>
+                                    <argument>base_image_kura=base-kura-docker-x86_64:${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-alpine:${project.version}</argument>
                                     <argument>-t</argument>

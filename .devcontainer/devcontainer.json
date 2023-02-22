@@ -1,8 +1,10 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "name": "kura-dev-container",
+  "image": "mcr.microsoft.com/devcontainers/universal:ubuntu",
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
     "version":"8",
+    "jdkDistro":"tem",
     "installMaven":true,
     "mavenVersion":"3.5.0"
     }

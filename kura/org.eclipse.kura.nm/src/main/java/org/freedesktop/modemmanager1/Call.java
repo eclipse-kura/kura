@@ -60,7 +60,7 @@ public interface Call extends DBusInterface {
         public StateChanged(String _path, int _old, int _new, UInt32 _reason) throws DBusException {
             super(_path, _old, _new, _reason);
             this.old = _old;
-            this.new = _new;
+            this.newparam = _new;
             this.reason = _reason;
         }
 

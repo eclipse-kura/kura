@@ -1,7 +1,11 @@
 package org.freedesktop.modemmanager1.modem;
 
+import java.util.List;
+import java.util.Map;
+
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
+import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.

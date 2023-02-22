@@ -14,9 +14,9 @@ public class PropertyPcoStruct extends Struct {
     @Position(1)
     private final boolean member1;
     @Position(2)
-    private final List<byte> member2;
+    private final List<Byte> member2;
 
-    public PropertyPcoStruct(UInt32 member0, boolean member1, List<byte> member2) {
+    public PropertyPcoStruct(UInt32 member0, boolean member1, List<Byte> member2) {
         this.member0 = member0;
         this.member1 = member1;
         this.member2 = member2;
@@ -31,7 +31,7 @@ public class PropertyPcoStruct extends Struct {
         return member1;
     }
 
-    public List<byte> getMember2() {
+    public List<Byte> getMember2() {
         return member2;
     }
 

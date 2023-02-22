@@ -64,24 +64,19 @@ import org.freedesktop.networkmanager.PropertyStateReasonStruct;
 @DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
 public interface Device extends DBusInterface {
 
-
     public void Reapply(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId, UInt32 flags);
+
     public GetAppliedConnectionTuple GetAppliedConnection(UInt32 flags);
+
     public void Disconnect();
+
     public void Delete();
 
-
     public static interface PropertyAvailableConnectionsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
     public static interface PropertyLldpNeighborsType extends TypeRef<List<Map<String, Variant>>> {
-
-
-
 
     }
 
@@ -98,7 +93,6 @@ public interface Device extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public UInt32 getNewState() {
             return newState;
         }
@@ -110,7 +104,6 @@ public interface Device extends DBusInterface {
         public UInt32 getReason() {
             return reason;
         }
-
 
     }
 }

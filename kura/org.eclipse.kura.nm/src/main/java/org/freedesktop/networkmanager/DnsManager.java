@@ -30,13 +30,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Configuration", type = DnsManager.PropertyConfigurationType.class, access = Access.READ)
 public interface DnsManager extends DBusInterface {
 
-
-
-
     public static interface PropertyConfigurationType extends TypeRef<List<Map<String, Variant>>> {
-
-
-
 
     }
 }

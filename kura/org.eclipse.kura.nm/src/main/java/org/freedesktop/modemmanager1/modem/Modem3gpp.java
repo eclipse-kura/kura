@@ -40,24 +40,19 @@ import org.freedesktop.modemmanager1.modem.PropertyPcoStruct;
 @DBusProperty(name = "InitialEpsBearerSettings", type = Modem3gpp.PropertyInitialEpsBearerSettingsType.class, access = Access.READ)
 public interface Modem3gpp extends DBusInterface {
 
-
     public void Register(String operatorId);
+
     public List<Map<String, Variant<?>>> Scan();
+
     public void SetEpsUeModeOperation(UInt32 mode);
+
     public void SetInitialEpsBearerSettings(Map<String, Variant<?>> settings);
 
-
     public static interface PropertyPcoType extends TypeRef<List<PropertyPcoStruct>> {
-
-
-
 
     }
 
     public static interface PropertyInitialEpsBearerSettingsType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 }

@@ -43,83 +43,47 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "WinsServerData", type = IP4Config.PropertyWinsServerDataType.class, access = Access.READ)
 public interface IP4Config extends DBusInterface {
 
-
-
-
     public static interface PropertyAddressesType extends TypeRef<List<List<UInt32>>> {
-
-
-
 
     }
 
     public static interface PropertyAddressDataType extends TypeRef<List<Map<String, Variant>>> {
 
-
-
-
     }
 
     public static interface PropertyRoutesType extends TypeRef<List<List<UInt32>>> {
-
-
-
 
     }
 
     public static interface PropertyRouteDataType extends TypeRef<List<Map<String, Variant>>> {
 
-
-
-
     }
 
     public static interface PropertyNameserversType extends TypeRef<List<UInt32>> {
-
-
-
 
     }
 
     public static interface PropertyNameserverDataType extends TypeRef<List<Map<String, Variant>>> {
 
-
-
-
     }
 
     public static interface PropertyDomainsType extends TypeRef<List<String>> {
-
-
-
 
     }
 
     public static interface PropertySearchesType extends TypeRef<List<String>> {
 
-
-
-
     }
 
     public static interface PropertyDnsOptionsType extends TypeRef<List<String>> {
-
-
-
 
     }
 
     public static interface PropertyWinsServersType extends TypeRef<List<UInt32>> {
 
-
-
-
     }
 
     public static interface PropertyWinsServerDataType extends TypeRef<List<String>> {
-
-
-
 
     }
 
@@ -132,11 +96,9 @@ public interface IP4Config extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

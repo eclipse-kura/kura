@@ -34,13 +34,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Config", type = String.class, access = Access.READ)
 public interface Team extends DBusInterface {
 
-
-
-
     public static interface PropertySlavesType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -53,11 +47,9 @@ public interface Team extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

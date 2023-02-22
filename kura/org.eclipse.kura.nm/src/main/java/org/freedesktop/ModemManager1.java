@@ -24,10 +24,12 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Version", type = String.class, access = Access.READ)
 public interface ModemManager1 extends DBusInterface {
 
-
     public void ScanDevices();
+
     public void SetLogging(String level);
+
     public void ReportKernelEvent(Map<String, Variant<?>> properties);
+
     public void InhibitDevice(String uid, boolean inhibit);
 
 }

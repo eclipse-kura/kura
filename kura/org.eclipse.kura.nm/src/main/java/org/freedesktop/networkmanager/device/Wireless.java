@@ -39,16 +39,13 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "LastScan", type = Long.class, access = Access.READ)
 public interface Wireless extends DBusInterface {
 
-
     public List<DBusPath> GetAccessPoints();
+
     public List<DBusPath> GetAllAccessPoints();
+
     public void RequestScan(Map<String, Variant<?>> options);
 
-
     public static interface PropertyAccessPointsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -61,11 +58,9 @@ public interface Wireless extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -78,11 +73,9 @@ public interface Wireless extends DBusInterface {
             this.accessPoint = _accessPoint;
         }
 
-
         public DBusPath getAccessPoint() {
             return accessPoint;
         }
-
 
     }
 
@@ -95,11 +88,9 @@ public interface Wireless extends DBusInterface {
             this.accessPoint = _accessPoint;
         }
 
-
         public DBusPath getAccessPoint() {
             return accessPoint;
         }
-
 
     }
 }

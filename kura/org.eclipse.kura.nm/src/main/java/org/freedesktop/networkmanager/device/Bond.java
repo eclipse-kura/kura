@@ -33,13 +33,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Slaves", type = Bond.PropertySlavesType.class, access = Access.READ)
 public interface Bond extends DBusInterface {
 
-
-
-
     public static interface PropertySlavesType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -52,11 +46,9 @@ public interface Bond extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

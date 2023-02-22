@@ -33,17 +33,16 @@ import org.freedesktop.modemmanager1.modem.PropertyPendingNetworkInitiatedSessio
 @DBusProperty(name = "SessionState", type = Integer.class, access = Access.READ)
 public interface Oma extends DBusInterface {
 
-
     public void Setup(UInt32 features);
+
     public void StartClientInitiatedSession(UInt32 sessionType);
+
     public void AcceptNetworkInitiatedSession(UInt32 sessionId, boolean accept);
+
     public void CancelSession();
 
-
-    public static interface PropertyPendingNetworkInitiatedSessionsType extends TypeRef<List<PropertyPendingNetworkInitiatedSessionsStruct>> {
-
-
-
+    public static interface PropertyPendingNetworkInitiatedSessionsType
+            extends TypeRef<List<PropertyPendingNetworkInitiatedSessionsStruct>> {
 
     }
 
@@ -53,13 +52,13 @@ public interface Oma extends DBusInterface {
         private final int newSessionState;
         private final UInt32 sessionStateFailedReason;
 
-        public SessionStateChanged(String _path, int _oldSessionState, int _newSessionState, UInt32 _sessionStateFailedReason) throws DBusException {
+        public SessionStateChanged(String _path, int _oldSessionState, int _newSessionState,
+                UInt32 _sessionStateFailedReason) throws DBusException {
             super(_path, _oldSessionState, _newSessionState, _sessionStateFailedReason);
             this.oldSessionState = _oldSessionState;
             this.newSessionState = _newSessionState;
             this.sessionStateFailedReason = _sessionStateFailedReason;
         }
-
 
         public int getOldSessionState() {
             return oldSessionState;
@@ -72,7 +71,6 @@ public interface Oma extends DBusInterface {
         public UInt32 getSessionStateFailedReason() {
             return sessionStateFailedReason;
         }
-
 
     }
 }

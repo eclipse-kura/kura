@@ -68,19 +68,27 @@ import org.freedesktop.modemmanager1.SetCurrentModesStruct;
 @DBusProperty(name = "SupportedIpFamilies", type = UInt32.class, access = Access.READ)
 public interface Modem extends DBusInterface {
 
-
     public void Enable(boolean enable);
-    public List<DBusPath> ListBearers();
-    public DBusPath CreateBearer(Map<String, Variant<?>> properties);
-    public void DeleteBearer(DBusPath bearer);
-    public void Reset();
-    public void FactoryReset(String code);
-    public void SetPowerState(UInt32 state);
-    public void SetCurrentCapabilities(UInt32 capabilities);
-    public void SetCurrentModes(SetCurrentModesStruct modes);
-    public void SetCurrentBands(List<UInt32> bands);
-    public String Command(String cmd, UInt32 timeout);
 
+    public List<DBusPath> ListBearers();
+
+    public DBusPath CreateBearer(Map<String, Variant<?>> properties);
+
+    public void DeleteBearer(DBusPath bearer);
+
+    public void Reset();
+
+    public void FactoryReset(String code);
+
+    public void SetPowerState(UInt32 state);
+
+    public void SetCurrentCapabilities(UInt32 capabilities);
+
+    public void SetCurrentModes(SetCurrentModesStruct modes);
+
+    public void SetCurrentBands(List<UInt32> bands);
+
+    public String Command(String cmd, UInt32 timeout);
 
     public static class StateChanged extends DBusSignal {
 
@@ -95,7 +103,6 @@ public interface Modem extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public int getOld() {
             return old;
         }
@@ -108,69 +115,41 @@ public interface Modem extends DBusInterface {
             return reason;
         }
 
-
     }
 
     public static interface PropertyBearersType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
     public static interface PropertySupportedCapabilitiesType extends TypeRef<List<UInt32>> {
 
-
-
-
     }
 
     public static interface PropertyDriversType extends TypeRef<List<String>> {
-
-
-
 
     }
 
     public static interface PropertyPortsType extends TypeRef<List<PropertyPortsStruct>> {
 
-
-
-
     }
 
     public static interface PropertyUnlockRetriesType extends TypeRef<Map<UInt32, UInt32>> {
-
-
-
 
     }
 
     public static interface PropertyOwnNumbersType extends TypeRef<List<String>> {
 
-
-
-
     }
 
     public static interface PropertySupportedModesType extends TypeRef<List<PropertySupportedModesStruct>> {
-
-
-
 
     }
 
     public static interface PropertySupportedBandsType extends TypeRef<List<UInt32>> {
 
-
-
-
     }
 
     public static interface PropertyCurrentBandsType extends TypeRef<List<UInt32>> {
-
-
-
 
     }
 }

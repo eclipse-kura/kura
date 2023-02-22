@@ -24,11 +24,14 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.NetworkManager.PPP")
 public interface PPP extends DBusInterface {
 
-
     public NeedSecretsTuple NeedSecrets();
+
     public void SetIp4Config(Map<String, Variant<?>> config);
+
     public void SetIp6Config(Map<String, Variant<?>> config);
+
     public void SetState(UInt32 state);
+
     public void SetIfindex(int ifindex);
 
 }

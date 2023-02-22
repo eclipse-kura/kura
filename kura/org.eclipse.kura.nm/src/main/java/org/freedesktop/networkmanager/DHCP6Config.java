@@ -29,13 +29,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Options", type = DHCP6Config.PropertyOptionsType.class, access = Access.READ)
 public interface DHCP6Config extends DBusInterface {
 
-
-
-
     public static interface PropertyOptionsType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 
@@ -48,11 +42,9 @@ public interface DHCP6Config extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

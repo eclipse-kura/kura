@@ -26,10 +26,13 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.NetworkManager.SecretAgent")
 public interface SecretAgent extends DBusInterface {
 
+    public Map<String, Map<String, Variant<?>>> GetSecrets(Map<String, Map<String, Variant<?>>> connection,
+            DBusPath connectionPath, String settingName, List<String> hints, UInt32 flags);
 
-    public Map<String, Map<String, Variant<?>>> GetSecrets(Map<String, Map<String, Variant<?>>> connection, DBusPath connectionPath, String settingName, List<String> hints, UInt32 flags);
     public void CancelGetSecrets(DBusPath connectionPath, String settingName);
+
     public void SaveSecrets(Map<String, Map<String, Variant<?>>> connection, DBusPath connectionPath);
+
     public void DeleteSecrets(Map<String, Map<String, Variant<?>>> connection, DBusPath connectionPath);
 
 }

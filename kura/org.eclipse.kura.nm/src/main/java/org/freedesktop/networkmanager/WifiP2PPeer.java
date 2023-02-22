@@ -36,13 +36,7 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "LastSeen", type = Integer.class, access = Access.READ)
 public interface WifiP2PPeer extends DBusInterface {
 
-
-
-
     public static interface PropertyWfdIEsType extends TypeRef<List<Byte>> {
-
-
-
 
     }
 }

@@ -22,9 +22,10 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusInterfaceName("org.freedesktop.NetworkManager.AgentManager")
 public interface AgentManager extends DBusInterface {
 
-
     public void Register(String identifier);
+
     public void RegisterWithCapabilities(String identifier, UInt32 capabilities);
+
     public void Unregister();
 
 }

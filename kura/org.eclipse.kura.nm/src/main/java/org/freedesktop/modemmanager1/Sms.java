@@ -43,15 +43,11 @@ import org.freedesktop.modemmanager1.PropertyValidityStruct;
 @DBusProperty(name = "Storage", type = UInt32.class, access = Access.READ)
 public interface Sms extends DBusInterface {
 
-
     public void Send();
+
     public void Store(UInt32 storage);
 
-
     public static interface PropertyDataType extends TypeRef<List<Byte>> {
-
-
-
 
     }
 }

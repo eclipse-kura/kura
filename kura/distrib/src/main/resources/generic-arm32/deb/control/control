@@ -7,7 +7,7 @@ Depends: openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temu
  bluez, bluez-hcidump,
  iptables,
  chrony, ntpdate, cron,
- telnet, dos2unix, unzip
+ telnet, dos2unix, unzip, python3
 Recommends: pi-bluetooth, rpi.gpio-common
 Architecture: all
 Maintainer: support@eurotech.com

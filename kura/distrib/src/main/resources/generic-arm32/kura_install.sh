@@ -12,6 +12,16 @@
 #  Eurotech
 #
 
+# manage running services
+systemctl daemon-reload
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+systemctl stop chrony
+systemctl disable chrony
+systemctl enable NetworkManager
+systemctl start NetworkManager
+systemctl enable firewall
+
 INSTALL_DIR=/opt/eclipse
 
 # create known kura install location
@@ -53,20 +63,14 @@ sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/f
 # copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+# replace snapshot_0 and iptables.init with correct interface names
+python3 ${INSTALL_DIR}/kura/install/find-net-Interfaces.py ${INSTALL_DIR}/kura/.data/snapshot_0.xml ${INSTALL_DIR}/kura/.data/iptables
+
 # disable NTP service
 if command -v timedatectl > /dev/null ;
   then
     timedatectl set-ntp false
 fi
-
-# manage running services
-systemctl daemon-reload
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
-systemctl stop chrony
-systemctl disable chrony
-systemctl enable NetworkManager
-systemctl enable firewall
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf

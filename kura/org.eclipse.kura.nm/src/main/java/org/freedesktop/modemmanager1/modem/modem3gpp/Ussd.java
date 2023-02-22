@@ -27,9 +27,10 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "NetworkRequest", type = String.class, access = Access.READ)
 public interface Ussd extends DBusInterface {
 
-
     public String Initiate(String command);
+
     public String Respond(String response);
+
     public void Cancel();
 
 }

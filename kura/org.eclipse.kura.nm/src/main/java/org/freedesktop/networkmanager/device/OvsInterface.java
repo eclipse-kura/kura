@@ -25,9 +25,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.NetworkManager.Device.OvsInterface")
 public interface OvsInterface extends DBusInterface {
 
-
-
-
     public static class PropertiesChanged extends DBusSignal {
 
         private final Map<String, Variant<?>> properties;
@@ -37,11 +34,9 @@ public interface OvsInterface extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

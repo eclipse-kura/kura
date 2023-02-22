@@ -34,21 +34,24 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "CanModify", type = Boolean.class, access = Access.READ)
 public interface Settings extends DBusInterface {
 
-
     public List<DBusPath> ListConnections();
+
     public DBusPath GetConnectionByUuid(String uuid);
+
     public DBusPath AddConnection(Map<String, Map<String, Variant<?>>> connection);
+
     public DBusPath AddConnectionUnsaved(Map<String, Map<String, Variant<?>>> connection);
-    public AddConnection2Tuple AddConnection2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags, Map<String, Variant<?>> args);
+
+    public AddConnection2Tuple AddConnection2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags,
+            Map<String, Variant<?>> args);
+
     public LoadConnectionsTuple LoadConnections(List<String> filenames);
+
     public boolean ReloadConnections();
+
     public void SaveHostname(String hostname);
 
-
     public static interface PropertyConnectionsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -61,11 +64,9 @@ public interface Settings extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -78,11 +79,9 @@ public interface Settings extends DBusInterface {
             this.connection = _connection;
         }
 
-
         public DBusPath getConnection() {
             return connection;
         }
-
 
     }
 
@@ -95,11 +94,9 @@ public interface Settings extends DBusInterface {
             this.connection = _connection;
         }
 
-
         public DBusPath getConnection() {
             return connection;
         }
-
 
     }
 }

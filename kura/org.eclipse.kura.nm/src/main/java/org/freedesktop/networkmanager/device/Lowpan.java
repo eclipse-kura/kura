@@ -26,6 +26,4 @@ import org.freedesktop.dbus.interfaces.DBusInterface;
 @DBusProperty(name = "Parent", type = DBusPath.class, access = Access.READ)
 public interface Lowpan extends DBusInterface {
 
-
-
 }

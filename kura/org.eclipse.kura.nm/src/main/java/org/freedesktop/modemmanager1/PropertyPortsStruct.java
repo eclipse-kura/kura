@@ -20,6 +20,7 @@ import org.freedesktop.dbus.types.UInt32;
  * Auto-generated class.
  */
 public class PropertyPortsStruct extends Struct {
+
     @Position(0)
     private final String member0;
     @Position(1)
@@ -30,7 +31,6 @@ public class PropertyPortsStruct extends Struct {
         this.member1 = member1;
     }
 
-
     public String getMember0() {
         return member0;
     }
@@ -38,6 +38,5 @@ public class PropertyPortsStruct extends Struct {
     public UInt32 getMember1() {
         return member1;
     }
-
 
 }

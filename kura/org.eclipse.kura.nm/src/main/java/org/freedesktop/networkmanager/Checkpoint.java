@@ -34,13 +34,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "RollbackTimeout", type = UInt32.class, access = Access.READ)
 public interface Checkpoint extends DBusInterface {
 
-
-
-
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -53,11 +47,9 @@ public interface Checkpoint extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

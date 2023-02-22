@@ -24,9 +24,10 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Simple")
 public interface Simple extends DBusInterface {
 
-
     public DBusPath Connect(Map<String, Variant<?>> properties);
+
     public void Disconnect(DBusPath bearer);
+
     public Map<String, Variant<?>> GetStatus();
 
 }

@@ -39,14 +39,9 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "ActiveNsp", type = DBusPath.class, access = Access.READ)
 public interface WiMax extends DBusInterface {
 
-
     public List<DBusPath> GetNspList();
 
-
     public static interface PropertyNspsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -59,11 +54,9 @@ public interface WiMax extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -76,11 +69,9 @@ public interface WiMax extends DBusInterface {
             this.nsp = _nsp;
         }
 
-
         public DBusPath getNsp() {
             return nsp;
         }
-
 
     }
 
@@ -93,11 +84,9 @@ public interface WiMax extends DBusInterface {
             this.nsp = _nsp;
         }
 
-
         public DBusPath getNsp() {
             return nsp;
         }
-
 
     }
 }

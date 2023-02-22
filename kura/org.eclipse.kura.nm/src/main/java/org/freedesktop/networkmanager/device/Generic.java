@@ -29,9 +29,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "TypeDescription", type = String.class, access = Access.READ)
 public interface Generic extends DBusInterface {
 
-
-
-
     public static class PropertiesChanged extends DBusSignal {
 
         private final Map<String, Variant<?>> properties;
@@ -41,11 +38,9 @@ public interface Generic extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

@@ -35,10 +35,9 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "EvdoRegistrationState", type = UInt32.class, access = Access.READ)
 public interface ModemCdma extends DBusInterface {
 
-
     public void Activate(String carrierCode);
-    public void ActivateManual(Map<String, Variant<?>> properties);
 
+    public void ActivateManual(Map<String, Variant<?>> properties);
 
     public static class ActivationStateChanged extends DBusSignal {
 
@@ -46,13 +45,13 @@ public interface ModemCdma extends DBusInterface {
         private final UInt32 activationError;
         private final Map<String, Variant<?>> statusChanges;
 
-        public ActivationStateChanged(String _path, UInt32 _activationState, UInt32 _activationError, Map<String, Variant<?>> _statusChanges) throws DBusException {
+        public ActivationStateChanged(String _path, UInt32 _activationState, UInt32 _activationError,
+                Map<String, Variant<?>> _statusChanges) throws DBusException {
             super(_path, _activationState, _activationError, _statusChanges);
             this.activationState = _activationState;
             this.activationError = _activationError;
             this.statusChanges = _statusChanges;
         }
-
 
         public UInt32 getActivationState() {
             return activationState;
@@ -65,7 +64,6 @@ public interface ModemCdma extends DBusInterface {
         public Map<String, Variant<?>> getStatusChanges() {
             return statusChanges;
         }
-
 
     }
 }

@@ -33,9 +33,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "VlanId", type = UInt32.class, access = Access.READ)
 public interface Vlan extends DBusInterface {
 
-
-
-
     public static class PropertiesChanged extends DBusSignal {
 
         private final Map<String, Variant<?>> properties;
@@ -45,11 +42,9 @@ public interface Vlan extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

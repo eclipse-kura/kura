@@ -36,15 +36,19 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "AudioFormat", type = Call.PropertyAudioFormatType.class, access = Access.READ)
 public interface Call extends DBusInterface {
 
-
     public void Start();
-    public void Accept();
-    public void Deflect(String number);
-    public void JoinMultiparty();
-    public void LeaveMultiparty();
-    public void Hangup();
-    public void SendDtmf(String dtmf);
 
+    public void Accept();
+
+    public void Deflect(String number);
+
+    public void JoinMultiparty();
+
+    public void LeaveMultiparty();
+
+    public void Hangup();
+
+    public void SendDtmf(String dtmf);
 
     public static class DtmfReceived extends DBusSignal {
 
@@ -55,11 +59,9 @@ public interface Call extends DBusInterface {
             this.dtmf = _dtmf;
         }
 
-
         public String getDtmf() {
             return dtmf;
         }
-
 
     }
 
@@ -76,7 +78,6 @@ public interface Call extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public int getOld() {
             return old;
         }
@@ -89,13 +90,9 @@ public interface Call extends DBusInterface {
             return reason;
         }
 
-
     }
 
     public static interface PropertyAudioFormatType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 }

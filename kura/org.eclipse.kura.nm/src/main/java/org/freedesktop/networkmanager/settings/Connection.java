@@ -31,16 +31,22 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Filename", type = String.class, access = Access.READ)
 public interface Connection extends DBusInterface {
 
-
     public void Update(Map<String, Map<String, Variant<?>>> properties);
-    public void UpdateUnsaved(Map<String, Map<String, Variant<?>>> properties);
-    public void Delete();
-    public Map<String, Map<String, Variant<?>>> GetSettings();
-    public Map<String, Map<String, Variant<?>>> GetSecrets(String settingName);
-    public void ClearSecrets();
-    public void Save();
-    public Map<String, Variant<?>> Update2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags, Map<String, Variant<?>> args);
 
+    public void UpdateUnsaved(Map<String, Map<String, Variant<?>>> properties);
+
+    public void Delete();
+
+    public Map<String, Map<String, Variant<?>>> GetSettings();
+
+    public Map<String, Map<String, Variant<?>>> GetSecrets(String settingName);
+
+    public void ClearSecrets();
+
+    public void Save();
+
+    public Map<String, Variant<?>> Update2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags,
+            Map<String, Variant<?>> args);
 
     public static class PropertiesChanged extends DBusSignal {
 
@@ -51,11 +57,9 @@ public interface Connection extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

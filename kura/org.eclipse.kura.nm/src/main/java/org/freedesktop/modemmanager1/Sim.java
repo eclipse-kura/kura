@@ -30,17 +30,15 @@ import org.freedesktop.dbus.interfaces.DBusInterface;
 @DBusProperty(name = "EmergencyNumbers", type = Sim.PropertyEmergencyNumbersType.class, access = Access.READ)
 public interface Sim extends DBusInterface {
 
-
     public void SendPin(String pin);
+
     public void SendPuk(String puk, String pin);
+
     public void EnablePin(String pin, boolean enabled);
+
     public void ChangePin(String oldPin, String newPin);
 
-
     public static interface PropertyEmergencyNumbersType extends TypeRef<List<String>> {
-
-
-
 
     }
 }

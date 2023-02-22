@@ -85,6 +85,11 @@ public class NMSettingsConverter {
             addressEntry.put("address", new Variant<>(address));
             addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
 
+            if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
+                Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
+                gateway.ifPresent(gatewayAddress -> settings.put("gateway", new Variant<>(gatewayAddress)));
+            }
+
             List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
             settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
         } else {
@@ -99,11 +104,6 @@ public class NMSettingsConverter {
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
                 settings.put("ignore-auto-dns", new Variant<>(true));
-            }
-            
-            Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
-            if (gateway.isPresent()) {
-                settings.put("gateway", new Variant<>(gateway.get()));
             }
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",

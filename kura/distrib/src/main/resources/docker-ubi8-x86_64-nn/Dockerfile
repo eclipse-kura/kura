@@ -5,11 +5,11 @@ LABEL maintainer="Eclipse Kura Developers <kura-dev@eclipse.org>" \
       io.k8s.description="Containerized version of the Eclipse Kura™ IoT gateway" \
       io.openshift.non-scalable=true
 
-ARG BASE_IMAGE_KURA='kura-base:latest'
+ARG base_image_kura='kura-base:latest'
 
 COPY bin/ /usr/local/bin/
 
-COPY --from=$BASE_IMAGE_KURA /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-install/
+COPY --from='$base_image_kura' /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-install/
 
 ENV \
   KURA_DIR=/opt/eclipse/kura \

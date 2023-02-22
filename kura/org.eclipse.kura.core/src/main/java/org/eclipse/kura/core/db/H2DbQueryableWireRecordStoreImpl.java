@@ -18,28 +18,20 @@ import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
-import org.eclipse.kura.util.wire.store.SqlQueryableWireRecordStoreHelper;
-import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.util.wire.store.AbstractJdbcQueryableWireRecordStoreImpl;
 
 @SuppressWarnings("restriction")
-public class H2DbQueryableWireRecordStoreImpl {
+public class H2DbQueryableWireRecordStoreImpl extends AbstractJdbcQueryableWireRecordStoreImpl {
 
-    private H2DbQueryableWireRecordStoreImpl() {
+    protected H2DbQueryableWireRecordStoreImpl(ConnectionProvider provider) {
+        super(provider);
     }
 
-    public static List<WireRecord> performQuery(final ConnectionProvider provider, final String query)
-            throws KuraStoreException {
-
-        return SqlQueryableWireRecordStoreHelper.performQuery(provider, query,
-                H2DbQueryableWireRecordStoreImpl::extractColumnResult);
-    }
-
-    private static Optional<Object> extractColumnResult(final ResultSet rset, final ResultSetMetaData rmet, final int i)
+    @Override
+    protected Optional<Object> extractColumnValue(final ResultSet rset, final ResultSetMetaData rmet, final int i)
             throws SQLException {
         Object dbExtractedData = rset.getObject(i);
 

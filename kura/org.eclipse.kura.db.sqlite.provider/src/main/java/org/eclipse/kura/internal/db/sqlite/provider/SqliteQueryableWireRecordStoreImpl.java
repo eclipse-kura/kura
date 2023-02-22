@@ -15,45 +15,37 @@ package org.eclipse.kura.internal.db.sqlite.provider;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
-import org.eclipse.kura.util.wire.store.SqlQueryableWireRecordStoreHelper;
-import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.util.wire.store.AbstractJdbcQueryableWireRecordStoreImpl;
 
 @SuppressWarnings("restriction")
-public class SqliteQueryableWireRecordStoreImpl {
+public class SqliteQueryableWireRecordStoreImpl extends AbstractJdbcQueryableWireRecordStoreImpl {
 
-    private SqliteQueryableWireRecordStoreImpl() {
+    protected SqliteQueryableWireRecordStoreImpl(ConnectionProvider provider) {
+        super(provider);
     }
 
-    public static List<WireRecord> performQuery(final ConnectionProvider provider, final String query)
-            throws KuraStoreException {
-
-        return SqlQueryableWireRecordStoreHelper.performQuery(provider, query,
-                SqliteQueryableWireRecordStoreImpl::extractColumnResult);
-    }
-
-    private static Optional<Object> extractColumnResult(final ResultSet rset, final ResultSetMetaData rmet, final int i)
+    @Override
+    protected Optional<Object> extractColumnValue(ResultSet resultSet, ResultSetMetaData metadata, int columnIndex)
             throws SQLException {
-        Object dbExtractedData = rset.getObject(i);
+        Object dbExtractedData = resultSet.getObject(columnIndex);
 
         if (dbExtractedData == null) {
             return Optional.empty();
         }
 
-        final String typeName = rmet.getColumnTypeName(i);
+        final String typeName = metadata.getColumnTypeName(columnIndex);
 
         if ("INT".equals(typeName)) {
-            dbExtractedData = rset.getInt(i);
+            dbExtractedData = resultSet.getInt(columnIndex);
         } else if ("BIGINT".equals(typeName)) {
-            dbExtractedData = rset.getLong(i);
+            dbExtractedData = resultSet.getLong(columnIndex);
         } else if ("BOOLEAN".equals(typeName)) {
-            dbExtractedData = rset.getBoolean(i);
+            dbExtractedData = resultSet.getBoolean(columnIndex);
         } else if ("BLOB".equals(typeName)) {
-            dbExtractedData = rset.getBytes(i);
+            dbExtractedData = resultSet.getBytes(columnIndex);
         }
 
         return Optional.of(dbExtractedData);

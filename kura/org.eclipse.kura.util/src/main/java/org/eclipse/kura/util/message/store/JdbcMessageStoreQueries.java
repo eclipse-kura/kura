@@ -14,7 +14,7 @@ package org.eclipse.kura.util.message.store;
 
 import static java.util.Objects.requireNonNull;
 
-public final class SqlMessageStoreQueries {
+public final class JdbcMessageStoreQueries {
 
     private final String sqlCreateTable;
     private final String sqlMessageCount;
@@ -37,7 +37,7 @@ public final class SqlMessageStoreQueries {
     private final String sqlCreateConfirmedOnIndex;
     private final String sqlCreateDroppedOnIndex;
 
-    private SqlMessageStoreQueries(Builder builder) {
+    private JdbcMessageStoreQueries(Builder builder) {
         this.sqlCreateTable = requireNonNull(builder.sqlCreateTable);
         this.sqlMessageCount = requireNonNull(builder.sqlMessageCount);
         this.sqlStore = requireNonNull(builder.sqlStore);
@@ -54,7 +54,7 @@ public final class SqlMessageStoreQueries {
         this.sqlDeleteDroppedMessages = requireNonNull(builder.sqlDeleteDroppedMessages);
         this.sqlDeleteConfirmedMessages = requireNonNull(builder.sqlDeleteConfirmedMessages);
         this.sqlDeletePublishedMessages = requireNonNull(builder.sqlDeletePublishedMessages);
-        this.sqlCreateNextMessageIndex = requireNonNull(builder.sqlCreateIndex);
+        this.sqlCreateNextMessageIndex = requireNonNull(builder.sqlCreateNextMessageIndex);
         this.sqlCreatePublishedOnIndex = requireNonNull(builder.sqlCreatePublishedOnIndex);
         this.sqlCreateConfirmedOnIndex = requireNonNull(builder.sqlCreateConfirmedOnIndex);
         this.sqlCreateDroppedOnIndex = requireNonNull(builder.sqlCreateDroppedOnIndex);
@@ -147,7 +147,6 @@ public final class SqlMessageStoreQueries {
     public static final class Builder {
 
         private String sqlCreateTable;
-        private String sqlCreateIndex;
         private String sqlMessageCount;
         private String sqlStore;
         private String sqlGetMessage;
@@ -248,8 +247,8 @@ public final class SqlMessageStoreQueries {
             return this;
         }
 
-        public Builder withSqlCreateNextMessageIndex(String sqlCreateIndex) {
-            this.sqlCreateIndex = sqlCreateIndex;
+        public Builder withSqlCreateNextMessageIndex(String sqlCreateNextMessageIndex) {
+            this.sqlCreateNextMessageIndex = sqlCreateNextMessageIndex;
             return this;
         }
 
@@ -268,8 +267,8 @@ public final class SqlMessageStoreQueries {
             return this;
         }
 
-        public SqlMessageStoreQueries build() {
-            return new SqlMessageStoreQueries(this);
+        public JdbcMessageStoreQueries build() {
+            return new JdbcMessageStoreQueries(this);
         }
     }
 

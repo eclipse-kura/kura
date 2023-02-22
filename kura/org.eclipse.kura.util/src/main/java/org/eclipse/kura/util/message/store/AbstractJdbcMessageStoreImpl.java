@@ -31,38 +31,56 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
+import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
 
-public final class SqlMessageStoreHelper {
+public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
 
     private static final String TOPIC_ELEMENT = "topic";
 
-    private final ConnectionProvider connectionProvider;
-    private final Calendar utcCalendar;
-    private final SqlMessageStoreQueries queries;
-    private final boolean isExplicitCommitEnabled;
+    protected final String tableName;
+    protected final String escapedTableName;
+    protected final JdbcMessageStoreQueries queries;
+    protected final ConnectionProvider connectionProvider;
+    protected final Calendar utcCalendar;
 
-    private SqlMessageStoreHelper(Builder builder) {
-        this.connectionProvider = requireNonNull(builder.connectionProvider);
-        this.queries = requireNonNull(builder.queries);
-        this.isExplicitCommitEnabled = builder.isExplicitCommitEnabled;
-
-        this.utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    protected AbstractJdbcMessageStoreImpl(final ConnectionProvider connectionProvider, final String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Table name cannot be null or empty.");
+        }
+        this.tableName = tableName;
+        this.connectionProvider = requireNonNull(connectionProvider, "Connection provider cannot be null");
+        this.escapedTableName = escapeIdentifier(tableName);
+        this.utcCalendar = buildUTCCalendar();
+        this.queries = buildSqlMessageStoreQueries();
     }
 
-    public void createTable() throws KuraStoreException {
+    protected abstract JdbcMessageStoreQueries buildSqlMessageStoreQueries();
+
+    protected String escapeIdentifier(final String string) {
+        final String sanitizedName = string.replace("\"", "\"\"");
+        return "\"" + sanitizedName + "\"";
+    }
+
+    protected void createTable() throws KuraStoreException {
         execute(this.queries.getSqlCreateTable());
     }
 
-    public void createIndexes() throws KuraStoreException {
+    protected void createIndexes() throws KuraStoreException {
         execute(this.queries.getSqlCreateNextMessageIndex());
         execute(this.queries.getSqlCreatePublishedOnIndex());
         execute(this.queries.getSqlCreateConfirmedOnIndex());
         execute(this.queries.getSqlCreateDroppedOnIndex());
     }
 
-    public long getMessageCount() throws KuraStoreException {
+    @Override
+    public synchronized int getMessageCount() throws KuraStoreException {
+
+        return (int) getMessageCountInternal();
+    }
+
+    protected long getMessageCountInternal() throws KuraStoreException {
 
         return this.connectionProvider.withPreparedStatement(this.queries.getSqlMessageCount(),
                 (c, stmt) -> getFirstColumnValue(stmt::executeQuery, ResultSet::getLong), "Cannot get message count");
@@ -75,7 +93,7 @@ public final class SqlMessageStoreHelper {
         }
     }
 
-    public long store(String topic, byte[] payload, int qos, boolean retain, int priority)
+    protected long storeInternal(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
         validate(topic);
 
@@ -104,7 +122,7 @@ public final class SqlMessageStoreHelper {
                 result = getFirstColumnValue(pstmt::getGeneratedKeys, ResultSet::getLong);
             }
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 c.commit();
             }
 
@@ -113,12 +131,13 @@ public final class SqlMessageStoreHelper {
 
     }
 
+    @Override
     public Optional<StoredMessage> get(int msgId) throws KuraStoreException {
 
         return get(msgId, rs -> buildStoredMessageBuilder(rs, true).build());
     }
 
-    public Optional<StoredMessage> get(int msgId, final SQLFunction<ResultSet, StoredMessage> messageBuilder)
+    protected Optional<StoredMessage> get(int msgId, final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
         return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetMessage(), (c, stmt) -> {
@@ -129,13 +148,14 @@ public final class SqlMessageStoreHelper {
         }, "Cannot get message by ID: " + msgId);
     }
 
+    @Override
     public Optional<StoredMessage> getNextMessage() throws KuraStoreException {
 
         return getNextMessage(rs -> buildStoredMessageBuilder(rs, true).build());
 
     }
 
-    public Optional<StoredMessage> getNextMessage(final SQLFunction<ResultSet, StoredMessage> messageBuilder)
+    protected Optional<StoredMessage> getNextMessage(final SQLFunction<ResultSet, StoredMessage> messageBuilder)
             throws KuraStoreException {
 
         return this.connectionProvider.withPreparedStatement(this.queries.getSqlGetNextMessage(),
@@ -143,6 +163,7 @@ public final class SqlMessageStoreHelper {
                 "Cannot get message next message");
     }
 
+    @Override
     public void markAsPublished(int msgId, DataTransportToken token) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
@@ -155,7 +176,7 @@ public final class SqlMessageStoreHelper {
 
             stmt.execute();
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 c.commit();
             }
             return null;
@@ -164,44 +185,57 @@ public final class SqlMessageStoreHelper {
 
     }
 
+    @Override
     public void markAsPublished(int msgId) throws KuraStoreException {
         updateTimestamp(this.queries.getSqlSetPublishedQoS0(), msgId);
     }
 
+    @Override
     public void markAsConfirmed(int msgId) throws KuraStoreException {
         updateTimestamp(this.queries.getSqlSetConfirmed(), msgId);
     }
 
+    @Override
     public List<StoredMessage> getUnpublishedMessages() throws KuraStoreException {
 
         return listMessages(this.queries.getSqlAllUnpublishedMessages());
     }
 
+    @Override
     public List<StoredMessage> getInFlightMessages() throws KuraStoreException {
 
         return listMessages(this.queries.getSqlAllInFlightMessages());
     }
 
+    @Override
     public synchronized List<StoredMessage> getDroppedMessages() throws KuraStoreException {
 
         return listMessages(this.queries.getSqlAllDroppedInFlightMessages());
     }
 
-    public void unpublishAllInFlighMessages() throws KuraStoreException {
+    @Override
+    public synchronized void unpublishAllInFlighMessages() throws KuraStoreException {
         execute(this.queries.getSqlUnpublishAllInFlightMessages());
     }
 
-    public void dropAllInFlightMessages() throws KuraStoreException {
+    @Override
+    public synchronized void dropAllInFlightMessages() throws KuraStoreException {
         updateTimestamp(this.queries.getSqlDropAllInFlightMessages());
     }
 
-    public void deleteStaleMessages(int purgeAgeSeconds) throws KuraStoreException {
+    @Override
+    public synchronized void deleteStaleMessages(int purgeAgeSeconds) throws KuraStoreException {
         final long timestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(purgeAgeSeconds);
 
         deleteStaleMessages(timestamp);
     }
 
-    public void deleteStaleMessages(final Object timestamp) throws KuraStoreException {
+    @Override
+    public void close() {
+        // nothing to close
+    }
+
+    protected void deleteStaleMessages(final Object timestamp) throws KuraStoreException {
 
         execute(this.queries.getSqlDeleteDroppedMessages(), timestamp);
 
@@ -210,7 +244,7 @@ public final class SqlMessageStoreHelper {
         execute(this.queries.getSqlDeletePublishedMessages(), timestamp);
     }
 
-    public void updateTimestamp(String sql, Integer... msgIds) throws KuraStoreException {
+    protected void updateTimestamp(String sql, Integer... msgIds) throws KuraStoreException {
         final Timestamp now = new Timestamp(new Date().getTime());
 
         this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
@@ -221,7 +255,7 @@ public final class SqlMessageStoreHelper {
             }
             stmt.execute();
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 c.commit();
             }
             return null;
@@ -229,7 +263,7 @@ public final class SqlMessageStoreHelper {
         }, "Cannot update timestamp");
     }
 
-    public List<StoredMessage> listMessages(String sql, Integer... params) throws KuraStoreException {
+    protected List<StoredMessage> listMessages(String sql, Integer... params) throws KuraStoreException {
         return this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
@@ -243,7 +277,7 @@ public final class SqlMessageStoreHelper {
         }, "Cannot list messages");
     }
 
-    public void execute(String sql, Object... params) throws KuraStoreException {
+    protected void execute(String sql, Object... params) throws KuraStoreException {
         this.connectionProvider.withPreparedStatement(sql, (c, stmt) -> {
 
             for (int i = 0; i < params.length; i++) {
@@ -252,7 +286,7 @@ public final class SqlMessageStoreHelper {
 
             stmt.execute();
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 c.commit();
             }
             return null;
@@ -260,7 +294,7 @@ public final class SqlMessageStoreHelper {
         }, "Cannot execute query");
     }
 
-    public List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {
+    protected List<StoredMessage> buildStoredMessagesNoPayload(ResultSet rs) throws SQLException {
         List<StoredMessage> messages = new ArrayList<>();
         while (rs.next()) {
             messages.add(buildStoredMessageBuilder(rs, false).build());
@@ -268,7 +302,7 @@ public final class SqlMessageStoreHelper {
         return messages;
     }
 
-    public StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs, final boolean includePayload)
+    protected StoredMessage.Builder buildStoredMessageBuilder(ResultSet rs, final boolean includePayload)
             throws SQLException {
         StoredMessage.Builder builder = new StoredMessage.Builder(rs.getInt("id"))
                 .withTopic(rs.getString(TOPIC_ELEMENT)).withQos(rs.getInt("qos")).withRetain(rs.getBoolean("retain"))
@@ -291,45 +325,19 @@ public final class SqlMessageStoreHelper {
         return builder;
     }
 
-    public SqlMessageStoreQueries getQueries() {
+    protected Calendar buildUTCCalendar() {
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    }
+
+    protected boolean isExplicitCommitEnabled() {
+        return false;
+    }
+
+    protected JdbcMessageStoreQueries getQueries() {
         return queries;
     }
 
-    public ConnectionProvider getConnectionProvider() {
+    protected ConnectionProvider getConnectionProvider() {
         return connectionProvider;
     }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static final class Builder {
-
-        private ConnectionProvider connectionProvider;
-        private SqlMessageStoreQueries queries;
-        private boolean isExplicitCommitEnabled;
-
-        private Builder() {
-        }
-
-        public Builder withConnectionProvider(ConnectionProvider connectionProvider) {
-            this.connectionProvider = connectionProvider;
-            return this;
-        }
-
-        public Builder withQueries(SqlMessageStoreQueries queries) {
-            this.queries = queries;
-            return this;
-        }
-
-        public Builder withExplicitCommitEnabled(boolean isExplicitCommitEnabled) {
-            this.isExplicitCommitEnabled = isExplicitCommitEnabled;
-            return this;
-        }
-
-        public SqlMessageStoreHelper build() {
-            return new SqlMessageStoreHelper(this);
-        }
-    }
-
 }

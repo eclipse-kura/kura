@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,72 +27,43 @@ import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
-import org.eclipse.kura.util.wire.store.SqlWireRecordStoreHelper;
-import org.eclipse.kura.util.wire.store.SqlWireRecordStoreQueries;
-import org.eclipse.kura.wire.WireRecord;
-import org.eclipse.kura.wire.store.provider.WireRecordStore;
+import org.eclipse.kura.util.wire.store.AbstractJdbcWireRecordStoreImpl;
+import org.eclipse.kura.util.wire.store.JdbcWireRecordStoreQueries;
 
 @SuppressWarnings("restriction")
-public class SqliteWireRecordStoreImpl implements WireRecordStore {
+public class SqliteWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
 
     private static final Map<Class<? extends TypedValue<?>>, String> TYPE_MAPPING = buildTypeMapping();
 
-    private final SqlWireRecordStoreHelper helper;
-
     public SqliteWireRecordStoreImpl(final ConnectionProvider provider, final String tableName)
             throws KuraStoreException {
-        final String sanitizedTableName = sanitizeSql(tableName);
+        super(provider, tableName);
 
-        final SqlWireRecordStoreQueries queries = SqlWireRecordStoreQueries.builder()
-                .withSqlAddColumn("ALTER TABLE " + sanitizedTableName + " ADD COLUMN {0} {1};")
-                .withSqlCreateTable("CREATE TABLE IF NOT EXISTS " + sanitizedTableName
+        super.createTable();
+        super.createTimestampIndex();
+    }
+
+    @Override
+    protected JdbcWireRecordStoreQueries buildSqlWireRecordStoreQueries() {
+        return JdbcWireRecordStoreQueries.builder()
+                .withSqlAddColumn("ALTER TABLE " + super.escapedTableName + " ADD COLUMN {0} {1};")
+                .withSqlCreateTable("CREATE TABLE IF NOT EXISTS " + super.escapedTableName
                         + " (ID INTEGER PRIMARY KEY, TIMESTAMP BIGINT);")
-                .withSqlRowCount("SELECT COUNT(*) FROM " + sanitizedTableName + ";")
-                .withSqlDeleteRangeTable("DELETE FROM " + sanitizedTableName + " WHERE ID IN (SELECT ID FROM "
-                        + sanitizedTableName + " ORDER BY ID ASC LIMIT {0});")
-                .withSqlDropColumn("ALTER TABLE " + sanitizedTableName + " DROP COLUMN {0};")
-                .withSqlInsertRecord("INSERT INTO " + sanitizedTableName + " ({0}) VALUES ({1});")
-                .withSqlTruncateTable("TRUNCATE TABLE " + sanitizedTableName + ";")
-                .withSqlCreateTimestampIndex("CREATE INDEX IF NOT EXISTS " + sanitizeSql(tableName + "_TIMESTAMP")
-                        + " ON " + sanitizedTableName + " (TIMESTAMP DESC);")
+                .withSqlRowCount("SELECT COUNT(*) FROM " + super.escapedTableName + ";")
+                .withSqlDeleteRangeTable("DELETE FROM " + super.escapedTableName + " WHERE ID IN (SELECT ID FROM "
+                        + super.escapedTableName + " ORDER BY ID ASC LIMIT {0});")
+                .withSqlDropColumn("ALTER TABLE " + super.escapedTableName + " DROP COLUMN {0};")
+                .withSqlInsertRecord("INSERT INTO " + super.escapedTableName + " ({0}) VALUES ({1});")
+                .withSqlTruncateTable("TRUNCATE TABLE " + super.escapedTableName + ";")
+                .withSqlCreateTimestampIndex(
+                        "CREATE INDEX IF NOT EXISTS " + super.escapeIdentifier(tableName + "_TIMESTAMP") + " ON "
+                                + super.escapedTableName + " (TIMESTAMP DESC);")
                 .build();
-
-        this.helper = SqlWireRecordStoreHelper.builder() //
-                .withConnectionProvider(provider) //
-                .withTableName(tableName) //
-                .withQueries(queries) //
-                .withSqlTypeMapper(this::getJdbcType) //
-                .withSanitizer(this::sanitizeSql) //
-                .withExplicitCommitEnabled(false) //
-                .build();
-
-        this.helper.createTable();
-        this.helper.createTimestampIndex();
     }
 
     @Override
-    public synchronized void truncate(final int noOfRecordsToKeep) throws KuraStoreException {
-        this.helper.truncate(noOfRecordsToKeep);
-    }
-
-    @Override
-    public synchronized int getSize() throws KuraStoreException {
-        return this.helper.getSize();
-    }
-
-    @Override
-    public synchronized void insertRecords(final List<WireRecord> records) throws KuraStoreException {
-        this.helper.insertRecords(records);
-    }
-
-    @Override
-    public void close() {
-        // nothing to shutdown
-    }
-
-    private String sanitizeSql(final String string) {
-        final String sanitizedName = string.replace("\"", "\"\"");
-        return "\"" + sanitizedName + "\"";
+    protected Optional<String> getMappedSqlType(final TypedValue<?> value) {
+        return Optional.ofNullable(value).flatMap(v -> Optional.ofNullable(TYPE_MAPPING.get(v.getClass())));
     }
 
     private static Map<Class<? extends TypedValue<?>>, String> buildTypeMapping() {
@@ -108,10 +78,6 @@ public class SqliteWireRecordStoreImpl implements WireRecordStore {
         result.put(ByteArrayValue.class, "BLOB");
 
         return Collections.unmodifiableMap(result);
-    }
-
-    private Optional<String> getJdbcType(final TypedValue<?> value) {
-        return Optional.ofNullable(value).flatMap(v -> Optional.ofNullable(TYPE_MAPPING.get(v.getClass())));
     }
 
 }

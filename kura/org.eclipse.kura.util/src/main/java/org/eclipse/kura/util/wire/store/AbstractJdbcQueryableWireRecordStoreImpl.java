@@ -13,6 +13,7 @@
 package org.eclipse.kura.util.wire.store;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -32,15 +33,21 @@ import org.eclipse.kura.wire.WireRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SqlQueryableWireRecordStoreHelper {
+public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlQueryableWireRecordStoreHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractJdbcQueryableWireRecordStoreImpl.class);
 
-    private SqlQueryableWireRecordStoreHelper() {
+    private final ConnectionProvider provider;
+
+    protected AbstractJdbcQueryableWireRecordStoreImpl(final ConnectionProvider provider) {
+        this.provider = requireNonNull(provider, "Connection provider cannot be null");
     }
 
-    public static List<WireRecord> performQuery(final ConnectionProvider provider, final String query,
-            final ColumnExtractor extractor)
+    protected abstract Optional<Object> extractColumnValue(ResultSet resultSet, ResultSetMetaData metadata,
+            int columnIndex)
+            throws SQLException;
+
+    public List<WireRecord> performQuery(final String query)
             throws KuraStoreException {
 
         try {
@@ -50,7 +57,7 @@ public class SqlQueryableWireRecordStoreHelper {
                     final List<WireRecord> dataRecords = new ArrayList<>();
 
                     while (rset.next()) {
-                        final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset, extractor));
+                        final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset));
                         dataRecords.add(wireRecord);
                     }
 
@@ -63,19 +70,18 @@ public class SqlQueryableWireRecordStoreHelper {
 
     }
 
-    public static Map<String, TypedValue<?>> convertSQLRowToWireRecord(final ResultSet rset,
-            final ColumnExtractor extractor)
+    protected Map<String, TypedValue<?>> convertSQLRowToWireRecord(final ResultSet rset)
             throws SQLException {
         final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
         final ResultSetMetaData rmet = rset.getMetaData();
-        for (int i = 1; i <= rmet.getColumnCount(); i++) {
-            String fieldName = rmet.getColumnLabel(i);
+        for (int columnIndex = 1; columnIndex <= rmet.getColumnCount(); columnIndex++) {
+            String fieldName = rmet.getColumnLabel(columnIndex);
 
             if (isNull(fieldName)) {
-                fieldName = rmet.getColumnName(i);
+                fieldName = getWireRecordPropertyName(rmet, columnIndex);
             }
 
-            final Optional<Object> dbExtractedData = extractor.extract(rset, rmet, i);
+            final Optional<Object> dbExtractedData = extractColumnValue(rset, rmet, columnIndex);
 
             if (!dbExtractedData.isPresent()) {
                 continue;
@@ -85,19 +91,26 @@ public class SqlQueryableWireRecordStoreHelper {
                 final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData.get());
                 wireRecordProperties.put(fieldName, value);
             } catch (final Exception e) {
-                logger.error(
-                        "Failed to convert result for column {} (SQL type {}, Java type {}) "
-                                + "to any of the supported Wires data type, "
-                                + "please consider using a conversion function like CAST in your query. "
-                                + "The result for this column will not be included in emitted envelope",
-                        fieldName, rmet.getColumnTypeName(i), dbExtractedData.getClass().getName(), e);
+                handleConversionException(rmet, columnIndex, fieldName, dbExtractedData, e);
             }
 
         }
         return wireRecordProperties;
     }
 
-    public interface ColumnExtractor {
-        public Optional<Object> extract(ResultSet resultSet, ResultSetMetaData metadata, int index) throws SQLException;
+    protected String getWireRecordPropertyName(final ResultSetMetaData resultSetMetaData, final int columnIndex)
+            throws SQLException {
+        return resultSetMetaData.getColumnName(columnIndex);
     }
+
+    protected void handleConversionException(final ResultSetMetaData rmet, int columnIndex, String fieldName,
+            final Optional<Object> dbExtractedData, final Exception e) throws SQLException {
+        logger.error(
+                "Failed to convert result for column {} (SQL type {}, Java type {}) "
+                        + "to any of the supported Wires data type, "
+                        + "please consider using a conversion function like CAST in your query. "
+                        + "The result for this column will not be included in emitted envelope",
+                fieldName, rmet.getColumnTypeName(columnIndex), dbExtractedData.getClass().getName(), e);
+    }
+
 }

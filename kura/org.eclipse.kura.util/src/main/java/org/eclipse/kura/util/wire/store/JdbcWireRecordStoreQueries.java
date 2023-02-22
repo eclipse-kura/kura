@@ -14,7 +14,7 @@ package org.eclipse.kura.util.wire.store;
 
 import static java.util.Objects.requireNonNull;
 
-public class SqlWireRecordStoreQueries {
+public class JdbcWireRecordStoreQueries {
 
     private final String sqlAddColumn;
     private final String sqlDropColumn;
@@ -25,7 +25,7 @@ public class SqlWireRecordStoreQueries {
     private final String sqlTruncateTable;
     private final String sqlCreateTimestampIndex;
 
-    private SqlWireRecordStoreQueries(Builder builder) {
+    private JdbcWireRecordStoreQueries(Builder builder) {
         this.sqlAddColumn = requireNonNull(builder.sqlAddColumn);
         this.sqlDropColumn = requireNonNull(builder.sqlDropColumn);
         this.sqlCreateTable = requireNonNull(builder.sqlCreateTable);
@@ -123,8 +123,8 @@ public class SqlWireRecordStoreQueries {
             return this;
         }
 
-        public SqlWireRecordStoreQueries build() {
-            return new SqlWireRecordStoreQueries(this);
+        public JdbcWireRecordStoreQueries build() {
+            return new JdbcWireRecordStoreQueries(this);
         }
     }
 }

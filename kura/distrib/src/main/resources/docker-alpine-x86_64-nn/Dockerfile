@@ -1,5 +1,5 @@
 ARG base_image_version=latest
-FROM base-kura-docker-x86_64:$base_image_version AS kura_base
+FROM base-kura-docker-x86_64:${base_image_version} AS kura_base
 FROM alpine:latest
 
 MAINTAINER Eclipse Kura Developers <kura-dev@eclipse.org>

@@ -1799,7 +1799,7 @@
                                 <arguments>
                                     <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>base_image_kura=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-ubi8:${project.version}</argument>
                                     <argument>-t</argument>
@@ -1845,7 +1845,7 @@
                                     <arguments>
                                         <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>base_image_kura=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-alpine:${project.version}</argument>
                                     <argument>-t</argument>

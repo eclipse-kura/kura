@@ -142,6 +142,44 @@ or
 
 and select the profiles you want to build.
 
+### Building Eclipse Kura Docker/Podman Containers
+
+The kura container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux ```kura-alpine-x86_64```, and another on Ubi8 ```kura-ubi8-x86_64```.
+
+Change to the new directory and clone the Kura repo:
+
+```bash
+git clone -b develop https://github.com/eclipse/kura.git
+```
+
+Move inside the newly created directory and build the target platform:
+
+```bash
+mvn -f target-platform/pom.xml clean install
+```
+
+Build the core components:
+
+```bash
+mvn -f kura/pom.xml clean install
+```
+
+Build the examples (optional):
+
+```bash
+mvn -f kura/examples/pom.xml clean install
+```
+
+Build the target profiles:
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
+```
+
+After this command runs, images can be found in your docker/podman image list.
+
+> *Note*: You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Praspberry-pi-armhf`).
+
 ### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
 

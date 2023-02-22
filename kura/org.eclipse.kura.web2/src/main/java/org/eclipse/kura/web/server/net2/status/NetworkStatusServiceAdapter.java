@@ -19,8 +19,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.net.util.SubnetUtils;
+import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
@@ -104,20 +107,17 @@ public class NetworkStatusServiceAdapter {
              * one. This is a limit of the current GWT UI.
              */
             networkInterfaceInfo.getInterfaceIp4Addresses().ifPresent(address -> {
-                gwtConfig.setIpAddress(address.getAddresses().get(0).getAddress().getHostAddress());
+                if (!address.getAddresses().isEmpty()) {
+                    NetworkInterfaceIpAddress<IP4Address> firstAddress = address.getAddresses().get(0);
+                    gwtConfig.setIpAddress(firstAddress.getAddress().getHostAddress());
+                    gwtConfig.setSubnetMask(NetworkUtil.getNetmaskStringForm(firstAddress.getPrefix()));
+                }
                 if (address.getGateway().isPresent()) {
                     gwtConfig.setGateway(address.getGateway().get().getHostAddress());
                 }
-                gwtConfig.setSubnetMask(convertPrefixToNetmask(address.getAddresses().get(0).getPrefix()));
                 gwtConfig.setReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
             });
         }
-    }
-
-    private String convertPrefixToNetmask(short prefix) {
-        SubnetUtils subnetUtils = new SubnetUtils("0.0.0.0" + "/" + prefix);
-        subnetUtils.setInclusiveHostCount(true);
-        return subnetUtils.getInfo().getNetmask();
     }
 
     private boolean isDhcpClient(String ipConfigMode) {

@@ -166,7 +166,7 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setSecurity(
                 EnumsParser.getGwtWifiSecurity(this.properties.getWifiMasterSecurityType(this.ifname)));
         gwtWifiConfig.setPairwiseCiphers(
-                EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraPairwiseCiphers(this.ifname)));
+                EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterPairwiseCiphers(this.ifname)));
         gwtWifiConfig.setGroupCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterGroupCiphers(this.ifname)));
 
@@ -200,7 +200,7 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig
                 .setSecurity(EnumsParser.getGwtWifiSecurity(this.properties.getWifiInfraSecurityType(this.ifname)));
         gwtWifiConfig.setPairwiseCiphers(
-                EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterPairwiseCiphers(this.ifname)));
+                EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraPairwiseCiphers(this.ifname)));
         gwtWifiConfig.setGroupCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraGroupCiphers(this.ifname)));
 

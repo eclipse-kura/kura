@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
+DP="$1"
+shift
+
+: ${PACKAGES_DIR:=${KURA_DIR}/kura/packages}
+
+install -m 0777 -D -d "${PACKAGES_DIR}"
+cp "$DP" "${PACKAGES_DIR}/"
+
+"$SCRIPT_DIR/dp-register" "${PACKAGES_DIR}/$(basename "$DP")"
+
+rm "$DP"

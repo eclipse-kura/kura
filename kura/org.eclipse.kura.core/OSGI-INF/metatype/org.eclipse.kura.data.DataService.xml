@@ -140,7 +140,7 @@
             required="true"
             default="1"
             min="1"
-            description="The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). This parameter has some limitations described in http://eclipse.github.io/kura/config/data-service-configuration.html"/>
+            description="The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). This parameter has some limitations described in https://eclipse.github.io/kura/latest/gateway-configuration/data-service-configuration/"/>
         
         <AD id="rate.limit.time.unit"
             name="Rate Limit Time Unit"

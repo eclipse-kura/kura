@@ -1,10 +1,14 @@
 {
   "name": "kura-dev-container",
   "image": "mcr.microsoft.com/vscode/devcontainers/java:8",
-  "args": {
-     "INSTALL_GRADLE": "true",
-     "MAVEN_VERSION": "3.8.3",
-     "INSTALL_MAVEN": "true",
-     "GRADLE_VERSION": "7.2"
+  "features": {
+	"ghcr.io/devcontainers/features/java:1": {
+		"installMaven": true,
+		"version": "8",
+		"jdkDistro": "tem",
+		"gradleVersion": "5.6.4",
+		"mavenVersion": "3.5.4",
+		"antVersion": "1.9.15"
+	  }
   }
 }

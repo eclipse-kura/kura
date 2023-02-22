@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
@@ -50,7 +49,6 @@ import org.osgi.service.event.EventAdmin;
 public class NMConfigurationServiceImplTest {
 
     private NMConfigurationServiceImpl networkConfigurationService;
-    private ConfigurationService configurationServiceMock;
     private final Map<String, Object> properties = new HashMap<>();
     private ComponentConfiguration configuration;
     private Map<String, Object> retrievedProperties;
@@ -305,9 +303,6 @@ public class NMConfigurationServiceImplTest {
         when(networkServiceMock.getNetworkInterfaces()).thenReturn(interfaces);
         this.networkConfigurationService.setNetworkService(networkServiceMock);
 
-        this.configurationServiceMock = mock(ConfigurationService.class);
-        this.networkConfigurationService.setConfigurationService(configurationServiceMock);
-
         this.posted = new AtomicBoolean(false);
 
         doAnswer(invocation -> {
@@ -331,21 +326,6 @@ public class NMConfigurationServiceImplTest {
 
     private void whenServiceIsUpdated() {
         this.networkConfigurationService.activate(null, this.properties);
-    }
-
-    private void whenServiceIsActivatedWithOneWanInterface() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("net.interfaces", "eth0");
-        props.put("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        this.networkConfigurationService.activate(null, props);
-    }
-
-    private void whenServiceIsUpdatedWithTwoWanInterface() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("net.interfaces", "eth0,eth1");
-        props.put("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        props.put("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
-        this.networkConfigurationService.update(props);
     }
 
     private void whenComponentDefinitionIsRetrieved() throws KuraException {
@@ -675,14 +655,6 @@ public class NMConfigurationServiceImplTest {
             }
         }
         assertEquals(40, adsConfigured);
-    }
-
-    private void thenOldWanIntefaceIsDisabled() {
-        assertEquals("netIPv4StatusDisabled", this.event.getProperty("net.interface.eth1.config.ip4.status"));
-    }
-
-    private void thenSnapshotIsTaken() throws KuraException {
-        verify(this.configurationServiceMock).snapshot();
     }
 
     private void thenPropertiesNumberIsCorrect() {

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -65,7 +64,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
-    private ConfigurationService configurationService;
     private DhcpServerMonitor dhcpServerMonitor;
 
     private LinuxNetworkUtil linuxNetworkUtil;
@@ -116,10 +114,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         if (this.cryptoService.equals(cryptoService)) {
             this.cryptoService = null;
         }
-    }
-
-    public void setConfigurationService(final ConfigurationService configurationService) {
-        this.configurationService = configurationService;
     }
 
     public NMConfigurationServiceImpl() {

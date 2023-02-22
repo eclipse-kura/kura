@@ -90,7 +90,7 @@ public class NetworkStatusServiceAdapter {
         networkInterfaceStatus.getUsbNetDevice()
                 .ifPresent(usbDevice -> gwtConfig.setHwUsbDevice(usbDevice.getUsbDevicePath()));
 
-        logger.debug("GWT common state properties for interface {}:\\n{}\\n", gwtConfig.getName(),
+        logger.debug("GWT common state properties for interface {}:\n{}\n", gwtConfig.getName(),
                 gwtConfig.getProperties());
     }
 

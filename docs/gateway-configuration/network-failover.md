@@ -1,6 +1,6 @@
 # Network Failover
 
-For devices configured to use NetworkManager, it is possible to configure multiple WAN interfaces and a basic network failover functionality.
+For devices configured to use [NetworkManager](https://networkmanager.dev), it is possible to configure multiple WAN interfaces and a basic network failover functionality.
 
 As in the picture below, the Kura UI allows for multiple WAN interfaces to be defined. Each WAN interface can be configured with a **WAN Priority**. WAN Priority is used to determine which interface will be selected for primary WAN. In the case where the primary WAN interface loses connection, then the next highest priority interface is assigned.
 
@@ -25,11 +25,11 @@ The `metric` flag will correspond to the set **WAN Priority**. *NetworkManager* 
 
 
 
-## Work Modalities
+## Operating modes
 
 The *NetworkManager* failover mechanism can work at two different levels:
 
-- by detecting disruptions at physical level;
+- by detecting disruptions at physical level (i.e. an ethernet cable that disconnects);
 - by performing a **connectivity check** to an upstream URI.
 
 *NetworkManager* brings a network interface down when it detects the loss of its physical link. In such case, the next highest priority interface is selected as the main one.
@@ -49,9 +49,9 @@ interval=60
 response="NetworkManager is online"
 ```
 
-The **interval** minimun is 60 seconds, if missing it defaults to 300 seconds.
+The minimun **interval** is 60 seconds, if no interval is specified it defaults to 300 seconds.
 
-The **response** should match what the **uri** is returning when probed. Some examples of web pages with *NetworkManager* responses:
+The **response** should match what the URI is returning when probed. Some examples of web pages with *NetworkManager* responses:
 
 | URI | Response |
 | - | - |

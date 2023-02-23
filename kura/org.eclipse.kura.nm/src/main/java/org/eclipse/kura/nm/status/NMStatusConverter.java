@@ -29,6 +29,8 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
+import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -79,6 +81,20 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
+
+        return builder.build();
+    }
+
+    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, Properties deviceProperties,
+            Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
+        logger.info("Building interface status for {}", interfaceName);
+        WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
+        builder.withName(interfaceName).withVirtual(false);
+
+        setDeviceStatus(builder, deviceProperties);
+        setIP4Status(builder, ip4configProperties);
+        // TODO
 
         return builder.build();
     }

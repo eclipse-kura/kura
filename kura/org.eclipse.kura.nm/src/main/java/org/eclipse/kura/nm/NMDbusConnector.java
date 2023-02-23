@@ -36,6 +36,7 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_GENERIC_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device.Generic";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
@@ -156,6 +158,28 @@ public class NMDbusConnector {
                     usbNetDevice);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
             return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+            logger.info("Gathering info for WIFI interface: {}", interfaceName);
+
+            Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Wireless.class);
+            Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    wirelessDevice.getObjectPath(), Properties.class);
+
+            List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
+            logger.info("Found {} wifi AP for interface {}", accessPoints.size(), interfaceName);
+
+            DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                    "ActiveAccessPoint");
+            Optional<Properties> activeAccessPoint = Optional.empty();
+
+            if (!activeAccessPointPath.getPath().equals("/")) {
+                activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        activeAccessPointPath.getPath(), Properties.class));
+            }
+
+            return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
+                    wirelessDeviceProperties, activeAccessPoint, accessPoints);
         }
 
         return null;
@@ -305,6 +329,21 @@ public class NMDbusConnector {
         }
 
         return devices;
+    }
+
+    private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
+        List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
+
+        List<Properties> accessPointProperties = new ArrayList<>();
+
+        for (DBusPath path : accessPointPaths) {
+            Properties apProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                    Properties.class);
+            accessPointProperties.add(apProperties);
+
+        }
+
+        return accessPointProperties;
     }
 
     private NMDeviceState getDeviceState(Device device) throws DBusException {

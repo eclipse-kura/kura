@@ -91,7 +91,7 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
                 final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData.get());
                 wireRecordProperties.put(fieldName, value);
             } catch (final Exception e) {
-                handleConversionException(rmet, columnIndex, fieldName, dbExtractedData, e);
+                handleConversionException(rmet, columnIndex, fieldName, dbExtractedData.get(), e);
             }
 
         }
@@ -104,7 +104,7 @@ public abstract class AbstractJdbcQueryableWireRecordStoreImpl {
     }
 
     protected void handleConversionException(final ResultSetMetaData rmet, int columnIndex, String fieldName,
-            final Optional<Object> dbExtractedData, final Exception e) throws SQLException {
+            final Object dbExtractedData, final Exception e) throws SQLException {
         logger.error(
                 "Failed to convert result for column {} (SQL type {}, Java type {}) "
                         + "to any of the supported Wires data type, "

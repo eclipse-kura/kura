@@ -2,9 +2,12 @@ package org.eclipse.kura.nm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -22,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.eclipse.kura.net.NetInterface;
+import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceType;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -49,6 +55,8 @@ public class NMDbusConnectorTest {
     Boolean hasDBusExceptionBeenThrown = false;
     Boolean hasNoSuchElementExceptionThrown = false;
     Boolean hasNullPointerExceptionThrown = false;
+    
+    NetInterface<NetInterfaceAddress> netInterface;
     
     Map<String, Device> mockDevices = new HashMap<>();
 
@@ -212,6 +220,8 @@ public class NMDbusConnectorTest {
     @Test
     public void applyShouldNotDisableLoopbackDevice() throws DBusException {
         givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenMockedDeviceList();
+        
         givenNetworkConfigMapWith("net.interfaces", "lo,");
         givenNetworkConfigMapWith("net.interface.lo.config.ip4.status", "netIPv4StatusDisabled");
 
@@ -219,6 +229,70 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenNetoworkSettingsDoNotChangeForDevice("lo");
+    }
+    
+    @Test
+    public void applyShouldNotDisableLoopbackDeviceOldVersionOfNM() throws DBusException {
+        givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_GENERIC, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenMockedDeviceList();
+        
+        givenNetworkConfigMapWith("net.interfaces", "lo,");
+        givenNetworkConfigMapWith("net.interface.lo.config.ip4.status", "netIPv4StatusDisabled");
+        
+        whenApplyIsCalledWith(this.netConfig);
+        
+        thenNoExceptionIsThrown();
+        thenNetoworkSettingsDoNotChangeForDevice("lo");
+    }
+    
+    @Test
+    public void getInterfaceStatusShouldWorkEthernet() throws DBusException {
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenExtraStatusMocksFor("eth0", NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenMockedDeviceList();
+
+        whenGetInterfaceStatus("eth0");
+
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNotNull();
+        thenNetInterfaceTypeIs(NetInterfaceType.ETHERNET);
+    }
+    
+    @Test
+    public void getInterfaceStatusShouldWorkLoopback() throws DBusException {
+        givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenExtraStatusMocksFor("lo", NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenMockedDeviceList();
+        
+        whenGetInterfaceStatus("lo");
+        
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNotNull();
+        thenNetInterfaceTypeIs(NetInterfaceType.LOOPBACK);
+    }
+    
+    @Test
+    public void getInterfaceStatusShouldWorkUnsuported() throws DBusException {
+        givenMockedDevice("unused0", NMDeviceType.NM_DEVICE_TYPE_UNUSED1, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenExtraStatusMocksFor("unused0", NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenMockedDeviceList();
+        
+        whenGetInterfaceStatus("unused0");
+        
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNull();
+    }
+    
+    @Test
+    public void getInterfaceStatusShouldWorkWireless() throws DBusException {
+        givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenExtraStatusMocksFor("wlan0", NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenMockedDeviceList();
+        
+        whenGetInterfaceStatus("wlan0");
+        
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNull();
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException {
@@ -304,6 +378,26 @@ public class NMDbusConnectorTest {
                 eq("/mock/device/lo"), eq(Generic.class));
     }
     
+    public void givenExtraStatusMocksFor(String interfaceName, NMDeviceState state) throws DBusException {
+        Device mockedDevice1 = this.mockDevices.get(interfaceName);
+        Properties mockedProperties = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/mock/device/" + interfaceName, Properties.class);
+        
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("Autoconnect"))).thenReturn(true);
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("FirmwareVersion"))).thenReturn("firmware");
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("Driver"))).thenReturn("driver");
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("DriverVersion"))).thenReturn("1.0.0");
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("State"))).thenReturn(NMDeviceState.toUInt32(state));
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("Mtu"))).thenReturn(new UInt32(100));
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("HwAddress"))).thenReturn("F5:5B:32:7C:40:EA");
+        
+        DBusPath path = mock(DBusPath.class);
+        when(path.getPath()).thenReturn("/");
+        
+        when(mockedProperties.Get(eq("org.freedesktop.NetworkManager.Device"), eq("Ip4Config"))).thenReturn(path);
+
+    }
+    
     public void givenMockedDeviceList() {
         
         List<DBusPath> devicePaths = new ArrayList<>();
@@ -357,6 +451,21 @@ public class NMDbusConnectorTest {
     public void whenApplyIsCalledWith(Map<String, Object> networkConfig) {
         try {
             this.instanceNMDbusConnector.apply(networkConfig);
+        } catch (DBusException e) {
+            e.printStackTrace();
+            hasDBusExceptionBeenThrown = true;
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+            hasNoSuchElementExceptionThrown = true;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            hasNullPointerExceptionThrown = true;
+        }
+    }
+    
+    public void whenGetInterfaceStatus(String netInterface) {
+        try {
+            this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface);
         } catch (DBusException e) {
             e.printStackTrace();
             hasDBusExceptionBeenThrown = true;
@@ -422,5 +531,17 @@ public class NMDbusConnectorTest {
         verify(connect, never()).Update(any());
         verify(this.mockDevices.get(netInterface), never()).Disconnect();
     }
-
+    
+    public void thenInterfaceStatusIsNull() {
+        assertNull(this.netInterface);
+    }
+    
+    public void thenInterfaceStatusIsNotNull() {
+        assertNotNull(this.netInterface);
+    }
+    
+    public void thenNetInterfaceTypeIs(NetInterfaceType type) {
+      assertEquals(type, this.netInterface.getType());   
+    }
+ 
 }

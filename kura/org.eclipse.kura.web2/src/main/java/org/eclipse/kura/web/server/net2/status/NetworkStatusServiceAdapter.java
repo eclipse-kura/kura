@@ -24,6 +24,7 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.Sim;
@@ -58,23 +59,26 @@ public class NetworkStatusServiceAdapter {
         return this.networkStatusService.getInterfaceNames();
     }
 
-    public Optional<GwtNetInterfaceConfig> fillWithStatusProperties(String ifname,
+    public void fillWithStatusProperties(String ifName,
             GwtNetInterfaceConfig gwtConfigToUpdate) {
-
-        Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifname);
+        Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifName);
 
         if (networkInterfaceInfo.isPresent()) {
             setCommonStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setIpv4DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setWifiStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setModemStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
-
-            return Optional.of(gwtConfigToUpdate);
         }
 
-        logger.debug("No status information retrieved for interface '{}'.", ifname);
+    }
 
-        return Optional.empty();
+    public Optional<NetworkInterfaceType> getNetInterfaceType(String ifName) {
+        Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifName);
+        Optional<NetworkInterfaceType> ifType = Optional.empty();
+        if (networkInterfaceInfo.isPresent()) {
+            ifType = Optional.of(networkInterfaceInfo.get().getType());
+        }
+        return ifType;
     }
 
     @SuppressWarnings("restriction")

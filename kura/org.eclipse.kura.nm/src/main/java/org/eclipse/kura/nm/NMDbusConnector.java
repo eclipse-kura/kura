@@ -163,15 +163,12 @@ public class NMDbusConnector {
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
             return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
-            logger.info("Gathering info for WIFI interface: {}", interfaceName);
-
             Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                     Wireless.class);
             Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     wirelessDevice.getObjectPath(), Properties.class);
 
             List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
-            logger.info("Found {} wifi AP for interface {}", accessPoints.size(), interfaceName);
 
             DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
                     "ActiveAccessPoint");

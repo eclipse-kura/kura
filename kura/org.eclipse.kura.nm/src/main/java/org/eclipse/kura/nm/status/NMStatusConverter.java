@@ -13,21 +13,24 @@
 package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.EthernetInterfaceImpl;
-import org.eclipse.kura.core.net.LoopbackInterfaceImpl;
-import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetInterfaceState;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceState;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus.NetworkInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
+import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
+import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
 import org.eclipse.kura.nm.NMDeviceState;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -41,125 +44,100 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
-    private static final EnumMap<NMDeviceState, NetInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
+    private static final EnumMap<NMDeviceState, NetworkInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
 
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetInterface<NetInterfaceAddress> buildEthernetStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties) {
-        EthernetInterfaceImpl<NetInterfaceAddress> ethInterface = new EthernetInterfaceImpl<>(interfaceName);
-
-        ethInterface.setVirtual(false);
-        ethInterface.setLoopback(false);
-        ethInterface.setPointToPoint(false); // TBD
-
-        setDeviceStatus(ethInterface, deviceProperties);
-        setIP4Status(ethInterface, ip4configProperties);
-
-        return ethInterface;
-
-    }
-
-    public static NetInterface<NetInterfaceAddress> buildLoopbackStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties) {
-        LoopbackInterfaceImpl<NetInterfaceAddress> loInterface = new LoopbackInterfaceImpl<>(interfaceName);
-
-        loInterface.setVirtual(true);
-        loInterface.setLoopback(true);
-        loInterface.setPointToPoint(false);
-
-        setDeviceStatus(loInterface, deviceProperties);
-        setIP4Status(loInterface, ip4configProperties);
-
-        return loInterface;
-    }
-
-    private static void setDeviceStatus(AbstractNetInterface<NetInterfaceAddress> iface, Properties deviceProperties) {
-        iface.setAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
-        iface.setFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
-        iface.setDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
-        iface.setDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
+    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName,
+            Properties deviceProperties, Optional<Properties> ip4configProperties,
+            Optional<UsbNetDevice> usbNetDevice) {
+        EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
+        builder.withName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        iface.setState(DEVICE_STATE_CONVERTER.get(deviceState));
-        iface.setUp(NMDeviceState.isConnected(deviceState));
+        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        builder.withIsLinkUp(NMDeviceState.isConnected(deviceState));
+
+        builder.withUsbNetDevice(usbNetDevice);
+
+        setDeviceStatus(builder, deviceProperties);
+        setIP4Status(builder, ip4configProperties);
+
+        return builder.build();
+
+    }
+
+    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
+            Properties deviceProperties, Optional<Properties> ip4configProperties) {
+        LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
+        builder.withName(interfaceName).withVirtual(true);
+
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+
+        setDeviceStatus(builder, deviceProperties);
+        setIP4Status(builder, ip4configProperties);
+
+        return builder.build();
+    }
+
+    private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder, Properties deviceProperties) {
+        builder.withAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
+        builder.withFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
+        builder.withDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
+        builder.withDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
 
         UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
-        iface.setMTU(mtu.intValue());
+        builder.withMtu(mtu.intValue());
 
         String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
-        iface.setHardwareAddress(getMacAddressBytes(hwAddress));
+        builder.withHardwareAddress(getMacAddressBytes(hwAddress));
     }
 
-    private static void setIP4Status(AbstractNetInterface<NetInterfaceAddress> iface,
+    private static void setIP4Status(NetworkInterfaceStatusBuilder<?> builder,
             Optional<Properties> ip4configProperties) {
-        if (!ip4configProperties.isPresent()) {
-            return;
-        }
-
-        List<NetInterfaceAddress> addressList = new ArrayList<>();
-
-        String gateway = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        List<Map<String, Variant<?>>> addressData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
-        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.get().Get(NM_IP4CONFIG_BUS_NAME,
-                "NameserverData");
-        for (Map<String, Variant<?>> data : addressData) {
-            NetInterfaceAddressImpl address = new NetInterfaceAddressImpl();
-
+        ip4configProperties.ifPresent(properties -> {
             try {
-                IPAddress ipGateway = IPAddress.parseHostAddress(gateway);
-                address.setGateway(ipGateway);
+                NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus = new NetworkInterfaceIpAddressStatus<>();
+                setIP4Gateway(properties, ip4AddressStatus);
+                setIP4DnsServers(properties, ip4AddressStatus);
+                setIP4Addresses(properties, ip4AddressStatus);
+                builder.withInterfaceIp4Addresses(Optional.of(ip4AddressStatus));
             } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve gateway address \"{}\" due to:", gateway, e);
+                logger.error("Failed to set IP4 address.", e);
             }
+        });
+    }
 
+    private static void setIP4Addresses(Properties ip4configProperties,
+            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+        List<Map<String, Variant<?>>> addressData = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+        for (Map<String, Variant<?>> data : addressData) {
             String addressStr = String.class.cast(data.get("address").getValue());
             UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
-            try {
-                address.setAddress(IPAddress.parseHostAddress(addressStr));
-                address.setNetworkPrefixLength(prefix.shortValue());
-                address.setNetmask(IPAddress.parseHostAddress(getNetmaskStringFrom(prefix.intValue())));
-            } catch (UnknownHostException e) {
-                logger.debug("Could not retrieve ip address due to:", e);
-            }
-
-            List<IPAddress> dnsServers = new ArrayList<>();
-            for (Map<String, Variant<?>> dns : nameserverData) {
-                String dnsAddressStr = String.class.cast(dns.get("address").getValue());
-                try {
-                    dnsServers.add(IPAddress.parseHostAddress(dnsAddressStr));
-                } catch (UnknownHostException e) {
-                    logger.debug("Could not retrieve ip address \"{}\" due to:", dnsAddressStr, e);
-                }
-            }
-            address.setDnsServers(dnsServers);
-
-            addressList.add(address);
-        }
-
-        iface.setNetInterfaceAddresses(addressList);
-    }
-
-    private static String getNetmaskStringFrom(int prefix) {
-        if (prefix >= 1 && prefix <= 32) {
-            int mask = ~((1 << 32 - prefix) - 1);
-            return dottedQuad(mask);
-        } else {
-            throw new IllegalArgumentException("prefix is invalid: " + Integer.toString(prefix));
+            NetworkInterfaceIpAddress<IP4Address> address = new NetworkInterfaceIpAddress<>(
+                    (IP4Address) IPAddress.parseHostAddress(addressStr), prefix.shortValue());
+            ip4AddressStatus.addAddress(address);
         }
     }
 
-    private static String dottedQuad(int ip) {
-        String[] items = new String[4];
-        for (int i = 3; i >= 0; i--) {
-            int value = ip & 0xFF;
-            items[i] = Integer.toString(value);
-            ip = ip >>> 8;
+    private static void setIP4DnsServers(Properties ip4configProperties,
+            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+        List<Map<String, Variant<?>>> nameserverData = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME,
+                "NameserverData");
+        for (Map<String, Variant<?>> dns : nameserverData) {
+            ip4AddressStatus
+                    .addDnsServerAddress(
+                            (IP4Address) IPAddress.parseHostAddress(String.class.cast(dns.get("address").getValue())));
         }
+    }
 
-        return String.join(".", items);
+    private static void setIP4Gateway(Properties ip4configProperties,
+            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+        String gateway = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
+        ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
     }
 
     private static byte[] getMacAddressBytes(String macAddress) {
@@ -174,22 +152,22 @@ public class NMStatusConverter {
         return macAddressBytes;
     }
 
-    private static EnumMap<NMDeviceState, NetInterfaceState> initDeviceStateConverter() {
-        EnumMap<NMDeviceState, NetInterfaceState> map = new EnumMap<>(NMDeviceState.class);
+    private static EnumMap<NMDeviceState, NetworkInterfaceState> initDeviceStateConverter() {
+        EnumMap<NMDeviceState, NetworkInterfaceState> map = new EnumMap<>(NMDeviceState.class);
 
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNKNOWN, NetInterfaceState.UNKNOWN);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNMANAGED, NetInterfaceState.UNMANAGED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE, NetInterfaceState.UNAVAILABLE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NetInterfaceState.DISCONNECTED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_PREPARE, NetInterfaceState.PREPARE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_CONFIG, NetInterfaceState.CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH, NetInterfaceState.NEED_AUTH);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NetInterfaceState.IP_CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CHECK, NetInterfaceState.IP_CHECK);
-        map.put(NMDeviceState.NM_DEVICE_STATE_SECONDARIES, NetInterfaceState.SECONDARIES);
-        map.put(NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NetInterfaceState.ACTIVATED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING, NetInterfaceState.DEACTIVATING);
-        map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetInterfaceState.FAILED);
+        map.put(NMDeviceState.NM_DEVICE_STATE_UNKNOWN, NetworkInterfaceState.UNKNOWN);
+        map.put(NMDeviceState.NM_DEVICE_STATE_UNMANAGED, NetworkInterfaceState.UNMANAGED);
+        map.put(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE, NetworkInterfaceState.UNAVAILABLE);
+        map.put(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NetworkInterfaceState.DISCONNECTED);
+        map.put(NMDeviceState.NM_DEVICE_STATE_PREPARE, NetworkInterfaceState.PREPARE);
+        map.put(NMDeviceState.NM_DEVICE_STATE_CONFIG, NetworkInterfaceState.CONFIG);
+        map.put(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH, NetworkInterfaceState.NEED_AUTH);
+        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NetworkInterfaceState.IP_CONFIG);
+        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CHECK, NetworkInterfaceState.IP_CHECK);
+        map.put(NMDeviceState.NM_DEVICE_STATE_SECONDARIES, NetworkInterfaceState.SECONDARIES);
+        map.put(NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NetworkInterfaceState.ACTIVATED);
+        map.put(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING, NetworkInterfaceState.DEACTIVATING);
+        map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetworkInterfaceState.FAILED);
 
         return map;
     }

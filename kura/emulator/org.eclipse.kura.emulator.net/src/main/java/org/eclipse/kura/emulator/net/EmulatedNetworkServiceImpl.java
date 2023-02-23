@@ -32,6 +32,7 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.NetworkState;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -360,6 +361,11 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public Optional<ModemDevice> getModemDevice(String usbPath) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UsbNetDevice> getUsbNetDevice(String interfaceName) {
         return Optional.empty();
     }
 }

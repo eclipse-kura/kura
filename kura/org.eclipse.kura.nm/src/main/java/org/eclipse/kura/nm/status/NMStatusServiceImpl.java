@@ -15,12 +15,14 @@ package org.eclipse.kura.nm.status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +31,30 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusServiceImpl.class);
 
     private NMDbusConnector nmDbusConnector;
+    private NetworkService networkService;
 
-    public void activate() throws DBusException {
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
+    }
+
+    public NMStatusServiceImpl() {
+        try {
+            this.nmDbusConnector = NMDbusConnector.getInstance();
+        } catch (DBusExecutionException | DBusException e) {
+            logger.error("Cannot initialize NMDbusConnector due to: ", e);
+        }
+    }
+
+    public NMStatusServiceImpl(NMDbusConnector nmDbusConnector) {
+        this.nmDbusConnector = Objects.requireNonNull(nmDbusConnector);
+    }
+
+    public void activate() {
         logger.debug("Activate NMStatusService...");
-        this.nmDbusConnector = NMDbusConnector.getInstance();
     }
 
     public void update() {
-        logger.info("Update TritonServerService...");
+        logger.info("Update NMStatusService...");
     }
 
     public void deactivate() {
@@ -45,29 +63,30 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public List<NetInterface<NetInterfaceAddress>> getNetworkStatus() {
+    public List<NetworkInterfaceStatus> getNetworkStatus() {
         List<String> availableInterfaces = getInterfaceNames();
 
-        List<NetInterface<NetInterfaceAddress>> interfaceStatuses = new ArrayList<>();
+        List<NetworkInterfaceStatus> interfaceStatuses = new ArrayList<>();
         for (String iface : availableInterfaces) {
-            NetInterface<NetInterfaceAddress> status = getNetworkStatus(iface);
-            if (Objects.nonNull(status)) {
-                interfaceStatuses.add(status);
-            }
+            getNetworkStatus(iface).ifPresent(interfaceStatuses::add);
         }
 
         return interfaceStatuses;
     }
 
     @Override
-    public NetInterface<NetInterfaceAddress> getNetworkStatus(String interfaceName) {
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName) {
+        Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            return this.nmDbusConnector.getInterfaceStatus(interfaceName);
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService);
+            if (Objects.nonNull(status)) {
+                networkInterfaceStatus = Optional.of(status);
+            }
         } catch (DBusException e) {
             logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
         }
 
-        return null;
+        return networkInterfaceStatus;
     }
 
     @Override

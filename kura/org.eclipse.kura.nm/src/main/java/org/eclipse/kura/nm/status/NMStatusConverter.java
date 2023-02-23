@@ -99,7 +99,7 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
-        // TODO
+        setWifiStatus(builder, wirelessDeviceProperties, activeAccessPoint, accessPoints);
 
         return builder.build();
     }
@@ -130,6 +130,13 @@ public class NMStatusConverter {
                 logger.error("Failed to set IP4 address.", e);
             }
         });
+    }
+
+    private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Properties wirelessDeviceProperties,
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
+        // TODO Auto-generated method stub
+        // builder.with*
+
     }
 
     private static void setIP4Addresses(Properties ip4configProperties,

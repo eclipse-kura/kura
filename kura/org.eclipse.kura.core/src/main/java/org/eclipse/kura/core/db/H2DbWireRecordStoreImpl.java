@@ -55,7 +55,7 @@ public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
                         + super.escapedTableName + " ORDER BY ID ASC LIMIT {0});")
                 .withSqlDropColumn("ALTER TABLE " + super.escapedTableName + " DROP COLUMN {0};")
                 .withSqlInsertRecord("INSERT INTO " + super.escapedTableName + " ({0}) VALUES ({1});")
-                .withSqlTruncateTable("TRUNCATE TABLE \" + sanitizedTableName + \";")
+                .withSqlTruncateTable("TRUNCATE TABLE " + super.escapedTableName + ";")
                 .withSqlCreateTimestampIndex(
                         "CREATE INDEX IF NOT EXISTS " + super.escapeIdentifier(tableName + "_TIMESTAMP")
                                 + " ON " + super.escapedTableName + " (TIMESTAMP DESC);")

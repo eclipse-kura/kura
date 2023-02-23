@@ -174,7 +174,17 @@ public class NMStatusConverter {
             }
         }
 
-        // builder.withAvailableWifiAccessPoints
+        builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));
+    }
+
+    private static List<WifiAccessPoint> wifiAccessPointConvert(List<Properties> nmAccessPoints) {
+        List<WifiAccessPoint> kuraAccessPoints = new ArrayList<>();
+
+        for (Properties prop : nmAccessPoints) {
+            kuraAccessPoints.add(wifiAccessPointConvert(prop));
+        }
+
+        return kuraAccessPoints;
     }
 
     private static WifiAccessPoint wifiAccessPointConvert(Properties nmAccessPoint) {

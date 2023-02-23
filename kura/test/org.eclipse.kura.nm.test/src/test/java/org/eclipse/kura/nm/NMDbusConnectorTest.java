@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
@@ -24,10 +25,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -56,7 +63,8 @@ public class NMDbusConnectorTest {
     Boolean hasNoSuchElementExceptionThrown = false;
     Boolean hasNullPointerExceptionThrown = false;
     
-    NetInterface<NetInterfaceAddress> netInterface;
+    NetworkInterfaceStatus netInterface;
+    NetworkService networkService;
     
     Map<String, Device> mockDevices = new HashMap<>();
 
@@ -92,15 +100,6 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
 
         thenGetDbusConnectionIsMockedConnection();
-    }
-
-    @Test
-    public void closeConnectionShouldWork() throws DBusException {
-        whenCloseConnectionIsRun();
-
-        thenNoExceptionIsThrown();
-
-        thenConnectionClosed();
     }
 
     @Test
@@ -250,12 +249,14 @@ public class NMDbusConnectorTest {
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenExtraStatusMocksFor("eth0", NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
+        givenNetworkServiceThatAlwaysReturnsEmpty();
+        
 
-        whenGetInterfaceStatus("eth0");
+        whenGetInterfaceStatus("eth0", networkService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
-        thenNetInterfaceTypeIs(NetInterfaceType.ETHERNET);
+        thenNetInterfaceTypeIs(NetworkInterfaceType.ETHERNET);
     }
     
     @Test
@@ -263,12 +264,13 @@ public class NMDbusConnectorTest {
         givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("lo", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
+        givenNetworkServiceThatAlwaysReturnsEmpty();
         
-        whenGetInterfaceStatus("lo");
+        whenGetInterfaceStatus("lo", networkService);
         
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
-        thenNetInterfaceTypeIs(NetInterfaceType.LOOPBACK);
+        thenNetInterfaceTypeIs(NetworkInterfaceType.LOOPBACK);
     }
     
     @Test
@@ -276,8 +278,9 @@ public class NMDbusConnectorTest {
         givenMockedDevice("unused0", NMDeviceType.NM_DEVICE_TYPE_UNUSED1, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("unused0", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
+        givenNetworkServiceThatAlwaysReturnsEmpty();
         
-        whenGetInterfaceStatus("unused0");
+        whenGetInterfaceStatus("unused0", networkService);
         
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNull();
@@ -288,11 +291,27 @@ public class NMDbusConnectorTest {
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("wlan0", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
+        givenNetworkServiceThatAlwaysReturnsEmpty();
         
-        whenGetInterfaceStatus("wlan0");
+        whenGetInterfaceStatus("wlan0", networkService);
         
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNull();
+    }
+    
+    @Test
+    public void getInterfaceStatusShouldWorkEthernetUSB() throws DBusException {
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenExtraStatusMocksFor("eth0", NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        givenMockedDeviceList();
+        givenNetworkServiceMockedForUsbInterfaceWithName("eth0");
+        
+
+        whenGetInterfaceStatus("eth0", networkService);
+
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNotNull();
+        thenNetInterfaceTypeIs(NetworkInterfaceType.ETHERNET);
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException {
@@ -411,13 +430,22 @@ public class NMDbusConnectorTest {
     public void givenNetworkConfigMapWith(String key, Object value) {
         netConfig.put(key, value);
     }
+    
+    public void givenNetworkServiceMockedForUsbInterfaceWithName(String interfaceName) {
+        this.networkService = mock(NetworkService.class);
+        
+        UsbNetDevice mockUsbNetDevice = mock(UsbNetDevice.class, RETURNS_DEEP_STUBS);
+        
+        when(this.networkService.getUsbNetDevice(interfaceName)).thenReturn(Optional.of(mockUsbNetDevice));
+    }
+    
+    public void givenNetworkServiceThatAlwaysReturnsEmpty() {
+        this.networkService = mock(NetworkService.class);
+        when(this.networkService.getUsbNetDevice(any())).thenReturn(Optional.empty());
+    }
 
     public void whenGetDbusConnectionIsRun() {
         this.dbusConnectionInternal = this.instanceNMDbusConnector.getDbusConnection();
-    }
-
-    public void whenCloseConnectionIsRun() {
-        this.instanceNMDbusConnector.closeConnection();
     }
 
     public void whenCheckPermissionsIsRun() {
@@ -463,9 +491,9 @@ public class NMDbusConnectorTest {
         }
     }
     
-    public void whenGetInterfaceStatus(String netInterface) {
+    public void whenGetInterfaceStatus(String netInterface, NetworkService netService) {
         try {
-            this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface);
+            this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface, netService);
         } catch (DBusException e) {
             e.printStackTrace();
             hasDBusExceptionBeenThrown = true;
@@ -540,7 +568,7 @@ public class NMDbusConnectorTest {
         assertNotNull(this.netInterface);
     }
     
-    public void thenNetInterfaceTypeIs(NetInterfaceType type) {
+    public void thenNetInterfaceTypeIs(NetworkInterfaceType type) {
       assertEquals(type, this.netInterface.getType());   
     }
  

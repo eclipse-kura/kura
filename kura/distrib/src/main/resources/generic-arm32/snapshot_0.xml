@@ -53,9 +53,6 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlan0.config.wifi.master.pairwiseCiphers" type="String">
                 <esf:value>CCMP</esf:value>
             </esf:property>
-            <esf:property name="net.interface.lo.config.ip4.prefix" array="false" encrypted="false" type="Short">
-                <esf:value>8</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledWAN</esf:value>
             </esf:property>
@@ -113,9 +110,6 @@
             <esf:property name="net.interface.eth0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
             </esf:property>
-            <esf:property name="net.interface.lo.config.ip4.address" array="false" encrypted="false" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
@@ -134,14 +128,8 @@
             <esf:property name="net.interface.wlan0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
                 <esf:value>172.16.1.110</esf:value>
             </esf:property>
-            <esf:property name="net.interface.lo.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.ip4.gateway" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
             <esf:property name="net.interface.lo.config.ip4.status" array="false" encrypted="false" type="String">
-                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+                <esf:value>netIPv4StatusUnmanaged</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
@@ -154,9 +142,6 @@
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.master.channel" array="false" encrypted="false" type="String">
                 <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.ip4.dnsServers" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>

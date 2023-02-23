@@ -81,7 +81,7 @@ public class NMDbusConnectorTest {
     public void getDbusConnectionShouldWork() throws DBusException {
         whenGetDbusConnectionIsRun();
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
 
         thenGetDbusConnectionIsMockedConnection();
     }
@@ -90,9 +90,9 @@ public class NMDbusConnectorTest {
     public void closeConnectionShouldWork() throws DBusException {
         whenCloseConnectionIsRun();
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
 
-        thenVerifyConnectionClosed();
+        thenConnectionClosed();
     }
 
     @Test
@@ -101,8 +101,8 @@ public class NMDbusConnectorTest {
 
         whenCheckPermissionsIsRun();
 
-        thenVerifyNoExceptionIsThrown();
-        thenVerifyCheckPermissionsRan();
+        thenNoExceptionIsThrown();
+        thenCheckPermissionsRan();
     }
 
     @Test
@@ -111,8 +111,8 @@ public class NMDbusConnectorTest {
 
         whenCheckVersionIsRun();
 
-        thenVerifyNoExceptionIsThrown();
-        thenVerifyCheckVersionIsRun();
+        thenNoExceptionIsThrown();
+        thenCheckVersionIsRun();
     }
 
     @Test
@@ -123,7 +123,7 @@ public class NMDbusConnectorTest {
         
         whenGetInterfaces();
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
         thenReturnedDevicesAre(Arrays.asList("wlan0", "eth0"));
     }
 
@@ -135,7 +135,7 @@ public class NMDbusConnectorTest {
         
         whenApply();
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
         thenNetoworkSettingsDoNotChangeForDevice("eth0");
         thenNetoworkSettingsDoNotChangeForDevice("wlan0");
     }
@@ -159,7 +159,7 @@ public class NMDbusConnectorTest {
         
         whenApplyIsCalledWith(new HashMap<String, Object>());
 
-        thenVerifyNoSuchElementExceptionIsThrown();
+        thenNoSuchElementExceptionIsThrown();
     }
 
     @Test
@@ -173,7 +173,7 @@ public class NMDbusConnectorTest {
 
         whenApplyIsCalledWith(netConfig);
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
         thenNetoworkSettingsDoNotChangeForDevice("unused0");
     }
 
@@ -191,7 +191,7 @@ public class NMDbusConnectorTest {
 
         whenApplyIsCalledWith(this.netConfig);
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
         thenConnectDisconnectIsCalledFor("eth0");
     }
 
@@ -205,8 +205,8 @@ public class NMDbusConnectorTest {
 
         whenApplyIsCalledWith(this.netConfig);
 
-        thenVerifyNoExceptionIsThrown();
-        thenVerifyDisconnectIsCalledFor("eth0");
+        thenNoExceptionIsThrown();
+        thenDisconnectIsCalledFor("eth0");
     }
 
     @Test
@@ -217,7 +217,7 @@ public class NMDbusConnectorTest {
 
         whenApplyIsCalledWith(this.netConfig);
 
-        thenVerifyNoExceptionIsThrown();
+        thenNoExceptionIsThrown();
         thenNetoworkSettingsDoNotChangeForDevice("lo");
     }
 
@@ -369,12 +369,12 @@ public class NMDbusConnectorTest {
         }
     }
 
-    public void thenVerifyNoExceptionIsThrown() {
+    public void thenNoExceptionIsThrown() {
         assertFalse(hasDBusExceptionBeenThrown);
         assertFalse(hasNoSuchElementExceptionThrown);
     }
 
-    public void thenVerifyDBusExceptionIsThrown() {
+    public void thenDBusExceptionIsThrown() {
         assertTrue(hasDBusExceptionBeenThrown);
     }
 
@@ -382,7 +382,7 @@ public class NMDbusConnectorTest {
         assertTrue(hasNullPointerExceptionThrown);
     }
 
-    public void thenVerifyNoSuchElementExceptionIsThrown() {
+    public void thenNoSuchElementExceptionIsThrown() {
         assertTrue(hasNoSuchElementExceptionThrown);
     }
 
@@ -390,16 +390,16 @@ public class NMDbusConnectorTest {
         assertEquals(this.dbusConnection, this.dbusConnectionInternal);
     }
 
-    public void thenVerifyConnectionClosed() {
+    public void thenConnectionClosed() {
         verify(this.dbusConnection, atLeastOnce()).disconnect();
     }
 
-    public void thenVerifyCheckVersionIsRun() throws DBusException {
+    public void thenCheckVersionIsRun() throws DBusException {
         verify(this.dbusConnection, atLeastOnce()).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                 eq("/org/freedesktop/NetworkManager"), any());
     }
 
-    public void thenVerifyCheckPermissionsRan() {
+    public void thenCheckPermissionsRan() {
         verify(this.mockedNetworkManager, atLeastOnce()).GetPermissions();
     }
 
@@ -407,7 +407,7 @@ public class NMDbusConnectorTest {
         assertEquals(list, this.internalStringList);
     }
     
-    public void thenVerifyDisconnectIsCalledFor(String netInterface) {
+    public void thenDisconnectIsCalledFor(String netInterface) {
         verify(this.mockDevices.get(netInterface)).Disconnect();
     }
     

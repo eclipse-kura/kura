@@ -74,7 +74,7 @@ public enum NMDeviceState {
         }
     }
 
-    public static UInt32 fromUInt32(NMDeviceState state) {
+    public static UInt32 toUInt32(NMDeviceState state) {
         switch (state) {
         case NM_DEVICE_STATE_UNMANAGED:
             return new UInt32(10);

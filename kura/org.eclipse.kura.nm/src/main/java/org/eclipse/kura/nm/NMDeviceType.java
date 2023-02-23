@@ -122,7 +122,7 @@ public enum NMDeviceType {
         }
     }
 
-    public static UInt32 fromUInt32(NMDeviceType type) {
+    public static UInt32 toUInt32(NMDeviceType type) {
         switch (type) {
         case NM_DEVICE_TYPE_GENERIC:
             return new UInt32(14);

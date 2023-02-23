@@ -8,7 +8,7 @@ Depends: openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temu
  iptables,
  chrony, ntpdate, cron,
  telnet, dos2unix, unzip
-Recommends: pi-bluetooth, rpi.gpio-common, python3 | python
+Recommends: python3 | python
 Architecture: all
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer

@@ -64,14 +64,6 @@ if len(ethernet_inteface_names) < 1:
 
 print('Found wireless interfaces: ', wireless_inteface_names)
 
-#with open('/tmp/eth0', 'wb') as tmp_file:
-#    #tmp_file.write(ethernet_inteface_names[0])
-#    print(ethernet_inteface_names[0] + ' written to /tmp/eth0')
-
-#with open('/tmp/wlan0', 'wb') as tmp_file:
-#    #tmp_file.write(wireless_inteface_names[0])
-#    print(wireless_inteface_names[0] + ' written to /tmp/wlan0')
-
 for path in file_paths_to_edit:
     with open(path, 'r+') as file_to_edit:
         print('Editing file ' + path)

@@ -580,7 +580,7 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/patch_sysctl.sh"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/find-net-Interfaces.py"
+            <zipfileset file="src/main/resources/common/find-net-interfaces.py"
                 prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset file="src/main/resources/common/named/named.conf"

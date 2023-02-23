@@ -13,6 +13,7 @@
 package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,10 +32,14 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
+import org.eclipse.kura.net.status.wifi.WifiSecurity;
+import org.eclipse.kura.nm.NM80211ApSecurityFlags;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
@@ -51,6 +56,7 @@ public class NMStatusConverter {
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
+    private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
     private NMStatusConverter() {
@@ -143,17 +149,112 @@ public class NMStatusConverter {
         builder.withMode(wifiModeConvert(mode));
 
         List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
-                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Capabilities"));
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
         builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
 
-        // builder.withCapabilities
         // builder.withSupportedBitrates
+
         // builder.withSupportedRadioModes
         // builder.withSupportedChannels
         // builder.withSupportedFrequencies
         // builder.withCountryCode
-        // builder.withActiveWifiAccessPoint
+
+        if (mode == NM80211Mode.NM_802_11_MODE_AP) {
+            if (!activeAccessPoint.isPresent()) {
+                logger.warn("No access point found for interface in MASTER mode.");
+                return;
+            }
+            // Only one AP should be available in MASTER mode
+            WifiAccessPoint ap = wifiAccessPointConvert(accessPoints.get(0));
+            builder.withActiveWifiAccessPoint(Optional.of(ap));
+        } else {
+            if (activeAccessPoint.isPresent()) {
+                WifiAccessPoint ap = wifiAccessPointConvert(activeAccessPoint.get());
+                builder.withActiveWifiAccessPoint(Optional.of(ap));
+            }
+        }
+
         // builder.withAvailableWifiAccessPoints
+    }
+
+    private static WifiAccessPoint wifiAccessPointConvert(Properties nmAccessPoint) {
+        WifiAccessPointBuilder builder = WifiAccessPoint.builder();
+
+        byte[] rawSsid = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Ssid");
+        String ssid = new String(rawSsid, StandardCharsets.UTF_8);
+        builder.withSsid(ssid);
+
+        NM80211Mode mode = NM80211Mode.fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Mode"));
+        builder.withMode(wifiModeConvert(mode));
+
+        String rawHwAddress = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "HwAddress");
+        builder.withHardwareAddress(getMacAddressBytes(rawHwAddress));
+
+        UInt32 frequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
+        builder.withFrequency(frequency.longValue());
+
+        UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
+        builder.withMaxBitrate(maxBitrate.longValue());
+
+        Byte strength = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
+        builder.withSignalQuality(strength.intValue());
+
+        List<NM80211ApSecurityFlags> wpaSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "WpaFlags"));
+        builder.withWpaSecurity(wifiSecurityFlagConvert(wpaSecurityFlags));
+
+        List<NM80211ApSecurityFlags> rsnSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "RsnFlags"));
+        builder.withRsnSecurity(wifiSecurityFlagConvert(rsnSecurityFlags));
+
+        return builder.build();
+    }
+
+    private static Set<WifiSecurity> wifiSecurityFlagConvert(List<NM80211ApSecurityFlags> nmSecurityFlags) {
+        List<WifiSecurity> kuraSecurityFlags = new ArrayList<>();
+
+        for (NM80211ApSecurityFlags nmFlag : nmSecurityFlags) {
+            kuraSecurityFlags.add(wifiSecurityFlagConvert(nmFlag));
+        }
+
+        return new HashSet<>(kuraSecurityFlags);
+    }
+
+    private static WifiSecurity wifiSecurityFlagConvert(NM80211ApSecurityFlags nmFlag) {
+        switch (nmFlag) {
+        case NM_802_11_AP_SEC_NONE:
+            return WifiSecurity.NONE;
+        case NM_802_11_AP_SEC_PAIR_WEP40:
+            return WifiSecurity.PAIR_WEP40;
+        case NM_802_11_AP_SEC_PAIR_WEP104:
+            return WifiSecurity.PAIR_WEP104;
+        case NM_802_11_AP_SEC_PAIR_TKIP:
+            return WifiSecurity.PAIR_TKIP;
+        case NM_802_11_AP_SEC_PAIR_CCMP:
+            return WifiSecurity.PAIR_CCMP;
+        case NM_802_11_AP_SEC_GROUP_WEP40:
+            return WifiSecurity.GROUP_WEP40;
+        case NM_802_11_AP_SEC_GROUP_WEP104:
+            return WifiSecurity.GROUP_WEP104;
+        case NM_802_11_AP_SEC_GROUP_TKIP:
+            return WifiSecurity.GROUP_TKIP;
+        case NM_802_11_AP_SEC_GROUP_CCMP:
+            return WifiSecurity.GROUP_CCMP;
+        case NM_802_11_AP_SEC_KEY_MGMT_PSK:
+            return WifiSecurity.KEY_MGMT_PSK;
+        case NM_802_11_AP_SEC_KEY_MGMT_802_1X:
+            return WifiSecurity.KEY_MGMT_802_1X;
+        case NM_802_11_AP_SEC_KEY_MGMT_SAE:
+            return WifiSecurity.KEY_MGMT_SAE;
+        case NM_802_11_AP_SEC_KEY_MGMT_OWE:
+            return WifiSecurity.KEY_MGMT_OWE;
+        case NM_802_11_AP_SEC_KEY_MGMT_OWE_TM:
+            return WifiSecurity.KEY_MGMT_OWE_TM;
+        case NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192:
+            return WifiSecurity.KEY_MGMT_EAP_SUITE_B_192;
+        default:
+            throw new IllegalArgumentException(String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
+        }
     }
 
     private static Set<WifiCapability> wifiCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {

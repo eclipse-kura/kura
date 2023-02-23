@@ -183,7 +183,7 @@ public class NMDbusConnector {
             }
 
             return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
-                    wirelessDeviceProperties, activeAccessPoint, accessPoints);
+                    wirelessDeviceProperties, activeAccessPoint, accessPoints, usbNetDevice);
         }
 
         return null;

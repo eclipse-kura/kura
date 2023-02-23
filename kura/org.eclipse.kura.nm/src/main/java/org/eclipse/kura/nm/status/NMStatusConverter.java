@@ -87,13 +87,16 @@ public class NMStatusConverter {
 
     public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, Properties deviceProperties,
             Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
-            Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints,
+            Optional<UsbNetDevice> usbNetDevice) {
         logger.info("Building interface status for {}", interfaceName);
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
         builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+
+        builder.withUsbNetDevice(usbNetDevice);
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);

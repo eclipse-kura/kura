@@ -13,9 +13,12 @@
 package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
@@ -28,11 +31,13 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiCapability;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
+import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
@@ -136,6 +141,62 @@ public class NMStatusConverter {
             Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
         NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
         builder.withMode(wifiModeConvert(mode));
+
+        List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Capabilities"));
+        builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
+
+        // builder.withCapabilities
+        // builder.withSupportedBitrates
+        // builder.withSupportedRadioModes
+        // builder.withSupportedChannels
+        // builder.withSupportedFrequencies
+        // builder.withCountryCode
+        // builder.withActiveWifiAccessPoint
+        // builder.withAvailableWifiAccessPoints
+    }
+
+    private static Set<WifiCapability> wifiCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {
+        List<WifiCapability> kuraCapabilities = new ArrayList<>();
+
+        for (NMDeviceWifiCapabilities nmCapability : nmCapabilities) {
+            kuraCapabilities.add(wifiCapabilitiesConvert(nmCapability));
+        }
+
+        return new HashSet<>(kuraCapabilities);
+
+    }
+
+    private static WifiCapability wifiCapabilitiesConvert(NMDeviceWifiCapabilities nmCapability) {
+        switch (nmCapability) {
+        case NM_WIFI_DEVICE_CAP_NONE:
+            return WifiCapability.NONE;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP40:
+            return WifiCapability.CIPHER_WEP40;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP104:
+            return WifiCapability.CIPHER_WEP104;
+        case NM_WIFI_DEVICE_CAP_CIPHER_TKIP:
+            return WifiCapability.CIPHER_TKIP;
+        case NM_WIFI_DEVICE_CAP_CIPHER_CCMP:
+            return WifiCapability.CIPHER_CCMP;
+        case NM_WIFI_DEVICE_CAP_WPA:
+            return WifiCapability.WPA;
+        case NM_WIFI_DEVICE_CAP_RSN:
+            return WifiCapability.RSN;
+        case NM_WIFI_DEVICE_CAP_AP:
+            return WifiCapability.AP;
+        case NM_WIFI_DEVICE_CAP_ADHOC:
+            return WifiCapability.ADHOC;
+        case NM_WIFI_DEVICE_CAP_FREQ_VALID:
+            return WifiCapability.FREQ_VALID;
+        case NM_WIFI_DEVICE_CAP_FREQ_2GHZ:
+            return WifiCapability.FREQ_2GHZ;
+        case NM_WIFI_DEVICE_CAP_FREQ_5GHZ:
+            return WifiCapability.FREQ_5GHZ;
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Non convertible NMDeviceWifiCapabilities \"%s\"", nmCapability));
+        }
     }
 
     private static void setIP4Addresses(Properties ip4configProperties,

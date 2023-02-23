@@ -89,7 +89,6 @@ public class NMStatusConverter {
             Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
             Optional<Properties> activeAccessPoint, List<Properties> accessPoints,
             Optional<UsbNetDevice> usbNetDevice) {
-        logger.info("Building interface status for {}", interfaceName);
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 

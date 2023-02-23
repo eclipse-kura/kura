@@ -13,7 +13,6 @@
 package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,8 +48,6 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
-    private static final EnumMap<NMDeviceState, NetworkInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
-
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -62,7 +59,7 @@ public class NMStatusConverter {
         builder.withName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        builder.withState(deviceStateConvert(deviceState));
         builder.withIsLinkUp(NMDeviceState.isConnected(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
@@ -80,7 +77,7 @@ public class NMStatusConverter {
         builder.withName(interfaceName).withVirtual(true);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        builder.withState(deviceStateConvert(deviceState));
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
@@ -96,7 +93,7 @@ public class NMStatusConverter {
         builder.withName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        builder.withState(deviceStateConvert(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
 
@@ -141,22 +138,6 @@ public class NMStatusConverter {
         builder.withMode(wifiModeConvert(mode));
     }
 
-    private static WifiMode wifiModeConvert(NM80211Mode mode) {
-        switch (mode) {
-        case NM_802_11_MODE_ADHOC:
-            return WifiMode.ADHOC;
-        case NM_802_11_MODE_INFRA:
-            return WifiMode.INFRA;
-        case NM_802_11_MODE_AP:
-            return WifiMode.MASTER;
-        case NM_802_11_MODE_MESH:
-            return WifiMode.MESH;
-        case NM_802_11_MODE_UNKNOWN:
-        default:
-            return WifiMode.UNKNOWN;
-        }
-    }
-
     private static void setIP4Addresses(Properties ip4configProperties,
             NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
         List<Map<String, Variant<?>>> addressData = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
@@ -198,24 +179,52 @@ public class NMStatusConverter {
         return macAddressBytes;
     }
 
-    private static EnumMap<NMDeviceState, NetworkInterfaceState> initDeviceStateConverter() {
-        EnumMap<NMDeviceState, NetworkInterfaceState> map = new EnumMap<>(NMDeviceState.class);
+    private static WifiMode wifiModeConvert(NM80211Mode mode) {
+        switch (mode) {
+        case NM_802_11_MODE_ADHOC:
+            return WifiMode.ADHOC;
+        case NM_802_11_MODE_INFRA:
+            return WifiMode.INFRA;
+        case NM_802_11_MODE_AP:
+            return WifiMode.MASTER;
+        case NM_802_11_MODE_MESH:
+            return WifiMode.MESH;
+        case NM_802_11_MODE_UNKNOWN:
+        default:
+            return WifiMode.UNKNOWN;
+        }
+    }
 
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNKNOWN, NetworkInterfaceState.UNKNOWN);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNMANAGED, NetworkInterfaceState.UNMANAGED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE, NetworkInterfaceState.UNAVAILABLE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NetworkInterfaceState.DISCONNECTED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_PREPARE, NetworkInterfaceState.PREPARE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_CONFIG, NetworkInterfaceState.CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH, NetworkInterfaceState.NEED_AUTH);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NetworkInterfaceState.IP_CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CHECK, NetworkInterfaceState.IP_CHECK);
-        map.put(NMDeviceState.NM_DEVICE_STATE_SECONDARIES, NetworkInterfaceState.SECONDARIES);
-        map.put(NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NetworkInterfaceState.ACTIVATED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING, NetworkInterfaceState.DEACTIVATING);
-        map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetworkInterfaceState.FAILED);
-
-        return map;
+    private static NetworkInterfaceState deviceStateConvert(NMDeviceState state) {
+        switch (state) {
+        case NM_DEVICE_STATE_UNMANAGED:
+            return NetworkInterfaceState.UNMANAGED;
+        case NM_DEVICE_STATE_UNAVAILABLE:
+            return NetworkInterfaceState.UNAVAILABLE;
+        case NM_DEVICE_STATE_DISCONNECTED:
+            return NetworkInterfaceState.DISCONNECTED;
+        case NM_DEVICE_STATE_PREPARE:
+            return NetworkInterfaceState.PREPARE;
+        case NM_DEVICE_STATE_CONFIG:
+            return NetworkInterfaceState.CONFIG;
+        case NM_DEVICE_STATE_NEED_AUTH:
+            return NetworkInterfaceState.NEED_AUTH;
+        case NM_DEVICE_STATE_IP_CONFIG:
+            return NetworkInterfaceState.IP_CONFIG;
+        case NM_DEVICE_STATE_IP_CHECK:
+            return NetworkInterfaceState.IP_CHECK;
+        case NM_DEVICE_STATE_SECONDARIES:
+            return NetworkInterfaceState.SECONDARIES;
+        case NM_DEVICE_STATE_ACTIVATED:
+            return NetworkInterfaceState.ACTIVATED;
+        case NM_DEVICE_STATE_DEACTIVATING:
+            return NetworkInterfaceState.DEACTIVATING;
+        case NM_DEVICE_STATE_FAILED:
+            return NetworkInterfaceState.FAILED;
+        case NM_DEVICE_STATE_UNKNOWN:
+        default:
+            return NetworkInterfaceState.UNKNOWN;
+        }
     }
 
 }

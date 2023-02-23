@@ -202,6 +202,7 @@ public class NMStatusConverter {
 
         UInt32 frequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
         builder.withFrequency(frequency.longValue());
+        builder.withChannel(channelFrequencyConvert(frequency));
 
         UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
         builder.withMaxBitrate(maxBitrate.longValue());
@@ -218,6 +219,30 @@ public class NMStatusConverter {
         builder.withRsnSecurity(wifiSecurityFlagConvert(rsnSecurityFlags));
 
         return builder.build();
+    }
+
+    private static int channelFrequencyConvert(UInt32 frequency) {
+        int fMHz = frequency.intValue();
+
+        /* see 802.11 17.3.8.3.2 and Annex J */
+        if (fMHz == 2484) {
+            return 14;
+        } else if (fMHz < 2484) {
+            return (fMHz - 2407) / 5;
+        } else if (fMHz >= 4910 && fMHz <= 4980) {
+            return (fMHz - 4000) / 5;
+        } else if (fMHz < 5925) {
+            return (fMHz - 5000) / 5;
+        } else if (fMHz == 5935) {
+            return 2;
+        } else if (fMHz <= 45000) { /* DMG band lower limit */
+            /* see 802.11ax D6.1 27.3.22.2 */
+            return (fMHz - 5950) / 5;
+        } else if (fMHz >= 58320 && fMHz <= 70200) {
+            return (fMHz - 56160) / 2160;
+        } else {
+            return 0;
+        }
     }
 
     private static Set<WifiSecurity> wifiSecurityFlagConvert(List<NM80211ApSecurityFlags> nmSecurityFlags) {

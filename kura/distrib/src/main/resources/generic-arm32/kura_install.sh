@@ -64,16 +64,15 @@ sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/f
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 # replace snapshot_0 and iptables.init with correct interface names
-if command -v python3 2>&1 /dev/null
+if python3 -V > /dev/null 2>&1
 then
     python3 ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/.data/snapshot_0.xml ${INSTALL_DIR}/kura/.data/iptables
-elif command -v python 2>&1 /dev/null
+elif python -V > /dev/null 2>&1
 then
     python ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/.data/snapshot_0.xml ${INSTALL_DIR}/kura/.data/iptables
 else
-    echo "python or python3 not found. ${INSTALL_DIR}/kura/.data/snapshot_0.xml and ${INSTALL_DIR}/kura/.data/iptables may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
+    echo "python/python3 not found. ${INSTALL_DIR}/kura/.data/snapshot_0.xml and ${INSTALL_DIR}/kura/.data/iptables may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
 fi
-
 
 # disable NTP service
 if command -v timedatectl > /dev/null ;

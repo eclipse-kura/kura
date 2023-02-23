@@ -49,7 +49,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
         this.nmDbusConnector = Objects.requireNonNull(nmDbusConnector);
     }
 
-    public void activate() throws DBusException {
+    public void activate() {
         logger.debug("Activate NMStatusService...");
     }
 

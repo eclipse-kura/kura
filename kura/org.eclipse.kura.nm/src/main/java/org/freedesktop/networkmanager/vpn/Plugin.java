@@ -30,17 +30,23 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "State", type = UInt32.class, access = Access.READ)
 public interface Plugin extends DBusInterface {
 
-
     public void Connect(Map<String, Map<String, Variant<?>>> connection);
-    public void ConnectInteractive(Map<String, Map<String, Variant<?>>> connection, Map<String, Variant<?>> details);
-    public String NeedSecrets(Map<String, Map<String, Variant<?>>> settings);
-    public void Disconnect();
-    public void SetConfig(Map<String, Variant<?>> config);
-    public void SetIp4Config(Map<String, Variant<?>> config);
-    public void SetIp6Config(Map<String, Variant<?>> config);
-    public void SetFailure(String reason);
-    public void NewSecrets(Map<String, Map<String, Variant<?>>> connection);
 
+    public void ConnectInteractive(Map<String, Map<String, Variant<?>>> connection, Map<String, Variant<?>> details);
+
+    public String NeedSecrets(Map<String, Map<String, Variant<?>>> settings);
+
+    public void Disconnect();
+
+    public void SetConfig(Map<String, Variant<?>> config);
+
+    public void SetIp4Config(Map<String, Variant<?>> config);
+
+    public void SetIp6Config(Map<String, Variant<?>> config);
+
+    public void SetFailure(String reason);
+
+    public void NewSecrets(Map<String, Map<String, Variant<?>>> connection);
 
     public static class StateChanged extends DBusSignal {
 
@@ -51,11 +57,9 @@ public interface Plugin extends DBusInterface {
             this.state = _state;
         }
 
-
         public UInt32 getState() {
             return state;
         }
-
 
     }
 
@@ -70,7 +74,6 @@ public interface Plugin extends DBusInterface {
             this.secrets = _secrets;
         }
 
-
         public String getMessage() {
             return message;
         }
@@ -78,7 +81,6 @@ public interface Plugin extends DBusInterface {
         public List<String> getSecrets() {
             return secrets;
         }
-
 
     }
 
@@ -91,11 +93,9 @@ public interface Plugin extends DBusInterface {
             this.config = _config;
         }
 
-
         public Map<String, Variant<?>> getConfig() {
             return config;
         }
-
 
     }
 
@@ -108,11 +108,9 @@ public interface Plugin extends DBusInterface {
             this.ip4config = _ip4config;
         }
 
-
         public Map<String, Variant<?>> getIp4config() {
             return ip4config;
         }
-
 
     }
 
@@ -125,11 +123,9 @@ public interface Plugin extends DBusInterface {
             this.ip6config = _ip6config;
         }
 
-
         public Map<String, Variant<?>> getIp6config() {
             return ip6config;
         }
-
 
     }
 
@@ -142,11 +138,9 @@ public interface Plugin extends DBusInterface {
             this.banner = _banner;
         }
 
-
         public String getBanner() {
             return banner;
         }
-
 
     }
 
@@ -159,11 +153,9 @@ public interface Plugin extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public UInt32 getReason() {
             return reason;
         }
-
 
     }
 }

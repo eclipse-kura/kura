@@ -36,13 +36,15 @@ public abstract class IPAddress {
 
     /**
      * Returns an InetAddress object given the raw IP address.
-     * The argument is in network byte order: the highest order byte of the address is in getAddress()[0].
+     * The argument is in network byte order: the highest order byte of the address
+     * is in getAddress()[0].
      * This method doesn't block, i.e. no reverse name service lookup is performed.
      * <br>
-     * IPv4 address byte array must be 4 bytes long and IPv6 byte array must be 16 bytes long
+     * IPv4 address byte array must be 4 bytes long and IPv6 byte array must be 16
+     * bytes long
      *
      * @param addr
-     *            - the raw IP address in network byte order
+     *             - the raw IP address in network byte order
      * @return an InetAddress object created from the raw IP address.
      */
     public static IPAddress getByAddress(byte[] addr) throws UnknownHostException {
@@ -85,7 +87,8 @@ public abstract class IPAddress {
 
     /**
      * Returns the raw IP address of this InetAddress object.
-     * The result is in network byte order: the highest order byte of the address is in getAddress()[0].
+     * The result is in network byte order: the highest order byte of the address is
+     * in getAddress()[0].
      *
      * @return the raw IP address of this object.
      */
@@ -114,7 +117,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the InetAddress is an link local address.
      *
-     * @return a boolean indicating if the InetAddress is a link local address; or false if address is not a link local
+     * @return a boolean indicating if the InetAddress is a link local address; or
+     *         false if address is not a link local
      *         unicast address.
      */
     public boolean isLinkLocalAddress() {
@@ -124,7 +128,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the InetAddress is a loopback address.
      *
-     * @return a boolean indicating if the InetAddress is a loopback address; or false otherwise.
+     * @return a boolean indicating if the InetAddress is a loopback address; or
+     *         false otherwise.
      */
     public boolean isLoopbackAddress() {
         return this.javaNetAddress.isLoopbackAddress();
@@ -133,7 +138,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the multicast address has global scope.
      *
-     * @return a boolean indicating if the address has is a multicast address of global scope, false if it is not of
+     * @return a boolean indicating if the address has is a multicast address of
+     *         global scope, false if it is not of
      *         global scope or it is not a multicast address
      */
     public boolean isMCGlobal() {
@@ -143,7 +149,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the multicast address has link scope.
      *
-     * @return a boolean indicating if the address has is a multicast address of link-local scope, false if it is not of
+     * @return a boolean indicating if the address has is a multicast address of
+     *         link-local scope, false if it is not of
      *         link-local scope or it is not a multicast address
      */
     public boolean isMCLinkLocal() {
@@ -153,7 +160,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the multicast address has node scope.
      *
-     * @return a boolean indicating if the address has is a multicast address of node-local scope, false if it is not of
+     * @return a boolean indicating if the address has is a multicast address of
+     *         node-local scope, false if it is not of
      *         node-local scope or it is not a multicast address
      */
     public boolean isMCNodeLocal() {
@@ -163,7 +171,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the multicast address has organization scope.
      *
-     * @return a boolean indicating if the address has is a multicast address of organization-local scope, false if it
+     * @return a boolean indicating if the address has is a multicast address of
+     *         organization-local scope, false if it
      *         is not of organization-local scope or it is not a multicast address
      */
     public boolean isMCOrgLocal() {
@@ -173,7 +182,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the multicast address has site scope.
      *
-     * @return a boolean indicating if the address has is a multicast address of site-local scope, false if it is not of
+     * @return a boolean indicating if the address has is a multicast address of
+     *         site-local scope, false if it is not of
      *         site-local scope or it is not a multicast address
      */
     public boolean isMCSiteLocal() {
@@ -192,7 +202,8 @@ public abstract class IPAddress {
     /**
      * Utility routine to check if the InetAddress is a site local address.}
      *
-     * @return a boolean indicating if the InetAddress is a site local address; or false if address is not a site local
+     * @return a boolean indicating if the InetAddress is a site local address; or
+     *         false if address is not a site local
      *         unicast address.
      */
     public boolean isSiteLocalAddress() {

@@ -23,6 +23,7 @@ import org.freedesktop.dbus.types.Variant;
  * Auto-generated class.
  */
 public class ListTuple extends Tuple {
+
     @Position(0)
     private String selected;
     @Position(1)
@@ -40,6 +41,7 @@ public class ListTuple extends Tuple {
     public String getSelected() {
         return selected;
     }
+
     public void setInstalled(List<Map<String, Variant<?>>> arg) {
         installed = arg;
     }
@@ -47,6 +49,5 @@ public class ListTuple extends Tuple {
     public List<Map<String, Variant<?>>> getInstalled() {
         return installed;
     }
-
 
 }

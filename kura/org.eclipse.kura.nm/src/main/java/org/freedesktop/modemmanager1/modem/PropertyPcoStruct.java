@@ -21,6 +21,7 @@ import org.freedesktop.dbus.types.UInt32;
  * Auto-generated class.
  */
 public class PropertyPcoStruct extends Struct {
+
     @Position(0)
     private final UInt32 member0;
     @Position(1)
@@ -34,7 +35,6 @@ public class PropertyPcoStruct extends Struct {
         this.member2 = member2;
     }
 
-
     public UInt32 getMember0() {
         return member0;
     }
@@ -46,6 +46,5 @@ public class PropertyPcoStruct extends Struct {
     public List<Byte> getMember2() {
         return member2;
     }
-
 
 }

@@ -35,13 +35,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Carrier", type = Boolean.class, access = Access.READ)
 public interface Wired extends DBusInterface {
 
-
-
-
     public static interface PropertyS390SubchannelsType extends TypeRef<List<String>> {
-
-
-
 
     }
 
@@ -54,11 +48,9 @@ public interface Wired extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

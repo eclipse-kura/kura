@@ -160,9 +160,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivate NetworkConfigurationService...");
-        if (Objects.nonNull(this.nmDbusConnector)) {
-            this.nmDbusConnector.closeConnection();
-        }
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
     }

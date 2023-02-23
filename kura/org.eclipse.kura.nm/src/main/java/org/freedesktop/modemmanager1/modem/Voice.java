@@ -32,17 +32,23 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "EmergencyOnly", type = Boolean.class, access = Access.READ)
 public interface Voice extends DBusInterface {
 
-
     public List<DBusPath> ListCalls();
-    public void DeleteCall(DBusPath path);
-    public DBusPath CreateCall(Map<String, Variant<?>> properties);
-    public void HoldAndAccept();
-    public void HangupAndAccept();
-    public void HangupAll();
-    public void Transfer();
-    public void CallWaitingSetup(boolean enable);
-    public boolean CallWaitingQuery();
 
+    public void DeleteCall(DBusPath path);
+
+    public DBusPath CreateCall(Map<String, Variant<?>> properties);
+
+    public void HoldAndAccept();
+
+    public void HangupAndAccept();
+
+    public void HangupAll();
+
+    public void Transfer();
+
+    public void CallWaitingSetup(boolean enable);
+
+    public boolean CallWaitingQuery();
 
     public static class CallAdded extends DBusSignal {
 
@@ -53,11 +59,9 @@ public interface Voice extends DBusInterface {
             this.dbusPath = _dbusPath;
         }
 
-
         public DBusPath getDbusPath() {
             return dbusPath;
         }
-
 
     }
 
@@ -70,18 +74,13 @@ public interface Voice extends DBusInterface {
             this.dbusPath = _dbusPath;
         }
 
-
         public DBusPath getDbusPath() {
             return dbusPath;
         }
 
-
     }
 
     public static interface PropertyCallsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 }

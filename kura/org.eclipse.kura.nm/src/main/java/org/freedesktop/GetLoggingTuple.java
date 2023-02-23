@@ -19,6 +19,7 @@ import org.freedesktop.dbus.annotations.Position;
  * Auto-generated class.
  */
 public class GetLoggingTuple extends Tuple {
+
     @Position(0)
     private String level;
     @Position(1)
@@ -36,6 +37,7 @@ public class GetLoggingTuple extends Tuple {
     public String getLevel() {
         return level;
     }
+
     public void setDomains(String arg) {
         domains = arg;
     }
@@ -43,6 +45,5 @@ public class GetLoggingTuple extends Tuple {
     public String getDomains() {
         return domains;
     }
-
 
 }

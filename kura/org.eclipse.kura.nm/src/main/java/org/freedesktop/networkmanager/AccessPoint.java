@@ -40,13 +40,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "LastSeen", type = Integer.class, access = Access.READ)
 public interface AccessPoint extends DBusInterface {
 
-
-
-
     public static interface PropertySsidType extends TypeRef<List<Byte>> {
-
-
-
 
     }
 
@@ -59,11 +53,9 @@ public interface AccessPoint extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

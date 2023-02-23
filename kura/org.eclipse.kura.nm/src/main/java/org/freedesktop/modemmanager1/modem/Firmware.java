@@ -28,8 +28,8 @@ import org.freedesktop.modemmanager1.modem.PropertyUpdateSettingsStruct;
 @DBusProperty(name = "UpdateSettings", type = PropertyUpdateSettingsStruct.class, access = Access.READ)
 public interface Firmware extends DBusInterface {
 
-
     public ListTuple List();
+
     public void Select(String uniqueid);
 
 }

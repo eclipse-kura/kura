@@ -27,12 +27,15 @@ public class IP6Address extends IPAddress {
     }
 
     /**
-     * Utility routine to check if the InetAddress is an IPv4 compatible IPv6 address.
+     * Utility routine to check if the InetAddress is an IPv4 compatible IPv6
+     * address.
      *
-     * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6 address; or false if address is IPv4
+     * @return a boolean indicating if the InetAddress is an IPv4 compatible IPv6
+     *         address; or false if address is IPv4
      *         address.
      */
     public boolean isIPv4CompatibleAddress() {
         return ((java.net.Inet6Address) this.javaNetAddress).isIPv4CompatibleAddress();
     }
+
 }

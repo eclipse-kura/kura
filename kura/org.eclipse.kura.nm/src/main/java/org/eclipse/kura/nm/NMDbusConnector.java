@@ -20,10 +20,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.NMStatusConverter;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -97,10 +98,6 @@ public class NMDbusConnector {
         return this.dbusConnection;
     }
 
-    public void closeConnection() {
-        this.dbusConnection.disconnect();
-    }
-
     public void checkPermissions() {
         Map<String, String> getPermissions = this.nm.GetPermissions();
         for (Entry<String, String> entry : getPermissions.entrySet()) {
@@ -133,7 +130,7 @@ public class NMDbusConnector {
         return supportedDeviceNames;
     }
 
-    public synchronized NetInterface<NetInterfaceAddress> getInterfaceStatus(String interfaceName)
+    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService)
             throws DBusException {
         Device device = getDeviceByIpIface(interfaceName);
         NMDeviceType deviceType = getDeviceType(device);
@@ -153,8 +150,10 @@ public class NMDbusConnector {
             return null;
         }
 
+        Optional<UsbNetDevice> usbNetDevice = networkService.getUsbNetDevice(interfaceName);
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties);
+            return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties,
+                    usbNetDevice);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
             return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
         }

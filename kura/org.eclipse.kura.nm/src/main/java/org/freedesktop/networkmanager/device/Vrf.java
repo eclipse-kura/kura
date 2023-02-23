@@ -25,6 +25,4 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "Table", type = UInt32.class, access = Access.READ)
 public interface Vrf extends DBusInterface {
 
-
-
 }

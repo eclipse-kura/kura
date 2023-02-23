@@ -32,9 +32,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "ActiveChannel", type = UInt32.class, access = Access.READ)
 public interface OlpcMesh extends DBusInterface {
 
-
-
-
     public static class PropertiesChanged extends DBusSignal {
 
         private final Map<String, Variant<?>> properties;
@@ -44,11 +41,9 @@ public interface OlpcMesh extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

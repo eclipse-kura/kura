@@ -34,11 +34,11 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "DefaultStorage", type = UInt32.class, access = Access.READ)
 public interface Messaging extends DBusInterface {
 
-
     public List<DBusPath> List();
-    public void Delete(DBusPath path);
-    public DBusPath Create(Map<String, Variant<?>> properties);
 
+    public void Delete(DBusPath path);
+
+    public DBusPath Create(Map<String, Variant<?>> properties);
 
     public static class Added extends DBusSignal {
 
@@ -51,7 +51,6 @@ public interface Messaging extends DBusInterface {
             this.received = _received;
         }
 
-
         public DBusPath getDbusPath() {
             return dbusPath;
         }
@@ -59,7 +58,6 @@ public interface Messaging extends DBusInterface {
         public boolean getReceived() {
             return received;
         }
-
 
     }
 
@@ -72,25 +70,17 @@ public interface Messaging extends DBusInterface {
             this.dbusPath = _dbusPath;
         }
 
-
         public DBusPath getDbusPath() {
             return dbusPath;
         }
-
 
     }
 
     public static interface PropertyMessagesType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertySupportedStoragesType extends TypeRef<List<UInt32>> {
-
-
-
 
     }
 }

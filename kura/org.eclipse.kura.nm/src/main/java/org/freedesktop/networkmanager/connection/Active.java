@@ -47,13 +47,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Master", type = DBusPath.class, access = Access.READ)
 public interface Active extends DBusInterface {
 
-
-
-
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -68,7 +62,6 @@ public interface Active extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public UInt32 getState() {
             return state;
         }
@@ -76,7 +69,6 @@ public interface Active extends DBusInterface {
         public UInt32 getReason() {
             return reason;
         }
-
 
     }
 
@@ -89,11 +81,9 @@ public interface Active extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 }

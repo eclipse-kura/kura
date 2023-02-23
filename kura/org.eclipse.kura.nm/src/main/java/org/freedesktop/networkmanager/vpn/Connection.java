@@ -30,9 +30,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Banner", type = String.class, access = Access.READ)
 public interface Connection extends DBusInterface {
 
-
-
-
     public static class PropertiesChanged extends DBusSignal {
 
         private final Map<String, Variant<?>> properties;
@@ -42,11 +39,9 @@ public interface Connection extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -61,7 +56,6 @@ public interface Connection extends DBusInterface {
             this.reason = _reason;
         }
 
-
         public UInt32 getState() {
             return state;
         }
@@ -69,7 +63,6 @@ public interface Connection extends DBusInterface {
         public UInt32 getReason() {
             return reason;
         }
-
 
     }
 }

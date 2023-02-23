@@ -22,6 +22,7 @@ import org.freedesktop.dbus.types.Variant;
  * Auto-generated class.
  */
 public class PropertyUpdateSettingsStruct extends Struct {
+
     @Position(0)
     private final UInt32 member0;
     @Position(1)
@@ -32,7 +33,6 @@ public class PropertyUpdateSettingsStruct extends Struct {
         this.member1 = member1;
     }
 
-
     public UInt32 getMember0() {
         return member0;
     }
@@ -40,6 +40,5 @@ public class PropertyUpdateSettingsStruct extends Struct {
     public Map<String, Variant<?>> getMember1() {
         return member1;
     }
-
 
 }

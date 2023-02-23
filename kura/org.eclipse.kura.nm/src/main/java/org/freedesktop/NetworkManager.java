@@ -53,60 +53,63 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "GlobalDnsConfiguration", type = NetworkManager.PropertyGlobalDnsConfigurationType.class, access = Access.READ_WRITE)
 public interface NetworkManager extends DBusInterface {
 
-
     public void Reload(UInt32 flags);
+
     public List<DBusPath> GetDevices();
+
     public List<DBusPath> GetAllDevices();
+
     public DBusPath GetDeviceByIpIface(String iface);
+
     public DBusPath ActivateConnection(DBusPath connection, DBusPath device, DBusPath specificObject);
-    public AddAndActivateConnectionTuple AddAndActivateConnection(Map<String, Map<String, Variant<?>>> connection, DBusPath device, DBusPath specificObject);
-    public AddAndActivateConnection2Tuple AddAndActivateConnection2(Map<String, Map<String, Variant<?>>> connection, DBusPath device, DBusPath specificObject, Map<String, Variant<?>> options);
+
+    public AddAndActivateConnectionTuple AddAndActivateConnection(Map<String, Map<String, Variant<?>>> connection,
+            DBusPath device, DBusPath specificObject);
+
+    public AddAndActivateConnection2Tuple AddAndActivateConnection2(Map<String, Map<String, Variant<?>>> connection,
+            DBusPath device, DBusPath specificObject, Map<String, Variant<?>> options);
+
     public void DeactivateConnection(DBusPath activeConnection);
+
     public void Sleep(boolean sleep);
+
     public void Enable(boolean enable);
+
     public Map<String, String> GetPermissions();
+
     public void SetLogging(String level, String domains);
+
     public GetLoggingTuple GetLogging();
+
     public UInt32 CheckConnectivity();
+
     public UInt32 state();
+
     public DBusPath CheckpointCreate(List<DBusPath> devices, UInt32 rollbackTimeout, UInt32 flags);
+
     public void CheckpointDestroy(DBusPath checkpoint);
+
     public Map<String, UInt32> CheckpointRollback(DBusPath checkpoint);
+
     public void CheckpointAdjustRollbackTimeout(DBusPath checkpoint, UInt32 addTimeout);
 
-
     public static interface PropertyDevicesType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
     public static interface PropertyAllDevicesType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertyCheckpointsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
     public static interface PropertyActiveConnectionsType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertyCapabilitiesType extends TypeRef<List<UInt32>> {
-
-
-
 
     }
 
@@ -119,18 +122,13 @@ public interface NetworkManager extends DBusInterface {
             this.state = _state;
         }
 
-
         public UInt32 getState() {
             return state;
         }
 
-
     }
 
     public static interface PropertyGlobalDnsConfigurationType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 
@@ -143,11 +141,9 @@ public interface NetworkManager extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -160,11 +156,9 @@ public interface NetworkManager extends DBusInterface {
             this.devicePath = _devicePath;
         }
 
-
         public DBusPath getDevicePath() {
             return devicePath;
         }
-
 
     }
 
@@ -177,11 +171,9 @@ public interface NetworkManager extends DBusInterface {
             this.devicePath = _devicePath;
         }
 
-
         public DBusPath getDevicePath() {
             return devicePath;
         }
-
 
     }
 }

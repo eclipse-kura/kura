@@ -24,6 +24,4 @@ import org.freedesktop.dbus.interfaces.DBusInterface;
 @DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
 public interface Wpan extends DBusInterface {
 
-
-
 }

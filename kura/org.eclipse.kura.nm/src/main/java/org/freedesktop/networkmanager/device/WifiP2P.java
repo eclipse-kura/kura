@@ -32,15 +32,11 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Peers", type = WifiP2P.PropertyPeersType.class, access = Access.READ)
 public interface WifiP2P extends DBusInterface {
 
-
     public void StartFind(Map<String, Variant<?>> options);
+
     public void StopFind();
 
-
     public static interface PropertyPeersType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 
@@ -53,11 +49,9 @@ public interface WifiP2P extends DBusInterface {
             this.peer = _peer;
         }
 
-
         public DBusPath getPeer() {
             return peer;
         }
-
 
     }
 
@@ -70,11 +64,9 @@ public interface WifiP2P extends DBusInterface {
             this.peer = _peer;
         }
 
-
         public DBusPath getPeer() {
             return peer;
         }
-
 
     }
 }

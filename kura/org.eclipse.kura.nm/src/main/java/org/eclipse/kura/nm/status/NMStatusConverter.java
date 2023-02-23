@@ -31,6 +31,8 @@ import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiMode;
+import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -44,6 +46,7 @@ public class NMStatusConverter {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusConverter.class);
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
     private static final EnumMap<NMDeviceState, NetworkInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
@@ -134,9 +137,24 @@ public class NMStatusConverter {
 
     private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Properties wirelessDeviceProperties,
             Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
-        // TODO Auto-generated method stub
-        // builder.with*
+        NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
+        builder.withMode(wifiModeConvert(mode));
+    }
 
+    private static WifiMode wifiModeConvert(NM80211Mode mode) {
+        switch (mode) {
+        case NM_802_11_MODE_ADHOC:
+            return WifiMode.ADHOC;
+        case NM_802_11_MODE_INFRA:
+            return WifiMode.INFRA;
+        case NM_802_11_MODE_AP:
+            return WifiMode.MASTER;
+        case NM_802_11_MODE_MESH:
+            return WifiMode.MESH;
+        case NM_802_11_MODE_UNKNOWN:
+        default:
+            return WifiMode.UNKNOWN;
+        }
     }
 
     private static void setIP4Addresses(Properties ip4configProperties,

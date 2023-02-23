@@ -50,6 +50,20 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
+# replace snapshot_0 and iptables.init with correct interface names
+if python3 -V > /dev/null 2>&1
+then
+    python3 ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/framework/kura.properties
+elif python -V > /dev/null 2>&1
+then
+    python ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/framework/kura.properties
+else
+    echo "python/python3 not found. ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml, ${INSTALL_DIR}/kura/install/iptables.init, and ${INSTALL_DIR}/kura/framework/kura.properties may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
+fi
+
+# copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+
 # set up default firewall configuration
 cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
 chmod 644 ${INSTALL_DIR}/kura/.data/iptables
@@ -59,20 +73,6 @@ chmod 755 ${INSTALL_DIR}/kura/bin/firewall
 cp ${INSTALL_DIR}/kura/install/firewall.service /lib/systemd/system/firewall.service
 chmod 644 /lib/systemd/system/firewall.service
 sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
-
-# copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
-
-# replace snapshot_0 and iptables.init with correct interface names
-if python3 -V > /dev/null 2>&1
-then
-    python3 ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/.data/snapshot_0.xml ${INSTALL_DIR}/kura/.data/iptables
-elif python -V > /dev/null 2>&1
-then
-    python ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/.data/snapshot_0.xml ${INSTALL_DIR}/kura/.data/iptables
-else
-    echo "python/python3 not found. ${INSTALL_DIR}/kura/.data/snapshot_0.xml and ${INSTALL_DIR}/kura/.data/iptables may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
-fi
 
 # disable NTP service
 if command -v timedatectl > /dev/null ;
@@ -119,13 +119,19 @@ fi
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit
 
 # install custom jdk.dio based on board
-BOARD="default"
+BOARD="generic-device"
 if uname -a | grep -q 'raspberry' > /dev/null 2>&1
 then
-    BOARD="raspberry" 
+    BOARD="raspberry"
     echo "Installing custom jdk.dio.properties for Raspberry PI"
 else
-    echo "Installing default jdk.dio.properties. Please review it with correct GPIO mappings."
+    echo "Installing generic-device jdk.dio.properties. Please review it with correct GPIO mappings."
 fi
 
 mv ${INSTALL_DIR}/kura/install/jdk.dio.properties-${BOARD} ${INSTALL_DIR}/kura/framework/jdk.dio.properties
+
+# customizing kura.properties
+
+KURA_PLATFORM=$( uname -m )
+sed -i "s/kura_platform/${KURA_PLATFORM}/" ${INSTALL_DIR}/kura/framework/kura.properties
+sed -i "s/device_name/${BOARD}/" ${INSTALL_DIR}/kura/framework/kura.properties

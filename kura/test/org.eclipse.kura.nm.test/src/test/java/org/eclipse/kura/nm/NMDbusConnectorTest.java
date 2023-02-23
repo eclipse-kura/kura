@@ -9,6 +9,7 @@ import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +37,7 @@ import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class NMDbusConnectorTest {
 
@@ -134,7 +136,8 @@ public class NMDbusConnectorTest {
         whenApply();
 
         thenVerifyNoExceptionIsThrown();
-        // check if nothing happened
+        thenNetoworkSettingsDoNotChangeForDevice("eth0");
+        thenNetoworkSettingsDoNotChangeForDevice("wlan0");
     }
 
     @Test
@@ -160,7 +163,7 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void applyShouldWorkWithEnabledUnsupportedDevices() throws DBusException {
+    public void applyShouldDoNothingWithEnabledUnsupportedDevices() throws DBusException {
         givenMockedDevice("unused0", NMDeviceType.NM_DEVICE_TYPE_UNUSED1, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
 
@@ -171,7 +174,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(netConfig);
 
         thenVerifyNoExceptionIsThrown();
-        // check if nothing happened
+        thenNetoworkSettingsDoNotChangeForDevice("unused0");
     }
 
     @Test
@@ -189,7 +192,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(this.netConfig);
 
         thenVerifyNoExceptionIsThrown();
-        // TODO: Verify
+        thenConnectDisconnectIsCalledFor("eth0");
     }
 
     @Test
@@ -215,7 +218,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(this.netConfig);
 
         thenVerifyNoExceptionIsThrown();
-        // TODO: Verify
+        thenNetoworkSettingsDoNotChangeForDevice("lo");
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException {
@@ -406,6 +409,18 @@ public class NMDbusConnectorTest {
     
     public void thenVerifyDisconnectIsCalledFor(String netInterface) {
         verify(this.mockDevices.get(netInterface)).Disconnect();
+    }
+    
+    public void thenConnectDisconnectIsCalledFor(String netInterface) throws DBusException {
+        Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager", "/mock/device/" + netInterface, Connection.class);
+        verify(connect).Update(any());
+    }
+    
+    public void thenNetoworkSettingsDoNotChangeForDevice(String netInterface) throws DBusException {
+        
+        Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager", "/mock/device/" + netInterface, Connection.class);
+        verify(connect, never()).Update(any());
+        verify(this.mockDevices.get(netInterface), never()).Disconnect();
     }
 
 }

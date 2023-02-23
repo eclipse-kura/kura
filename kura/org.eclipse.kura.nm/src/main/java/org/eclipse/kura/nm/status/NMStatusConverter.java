@@ -92,6 +92,9 @@ public class NMStatusConverter {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
         // TODO

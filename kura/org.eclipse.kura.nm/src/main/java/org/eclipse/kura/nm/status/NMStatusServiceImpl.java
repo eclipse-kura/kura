@@ -41,7 +41,6 @@ public class NMStatusServiceImpl implements NetworkStatusService {
 
     public void deactivate() {
         logger.debug("Deactivate NMStatusService...");
-        this.nmDbusConnector.closeConnection();
     }
 
     @Override

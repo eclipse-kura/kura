@@ -97,10 +97,6 @@ public class NMDbusConnector {
         return this.dbusConnection;
     }
 
-    public void closeConnection() {
-        this.dbusConnection.disconnect();
-    }
-
     public void checkPermissions() {
         Map<String, String> getPermissions = this.nm.GetPermissions();
         for (Entry<String, String> entry : getPermissions.entrySet()) {

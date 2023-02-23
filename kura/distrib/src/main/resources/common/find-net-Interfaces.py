@@ -14,6 +14,8 @@ import subprocess
 import sys
 
 LOG_MSG_PREFIX = "[find-net-interfaces.py] "
+ETHERNET_TYPES = ['ethernet', 'eth', 'wired']
+WIRELESS_TYPES = ['wifi', 'wireless']
 
 def get_eth_wlan_interfaces_names():
     """Reads the network interface names using 'nmcli dev' command.
@@ -22,7 +24,7 @@ def get_eth_wlan_interfaces_names():
     ethernet interface is present.
 
     Returns:
-         of lists (eth_names, wlan_names) where:
+        tuple of lists (eth_names, wlan_names) where:
             'eth_names' are the found ethernet interface names,
             'wlan_names' are the found wireless interface names, might be an empty list.
     """
@@ -30,25 +32,24 @@ def get_eth_wlan_interfaces_names():
     # list comprehension to remove empty items
     lines = [x.strip() for x in cmd_output.split('\n') if len(x.strip()) > 0]
 
-    header = list()
-    for column in [x.strip() for x in lines[0].split(' ') if len(x.strip()) > 0]:
-        header.append(column.lower())
-
+    # removing header
     del lines[0]
-    interfaces_info = list()
+
+    ethernet_inteface_names = list()
+    wireless_inteface_names = list()
+
     for line in lines:
-        interface_info = dict()
         row = [x.strip() for x in line.split(' ') if len(x.strip()) > 0]
-        for i in range(len(row)):
-            interface_info[header[i]] = row[i].lower()
-        interfaces_info.append(interface_info)
+        
+        interface_name = row[0].lower()
+        interface_type = row[1].lower()
+
+        if interface_type in ETHERNET_TYPES:
+            ethernet_inteface_names.append(interface_name)
+        
+        if  interface_type in WIRELESS_TYPES:
+            wireless_inteface_names.append(interface_name)
     
-    ethernet_types = ['ethernet', 'eth']
-    wireless_types = ['wifi', 'wireless']
-
-    ethernet_inteface_names = [x['device'] for x in interfaces_info if x['type'] in ethernet_types]
-    wireless_inteface_names = [x['device'] for x in interfaces_info if x['type'] in wireless_types]
-
     if len(ethernet_inteface_names) < 1:
         print(LOG_MSG_PREFIX + 'ERROR: no ethernet interfaces found')
         sys.exit(1)

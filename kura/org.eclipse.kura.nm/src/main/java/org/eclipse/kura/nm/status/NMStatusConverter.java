@@ -159,8 +159,8 @@ public class NMStatusConverter {
 
         // builder.withSupportedBitrates
 
-        // builder.withSupportedChannels
-        // builder.withSupportedFrequencies
+        builder.withSupportedChannels(wifiChannelsConvert(supportedChannels));
+        builder.withSupportedFrequencies(wifiFrequenciesConvert(supportedChannels));
 
         builder.withCountryCode(countryCode);
 
@@ -180,6 +180,26 @@ public class NMStatusConverter {
         }
 
         builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));
+    }
+
+    private static List<Long> wifiFrequenciesConvert(List<WifiChannel> supportedChannels) {
+        List<Long> kuraFrequencies = new ArrayList<>();
+
+        for (WifiChannel channel : supportedChannels) {
+            kuraFrequencies.add(channel.getFrequency().longValue());
+        }
+
+        return kuraFrequencies;
+    }
+
+    private static List<Integer> wifiChannelsConvert(List<WifiChannel> supportedChannels) {
+        List<Integer> kuraChannels = new ArrayList<>();
+
+        for (WifiChannel channel : supportedChannels) {
+            kuraChannels.add(channel.getChannel());
+        }
+
+        return kuraChannels;
     }
 
     private static Set<WifiRadioMode> wifiRadioModesConvert(List<NMDeviceWifiCapabilities> capabilities) {

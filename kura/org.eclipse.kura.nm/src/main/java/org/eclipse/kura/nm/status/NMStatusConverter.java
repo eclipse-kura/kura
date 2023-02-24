@@ -38,6 +38,7 @@ import org.eclipse.kura.net.status.wifi.WifiCapability;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
+import org.eclipse.kura.net.status.wifi.WifiRadioMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.NM80211ApSecurityFlags;
@@ -154,10 +155,10 @@ public class NMStatusConverter {
         List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
                 .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
         builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
+        builder.withSupportedRadioModes(wifiRadioModesConvert(capabilities));
 
         // builder.withSupportedBitrates
 
-        // builder.withSupportedRadioModes
         // builder.withSupportedChannels
         // builder.withSupportedFrequencies
 
@@ -179,6 +180,35 @@ public class NMStatusConverter {
         }
 
         builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));
+    }
+
+    private static Set<WifiRadioMode> wifiRadioModesConvert(List<NMDeviceWifiCapabilities> capabilities) {
+        List<WifiRadioMode> kuraRadioModes = new ArrayList<>();
+
+        if (!capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_VALID)) {
+            // Device doesn't report frequency capabilities
+            kuraRadioModes.add(WifiRadioMode.UNKNOWN);
+            return new HashSet<>(kuraRadioModes);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_2GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211B);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211G);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_5GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211A);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211_AC);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_2GHZ)
+                && capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_5GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT20);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT40_ABOVE);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT40_BELOW);
+        }
+
+        return new HashSet<>(kuraRadioModes);
     }
 
     private static List<WifiAccessPoint> wifiAccessPointConvert(List<Properties> nmAccessPoints) {

@@ -39,6 +39,7 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.NM80211ApSecurityFlags;
 import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
@@ -98,8 +99,8 @@ public class NMStatusConverter {
 
     public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, Properties deviceProperties,
             Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
-            Optional<Properties> activeAccessPoint, List<Properties> accessPoints,
-            Optional<UsbNetDevice> usbNetDevice) {
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints, Optional<UsbNetDevice> usbNetDevice,
+            String countryCode, List<WifiChannel> supportedChannels) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
@@ -110,7 +111,8 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
-        setWifiStatus(builder, wirelessDeviceProperties, activeAccessPoint, accessPoints);
+        setWifiStatus(builder, wirelessDeviceProperties, activeAccessPoint, accessPoints, countryCode,
+                supportedChannels);
 
         return builder.build();
     }
@@ -144,7 +146,8 @@ public class NMStatusConverter {
     }
 
     private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Properties wirelessDeviceProperties,
-            Optional<Properties> activeAccessPoint, List<Properties> accessPoints) {
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints, String countryCode,
+            List<WifiChannel> supportedChannels) {
         NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
         builder.withMode(wifiModeConvert(mode));
 
@@ -157,7 +160,8 @@ public class NMStatusConverter {
         // builder.withSupportedRadioModes
         // builder.withSupportedChannels
         // builder.withSupportedFrequencies
-        // builder.withCountryCode
+
+        builder.withCountryCode(countryCode);
 
         if (mode == NM80211Mode.NM_802_11_MODE_AP) {
             if (!activeAccessPoint.isPresent()) {

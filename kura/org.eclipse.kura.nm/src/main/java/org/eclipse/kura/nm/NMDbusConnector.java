@@ -20,8 +20,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.usb.UsbNetDevice;
@@ -132,8 +136,8 @@ public class NMDbusConnector {
         return supportedDeviceNames;
     }
 
-    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService)
-            throws DBusException {
+    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService,
+            CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         Device device = getDeviceByIpIface(interfaceName);
         NMDeviceType deviceType = getDeviceType(device);
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
@@ -170,13 +174,17 @@ public class NMDbusConnector {
                     "ActiveAccessPoint");
             Optional<Properties> activeAccessPoint = Optional.empty();
 
+            String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
+            List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName, commandExecutorService);
+
             if (!activeAccessPointPath.getPath().equals("/")) {
                 activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                         activeAccessPointPath.getPath(), Properties.class));
             }
 
             return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
-                    wirelessDeviceProperties, activeAccessPoint, accessPoints, usbNetDevice);
+                    wirelessDeviceProperties, activeAccessPoint, accessPoints, usbNetDevice, countryCode,
+                    supportedChannels);
         }
 
         return null;

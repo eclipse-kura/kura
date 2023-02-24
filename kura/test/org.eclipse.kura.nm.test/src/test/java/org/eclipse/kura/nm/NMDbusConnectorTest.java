@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
@@ -27,10 +26,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetInterfaceStatus;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
@@ -50,7 +45,6 @@ import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class NMDbusConnectorTest {
 
@@ -70,11 +64,6 @@ public class NMDbusConnectorTest {
 
     List<String> internalStringList;
     Map<String, Object> netConfig = new HashMap<>();
-
-    @Before
-    public void setUpPersistantMocks() throws DBusException {
-        givenBasicMockedDbusConnector();
-    }
     
     @After
     public void tearDown() {
@@ -95,6 +84,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void getDbusConnectionShouldWork() throws DBusException {
+        givenBasicMockedDbusConnector();
         whenGetDbusConnectionIsRun();
 
         thenNoExceptionIsThrown();
@@ -104,6 +94,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void checkPermissionsShouldWork() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedPermissions();
 
         whenCheckPermissionsIsRun();
@@ -114,6 +105,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void checkVersionShouldWork() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedVersion();
 
         whenCheckVersionIsRun();
@@ -124,6 +116,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void getInterfacesShouldWork() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
@@ -136,11 +129,12 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldDoNothingWithNoCache() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
         
-        whenApply();
+        whenApplyIsCalled();
 
         thenNoExceptionIsThrown();
         thenNetoworkSettingsDoNotChangeForDevice("eth0");
@@ -149,6 +143,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldThrowWithNullMap() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
@@ -160,6 +155,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldThrowWithEmptyMap() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
@@ -171,6 +167,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldDoNothingWithEnabledUnsupportedDevices() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("unused0", NMDeviceType.NM_DEVICE_TYPE_UNUSED1, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
 
@@ -186,6 +183,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldWorkWithEnabledEthernet() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         givenMockedDeviceList();
         
@@ -204,6 +202,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldWorkWithDisabledEthernet() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
         
@@ -218,6 +217,7 @@ public class NMDbusConnectorTest {
 
     @Test
     public void applyShouldNotDisableLoopbackDevice() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
         
@@ -232,6 +232,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void applyShouldNotDisableLoopbackDeviceOldVersionOfNM() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_GENERIC, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
         
@@ -246,6 +247,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void getInterfaceStatusShouldWorkEthernet() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenExtraStatusMocksFor("eth0", NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
@@ -261,6 +263,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void getInterfaceStatusShouldWorkLoopback() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("lo", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
@@ -275,6 +278,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void getInterfaceStatusShouldWorkUnsuported() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("unused0", NMDeviceType.NM_DEVICE_TYPE_UNUSED1, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("unused0", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
@@ -288,6 +292,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void getInterfaceStatusShouldWorkWireless() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenExtraStatusMocksFor("wlan0", NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenMockedDeviceList();
@@ -301,6 +306,7 @@ public class NMDbusConnectorTest {
     
     @Test
     public void getInterfaceStatusShouldWorkEthernetUSB() throws DBusException {
+        givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenExtraStatusMocksFor("eth0", NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         givenMockedDeviceList();
@@ -468,7 +474,7 @@ public class NMDbusConnectorTest {
         }
     }
 
-    public void whenApply() {
+    public void whenApplyIsCalled() {
         try {
             this.instanceNMDbusConnector.apply();
         } catch (DBusException e) {

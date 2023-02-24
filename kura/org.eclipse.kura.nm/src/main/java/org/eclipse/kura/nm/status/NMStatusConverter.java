@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
@@ -159,8 +160,9 @@ public class NMStatusConverter {
 
         // builder.withSupportedBitrates
 
-        builder.withSupportedChannels(wifiChannelsConvert(supportedChannels));
-        builder.withSupportedFrequencies(wifiFrequenciesConvert(supportedChannels));
+        Pair<List<Integer>, List<Long>> kuraSupportedChannels = wifiChannelsConvert(supportedChannels);
+        builder.withSupportedChannels(kuraSupportedChannels.getLeft());
+        builder.withSupportedFrequencies(kuraSupportedChannels.getRight());
 
         builder.withCountryCode(countryCode);
 
@@ -182,24 +184,16 @@ public class NMStatusConverter {
         builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));
     }
 
-    private static List<Long> wifiFrequenciesConvert(List<WifiChannel> supportedChannels) {
+    private static Pair<List<Integer>, List<Long>> wifiChannelsConvert(List<WifiChannel> supportedChannels) {
+        List<Integer> kuraChannels = new ArrayList<>();
         List<Long> kuraFrequencies = new ArrayList<>();
 
         for (WifiChannel channel : supportedChannels) {
+            kuraChannels.add(channel.getChannel());
             kuraFrequencies.add(channel.getFrequency().longValue());
         }
 
-        return kuraFrequencies;
-    }
-
-    private static List<Integer> wifiChannelsConvert(List<WifiChannel> supportedChannels) {
-        List<Integer> kuraChannels = new ArrayList<>();
-
-        for (WifiChannel channel : supportedChannels) {
-            kuraChannels.add(channel.getChannel());
-        }
-
-        return kuraChannels;
+        return Pair.of(kuraChannels, kuraFrequencies);
     }
 
     private static Set<WifiRadioMode> wifiRadioModesConvert(List<NMDeviceWifiCapabilities> capabilities) {

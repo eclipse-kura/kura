@@ -13,6 +13,8 @@
 package org.freedesktop.networkmanager.settings;
 
 import java.util.Map;
+
+import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -59,6 +61,21 @@ public interface Connection extends DBusInterface {
 
         public Map<String, Variant<?>> getProperties() {
             return properties;
+        }
+
+    }
+
+    public static class Updated extends DBusSignal {
+
+        private final DBusPath devicePath;
+
+        public Updated(String _path, DBusPath _devicePath) throws DBusException {
+            super(_path, _devicePath);
+            this.devicePath = _devicePath;
+        }
+
+        public DBusPath getDevicePath() {
+            return devicePath;
         }
 
     }

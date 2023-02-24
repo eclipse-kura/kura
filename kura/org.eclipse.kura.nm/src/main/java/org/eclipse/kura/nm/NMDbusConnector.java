@@ -84,11 +84,15 @@ public class NMDbusConnector {
 
     private Map<String, Object> cachedConfiguration = null;
 
+    private NMConnectionChangedHandler nmConnectionChangedHandler = new NMConnectionChangedHandler(this);
+
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, new NMDeviceAddedHandler());
+
+        enableNMConnectionChangedHandler();
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -197,6 +201,7 @@ public class NMDbusConnector {
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         doApply(networkConfiguration);
         this.cachedConfiguration = networkConfiguration;
+        this.nmConnectionChangedHandler.setConfiguation(this.cachedConfiguration);
     }
 
     public synchronized void apply() throws DBusException {
@@ -210,13 +215,37 @@ public class NMDbusConnector {
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
 
-        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+        try {
+            disableNMConnectionChangedHandler();
 
-        List<String> configuredInterfaces = properties.getStringList("net.interfaces");
-        manageConfiguredInterfaces(configuredInterfaces, properties);
+            NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
-        List<Device> availableInterfaces = getAllDevices();
-        manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+            List<String> configuredInterfaces = properties.getStringList("net.interfaces");
+            manageConfiguredInterfaces(configuredInterfaces, properties);
+
+            List<Device> availableInterfaces = getAllDevices();
+            manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+        } finally {
+            enableNMConnectionChangedHandler();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private synchronized void enableNMConnectionChangedHandler() throws DBusException {
+
+        this.dbusConnection.addSigHandler(Settings.NewConnection.class, this.nmConnectionChangedHandler);
+        this.dbusConnection.addSigHandler(Settings.ConnectionRemoved.class, this.nmConnectionChangedHandler);
+        this.dbusConnection.addSigHandler(Connection.Updated.class, this.nmConnectionChangedHandler);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private synchronized void disableNMConnectionChangedHandler() throws DBusException {
+
+        this.dbusConnection.removeSigHandler(Settings.NewConnection.class, this.nmConnectionChangedHandler);
+        this.dbusConnection.removeSigHandler(Settings.ConnectionRemoved.class, this.nmConnectionChangedHandler);
+        this.dbusConnection.removeSigHandler(Connection.Updated.class, this.nmConnectionChangedHandler);
+
     }
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,

@@ -12,17 +12,12 @@
 #  Eurotech
 #
 
-# manage running services
-systemctl daemon-reload
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
-systemctl stop chrony
-systemctl disable chrony
-systemctl enable NetworkManager
-systemctl start NetworkManager
-systemctl enable firewall
-
 INSTALL_DIR=/opt/eclipse
+
+# NetworkManager cannot modify connection settings that are from /etc/network/interfaces
+if test -f /etc/network/interfaces; then
+    rm /etc/network/interfaces
+fi
 
 # create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
@@ -44,6 +39,32 @@ mkdir -p ${INSTALL_DIR}/kura/data
 if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
 fi
+
+# execute patch_sysctl.sh (required for disabling ipv6))
+chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
+${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
+
+# disables IPv6 on all network interfaces in the system if the "/sys/class/net" directory exists, or applies the system-wide configuration specified in the "/etc/sysctl.conf" file using the "sysctl -p" command otherwise.
+if ! [ -d /sys/class/net ]
+then
+    sysctl -p || true
+else
+    sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sysctl -w net.ipv6.conf.default.disable_ipv6=1
+    for INTERFACE in $(ls /sys/class/net)
+    do
+ 	    sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
+    done
+fi
+
+# manage running services
+systemctl daemon-reload
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+systemctl stop chrony
+systemctl disable chrony
+systemctl enable NetworkManager
+systemctl start NetworkManager
 
 # set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
@@ -82,7 +103,7 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
-#set up logrotate - no need to restart as it is a cronjob
+# set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
 
 if [ ! -f /etc/cron.d/logrotate-kura ]; then
@@ -98,25 +119,8 @@ cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 chmod 700 ${INSTALL_DIR}/kura/bin/*.sh
 chown -R kurad:kurad /opt/eclipse
 chmod -R go-rwx /opt/eclipse
-chmod a+rx /opt/eclipse    
+chmod a+rx /opt/eclipse
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
-
-# execute patch_sysctl.sh (required for disabling ipv6))
-chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
-${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
-
-# disables IPv6 on all network interfaces in the system if the "/sys/class/net" directory exists, or applies the system-wide configuration specified in the "/etc/sysctl.conf" file using the "sysctl -p" command otherwise.
-if ! [ -d /sys/class/net ]
-then
-    sysctl -p || true
-else
-    sysctl -w net.ipv6.conf.all.disable_ipv6=1
-    sysctl -w net.ipv6.conf.default.disable_ipv6=1
-    for INTERFACE in $(ls /sys/class/net)
-    do
- 	    sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
-    done
-fi
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit
 
@@ -133,7 +137,6 @@ fi
 mv ${INSTALL_DIR}/kura/install/jdk.dio.properties-${BOARD} ${INSTALL_DIR}/kura/framework/jdk.dio.properties
 
 # customizing kura.properties
-
 KURA_PLATFORM=$( uname -m )
 sed -i "s/kura_platform/${KURA_PLATFORM}/" ${INSTALL_DIR}/kura/framework/kura.properties
 sed -i "s/device_name/${BOARD}/" ${INSTALL_DIR}/kura/framework/kura.properties

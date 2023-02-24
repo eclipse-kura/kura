@@ -70,11 +70,11 @@ if len(file_paths_to_edit) < 1:
 (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
 
 for path in file_paths_to_edit:
-    with open(path, 'r+') as file_to_edit:
+    with open(path, 'r+', encoding='utf-8-sig') as file_to_edit:
         print(LOG_MSG_PREFIX + '- ' + path + ': starting editing')
 
         for i, eth_name in enumerate(eth_names):
-            content = file_to_edit.read().decode('utf-8-sig')
+            content = file_to_edit.read()
             replaced_content = content.replace('eth' + str(i), eth_name)
             print(LOG_MSG_PREFIX + '- ' + path + ': replaced eth' + str(i) + ' with ' + eth_name)
 

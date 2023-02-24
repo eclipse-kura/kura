@@ -27,7 +27,10 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
+import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.NMStatusConverter;
+import org.eclipse.kura.nm.status.SupportedChannelsProperties;
+import org.eclipse.kura.nm.status.WirelessProperties;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -176,15 +179,17 @@ public class NMDbusConnector {
 
             String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
             List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName, commandExecutorService);
+            logger.info("Country code detected: {}", countryCode);
 
             if (!activeAccessPointPath.getPath().equals("/")) {
                 activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                         activeAccessPointPath.getPath(), Properties.class));
             }
 
-            return NMStatusConverter.buildWirelessStatus(interfaceName, deviceProperties, ip4configProperties,
-                    wirelessDeviceProperties, activeAccessPoint, accessPoints, usbNetDevice, countryCode,
-                    supportedChannels);
+            return NMStatusConverter.buildWirelessStatus(interfaceName,
+                    new WirelessProperties(deviceProperties, wirelessDeviceProperties), ip4configProperties,
+                    new AccessPointsProperties(activeAccessPoint, accessPoints), usbNetDevice,
+                    new SupportedChannelsProperties(countryCode, supportedChannels));
         }
 
         return null;

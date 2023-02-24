@@ -99,22 +99,23 @@ public class NMStatusConverter {
         return builder.build();
     }
 
-    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, Properties deviceProperties,
-            Optional<Properties> ip4configProperties, Properties wirelessDeviceProperties,
-            Optional<Properties> activeAccessPoint, List<Properties> accessPoints, Optional<UsbNetDevice> usbNetDevice,
-            String countryCode, List<WifiChannel> supportedChannels) {
+    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, WirelessProperties deviceProperties,
+            Optional<Properties> ip4configProperties, AccessPointsProperties accessPointsProperties,
+            Optional<UsbNetDevice> usbNetDevice, SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "State"));
         builder.withState(deviceStateConvert(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
 
-        setDeviceStatus(builder, deviceProperties);
+        setDeviceStatus(builder, deviceProperties.getDeviceProperties());
         setIP4Status(builder, ip4configProperties);
-        setWifiStatus(builder, wirelessDeviceProperties, activeAccessPoint, accessPoints, countryCode,
-                supportedChannels);
+        setWifiStatus(builder, deviceProperties.getWirelessDeviceProperties(),
+                accessPointsProperties.getActiveAccessPoint(), accessPointsProperties.getAvailableAccessPoints(),
+                supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
         return builder.build();
     }

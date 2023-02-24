@@ -73,6 +73,8 @@ chmod 755 ${INSTALL_DIR}/kura/bin/firewall
 cp ${INSTALL_DIR}/kura/install/firewall.service /lib/systemd/system/firewall.service
 chmod 644 /lib/systemd/system/firewall.service
 sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
+systemctl daemon-reload
+systemctl enable firewall
 
 # disable NTP service
 if command -v timedatectl > /dev/null ;

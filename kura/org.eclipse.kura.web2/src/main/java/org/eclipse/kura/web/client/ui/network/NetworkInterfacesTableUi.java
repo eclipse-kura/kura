@@ -150,9 +150,9 @@ public class NetworkInterfacesTableUi extends Composite {
             public String getValue(GwtNetInterfaceConfig object) {
                 if (object.getHwTypeEnum().equals(GwtNetIfType.MODEM) && object instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig modemObject = (GwtModemInterfaceConfig) object;
-                    return "ppp" + modemObject.getPppNum() + " (" + modemObject.getName() + ")";
+                    return modemObject.getInterfaceName() + " (" + modemObject.getName() + ")";
                 } else {
-                    return object.getName();
+                    return object.getInterfaceName();
                 }
             }
         };

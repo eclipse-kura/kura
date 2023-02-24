@@ -205,6 +205,14 @@ public class NetworkStatusServiceAdapter {
                 wifiInterfaceInfo.getActiveWifiAccessPoint()
                         .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalQuality())));
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
+                if (Objects.nonNull(gwtWifiNetInterfaceConfig.getStationWifiConfig())) {
+                    gwtWifiNetInterfaceConfig.getStationWifiConfig()
+                            .setChannels(wifiInterfaceInfo.getSupportedChannels());
+                } else {
+                    GwtWifiConfig gwtConfig = new GwtWifiConfig();
+                    gwtConfig.setChannels(wifiInterfaceInfo.getSupportedChannels());
+                    gwtWifiNetInterfaceConfig.setStationWifiConfig(gwtConfig);
+                }
             }
         }
     }

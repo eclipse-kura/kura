@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.wifi;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;

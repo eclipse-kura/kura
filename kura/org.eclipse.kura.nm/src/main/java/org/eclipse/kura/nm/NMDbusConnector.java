@@ -179,7 +179,6 @@ public class NMDbusConnector {
 
             String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
             List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName, commandExecutorService);
-            logger.info("Country code detected: {}", countryCode);
 
             if (!activeAccessPointPath.getPath().equals("/")) {
                 activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,

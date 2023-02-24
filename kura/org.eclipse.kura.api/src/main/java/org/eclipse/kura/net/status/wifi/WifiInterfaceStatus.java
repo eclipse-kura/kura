@@ -98,10 +98,10 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
     public static class WifiInterfaceStatusBuilder extends NetworkInterfaceStatusBuilder<WifiInterfaceStatusBuilder> {
 
         private Set<WifiCapability> capabilities = EnumSet.of(WifiCapability.NONE);
-        private List<Long> supportedBitrates = Arrays.asList(0L);
+        private List<Long> supportedBitrates = Collections.emptyList();
         private Set<WifiRadioMode> supportedRadioModes = EnumSet.of(WifiRadioMode.UNKNOWN);
-        private List<Integer> supportedChannels = Arrays.asList(0);
-        private List<Long> supportedFrequencies = Arrays.asList(0L);
+        private List<Integer> supportedChannels = Collections.emptyList();
+        private List<Long> supportedFrequencies = Collections.emptyList();
         private String countryCode = "00";
         private WifiMode mode = WifiMode.UNKNOWN;
         private Optional<WifiAccessPoint> currentWifiAccessPoint = Optional.empty();

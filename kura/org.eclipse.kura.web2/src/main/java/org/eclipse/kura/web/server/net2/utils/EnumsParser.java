@@ -60,7 +60,7 @@ public class EnumsParser {
             }
         }
 
-        return GwtWifiWirelessMode.netWifiWirelessModeDisabled.name();
+        return GwtWifiWirelessMode.netWifiWirelessModeStation.name();
     }
 
     /**
@@ -166,7 +166,7 @@ public class EnumsParser {
             }
         }
 
-        return GwtWifiSecurity.netWifiSecurityNONE.name();
+        return GwtWifiSecurity.netWifiSecurityWPA2.name();
     }
 
     /**
@@ -214,7 +214,7 @@ public class EnumsParser {
             }
         }
 
-        return GwtWifiCiphers.netWifiCiphers_NONE.name();
+        return GwtWifiCiphers.netWifiCiphers_CCMP.name();
     }
 
     /**
@@ -268,7 +268,8 @@ public class EnumsParser {
             }
         }
 
-        return Optional.empty();
+        return Optional.of(GwtWifiRadioMode.netWifiRadioModeBGN.name());
+
     }
 
     /**

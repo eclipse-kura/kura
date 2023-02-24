@@ -16,6 +16,7 @@ package org.eclipse.kura.web.client.ui.network;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -415,13 +416,15 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
             logger.severe("config: " + selectedNetIfConfig);
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
-            logger.severe("active config: " + this.activeConfig);
-            logger.severe("wireless mode: " + this.activeConfig.getWirelessMode());
-            logger.severe("channels " + this.activeConfig.getChannels());
-            if (this.activeConfig.getChannels() != null && !TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
-                updateChanneList(TabWirelessUi.this.activeConfig);
+            if (Objects.nonNull(this.activeConfig)) {
+                logger.severe("active config: " + this.activeConfig);
+                logger.severe("wireless mode: " + this.activeConfig.getWirelessMode());
+                logger.severe("channels " + this.activeConfig.getChannels());
+                if (this.activeConfig.getChannels() != null
+                        && !TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
+                    updateChanneList(TabWirelessUi.this.activeConfig);
+                }
             }
-
             loadCountryCode();
         }
 

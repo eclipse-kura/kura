@@ -64,14 +64,14 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     /**
-     * Return an empty {@link GwtNetInterfaceConfig} for the given network interface
-     * name and type
+     * Return a {@link GwtNetInterfaceConfig} for the given network interface
+     * name and type with default values
      * 
      * @param ifName the network interface name
      * @param ifType the network interface type
      * @return a new {@link GwtNetInterfaceConfig}
      */
-    public GwtNetInterfaceConfig createGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
+    public GwtNetInterfaceConfig getDefaultGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
         GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfigBuilder()
                 .forInterface(ifName).forType(ifType).build();
         logger.debug("Created GWT Network Configuration for interface {} and type {}", ifName, ifType);

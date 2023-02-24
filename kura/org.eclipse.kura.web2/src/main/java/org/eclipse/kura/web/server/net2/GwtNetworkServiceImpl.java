@@ -61,7 +61,7 @@ public class GwtNetworkServiceImpl {
                 } else {
                     Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
                     if (ifType.isPresent()) {
-                        GwtNetInterfaceConfig gwtConfig = configuration.createGwtNetInterfaceConfig(ifName,
+                        GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
                                 ifType.get());
                         status.fillWithStatusProperties(ifName, gwtConfig);
                         result.add(gwtConfig);

@@ -101,14 +101,9 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setName(this.ifName);
         this.gwtConfig.setHwName(this.ifName);
 
-        Optional<String> ifType = this.properties.getType(this.ifName);
-        if (ifType.isPresent()) {
-            this.gwtConfig.setHwType(ifType.get());
-        }
-
-        if (this.gwtConfig instanceof GwtWifiNetInterfaceConfig) {
-            String wifiMode = EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMode(this.ifName));
-            ((GwtWifiNetInterfaceConfig) gwtConfig).setWirelessMode(wifiMode);
+        Optional<String> interfaceType = this.properties.getType(this.ifName);
+        if (interfaceType.isPresent()) {
+            this.gwtConfig.setHwType(interfaceType.get());
         }
     }
 
@@ -163,6 +158,7 @@ public class GwtNetInterfaceConfigBuilder {
     private void setWifiProperties() {
         if (this.gwtConfig instanceof GwtWifiNetInterfaceConfig) {
             String wifiMode = EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMode(this.ifName));
+            ((GwtWifiNetInterfaceConfig) gwtConfig).setWirelessMode(wifiMode);
 
             if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
                 setWifiMasterProperties();
@@ -183,7 +179,6 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiMasterDriver(this.ifName));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiMasterIgnoreSsid(this.ifName));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiMasterPassphrase(this.ifName).getPassword()));
-        gwtWifiConfig.setChannels(this.properties.getWifiMasterChannel(this.ifName));
         gwtWifiConfig.setWirelessMode(
                 EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMasterMode(this.ifName)));
         gwtWifiConfig.setSecurity(
@@ -217,7 +212,6 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiInfraDriver(this.ifName));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiInfraIgnoreSsid(this.ifName));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiInfraPassphrase(this.ifName).getPassword()));
-        gwtWifiConfig.setChannels(this.properties.getWifiInfraChannel(this.ifName));
         gwtWifiConfig
                 .setWirelessMode(EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiInfraMode(this.ifName)));
         gwtWifiConfig

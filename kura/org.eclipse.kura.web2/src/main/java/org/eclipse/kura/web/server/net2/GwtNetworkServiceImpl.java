@@ -177,4 +177,14 @@ public class GwtNetworkServiceImpl {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
+
+    public static String getWifiCountryCode() throws GwtKuraException {
+        NetworkStatusServiceAdapter status;
+        try {
+            status = new NetworkStatusServiceAdapter();
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+        return status.getWifiCountryCode();
+    }
 }

@@ -19,6 +19,7 @@ import static org.eclipse.kura.wire.graph.Constants.EMITTER_PORT_COUNT_PROP_NAME
 import static org.eclipse.kura.wire.graph.Constants.RECEIVER_PORT_COUNT_PROP_NAME;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;

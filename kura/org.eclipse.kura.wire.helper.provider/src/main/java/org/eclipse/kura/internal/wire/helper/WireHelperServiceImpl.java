@@ -19,6 +19,7 @@ import static org.eclipse.kura.wire.graph.Constants.EMITTER_PORT_COUNT_PROP_NAME
 import static org.eclipse.kura.wire.graph.Constants.RECEIVER_PORT_COUNT_PROP_NAME;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -28,6 +29,7 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+
 
 /**
  * The Class WireHelperServiceImpl is the implementation of

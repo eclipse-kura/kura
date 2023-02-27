@@ -35,7 +35,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
     private static final long serialVersionUID = -4188750359099902616L;
 
     @Override
-    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute) throws GwtKuraException {
+    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
+            throws GwtKuraException {
 
         if (isNet2()) {
             return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findNetInterfaceConfigurations(recompute);
@@ -187,7 +188,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.getWifiCountryCode();
+            // TODO
+            return "";
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.getWifiCountryCode();
         }

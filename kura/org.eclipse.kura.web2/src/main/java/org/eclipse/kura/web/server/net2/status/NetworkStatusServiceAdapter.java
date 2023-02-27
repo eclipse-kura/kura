@@ -133,7 +133,8 @@ public class NetworkStatusServiceAdapter {
         return result.toString();
     }
 
-    private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, NetworkInterfaceStatus networkInterfaceInfo) {
+    private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig,
+            NetworkInterfaceStatus networkInterfaceInfo) {
         if (gwtConfig instanceof GwtModemInterfaceConfig && networkInterfaceInfo instanceof ModemInterfaceStatus) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
             ModemInterfaceStatus modemInterfaceInfo = (ModemInterfaceStatus) networkInterfaceInfo;
@@ -202,18 +203,6 @@ public class NetworkStatusServiceAdapter {
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
             }
         }
-    }
-
-    public String getWifiCountryCode() {
-        List<NetworkInterfaceStatus> netInterfaces = this.networkStatusService.getNetworkStatus();
-
-        for (NetworkInterfaceStatus ifaceStatus : netInterfaces) {
-            if (ifaceStatus instanceof WifiInterfaceStatus) {
-                return ((WifiInterfaceStatus) ifaceStatus).getCountryCode();
-            }
-        }
-
-        return "";
     }
 
 }

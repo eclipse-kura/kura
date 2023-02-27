@@ -62,17 +62,19 @@ public class NMStatusConverter {
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
+    private static final String NM_DEVICE_PROPERTY_STATE = "State";
+
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties,
-            Optional<UsbNetDevice> usbNetDevice) {
+    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName, Properties deviceProperties,
+            Optional<Properties> ip4configProperties, Optional<UsbNetDevice> usbNetDevice) {
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
         builder.withIsLinkUp(NMDeviceState.isConnected(deviceState));
 
@@ -85,12 +87,13 @@ public class NMStatusConverter {
 
     }
 
-    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties) {
+    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName, Properties deviceProperties,
+            Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(true);
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
 
         setDeviceStatus(builder, deviceProperties);
@@ -106,7 +109,7 @@ public class NMStatusConverter {
         builder.withName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState
-                .fromUInt32(deviceProperties.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "State"));
+                .fromUInt32(deviceProperties.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);

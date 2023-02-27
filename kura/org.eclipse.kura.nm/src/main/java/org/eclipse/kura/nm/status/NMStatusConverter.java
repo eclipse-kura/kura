@@ -381,6 +381,10 @@ public class NMStatusConverter {
             return WifiCapability.FREQ_2GHZ;
         case NM_WIFI_DEVICE_CAP_FREQ_5GHZ:
             return WifiCapability.FREQ_5GHZ;
+        case NM_WIFI_DEVICE_CAP_MESH:
+            return WifiCapability.MESH;
+        case NM_WIFI_DEVICE_CAP_IBSS_RSN:
+            return WifiCapability.IBSS_RSN;
         default:
             throw new IllegalArgumentException(
                     String.format("Non convertible NMDeviceWifiCapabilities \"%s\"", nmCapability));

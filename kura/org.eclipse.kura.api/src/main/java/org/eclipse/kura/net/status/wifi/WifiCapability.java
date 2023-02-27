@@ -40,6 +40,10 @@ public enum WifiCapability {
     /** The device supports 2.4GHz frequencies. */
     FREQ_2GHZ,
     /** The device supports 5GHz frequencies. */
-    FREQ_5GHZ;
+    FREQ_5GHZ,
+    /** The device supports mesh points. */
+    MESH,
+    /** The device supports WPA2 in IBSS networks */
+    IBSS_RSN;
 
 }

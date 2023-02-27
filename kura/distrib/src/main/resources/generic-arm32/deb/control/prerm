@@ -86,6 +86,11 @@ function preRemove {
       rm -rf $PARENT
     fi
 
+    # restore /etc/network/interfaces.old
+    if test -f /etc/network/interfaces.old; then
+        mv /etc/network/interfaces.old /etc/network/interfaces
+    fi
+
     echo ""
     echo "Uninstalling KURA... Done!"
 }

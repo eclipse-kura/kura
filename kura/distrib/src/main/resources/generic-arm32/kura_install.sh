@@ -16,7 +16,7 @@ INSTALL_DIR=/opt/eclipse
 
 # NetworkManager cannot modify connection settings that are from /etc/network/interfaces
 if test -f /etc/network/interfaces; then
-    rm /etc/network/interfaces
+    mv /etc/network/interfaces /etc/network/interfaces.old
 fi
 
 # create known kura install location

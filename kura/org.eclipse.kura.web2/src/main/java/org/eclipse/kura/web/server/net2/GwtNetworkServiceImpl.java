@@ -15,6 +15,7 @@ package org.eclipse.kura.web.server.net2;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
@@ -22,6 +23,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.web.server.net2.configuration.NetworkConfigurationServiceAdapter;
 import org.eclipse.kura.web.server.net2.status.NetworkStatusServiceAdapter;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -48,12 +50,25 @@ public class GwtNetworkServiceImpl {
             NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
             NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
 
+            List<String> configuredInterfaceNames = configuration.getConfiguredNetworkInterfaceNames();
+            List<String> systemInterfaceNames = status.getNetInterfaces();
             List<GwtNetInterfaceConfig> result = new LinkedList<>();
-            for (String ifname : status.getNetInterfaces()) {
-                GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifname);
-                status.fillWithStatusProperties(ifname, gwtConfig);
-
-                result.add(gwtConfig);
+            for (String ifName : systemInterfaceNames) {
+                if (configuredInterfaceNames.contains(ifName)) {
+                    GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifName);
+                    status.fillWithStatusProperties(ifName, gwtConfig);
+                    result.add(gwtConfig);
+                } else {
+                    Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
+                    if (ifType.isPresent()) {
+                        GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
+                                ifType.get());
+                        status.fillWithStatusProperties(ifName, gwtConfig);
+                        result.add(gwtConfig);
+                    } else {
+                        logger.warn("Cannot create configuration for {}", ifName);
+                    }
+                }
             }
 
             return result;

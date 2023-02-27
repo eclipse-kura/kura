@@ -71,7 +71,7 @@ if len(file_paths_to_edit) < 1:
 (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
 
 for path in file_paths_to_edit:
-    with open(path, 'r+', encoding='utf-8-sig') as file_to_edit:
+    with open(path, 'r+', encoding='utf-8') as file_to_edit:
         print(LOG_MSG_PREFIX + '- ' + path + ': starting editing')
 
         content = file_to_edit.read()

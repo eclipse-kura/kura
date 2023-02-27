@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.junit.Test;
 
@@ -66,6 +67,13 @@ public class NetworkConfigurationServiceCommonTest {
         givenFullProperties();
         whenTocdIsRetrieved();
         thenComponentDefinitionHasModemProperties();
+    }
+
+    @Test
+    public void pppNumberShouldBeAnInteger() throws KuraException {
+        givenFullProperties();
+        whenTocdIsRetrieved();
+        thenPppNumIsInteger();
     }
 
     private void givenPropertiesWithoutInterfaces() {
@@ -492,6 +500,13 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasModemProperties() {
         assertEquals(28, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
+    }
+
+    private void thenPppNumIsInteger() {
+        Optional<AD> adOptional = this.ads.stream().filter(ad -> ad.getName().equals("net.interface.1-4.config.pppNum"))
+                .findFirst();
+        assertTrue(adOptional.isPresent());
+        assertEquals(Scalar.INTEGER, adOptional.get().getType());
     }
 
 }

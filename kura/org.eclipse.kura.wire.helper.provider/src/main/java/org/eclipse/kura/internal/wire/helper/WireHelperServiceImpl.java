@@ -145,9 +145,9 @@ public final class WireHelperServiceImpl implements WireHelperService {
         }
 
         if (wireComponentRef.getProperty(SERVICE_PID) instanceof java.util.ArrayList) {
-            throw new RuntimeException(
-                    "The service PID of {} is an array. It should be a string. (Maybe you used the same PID twice in OSGi metadata?)",
-                    wireComponentRef.getClass().getCanonicalName());
+            throw new RuntimeException(String.format(
+                    "The service PID of %s is an array. It should be a string. (Maybe you used the same PID twice in OSGi metadata?)",
+                    wireComponentRef.getClass().getCanonicalName()));
         }
         final String servicePid = (String) wireComponentRef.getProperty(SERVICE_PID);
         final String kuraServicePid = (String) wireComponentRef.getProperty(KURA_SERVICE_PID);

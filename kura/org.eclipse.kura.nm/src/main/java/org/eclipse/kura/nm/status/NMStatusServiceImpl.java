@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
@@ -30,11 +32,17 @@ public class NMStatusServiceImpl implements NetworkStatusService {
 
     private static final Logger logger = LoggerFactory.getLogger(NMStatusServiceImpl.class);
 
+    private CommandExecutorService commandExecutorService;
+
     private NMDbusConnector nmDbusConnector;
     private NetworkService networkService;
 
     public void setNetworkService(NetworkService networkService) {
         this.networkService = networkService;
+    }
+
+    public void setCommandExecutorService(CommandExecutorService executorService) {
+        this.commandExecutorService = executorService;
     }
 
     public NMStatusServiceImpl() {
@@ -77,11 +85,12 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName) {
         Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService);
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService,
+                    this.commandExecutorService);
             if (Objects.nonNull(status)) {
                 networkInterfaceStatus = Optional.of(status);
             }
-        } catch (DBusException e) {
+        } catch (DBusException | KuraException e) {
             logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
         }
 

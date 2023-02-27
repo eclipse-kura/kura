@@ -20,10 +20,17 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
+import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.NMStatusConverter;
+import org.eclipse.kura.nm.status.SupportedChannelsProperties;
+import org.eclipse.kura.nm.status.WirelessProperties;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -36,6 +43,7 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +55,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_GENERIC_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device.Generic";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
@@ -130,8 +139,8 @@ public class NMDbusConnector {
         return supportedDeviceNames;
     }
 
-    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService)
-            throws DBusException {
+    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService,
+            CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         Device device = getDeviceByIpIface(interfaceName);
         NMDeviceType deviceType = getDeviceType(device);
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
@@ -156,6 +165,30 @@ public class NMDbusConnector {
                     usbNetDevice);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
             return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+            Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Wireless.class);
+            Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    wirelessDevice.getObjectPath(), Properties.class);
+
+            List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
+
+            DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                    "ActiveAccessPoint");
+            Optional<Properties> activeAccessPoint = Optional.empty();
+
+            String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
+            List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName, commandExecutorService);
+
+            if (!activeAccessPointPath.getPath().equals("/")) {
+                activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        activeAccessPointPath.getPath(), Properties.class));
+            }
+
+            return NMStatusConverter.buildWirelessStatus(interfaceName,
+                    new WirelessProperties(deviceProperties, wirelessDeviceProperties), ip4configProperties,
+                    new AccessPointsProperties(activeAccessPoint, accessPoints), usbNetDevice,
+                    new SupportedChannelsProperties(countryCode, supportedChannels));
         }
 
         return null;
@@ -305,6 +338,21 @@ public class NMDbusConnector {
         }
 
         return devices;
+    }
+
+    private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
+        List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
+
+        List<Properties> accessPointProperties = new ArrayList<>();
+
+        for (DBusPath path : accessPointPaths) {
+            Properties apProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                    Properties.class);
+            accessPointProperties.add(apProperties);
+
+        }
+
+        return accessPointProperties;
     }
 
     private NMDeviceState getDeviceState(Device device) throws DBusException {

@@ -13,11 +13,15 @@
 package org.eclipse.kura.nm.status;
 
 import java.net.UnknownHostException;
-import java.util.EnumMap;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
@@ -29,7 +33,19 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
+import org.eclipse.kura.net.status.wifi.WifiCapability;
+import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
+import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.wifi.WifiMode;
+import org.eclipse.kura.net.status.wifi.WifiRadioMode;
+import org.eclipse.kura.net.status.wifi.WifiSecurity;
+import org.eclipse.kura.net.wifi.WifiChannel;
+import org.eclipse.kura.nm.NM80211ApSecurityFlags;
+import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
+import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
@@ -42,22 +58,24 @@ public class NMStatusConverter {
     private static final Logger logger = LoggerFactory.getLogger(NMStatusConverter.class);
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
+    private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
-    private static final EnumMap<NMDeviceState, NetworkInterfaceState> DEVICE_STATE_CONVERTER = initDeviceStateConverter();
+    private static final String NM_DEVICE_PROPERTY_STATE = "State";
 
     private NMStatusConverter() {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties,
-            Optional<UsbNetDevice> usbNetDevice) {
+    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName, Properties deviceProperties,
+            Optional<Properties> ip4configProperties, Optional<UsbNetDevice> usbNetDevice) {
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        builder.withState(deviceStateConvert(deviceState));
         builder.withIsLinkUp(NMDeviceState.isConnected(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
@@ -69,16 +87,38 @@ public class NMStatusConverter {
 
     }
 
-    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties) {
+    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName, Properties deviceProperties,
+            Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(true);
 
-        NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, "State"));
-        builder.withState(DEVICE_STATE_CONVERTER.get(deviceState));
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        builder.withState(deviceStateConvert(deviceState));
 
         setDeviceStatus(builder, deviceProperties);
         setIP4Status(builder, ip4configProperties);
+
+        return builder.build();
+    }
+
+    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, WirelessProperties deviceProperties,
+            Optional<Properties> ip4configProperties, AccessPointsProperties accessPointsProperties,
+            Optional<UsbNetDevice> usbNetDevice, SupportedChannelsProperties supportedChannelsProperties) {
+        WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
+        builder.withName(interfaceName).withVirtual(false);
+
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(deviceProperties.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        builder.withState(deviceStateConvert(deviceState));
+
+        builder.withUsbNetDevice(usbNetDevice);
+
+        setDeviceStatus(builder, deviceProperties.getDeviceProperties());
+        setIP4Status(builder, ip4configProperties);
+        setWifiStatus(builder, deviceProperties.getWirelessDeviceProperties(),
+                accessPointsProperties.getActiveAccessPoint(), accessPointsProperties.getAvailableAccessPoints(),
+                supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
         return builder.build();
     }
@@ -109,6 +149,244 @@ public class NMStatusConverter {
                 logger.error("Failed to set IP4 address.", e);
             }
         });
+    }
+
+    private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Properties wirelessDeviceProperties,
+            Optional<Properties> activeAccessPoint, List<Properties> accessPoints, String countryCode,
+            List<WifiChannel> supportedChannels) {
+        NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
+        builder.withMode(wifiModeConvert(mode));
+
+        List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
+        builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
+        builder.withSupportedRadioModes(wifiRadioModesConvert(capabilities));
+
+        Pair<List<Integer>, List<Long>> kuraSupportedChannels = wifiChannelsConvert(supportedChannels);
+        builder.withSupportedChannels(kuraSupportedChannels.getLeft());
+        builder.withSupportedFrequencies(kuraSupportedChannels.getRight());
+
+        builder.withCountryCode(countryCode);
+
+        if (mode == NM80211Mode.NM_802_11_MODE_AP) {
+            if (!activeAccessPoint.isPresent()) {
+                logger.warn("No access point found for interface in MASTER mode.");
+                return;
+            }
+            // Only one AP should be available in MASTER mode
+            WifiAccessPoint ap = wifiAccessPointConvert(accessPoints.get(0));
+            builder.withActiveWifiAccessPoint(Optional.of(ap));
+        } else {
+            if (activeAccessPoint.isPresent()) {
+                WifiAccessPoint ap = wifiAccessPointConvert(activeAccessPoint.get());
+                builder.withActiveWifiAccessPoint(Optional.of(ap));
+            }
+        }
+
+        builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));
+    }
+
+    private static Pair<List<Integer>, List<Long>> wifiChannelsConvert(List<WifiChannel> supportedChannels) {
+        List<Integer> kuraChannels = new ArrayList<>();
+        List<Long> kuraFrequencies = new ArrayList<>();
+
+        for (WifiChannel channel : supportedChannels) {
+            kuraChannels.add(channel.getChannel());
+            kuraFrequencies.add(channel.getFrequency().longValue());
+        }
+
+        return Pair.of(kuraChannels, kuraFrequencies);
+    }
+
+    private static Set<WifiRadioMode> wifiRadioModesConvert(List<NMDeviceWifiCapabilities> capabilities) {
+        List<WifiRadioMode> kuraRadioModes = new ArrayList<>();
+
+        if (!capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_VALID)) {
+            // Device doesn't report frequency capabilities
+            kuraRadioModes.add(WifiRadioMode.UNKNOWN);
+            return new HashSet<>(kuraRadioModes);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_2GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211B);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211G);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_5GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211A);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211_AC);
+        }
+
+        if (capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_2GHZ)
+                && capabilities.contains(NMDeviceWifiCapabilities.NM_WIFI_DEVICE_CAP_FREQ_5GHZ)) {
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT20);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT40_ABOVE);
+            kuraRadioModes.add(WifiRadioMode.RADIO_MODE_80211NHT40_BELOW);
+        }
+
+        return new HashSet<>(kuraRadioModes);
+    }
+
+    private static List<WifiAccessPoint> wifiAccessPointConvert(List<Properties> nmAccessPoints) {
+        List<WifiAccessPoint> kuraAccessPoints = new ArrayList<>();
+
+        for (Properties prop : nmAccessPoints) {
+            kuraAccessPoints.add(wifiAccessPointConvert(prop));
+        }
+
+        return kuraAccessPoints;
+    }
+
+    private static WifiAccessPoint wifiAccessPointConvert(Properties nmAccessPoint) {
+        WifiAccessPointBuilder builder = WifiAccessPoint.builder();
+
+        byte[] rawSsid = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Ssid");
+        String ssid = new String(rawSsid, StandardCharsets.UTF_8);
+        builder.withSsid(ssid);
+
+        NM80211Mode mode = NM80211Mode.fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Mode"));
+        builder.withMode(wifiModeConvert(mode));
+
+        String rawHwAddress = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "HwAddress");
+        builder.withHardwareAddress(getMacAddressBytes(rawHwAddress));
+
+        UInt32 frequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
+        builder.withFrequency(frequency.longValue());
+        builder.withChannel(channelFrequencyConvert(frequency));
+
+        UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
+        builder.withMaxBitrate(maxBitrate.longValue());
+
+        Byte strength = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
+        builder.withSignalQuality(strength.intValue());
+
+        List<NM80211ApSecurityFlags> wpaSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "WpaFlags"));
+        builder.withWpaSecurity(wifiSecurityFlagConvert(wpaSecurityFlags));
+
+        List<NM80211ApSecurityFlags> rsnSecurityFlags = NM80211ApSecurityFlags
+                .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "RsnFlags"));
+        builder.withRsnSecurity(wifiSecurityFlagConvert(rsnSecurityFlags));
+
+        return builder.build();
+    }
+
+    private static int channelFrequencyConvert(UInt32 frequency) {
+        int fMHz = frequency.intValue();
+
+        /* see 802.11 17.3.8.3.2 and Annex J */
+        if (fMHz == 2484) {
+            return 14;
+        } else if (fMHz < 2484) {
+            return (fMHz - 2407) / 5;
+        } else if (fMHz >= 4910 && fMHz <= 4980) {
+            return (fMHz - 4000) / 5;
+        } else if (fMHz < 5925) {
+            return (fMHz - 5000) / 5;
+        } else if (fMHz == 5935) {
+            return 2;
+        } else if (fMHz <= 45000) { /* DMG band lower limit */
+            /* see 802.11ax D6.1 27.3.22.2 */
+            return (fMHz - 5950) / 5;
+        } else if (fMHz >= 58320 && fMHz <= 70200) {
+            return (fMHz - 56160) / 2160;
+        } else {
+            return 0;
+        }
+    }
+
+    private static Set<WifiSecurity> wifiSecurityFlagConvert(List<NM80211ApSecurityFlags> nmSecurityFlags) {
+        List<WifiSecurity> kuraSecurityFlags = new ArrayList<>();
+
+        for (NM80211ApSecurityFlags nmFlag : nmSecurityFlags) {
+            kuraSecurityFlags.add(wifiSecurityFlagConvert(nmFlag));
+        }
+
+        return new HashSet<>(kuraSecurityFlags);
+    }
+
+    private static WifiSecurity wifiSecurityFlagConvert(NM80211ApSecurityFlags nmFlag) {
+        switch (nmFlag) {
+        case NM_802_11_AP_SEC_NONE:
+            return WifiSecurity.NONE;
+        case NM_802_11_AP_SEC_PAIR_WEP40:
+            return WifiSecurity.PAIR_WEP40;
+        case NM_802_11_AP_SEC_PAIR_WEP104:
+            return WifiSecurity.PAIR_WEP104;
+        case NM_802_11_AP_SEC_PAIR_TKIP:
+            return WifiSecurity.PAIR_TKIP;
+        case NM_802_11_AP_SEC_PAIR_CCMP:
+            return WifiSecurity.PAIR_CCMP;
+        case NM_802_11_AP_SEC_GROUP_WEP40:
+            return WifiSecurity.GROUP_WEP40;
+        case NM_802_11_AP_SEC_GROUP_WEP104:
+            return WifiSecurity.GROUP_WEP104;
+        case NM_802_11_AP_SEC_GROUP_TKIP:
+            return WifiSecurity.GROUP_TKIP;
+        case NM_802_11_AP_SEC_GROUP_CCMP:
+            return WifiSecurity.GROUP_CCMP;
+        case NM_802_11_AP_SEC_KEY_MGMT_PSK:
+            return WifiSecurity.KEY_MGMT_PSK;
+        case NM_802_11_AP_SEC_KEY_MGMT_802_1X:
+            return WifiSecurity.KEY_MGMT_802_1X;
+        case NM_802_11_AP_SEC_KEY_MGMT_SAE:
+            return WifiSecurity.KEY_MGMT_SAE;
+        case NM_802_11_AP_SEC_KEY_MGMT_OWE:
+            return WifiSecurity.KEY_MGMT_OWE;
+        case NM_802_11_AP_SEC_KEY_MGMT_OWE_TM:
+            return WifiSecurity.KEY_MGMT_OWE_TM;
+        case NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192:
+            return WifiSecurity.KEY_MGMT_EAP_SUITE_B_192;
+        default:
+            throw new IllegalArgumentException(String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
+        }
+    }
+
+    private static Set<WifiCapability> wifiCapabilitiesConvert(List<NMDeviceWifiCapabilities> nmCapabilities) {
+        List<WifiCapability> kuraCapabilities = new ArrayList<>();
+
+        for (NMDeviceWifiCapabilities nmCapability : nmCapabilities) {
+            kuraCapabilities.add(wifiCapabilitiesConvert(nmCapability));
+        }
+
+        return new HashSet<>(kuraCapabilities);
+
+    }
+
+    private static WifiCapability wifiCapabilitiesConvert(NMDeviceWifiCapabilities nmCapability) {
+        switch (nmCapability) {
+        case NM_WIFI_DEVICE_CAP_NONE:
+            return WifiCapability.NONE;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP40:
+            return WifiCapability.CIPHER_WEP40;
+        case NM_WIFI_DEVICE_CAP_CIPHER_WEP104:
+            return WifiCapability.CIPHER_WEP104;
+        case NM_WIFI_DEVICE_CAP_CIPHER_TKIP:
+            return WifiCapability.CIPHER_TKIP;
+        case NM_WIFI_DEVICE_CAP_CIPHER_CCMP:
+            return WifiCapability.CIPHER_CCMP;
+        case NM_WIFI_DEVICE_CAP_WPA:
+            return WifiCapability.WPA;
+        case NM_WIFI_DEVICE_CAP_RSN:
+            return WifiCapability.RSN;
+        case NM_WIFI_DEVICE_CAP_AP:
+            return WifiCapability.AP;
+        case NM_WIFI_DEVICE_CAP_ADHOC:
+            return WifiCapability.ADHOC;
+        case NM_WIFI_DEVICE_CAP_FREQ_VALID:
+            return WifiCapability.FREQ_VALID;
+        case NM_WIFI_DEVICE_CAP_FREQ_2GHZ:
+            return WifiCapability.FREQ_2GHZ;
+        case NM_WIFI_DEVICE_CAP_FREQ_5GHZ:
+            return WifiCapability.FREQ_5GHZ;
+        case NM_WIFI_DEVICE_CAP_MESH:
+            return WifiCapability.MESH;
+        case NM_WIFI_DEVICE_CAP_IBSS_RSN:
+            return WifiCapability.IBSS_RSN;
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Non convertible NMDeviceWifiCapabilities \"%s\"", nmCapability));
+        }
     }
 
     private static void setIP4Addresses(Properties ip4configProperties,
@@ -152,24 +430,52 @@ public class NMStatusConverter {
         return macAddressBytes;
     }
 
-    private static EnumMap<NMDeviceState, NetworkInterfaceState> initDeviceStateConverter() {
-        EnumMap<NMDeviceState, NetworkInterfaceState> map = new EnumMap<>(NMDeviceState.class);
+    private static WifiMode wifiModeConvert(NM80211Mode mode) {
+        switch (mode) {
+        case NM_802_11_MODE_ADHOC:
+            return WifiMode.ADHOC;
+        case NM_802_11_MODE_INFRA:
+            return WifiMode.INFRA;
+        case NM_802_11_MODE_AP:
+            return WifiMode.MASTER;
+        case NM_802_11_MODE_MESH:
+            return WifiMode.MESH;
+        case NM_802_11_MODE_UNKNOWN:
+        default:
+            return WifiMode.UNKNOWN;
+        }
+    }
 
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNKNOWN, NetworkInterfaceState.UNKNOWN);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNMANAGED, NetworkInterfaceState.UNMANAGED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE, NetworkInterfaceState.UNAVAILABLE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NetworkInterfaceState.DISCONNECTED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_PREPARE, NetworkInterfaceState.PREPARE);
-        map.put(NMDeviceState.NM_DEVICE_STATE_CONFIG, NetworkInterfaceState.CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH, NetworkInterfaceState.NEED_AUTH);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NetworkInterfaceState.IP_CONFIG);
-        map.put(NMDeviceState.NM_DEVICE_STATE_IP_CHECK, NetworkInterfaceState.IP_CHECK);
-        map.put(NMDeviceState.NM_DEVICE_STATE_SECONDARIES, NetworkInterfaceState.SECONDARIES);
-        map.put(NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NetworkInterfaceState.ACTIVATED);
-        map.put(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING, NetworkInterfaceState.DEACTIVATING);
-        map.put(NMDeviceState.NM_DEVICE_STATE_FAILED, NetworkInterfaceState.FAILED);
-
-        return map;
+    private static NetworkInterfaceState deviceStateConvert(NMDeviceState state) {
+        switch (state) {
+        case NM_DEVICE_STATE_UNMANAGED:
+            return NetworkInterfaceState.UNMANAGED;
+        case NM_DEVICE_STATE_UNAVAILABLE:
+            return NetworkInterfaceState.UNAVAILABLE;
+        case NM_DEVICE_STATE_DISCONNECTED:
+            return NetworkInterfaceState.DISCONNECTED;
+        case NM_DEVICE_STATE_PREPARE:
+            return NetworkInterfaceState.PREPARE;
+        case NM_DEVICE_STATE_CONFIG:
+            return NetworkInterfaceState.CONFIG;
+        case NM_DEVICE_STATE_NEED_AUTH:
+            return NetworkInterfaceState.NEED_AUTH;
+        case NM_DEVICE_STATE_IP_CONFIG:
+            return NetworkInterfaceState.IP_CONFIG;
+        case NM_DEVICE_STATE_IP_CHECK:
+            return NetworkInterfaceState.IP_CHECK;
+        case NM_DEVICE_STATE_SECONDARIES:
+            return NetworkInterfaceState.SECONDARIES;
+        case NM_DEVICE_STATE_ACTIVATED:
+            return NetworkInterfaceState.ACTIVATED;
+        case NM_DEVICE_STATE_DEACTIVATING:
+            return NetworkInterfaceState.DEACTIVATING;
+        case NM_DEVICE_STATE_FAILED:
+            return NetworkInterfaceState.FAILED;
+        case NM_DEVICE_STATE_UNKNOWN:
+        default:
+            return NetworkInterfaceState.UNKNOWN;
+        }
     }
 
 }

@@ -186,85 +186,85 @@ public class NMDeviceStateTest {
     
     @Test
     public void conversionWorksForStateUnknownToUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
         thenStateUIntShouldBeEqualTo(new UInt32(0));
     }
 
     @Test
     public void conversionWorksForStateUnmanagedUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNMANAGED);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNMANAGED);
         thenStateUIntShouldBeEqualTo(new UInt32(10));
     }
 
     @Test
     public void conversionWorksForStateUnavailableUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE);
         thenStateUIntShouldBeEqualTo(new UInt32(20));
     }
 
     @Test
     public void conversionWorksForStateDisconnectedUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
         thenStateUIntShouldBeEqualTo(new UInt32(30));
     }
 
     @Test
     public void conversionWorksForStatePrepareUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_PREPARE);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_PREPARE);
         thenStateUIntShouldBeEqualTo(new UInt32(40));
     }
 
     @Test
     public void conversionWorksForStateConfigUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_CONFIG);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_CONFIG);
         thenStateUIntShouldBeEqualTo(new UInt32(50));
     }
 
     @Test
     public void conversionWorksForStateNeedAuthUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH);
         thenStateUIntShouldBeEqualTo(new UInt32(60));
     }
 
     @Test
     public void conversionWorksForStateIpConfigUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG);
         thenStateUIntShouldBeEqualTo(new UInt32(70));
     }
 
     @Test
     public void conversionWorksForStateIpCheckUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CHECK);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CHECK);
         thenStateUIntShouldBeEqualTo(new UInt32(80));
     }
 
     @Test
     public void conversionWorksForStateSecondariesUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_SECONDARIES);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_SECONDARIES);
         thenStateUIntShouldBeEqualTo(new UInt32(90));
     }
 
     @Test
     public void conversionWorksForStateActivatedUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
         thenStateUIntShouldBeEqualTo(new UInt32(100));
     }
 
     @Test
     public void conversionWorksForStateDeactivatingUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING);
         thenStateUIntShouldBeEqualTo(new UInt32(110));
     }
 
     @Test
     public void conversionWorksForStateFailedUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_FAILED);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_FAILED);
         thenStateUIntShouldBeEqualTo(new UInt32(120));
     }
 
     @Test
     public void conversionWorksForStateUnknownDefaultUINT() {
-        whenNMDeviceStateStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
         thenStateUIntShouldBeEqualTo(new UInt32(0));
     }
 
@@ -272,7 +272,7 @@ public class NMDeviceStateTest {
         this.state = NMDeviceState.fromUInt32(state);
     }
     
-    public void whenNMDeviceStateStateIsPassed(NMDeviceState state) {
+    public void whenNMDeviceStateIsPassed(NMDeviceState state) {
         this.stateInt = NMDeviceState.toUInt32(state);
     }
 

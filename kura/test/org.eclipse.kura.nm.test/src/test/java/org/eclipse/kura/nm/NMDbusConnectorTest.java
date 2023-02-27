@@ -92,7 +92,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
 
-        thenGetDbusConnectionIsMockedConnection();
+        thenGetDbusConnectionReturns(this.dbusConnectionInternal);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class NMDbusConnectorTest {
         whenGetInterfacesIsCalled();
 
         thenNoExceptionIsThrown();
-        thenReturnedDevicesAre(Arrays.asList("wlan0", "eth0"));
+        thenGetInterfacesReturn(Arrays.asList("wlan0", "eth0"));
     }
 
     @Test
@@ -142,8 +142,8 @@ public class NMDbusConnectorTest {
         whenApplyIsCalled();
 
         thenNoExceptionIsThrown();
-        thenNetworkSettingsDoNotChangeForDevice("eth0");
-        thenNetworkSettingsDoNotChangeForDevice("wlan0");
+        thenNetworkSettingsDidNotChangeForDevice("eth0");
+        thenNetworkSettingsDidNotChangeForDevice("wlan0");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(netConfig);
 
         thenNoExceptionIsThrown();
-        thenNetworkSettingsDoNotChangeForDevice("unused0");
+        thenNetworkSettingsDidNotChangeForDevice("unused0");
     }
 
     @Test
@@ -207,7 +207,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("eth0");
-        thenNetworkManagerCalledActivateConnection("eth0");
+        thenActivateConnectionIsCalledFor("eth0");
     }
 
     @Test
@@ -227,7 +227,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
-        thenNetworkManagerCalledAddAndActivateConnection("eth0");
+        thenAddAndActivateConnectionIsCalledFor("eth0");
     }
 
     @Test
@@ -257,7 +257,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
-        thenNetworkSettingsDoNotChangeForDevice("lo");
+        thenNetworkSettingsDidNotChangeForDevice("lo");
     }
 
     @Test
@@ -272,7 +272,7 @@ public class NMDbusConnectorTest {
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
-        thenNetworkSettingsDoNotChangeForDevice("lo");
+        thenNetworkSettingsDidNotChangeForDevice("lo");
     }
 
     @Test
@@ -560,8 +560,8 @@ public class NMDbusConnectorTest {
         assertTrue(hasNoSuchElementExceptionThrown);
     }
 
-    public void thenGetDbusConnectionIsMockedConnection() {
-        assertEquals(this.dbusConnection, this.dbusConnectionInternal);
+    public void thenGetDbusConnectionReturns(DBusConnection dbusConnection) {
+        assertEquals(this.dbusConnection, dbusConnection);
     }
 
     public void thenCheckVersionIsRun() throws DBusException {
@@ -573,7 +573,7 @@ public class NMDbusConnectorTest {
         verify(this.mockedNetworkManager, atLeastOnce()).GetPermissions();
     }
 
-    public void thenReturnedDevicesAre(List<String> list) {
+    public void thenGetInterfacesReturn(List<String> list) {
         assertEquals(list, this.internalStringList);
     }
 
@@ -587,15 +587,15 @@ public class NMDbusConnectorTest {
         verify(connect).Update(any());
     }
 
-    public void thenNetworkManagerCalledActivateConnection(String netInterface) throws DBusException {
+    public void thenActivateConnectionIsCalledFor(String netInterface) throws DBusException {
         verify(this.mockedNetworkManager).ActivateConnection(any(), any(), any());
     }
 
-    public void thenNetworkManagerCalledAddAndActivateConnection(String netInterface) throws DBusException {
+    public void thenAddAndActivateConnectionIsCalledFor(String netInterface) throws DBusException {
         verify(this.mockedNetworkManager).AddAndActivateConnection(any(), any(), any());
     }
 
-    public void thenNetworkSettingsDoNotChangeForDevice(String netInterface) throws DBusException {
+    public void thenNetworkSettingsDidNotChangeForDevice(String netInterface) throws DBusException {
         Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
                 "/mock/device/" + netInterface, Connection.class);
         verify(connect, never()).Update(any());

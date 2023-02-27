@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # Copyright (c) 2023 Eurotech and/or its affiliates and others
 #
@@ -25,7 +26,7 @@ def get_eth_wlan_interfaces_names():
 
     Returns:
         tuple of lists (eth_names, wlan_names) where:
-            'eth_names' are the found ethernet interface names,
+            'eth_names' are the found ethernet interface names;
             'wlan_names' are the found wireless interface names, might be an empty list.
     """
     cmd_output = subprocess.check_output(['nmcli', 'dev']).decode(sys.stdout.encoding).strip()
@@ -73,14 +74,18 @@ for path in file_paths_to_edit:
     with open(path, 'r+', encoding='utf-8-sig') as file_to_edit:
         print(LOG_MSG_PREFIX + '- ' + path + ': starting editing')
 
+        content = file_to_edit.read()
+
         for i, eth_name in enumerate(eth_names):
-            content = file_to_edit.read()
-            replaced_content = content.replace('eth' + str(i), eth_name)
+            content = content.replace('eth' + str(i), eth_name)
             print(LOG_MSG_PREFIX + '- ' + path + ': replaced eth' + str(i) + ' with ' + eth_name)
 
         for i, wlan_name in enumerate(wlan_names):
-            replaced_content = replaced_content.replace('wlan' + str(i), wlan_name)
+            content = content.replace('wlan' + str(i), wlan_name)
             print(LOG_MSG_PREFIX + '- ' + path + ': replaced wlan' + str(i) + ' with ' + wlan_name)
         
-        file_to_edit.write(replaced_content)
+        file_to_edit.seek(0)
+        file_to_edit.truncate()
+        file_to_edit.write(content)
+        
         print(LOG_MSG_PREFIX + '- ' + path + ': successfully edited')

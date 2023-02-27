@@ -11,6 +11,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -45,6 +47,7 @@ import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class NMDbusConnectorTest {
 
@@ -422,7 +425,7 @@ public class NMDbusConnectorTest {
             doReturn(mockedDevice1Connection).when(this.dbusConnection).getRemoteObject(
                     eq("org.freedesktop.NetworkManager"), eq("/mock/device/" + interfaceName), eq(Connection.class));
         } else {
-            doReturn(null).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+            doThrow(new DBusExecutionException("initiate mocked throw")).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                     eq("/mock/device/" + interfaceName), eq(Connection.class));
         }
 

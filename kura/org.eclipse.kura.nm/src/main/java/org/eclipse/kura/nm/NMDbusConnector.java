@@ -372,14 +372,9 @@ public class NMDbusConnector {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 
             DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
-
-            Connection connection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(),
-                    Connection.class);
-            if (connection == null) {
-                return Optional.empty();
-            } else {
-                return Optional.of(connection);
-            }
+            
+            return Optional
+                    .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();

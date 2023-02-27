@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.status;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,7 +34,6 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.slf4j.Logger;
@@ -216,26 +214,6 @@ public class NetworkStatusServiceAdapter {
         }
 
         return "";
-    }
-
-    public List<GwtWifiChannelFrequency> getSupportedChannels(String interfaceName) {
-        Optional<NetworkInterfaceStatus> netInterface = this.networkStatusService.getNetworkStatus(interfaceName);
-        if (!netInterface.isPresent() || netInterface.get() instanceof WifiInterfaceStatus == false) {
-            return new ArrayList<>();
-        }
-        WifiInterfaceStatus wifiInterfaceInfo = (WifiInterfaceStatus) netInterface.get();
-        List<Integer> wifiChannels = wifiInterfaceInfo.getSupportedChannels();
-        List<Long> wifiFrequencies = wifiInterfaceInfo.getSupportedFrequencies();
-
-        List<GwtWifiChannelFrequency> gwtChannels = new ArrayList<>();
-        for (int i = 0; i < wifiChannels.size(); i++) {
-            Integer channel = wifiChannels.get(i);
-            Long freq = wifiFrequencies.get(i);
-
-            gwtChannels.add(new GwtWifiChannelFrequency(channel, freq.intValue()));
-        }
-
-        return gwtChannels;
     }
 
 }

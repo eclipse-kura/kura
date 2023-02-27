@@ -175,7 +175,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
+            // TODO
+            return new ArrayList<>();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
         }

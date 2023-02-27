@@ -54,12 +54,12 @@ public class NMConnectionChangedHandler implements DBusSigHandler {
 
     }
 
-    public Map<String, Object> getConfiguation() {
-        return configuation;
+    public Map<String, Object> getConfiguration() {
+        return configuration;
     }
 
-    public void setConfiguation(Map<String, Object> configuation) {
-        this.configuation = configuation;
+    public void setConfiguration(Map<String, Object> configuration) {
+        this.configuration = configuration;
     }
 
 }

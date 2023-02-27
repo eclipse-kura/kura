@@ -19,8 +19,6 @@ import static org.eclipse.kura.wire.graph.Constants.EMITTER_PORT_COUNT_PROP_NAME
 import static org.eclipse.kura.wire.graph.Constants.RECEIVER_PORT_COUNT_PROP_NAME;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -30,7 +28,6 @@ import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-
 
 /**
  * The Class WireHelperServiceImpl is the implementation of
@@ -148,8 +145,8 @@ public final class WireHelperServiceImpl implements WireHelperService {
         }
 
         if (wireComponentRef.getProperty(SERVICE_PID) instanceof java.util.ArrayList) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    "The service PID of {} is an array. It should be a string. (Maybe two components with the same PID?)",
+            throw new RuntimeException(
+                    "The service PID of {} is an array. It should be a string. (Maybe you used the same PID twice in OSGi metadata?)",
                     wireComponentRef.getClass().getCanonicalName());
         }
         final String servicePid = (String) wireComponentRef.getProperty(SERVICE_PID);

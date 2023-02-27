@@ -372,7 +372,6 @@ public class NMDbusConnector {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 
             DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
-            
             return Optional
                     .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {

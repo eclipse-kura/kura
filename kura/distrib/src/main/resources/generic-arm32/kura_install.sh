@@ -76,7 +76,7 @@ if python3 -V > /dev/null 2>&1
 then
     python3 ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/framework/kura.properties
 else
-    echo "python3 not found. ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml, ${INSTALL_DIR}/kura/install/iptables.init, and ${INSTALL_DIR}/kura/framework/kura.properties may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
+    echo "python3 not found. snapshot_0.xml, iptables.init, and kura.properties files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
 fi
 
 # copy snapshot_0.xml

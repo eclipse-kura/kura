@@ -13,8 +13,6 @@
 
 package org.eclipse.kura.nm;
 
-import java.util.Map;
-
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.dbus.messages.DBusSignal;
@@ -27,8 +25,6 @@ import org.slf4j.LoggerFactory;
 public class NMConnectionChangedHandler implements DBusSigHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(NMConnectionChangedHandler.class);
-
-    private Map<String, Object> configuation;
 
     private final NMDbusConnector nmDbusConnector;
 
@@ -43,7 +39,7 @@ public class NMConnectionChangedHandler implements DBusSigHandler {
 
             logger.info("Detected external network change, rollbacking to the cached configuration!");
             try {
-                this.nmDbusConnector.apply(configuation);
+                this.nmDbusConnector.apply();
             } catch (DBusException e) {
                 logger.error("Couldn't apply network configuration settings due to: ", e);
             }
@@ -52,14 +48,6 @@ public class NMConnectionChangedHandler implements DBusSigHandler {
             throw new IllegalArgumentException("Signal " + signal.getClass().getName() + " not supported");
         }
 
-    }
-
-    public Map<String, Object> getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Map<String, Object> configuration) {
-        this.configuration = configuration;
     }
 
 }

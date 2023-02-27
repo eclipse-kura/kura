@@ -201,7 +201,6 @@ public class NMDbusConnector {
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         doApply(networkConfiguration);
         this.cachedConfiguration = networkConfiguration;
-        this.nmConnectionChangedHandler.setConfiguation(this.cachedConfiguration);
     }
 
     public synchronized void apply() throws DBusException {

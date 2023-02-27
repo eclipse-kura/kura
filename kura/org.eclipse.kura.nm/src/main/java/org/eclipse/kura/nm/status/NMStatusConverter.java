@@ -162,8 +162,6 @@ public class NMStatusConverter {
         builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
         builder.withSupportedRadioModes(wifiRadioModesConvert(capabilities));
 
-        // builder.withSupportedBitrates
-
         Pair<List<Integer>, List<Long>> kuraSupportedChannels = wifiChannelsConvert(supportedChannels);
         builder.withSupportedChannels(kuraSupportedChannels.getLeft());
         builder.withSupportedFrequencies(kuraSupportedChannels.getRight());

@@ -183,7 +183,7 @@ public class NetworkConfigurationServiceCommon {
 
         tocd.addAD(buildAttributeDefinition(
                 String.format(PREFIX + "%s.config.pppNum", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_MODEM_PPP_NUM, Tscalar.STRING));
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_PPP_NUM, Tscalar.INTEGER));
     }
 
     private static void getWifiDefinition(Tocd tocd, String ifaceName) {

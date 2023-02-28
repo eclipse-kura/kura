@@ -2,6 +2,7 @@ package org.eclipse.kura.nm.status;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -20,30 +21,63 @@ public class NMStatusConverterTest {
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
 
+    Properties mockProperties = mock(Properties.class);
+    NetworkInterfaceStatus resultingStatus;
+
+    private boolean nullPointerExceptionWasThrown = false;
+
+    @Test
+    public void buildLoopbackStatusThrowsWithEmptyProperties() {
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockProperties, Optional.empty());
+
+        thenNullPointerExceptionIsThrown();
+    }
+
     @Test
     public void buildLoopbackStatusWorksWithoutIPV4Info() {
-        Properties mockProperties = mock(Properties.class);
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+        givenDevicePropertiesWith("Driver", "awesomeDriver");
+        givenDevicePropertiesWith("DriverVersion", "awesomeDriverVersion");
+        givenDevicePropertiesWith("Mtu", new UInt32(42));
+        givenDevicePropertiesWith("HwAddress", "00:00:00:00:00:00");
 
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("State")))
-                .thenReturn(NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("Autoconnect"))).thenReturn(true);
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("FirmwareVersion"))).thenReturn("awesomeFirmwareVersion");
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("Driver"))).thenReturn("awesomeDriver");
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("DriverVersion"))).thenReturn("awesomeDriverVersion");
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("Mtu"))).thenReturn(new UInt32(42));
-        when(mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq("HwAddress"))).thenReturn("00:00:00:00:00:00");
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockProperties, Optional.empty());
 
-        NetworkInterfaceStatus status = NMStatusConverter.buildLoopbackStatus("lo", mockProperties, Optional.empty());
+        thenNoExceptionIsThrown();
 
-        assertTrue(status.isAutoConnect());
-        assertEquals(NetworkInterfaceState.UNMANAGED, status.getState());
-        assertEquals("awesomeFirmwareVersion", status.getFirmwareVersion());
-        assertEquals("awesomeDriver", status.getDriver());
-        assertEquals("awesomeDriverVersion", status.getDriverVersion());
-        assertEquals(42, status.getMtu());
-        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0 }, status.getHardwareAddress());
+        assertTrue(this.resultingStatus.isAutoConnect());
+        assertEquals(NetworkInterfaceState.UNMANAGED, this.resultingStatus.getState());
+        assertEquals("awesomeFirmwareVersion", this.resultingStatus.getFirmwareVersion());
+        assertEquals("awesomeDriver", this.resultingStatus.getDriver());
+        assertEquals("awesomeDriverVersion", this.resultingStatus.getDriverVersion());
+        assertEquals(42, this.resultingStatus.getMtu());
+        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0 }, this.resultingStatus.getHardwareAddress());
 
-        assertEquals(Optional.empty(), status.getInterfaceIp4Addresses());
+        assertEquals(Optional.empty(), this.resultingStatus.getInterfaceIp4Addresses());
+    }
+
+    private void givenDevicePropertiesWith(String propertyName, Object propertyValue) {
+        when(this.mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq(propertyName)))
+                .thenReturn(propertyValue);
+    }
+
+    private void whenBuildLoopbackStatusIsCalledWith(String ifaceName, Properties deviceProps,
+            Optional<Properties> ip4Properties) {
+        try {
+            this.resultingStatus = NMStatusConverter.buildLoopbackStatus(ifaceName, deviceProps, ip4Properties);
+        } catch (NullPointerException e) {
+            this.nullPointerExceptionWasThrown = true;
+        }
+    }
+
+    private void thenNoExceptionIsThrown() {
+        assertFalse(this.nullPointerExceptionWasThrown);
+    }
+
+    private void thenNullPointerExceptionIsThrown() {
+        assertTrue(this.nullPointerExceptionWasThrown);
     }
 
 }

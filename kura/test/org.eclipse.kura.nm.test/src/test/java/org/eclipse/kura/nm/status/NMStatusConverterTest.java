@@ -10,16 +10,21 @@ import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
 import org.junit.Test;
 
 public class NMStatusConverterTest {
@@ -88,8 +93,8 @@ public class NMStatusConverterTest {
         givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
 
         givenIpv4ConfigPropertiesWith("Gateway", "127.0.0.1");
-        givenIpv4ConfigPropertiesWith("NameserverData", Arrays.asList());
-        givenIpv4ConfigPropertiesWith("AddressData", Arrays.asList());
+        givenIpv4ConfigPropertiesWithDNS("192.168.1.1");
+        givenIpv4ConfigPropertiesWithAddress("127.0.0.1", new UInt32(24));
 
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.of(this.mockIp4ConfigProperties));
 
@@ -105,6 +110,8 @@ public class NMStatusConverterTest {
                 new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
 
         thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("127.0.0.1"));
+        thenResultingIp4InterfaceDNSIs(IPAddress.parseHostAddress("192.168.1.1"));
+        thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("127.0.0.1"), (short) 24);
     }
 
     /*
@@ -119,6 +126,23 @@ public class NMStatusConverterTest {
     private void givenIpv4ConfigPropertiesWith(String propertyName, Object propertyValue) {
         when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq(propertyName)))
                 .thenReturn(propertyValue);
+    }
+
+    private void givenIpv4ConfigPropertiesWithDNS(String ip4Address) {
+        Map<String, Variant<?>> structure = new HashMap<>();
+        structure.put("address", new Variant<>(ip4Address));
+
+        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("NameserverData")))
+                .thenReturn(Arrays.asList(structure));
+    }
+
+    private void givenIpv4ConfigPropertiesWithAddress(String address, UInt32 prefix) {
+        Map<String, Variant<?>> structure = new HashMap<>();
+        structure.put("address", new Variant<>(address));
+        structure.put("prefix", new Variant<>(prefix));
+
+        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("AddressData")))
+                .thenReturn(Arrays.asList(structure));
     }
 
     /*
@@ -186,5 +210,26 @@ public class NMStatusConverterTest {
         IPAddress gateway = address.getGateway().get();
 
         assertEquals(expectedResult, gateway);
+    }
+
+    private void thenResultingIp4InterfaceDNSIs(IPAddress expectedResult) {
+        assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
+
+        List<IP4Address> dns = address.getDnsServerAddresses();
+        assertEquals(1, dns.size());
+
+        assertEquals(expectedResult, dns.get(0));
+    }
+
+    private void thenResultingIp4InterfaceAddressIs(IPAddress expectedAddress, short expectedPrefix) {
+        assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
+
+        List<NetworkInterfaceIpAddress<IP4Address>> addresses = address.getAddresses();
+        assertEquals(1, addresses.size());
+
+        assertEquals(expectedAddress, addresses.get(0).getAddress());
+        assertEquals(expectedPrefix, addresses.get(0).getPrefix());
     }
 }

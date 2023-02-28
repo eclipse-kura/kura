@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -165,6 +166,43 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceAddressIsMissing();
     }
 
+    @Test
+    public void buildEthernetStatusWorksWithIPV4Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+        givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList("192.168.1.10"));
+        givenIpv4ConfigPropertiesWithAddress("192.168.1.82", new UInt32(24));
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDeviceProperties,
+                Optional.of(this.mockIp4ConfigProperties), Optional.empty());
+
+        thenNoExceptionIsThrown();
+
+        thenResultingNetworkInterfaceIsVirtual(false);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+
+        thenResultingEthernetInterfaceUsbDeviceIsMissing();
+        thenResultingEthernetInterfaceLinkUpIs(true);
+
+        thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
+        thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("192.168.1.10")));
+        thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
+    }
+
     /*
      * Given
      */
@@ -180,7 +218,7 @@ public class NMStatusConverterTest {
     }
 
     private void givenIpv4ConfigPropertiesWithDNS(List<String> addresses) {
-        List<Map<String, Variant<?>>> addressList = Arrays.asList();
+        List<Map<String, Variant<?>>> addressList = new ArrayList<>();
 
         for (String address : addresses) {
             Map<String, Variant<?>> structure = new HashMap<>();

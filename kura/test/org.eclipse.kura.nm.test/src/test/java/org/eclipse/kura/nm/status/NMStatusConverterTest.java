@@ -12,7 +12,9 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.nm.NMDeviceState;
@@ -72,7 +74,7 @@ public class NMStatusConverterTest {
         thenResultingNetworkInterfaceMtuIs(42);
         thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
 
-        assertEquals(Optional.empty(), this.resultingStatus.getInterfaceIp4Addresses());
+        thenResultingIp4InterfaceAddressIsMissing();
     }
 
     @Test
@@ -102,8 +104,7 @@ public class NMStatusConverterTest {
         thenResultingNetworkInterfaceHardwareAddressIs(
                 new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
 
-        assertEquals(IPAddress.parseHostAddress("127.0.0.1"),
-                this.resultingStatus.getInterfaceIp4Addresses().get().getGateway().get());
+        thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("127.0.0.1"));
     }
 
     /*
@@ -171,5 +172,19 @@ public class NMStatusConverterTest {
 
     private void thenResultingNetworkInterfaceHardwareAddressIs(byte[] expectedResult) {
         assertArrayEquals(expectedResult, this.resultingStatus.getHardwareAddress());
+    }
+
+    private void thenResultingIp4InterfaceAddressIsMissing() {
+        assertFalse(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
+    }
+
+    private void thenResultingIp4InterfaceGatewayIs(IPAddress expectedResult) {
+        assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
+
+        assertTrue(address.getGateway().isPresent());
+        IPAddress gateway = address.getGateway().get();
+
+        assertEquals(expectedResult, gateway);
     }
 }

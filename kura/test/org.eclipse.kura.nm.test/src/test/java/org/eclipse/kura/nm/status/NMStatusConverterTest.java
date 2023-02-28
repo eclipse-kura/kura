@@ -94,6 +94,10 @@ public class NMStatusConverterTest {
                 this.resultingStatus.getInterfaceIp4Addresses().get().getGateway().get());
     }
 
+    /*
+     * Given
+     */
+
     private void givenDevicePropertiesWith(String propertyName, Object propertyValue) {
         when(this.mockDeviceProperties.Get(eq(NM_DEVICE_BUS_NAME), eq(propertyName)))
                 .thenReturn(propertyValue);
@@ -104,6 +108,10 @@ public class NMStatusConverterTest {
                 .thenReturn(propertyValue);
     }
 
+    /*
+     * When
+     */
+
     private void whenBuildLoopbackStatusIsCalledWith(String ifaceName, Properties deviceProps,
             Optional<Properties> ip4Properties) {
         try {
@@ -112,6 +120,10 @@ public class NMStatusConverterTest {
             this.nullPointerExceptionWasThrown = true;
         }
     }
+
+    /*
+     * Then
+     */
 
     private void thenNoExceptionIsThrown() {
         assertFalse(this.nullPointerExceptionWasThrown);

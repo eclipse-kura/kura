@@ -8,8 +8,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Optional;
 
+import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.nm.NMDeviceState;
@@ -20,15 +23,18 @@ import org.junit.Test;
 public class NMStatusConverterTest {
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
+    private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
-    Properties mockProperties = mock(Properties.class);
+    Properties mockDeviceProperties = mock(Properties.class);
+    Properties mockIp4ConfigProperties = mock(Properties.class);
+
     NetworkInterfaceStatus resultingStatus;
 
     private boolean nullPointerExceptionWasThrown = false;
 
     @Test
     public void buildLoopbackStatusThrowsWithEmptyProperties() {
-        whenBuildLoopbackStatusIsCalledWith("lo", this.mockProperties, Optional.empty());
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.empty());
 
         thenNullPointerExceptionIsThrown();
     }
@@ -43,7 +49,7 @@ public class NMStatusConverterTest {
         givenDevicePropertiesWith("Mtu", new UInt32(42));
         givenDevicePropertiesWith("HwAddress", "00:00:00:00:00:00");
 
-        whenBuildLoopbackStatusIsCalledWith("lo", this.mockProperties, Optional.empty());
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.empty());
 
         thenNoExceptionIsThrown();
 
@@ -58,8 +64,43 @@ public class NMStatusConverterTest {
         assertEquals(Optional.empty(), this.resultingStatus.getInterfaceIp4Addresses());
     }
 
+    @Test
+    public void buildLoopbackStatusWorksWithIPV4Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+        givenDevicePropertiesWith("Driver", "awesomeDriver");
+        givenDevicePropertiesWith("DriverVersion", "awesomeDriverVersion");
+        givenDevicePropertiesWith("Mtu", new UInt32(42));
+        givenDevicePropertiesWith("HwAddress", "00:00:00:00:00:00");
+
+        givenIpv4ConfigPropertiesWith("Gateway", "127.0.0.1");
+        givenIpv4ConfigPropertiesWith("NameserverData", Arrays.asList());
+        givenIpv4ConfigPropertiesWith("AddressData", Arrays.asList());
+
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.of(this.mockIp4ConfigProperties));
+
+        thenNoExceptionIsThrown();
+
+        assertTrue(this.resultingStatus.isAutoConnect());
+        assertEquals(NetworkInterfaceState.UNMANAGED, this.resultingStatus.getState());
+        assertEquals("awesomeFirmwareVersion", this.resultingStatus.getFirmwareVersion());
+        assertEquals("awesomeDriver", this.resultingStatus.getDriver());
+        assertEquals("awesomeDriverVersion", this.resultingStatus.getDriverVersion());
+        assertEquals(42, this.resultingStatus.getMtu());
+        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0 }, this.resultingStatus.getHardwareAddress());
+
+        assertEquals(IPAddress.parseHostAddress("127.0.0.1"),
+                this.resultingStatus.getInterfaceIp4Addresses().get().getGateway().get());
+    }
+
     private void givenDevicePropertiesWith(String propertyName, Object propertyValue) {
-        when(this.mockProperties.Get(eq(NM_DEVICE_BUS_NAME), eq(propertyName)))
+        when(this.mockDeviceProperties.Get(eq(NM_DEVICE_BUS_NAME), eq(propertyName)))
+                .thenReturn(propertyValue);
+    }
+
+    private void givenIpv4ConfigPropertiesWith(String propertyName, Object propertyValue) {
+        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq(propertyName)))
                 .thenReturn(propertyValue);
     }
 

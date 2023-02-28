@@ -74,6 +74,7 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
+        thenResultingNetworkInterfaceIsVirtual(true);
         thenResultingNetworkInterfaceAutoConnectIs(true);
         thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
         thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
@@ -103,6 +104,7 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
+        thenResultingNetworkInterfaceIsVirtual(true);
         thenResultingNetworkInterfaceAutoConnectIs(false);
         thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
         thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
@@ -148,6 +150,7 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
+        thenResultingNetworkInterfaceIsVirtual(false);
         thenResultingNetworkInterfaceAutoConnectIs(true);
         thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
         thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
@@ -232,6 +235,10 @@ public class NMStatusConverterTest {
 
     private void thenNullPointerExceptionIsThrown() {
         assertTrue(this.nullPointerExceptionWasThrown);
+    }
+
+    private void thenResultingNetworkInterfaceIsVirtual(boolean expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.isVirtual());
     }
 
     private void thenResultingNetworkInterfaceAutoConnectIs(boolean expectedResult) {

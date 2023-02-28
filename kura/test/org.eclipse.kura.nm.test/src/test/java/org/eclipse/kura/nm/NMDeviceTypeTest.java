@@ -20,6 +20,7 @@ import org.junit.Test;
 public class NMDeviceTypeTest {
 
     NMDeviceType type;
+    UInt32 typeInt;
 
     @Test
     public void conversionWorksForTypeUnknown() {
@@ -225,13 +226,218 @@ public class NMDeviceTypeTest {
         thenTypeShouldBeEqualTo(NMDeviceType.NM_DEVICE_TYPE_UNKNOWN);
     }
 
+    @Test
+    public void conversionWorksForTypeUnknownUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_UNKNOWN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(0));
+    }
+
+    @Test
+    public void conversionWorksForTypeEthernetUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(1));
+    }
+
+    @Test
+    public void conversionWorksForTypeWiFiUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(2));
+    }
+
+    @Test
+    public void conversionWorksForTypeUnusedUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_UNUSED1);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(3));
+    }
+
+    @Test
+    public void conversionWorksForTypeUnused2UInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_UNUSED2);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(4));
+    }
+
+    @Test
+    public void conversionWorksForTypeBtUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_BT);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(5));
+    }
+
+    @Test
+    public void conversionWorksForTypeOlpcMeshUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_OLPC_MESH);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(6));
+    }
+
+    @Test
+    public void conversionWorksForTypeWiMaxUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_WIMAX);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(7));
+    }
+
+    @Test
+    public void conversionWorksForTypeModemUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_MODEM);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(8));
+    }
+
+    @Test
+    public void conversionWorksForTypeInfinibandUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_INFINIBAND);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(9));
+    }
+
+    @Test
+    public void conversionWorksForTypeBondUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_BOND);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(10));
+    }
+
+    @Test
+    public void conversionWorksForTypeVlanUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_VLAN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(11));
+    }
+
+    @Test
+    public void conversionWorksForTypeAdslUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_ADSL);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(12));
+    }
+
+    @Test
+    public void conversionWorksForTypeBridgeUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_BRIDGE);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(13));
+    }
+
+    @Test
+    public void conversionWorksForTypeGenericUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_GENERIC);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(14));
+    }
+
+    @Test
+    public void conversionWorksForTypeTeamUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_TEAM);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(15));
+    }
+
+    @Test
+    public void conversionWorksForTypeTunUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_TUN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(16));
+    }
+
+    @Test
+    public void conversionWorksForTypeIpTunnelUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_IP_TUNNEL);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(17));
+    }
+
+    @Test
+    public void conversionWorksForTypeMacVlanUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_MACVLAN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(18));
+    }
+
+    @Test
+    public void conversionWorksForTypeVxlanUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_VXLAN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(19));
+    }
+
+    @Test
+    public void conversionWorksForTypeVethUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_VETH);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(20));
+    }
+
+    @Test
+    public void conversionWorksForTypeMacsecUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_MACSEC);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(21));
+    }
+
+    @Test
+    public void conversionWorksForTypeDummyUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_DUMMY);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(22));
+    }
+
+    @Test
+    public void conversionWorksForTypePppUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_PPP);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(23));
+    }
+
+    @Test
+    public void conversionWorksForTypeOvsInterfaceUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_OVS_INTERFACE);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(24));
+    }
+
+    @Test
+    public void conversionWorksForTypeOvsPortUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_OVS_PORT);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(25));
+    }
+
+    @Test
+    public void conversionWorksForTypeOvsBridgeUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_OVS_BRIDGE);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(26));
+    }
+
+    @Test
+    public void conversionWorksForTypeWpanUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_WPAN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(27));
+    }
+
+    @Test
+    public void conversionWorksForType6LowPanUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_6LOWPAN);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(28));
+    }
+
+    @Test
+    public void conversionWorksForTypeWireguardUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_WIREGUARD);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(29));
+    }
+
+    @Test
+    public void conversionWorksForTypeWiFiP2pUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_WIFI_P2P);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(30));
+    }
+
+    @Test
+    public void conversionWorksForTypeVrfUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_VRF);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(31));
+    }
+
+    @Test
+    public void conversionWorksForTypeNullUInt() {
+        whenNMDeviceTypeStateIsPassed(NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+        thenTypeUInt32ShouldBeEqualTo(new UInt32(32));
+    }
+
     private void whenInt32StateIsPassed(UInt32 type) {
         this.type = NMDeviceType.fromUInt32(type);
     }
 
+    private void whenNMDeviceTypeStateIsPassed(NMDeviceType type) {
+        this.typeInt = NMDeviceType.toUInt32(type);
+    }
+
     private void thenTypeShouldBeEqualTo(NMDeviceType type) {
         assertEquals(this.type, type);
+    }
 
+    private void thenTypeUInt32ShouldBeEqualTo(UInt32 type) {
+        assertEquals(this.typeInt, type);
     }
 
 }

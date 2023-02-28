@@ -20,6 +20,7 @@ import org.junit.Test;
 public class NMDeviceStateTest {
 
     NMDeviceState state;
+    UInt32 stateInt;
 
     @Test
     public void conversionWorksForStateUnknown() {
@@ -182,9 +183,97 @@ public class NMDeviceStateTest {
         whenStateIsSetTo(NMDeviceState.NM_DEVICE_STATE_FAILED);
         thenIsConnectShouldReturn(true);
     }
+    
+    @Test
+    public void conversionWorksForStateUnknownToUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
+        thenStateUIntShouldBeEqualTo(new UInt32(0));
+    }
 
-    public void whenInt32StateIsPassed(UInt32 type) {
-        this.state = NMDeviceState.fromUInt32(type);
+    @Test
+    public void conversionWorksForStateUnmanagedUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNMANAGED);
+        thenStateUIntShouldBeEqualTo(new UInt32(10));
+    }
+
+    @Test
+    public void conversionWorksForStateUnavailableUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE);
+        thenStateUIntShouldBeEqualTo(new UInt32(20));
+    }
+
+    @Test
+    public void conversionWorksForStateDisconnectedUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+        thenStateUIntShouldBeEqualTo(new UInt32(30));
+    }
+
+    @Test
+    public void conversionWorksForStatePrepareUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_PREPARE);
+        thenStateUIntShouldBeEqualTo(new UInt32(40));
+    }
+
+    @Test
+    public void conversionWorksForStateConfigUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_CONFIG);
+        thenStateUIntShouldBeEqualTo(new UInt32(50));
+    }
+
+    @Test
+    public void conversionWorksForStateNeedAuthUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_NEED_AUTH);
+        thenStateUIntShouldBeEqualTo(new UInt32(60));
+    }
+
+    @Test
+    public void conversionWorksForStateIpConfigUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CONFIG);
+        thenStateUIntShouldBeEqualTo(new UInt32(70));
+    }
+
+    @Test
+    public void conversionWorksForStateIpCheckUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_IP_CHECK);
+        thenStateUIntShouldBeEqualTo(new UInt32(80));
+    }
+
+    @Test
+    public void conversionWorksForStateSecondariesUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_SECONDARIES);
+        thenStateUIntShouldBeEqualTo(new UInt32(90));
+    }
+
+    @Test
+    public void conversionWorksForStateActivatedUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+        thenStateUIntShouldBeEqualTo(new UInt32(100));
+    }
+
+    @Test
+    public void conversionWorksForStateDeactivatingUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING);
+        thenStateUIntShouldBeEqualTo(new UInt32(110));
+    }
+
+    @Test
+    public void conversionWorksForStateFailedUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_FAILED);
+        thenStateUIntShouldBeEqualTo(new UInt32(120));
+    }
+
+    @Test
+    public void conversionWorksForStateUnknownDefaultUINT() {
+        whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
+        thenStateUIntShouldBeEqualTo(new UInt32(0));
+    }
+
+    public void whenInt32StateIsPassed(UInt32 state) {
+        this.state = NMDeviceState.fromUInt32(state);
+    }
+    
+    public void whenNMDeviceStateIsPassed(NMDeviceState state) {
+        this.stateInt = NMDeviceState.toUInt32(state);
     }
 
     public void whenStateIsSetTo(NMDeviceState type) {
@@ -193,6 +282,10 @@ public class NMDeviceStateTest {
 
     public void thenStateShouldBeEqualTo(NMDeviceState type) {
         assertEquals(this.state, type);
+    }
+    
+    public void thenStateUIntShouldBeEqualTo(UInt32 state) {
+        assertEquals(this.stateInt, state);
     }
 
     public void thenIsConnectShouldReturn(Boolean bool) {

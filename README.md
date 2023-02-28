@@ -184,5 +184,3 @@ Check the following [link](https://www.eclipse.org/kura/downloads.php) to downlo
 ## Docker Image
 Eclipse Kura is available also as a [Docker container](https://hub.docker.com/r/eclipse/kura/)
 To easily run, use: `docker run -d -p 443:443 -t eclipse/kura`.
-
-This is just a test

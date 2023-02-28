@@ -53,13 +53,13 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
-        assertTrue(this.resultingStatus.isAutoConnect());
-        assertEquals(NetworkInterfaceState.UNMANAGED, this.resultingStatus.getState());
-        assertEquals("awesomeFirmwareVersion", this.resultingStatus.getFirmwareVersion());
-        assertEquals("awesomeDriver", this.resultingStatus.getDriver());
-        assertEquals("awesomeDriverVersion", this.resultingStatus.getDriverVersion());
-        assertEquals(42, this.resultingStatus.getMtu());
-        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0 }, this.resultingStatus.getHardwareAddress());
+        thenResultingNetworkInterfaceAutoConnectIs(true);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
+        thenResultingNetworkInterfaceDriverIs("awesomeDriver");
+        thenResultingNetworkInterfaceDriverVersionIs("awesomeDriverVersion");
+        thenResultingNetworkInterfaceMtuIs(42);
+        thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
 
         assertEquals(Optional.empty(), this.resultingStatus.getInterfaceIp4Addresses());
     }
@@ -82,13 +82,13 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
-        assertTrue(this.resultingStatus.isAutoConnect());
-        assertEquals(NetworkInterfaceState.UNMANAGED, this.resultingStatus.getState());
-        assertEquals("awesomeFirmwareVersion", this.resultingStatus.getFirmwareVersion());
-        assertEquals("awesomeDriver", this.resultingStatus.getDriver());
-        assertEquals("awesomeDriverVersion", this.resultingStatus.getDriverVersion());
-        assertEquals(42, this.resultingStatus.getMtu());
-        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0 }, this.resultingStatus.getHardwareAddress());
+        thenResultingNetworkInterfaceAutoConnectIs(true);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
+        thenResultingNetworkInterfaceDriverIs("awesomeDriver");
+        thenResultingNetworkInterfaceDriverVersionIs("awesomeDriverVersion");
+        thenResultingNetworkInterfaceMtuIs(42);
+        thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
 
         assertEquals(IPAddress.parseHostAddress("127.0.0.1"),
                 this.resultingStatus.getInterfaceIp4Addresses().get().getGateway().get());
@@ -133,4 +133,31 @@ public class NMStatusConverterTest {
         assertTrue(this.nullPointerExceptionWasThrown);
     }
 
+    private void thenResultingNetworkInterfaceAutoConnectIs(boolean expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.isAutoConnect());
+    }
+
+    private void thenResultingNetworkInterfaceStateIs(NetworkInterfaceState expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.getState());
+    }
+
+    private void thenResultingNetworkInterfaceFirmwareVersionIs(String expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.getFirmwareVersion());
+    }
+
+    private void thenResultingNetworkInterfaceDriverIs(String expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.getDriver());
+    }
+
+    private void thenResultingNetworkInterfaceDriverVersionIs(String expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.getDriverVersion());
+    }
+
+    private void thenResultingNetworkInterfaceMtuIs(int expectedResult) {
+        assertEquals(expectedResult, this.resultingStatus.getMtu());
+    }
+
+    private void thenResultingNetworkInterfaceHardwareAddressIs(byte[] expectedResult) {
+        assertArrayEquals(expectedResult, this.resultingStatus.getHardwareAddress());
+    }
 }

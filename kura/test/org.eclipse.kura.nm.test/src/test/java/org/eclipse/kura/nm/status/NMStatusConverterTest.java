@@ -93,7 +93,7 @@ public class NMStatusConverterTest {
         givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
 
         givenIpv4ConfigPropertiesWith("Gateway", "");
-        givenIpv4ConfigPropertiesWithDNS("192.168.1.1");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList());
         givenIpv4ConfigPropertiesWithAddress("127.0.0.1", new UInt32(8));
 
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.of(this.mockIp4ConfigProperties));
@@ -110,7 +110,7 @@ public class NMStatusConverterTest {
                 new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
 
         thenResultingIp4InterfaceGatewayIsMissing();
-        thenResultingIp4InterfaceDNSIs(IPAddress.parseHostAddress("192.168.1.1"));
+        thenResultingIp4InterfaceDNSIsMissing();
         thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("127.0.0.1"), (short) 8);
     }
 
@@ -128,12 +128,17 @@ public class NMStatusConverterTest {
                 .thenReturn(propertyValue);
     }
 
-    private void givenIpv4ConfigPropertiesWithDNS(String ip4Address) {
-        Map<String, Variant<?>> structure = new HashMap<>();
-        structure.put("address", new Variant<>(ip4Address));
+    private void givenIpv4ConfigPropertiesWithDNS(List<String> addresses) {
+        List<Map<String, Variant<?>>> addressList = Arrays.asList();
 
-        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("NameserverData")))
-                .thenReturn(Arrays.asList(structure));
+        for (String address : addresses) {
+            Map<String, Variant<?>> structure = new HashMap<>();
+            structure.put("address", new Variant<>(address));
+
+            addressList.add(structure);
+        }
+
+        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("NameserverData"))).thenReturn(addressList);
     }
 
     private void givenIpv4ConfigPropertiesWithAddress(String address, UInt32 prefix) {
@@ -215,6 +220,14 @@ public class NMStatusConverterTest {
 
         assertTrue(address.getGateway().isPresent());
         assertEquals(expectedResult, address.getGateway().get());
+    }
+
+    private void thenResultingIp4InterfaceDNSIsMissing() {
+        assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
+
+        List<IP4Address> dns = address.getDnsServerAddresses();
+        assertTrue(dns.isEmpty());
     }
 
     private void thenResultingIp4InterfaceDNSIs(IPAddress expectedResult) {

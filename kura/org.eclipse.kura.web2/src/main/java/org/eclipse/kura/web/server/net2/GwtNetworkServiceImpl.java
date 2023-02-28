@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
@@ -45,38 +45,54 @@ public class GwtNetworkServiceImpl {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    
+    private static Optional<List<GwtNetInterfaceConfig>> cachedConfigs = Optional.empty();
+    private static Optional<String> cachedCountryCode = Optional.empty();
 
     public static List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
-        try {
-            NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
-            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+        if (!cachedConfigs.isPresent() || recompute) {
+            logger.debug("Recomputing network configuration/status.");
 
-            List<String> configuredInterfaceNames = configuration.getConfiguredNetworkInterfaceNames();
-            List<String> systemInterfaceNames = status.getNetInterfaces();
-            List<GwtNetInterfaceConfig> result = new LinkedList<>();
-            for (String ifName : systemInterfaceNames) {
-                if (configuredInterfaceNames.contains(ifName)) {
-                    GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifName);
+            try {
+                cachedConfigs = Optional.of(getConfigsAndStatuses());
+            } catch (KuraException e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        } else {
+            logger.debug("Returning cached network configuration/status.");
+        }
+
+        return cachedConfigs.get();
+    }
+
+    private static List<GwtNetInterfaceConfig> getConfigsAndStatuses() throws GwtKuraException, KuraException {
+        NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
+        NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+
+        List<String> configuredInterfaceNames = configuration.getConfiguredNetworkInterfaceNames();
+        List<String> systemInterfaceNames = status.getNetInterfaces();
+
+        List<GwtNetInterfaceConfig> result = new LinkedList<>();
+        for (String ifName : systemInterfaceNames) {
+            if (configuredInterfaceNames.contains(ifName)) {
+                GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifName);
+                status.fillWithStatusProperties(ifName, gwtConfig);
+                result.add(gwtConfig);
+            } else {
+                Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
+                if (ifType.isPresent()) {
+                    GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
+                            ifType.get());
                     status.fillWithStatusProperties(ifName, gwtConfig);
                     result.add(gwtConfig);
                 } else {
-                    Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
-                    if (ifType.isPresent()) {
-                        GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
-                                ifType.get());
-                        status.fillWithStatusProperties(ifName, gwtConfig);
-                        result.add(gwtConfig);
-                    } else {
-                        logger.warn("Cannot create configuration for {}", ifName);
-                    }
+                    logger.warn("Cannot create configuration for {}", ifName);
                 }
             }
-
-            return result;
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
+
+        return result;
     }
 
     public static void updateNetInterfaceConfigurations(GwtNetInterfaceConfig config) throws GwtKuraException {
@@ -218,12 +234,19 @@ public class GwtNetworkServiceImpl {
     }
     
     public static String getWifiCountryCode() throws GwtKuraException {
-        try {
-            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
-            return status.getWifiCountryCode();
-        } catch (GwtKuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        if (!cachedCountryCode.isPresent()) {
+            logger.debug("Recomputing country code.");
+            try {
+                NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+                cachedCountryCode = Optional.of(status.getWifiCountryCode());
+            } catch (GwtKuraException e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        } else {
+            logger.debug("Returning cached country code.");
         }
+
+        return cachedCountryCode.get();
     }
 
 }

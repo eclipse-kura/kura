@@ -26,12 +26,6 @@ public class NMConnectionChangedHandler implements DBusSigHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(NMConnectionChangedHandler.class);
 
-    private final NMDbusConnector nmDbusConnector;
-
-    public NMConnectionChangedHandler(NMDbusConnector nmDbusConnector) {
-        this.nmDbusConnector = nmDbusConnector;
-    }
-
     @Override
     public void handle(DBusSignal signal) {
         if (signal instanceof Settings.NewConnection || signal instanceof Settings.ConnectionRemoved
@@ -39,7 +33,7 @@ public class NMConnectionChangedHandler implements DBusSigHandler {
 
             logger.info("Detected external network change, rollbacking to the cached configuration!");
             try {
-                NMDbusConnector nmDbusConnector = NMDbusConnector.getInstance(); 
+                NMDbusConnector nmDbusConnector = NMDbusConnector.getInstance();
                 nmDbusConnector.apply();
             } catch (DBusException e) {
                 logger.error("Couldn't apply network configuration settings due to: ", e);

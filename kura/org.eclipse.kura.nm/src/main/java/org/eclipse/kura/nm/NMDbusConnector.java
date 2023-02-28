@@ -84,7 +84,7 @@ public class NMDbusConnector {
 
     private Map<String, Object> cachedConfiguration = null;
 
-    private NMConnectionChangedHandler nmConnectionChangedHandler = new NMConnectionChangedHandler(this);
+    private NMConnectionChangedHandler nmConnectionChangedHandler = new NMConnectionChangedHandler();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);

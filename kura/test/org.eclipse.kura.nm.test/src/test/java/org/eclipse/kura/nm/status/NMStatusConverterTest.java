@@ -40,6 +40,17 @@ public class NMStatusConverterTest {
     }
 
     @Test
+    public void buildLoopbackStatusThrowsWithPartialProperties() {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDeviceProperties, Optional.empty());
+
+        thenNullPointerExceptionIsThrown();
+    }
+
+    @Test
     public void buildLoopbackStatusWorksWithoutIPV4Info() {
         givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
         givenDevicePropertiesWith("Autoconnect", true);

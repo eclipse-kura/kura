@@ -21,6 +21,7 @@ import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -33,10 +34,11 @@ public class NMStatusConverterTest {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
-    Properties mockDeviceProperties = mock(Properties.class);
-    Properties mockIp4ConfigProperties = mock(Properties.class);
+    private Properties mockDeviceProperties = mock(Properties.class);
+    private Properties mockIp4ConfigProperties = mock(Properties.class);
 
-    NetworkInterfaceStatus resultingStatus;
+    private NetworkInterfaceStatus resultingStatus;
+    private EthernetInterfaceStatus resultingEthernetStatus;
 
     private boolean nullPointerExceptionWasThrown = false;
 
@@ -133,6 +135,33 @@ public class NMStatusConverterTest {
         thenNullPointerExceptionIsThrown();
     }
 
+    public void buildEthernetStatusWorksWithoutIPV4Info() {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+        givenDevicePropertiesWith("Driver", "awesomeDriver");
+        givenDevicePropertiesWith("DriverVersion", "awesomeDriverVersion");
+        givenDevicePropertiesWith("Mtu", new UInt32(42));
+        givenDevicePropertiesWith("HwAddress", "00:00:00:00:00:00");
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDeviceProperties, Optional.empty(), Optional.empty());
+
+        thenNoExceptionIsThrown();
+
+        thenResultingNetworkInterfaceAutoConnectIs(true);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
+        thenResultingNetworkInterfaceDriverIs("awesomeDriver");
+        thenResultingNetworkInterfaceDriverVersionIs("awesomeDriverVersion");
+        thenResultingNetworkInterfaceMtuIs(42);
+        thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
+
+        thenResultingEthernetInterfaceUsbDeviceIsMissing();
+        thenResultingEthernetInterfaceLinkUpIs(false);
+
+        thenResultingIp4InterfaceAddressIsMissing();
+    }
+
     /*
      * Given
      */
@@ -187,6 +216,7 @@ public class NMStatusConverterTest {
         try {
             this.resultingStatus = NMStatusConverter.buildEthernetStatus(ifaceName, deviceProps, ip4Properties,
                     usbDevice);
+            this.resultingEthernetStatus = (EthernetInterfaceStatus) this.resultingStatus;
         } catch (NullPointerException e) {
             this.nullPointerExceptionWasThrown = true;
         }
@@ -281,4 +311,13 @@ public class NMStatusConverterTest {
         assertEquals(expectedAddress, addresses.get(0).getAddress());
         assertEquals(expectedPrefix, addresses.get(0).getPrefix());
     }
+
+    private void thenResultingEthernetInterfaceLinkUpIs(boolean expectedResult) {
+        assertEquals(expectedResult, this.resultingEthernetStatus.isLinkUp());
+    }
+
+    private void thenResultingEthernetInterfaceUsbDeviceIsMissing() {
+        assertFalse(this.resultingEthernetStatus.getUsbNetDevice().isPresent());
+    }
+
 }

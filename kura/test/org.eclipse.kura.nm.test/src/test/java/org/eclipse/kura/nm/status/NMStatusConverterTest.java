@@ -22,6 +22,7 @@ import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.nm.NMDeviceState;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -114,6 +115,24 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("127.0.0.1"), (short) 8);
     }
 
+    @Test
+    public void buildEthernetStatusThrowsWithEmptyProperties() {
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDeviceProperties, Optional.empty(), Optional.empty());
+
+        thenNullPointerExceptionIsThrown();
+    }
+
+    @Test
+    public void buildEthernetStatusThrowsWithPartialProperties() {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDeviceProperties, Optional.empty(), Optional.empty());
+
+        thenNullPointerExceptionIsThrown();
+    }
+
     /*
      * Given
      */
@@ -158,6 +177,16 @@ public class NMStatusConverterTest {
             Optional<Properties> ip4Properties) {
         try {
             this.resultingStatus = NMStatusConverter.buildLoopbackStatus(ifaceName, deviceProps, ip4Properties);
+        } catch (NullPointerException e) {
+            this.nullPointerExceptionWasThrown = true;
+        }
+    }
+
+    private void whenBuildEthernetStatusIsCalledWith(String ifaceName, Properties deviceProps,
+            Optional<Properties> ip4Properties, Optional<UsbNetDevice> usbDevice) {
+        try {
+            this.resultingStatus = NMStatusConverter.buildEthernetStatus(ifaceName, deviceProps, ip4Properties,
+                    usbDevice);
         } catch (NullPointerException e) {
             this.nullPointerExceptionWasThrown = true;
         }

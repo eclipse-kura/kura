@@ -230,14 +230,16 @@ public class NMStatusConverterTest {
         assertTrue(dns.isEmpty());
     }
 
-    private void thenResultingIp4InterfaceDNSIs(IPAddress expectedResult) {
+    private void thenResultingIp4InterfaceDNSIs(List<IPAddress> expectedDNSAddresses) {
         assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
         NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
 
         List<IP4Address> dns = address.getDnsServerAddresses();
-        assertEquals(1, dns.size());
+        assertEquals(expectedDNSAddresses.size(), dns.size());
 
-        assertEquals(expectedResult, dns.get(0));
+        for (IPAddress expectedDNSAddress : expectedDNSAddresses) {
+            assertTrue(dns.contains(expectedDNSAddress));
+        }
     }
 
     private void thenResultingIp4InterfaceAddressIs(IPAddress expectedAddress, short expectedPrefix) {

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -415,7 +416,9 @@ public class NMStatusConverter {
     private static void setIP4Gateway(Properties ip4configProperties,
             NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
         String gateway = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
-        ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
+        if (Objects.nonNull(gateway) && !gateway.isEmpty()) {
+            ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
+        }
     }
 
     private static byte[] getMacAddressBytes(String macAddress) {

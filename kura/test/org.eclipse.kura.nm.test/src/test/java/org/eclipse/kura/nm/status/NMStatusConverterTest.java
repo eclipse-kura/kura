@@ -66,13 +66,13 @@ public class NMStatusConverterTest {
 
     @Test
     public void buildLoopbackStatusWorksWithIPV4Info() throws UnknownHostException {
-        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
-        givenDevicePropertiesWith("Autoconnect", true);
-        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
-        givenDevicePropertiesWith("Driver", "awesomeDriver");
-        givenDevicePropertiesWith("DriverVersion", "awesomeDriverVersion");
-        givenDevicePropertiesWith("Mtu", new UInt32(42));
-        givenDevicePropertiesWith("HwAddress", "00:00:00:00:00:00");
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
 
         givenIpv4ConfigPropertiesWith("Gateway", "127.0.0.1");
         givenIpv4ConfigPropertiesWith("NameserverData", Arrays.asList());
@@ -82,13 +82,14 @@ public class NMStatusConverterTest {
 
         thenNoExceptionIsThrown();
 
-        thenResultingNetworkInterfaceAutoConnectIs(true);
-        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.UNMANAGED);
-        thenResultingNetworkInterfaceFirmwareVersionIs("awesomeFirmwareVersion");
-        thenResultingNetworkInterfaceDriverIs("awesomeDriver");
-        thenResultingNetworkInterfaceDriverVersionIs("awesomeDriverVersion");
-        thenResultingNetworkInterfaceMtuIs(42);
-        thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
 
         assertEquals(IPAddress.parseHostAddress("127.0.0.1"),
                 this.resultingStatus.getInterfaceIp4Addresses().get().getGateway().get());

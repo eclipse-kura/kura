@@ -37,6 +37,7 @@ public class NMStatusConverterTest {
 
     private Properties mockDeviceProperties = mock(Properties.class);
     private Properties mockIp4ConfigProperties = mock(Properties.class);
+    private UsbNetDevice mockUsbDevice = mock(UsbNetDevice.class);
 
     private NetworkInterfaceStatus resultingStatus;
     private EthernetInterfaceStatus resultingEthernetStatus;
@@ -203,6 +204,35 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
     }
 
+    @Test
+    public void buildEthernetStatusWorksWithUsbDeviceInfo() {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDeviceProperties, Optional.empty(),
+                Optional.of(this.mockUsbDevice));
+
+        thenNoExceptionIsThrown();
+
+        thenResultingNetworkInterfaceIsVirtual(false);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+
+        thenResultingEthernetInterfaceLinkUpIs(true);
+        thenResultingEthernetInterfaceUsbDeviceIs(this.mockUsbDevice);
+    }
+
     /*
      * Given
      */
@@ -363,6 +393,11 @@ public class NMStatusConverterTest {
 
     private void thenResultingEthernetInterfaceUsbDeviceIsMissing() {
         assertFalse(this.resultingEthernetStatus.getUsbNetDevice().isPresent());
+    }
+
+    private void thenResultingEthernetInterfaceUsbDeviceIs(UsbNetDevice mockUsbDevice2) {
+        assertTrue(this.resultingEthernetStatus.getUsbNetDevice().isPresent());
+        assertEquals(mockUsbDevice2, this.resultingEthernetStatus.getUsbNetDevice().get());
     }
 
 }

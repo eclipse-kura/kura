@@ -37,6 +37,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.slf4j.Logger;
@@ -80,6 +81,39 @@ public class NetworkStatusServiceAdapter {
             ifType = Optional.of(networkInterfaceInfo.get().getType());
         }
         return ifType;
+    }
+
+    public List<GwtWifiChannelFrequency> getAllSupportedChannels(String ifname) {
+        Optional<NetworkInterfaceStatus> netInterface = this.networkStatusService.getNetworkStatus(ifname);
+        if (!netInterface.isPresent() || !(netInterface.get() instanceof WifiInterfaceStatus)) {
+            return new ArrayList<>();
+        }
+
+        WifiInterfaceStatus wifiInterfaceInfo = (WifiInterfaceStatus) netInterface.get();
+        List<Integer> wifiChannels = wifiInterfaceInfo.getSupportedChannels();
+        List<Long> wifiFrequencies = wifiInterfaceInfo.getSupportedFrequencies();
+
+        List<GwtWifiChannelFrequency> gwtChannels = new ArrayList<>();
+        for (int i = 0; i < wifiChannels.size(); i++) {
+            Integer channel = wifiChannels.get(i);
+            Long freq = wifiFrequencies.get(i);
+
+            gwtChannels.add(new GwtWifiChannelFrequency(channel, freq.intValue()));
+        }
+
+        return gwtChannels;
+    }
+
+    public String getWifiCountryCode() {
+        List<NetworkInterfaceStatus> netInterfaces = this.networkStatusService.getNetworkStatus();
+
+        for (NetworkInterfaceStatus ifaceStatus : netInterfaces) {
+            if (ifaceStatus instanceof WifiInterfaceStatus) {
+                return ((WifiInterfaceStatus) ifaceStatus).getCountryCode();
+            }
+        }
+
+        return "";
     }
 
     @SuppressWarnings("restriction")

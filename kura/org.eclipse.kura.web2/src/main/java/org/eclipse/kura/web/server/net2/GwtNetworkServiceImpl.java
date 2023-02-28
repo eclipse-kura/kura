@@ -33,6 +33,8 @@ import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
+import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,4 +194,36 @@ public class GwtNetworkServiceImpl {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
+    
+    public static List<GwtWifiChannelFrequency> findFrequencies(String interfaceName, GwtWifiRadioMode radioMode)
+            throws GwtKuraException {
+        try {
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+
+            List<GwtWifiChannelFrequency> allSupportedChannels = status.getAllSupportedChannels(interfaceName);
+            List<GwtWifiChannelFrequency> displayedChannels = new ArrayList<>();
+
+            for (GwtWifiChannelFrequency supportedChannel : allSupportedChannels) {
+                boolean channelIsfive5Ghz = supportedChannel.getFrequency() > 2501;
+
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
+                    displayedChannels.add(supportedChannel);
+                }
+            }
+
+            return displayedChannels;
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+    
+    public static String getWifiCountryCode() throws GwtKuraException {
+        try {
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+            return status.getWifiCountryCode();
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
 }

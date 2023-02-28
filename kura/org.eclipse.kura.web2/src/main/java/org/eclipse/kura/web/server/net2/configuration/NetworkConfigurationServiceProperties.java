@@ -310,7 +310,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setWifiMasterChannel(String ifname, List<Integer> channels) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname), channels);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname),
+                integerListAsChannels(channels));
     }
 
     public Optional<String> getWifiMasterRadioMode(String ifname) {
@@ -366,11 +367,12 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE = "net.interface.%s.config.wifi.infra.passphrase";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_IGNORE_SSID = "net.interface.%s.config.wifi.infra.ignoreSSID";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_MODE = "net.interface.%s.config.wifi.infra.mode";
-    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PING_AP = "net.interface.%s..config.wifi.infra.pingAccessPoint";
+    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PING_AP = "net.interface.%s.config.wifi.infra.pingAccessPoint";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_DRIVER = "net.interface.%s.config.wifi.infra.driver";
-    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_SECURITY_TYPE = "net.interface.%s..config.wifi.infra.securityType";
+    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_SECURITY_TYPE = "net.interface.%s.config.wifi.infra.securityType";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_PAIRWISE_CIPHERS = "net.interface.%s.config.wifi.infra.pairwiseCiphers";
     private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_GROUP_CIPHERS = "net.interface.%s.config.wifi.infra.groupCiphers";
+    private static final String NET_INTERFACE_CONFIG_WIFI_INFRA_RADIO_MODE = "net.interface.%s.config.wifi.infra.radioMode";
 
     public String getWifiInfraSsid(String ifname) {
         return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_SSID, ifname));
@@ -387,7 +389,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setWifiInfraChannel(String ifname, List<Integer> channels) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname), channels);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname),
+                integerListAsChannels(channels));
     }
 
     public Optional<String> getWifiInfraBgscan(String ifname) {
@@ -473,6 +476,17 @@ public class NetworkConfigurationServiceProperties {
         if (groupCiphers.isPresent()) {
             this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_GROUP_CIPHERS, ifname),
                     groupCiphers.get());
+        }
+    }
+
+    public Optional<String> getWifiInfraRadioMode(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_RADIO_MODE, ifname)));
+    }
+
+    public void setWifiInfraRadioMode(String ifname, Optional<String> mode) {
+        if (mode.isPresent()) {
+            this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_RADIO_MODE, ifname), mode.get());
         }
     }
 
@@ -761,6 +775,16 @@ public class NetworkConfigurationServiceProperties {
         }
 
         return channels;
+    }
+
+    private String integerListAsChannels(List<Integer> channels) {
+        StringBuilder result = new StringBuilder();
+        for (int channel : channels) {
+            result.append(channel);
+            result.append(" ");
+        }
+
+        return result.toString().trim();
     }
 
 }

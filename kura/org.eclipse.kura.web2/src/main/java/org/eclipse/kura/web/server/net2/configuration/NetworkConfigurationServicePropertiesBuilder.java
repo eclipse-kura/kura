@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
@@ -24,7 +25,6 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 
 public class NetworkConfigurationServicePropertiesBuilder {
 
@@ -114,14 +114,17 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setWifiProperties() {
         if (this.gwtConfig instanceof GwtWifiNetInterfaceConfig) {
+
             String wifiMode = EnumsParser
                     .getWifiMode(Optional.ofNullable(((GwtWifiNetInterfaceConfig) this.gwtConfig).getWirelessMode()));
 
-            if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
+            this.properties.setWifiMode(this.ifname, wifiMode);
+
+            if (wifiMode.equals(WifiMode.MASTER.name())) {
                 setWifiMasterProperties();
             }
 
-            if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name())) {
+            if (wifiMode.equals(WifiMode.INFRA.name())) {
                 setWifiInfraProperties();
             }
         }
@@ -133,7 +136,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
         // common wifi properties
 
         this.properties.setWifiMasterSsid(this.ifname, gwtWifiConfig.getWirelessSsid());
-        this.properties.setWifiMasterDriver(this.ifname, gwtWifiConfig.getDriver());
         this.properties.setWifiMasterIgnoreSsid(this.ifname, gwtWifiConfig.ignoreSSID());
         this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());
         this.properties.setWifiMasterChannel(this.ifname, gwtWifiConfig.getChannels());
@@ -143,8 +145,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiMasterSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
         this.properties.setWifiMasterPairwiseCiphers(this.ifname,
-                Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers()));
-        this.properties.setWifiMasterGroupCiphers(this.ifname, Optional.ofNullable(gwtWifiConfig.getGroupCiphers()));
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
+        this.properties.setWifiMasterGroupCiphers(this.ifname,
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getGroupCiphers())));
 
         // wifi master specific properties
         this.properties.setWifiMasterRadioMode(this.ifname,
@@ -158,7 +161,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
         // common wifi properties
 
         this.properties.setWifiInfraSsid(this.ifname, gwtWifiConfig.getWirelessSsid());
-        this.properties.setWifiInfraDriver(this.ifname, gwtWifiConfig.getDriver());
         this.properties.setWifiInfraIgnoreSsid(this.ifname, gwtWifiConfig.ignoreSSID());
         this.properties.setWifiInfraPassphrase(this.ifname, gwtWifiConfig.getPassword());
         this.properties.setWifiInfraChannel(this.ifname, gwtWifiConfig.getChannels());
@@ -168,8 +170,11 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiInfraSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
         this.properties.setWifiInfraPairwiseCiphers(this.ifname,
-                Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers()));
-        this.properties.setWifiInfraGroupCiphers(this.ifname, Optional.ofNullable(gwtWifiConfig.getGroupCiphers()));
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
+        this.properties.setWifiInfraGroupCiphers(this.ifname,
+                EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getGroupCiphers())));
+        this.properties.setWifiInfraRadioMode(this.ifname,
+                EnumsParser.getWifiRadioMode(Optional.ofNullable(gwtWifiConfig.getRadioMode())));
 
         // wifi infra specific properties
 

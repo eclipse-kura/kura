@@ -1,0 +1,3 @@
+#!/usr/bin/env jjs
+
+print(new java.util.jar.JarFile(arguments[0]).manifest.mainAttributes.getValue("DeploymentPackage-SymbolicName"));

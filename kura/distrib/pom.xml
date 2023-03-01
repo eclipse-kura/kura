@@ -1817,7 +1817,7 @@
                         <version>1.7</version>
                         <executions>
                           <execution>
-                            <id>docker-x86_64-nn-base-container</id>
+                            <id>docker-x86_64-nn-build-container</id>
                             <phase>package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1873,14 +1873,10 @@
         <profile>
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
                 <property>
                     <name>buildAllContainers</name>
                 </property>
             </activation>
-            <properties>
-                
-            </properties>
             <build>
                 <resources>
                     <resource>
@@ -1894,7 +1890,8 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
+                            <execution>
+                            <id>docker-ubi8-x86_64-nn-build-container</id>
                             <phase>package</phase>
                             <configuration>
                                 <executable>docker</executable>
@@ -1902,7 +1899,7 @@
                                 <arguments>
                                     <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-ubi8:${project.version}</argument>
                                     <argument>-t</argument>
@@ -1934,20 +1931,21 @@
                     </resource>
                 </resources>
                 <plugins>
-                      <plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
-                            <phase>package</phase>
-                            <configuration>
-                                <executable>docker</executable>
-                                <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
-                                <arguments>
-                                    <argument>build</argument>
+                            <execution>
+                                <id>docker-alpine-x86_64-nn-build-container</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                                    <arguments>
+                                        <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-alpine:${project.version}</argument>
                                     <argument>-t</argument>

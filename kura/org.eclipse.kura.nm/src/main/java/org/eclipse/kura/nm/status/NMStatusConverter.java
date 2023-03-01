@@ -168,19 +168,11 @@ public class NMStatusConverter {
 
         builder.withCountryCode(countryCode);
 
-        if (mode == NM80211Mode.NM_802_11_MODE_AP) {
-            if (!activeAccessPoint.isPresent()) {
-                logger.warn("No access point found for interface in MASTER mode.");
-                return;
-            }
-            // Only one AP should be available in MASTER mode
-            WifiAccessPoint ap = wifiAccessPointConvert(accessPoints.get(0));
+        if (activeAccessPoint.isPresent()) {
+            // ActiveAccessPoint returns itself if in MASTER mode
+            // returns the one we're connected to in INFRA mode
+            WifiAccessPoint ap = wifiAccessPointConvert(activeAccessPoint.get());
             builder.withActiveWifiAccessPoint(Optional.of(ap));
-        } else {
-            if (activeAccessPoint.isPresent()) {
-                WifiAccessPoint ap = wifiAccessPointConvert(activeAccessPoint.get());
-                builder.withActiveWifiAccessPoint(Optional.of(ap));
-            }
         }
 
         builder.withAvailableWifiAccessPoints(wifiAccessPointConvert(accessPoints));

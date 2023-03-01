@@ -60,7 +60,7 @@ public class AuditContext {
      */
     @Override
     public String toString() {
-        return properties.toString();
+        return properties.toString().replaceAll("[\n\r\t]", "_");
     }
 
     /**

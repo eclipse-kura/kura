@@ -46,24 +46,13 @@ public class GwtNetworkServiceImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
     
-    private static Optional<List<GwtNetInterfaceConfig>> cachedConfigs = Optional.empty();
-    private static Optional<String> cachedCountryCode = Optional.empty();
-
     public static List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
-        if (!cachedConfigs.isPresent() || recompute) {
-            logger.debug("Recomputing network configuration/status.");
-
-            try {
-                cachedConfigs = Optional.of(getConfigsAndStatuses());
-            } catch (KuraException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-            }
-        } else {
-            logger.debug("Returning cached network configuration/status.");
+        try {
+            return getConfigsAndStatuses();
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
-
-        return cachedConfigs.get();
     }
 
     private static List<GwtNetInterfaceConfig> getConfigsAndStatuses() throws GwtKuraException, KuraException {
@@ -234,19 +223,12 @@ public class GwtNetworkServiceImpl {
     }
     
     public static String getWifiCountryCode() throws GwtKuraException {
-        if (!cachedCountryCode.isPresent()) {
-            logger.debug("Recomputing country code.");
-            try {
-                NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
-                cachedCountryCode = Optional.of(status.getWifiCountryCode());
-            } catch (GwtKuraException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-            }
-        } else {
-            logger.debug("Returning cached country code.");
+        try {
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+            return status.getWifiCountryCode();
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
-
-        return cachedCountryCode.get();
     }
 
 }

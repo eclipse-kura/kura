@@ -13,5 +13,8 @@ Import-Package: org.apache.felix.service.command;version="1.0.0",
  org.eclipse.kura.core.testutil.service;version="[1.0,2.0)",
  org.eclipse.kura.db;version="2.0.0",
  org.junit;version="4.12.0",
+ org.mockito;version="4.8.1",
+ org.mockito.invocation;version="4.8.1",
+ org.mockito.stubbing;version="4.8.1",
  org.osgi.framework;version="1.10.0"
-Require-Bundle: org.eclipse.kura.db.sqlite.provider
+Fragment-Host: org.eclipse.kura.db.sqlite.provider

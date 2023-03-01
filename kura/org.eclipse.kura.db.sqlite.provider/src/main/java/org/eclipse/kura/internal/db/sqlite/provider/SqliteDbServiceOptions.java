@@ -14,11 +14,15 @@ package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.util.configuration.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteConfig.HexKeyMode;
 
 class SqliteDbServiceOptions {
 
@@ -34,18 +38,77 @@ class SqliteDbServiceOptions {
         WAL
     }
 
+    public enum EncryptionKeyFormat {
+
+        ASCII,
+        HEX_SSE,
+        HEX_SQLCIPHER;
+
+        public HexKeyMode toHexKeyMode() {
+            if (this == EncryptionKeyFormat.ASCII) {
+                return HexKeyMode.NONE;
+            } else if (this == EncryptionKeyFormat.HEX_SSE) {
+                return HexKeyMode.SSE;
+            } else if (this == EncryptionKeyFormat.HEX_SQLCIPHER) {
+                return HexKeyMode.SQLCIPHER;
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+    }
+
+    public static class EncryptionKeySpec {
+
+        private final String key;
+        private final EncryptionKeyFormat format;
+
+        public EncryptionKeySpec(final String key, final EncryptionKeyFormat format) {
+            this.key = key;
+            this.format = format;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public EncryptionKeyFormat getFormat() {
+            return format;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(format, key);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof EncryptionKeySpec)) {
+                return false;
+            }
+            EncryptionKeySpec other = (EncryptionKeySpec) obj;
+            return format == other.format && Objects.equals(key, other.key);
+        }
+
+    }
+
     private static final Property<String> MODE_PROPERTY = new Property<>("db.mode", Mode.PERSISTED.name());
     private static final Property<String> PATH_PROPERTY = new Property<>("db.path", "mydb");
     private static final Property<Integer> CONNECTION_POOL_MAX_SIZE_PROPERTY = new Property<>(
             "db.connection.pool.max.size", 10);
     private static final Property<String> JOURNAL_MODE_PROPERTY = new Property<>("db.journal.mode",
-            JournalMode.ROLLBACK_JOURNAL.name());
+            JournalMode.WAL.name());
     private static final Property<Long> DEFRAG_INTERVAL_SECONDS_PROPERTY = new Property<>("db.defrag.interval.seconds",
             900L);
     private static final Property<Long> WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY = new Property<>(
             "db.wal.checkpoint.interval.seconds", 600L);
     private static final Property<Boolean> DEBUG_SHELL_ACCESS_ENABLED_PROPERTY = new Property<>(
             "debug.shell.access.enabled", false);
+    private static final Property<String> ENCRYPTION_KEY_PROPERTY = new Property<>("db.key", String.class);
+    private static final Property<String> ENCRYPTION_KEY_FORMAT_PROPERTY = new Property<>("db.key.format",
+            EncryptionKeyFormat.ASCII.name());
     private static final Property<String> KURA_SERVICE_PID_PROPERTY = new Property<>(
             ConfigurationService.KURA_SERVICE_PID, "sqlitedb");
 
@@ -57,6 +120,8 @@ class SqliteDbServiceOptions {
     private final long walCheckpointIntervalSeconds;
     private final int maxConnectionPoolSize;
     private final JournalMode journalMode;
+    private final Optional<String> encryptionKey;
+    private final EncryptionKeyFormat encryptionKeyFormat;
 
     public SqliteDbServiceOptions(Map<String, Object> properties) {
         this.mode = extractMode(properties);
@@ -67,6 +132,8 @@ class SqliteDbServiceOptions {
         this.walCheckpointIntervalSeconds = WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY.get(properties);
         this.journalMode = extractJournalMode(properties);
         this.isDebugShellAccessEnabled = DEBUG_SHELL_ACCESS_ENABLED_PROPERTY.get(properties);
+        this.encryptionKey = ENCRYPTION_KEY_PROPERTY.getOptional(properties).filter(s -> !s.trim().isEmpty());
+        this.encryptionKeyFormat = extractEncryptionKeyFormat(properties);
     }
 
     public Mode getMode() {
@@ -99,6 +166,20 @@ class SqliteDbServiceOptions {
 
     public long getWalCheckpointIntervalSeconds() {
         return walCheckpointIntervalSeconds;
+    }
+
+    public EncryptionKeyFormat getEncryptionKeyFormat() {
+        return encryptionKeyFormat;
+    }
+
+    public Optional<EncryptionKeySpec> getEncryptionKey(final CryptoService cryptoService) throws KuraException {
+        if (this.encryptionKey.isPresent()) {
+            final String decrypted = new String(cryptoService.decryptAes(this.encryptionKey.get().toCharArray()));
+
+            return Optional.of(new EncryptionKeySpec(decrypted, getEncryptionKeyFormat()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     public boolean isPeriodicWalCheckpointEnabled() {
@@ -136,10 +217,18 @@ class SqliteDbServiceOptions {
         }
     }
 
+    private static EncryptionKeyFormat extractEncryptionKeyFormat(final Map<String, Object> properties) {
+        try {
+            return EncryptionKeyFormat.valueOf(ENCRYPTION_KEY_FORMAT_PROPERTY.get(properties));
+        } catch (final Exception e) {
+            return EncryptionKeyFormat.ASCII;
+        }
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(defragIntervalSeconds, journalMode, kuraServicePid, maxConnectionPoolSize, mode, path,
-                walCheckpointIntervalSeconds);
+        return Objects.hash(defragIntervalSeconds, encryptionKey, encryptionKeyFormat, journalMode, kuraServicePid,
+                maxConnectionPoolSize, mode, path, walCheckpointIntervalSeconds);
     }
 
     @Override
@@ -151,7 +240,9 @@ class SqliteDbServiceOptions {
             return false;
         }
         SqliteDbServiceOptions other = (SqliteDbServiceOptions) obj;
-        return defragIntervalSeconds == other.defragIntervalSeconds && journalMode == other.journalMode
+        return defragIntervalSeconds == other.defragIntervalSeconds
+                && Objects.equals(encryptionKey, other.encryptionKey)
+                && encryptionKeyFormat == other.encryptionKeyFormat && journalMode == other.journalMode
                 && Objects.equals(kuraServicePid, other.kuraServicePid)
                 && maxConnectionPoolSize == other.maxConnectionPoolSize && mode == other.mode
                 && Objects.equals(path, other.path)

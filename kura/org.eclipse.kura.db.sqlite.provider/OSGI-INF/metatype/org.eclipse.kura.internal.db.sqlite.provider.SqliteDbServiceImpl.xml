@@ -34,6 +34,25 @@
             default="/opt/mydb.sqlite"
             description="Defines the database path. The parameter value should be set to the absolute path to the database file (it should end with the database file name, it is not enough to specify only the parent directory). This parameter is only relevant for persisted databases.">
          </AD>
+         
+         <AD id="db.key"
+            name="Encryption Key"
+            type="Password"
+            cardinality="0" 
+            required="false"
+            description="Allows to specify a key/passphrase for encrypting the database file. This feature requires a SQLite binary with an encryption extension, and is only relevant for persisted databases. The key format can be specified using the Encryption Key Format parameter. If the value of this parameter is changed, the encryption key of the database will be updated accordingly. This parameter can be left empty to create an unencrypted database or to decrypt an encrypted one."/>
+            
+         <AD id="db.key.format"
+            name="Encryption Key Format"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="ASCII"
+            description="Allows to specify the format of the Encryption Key parameter value. The possible values are ASCII (an ASCII string), Hex SSE (the key is an hexadecimal string to be used with the SSE extension) or Hex SQLCipher (the key is an hexadecimal string to be used with the SQLCipher extension)">
+            <Option label="ASCII" value="ASCII"/>
+            <Option label="Hex SSE" value="HEX_SSE"/>
+            <Option label="Hex SQLCipher" value="HEX_SQLCIPHER"/>
+         </AD>
 
          <AD id="db.journal.mode"
             name="Journal Mode"

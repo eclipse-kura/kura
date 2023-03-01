@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,8 +25,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
@@ -40,31 +41,35 @@ import org.eclipse.kura.wire.store.provider.WireRecordStore;
 import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteJDBCLoader;
 
 public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
         WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceImpl.class);
 
-    static {
-        try {
-            DriverManager.registerDriver(new org.sqlite.JDBC());
-        } catch (SQLException e) {
-            throw new IllegalStateException("Failed to register driver");
-        }
-    }
-
+    private CryptoService cryptoService;
     private SqliteDebugShell debugShell;
 
     public void setDebugShell(final SqliteDebugShell debugShell) {
         this.debugShell = debugShell;
     }
 
+    public void setCryptoService(final CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
     private Optional<DbState> state = Optional.empty();
 
     public void activate(final Map<String, Object> properties) {
+
         logger.info("activating...");
+        try {
+            logger.info("SQLite driver is in native mode: {}", SQLiteJDBCLoader.isNativeMode());
+        } catch (Exception e) {
+            logger.info("Failed to determine if SQLite driver is in native mode", e);
+        }
 
         updated(properties);
 
@@ -77,10 +82,12 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         final SqliteDbServiceOptions newOptions = new SqliteDbServiceOptions(properties);
         this.debugShell.setPidAllowed(newOptions.getKuraServicePid(), newOptions.isDebugShellAccessEnabled());
 
-        if (!this.state.map(DbState::getOptions).equals(Optional.of(newOptions))) {
+        final Optional<SqliteDbServiceOptions> oldOptions = this.state.map(DbState::getOptions);
+
+        if (!oldOptions.equals(Optional.of(newOptions))) {
             shutdown();
             try {
-                this.state = Optional.of(new DbState(newOptions));
+                this.state = Optional.of(new DbState(newOptions, oldOptions, cryptoService));
             } catch (final Exception e) {
                 logger.warn("Failed to initialize the database instance", e);
             }
@@ -122,26 +129,20 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         private final ConnectionPoolManager connectionPool;
         private final SqliteDbServiceOptions options;
 
-        public DbState(SqliteDbServiceOptions options) throws SQLException {
+        public DbState(SqliteDbServiceOptions options, final Optional<SqliteDbServiceOptions> oldOptions,
+                final CryptoService cryptoService) throws SQLException, KuraException {
             this.options = options;
             tryClaimFile();
 
             try {
                 logger.info("opening database with url: {}...", options.getDbUrl());
 
-                final SQLiteConnectionPoolDataSource dataSource = new SQLiteConnectionPoolDataSource();
-                dataSource.setUrl(options.getDbUrl());
-
-                if (options.getMode() == Mode.PERSISTED) {
-                    dataSource.setJournalMode(
-                            options.getJournalMode() == JournalMode.ROLLBACK_JOURNAL ? "DELETE" : "WAL");
-                }
+                final SQLiteDataSource dataSource = new DatabaseLoader(options, oldOptions, cryptoService)
+                        .openDataSource();
 
                 int maxConnectionCount = options.getMode() == Mode.PERSISTED ? options.getConnectionPoolMaxSize() : 1;
 
                 this.connectionPool = new ConnectionPoolManager(dataSource, maxConnectionCount);
-
-                this.connectionPool.getConnection().close();
 
                 if (options.isPeriodicDefragEnabled() || options.isPeriodicWalCheckpointEnabled()) {
                     this.executor = Optional.of(Executors.newSingleThreadScheduledExecutor());

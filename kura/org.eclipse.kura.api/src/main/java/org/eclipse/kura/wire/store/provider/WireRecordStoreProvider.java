@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.wire.store.provider;
 
+import java.util.Set;
+
 import org.eclipse.kura.KuraStoreException;
+import org.eclipse.kura.store.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -27,10 +30,25 @@ public interface WireRecordStoreProvider {
     /**
      * Opens or creates a {@link WireRecordStore} instance with the given name.
      * 
-     * @param name the store name
+     * @param name
+     *            the store name
      * @return the result {@link WireRecordStore}.
      * @throws KuraStoreException
      */
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException;
 
+    /**
+     * Opens or creates a {@link WireRecordStore} instance with the given name and adds a set of
+     * {@link ConnectionListener}
+     * to be invoked when connection events occur in {@link WireRecordStore}
+     * 
+     * @param name
+     *            the store name
+     * @param listeners
+     *            a set of {@link ConnectionListener} *
+     * @return the result {@link WireRecordStore}.
+     * @throws KuraStoreException
+     */
+    public WireRecordStore openWireRecordStore(String name, Set<ConnectionListener> listeners)
+            throws KuraStoreException;
 }

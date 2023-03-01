@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.core.data.store;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,6 +22,7 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.data.DataServiceOptions;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.store.listener.ConnectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +31,16 @@ public class MessageStoreState {
     private static final Logger logger = LoggerFactory.getLogger(MessageStoreState.class);
 
     private final MessageStoreProvider messageStoreProvider;
+    private final ConnectionListener connectionListener;
+
     private DataServiceOptions options;
     private Optional<MessageStore> messageStore = Optional.empty();
     private Optional<ScheduledExecutorService> houseKeeperExecutor = Optional.empty();
 
-    public MessageStoreState(final MessageStoreProvider messageStoreProvider, final DataServiceOptions options) {
+    public MessageStoreState(final MessageStoreProvider messageStoreProvider,
+            final ConnectionListener connectionListener, final DataServiceOptions options) {
         this.messageStoreProvider = messageStoreProvider;
+        this.connectionListener = connectionListener;
         update(options);
     }
 
@@ -61,7 +67,8 @@ public class MessageStoreState {
             return this.messageStore.get();
         }
 
-        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid());
+        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid(),
+                Collections.singleton(this.connectionListener));
 
         this.messageStore = Optional.of(result);
 

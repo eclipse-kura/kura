@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -44,6 +45,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
@@ -56,9 +58,8 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class H2DbServiceImpl
-        implements H2DbService, MessageStoreProvider, WireRecordStoreProvider, ConfigurableComponent,
-        QueryableWireRecordStoreProvider {
+public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
+        ConfigurableComponent, QueryableWireRecordStoreProvider {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
@@ -409,7 +410,7 @@ public class H2DbServiceImpl
             conn = this.connectionPool.getConnection();
         } catch (SQLException e) {
             logger.error("Error getting connection", e);
-            throw e;
+            throw new SQLException("Error getting connection");
         }
         return conn;
     }
@@ -619,13 +620,24 @@ public class H2DbServiceImpl
     }
 
     @Override
+    public MessageStore openMessageStore(String name, Set<ConnectionListener> listeners) throws KuraStoreException {
+        return new H2DbMessageStoreImpl(this::withConnectionAdapter, name, listeners);
+    }
+
+    @Override
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
 
         return new H2DbWireRecordStoreImpl(this::withConnectionAdapter, name);
     }
 
     @Override
-    @SuppressWarnings("restriction")
+    public WireRecordStore openWireRecordStore(String name, Set<ConnectionListener> listeners)
+            throws KuraStoreException {
+
+        return new H2DbWireRecordStoreImpl(this::withConnectionAdapter, name, listeners);
+    }
+
+    @Override
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
         return new H2DbQueryableWireRecordStoreImpl(this::withConnectionAdapter).performQuery(query);
@@ -636,4 +648,5 @@ public class H2DbServiceImpl
 
         return this.withConnection(callable::call);
     }
+
 }

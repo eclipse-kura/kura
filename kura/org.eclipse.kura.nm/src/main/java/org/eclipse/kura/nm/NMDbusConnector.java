@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -82,6 +83,8 @@ public class NMDbusConnector {
     private final DBusConnection dbusConnection;
     private final NetworkManager nm;
 
+    private ReentrantLock lock = new ReentrantLock();
+
     private Map<String, Object> cachedConfiguration = null;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
@@ -141,54 +144,62 @@ public class NMDbusConnector {
 
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
-        Device device = getDeviceByIpIface(interfaceName);
-        NMDeviceType deviceType = getDeviceType(device);
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                Properties.class);
 
-        DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_IP4CONFIG);
-        Optional<Properties> ip4configProperties = Optional.empty();
+        lock.lock();
+        try {
+            Device device = getDeviceByIpIface(interfaceName);
+            NMDeviceType deviceType = getDeviceType(device);
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Properties.class);
 
-        if (!ip4configPath.getPath().equals("/")) {
-            ip4configProperties = Optional
-                    .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(), Properties.class));
-        }
+            DBusPath ip4configPath = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_IP4CONFIG);
+            Optional<Properties> ip4configProperties = Optional.empty();
 
-        if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-            logger.warn("Device \"{}\" of type \"{}\" currently not supported", interfaceName, deviceType);
-            return null;
-        }
-
-        Optional<UsbNetDevice> usbNetDevice = networkService.getUsbNetDevice(interfaceName);
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties,
-                    usbNetDevice);
-        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
-            return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
-        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
-            Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                    Wireless.class);
-            Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                    wirelessDevice.getObjectPath(), Properties.class);
-
-            List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
-
-            DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
-                    "ActiveAccessPoint");
-            Optional<Properties> activeAccessPoint = Optional.empty();
-
-            String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
-            List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName, commandExecutorService);
-
-            if (!activeAccessPointPath.getPath().equals("/")) {
-                activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                        activeAccessPointPath.getPath(), Properties.class));
+            if (!ip4configPath.getPath().equals("/")) {
+                ip4configProperties = Optional.of(
+                        this.dbusConnection.getRemoteObject(NM_BUS_NAME, ip4configPath.getPath(), Properties.class));
             }
 
-            return NMStatusConverter.buildWirelessStatus(interfaceName,
-                    new WirelessProperties(deviceProperties, wirelessDeviceProperties), ip4configProperties,
-                    new AccessPointsProperties(activeAccessPoint, accessPoints), usbNetDevice,
-                    new SupportedChannelsProperties(countryCode, supportedChannels));
+            if (!STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+                logger.warn("Device \"{}\" of type \"{}\" currently not supported", interfaceName, deviceType);
+                return null;
+            }
+
+            Optional<UsbNetDevice> usbNetDevice = networkService.getUsbNetDevice(interfaceName);
+            if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+                return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties,
+                        usbNetDevice);
+            } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
+                return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
+            } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+                Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                        Wireless.class);
+                Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        wirelessDevice.getObjectPath(), Properties.class);
+
+                List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
+
+                DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                        "ActiveAccessPoint");
+                Optional<Properties> activeAccessPoint = Optional.empty();
+
+                String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
+                List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName,
+                        commandExecutorService);
+
+                if (!activeAccessPointPath.getPath().equals("/")) {
+                    activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                            activeAccessPointPath.getPath(), Properties.class));
+                }
+
+                return NMStatusConverter.buildWirelessStatus(interfaceName,
+                        new WirelessProperties(deviceProperties, wirelessDeviceProperties), ip4configProperties,
+                        new AccessPointsProperties(activeAccessPoint, accessPoints), usbNetDevice,
+                        new SupportedChannelsProperties(countryCode, supportedChannels));
+            }
+
+        } finally {
+            lock.unlock();
         }
 
         return null;
@@ -208,15 +219,20 @@ public class NMDbusConnector {
     }
 
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
-        logger.info("Applying configuration using NetworkManager Dbus connector");
+        lock.lock();
+        try {
+            logger.info("Applying configuration using NetworkManager Dbus connector");
 
-        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+            NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
-        List<String> configuredInterfaces = properties.getStringList("net.interfaces");
-        manageConfiguredInterfaces(configuredInterfaces, properties);
+            List<String> configuredInterfaces = properties.getStringList("net.interfaces");
+            manageConfiguredInterfaces(configuredInterfaces, properties);
 
-        List<Device> availableInterfaces = getAllDevices();
-        manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+            List<Device> availableInterfaces = getAllDevices();
+            manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,

@@ -1,12 +1,4 @@
-# Eclipse Kura™ emulator Docker image
-
-This is a Docker image running Eclipse Kura™.
-
-Use the following command to run it:
-
-    docker run -d -p 8443:443 -t eclipse/kura
-
-Once the image is started you can navigate your browser to https://localhost:8443 and log in using the credentials `admin` : `admin`.
+# Extra container-related tools and resources
 
 ## Making use of Apache Felix File Install
 
@@ -50,26 +42,6 @@ Where *<IP>* is the Docker address, you can find it by using *ipconfig* and sear
     Default Gateway . . . . . . . . . :
 
 The JMX port defined is 9010 and the Remote debug port is 9011. Both ports are not exposed by default and have to be exposed from the command line using `--expose 9010 --expose 9011`.
-
-## Re-Building
-
-This Docker container is being built by re-using the Intel UP² Ubuntu 20.04 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
-There is also the possibility to build the Docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
-
-If you want to re-build this image, check out this repository, move to one of the child directories "kura_alpine" or "kura_ubi8" and simply issue a:
-`docker build -t kura_ubi8 .` if you intend to re-build the UBI8 container image.
-`docker build -t kura_alpine .` if you intend to re-build the Alpine Linux Docker image.
-
-Usage of tags (-t argument) is not necessary for the build, but is required if you intend to build both the images on the same system.
-
-It is also possible to build directly from the root of this repo, by specifying the Dockerfile position with the -f command; this however would cause an increase of approx. 200MB in the final image size, due to the copy of the context directory in a previous layer during the boot process, and it will not be possible to remove it, due to Docker's UnionFS limitations.
-
-You can re-build the image from a specific Git commit or using a different repository or a different branch. For this you need to pass in the build argument `KURA_COMMIT`, `GIT_REPO`, `GIT_BRANCH`.
-
-For example:
-```shell
-docker build --build-arg GIT_REPO=https://github.com/custom-repo/kura.git --build-arg GIT_BRANCH=custom-branch --build-arg KURA_COMMIT=custom-commit-number -t kura_alpine .
-```
  
 ## Running in OpenShift
 

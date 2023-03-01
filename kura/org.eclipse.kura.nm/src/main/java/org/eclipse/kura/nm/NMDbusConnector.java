@@ -230,6 +230,17 @@ public class NMDbusConnector {
 
             List<Device> availableInterfaces = getAllDevices();
             manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+
+            // TEMPORARY FIX!
+            // All NMDbusConnector client expect that the apply method return only when
+            // the configuration was applied. Unfortunately, due to the asynch nature of DBus,
+            // once the apply method returns, some status/config information can still change.
+            // The correct way to fix this would be by handling a signal coming from the DBus
+            // but this still work 99% of the time.
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            logger.warn("Wait interrupted because of:", e);
+            Thread.currentThread().interrupt();
         } finally {
             lock.unlock();
         }

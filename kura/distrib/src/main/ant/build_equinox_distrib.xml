@@ -580,7 +580,13 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/patch_sysctl.sh"
                 prefix="${build.output.name}/${install.folder}" />
-
+            <zipfileset file="src/main/resources/common/find-net-interfaces.py"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset dir="src/main/resources/common/jdk-dio-properties"
+                prefix="${build.output.name}/${install.folder}">
+                <include name="*" />
+            </zipfileset>
+            
             <zipfileset file="src/main/resources/common/named/named.conf"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/named/named.ca"

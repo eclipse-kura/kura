@@ -23,6 +23,8 @@ import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
+import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -37,10 +39,16 @@ public class NMStatusConverterTest {
 
     private Properties mockDeviceProperties = mock(Properties.class);
     private Properties mockIp4ConfigProperties = mock(Properties.class);
+    private Properties mockWirelessDeviceProperties = mock(Properties.class);
+    private Properties mockActiveAccessPointProperties = mock(Properties.class);
+    private List<Properties> mockAvailableAccessPoints = new ArrayList<>();
+    private List<WifiChannel> mockSupportedChannels = new ArrayList<>();
+
     private UsbNetDevice mockUsbDevice = mock(UsbNetDevice.class);
 
     private NetworkInterfaceStatus resultingStatus;
     private EthernetInterfaceStatus resultingEthernetStatus;
+    private WifiInterfaceStatus resultingWirelessStatus;
 
     private boolean nullPointerExceptionWasThrown = false;
 
@@ -233,6 +241,28 @@ public class NMStatusConverterTest {
         thenResultingEthernetInterfaceUsbDeviceIs(this.mockUsbDevice);
     }
 
+    @Test
+    public void buildWirelessStatusThrowsWithEmptyProperties() {
+        whenBuildWirelessStatusIsCalledWith("wlan0", this.mockDeviceProperties, this.mockWirelessDeviceProperties,
+                Optional.empty(), Optional.of(this.mockActiveAccessPointProperties), this.mockAvailableAccessPoints,
+                Optional.of(this.mockUsbDevice), "IT", this.mockSupportedChannels);
+
+        thenNullPointerExceptionIsThrown();
+    }
+
+    @Test
+    public void buildWirelessStatusThrowsWithPartialProperties() {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
+        givenDevicePropertiesWith("Autoconnect", true);
+        givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
+
+        whenBuildWirelessStatusIsCalledWith("wlan0", this.mockDeviceProperties, this.mockWirelessDeviceProperties,
+                Optional.empty(), Optional.of(this.mockActiveAccessPointProperties), this.mockAvailableAccessPoints,
+                Optional.of(this.mockUsbDevice), "IT", this.mockSupportedChannels);
+
+        thenNullPointerExceptionIsThrown();
+    }
+
     /*
      * Given
      */
@@ -291,6 +321,27 @@ public class NMStatusConverterTest {
         } catch (NullPointerException e) {
             this.nullPointerExceptionWasThrown = true;
         }
+    }
+
+    private void whenBuildWirelessStatusIsCalledWith(String ifaceName, Properties deviceProps, Properties wirelessProps,
+            Optional<Properties> ip4Properties, Optional<Properties> activeAccessPoint,
+            List<Properties> availableAccessPoints, Optional<UsbNetDevice> usbDevice, String countryCode,
+            List<WifiChannel> supportedChannels) {
+
+        WirelessProperties wirelessProperties = new WirelessProperties(deviceProps, wirelessProps);
+        AccessPointsProperties accessPointProperties = new AccessPointsProperties(activeAccessPoint,
+                availableAccessPoints);
+        SupportedChannelsProperties supportedChannelsProperties = new SupportedChannelsProperties(countryCode,
+                supportedChannels);
+
+        try {
+            this.resultingStatus = NMStatusConverter.buildWirelessStatus(ifaceName, wirelessProperties, ip4Properties,
+                    accessPointProperties, usbDevice, supportedChannelsProperties);
+            this.resultingWirelessStatus = (WifiInterfaceStatus) this.resultingStatus;
+        } catch (NullPointerException e) {
+            this.nullPointerExceptionWasThrown = true;
+        }
+
     }
 
     /*

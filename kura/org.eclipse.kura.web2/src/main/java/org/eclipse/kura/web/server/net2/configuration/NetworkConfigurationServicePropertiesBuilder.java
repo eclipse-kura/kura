@@ -43,8 +43,17 @@ public class NetworkConfigurationServicePropertiesBuilder {
         setIpv4Properties();
         setIpv4DhcpClientProperties();
         setIpv4DhcpServerProperties();
-        setWifiProperties();
-        setModemProperties();
+
+        switch (this.gwtConfig.getStatusEnum()) {
+            case netIPv4StatusDisabled:
+                break;
+            case netIPv4StatusUnmanaged:
+                break;
+            default:
+                setWifiProperties();
+                setModemProperties();
+                break;
+        }
 
         return this.properties.getProperties();
     }
@@ -114,7 +123,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setWifiProperties() {
         if (this.gwtConfig instanceof GwtWifiNetInterfaceConfig) {
-
             String wifiMode = EnumsParser
                     .getWifiMode(Optional.ofNullable(((GwtWifiNetInterfaceConfig) this.gwtConfig).getWirelessMode()));
 

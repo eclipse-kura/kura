@@ -33,10 +33,10 @@ import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInte
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
+import org.eclipse.kura.net.status.wifi.WifiChannel;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
-import org.eclipse.kura.net.status.wifi.WifiRadioMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.usb.UsbNetDevice;
@@ -230,15 +230,9 @@ public class NMStatusServiceImplTest {
                 wifiStatus.getUsbNetDevice().get());
         assertEquals(2, wifiStatus.getCapabilities().size());
         assertEquals(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ), wifiStatus.getCapabilities());
-        assertEquals(2, wifiStatus.getSupportedBitrates().size());
-        assertEquals(Arrays.asList(54L, 1000L), wifiStatus.getSupportedBitrates());
-        assertEquals(2, wifiStatus.getSupportedRadioModes().size());
-        assertEquals(EnumSet.of(WifiRadioMode.RADIO_MODE_80211A, WifiRadioMode.RADIO_MODE_80211G),
-                wifiStatus.getSupportedRadioModes());
-        assertEquals(4, wifiStatus.getSupportedChannels().size());
-        assertEquals(Arrays.asList(1, 2, 3, 4), wifiStatus.getSupportedChannels());
-        assertEquals(2, wifiStatus.getSupportedFrequencies().size());
-        assertEquals(Arrays.asList(900L, 2400L), wifiStatus.getSupportedFrequencies());
+        assertEquals(4, wifiStatus.getChannels().size());
+        assertEquals(Arrays.asList(new WifiChannel(1, 2412), new WifiChannel(2, 2417), new WifiChannel(3, 2422),
+                new WifiChannel(4, 2432)), wifiStatus.getChannels());
         assertEquals("IT", wifiStatus.getCountryCode());
         assertEquals(WifiMode.INFRA, wifiStatus.getMode());
         assertTrue(wifiStatus.getActiveWifiAccessPoint().isPresent());
@@ -334,10 +328,8 @@ public class NMStatusServiceImplTest {
         builder.withUsbNetDevice(
                 Optional.of(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "wlan0")));
         builder.withCapabilities(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ));
-        builder.withSupportedBitrates(Arrays.asList(54L, 1000L));
-        builder.withSupportedRadioModes(EnumSet.of(WifiRadioMode.RADIO_MODE_80211A, WifiRadioMode.RADIO_MODE_80211G));
-        builder.withSupportedChannels(Arrays.asList(1, 2, 3, 4));
-        builder.withSupportedFrequencies(Arrays.asList(900L, 2400L));
+        builder.withWifiChannels(Arrays.asList(new WifiChannel(1, 2412), new WifiChannel(2, 2417),
+                new WifiChannel(3, 2422), new WifiChannel(4, 2432)));
         builder.withCountryCode("IT");
         builder.withMode(WifiMode.INFRA);
         builder.withActiveWifiAccessPoint(Optional.of(buildAP()));
@@ -389,8 +381,7 @@ public class NMStatusServiceImplTest {
         WifiAccessPointBuilder builder = WifiAccessPoint.builder();
         builder.withSsid("MyCoolAP");
         builder.withHardwareAddress(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 });
-        builder.withFrequency(5000L);
-        builder.withChannel(7);
+        builder.withChannel(new WifiChannel(7, 2442));
         builder.withMode(WifiMode.INFRA);
         builder.withMaxBitrate(54);
         builder.withSignalQuality(78);
@@ -402,8 +393,7 @@ public class NMStatusServiceImplTest {
     private void assertEqualAPProperties(WifiAccessPoint ap) {
         assertEquals("MyCoolAP", ap.getSsid());
         assertArrayEquals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, ap.getHardwareAddress());
-        assertEquals(5000L, ap.getFrequency());
-        assertEquals(7, ap.getChannel());
+        assertEquals(new WifiChannel(7, 2442), ap.getChannel());
         assertEquals(WifiMode.INFRA, ap.getMode());
         assertEquals(54, ap.getMaxBitrate());
         assertEquals(78, ap.getSignalQuality());

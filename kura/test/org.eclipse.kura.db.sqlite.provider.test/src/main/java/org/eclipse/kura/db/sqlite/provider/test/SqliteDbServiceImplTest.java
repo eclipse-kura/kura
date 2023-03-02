@@ -13,9 +13,16 @@
 package org.eclipse.kura.db.sqlite.provider.test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -225,11 +232,138 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         thenExceptionIsThrown();
     }
 
+    @Test
+    public void deleteDbFileIfItCannotBeOpenedRollbackJournal()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "ROLLBACK_JOURNAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite" //
+        ));
+        whenAConnectionIsRequested();
+
+        thenNoExceptionIsThrown();
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+    }
+
+    @Test
+    public void deleteDbFileIfItCannotBeOpenedWAL()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "WAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite" //
+        ));
+        whenAConnectionIsRequested();
+
+        thenNoExceptionIsThrown();
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        thenFileContentIsNot(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+    }
+
+    @Test
+    public void deleteNotDbFileIfItCannotBeOpenedIFNotEnabledRollbackJournal()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "ROLLBACK_JOURNAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite", //
+                "delete.db.files.on.failure", false) //
+        );
+        whenAConnectionIsRequested();
+
+        thenExceptionIsThrown();
+        thenFileContentIs(temporaryDirectory() + "/test.sqlite", "foobar");
+    }
+
+    @Test
+    public void deleteNotDbFileIfItCannotBeOpenedIFNotEnabledWal()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-journal", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-shm", "foobar");
+        givenFileWithContent(temporaryDirectory() + "/test.sqlite-wal", "foobar");
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "WAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite", //
+                "delete.db.files.on.failure", false) //
+        );
+        whenAConnectionIsRequested();
+
+        thenExceptionIsThrown();
+        thenFileContentIs(temporaryDirectory() + "/test.sqlite", "foobar");
+    }
+
+    private void givenFileWithContent(final String file, final String content) throws IOException {
+        try (final FileOutputStream out = new FileOutputStream(file)) {
+            out.write(content.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
     private void thenThereIsNoSqliteLibraryInJavaTempdir() {
         final File javaTempDir = new File(System.getProperty("java.io.tmpdir"));
 
         assertArrayEquals(new String[] {}, javaTempDir.list((dir, name) -> name.startsWith("sqlite-")));
+    }
 
+    private void thenFileContentIs(final String path, final String content) throws IOException {
+        final byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
+        final byte[] actualContent = new byte[contentBytes.length + 1];
+
+        final int len = fillBuffer(new File(path), actualContent);
+
+        assertEquals(contentBytes.length, len);
+        assertArrayEquals(contentBytes, Arrays.copyOfRange(actualContent, 0, len));
+    }
+
+    private void thenFileContentIsNot(final String path, final String content) throws IOException {
+        final byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
+        final byte[] actualContent = new byte[contentBytes.length + 1];
+
+        final File file = new File(path);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        final int len = fillBuffer(file, actualContent);
+
+        if (contentBytes.length == len) {
+            assertFalse(Arrays.equals(contentBytes, Arrays.copyOfRange(actualContent, 0, len)));
+        }
+    }
+
+    private int fillBuffer(final File file, final byte[] dst) throws FileNotFoundException, IOException {
+        int pos = 0;
+
+        try (final FileInputStream in = new FileInputStream(file)) {
+
+            int rd;
+
+            while (pos < dst.length && (rd = in.read(dst, pos, dst.length - pos)) != -1) {
+                pos += rd;
+            }
+        }
+
+        return pos;
     }
 
 }

@@ -58,6 +58,8 @@ public class NMStatusConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(NMStatusConverter.class);
 
+    private static final byte[] DEFAULT_MAC = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
@@ -414,14 +416,24 @@ public class NMStatusConverter {
     }
 
     private static byte[] getMacAddressBytes(String macAddress) {
-        String[] macAddressParts = macAddress.split(":");
-
-        byte[] macAddressBytes = new byte[6];
-        for (int i = 0; i < 6; i++) {
-            Integer hex = Integer.parseInt(macAddressParts[i], 16);
-            macAddressBytes[i] = hex.byteValue();
+        if (Objects.isNull(macAddress) || macAddress.isEmpty()) {
+            return DEFAULT_MAC;
         }
-
+        String[] macAddressParts = macAddress.split(":");
+        byte[] macAddressBytes = new byte[6];
+        try {
+            if (macAddressParts.length == 6) {
+                for (int i = 0; i < 6; i++) {
+                    Integer hex = Integer.parseInt(macAddressParts[i], 16);
+                    macAddressBytes[i] = hex.byteValue();
+                }
+            } else {
+                return DEFAULT_MAC;
+            }
+        } catch (NumberFormatException e) {
+            logger.warn("Cannot parse Hardware address", e);
+            return DEFAULT_MAC;
+        }
         return macAddressBytes;
     }
 

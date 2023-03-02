@@ -298,12 +298,6 @@ public class NetworkStatusServiceAdapter {
         boolean isGroupTKIP = supportedSecurity.contains(WifiSecurity.GROUP_TKIP);
         boolean isPairCCMP = supportedSecurity.contains(WifiSecurity.PAIR_CCMP);
         boolean isPairTKIP = supportedSecurity.contains(WifiSecurity.PAIR_TKIP);
-        boolean isWPA = supportedSecurity.contains(WifiSecurity.KEY_MGMT_SAE) ||
-                supportedSecurity.contains(WifiSecurity.KEY_MGMT_EAP_SUITE_B_192) ||
-                supportedSecurity.contains(WifiSecurity.KEY_MGMT_OWE) ||
-                supportedSecurity.contains(WifiSecurity.KEY_MGMT_OWE_TM) ||
-                supportedSecurity.contains(WifiSecurity.KEY_MGMT_802_1X) ||
-                supportedSecurity.contains(WifiSecurity.KEY_MGMT_PSK);
 
         if (isGroupCCMP && isGroupTKIP) {
             entryToModify.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
@@ -320,10 +314,27 @@ public class NetworkStatusServiceAdapter {
         } else if (isPairTKIP) {
             entryToModify.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
         }
+        
+        entryToModify.setSecurity(wifiSecurityCollectionToString(supportedSecurity));
+    }
 
-        if (isWPA) {
-            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
+    private String wifiSecurityCollectionToString(Set<WifiSecurity> wifiSecurities) {
+        StringBuilder prettyPrint = new StringBuilder();
+
+        for (WifiSecurity wifiSecurity : wifiSecurities) {
+            String secString = wifiSecurity.name();
+            if (secString.contains("KEY_MGMT")) {
+                prettyPrint.append(secString.replace("KEY_MGMT_", ""));
+                prettyPrint.append(", ");
+            }
         }
+
+        if (prettyPrint.length() > 2) {
+            prettyPrint.deleteCharAt(prettyPrint.length() - 1);
+            prettyPrint.deleteCharAt(prettyPrint.length() - 1);
+        }
+
+        return prettyPrint.toString();
     }
 
     private class ChannelsBuilder {

@@ -34,6 +34,7 @@ import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
+import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,6 +227,16 @@ public class GwtNetworkServiceImpl {
         try {
             NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
             return status.getWifiCountryCode();
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws GwtKuraException {
+        try {
+            List<GwtWifiHotspotEntry> aps = new NetworkStatusServiceAdapter().findWifiHotspots(interfaceName);
+            logger.debug("Found APs: {}", aps);
+            return aps;
         } catch (GwtKuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }

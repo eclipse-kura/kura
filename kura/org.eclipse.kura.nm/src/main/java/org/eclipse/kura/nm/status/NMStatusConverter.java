@@ -220,7 +220,6 @@ public class NMStatusConverter {
         UInt32 uintFrequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
         int frequency = uintFrequency.intValue();
         int channel = channelFrequencyConvert(frequency);
-
         builder.withChannel(new org.eclipse.kura.net.status.wifi.WifiChannel(channel, frequency));
 
         UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");

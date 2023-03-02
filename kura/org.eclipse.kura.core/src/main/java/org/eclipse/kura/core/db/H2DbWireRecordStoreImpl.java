@@ -91,4 +91,8 @@ public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
         return Collections.unmodifiableMap(result);
     }
 
+    private Optional<String> getJdbcType(final TypedValue<?> value) {
+        return Optional.ofNullable(value).flatMap(v -> Optional.ofNullable(TYPE_MAPPING.get(v.getClass())));
+    }
+
 }

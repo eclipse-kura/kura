@@ -39,8 +39,10 @@ public class MessageStoreState {
 
     public MessageStoreState(final MessageStoreProvider messageStoreProvider,
             final ConnectionListener connectionListener, final DataServiceOptions options) {
+
         this.messageStoreProvider = messageStoreProvider;
         this.connectionListener = connectionListener;
+
         update(options);
     }
 
@@ -62,10 +64,15 @@ public class MessageStoreState {
         return messageStoreProvider;
     }
 
-    public synchronized MessageStore getMessageStore() throws KuraStoreException {
+    public synchronized MessageStore getOrOpenMessageStore() throws KuraStoreException {
         if (this.messageStore.isPresent()) {
             return this.messageStore.get();
         }
+
+        return this.openMessageStore();
+    }
+
+    public synchronized MessageStore openMessageStore() throws KuraStoreException {
 
         final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid(),
                 Collections.singleton(this.connectionListener));

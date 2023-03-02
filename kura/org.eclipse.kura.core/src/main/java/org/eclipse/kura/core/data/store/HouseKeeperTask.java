@@ -42,7 +42,7 @@ public class HouseKeeperTask implements Runnable {
             //
             // delete all confirmed messages
             logger.info("HouseKeeperTask: Delete confirmed messages...");
-            this.store.getMessageStore().deleteStaleMessages(this.purgeAge);
+            this.store.getOrOpenMessageStore().deleteStaleMessages(this.purgeAge);
 
             logger.info("HouseKeeperTask ended.");
         } catch (KuraStoreException me) { // do not throw the exception as that will stop future executions

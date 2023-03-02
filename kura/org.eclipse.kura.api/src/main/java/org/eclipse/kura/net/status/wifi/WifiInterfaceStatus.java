@@ -32,10 +32,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class WifiInterfaceStatus extends NetworkInterfaceStatus {
 
     private final Set<WifiCapability> capabilities;
-    private final List<Long> supportedBitrates;
-    private final Set<WifiRadioMode> supportedRadioModes;
-    private final List<Integer> supportedChannels;
-    private final List<Long> supportedFrequencies;
+    private final List<WifiChannel> channels;
     private final String countryCode;
     private final WifiMode mode;
     private final Optional<WifiAccessPoint> activeWifiAccessPoint;
@@ -44,10 +41,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
     private WifiInterfaceStatus(WifiInterfaceStatusBuilder builder) {
         super(builder);
         this.capabilities = builder.capabilities;
-        this.supportedBitrates = builder.supportedBitrates;
-        this.supportedRadioModes = builder.supportedRadioModes;
-        this.supportedChannels = builder.supportedChannels;
-        this.supportedFrequencies = builder.supportedFrequencies;
+        this.channels = builder.channels;
         this.countryCode = builder.countryCode;
         this.mode = builder.mode;
         this.activeWifiAccessPoint = builder.currentWifiAccessPoint;
@@ -58,20 +52,8 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
         return this.capabilities;
     }
 
-    public List<Long> getSupportedBitrates() {
-        return this.supportedBitrates;
-    }
-
-    public Set<WifiRadioMode> getSupportedRadioModes() {
-        return this.supportedRadioModes;
-    }
-
-    public List<Integer> getSupportedChannels() {
-        return this.supportedChannels;
-    }
-
-    public List<Long> getSupportedFrequencies() {
-        return this.supportedFrequencies;
+    public List<WifiChannel> getChannels() {
+        return this.channels;
     }
 
     public String getCountryCode() {
@@ -97,10 +79,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
     public static class WifiInterfaceStatusBuilder extends NetworkInterfaceStatusBuilder<WifiInterfaceStatusBuilder> {
 
         private Set<WifiCapability> capabilities = EnumSet.of(WifiCapability.NONE);
-        private List<Long> supportedBitrates = Collections.emptyList();
-        private Set<WifiRadioMode> supportedRadioModes = EnumSet.of(WifiRadioMode.UNKNOWN);
-        private List<Integer> supportedChannels = Collections.emptyList();
-        private List<Long> supportedFrequencies = Collections.emptyList();
+        private List<WifiChannel> channels = Collections.emptyList();
         private String countryCode = "00";
         private WifiMode mode = WifiMode.UNKNOWN;
         private Optional<WifiAccessPoint> currentWifiAccessPoint = Optional.empty();
@@ -111,23 +90,8 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
             return this;
         }
 
-        public WifiInterfaceStatusBuilder withSupportedBitrates(List<Long> supportedBitrates) {
-            this.supportedBitrates = supportedBitrates;
-            return this;
-        }
-
-        public WifiInterfaceStatusBuilder withSupportedRadioModes(Set<WifiRadioMode> supportedRadioModes) {
-            this.supportedRadioModes = supportedRadioModes;
-            return this;
-        }
-
-        public WifiInterfaceStatusBuilder withSupportedChannels(List<Integer> supportedChannels) {
-            this.supportedChannels = supportedChannels;
-            return this;
-        }
-
-        public WifiInterfaceStatusBuilder withSupportedFrequencies(List<Long> supportedFrequencies) {
-            this.supportedFrequencies = supportedFrequencies;
+        public WifiInterfaceStatusBuilder withWifiChannels(List<WifiChannel> channels) {
+            this.channels = channels;
             return this;
         }
 
@@ -170,8 +134,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
         int result = super.hashCode();
         result = prime * result
                 + Objects.hash(this.activeWifiAccessPoint, this.availableWifiAccessPoints, this.capabilities,
-                        this.countryCode, this.mode, this.supportedBitrates, this.supportedChannels,
-                        this.supportedFrequencies, this.supportedRadioModes);
+                        this.countryCode, this.mode, this.channels);
         return result;
     }
 
@@ -188,10 +151,7 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
                 && Objects.equals(this.availableWifiAccessPoints, other.availableWifiAccessPoints)
                 && Objects.equals(this.capabilities, other.capabilities)
                 && Objects.equals(this.countryCode, other.countryCode)
-                && this.mode == other.mode && Objects.equals(this.supportedBitrates, other.supportedBitrates)
-                && Objects.equals(this.supportedChannels, other.supportedChannels)
-                && Objects.equals(this.supportedFrequencies, other.supportedFrequencies)
-                && Objects.equals(this.supportedRadioModes, other.supportedRadioModes);
+                && this.mode == other.mode && Objects.equals(this.channels, other.channels);
     }
 
 }

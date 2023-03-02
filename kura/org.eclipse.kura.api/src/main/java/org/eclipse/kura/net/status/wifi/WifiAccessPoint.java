@@ -30,8 +30,7 @@ public class WifiAccessPoint {
 
     private final String ssid;
     private final byte[] hardwareAddress;
-    private final long frequency;
-    private final int channel;
+    private final WifiChannel channel;
     private final WifiMode mode;
     private final long maxBitrate;
     private final int signalQuality;
@@ -41,7 +40,6 @@ public class WifiAccessPoint {
     private WifiAccessPoint(WifiAccessPointBuilder builder) {
         this.ssid = builder.ssid;
         this.hardwareAddress = builder.hardwareAddress;
-        this.frequency = builder.frequency;
         this.channel = builder.channel;
         this.mode = builder.mode;
         this.maxBitrate = builder.maxBitrate;
@@ -58,11 +56,7 @@ public class WifiAccessPoint {
         return this.hardwareAddress;
     }
 
-    public long getFrequency() {
-        return this.frequency;
-    }
-
-    public int getChannel() {
+    public WifiChannel getChannel() {
         return this.channel;
     }
 
@@ -94,8 +88,7 @@ public class WifiAccessPoint {
 
         private String ssid;
         private byte[] hardwareAddress;
-        private long frequency;
-        private int channel;
+        private WifiChannel channel;
         private WifiMode mode;
         private long maxBitrate;
         private int signalQuality;
@@ -115,12 +108,7 @@ public class WifiAccessPoint {
             return this;
         }
 
-        public WifiAccessPointBuilder withFrequency(long frequency) {
-            this.frequency = frequency;
-            return this;
-        }
-
-        public WifiAccessPointBuilder withChannel(int channel) {
+        public WifiAccessPointBuilder withChannel(WifiChannel channel) {
             this.channel = channel;
             return this;
         }
@@ -160,9 +148,8 @@ public class WifiAccessPoint {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result
-                + Objects.hash(this.channel, this.frequency, this.maxBitrate, this.mode, this.rsnSecurity,
-                        this.signalQuality, this.ssid, this.wpaSecurity);
+        result = prime * result + Objects.hash(this.channel, this.maxBitrate, this.mode, this.rsnSecurity,
+                this.signalQuality, this.ssid, this.wpaSecurity);
         return result;
     }
 
@@ -175,11 +162,10 @@ public class WifiAccessPoint {
             return false;
         }
         WifiAccessPoint other = (WifiAccessPoint) obj;
-        return this.channel == other.channel && this.frequency == other.frequency
-                && Arrays.equals(this.hardwareAddress, other.hardwareAddress) && this.maxBitrate == other.maxBitrate
-                && this.mode == other.mode && Objects.equals(this.rsnSecurity, other.rsnSecurity)
-                && this.signalQuality == other.signalQuality && Objects.equals(this.ssid, other.ssid)
-                && Objects.equals(this.wpaSecurity, other.wpaSecurity);
+        return Objects.equals(channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+                && this.maxBitrate == other.maxBitrate && this.mode == other.mode
+                && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
+                && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.wpaSecurity, other.wpaSecurity);
     }
 
 }

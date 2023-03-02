@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.status;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.Sim;
+import org.eclipse.kura.net.status.wifi.WifiChannel;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -59,8 +61,7 @@ public class NetworkStatusServiceAdapter {
         return this.networkStatusService.getInterfaceNames();
     }
 
-    public void fillWithStatusProperties(String ifName,
-            GwtNetInterfaceConfig gwtConfigToUpdate) {
+    public void fillWithStatusProperties(String ifName, GwtNetInterfaceConfig gwtConfigToUpdate) {
         Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifName);
 
         if (networkInterfaceInfo.isPresent()) {
@@ -137,8 +138,7 @@ public class NetworkStatusServiceAdapter {
         return result.toString();
     }
 
-    private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig,
-            NetworkInterfaceStatus networkInterfaceInfo) {
+    private void setModemStateProperties(GwtNetInterfaceConfig gwtConfig, NetworkInterfaceStatus networkInterfaceInfo) {
         if (gwtConfig instanceof GwtModemInterfaceConfig && networkInterfaceInfo instanceof ModemInterfaceStatus) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
             ModemInterfaceStatus modemInterfaceInfo = (ModemInterfaceStatus) networkInterfaceInfo;
@@ -193,11 +193,12 @@ public class NetworkStatusServiceAdapter {
             gwtWifiNetInterfaceConfig.setHwState(wifiInterfaceInfo.getState().toString());
             if (wifiInterfaceInfo.getMode() == WifiMode.MASTER) {
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getAccessPointWifiConfig())) {
-                    gwtWifiNetInterfaceConfig.getAccessPointWifiConfig()
-                            .setChannels(wifiInterfaceInfo.getSupportedChannels());
+                    List<WifiChannel> channels = wifiInterfaceInfo.getChannels();
+                    gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().setChannels(convertChannels(channels));
                 } else {
                     GwtWifiConfig gwtConfig = new GwtWifiConfig();
-                    gwtConfig.setChannels(wifiInterfaceInfo.getSupportedChannels());
+                    List<WifiChannel> channels = wifiInterfaceInfo.getChannels();
+                    gwtConfig.setChannels(convertChannels(channels));
                     gwtWifiNetInterfaceConfig.setAccessPointWifiConfig(gwtConfig);
                 }
             } else if (wifiInterfaceInfo.getMode() == WifiMode.INFRA) {
@@ -206,15 +207,26 @@ public class NetworkStatusServiceAdapter {
                         .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalQuality())));
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getStationWifiConfig())) {
-                    gwtWifiNetInterfaceConfig.getStationWifiConfig()
-                            .setChannels(wifiInterfaceInfo.getSupportedChannels());
+                    List<WifiChannel> channels = wifiInterfaceInfo.getChannels();
+                    gwtWifiNetInterfaceConfig.getStationWifiConfig().setChannels(convertChannels(channels));
                 } else {
                     GwtWifiConfig gwtConfig = new GwtWifiConfig();
-                    gwtConfig.setChannels(wifiInterfaceInfo.getSupportedChannels());
+                    List<WifiChannel> channels = wifiInterfaceInfo.getChannels();
+                    gwtConfig.setChannels(convertChannels(channels));
                     gwtWifiNetInterfaceConfig.setStationWifiConfig(gwtConfig);
                 }
             }
         }
+    }
+
+    private List<Integer> convertChannels(List<WifiChannel> channels) {
+        List<Integer> intChannels = new ArrayList<>();
+
+        for (WifiChannel channel : channels) {
+            intChannels.add(channel.getChannel());
+        }
+
+        return intChannels;
     }
 
 }

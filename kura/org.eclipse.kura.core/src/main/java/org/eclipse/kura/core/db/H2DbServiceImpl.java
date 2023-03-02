@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -96,13 +97,9 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final AtomicInteger pendingUpdates = new AtomicInteger();
-    private final ThreadLocal<Boolean> isOnExecutor = new ThreadLocal<Boolean>() {
+    private final ThreadLocal<Boolean> isOnExecutor = ThreadLocal.withInitial(() -> false);
 
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
+    private Set<ConnectionListener> listeners = new CopyOnWriteArraySet<>();
 
     private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>());
@@ -164,6 +161,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
             Thread.currentThread().interrupt();
         }
 
+        this.isOnExecutor.remove();
         this.executorService.shutdown();
         awaitExecutorServiceTermination();
         try {
@@ -218,7 +216,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
             syncWithExecutor();
         }
 
-        if (this.isOnExecutor.get()) {
+        if (Boolean.TRUE.equals(this.isOnExecutor.get())) {
             return withConnectionInternal(callable);
         }
 
@@ -238,6 +236,12 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
             throw new IllegalStateException(e);
         }
 
+    }
+
+    @Override
+    public <T> T withConnection(ConnectionCallable<T> task, Set<ConnectionListener> listeners) throws SQLException {
+        this.listeners = listeners;
+        return withConnection(task);
     }
 
     @Override
@@ -408,8 +412,10 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         Connection conn = null;
         try {
             conn = this.connectionPool.getConnection();
+            this.listeners.forEach(l -> l.connected());
         } catch (SQLException e) {
             logger.error("Error getting connection", e);
+            this.listeners.forEach(l -> l.disconnected());
             throw new SQLException("Error getting connection");
         }
         return conn;

@@ -48,7 +48,7 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected final ConnectionProvider connectionProvider;
     protected final Calendar utcCalendar;
 
-    private Set<ConnectionListener> connectionListeners = new CopyOnWriteArraySet<>();
+    protected Set<ConnectionListener> connectionListeners = new CopyOnWriteArraySet<>();
 
     protected AbstractJdbcMessageStoreImpl(final ConnectionProvider connectionProvider, final String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {

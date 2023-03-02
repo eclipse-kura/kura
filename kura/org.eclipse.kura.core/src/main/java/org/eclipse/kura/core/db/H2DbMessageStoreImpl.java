@@ -241,6 +241,12 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
         }
 
         return result;
+
+    }
+
+    @Override
+    public void close() {
+        this.connectionListeners.forEach(l -> l.disconnected());
     }
 
 }

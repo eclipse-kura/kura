@@ -237,7 +237,7 @@ public class NMDbusConnector {
             // once the apply method returns, some status/config information can still change.
             // The correct way to fix this would be by handling a signal coming from the DBus
             // but this still work 99% of the time.
-            Thread.sleep(1500);
+            Thread.sleep(1500);  // NOSONAR
         } catch (InterruptedException e) {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();

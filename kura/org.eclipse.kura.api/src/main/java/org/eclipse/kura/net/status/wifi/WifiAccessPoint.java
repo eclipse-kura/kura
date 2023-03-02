@@ -162,7 +162,7 @@ public class WifiAccessPoint {
             return false;
         }
         WifiAccessPoint other = (WifiAccessPoint) obj;
-        return this.channel == other.channel && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+        return Objects.equals(channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
                 && this.maxBitrate == other.maxBitrate && this.mode == other.mode
                 && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
                 && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.wpaSecurity, other.wpaSecurity);

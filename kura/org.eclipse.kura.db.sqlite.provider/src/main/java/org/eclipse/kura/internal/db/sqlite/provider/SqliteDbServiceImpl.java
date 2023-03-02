@@ -329,9 +329,10 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
-        return SqliteQueryableWireRecordStoreImpl.performQuery(this::withConnection, query);
+        return new SqliteQueryableWireRecordStoreImpl(this::withConnection).performQuery(query);
     }
 
     @SuppressWarnings("restriction")

@@ -625,9 +625,10 @@ public class H2DbServiceImpl
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
-        return H2DbQueryableWireRecordStoreImpl.performQuery(this::withConnectionAdapter, query);
+        return new H2DbQueryableWireRecordStoreImpl(this::withConnectionAdapter).performQuery(query);
     }
 
     @SuppressWarnings("restriction")

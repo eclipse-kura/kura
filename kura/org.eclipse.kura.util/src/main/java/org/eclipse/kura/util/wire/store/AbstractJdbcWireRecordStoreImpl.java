@@ -26,62 +26,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.JdbcUtil;
 import org.eclipse.kura.wire.WireRecord;
+import org.eclipse.kura.wire.store.provider.WireRecordStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SqlWireRecordStoreHelper {
+public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlWireRecordStoreHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractJdbcWireRecordStoreImpl.class);
 
     private static final String COLUMN_NAME = "COLUMN_NAME";
     private static final String TYPE_NAME = "TYPE_NAME";
 
-    private final String tableName;
-    private final String sanitizedTableName;
-    private final ConnectionProvider connectionProvider;
-    private final SqlWireRecordStoreQueries queries;
-    private final Function<TypedValue<?>, Optional<String>> sqlTypeMapper;
-    private final UnaryOperator<String> sanitizer;
-    private final boolean isExplicitCommitEnabled;
+    protected final String tableName;
+    protected final String escapedTableName;
+    protected final ConnectionProvider connectionProvider;
+    protected final JdbcWireRecordStoreQueries queries;
 
-    private SqlWireRecordStoreHelper(final Builder builder) {
-        this.tableName = requireNonNull(builder.tableName);
-        this.sanitizer = requireNonNull(builder.sanitizer);
-        this.connectionProvider = requireNonNull(builder.connectionProvider);
-        this.queries = requireNonNull(builder.queries);
-        this.sqlTypeMapper = requireNonNull(builder.sqlTypeMapper);
-        this.isExplicitCommitEnabled = builder.isExplicitCommitEnabled;
-
-        this.sanitizedTableName = builder.sanitizer.apply(tableName);
+    protected AbstractJdbcWireRecordStoreImpl(final ConnectionProvider connectionProvider, final String tableName) {
+        if (tableName == null || tableName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Table name cannot be null or empty.");
+        }
+        this.tableName = tableName;
+        this.connectionProvider = requireNonNull(connectionProvider, "Connection provider cannot be null");
+        this.escapedTableName = escapeIdentifier(tableName);
+        this.queries = buildSqlWireRecordStoreQueries();
     }
 
-    public void createTable() throws KuraStoreException {
+    protected abstract Optional<String> getMappedSqlType(final TypedValue<?> value);
+
+    protected abstract JdbcWireRecordStoreQueries buildSqlWireRecordStoreQueries();
+
+    protected String escapeIdentifier(final String string) {
+        final String escapedName = string.replace("\"", "\"\"");
+        return "\"" + escapedName + "\"";
+    }
+
+    protected void createTable() throws KuraStoreException {
         this.connectionProvider.withConnection(c -> {
             execute(c, this.queries.getSqlCreateTable());
             return null;
         }, "failed to create table");
     }
 
-    public void createTimestampIndex() throws KuraStoreException {
+    protected void createTimestampIndex() throws KuraStoreException {
         this.connectionProvider.withConnection(c -> {
             execute(c, this.queries.getSqlCreateTimestampIndex());
             return null;
         }, "failed to create index");
     }
 
-    public void truncate(final int noOfRecordsToKeep) throws KuraStoreException {
+    @Override
+    public synchronized void truncate(final int noOfRecordsToKeep) throws KuraStoreException {
 
         this.connectionProvider.withConnection(c -> {
             if (noOfRecordsToKeep == 0) {
-                logger.info("Truncating table {}...", sanitizedTableName);
+                logger.info("Truncating table {}...", escapedTableName);
                 execute(c, this.queries.getSqlTruncateTable());
             } else {
                 final int tableSize = getTableSize(c);
@@ -91,7 +96,7 @@ public class SqlWireRecordStoreHelper {
                     return null;
                 }
 
-                logger.info("Partially emptying table {}", sanitizedTableName);
+                logger.info("Partially emptying table {}", escapedTableName);
                 execute(c, MessageFormat.format(this.queries.getSqlDeleteRangeTable(), deleteCount));
             }
 
@@ -100,10 +105,12 @@ public class SqlWireRecordStoreHelper {
 
     }
 
-    public int getSize() throws KuraStoreException {
+    @Override
+    public synchronized int getSize() throws KuraStoreException {
         return this.connectionProvider.withConnection(this::getTableSize, "failed to determine table size");
     }
 
+    @Override
     public synchronized void insertRecords(final List<WireRecord> records) throws KuraStoreException {
         this.connectionProvider.withConnection(c -> {
 
@@ -123,7 +130,12 @@ public class SqlWireRecordStoreHelper {
         }, "failed to insert records");
     }
 
-    public void createColumns(final Connection c, final WireRecord wireRecord) throws SQLException {
+    @Override
+    public void close() {
+        // nothing to close
+    }
+
+    protected void createColumns(final Connection c, final WireRecord wireRecord) throws SQLException {
 
         final Map<String, String> columnTypes = probeColumnTypes(c);
 
@@ -134,39 +146,43 @@ public class SqlWireRecordStoreHelper {
         }
     }
 
-    public void createColumn(final Connection c, final String name, final TypedValue<?> value,
+    protected void createColumn(final Connection c, final String name, final TypedValue<?> value,
             final Map<String, String> columnTypes) throws SQLException {
 
-        final Optional<String> expectedType = this.sqlTypeMapper.apply(value);
+        final Optional<String> mappedType = getMappedSqlType(value);
 
-        if (!expectedType.isPresent()) {
+        if (!mappedType.isPresent()) {
             logger.warn("Unsupported typed value: {}", value);
             return;
         }
 
-        final String sqlColName = sanitizer.apply(name);
+        final String escapedColName = escapeIdentifier(name);
 
-        if (!columnTypes.containsKey(name)) {
+        if (!columnTypes.containsKey(escapedColName)) {
 
-            logger.debug("creating new column: {} {}", name, expectedType.get());
-            execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,
-                    expectedType.get()));
+            logger.debug("creating new column: {} {}", name, mappedType.get());
+            execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName,
+                    mappedType.get()));
 
         } else {
-            final Optional<String> columnType = Optional.ofNullable(columnTypes.get(name));
+            final String actualColumnType = columnTypes.get(escapedColName);
 
-            if (!expectedType.equals(columnType)) {
+            if (!isCorrectColumnType(value, mappedType.get(), actualColumnType)) {
 
-                logger.debug("changing column type: {} {}", name, expectedType.get());
+                logger.debug("changing column type: {} {}", name, mappedType.get());
 
-                execute(c, MessageFormat.format(queries.getSqlDropColumn(), sqlColName));
-                execute(c, MessageFormat.format(queries.getSqlAddColumn(), sqlColName,
-                        expectedType.get()));
+                execute(c, MessageFormat.format(queries.getSqlDropColumn(), escapedColName));
+                execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName,
+                        mappedType.get()));
             }
         }
     }
 
-    public final Map<String, String> probeColumnTypes(final Connection c) throws SQLException {
+    protected boolean isCorrectColumnType(final TypedValue<?> value, final String mappedType, final String actualType) {
+        return mappedType.equals(actualType);
+    }
+
+    protected Map<String, String> probeColumnTypes(final Connection c) throws SQLException {
         final Map<String, String> result = new HashMap<>();
 
         final String catalog = c.getCatalog();
@@ -174,8 +190,8 @@ public class SqlWireRecordStoreHelper {
         try (final ResultSet rsColumns = dbMetaData.getColumns(catalog, null, tableName, null)) {
 
             while (rsColumns.next()) {
-                final String colName = rsColumns.getString(COLUMN_NAME);
-                final String type = rsColumns.getString(TYPE_NAME);
+                final String colName = getEscapedColumnName(rsColumns);
+                final String type = getColumnType(rsColumns);
 
                 result.put(colName, type);
             }
@@ -184,13 +200,21 @@ public class SqlWireRecordStoreHelper {
         return result;
     }
 
-    public void insertRecord(Connection connection, final WireRecord wireRecord) throws SQLException {
+    protected String getEscapedColumnName(final ResultSet columnMetadata) throws SQLException {
+        return escapeIdentifier(columnMetadata.getString(COLUMN_NAME));
+    }
+
+    protected String getColumnType(final ResultSet columnMetadata) throws SQLException {
+        return columnMetadata.getString(TYPE_NAME);
+    }
+
+    protected void insertRecord(Connection connection, final WireRecord wireRecord) throws SQLException {
 
         final String insertQuery = buildInsertQuerySql(wireRecord.getProperties());
 
         final long timestamp = System.currentTimeMillis();
 
-        logger.debug("Storing data into table {}...", sanitizedTableName);
+        logger.debug("Storing data into table {}...", escapedTableName);
 
         try (final PreparedStatement stmt = connection.prepareStatement(insertQuery)) {
             stmt.setLong(1, timestamp);
@@ -206,7 +230,7 @@ public class SqlWireRecordStoreHelper {
 
             stmt.execute();
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 connection.commit();
             }
 
@@ -215,7 +239,7 @@ public class SqlWireRecordStoreHelper {
 
     }
 
-    public String buildInsertQuerySql(final Map<String, TypedValue<?>> properties) {
+    protected String buildInsertQuerySql(final Map<String, TypedValue<?>> properties) {
         final StringBuilder sbCols = new StringBuilder();
         final StringBuilder sbVals = new StringBuilder();
 
@@ -223,8 +247,8 @@ public class SqlWireRecordStoreHelper {
         sbVals.append("?");
 
         for (final Entry<String, TypedValue<?>> entry : properties.entrySet()) {
-            final String sqlColName = sanitizer.apply(entry.getKey());
-            sbCols.append(", ").append(sqlColName);
+            final String escapedColName = escapeIdentifier(entry.getKey());
+            sbCols.append(", ").append(escapedColName);
             sbVals.append(", ?");
         }
 
@@ -232,7 +256,7 @@ public class SqlWireRecordStoreHelper {
                 sbVals.toString());
     }
 
-    public void setParameterValue(final PreparedStatement stmt, final int index, final Object value)
+    protected void setParameterValue(final PreparedStatement stmt, final int index, final Object value)
             throws SQLException {
         if (value instanceof String) {
             stmt.setString(index, (String) value);
@@ -253,7 +277,7 @@ public class SqlWireRecordStoreHelper {
         }
     }
 
-    public int getTableSize(final Connection c) throws SQLException {
+    protected int getTableSize(final Connection c) throws SQLException {
         try (final Statement stmt = c.createStatement();
                 final ResultSet rset = stmt
                         .executeQuery(this.queries.getSqlRowCount())) {
@@ -262,77 +286,21 @@ public class SqlWireRecordStoreHelper {
         }
     }
 
-    public void execute(final Connection c, final String sql, final Object... params) throws SQLException {
+    protected void execute(final Connection c, final String sql, final Object... params) throws SQLException {
         try (final PreparedStatement stmt = c.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 setParameterValue(stmt, 1 + i, params[i]);
             }
             stmt.execute();
 
-            if (isExplicitCommitEnabled) {
+            if (isExplicitCommitEnabled()) {
                 c.commit();
             }
         }
     }
 
-    public interface ConnectionCallable<T> {
-
-        public T call(Connection connection) throws SQLException;
-    }
-
-    public interface SqlTypeMapper {
-        public Optional<String> getMappedType(final TypedValue<?> value);
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static final class Builder {
-
-        private String tableName;
-        private ConnectionProvider connectionProvider;
-        private SqlWireRecordStoreQueries queries;
-        private Function<TypedValue<?>, Optional<String>> sqlTypeMapper;
-        private UnaryOperator<String> sanitizer;
-        private boolean isExplicitCommitEnabled;
-
-        private Builder() {
-        }
-
-        public Builder withTableName(String tableName) {
-            this.tableName = tableName;
-            return this;
-        }
-
-        public Builder withConnectionProvider(ConnectionProvider connectionProvider) {
-            this.connectionProvider = connectionProvider;
-            return this;
-        }
-
-        public Builder withQueries(SqlWireRecordStoreQueries queries) {
-            this.queries = queries;
-            return this;
-        }
-
-        public Builder withSqlTypeMapper(Function<TypedValue<?>, Optional<String>> sqlTypeMapper) {
-            this.sqlTypeMapper = sqlTypeMapper;
-            return this;
-        }
-
-        public Builder withSanitizer(UnaryOperator<String> sanitizer) {
-            this.sanitizer = sanitizer;
-            return this;
-        }
-
-        public Builder withExplicitCommitEnabled(boolean isExplicitCommitEnabled) {
-            this.isExplicitCommitEnabled = isExplicitCommitEnabled;
-            return this;
-        }
-
-        public SqlWireRecordStoreHelper build() {
-            return new SqlWireRecordStoreHelper(this);
-        }
+    protected boolean isExplicitCommitEnabled() {
+        return false;
     }
 
 }

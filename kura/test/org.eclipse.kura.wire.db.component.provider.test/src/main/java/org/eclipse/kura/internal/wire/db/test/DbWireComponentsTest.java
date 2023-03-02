@@ -178,6 +178,26 @@ public class DbWireComponentsTest extends DbComponentsTestBase {
     }
 
     @Test
+    public void shouldSupportMaximumTableSize1()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 5);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(1));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(2));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(3));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(4));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(5));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(6));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(7));
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 1);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(8));
+
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY ID DESC;");
+
+        thenEnvelopeRecordCountIs(0, 1);
+        thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(8));
+    }
+
+    @Test
     public void shouldSupportCleanupRecordKeep()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 5,

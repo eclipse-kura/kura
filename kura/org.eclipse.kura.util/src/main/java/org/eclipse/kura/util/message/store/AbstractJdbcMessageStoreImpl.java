@@ -25,16 +25,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
 
@@ -48,8 +45,6 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected final ConnectionProvider connectionProvider;
     protected final Calendar utcCalendar;
 
-    protected Set<ConnectionListener> connectionListeners = new CopyOnWriteArraySet<>();
-
     protected AbstractJdbcMessageStoreImpl(final ConnectionProvider connectionProvider, final String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {
             throw new IllegalArgumentException("Table name cannot be null or empty.");
@@ -59,13 +54,6 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
         this.escapedTableName = escapeIdentifier(tableName);
         this.utcCalendar = buildUTCCalendar();
         this.queries = buildSqlMessageStoreQueries();
-    }
-
-    protected AbstractJdbcMessageStoreImpl(ConnectionProvider connectionProvider, String tableName,
-            Set<ConnectionListener> listeners) {
-        this(connectionProvider, tableName);
-
-        this.connectionListeners = listeners;
     }
 
     protected abstract JdbcMessageStoreQueries buildSqlMessageStoreQueries();
@@ -352,15 +340,4 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
         return connectionProvider;
     }
 
-    @Override
-    public void addListener(ConnectionListener listener) {
-        this.connectionListeners.add(listener);
-
-    }
-
-    @Override
-    public void removeListener(ConnectionListener listener) {
-        this.connectionListeners.remove(listener);
-
-    }
 }

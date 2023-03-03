@@ -18,7 +18,6 @@ import java.util.Optional;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -227,23 +226,4 @@ public interface MessageStore {
      */
     public void close();
 
-    /**
-     * Adds a {@link ConnectionListener}
-     *
-     * @param listener
-     *            to add
-     *
-     * @since 2.5.0
-     */
-    public void addListener(ConnectionListener listener);
-
-    /**
-     * Removes a {@link ConnectionListener}
-     *
-     * @param listener
-     *            to remove
-     *
-     * @since 2.5.0
-     */
-    public void removeListener(ConnectionListener listener);
 }

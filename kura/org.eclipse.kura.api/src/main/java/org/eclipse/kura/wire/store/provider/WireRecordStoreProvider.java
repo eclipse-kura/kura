@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.wire.store.provider;
 
-import java.util.Set;
-
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.store.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
@@ -38,17 +36,22 @@ public interface WireRecordStoreProvider {
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException;
 
     /**
-     * Opens or creates a {@link WireRecordStore} instance with the given name and adds a set of
-     * {@link ConnectionListener}
-     * to be invoked when connection events occur in {@link WireRecordStore}
-     * 
-     * @param name
-     *            the store name
-     * @param listeners
-     *            a set of {@link ConnectionListener} *
-     * @return the result {@link WireRecordStore}.
-     * @throws KuraStoreException
+     * Adds a {@link ConnectionListener}
+     *
+     * @param listener
+     *            to add
+     *
+     * @since 2.5.0
      */
-    public WireRecordStore openWireRecordStore(String name, Set<ConnectionListener> listeners)
-            throws KuraStoreException;
+    public void addListener(ConnectionListener listener);
+
+    /**
+     * Removes a {@link ConnectionListener}
+     *
+     * @param listener
+     *            to remove
+     *
+     * @since 2.5.0
+     */
+    public void removeListener(ConnectionListener listener);
 }

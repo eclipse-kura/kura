@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -195,6 +194,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         @Override
                         public void modifiedService(ServiceReference<Object> reference, Object service) {
                             logger.info("Message store instance updated, recreating table if needed...");
+                            if (service instanceof MessageStoreProvider) {
+                                return;
+                            }
                             synchronized (DataServiceImpl.this) {
                                 if (DataServiceImpl.this.storeState.isPresent()) {
                                     DataServiceImpl.this.storeState.get()
@@ -354,19 +356,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
             @SuppressWarnings("restriction")
             @Override
-            public MessageStore openMessageStore(String name, Set<ConnectionListener> listeners)
-                    throws KuraStoreException {
-                return new H2DbMessageStoreImpl(new ConnectionProvider() {
-
-                    @Override
-                    public <T> T withConnection(final SQLFunction<Connection, T> task) throws SQLException {
-                        return dbService.withConnection(task::call);
-                    }
-                }, name, listeners);
-            }
-
-            @SuppressWarnings("restriction")
-            @Override
             public MessageStore openMessageStore(String name) throws KuraStoreException {
                 return new H2DbMessageStoreImpl(new ConnectionProvider() {
 
@@ -375,6 +364,18 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         return dbService.withConnection(task::call);
                     }
                 }, name);
+            }
+
+            @Override
+            public void addListener(ConnectionListener listener) {
+                // Do nothing
+
+            }
+
+            @Override
+            public void removeListener(ConnectionListener listener) {
+                // Do nothin
+
             }
         });
     }
@@ -799,15 +800,19 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         int initialDelay = Math.max(this.random.nextInt(maxDelay), RECONNECTION_MIN_DELAY);
 
-        logger.info("Starting MessageStore reconnecting task with initial delay {}", initialDelay);
+        logger.info("Starting Message Store reconnecting task with initial delay {}", initialDelay);
         this.messageStoreConnectionMonitorFuture = this.messageStoreConnectionMonitorExecutor.scheduleAtFixedRate(
                 new MessageStoreReconnectTask(), initialDelay, reconnectInterval, TimeUnit.SECONDS);
 
     }
 
     private void stopMessageStoreConnectionMonitor() {
-        // TODO Auto-generated method stub
+        if (this.messageStoreConnectionMonitorFuture != null && !this.messageStoreConnectionMonitorFuture.isDone()) {
 
+            logger.info("Message Store Reconnect task running. Stopping it");
+
+            this.messageStoreConnectionMonitorFuture.cancel(true);
+        }
     }
 
     private void createThrottle() {

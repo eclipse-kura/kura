@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.core.data.store;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,7 +30,6 @@ public class MessageStoreState {
     private static final Logger logger = LoggerFactory.getLogger(MessageStoreState.class);
 
     private final MessageStoreProvider messageStoreProvider;
-    private final ConnectionListener connectionListener;
 
     private DataServiceOptions options;
     private Optional<MessageStore> messageStore = Optional.empty();
@@ -41,7 +39,6 @@ public class MessageStoreState {
             final ConnectionListener connectionListener, final DataServiceOptions options) {
 
         this.messageStoreProvider = messageStoreProvider;
-        this.connectionListener = connectionListener;
 
         update(options);
     }
@@ -74,8 +71,7 @@ public class MessageStoreState {
 
     public synchronized MessageStore openMessageStore() throws KuraStoreException {
 
-        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid(),
-                Collections.singleton(this.connectionListener));
+        final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid());
 
         this.messageStore = Optional.of(result);
 

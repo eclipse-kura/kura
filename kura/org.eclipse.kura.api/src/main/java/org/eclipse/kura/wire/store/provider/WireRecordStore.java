@@ -15,7 +15,6 @@ package org.eclipse.kura.wire.store.provider;
 import java.util.List;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.wire.WireRecord;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -62,24 +61,4 @@ public interface WireRecordStore {
      * Closes the store, releasing any runtime resource allocated for it.
      */
     public void close();
-
-    /**
-     * Adds a {@link ConnectionListener}
-     *
-     * @param listener
-     *            to add
-     *
-     * @since 2.5.0
-     */
-    public void addListener(ConnectionListener listener);
-
-    /**
-     * Removes a {@link ConnectionListener}
-     *
-     * @param listener
-     *            to remove
-     *
-     * @since 2.5.0
-     */
-    public void removeListener(ConnectionListener listener);
 }

@@ -89,6 +89,12 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
+
+        if (!this.state.isConnected()) {
+            logger.warn("Wire Record Store not connected");
+            return;
+        }
+
         final List<WireRecord> records = wireEvelope.getRecords();
 
         try {

@@ -301,7 +301,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("eth0", networkService);
+        whenGetInterfaceStatus("eth0", networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -315,7 +315,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("lo", networkService);
+        whenGetInterfaceStatus("lo", networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -329,7 +329,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("unused0", networkService);
+        whenGetInterfaceStatus("unused0", networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNull();
@@ -342,7 +342,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("wlan0", networkService);
+        whenGetInterfaceStatus("wlan0", networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -356,7 +356,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceMockedForUsbInterfaceWithName("eth0");
 
-        whenGetInterfaceStatus("eth0", networkService);
+        whenGetInterfaceStatus("eth0", networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -801,9 +801,9 @@ public class NMDbusConnectorTest {
         }
     }
 
-    public void whenGetInterfaceStatus(String netInterface, NetworkService netService) {
+    public void whenGetInterfaceStatus(String netInterface, NetworkService netService, CommandExecutorService commandExecutorService) {
         try {
-            this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface, netService, this.commandExecutorService);
+            this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface, netService, commandExecutorService);
         } catch (DBusException e) {
             hasDBusExceptionBeenThrown = true;
             e.printStackTrace();

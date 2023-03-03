@@ -432,7 +432,7 @@ public class NMDbusConnectorTest {
         	when(exitStatus.getExitCode()).thenReturn(1);
         	when(exitStatus.isSuccessful()).thenReturn(true);
         	
-        	String commandOutput = "global\n"
+        	String iwRegGetOutput = "global\n"
         			+ "country CA: DFS-FCC\n"
         			+ "	(2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
         			+ "	(5150 - 5250 @ 80), (N/A, 23), (N/A), NO-OUTDOOR, AUTO-BW\n"
@@ -448,7 +448,7 @@ public class NMDbusConnectorTest {
         			+ "	(5140 - 5360 @ 160), (6, 20), (N/A)\n"
         			+ "	(5460 - 5860 @ 160), (6, 20), (N/A)";
         	
-        	String commandOutput2 = "Interface wlan0\n"
+        	String iwWlan0InfoOutput = "Interface wlan0\n"
         			+ "	ifindex 3\n"
         			+ "	wdev 0x1\n"
         			+ "	addr dc:a6:32:a6:e0:c2\n"
@@ -458,7 +458,7 @@ public class NMDbusConnectorTest {
         			+ "	channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
         			+ "	txpower 31.00 dBm";
         	
-        	String commandOutput3 = "Wiphy phy0\n"
+        	String IwPhyPhy0InfoOutput = "Wiphy phy0\n"
         			+ "	wiphy index: 0\n"
         			+ "	max # scan SSIDs: 10\n"
         			+ "	max scan IEs length: 2048 bytes\n"
@@ -650,13 +650,13 @@ public class NMDbusConnectorTest {
         			+ "		* [ DFS_OFFLOAD ]: DFS offload\n"
         			+ "		* [ 4WAY_HANDSHAKE_AP_PSK ]: AP mode PSK offload support";
         	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        	outputStream.write(commandOutput.getBytes());
+        	outputStream.write(iwRegGetOutput.getBytes());
         	
         	ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
-        	outputStream2.write(commandOutput2.getBytes());
+        	outputStream2.write(iwWlan0InfoOutput.getBytes());
         	 
         	ByteArrayOutputStream outputStream3 = new ByteArrayOutputStream();
-        	outputStream3.write(commandOutput3.getBytes());
+        	outputStream3.write(IwPhyPhy0InfoOutput.getBytes());
         	
         	CommandStatus commandStatus = mock(CommandStatus.class);
         	when(commandStatus.getExitStatus()).thenReturn(exitStatus);

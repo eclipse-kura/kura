@@ -13,12 +13,11 @@
 
 package org.eclipse.kura.store.listener;
 
-import org.eclipse.kura.message.store.provider.MessageStore;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Listener interface to be implemented by applications that needs to be notified about connection events in the
- * {@link org.eclipse.kura.message.store.provider.MessageStore}.
+ * {@link MessageStore}.
  * All registered listeners are called synchronously by the {@link MessageStore} implementation at the occurrence of the
  * event.
  *

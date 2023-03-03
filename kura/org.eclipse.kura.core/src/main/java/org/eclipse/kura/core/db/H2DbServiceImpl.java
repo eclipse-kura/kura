@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -48,6 +47,7 @@ import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.util.jdbc.SQLFunction;
+import org.eclipse.kura.util.store.listener.ConnectionListenerManager;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
@@ -99,7 +99,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     private final AtomicInteger pendingUpdates = new AtomicInteger();
     private final ThreadLocal<Boolean> isOnExecutor = ThreadLocal.withInitial(() -> false);
 
-    private Set<ConnectionListener> listeners = new CopyOnWriteArraySet<>();
+    private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
     private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>());
@@ -166,6 +166,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         awaitExecutorServiceTermination();
         try {
             shutdownDb();
+            this.listenerManager.dispatchDisconnected();
         } catch (SQLException e) {
             logger.warn("got exception while shutting down the database", e);
         }
@@ -240,7 +241,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
     @Override
     public <T> T withConnection(ConnectionCallable<T> task, Set<ConnectionListener> listeners) throws SQLException {
-        this.listeners = listeners;
+        this.listenerManager.addAll(listeners);
         return withConnection(task);
     }
 
@@ -412,10 +413,9 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         Connection conn = null;
         try {
             conn = this.connectionPool.getConnection();
-            this.listeners.forEach(l -> l.connected());
         } catch (SQLException e) {
             logger.error("Error getting connection", e);
-            this.listeners.forEach(l -> l.disconnected());
+            this.listenerManager.dispatchDisconnected();
             throw new SQLException("Error getting connection");
         }
         return conn;
@@ -459,6 +459,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         }
 
         disposeConnectionPool();
+        this.listenerManager.dispatchDisconnected();
         activeInstances.remove(this.configuration.getBaseUrl());
     }
 
@@ -480,6 +481,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         Connection conn = null;
         try {
             conn = getConnectionInternal();
+            this.listenerManager.dispatchConnected();
         } catch (SQLException e) {
             logger.error("Failed to open database", e);
             if (deleteDbOnError && configuration.isFileBased()) {
@@ -626,21 +628,9 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     }
 
     @Override
-    public MessageStore openMessageStore(String name, Set<ConnectionListener> listeners) throws KuraStoreException {
-        return new H2DbMessageStoreImpl(this::withConnectionAdapter, name, listeners);
-    }
-
-    @Override
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException {
 
         return new H2DbWireRecordStoreImpl(this::withConnectionAdapter, name);
-    }
-
-    @Override
-    public WireRecordStore openWireRecordStore(String name, Set<ConnectionListener> listeners)
-            throws KuraStoreException {
-
-        return new H2DbWireRecordStoreImpl(this::withConnectionAdapter, name, listeners);
     }
 
     @Override
@@ -653,6 +643,18 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     private <T> T withConnectionAdapter(final SQLFunction<Connection, T> callable) throws SQLException {
 
         return this.withConnection(callable::call);
+    }
+
+    @Override
+    public void addListener(ConnectionListener listener) {
+        this.listenerManager.add(listener);
+
+    }
+
+    @Override
+    public void removeListener(ConnectionListener listener) {
+        this.listenerManager.remove(listener);
+
     }
 
 }

@@ -19,12 +19,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
-import java.util.Set;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.StoredMessage.Builder;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.JdbcUtil;
 import org.eclipse.kura.util.message.store.AbstractJdbcMessageStoreImpl;
@@ -59,13 +57,6 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
     private String sqlSetNextId;
     private String sqlGetFreeId;
-
-    public H2DbMessageStoreImpl(final ConnectionProvider provider, final String table,
-            Set<ConnectionListener> listeners) throws KuraStoreException {
-        super(provider, table, listeners);
-
-        initDb();
-    }
 
     public H2DbMessageStoreImpl(final ConnectionProvider provider, final String table) throws KuraStoreException {
         super(provider, table);
@@ -242,11 +233,6 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
         return result;
 
-    }
-
-    @Override
-    public void close() {
-        this.connectionListeners.forEach(l -> l.disconnected());
     }
 
 }

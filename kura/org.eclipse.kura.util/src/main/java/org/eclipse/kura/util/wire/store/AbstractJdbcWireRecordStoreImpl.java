@@ -310,16 +310,4 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
         return false;
     }
 
-    @Override
-    public void addListener(ConnectionListener listener) {
-        this.connectionListeners.add(listener);
-
-    }
-
-    @Override
-    public void removeListener(ConnectionListener listener) {
-        this.connectionListeners.remove(listener);
-
-    }
-
 }

@@ -10,7 +10,7 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.db.SQLiteDbService">
    <implementation class="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
@@ -19,7 +19,6 @@
       <provide interface="org.eclipse.kura.wire.store.provider.WireRecordStoreProvider"/>
       <provide interface="org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl"/>
    <reference bind="setDebugShell" cardinality="1..1" interface="org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell" name="SqliteDebugShell" policy="static"/>
    <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
 </scr:component>

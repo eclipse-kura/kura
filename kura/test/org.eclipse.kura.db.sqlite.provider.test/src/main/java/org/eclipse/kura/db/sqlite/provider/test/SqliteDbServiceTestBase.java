@@ -43,7 +43,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public class SqliteDbServiceTestBase {
 
-    private static final String SQLITE_DB_SERVICE_FACTORY_PID = "org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl";
+    private static final String SQLITE_DB_SERVICE_FACTORY_PID = "org.eclipse.kura.db.SQLiteDbService";
     private static final AtomicInteger currentId = new AtomicInteger(0);
 
     private final ConfigurationService configurationService;

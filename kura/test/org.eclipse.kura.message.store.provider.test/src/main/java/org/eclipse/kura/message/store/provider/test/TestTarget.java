@@ -81,7 +81,7 @@ public interface TestTarget {
         @Override
         public String storeFactoryPid() {
 
-            return "org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl";
+            return "org.eclipse.kura.db.SQLiteDbService";
         }
 
         @Override

@@ -11,9 +11,9 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl" 
+    <OCD id="org.eclipse.kura.db.SQLiteDbService" 
          name="SqliteDbService" 
-         description="Sqlite based database service.">
+         description="SQLite based database service.">
 
         <AD id="db.mode"
             name="Database Mode"
@@ -101,7 +101,7 @@
             description="Enables or disables the interaction with this database instance using the sqlitedbg OSGi console command"/>
 
         </OCD>
-    <Designate pid="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl" factoryPid="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl">
-        <Object ocdref="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl"/>
+    <Designate factoryPid="org.eclipse.kura.db.SQLiteDbService">
+        <Object ocdref="org.eclipse.kura.db.SQLiteDbService"/>
     </Designate>
 </MetaData>

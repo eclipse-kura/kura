@@ -23,7 +23,7 @@ Kura supports the following SQLite database features:
 To create a new SQLite database instance, use the following procedure:
 
 1. Open the Administrative UI and press the **+** button in the side menu, under the Services section. A pop-up dialog should appear.
-2. Select ```org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl``` from the **Factory** drop-down list, enter an arbitrary name for the new instance and click **Apply**.
+2. Select ```org.eclipse.kura.db.SQLiteDbService``` from the **Factory** drop-down list, enter an arbitrary name for the new instance and click **Apply**.
 3. An entry for the newly created instance should appear in the side menu under **Services**, click on it to review its configuration. It is not possible to create different DB instances that manage the same database file.
 
 ### Configuration Parameters

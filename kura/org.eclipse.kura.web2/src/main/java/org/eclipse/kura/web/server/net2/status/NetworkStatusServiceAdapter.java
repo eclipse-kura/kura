@@ -130,8 +130,8 @@ public class NetworkStatusServiceAdapter {
 
             for (WifiAccessPoint ap : wifiStatus.getAvailableWifiAccessPoints()) {
                 GwtWifiHotspotEntry entry = new GwtWifiHotspotEntry();
-                entry.setChannel(ap.getChannel());
-                entry.setFrequency(((Long) ap.getFrequency()).intValue());
+                entry.setChannel(ap.getChannel().getChannel());
+                entry.setFrequency(ap.getChannel().getFrequency());
                 entry.setMacAddress(NetworkUtil.macToString(ap.getHardwareAddress()));
                 entry.setSSID(ap.getSsid());
                 entry.setsignalStrength(ap.getSignalQuality());

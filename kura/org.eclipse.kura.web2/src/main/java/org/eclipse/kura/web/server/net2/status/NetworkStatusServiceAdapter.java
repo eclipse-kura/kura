@@ -102,7 +102,26 @@ public class NetworkStatusServiceAdapter {
         List<GwtWifiChannelFrequency> gwtChannels = new ArrayList<>();
 
         for (WifiChannel channel : channels) {
-            gwtChannels.add(new GwtWifiChannelFrequency(channel.getChannel(), channel.getFrequency()));
+            GwtWifiChannelFrequency gwtChannel = new GwtWifiChannelFrequency(channel.getChannel(),
+                    channel.getFrequency());
+
+            Optional<Boolean> isDisabled = channel.getDisabled();
+            Optional<Boolean> isNoInitiatingRadiation = channel.getNoInitiatingRadiation();
+            Optional<Boolean> isRadarDetection = channel.getRadarDetection();
+
+            if (isDisabled.isPresent()) {
+                gwtChannel.setDisabled(isDisabled.get().booleanValue());
+            }
+
+            if (isNoInitiatingRadiation.isPresent()) {
+                gwtChannel.setNoIrradiation(isNoInitiatingRadiation.get().booleanValue());
+            }
+
+            if (isRadarDetection.isPresent()) {
+                gwtChannel.setRadarDetection(isRadarDetection.get().booleanValue());
+            }
+
+            gwtChannels.add(gwtChannel);
         }
 
         return gwtChannels;

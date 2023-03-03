@@ -12,12 +12,16 @@
 #   Eurotech
 #
 
+KURA_PLATFORM=$( uname -m )
+sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
+
 BOARD="generic-device"
 
 if uname -a | grep -q 'raspberry' > /dev/null 2>&1
 then
     BOARD="raspberry"
-    echo "Installing custom jdk.dio.properties for Raspberry PI"
+    echo "Customizing installation for Raspberry PI"
 fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
+sed -i "s/device_name/${BOARD}/g" "/opt/eclipse/kura/framework/kura.properties"

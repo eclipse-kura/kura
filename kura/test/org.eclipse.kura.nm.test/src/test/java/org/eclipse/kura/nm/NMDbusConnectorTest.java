@@ -88,6 +88,111 @@ public class NMDbusConnectorTest {
     List<String> internalStringList;
     Map<String, Object> netConfig = new HashMap<>();
 
+    private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"
+            + "    (2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
+            + " (5150 - 5250 @ 80), (N/A, 23), (N/A), NO-OUTDOOR, AUTO-BW\n"
+            + " (5250 - 5350 @ 80), (N/A, 24), (0 ms), DFS, AUTO-BW\n" + " (5470 - 5600 @ 80), (N/A, 24), (0 ms), DFS\n"
+            + " (5650 - 5730 @ 80), (N/A, 24), (0 ms), DFS\n" + "   (5735 - 5835 @ 80), (N/A, 30), (N/A)\n" + "\n"
+            + "phy#0\n" + "country 99: DFS-UNSET\n" + "  (2402 - 2482 @ 40), (6, 20), (N/A)\n"
+            + " (2474 - 2494 @ 20), (6, 20), (N/A)\n" + "   (5140 - 5360 @ 160), (6, 20), (N/A)\n"
+            + " (5460 - 5860 @ 160), (6, 20), (N/A)";
+
+    private static String iwWlan0InfoOutput = "Interface wlan0\n" + "  ifindex 3\n" + "    wdev 0x1\n"
+            + " addr dc:a6:32:a6:e0:c2\n" + "   ssid kura_gateway_raspberry_pi\n" + "   type AP\n" + " wiphy 0\n"
+            + "  channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n" + " txpower 31.00 dBm";
+
+    private static String iwPhyPhy0InfoOutput = "Wiphy phy0\n" + " wiphy index: 0\n" + "   max # scan SSIDs: 10\n"
+            + " max scan IEs length: 2048 bytes\n" + "  max # sched scan SSIDs: 16\n" + " max # match sets: 16\n"
+            + " Retry short limit: 7\n" + " Retry long limit: 4\n" + " Coverage class: 0 (up to 0m)\n"
+            + " Device supports roaming.\n" + " Device supports T-DLS.\n" + " Supported Ciphers:\n"
+            + "       * WEP40 (00-0f-ac:1)\n" + "     * WEP104 (00-0f-ac:5)\n" + "     * TKIP (00-0f-ac:2)\n"
+            + "      * CCMP-128 (00-0f-ac:4)\n" + "      * CMAC (00-0f-ac:6)\n" + " Available Antennas: TX 0 RX 0\n"
+            + "    Supported interface modes:\n" + "        * IBSS\n" + "      * managed\n" + "        * AP\n"
+            + "         * P2P-client\n" + "         * P2P-GO\n" + "      * P2P-device\n" + "    Band 1:\n"
+            + "      Capabilities: 0x1062\n" + "         HT20/HT40\n" + "         Static SM Power Save\n"
+            + "         RX HT20 SGI\n" + "          RX HT40 SGI\n" + "         No RX STBC\n"
+            + "           Max AMSDU length: 3839 bytes\n" + "         DSSS/CCK HT40\n"
+            + "     Maximum RX AMPDU length 65535 bytes (exponent: 0x003)\n"
+            + "     Minimum RX AMPDU time spacing: 16 usec (0x07)\n" + "     HT TX/RX MCS rate indexes supported: 0-7\n"
+            + "     Bitrates (non-HT):\n" + "         * 1.0 Mbps\n"
+            + "           * 2.0 Mbps (short preamble supported)\n" + "         * 5.5 Mbps (short preamble supported)\n"
+            + "         * 11.0 Mbps (short preamble supported)\n" + "           * 6.0 Mbps\n" + "         * 9.0 Mbps\n"
+            + "           * 12.0 Mbps\n" + "          * 18.0 Mbps\n" + "         * 24.0 Mbps\n"
+            + "          * 36.0 Mbps\n" + "          * 48.0 Mbps\n" + "         * 54.0 Mbps\n" + "      Frequencies:\n"
+            + "         * 2412 MHz [1] (20.0 dBm)\n" + "         * 2417 MHz [2] (20.0 dBm)\n"
+            + "            * 2422 MHz [3] (20.0 dBm)\n" + "         * 2427 MHz [4] (20.0 dBm)\n"
+            + "            * 2432 MHz [5] (20.0 dBm)\n" + "         * 2437 MHz [6] (20.0 dBm)\n"
+            + "            * 2442 MHz [7] (20.0 dBm)\n" + "         * 2447 MHz [8] (20.0 dBm)\n"
+            + "            * 2452 MHz [9] (20.0 dBm)\n" + "         * 2457 MHz [10] (20.0 dBm)\n"
+            + "           * 2462 MHz [11] (20.0 dBm)\n" + "         * 2467 MHz [12] (disabled)\n"
+            + "           * 2472 MHz [13] (disabled)\n" + "         * 2484 MHz [14] (disabled)\n" + "   Band 2:\n"
+            + "      Capabilities: 0x1062\n" + "         HT20/HT40\n" + "            Static SM Power Save\n"
+            + "         RX HT20 SGI\n" + "         RX HT40 SGI\n" + "          No RX STBC\n"
+            + "           Max AMSDU length: 3839 bytes\n" + "         DSSS/CCK HT40\n"
+            + "        Maximum RX AMPDU length 65535 bytes (exponent: 0x003)\n"
+            + "     Minimum RX AMPDU time spacing: 16 usec (0x07)\n" + "     HT TX/RX MCS rate indexes supported: 0-7\n"
+            + "     VHT Capabilities (0x00001020):\n" + "         Max MPDU length: 3895\n"
+            + "         Supported Channel Width: neither 160 nor 80+80\n" + "           short GI (80 MHz)\n"
+            + "         SU Beamformee\n" + "        VHT RX MCS set:\n" + "          1 streams: MCS 0-9\n"
+            + "         2 streams: not supported\n" + "         3 streams: not supported\n"
+            + "         4 streams: not supported\n" + "         5 streams: not supported\n"
+            + "         6 streams: not supported\n" + "         7 streams: not supported\n"
+            + "         8 streams: not supported\n" + "     VHT RX highest supported: 0 Mbps\n"
+            + "     VHT TX MCS set:\n" + "          1 streams: MCS 0-9\n" + "         2 streams: not supported\n"
+            + "         3 streams: not supported\n" + "         4 streams: not supported\n"
+            + "         5 streams: not supported\n" + "         6 streams: not supported\n"
+            + "         7 streams: not supported\n" + "         8 streams: not supported\n"
+            + "     VHT TX highest supported: 0 Mbps\n" + "     Bitrates (non-HT):\n" + "           * 6.0 Mbps\n"
+            + "           * 9.0 Mbps\n" + "         * 12.0 Mbps\n" + "          * 18.0 Mbps\n"
+            + "          * 24.0 Mbps\n" + "         * 36.0 Mbps\n" + "          * 48.0 Mbps\n"
+            + "          * 54.0 Mbps\n" + "     Frequencies:\n" + "         * 5170 MHz [34] (disabled)\n"
+            + "         * 5180 MHz [36] (20.0 dBm)\n" + "           * 5190 MHz [38] (disabled)\n"
+            + "         * 5200 MHz [40] (20.0 dBm)\n" + "           * 5210 MHz [42] (disabled)\n"
+            + "         * 5220 MHz [44] (20.0 dBm)\n" + "           * 5230 MHz [46] (disabled)\n"
+            + "         * 5240 MHz [48] (20.0 dBm)\n" + "         * 5260 MHz [52] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5280 MHz [56] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5300 MHz [60] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5320 MHz [64] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5500 MHz [100] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5520 MHz [104] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5540 MHz [108] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5560 MHz [112] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5580 MHz [116] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5600 MHz [120] (disabled)\n" + "          * 5620 MHz [124] (disabled)\n"
+            + "         * 5640 MHz [128] (disabled)\n"
+            + "         * 5660 MHz [132] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5680 MHz [136] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5700 MHz [140] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5720 MHz [144] (20.0 dBm) (no IR, radar detection)\n"
+            + "         * 5745 MHz [149] (20.0 dBm)\n" + "          * 5765 MHz [153] (20.0 dBm)\n"
+            + "         * 5785 MHz [157] (20.0 dBm)\n" + "          * 5805 MHz [161] (20.0 dBm)\n"
+            + "         * 5825 MHz [165] (20.0 dBm)\n" + "  Supported commands:\n" + "       * new_interface\n"
+            + "      * set_interface\n" + "      * new_key\n" + "        * start_ap\n" + "       * join_ibss\n"
+            + "      * set_pmksa\n" + "      * del_pmksa\n" + "      * flush_pmksa\n" + "      * remain_on_channel\n"
+            + "      * frame\n" + "      * set_wiphy_netns\n" + "      * set_channel\n" + "        * tdls_oper\n"
+            + "      * start_sched_scan\n" + "      * start_p2p_device\n" + "       * connect\n"
+            + "        * disconnect\n" + "      * crit_protocol_start\n" + "        * crit_protocol_stop\n"
+            + "      * update_connect_params\n" + " software interface modes (can always be added):\n"
+            + " valid interface combinations:\n"
+            + "      * #{ managed } <= 1, #{ P2P-device } <= 1, #{ P2P-client, P2P-GO } <= 1,\n"
+            + "        total <= 3, #channels <= 2\n"
+            + "      * #{ managed } <= 1, #{ AP } <= 1, #{ P2P-client } <= 1, #{ P2P-device } <= 1,\n"
+            + "        total <= 4, #channels <= 1\n" + "    Device supports scan flush.\n"
+            + " Device supports randomizing MAC-addr in sched scans.\n" + " max # scan plans: 1\n"
+            + " max scan plan interval: 508\n" + "  max scan plan iterations: 0\n" + " Supported TX frame types:\n"
+            + "      * managed: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
+            + "      * AP: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
+            + "      * P2P-client: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
+            + "      * P2P-GO: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
+            + "      * P2P-device: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
+            + " Supported RX frame types:\n" + "         * managed: 0x40 0xd0\n"
+            + "      * AP: 0x00 0x20 0x40 0xa0 0xb0 0xc0 0xd0\n" + "         * P2P-client: 0x40 0xd0\n"
+            + "      * P2P-GO: 0x00 0x20 0x40 0xa0 0xb0 0xc0 0xd0\n" + "         * P2P-device: 0x40 0xd0\n"
+            + " Supported extended features:\n" + "     * [ CQM_RSSI_LIST ]: multiple CQM_RSSI_THOLD records\n"
+            + "     * [ 4WAY_HANDSHAKE_STA_PSK ]: 4-way handshake with PSK in station mode\n"
+            + "     * [ 4WAY_HANDSHAKE_STA_1X ]: 4-way handshake with 802.1X in station mode\n"
+            + "     * [ DFS_OFFLOAD ]: DFS offload\n" + "     * [ 4WAY_HANDSHAKE_AP_PSK ]: AP mode PSK offload support";
+
     @After
     public void tearDown() {
         resetSingleton(NMDbusConnector.class, "instance");
@@ -420,188 +525,12 @@ public class NMDbusConnectorTest {
 
         Properties mockedProperties1 = mock(Properties.class);
 
-        if (interfaceName.equals("lo")) {
+        if (type == NMDeviceType.NM_DEVICE_TYPE_GENERIC && interfaceName.equals("lo")) {
             when(mockedProperties1.Get(any(), any())).thenReturn("loopback");
         }
 
-        if (interfaceName.toLowerCase().contains("wlan")) {
-
-            Wireless wirelessDevice = mock(Wireless.class);
-            when(wirelessDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
-
-            ExitStatus exitStatus = mock(ExitStatus.class);
-            when(exitStatus.getExitCode()).thenReturn(1);
-            when(exitStatus.isSuccessful()).thenReturn(true);
-
-            String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n" + "	(2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
-                    + "	(5150 - 5250 @ 80), (N/A, 23), (N/A), NO-OUTDOOR, AUTO-BW\n"
-                    + "	(5250 - 5350 @ 80), (N/A, 24), (0 ms), DFS, AUTO-BW\n"
-                    + "	(5470 - 5600 @ 80), (N/A, 24), (0 ms), DFS\n"
-                    + "	(5650 - 5730 @ 80), (N/A, 24), (0 ms), DFS\n" + "	(5735 - 5835 @ 80), (N/A, 30), (N/A)\n"
-                    + "\n" + "phy#0\n" + "country 99: DFS-UNSET\n" + "	(2402 - 2482 @ 40), (6, 20), (N/A)\n"
-                    + "	(2474 - 2494 @ 20), (6, 20), (N/A)\n" + "	(5140 - 5360 @ 160), (6, 20), (N/A)\n"
-                    + "	(5460 - 5860 @ 160), (6, 20), (N/A)";
-
-            String iwWlan0InfoOutput = "Interface wlan0\n" + "	ifindex 3\n" + "	wdev 0x1\n"
-                    + "	addr dc:a6:32:a6:e0:c2\n" + "	ssid kura_gateway_raspberry_pi\n" + "	type AP\n"
-                    + "	wiphy 0\n" + "	channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
-                    + "	txpower 31.00 dBm";
-
-            String iwPhyPhy0InfoOutput = "Wiphy phy0\n" + "	wiphy index: 0\n" + "	max # scan SSIDs: 10\n"
-                    + "	max scan IEs length: 2048 bytes\n" + "	max # sched scan SSIDs: 16\n"
-                    + "	max # match sets: 16\n" + "	Retry short limit: 7\n" + "	Retry long limit: 4\n"
-                    + "	Coverage class: 0 (up to 0m)\n" + "	Device supports roaming.\n" + "	Device supports T-DLS.\n"
-                    + "	Supported Ciphers:\n" + "		* WEP40 (00-0f-ac:1)\n" + "		* WEP104 (00-0f-ac:5)\n"
-                    + "		* TKIP (00-0f-ac:2)\n" + "		* CCMP-128 (00-0f-ac:4)\n" + "		* CMAC (00-0f-ac:6)\n"
-                    + "	Available Antennas: TX 0 RX 0\n" + "	Supported interface modes:\n" + "		 * IBSS\n"
-                    + "		 * managed\n" + "		 * AP\n" + "		 * P2P-client\n" + "		 * P2P-GO\n"
-                    + "		 * P2P-device\n" + "	Band 1:\n" + "		Capabilities: 0x1062\n" + "			HT20/HT40\n"
-                    + "			Static SM Power Save\n" + "			RX HT20 SGI\n" + "			RX HT40 SGI\n"
-                    + "			No RX STBC\n" + "			Max AMSDU length: 3839 bytes\n" + "			DSSS/CCK HT40\n"
-                    + "		Maximum RX AMPDU length 65535 bytes (exponent: 0x003)\n"
-                    + "		Minimum RX AMPDU time spacing: 16 usec (0x07)\n"
-                    + "		HT TX/RX MCS rate indexes supported: 0-7\n" + "		Bitrates (non-HT):\n"
-                    + "			* 1.0 Mbps\n" + "			* 2.0 Mbps (short preamble supported)\n"
-                    + "			* 5.5 Mbps (short preamble supported)\n"
-                    + "			* 11.0 Mbps (short preamble supported)\n" + "			* 6.0 Mbps\n"
-                    + "			* 9.0 Mbps\n" + "			* 12.0 Mbps\n" + "			* 18.0 Mbps\n"
-                    + "			* 24.0 Mbps\n" + "			* 36.0 Mbps\n" + "			* 48.0 Mbps\n"
-                    + "			* 54.0 Mbps\n" + "		Frequencies:\n" + "			* 2412 MHz [1] (20.0 dBm)\n"
-                    + "			* 2417 MHz [2] (20.0 dBm)\n" + "			* 2422 MHz [3] (20.0 dBm)\n"
-                    + "			* 2427 MHz [4] (20.0 dBm)\n" + "			* 2432 MHz [5] (20.0 dBm)\n"
-                    + "			* 2437 MHz [6] (20.0 dBm)\n" + "			* 2442 MHz [7] (20.0 dBm)\n"
-                    + "			* 2447 MHz [8] (20.0 dBm)\n" + "			* 2452 MHz [9] (20.0 dBm)\n"
-                    + "			* 2457 MHz [10] (20.0 dBm)\n" + "			* 2462 MHz [11] (20.0 dBm)\n"
-                    + "			* 2467 MHz [12] (disabled)\n" + "			* 2472 MHz [13] (disabled)\n"
-                    + "			* 2484 MHz [14] (disabled)\n" + "	Band 2:\n" + "		Capabilities: 0x1062\n"
-                    + "			HT20/HT40\n" + "			Static SM Power Save\n" + "			RX HT20 SGI\n"
-                    + "			RX HT40 SGI\n" + "			No RX STBC\n" + "			Max AMSDU length: 3839 bytes\n"
-                    + "			DSSS/CCK HT40\n" + "		Maximum RX AMPDU length 65535 bytes (exponent: 0x003)\n"
-                    + "		Minimum RX AMPDU time spacing: 16 usec (0x07)\n"
-                    + "		HT TX/RX MCS rate indexes supported: 0-7\n" + "		VHT Capabilities (0x00001020):\n"
-                    + "			Max MPDU length: 3895\n"
-                    + "			Supported Channel Width: neither 160 nor 80+80\n" + "			short GI (80 MHz)\n"
-                    + "			SU Beamformee\n" + "		VHT RX MCS set:\n" + "			1 streams: MCS 0-9\n"
-                    + "			2 streams: not supported\n" + "			3 streams: not supported\n"
-                    + "			4 streams: not supported\n" + "			5 streams: not supported\n"
-                    + "			6 streams: not supported\n" + "			7 streams: not supported\n"
-                    + "			8 streams: not supported\n" + "		VHT RX highest supported: 0 Mbps\n"
-                    + "		VHT TX MCS set:\n" + "			1 streams: MCS 0-9\n"
-                    + "			2 streams: not supported\n" + "			3 streams: not supported\n"
-                    + "			4 streams: not supported\n" + "			5 streams: not supported\n"
-                    + "			6 streams: not supported\n" + "			7 streams: not supported\n"
-                    + "			8 streams: not supported\n" + "		VHT TX highest supported: 0 Mbps\n"
-                    + "		Bitrates (non-HT):\n" + "			* 6.0 Mbps\n" + "			* 9.0 Mbps\n"
-                    + "			* 12.0 Mbps\n" + "			* 18.0 Mbps\n" + "			* 24.0 Mbps\n"
-                    + "			* 36.0 Mbps\n" + "			* 48.0 Mbps\n" + "			* 54.0 Mbps\n"
-                    + "		Frequencies:\n" + "			* 5170 MHz [34] (disabled)\n"
-                    + "			* 5180 MHz [36] (20.0 dBm)\n" + "			* 5190 MHz [38] (disabled)\n"
-                    + "			* 5200 MHz [40] (20.0 dBm)\n" + "			* 5210 MHz [42] (disabled)\n"
-                    + "			* 5220 MHz [44] (20.0 dBm)\n" + "			* 5230 MHz [46] (disabled)\n"
-                    + "			* 5240 MHz [48] (20.0 dBm)\n"
-                    + "			* 5260 MHz [52] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5280 MHz [56] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5300 MHz [60] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5320 MHz [64] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5500 MHz [100] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5520 MHz [104] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5540 MHz [108] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5560 MHz [112] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5580 MHz [116] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5600 MHz [120] (disabled)\n" + "			* 5620 MHz [124] (disabled)\n"
-                    + "			* 5640 MHz [128] (disabled)\n"
-                    + "			* 5660 MHz [132] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5680 MHz [136] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5700 MHz [140] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5720 MHz [144] (20.0 dBm) (no IR, radar detection)\n"
-                    + "			* 5745 MHz [149] (20.0 dBm)\n" + "			* 5765 MHz [153] (20.0 dBm)\n"
-                    + "			* 5785 MHz [157] (20.0 dBm)\n" + "			* 5805 MHz [161] (20.0 dBm)\n"
-                    + "			* 5825 MHz [165] (20.0 dBm)\n" + "	Supported commands:\n" + "		 * new_interface\n"
-                    + "		 * set_interface\n" + "		 * new_key\n" + "		 * start_ap\n" + "		 * join_ibss\n"
-                    + "		 * set_pmksa\n" + "		 * del_pmksa\n" + "		 * flush_pmksa\n"
-                    + "		 * remain_on_channel\n" + "		 * frame\n" + "		 * set_wiphy_netns\n"
-                    + "		 * set_channel\n" + "		 * tdls_oper\n" + "		 * start_sched_scan\n"
-                    + "		 * start_p2p_device\n" + "		 * connect\n" + "		 * disconnect\n"
-                    + "		 * crit_protocol_start\n" + "		 * crit_protocol_stop\n"
-                    + "		 * update_connect_params\n" + "	software interface modes (can always be added):\n"
-                    + "	valid interface combinations:\n"
-                    + "		 * #{ managed } <= 1, #{ P2P-device } <= 1, #{ P2P-client, P2P-GO } <= 1,\n"
-                    + "		   total <= 3, #channels <= 2\n"
-                    + "		 * #{ managed } <= 1, #{ AP } <= 1, #{ P2P-client } <= 1, #{ P2P-device } <= 1,\n"
-                    + "		   total <= 4, #channels <= 1\n" + "	Device supports scan flush.\n"
-                    + "	Device supports randomizing MAC-addr in sched scans.\n" + "	max # scan plans: 1\n"
-                    + "	max scan plan interval: 508\n" + "	max scan plan iterations: 0\n"
-                    + "	Supported TX frame types:\n"
-                    + "		 * managed: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
-                    + "		 * AP: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
-                    + "		 * P2P-client: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
-                    + "		 * P2P-GO: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
-                    + "		 * P2P-device: 0x00 0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80 0x90 0xa0 0xb0 0xc0 0xd0 0xe0 0xf0\n"
-                    + "	Supported RX frame types:\n" + "		 * managed: 0x40 0xd0\n"
-                    + "		 * AP: 0x00 0x20 0x40 0xa0 0xb0 0xc0 0xd0\n" + "		 * P2P-client: 0x40 0xd0\n"
-                    + "		 * P2P-GO: 0x00 0x20 0x40 0xa0 0xb0 0xc0 0xd0\n" + "		 * P2P-device: 0x40 0xd0\n"
-                    + "	Supported extended features:\n" + "		* [ CQM_RSSI_LIST ]: multiple CQM_RSSI_THOLD records\n"
-                    + "		* [ 4WAY_HANDSHAKE_STA_PSK ]: 4-way handshake with PSK in station mode\n"
-                    + "		* [ 4WAY_HANDSHAKE_STA_1X ]: 4-way handshake with 802.1X in station mode\n"
-                    + "		* [ DFS_OFFLOAD ]: DFS offload\n"
-                    + "		* [ 4WAY_HANDSHAKE_AP_PSK ]: AP mode PSK offload support";
-
-            String[] iwRegGet = { "iw", "reg", "get" };
-            Command iwRegGetCmd = new Command(iwRegGet);
-            iwRegGetCmd.setTimeout(60);
-            iwRegGetCmd.setOutputStream(new ByteArrayOutputStream());
-
-            ByteArrayOutputStream iwRegGetStream = new ByteArrayOutputStream();
-            iwRegGetStream.write(iwRegGetOutput.getBytes());
-
-            CommandStatus iwRegGetCommandStatus = mock(CommandStatus.class);
-            when(iwRegGetCommandStatus.getExitStatus()).thenReturn(exitStatus);
-            when(iwRegGetCommandStatus.getOutputStream()).thenReturn(iwRegGetStream);
-
-            // ---
-
-            String[] iwWlan0Info = { "iw", "wlan0", "info" };
-            Command iwWlan0InfoCmd = new Command(iwWlan0Info);
-            //iwWlan0InfoCmd.setTimeout(60);
-            iwWlan0InfoCmd.setOutputStream(new ByteArrayOutputStream());
-
-            ByteArrayOutputStream iwWlan0InfoStream = new ByteArrayOutputStream();
-            iwWlan0InfoStream.write(iwWlan0InfoOutput.getBytes());
-
-            CommandStatus iwWlan0InfoStatus = mock(CommandStatus.class);
-            when(iwWlan0InfoStatus.getExitStatus()).thenReturn(exitStatus);
-            when(iwWlan0InfoStatus.getOutputStream()).thenReturn(iwWlan0InfoStream);
-
-            // ---
-
-            String[] iwPhyPhy0Info = { "iw", "phy0", "info" };
-            Command iwPhyPhy0InfoCmd = new Command(iwPhyPhy0Info);
-            //iwPhyPhy0InfoCmd.setTimeout(60);
-            iwPhyPhy0InfoCmd.setOutputStream(new ByteArrayOutputStream());
-
-            ByteArrayOutputStream iwPhyPhy0InfoStream = new ByteArrayOutputStream();
-            iwPhyPhy0InfoStream.write(iwPhyPhy0InfoOutput.getBytes());
-
-            CommandStatus iwPhyPhy0InfoStatus = mock(CommandStatus.class);
-            when(iwPhyPhy0InfoStatus.getExitStatus()).thenReturn(exitStatus);
-            when(iwPhyPhy0InfoStatus.getOutputStream()).thenReturn(iwPhyPhy0InfoStream);
-            
-            doReturn(iwRegGetCommandStatus).when(this.commandExecutorService).execute(iwRegGetCmd);
-            doReturn(iwWlan0InfoStatus).when(this.commandExecutorService).execute(iwWlan0InfoCmd);
-            doReturn(iwPhyPhy0InfoStatus).when(this.commandExecutorService).execute(iwPhyPhy0InfoCmd);
-
-            DBusPath mockedApPath = mock(DBusPath.class);
-            when(mockedApPath.getPath()).thenReturn("/");
-
-            when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"), eq("ActiveAccessPoint")))
-                    .thenReturn(mockedApPath);
-            when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"), eq("Mode")))
-                    .thenReturn(new UInt32(1));
-            when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"),
-                    eq("WirelessCapabilities"))).thenReturn(new UInt32(1));
-
-            doReturn(wirelessDevice).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
-                    eq("/mock/device/" + interfaceName), eq(Wireless.class));
+        if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
+            simulateIwCommandOutputs(interfaceName, mockedProperties1);
         }
 
         when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device"), eq("DeviceType")))
@@ -823,6 +752,73 @@ public class NMDbusConnectorTest {
 
     public void thenNetInterfaceTypeIs(NetworkInterfaceType type) {
         assertEquals(type, this.netInterface.getType());
+    }
+
+    private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)
+            throws IOException, DBusException {
+        Wireless wirelessDevice = mock(Wireless.class);
+        when(wirelessDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
+
+        ExitStatus exitStatus = mock(ExitStatus.class);
+        when(exitStatus.getExitCode()).thenReturn(1);
+        when(exitStatus.isSuccessful()).thenReturn(true);
+
+        String[] iwRegGet = { "iw", "reg", "get" };
+        Command iwRegGetCmd = new Command(iwRegGet);
+        iwRegGetCmd.setTimeout(60);
+        iwRegGetCmd.setOutputStream(new ByteArrayOutputStream());
+
+        ByteArrayOutputStream iwRegGetStream = new ByteArrayOutputStream();
+        iwRegGetStream.write(iwRegGetOutput.getBytes());
+
+        CommandStatus iwRegGetCommandStatus = mock(CommandStatus.class);
+        when(iwRegGetCommandStatus.getExitStatus()).thenReturn(exitStatus);
+        when(iwRegGetCommandStatus.getOutputStream()).thenReturn(iwRegGetStream);
+
+        // ---
+
+        String[] iwWlan0Info = { "iw", "wlan0", "info" };
+        Command iwWlan0InfoCmd = new Command(iwWlan0Info);
+        // iwWlan0InfoCmd.setTimeout(60);
+        iwWlan0InfoCmd.setOutputStream(new ByteArrayOutputStream());
+
+        ByteArrayOutputStream iwWlan0InfoStream = new ByteArrayOutputStream();
+        iwWlan0InfoStream.write(iwWlan0InfoOutput.getBytes());
+
+        CommandStatus iwWlan0InfoStatus = mock(CommandStatus.class);
+        when(iwWlan0InfoStatus.getExitStatus()).thenReturn(exitStatus);
+        when(iwWlan0InfoStatus.getOutputStream()).thenReturn(iwWlan0InfoStream);
+
+        // ---
+
+        String[] iwPhyPhy0Info = { "iw", "phy0", "info" };
+        Command iwPhyPhy0InfoCmd = new Command(iwPhyPhy0Info);
+        // iwPhyPhy0InfoCmd.setTimeout(60);
+        iwPhyPhy0InfoCmd.setOutputStream(new ByteArrayOutputStream());
+
+        ByteArrayOutputStream iwPhyPhy0InfoStream = new ByteArrayOutputStream();
+        iwPhyPhy0InfoStream.write(iwPhyPhy0InfoOutput.getBytes());
+
+        CommandStatus iwPhyPhy0InfoStatus = mock(CommandStatus.class);
+        when(iwPhyPhy0InfoStatus.getExitStatus()).thenReturn(exitStatus);
+        when(iwPhyPhy0InfoStatus.getOutputStream()).thenReturn(iwPhyPhy0InfoStream);
+
+        doReturn(iwRegGetCommandStatus).when(this.commandExecutorService).execute(iwRegGetCmd);
+        doReturn(iwWlan0InfoStatus).when(this.commandExecutorService).execute(iwWlan0InfoCmd);
+        doReturn(iwPhyPhy0InfoStatus).when(this.commandExecutorService).execute(iwPhyPhy0InfoCmd);
+
+        DBusPath mockedApPath = mock(DBusPath.class);
+        when(mockedApPath.getPath()).thenReturn("/");
+
+        when(preMockedProperties.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"), eq("ActiveAccessPoint")))
+                .thenReturn(mockedApPath);
+        when(preMockedProperties.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"), eq("Mode")))
+                .thenReturn(new UInt32(1));
+        when(preMockedProperties.Get(eq("org.freedesktop.NetworkManager.Device.Wireless"), eq("WirelessCapabilities")))
+                .thenReturn(new UInt32(1));
+
+        doReturn(wirelessDevice).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+                eq("/mock/device/" + interfaceName), eq(Wireless.class));
     }
 
 }

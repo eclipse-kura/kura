@@ -121,9 +121,4 @@ find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit
 
-bash "${INSTALL_DIR}/kura/install/install-jdk-dio-properties.sh"
-
-# customizing kura.properties
-KURA_PLATFORM=$( uname -m )
-sed -i "s/kura_platform/${KURA_PLATFORM}/" ${INSTALL_DIR}/kura/framework/kura.properties
-sed -i "s/device_name/${BOARD}/" ${INSTALL_DIR}/kura/framework/kura.properties
+bash "${INSTALL_DIR}/kura/install/customize-installation.sh"

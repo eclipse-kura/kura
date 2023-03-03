@@ -1,6 +1,6 @@
 # SQLite Db Service
 
-Starting from version 5.3, Kura provides provides an integration of the SQLite database.
+Starting from version 5.3, Kura provides provides an integration of the SQLite database, based on the org.xerial:sqlite-jdbc wrapper .
 
 The database integration is not included in the official distribution, but it can be downloaded from Eclipse Marketplace as a deployment package.
 
@@ -32,6 +32,13 @@ The SQLite DB provides the following configuration parameters:
 * **Database Mode**: Defines the database mode. If `In Memory` is selected, the database will not be persisted on the filesystem, all data will be lost if Kura is restarted and/or the database instance is deleted. If `Persisted` is selected, the database will be stored on disk in the location specified by the **Persisted Database Path** parameter.
 
 * **Persisted Database Path**: Defines the path to the database file (it must include the database file name). This parameter is only relevant for persisted databases.
+
+* **Encryption Key**: Allows to specify a key/passphrase for encrypting the database file. This feature requires a SQLite binary with an encryption extension, and is only relevant for persisted databases. The key format can be specified using the **Encryption Key Format** parameter. If the value of this parameter is changed, the encryption key of the database will be updated accordingly. This parameter can be left empty to create an unencrypted database or to decrypt an encrypted one.
+
+!!! note
+    The sqlite-jdbc version distributed with Kura does not contain any encryption extension, encryption features will not be available out of the box. See [sqlite-jdbc documentaton](https://github.com/xerial/sqlite-jdbc/blob/master/USAGE.md#how-to-use-encrypted-databases) for instructions about how to use a security extension.
+
+* **Encryption Key Format**: Allows to specify the format of the Encryption Key parameter value. The possible values are ASCII (an ASCII string), Hex SSE (the key is an hexadecimal string to be used with the SSE extension) or Hex SQLCipher (the key is an hexadecimal string to be used with the SQLCipher extension).
 
 * **Journal Mode**: The database journal mode. The following options are available:
     

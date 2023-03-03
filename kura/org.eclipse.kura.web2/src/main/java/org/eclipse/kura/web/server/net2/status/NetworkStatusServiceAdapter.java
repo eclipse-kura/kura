@@ -291,7 +291,7 @@ public class NetworkStatusServiceAdapter {
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getAccessPointWifiConfig())) {
                     gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().setChannels(channelsBuilder.getChannelsIntegers());
                 } else {
-                    GwtWifiConfig gwtConfig = new GwtWifiConfig();
+                    GwtWifiConfig gwtConfig = gwtWifiNetInterfaceConfig.getActiveWifiConfig();
                     gwtConfig.setChannels(channelsBuilder.getChannelsIntegers());
                     gwtWifiNetInterfaceConfig.setAccessPointWifiConfig(gwtConfig);
                 }
@@ -304,7 +304,7 @@ public class NetworkStatusServiceAdapter {
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getStationWifiConfig())) {
                     gwtWifiNetInterfaceConfig.getStationWifiConfig().setChannels(channelsBuilder.getChannelsIntegers());
                 } else {
-                    GwtWifiConfig gwtConfig = new GwtWifiConfig();
+                    GwtWifiConfig gwtConfig = gwtWifiNetInterfaceConfig.getActiveWifiConfig();
                     gwtConfig.setChannels(channelsBuilder.getChannelsIntegers());
                     gwtWifiNetInterfaceConfig.setStationWifiConfig(gwtConfig);
                 }

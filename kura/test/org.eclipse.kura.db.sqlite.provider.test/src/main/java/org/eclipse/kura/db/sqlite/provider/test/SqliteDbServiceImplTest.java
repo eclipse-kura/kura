@@ -12,6 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.db.sqlite.provider.test;
 
+import static org.junit.Assert.assertArrayEquals;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +29,16 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
 
     public SqliteDbServiceImplTest() throws InterruptedException, ExecutionException, TimeoutException {
         super();
+    }
+
+    @Test
+    public void shouldNotExtractNativeLibrariesInJavaTempdir()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        givenSqliteDbService(Collections.emptyMap());
+
+        whenAConnectionIsRequested();
+
+        thenThereIsNoSqliteLibraryInJavaTempdir();
     }
 
     @Test
@@ -210,6 +223,13 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         whenAConnectionIsRequested();
 
         thenExceptionIsThrown();
+    }
+
+    private void thenThereIsNoSqliteLibraryInJavaTempdir() {
+        final File javaTempDir = new File(System.getProperty("java.io.tmpdir"));
+
+        assertArrayEquals(new String[] {}, javaTempDir.list((dir, name) -> name.startsWith("sqlite-")));
+
     }
 
 }

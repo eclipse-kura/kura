@@ -76,8 +76,8 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
+            return new ArrayList<>(
+                    org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findWifiHotspots(interfaceName));
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findWifiHotspots(interfaceName, wirelessSsid);
         }
@@ -176,8 +176,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return new ArrayList<>();
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findFrequencies(interfaceName, radioMode);
         }
@@ -188,8 +187,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
-            // TODO
-            return "";
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.getWifiCountryCode();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.getWifiCountryCode();
         }
@@ -201,7 +199,7 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
 
         if (isNet2()) {
             // TODO
-            return false;
+            return true;
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.isIEEE80211ACSupported(ifaceName);
         }

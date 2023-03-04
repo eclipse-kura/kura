@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
@@ -33,6 +33,9 @@ import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
+import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
+import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,38 +46,43 @@ public class GwtNetworkServiceImpl {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
-
+    
     public static List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
         try {
-            NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
-            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
-
-            List<String> configuredInterfaceNames = configuration.getConfiguredNetworkInterfaceNames();
-            List<String> systemInterfaceNames = status.getNetInterfaces();
-            List<GwtNetInterfaceConfig> result = new LinkedList<>();
-            for (String ifName : systemInterfaceNames) {
-                if (configuredInterfaceNames.contains(ifName)) {
-                    GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifName);
-                    status.fillWithStatusProperties(ifName, gwtConfig);
-                    result.add(gwtConfig);
-                } else {
-                    Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
-                    if (ifType.isPresent()) {
-                        GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
-                                ifType.get());
-                        status.fillWithStatusProperties(ifName, gwtConfig);
-                        result.add(gwtConfig);
-                    } else {
-                        logger.warn("Cannot create configuration for {}", ifName);
-                    }
-                }
-            }
-
-            return result;
+            return getConfigsAndStatuses();
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
+    }
+
+    private static List<GwtNetInterfaceConfig> getConfigsAndStatuses() throws GwtKuraException, KuraException {
+        NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
+        NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+
+        List<String> configuredInterfaceNames = configuration.getConfiguredNetworkInterfaceNames();
+        List<String> systemInterfaceNames = status.getNetInterfaces();
+
+        List<GwtNetInterfaceConfig> result = new LinkedList<>();
+        for (String ifName : systemInterfaceNames) {
+            if (configuredInterfaceNames.contains(ifName)) {
+                GwtNetInterfaceConfig gwtConfig = configuration.getGwtNetInterfaceConfig(ifName);
+                status.fillWithStatusProperties(ifName, gwtConfig);
+                result.add(gwtConfig);
+            } else {
+                Optional<NetworkInterfaceType> ifType = status.getNetInterfaceType(ifName);
+                if (ifType.isPresent()) {
+                    GwtNetInterfaceConfig gwtConfig = configuration.getDefaultGwtNetInterfaceConfig(ifName,
+                            ifType.get());
+                    status.fillWithStatusProperties(ifName, gwtConfig);
+                    result.add(gwtConfig);
+                } else {
+                    logger.warn("Cannot create configuration for {}", ifName);
+                }
+            }
+        }
+
+        return result;
     }
 
     public static void updateNetInterfaceConfigurations(GwtNetInterfaceConfig config) throws GwtKuraException {
@@ -192,4 +200,46 @@ public class GwtNetworkServiceImpl {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
+    
+    public static List<GwtWifiChannelFrequency> findFrequencies(String interfaceName, GwtWifiRadioMode radioMode)
+            throws GwtKuraException {
+        try {
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+
+            List<GwtWifiChannelFrequency> allSupportedChannels = status.getAllSupportedChannels(interfaceName);
+            List<GwtWifiChannelFrequency> displayedChannels = new ArrayList<>();
+
+            for (GwtWifiChannelFrequency supportedChannel : allSupportedChannels) {
+                boolean channelIsfive5Ghz = supportedChannel.getFrequency() > 2501;
+
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
+                    displayedChannels.add(supportedChannel);
+                }
+            }
+
+            return displayedChannels;
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+    
+    public static String getWifiCountryCode() throws GwtKuraException {
+        try {
+            NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
+            return status.getWifiCountryCode();
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws GwtKuraException {
+        try {
+            List<GwtWifiHotspotEntry> aps = new NetworkStatusServiceAdapter().findWifiHotspots(interfaceName);
+            logger.debug("Found APs: {}", aps);
+            return aps;
+        } catch (GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
 }

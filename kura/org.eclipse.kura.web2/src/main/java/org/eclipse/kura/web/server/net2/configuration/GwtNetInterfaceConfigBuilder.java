@@ -160,12 +160,17 @@ public class GwtNetInterfaceConfigBuilder {
             String wifiMode = EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMode(this.ifName));
             ((GwtWifiNetInterfaceConfig) gwtConfig).setWirelessMode(wifiMode);
 
+            setWifiMasterProperties();
+            setWifiInfraProperties();
+
             if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-                setWifiMasterProperties();
+                this.gwtConfig.setHwRssi(NA);
+                this.gwtConfig.setHwDriver(this.properties.getWifiMasterDriver(this.ifName));
             }
 
             if (wifiMode.equals(GwtWifiWirelessMode.netWifiWirelessModeStation.name())) {
-                setWifiInfraProperties();
+                this.gwtConfig.setHwRssi(NA);
+                this.gwtConfig.setHwDriver(this.properties.getWifiInfraDriver(this.ifName));
             }
         }
     }
@@ -196,8 +201,6 @@ public class GwtNetInterfaceConfigBuilder {
             gwtWifiConfig.setRadioMode(radioMode.get());
         }
 
-        this.gwtConfig.setHwRssi(NA);
-        this.gwtConfig.setHwDriver(this.properties.getWifiMasterDriver(this.ifName));
         ((GwtWifiNetInterfaceConfig) this.gwtConfig).setAccessPointWifiConfig(gwtWifiConfig);
         logger.debug("GWT Wifi Master Configuration for interface {}:\n{}\n", this.ifName,
                 gwtWifiConfig.getProperties());
@@ -223,11 +226,15 @@ public class GwtNetInterfaceConfigBuilder {
 
         // wifi infra specific properties
 
+        Optional<String> radioMode = EnumsParser
+                .getGwtWifiRadioMode(this.properties.getWifiInfraRadioMode(this.ifName));
+        if (radioMode.isPresent()) {
+            gwtWifiConfig.setRadioMode(radioMode.get());
+        }
+
         setBgScanProperties(gwtWifiConfig, this.properties.getWifiInfraBgscan(this.ifName));
         gwtWifiConfig.setPingAccessPoint(this.properties.getWifiInfraPingAP(this.ifName));
 
-        this.gwtConfig.setHwRssi(NA);
-        this.gwtConfig.setHwDriver(this.properties.getWifiInfraDriver(this.ifName));
         ((GwtWifiNetInterfaceConfig) this.gwtConfig).setStationWifiConfig(gwtWifiConfig);
         logger.debug("GWT Wifi Infra Configuration for interface {}:\n{}\n", this.ifName,
                 gwtWifiConfig.getProperties());

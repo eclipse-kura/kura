@@ -82,6 +82,8 @@ public class NMDbusConnector {
     private final DBusConnection dbusConnection;
     private final NetworkManager nm;
 
+    private final NMConfigurationEnforcementHandler nmConfigEnforcement = new NMConfigurationEnforcementHandler();
+
     private Map<String, Object> cachedConfiguration = null;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
@@ -89,6 +91,7 @@ public class NMDbusConnector {
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, new NMDeviceAddedHandler());
+        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -209,14 +212,19 @@ public class NMDbusConnector {
 
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
+        try {
+            this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
 
-        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+            NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
-        List<String> configuredInterfaces = properties.getStringList("net.interfaces");
-        manageConfiguredInterfaces(configuredInterfaces, properties);
+            List<String> configuredInterfaces = properties.getStringList("net.interfaces");
+            manageConfiguredInterfaces(configuredInterfaces, properties);
 
-        List<Device> availableInterfaces = getAllDevices();
-        manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+            List<Device> availableInterfaces = getAllDevices();
+            manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+        } finally {
+            this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+        }
     }
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,

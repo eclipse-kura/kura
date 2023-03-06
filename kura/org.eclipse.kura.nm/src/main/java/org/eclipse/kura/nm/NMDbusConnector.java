@@ -90,7 +90,6 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
-        this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, new NMDeviceAddedHandler());
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
     }
 

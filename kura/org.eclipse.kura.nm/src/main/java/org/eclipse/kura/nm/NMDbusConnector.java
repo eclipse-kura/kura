@@ -255,16 +255,10 @@ public class NMDbusConnector {
         logger.info("Settings iface \"{}\":{}", iface, deviceType);
 
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-            NMDeviceState currentState = getDeviceState(device);
-            if (currentState != NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
-                DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                        NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
-                disable(device);
-                dsLock.waitForSignal();
-            }
+            disable(device);
         } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
             logger.info("Iface \"{}\" set as Kura UNMANAGED. Skipping configuration.", iface);
-        } else { // NMDeviceEnable.ENABLED
+        } else { // KuraInterfaceStatus.ENABLED
             if (Boolean.FALSE.equals(isDeviceManaged(device))) {
                 setDeviceManaged(device, true);
             }
@@ -318,7 +312,10 @@ public class NMDbusConnector {
     private void disable(Device device) throws DBusException {
         NMDeviceState deviceState = getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
+            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
             device.Disconnect();
+            dsLock.waitForSignal();
         }
 
         Optional<Connection> connection = getAppliedConnection(device);

@@ -666,16 +666,12 @@ public class NMDbusConnectorTest {
                     commandExecutorService);
         } catch (DBusException e) {
             this.hasDBusExceptionBeenThrown = true;
-            e.printStackTrace();
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionThrown = true;
-            e.printStackTrace();
         } catch (NullPointerException e) {
             this.hasNullPointerExceptionThrown = true;
-            e.printStackTrace();
         } catch (KuraException e) {
             this.hasKuraExceptionThrown = true;
-            e.printStackTrace();
         }
     }
 

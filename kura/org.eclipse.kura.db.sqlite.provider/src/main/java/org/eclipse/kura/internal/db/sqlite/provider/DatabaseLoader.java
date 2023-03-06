@@ -56,7 +56,6 @@ public class DatabaseLoader {
 
             if (this.newOptions.isDeleteDbFilesOnFailure() && this.newOptions.getMode() != Mode.IN_MEMORY) {
                 logger.warn("failed to open database, deleting database files and retrying", e);
-                logger.warn("deleting database files");
                 deleteDbFiles(newOptions.getPath());
                 return openDataSourceInternal();
             }
@@ -210,7 +209,7 @@ public class DatabaseLoader {
 
         for (final String path : paths) {
             try {
-                logger.info("deleting database file: {}");
+                logger.info("deleting database file: {}", path);
                 deleteFile(new File(path));
             } catch (final Exception e) {
                 logger.warn("failed to delete database file", e);

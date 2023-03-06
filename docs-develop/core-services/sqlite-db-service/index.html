@@ -3003,6 +3003,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Connection pool max size</strong>: The implementation manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. If a new connection is requested </p>
 </li>
 <li>
+<p><strong>Delete Database Files On Failure</strong>: If set to true, the database files will be deleted in case of failure in opening a persisted database. This is intended as a last resort measure for keeping the database service operational, especially in the case when it is used as a cloud connection message store.</p>
+</li>
+<li>
 <p><strong>Debug Shell Access Enabled</strong>: Enables or disables the interaction with this database instance using the <code>sqlitedbg:excuteQuery</code> OSGi console command. (see #debug-shell)</p>
 </li>
 </ul>

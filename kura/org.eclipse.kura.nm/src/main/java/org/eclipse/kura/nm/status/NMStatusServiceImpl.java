@@ -95,7 +95,6 @@ public class NMStatusServiceImpl implements NetworkStatusService {
             logger.warn(
                     "Could not retrieve status for \"{}\" interface from NM because the DBus object path references got invalidated.",
                     interfaceName);
-            return Optional.empty();
         } catch (DBusException | KuraException e) {
             logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
         }

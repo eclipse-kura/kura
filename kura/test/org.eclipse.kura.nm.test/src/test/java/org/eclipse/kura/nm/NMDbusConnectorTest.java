@@ -775,7 +775,6 @@ public class NMDbusConnectorTest {
 
         String[] iwWlan0Info = { "iw", "wlan0", "info" };
         Command iwWlan0InfoCmd = new Command(iwWlan0Info);
-        // iwWlan0InfoCmd.setTimeout(60);
         iwWlan0InfoCmd.setOutputStream(new ByteArrayOutputStream());
 
         ByteArrayOutputStream iwWlan0InfoStream = new ByteArrayOutputStream();
@@ -789,7 +788,6 @@ public class NMDbusConnectorTest {
 
         String[] iwPhyPhy0Info = { "iw", "phy0", "info" };
         Command iwPhyPhy0InfoCmd = new Command(iwPhyPhy0Info);
-        // iwPhyPhy0InfoCmd.setTimeout(60);
         iwPhyPhy0InfoCmd.setOutputStream(new ByteArrayOutputStream());
 
         ByteArrayOutputStream iwPhyPhy0InfoStream = new ByteArrayOutputStream();

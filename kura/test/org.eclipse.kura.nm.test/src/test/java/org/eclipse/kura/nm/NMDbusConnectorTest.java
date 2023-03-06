@@ -308,7 +308,7 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.unused0.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.unused0.config.ip4.status", "netIPv4StatusEnabledWAN");
 
-        whenApplyIsCalledWith(netConfig);
+        whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
         thenNetworkSettingsDidNotChangeForDevice("unused0");
@@ -407,7 +407,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("eth0", networkService, this.commandExecutorService);
+        whenGetInterfaceStatus("eth0", this.networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -421,7 +421,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("lo", networkService, this.commandExecutorService);
+        whenGetInterfaceStatus("lo", this.networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -435,7 +435,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("unused0", networkService, this.commandExecutorService);
+        whenGetInterfaceStatus("unused0", this.networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNull();
@@ -448,7 +448,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceThatAlwaysReturnsEmpty();
 
-        whenGetInterfaceStatus("wlan0", networkService, this.commandExecutorService);
+        whenGetInterfaceStatus("wlan0", this.networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -462,7 +462,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
         givenNetworkServiceMockedForUsbInterfaceWithName("eth0");
 
-        whenGetInterfaceStatus("eth0", networkService, this.commandExecutorService);
+        whenGetInterfaceStatus("eth0", this.networkService, this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -470,9 +470,9 @@ public class NMDbusConnectorTest {
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
-		when(dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
-					.thenReturn(mockedNetworkManager);
-		
+		when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
+					.thenReturn(this.mockedNetworkManager);
+
 		this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
 	}
 
@@ -484,7 +484,7 @@ public class NMDbusConnectorTest {
         tempPerms.put("test2", "testVal2");
         tempPerms.put("test3", "testVal3");
 
-        when(mockedNetworkManager.GetPermissions()).thenReturn(tempPerms);
+        when(this.mockedNetworkManager.GetPermissions()).thenReturn(tempPerms);
 
     }
 
@@ -511,7 +511,7 @@ public class NMDbusConnectorTest {
         DBusPath mockedPath1 = mock(DBusPath.class);
         when(mockedPath1.getPath()).thenReturn("/mock/device/" + interfaceName);
 
-        Map<String, Map<String, Variant<?>>> mockedDevice1ConnectionSetting = new HashMap<String, Map<String, Variant<?>>>();
+        Map<String, Map<String, Variant<?>>> mockedDevice1ConnectionSetting = new HashMap<>();
         mockedDevice1ConnectionSetting.put("connection",
                 Collections.singletonMap("uuid", new Variant<>("mock-uuid-123")));
 
@@ -599,7 +599,7 @@ public class NMDbusConnectorTest {
     }
 
     public void givenNetworkConfigMapWith(String key, Object value) {
-        netConfig.put(key, value);
+        this.netConfig.put(key, value);
     }
 
     public void givenNetworkServiceMockedForUsbInterfaceWithName(String interfaceName) {
@@ -627,7 +627,7 @@ public class NMDbusConnectorTest {
         try {
             this.instanceNMDbusConnector.checkVersion();
         } catch (DBusException e) {
-            hasDBusExceptionBeenThrown = true;
+            this.hasDBusExceptionBeenThrown = true;
         }
     }
 
@@ -635,7 +635,7 @@ public class NMDbusConnectorTest {
         try {
             this.internalStringList = this.instanceNMDbusConnector.getInterfaces();
         } catch (DBusException e) {
-            hasDBusExceptionBeenThrown = true;
+            this.hasDBusExceptionBeenThrown = true;
         }
     }
 
@@ -643,7 +643,7 @@ public class NMDbusConnectorTest {
         try {
             this.instanceNMDbusConnector.apply();
         } catch (DBusException e) {
-            hasDBusExceptionBeenThrown = true;
+            this.hasDBusExceptionBeenThrown = true;
         }
     }
 
@@ -651,11 +651,11 @@ public class NMDbusConnectorTest {
         try {
             this.instanceNMDbusConnector.apply(networkConfig);
         } catch (DBusException e) {
-            hasDBusExceptionBeenThrown = true;
+            this.hasDBusExceptionBeenThrown = true;
         } catch (NoSuchElementException e) {
-            hasNoSuchElementExceptionThrown = true;
+            this.hasNoSuchElementExceptionThrown = true;
         } catch (NullPointerException e) {
-            hasNullPointerExceptionThrown = true;
+            this.hasNullPointerExceptionThrown = true;
         }
     }
 
@@ -665,37 +665,37 @@ public class NMDbusConnectorTest {
             this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface, netService,
                     commandExecutorService);
         } catch (DBusException e) {
-            hasDBusExceptionBeenThrown = true;
+            this.hasDBusExceptionBeenThrown = true;
             e.printStackTrace();
         } catch (NoSuchElementException e) {
-            hasNoSuchElementExceptionThrown = true;
+            this.hasNoSuchElementExceptionThrown = true;
             e.printStackTrace();
         } catch (NullPointerException e) {
-            hasNullPointerExceptionThrown = true;
+            this.hasNullPointerExceptionThrown = true;
             e.printStackTrace();
         } catch (KuraException e) {
-            hasKuraExceptionThrown = true;
+            this.hasKuraExceptionThrown = true;
             e.printStackTrace();
         }
     }
 
     public void thenNoExceptionIsThrown() {
-        assertFalse(hasDBusExceptionBeenThrown);
-        assertFalse(hasNoSuchElementExceptionThrown);
-        assertFalse(hasNullPointerExceptionThrown);
-        assertFalse(hasKuraExceptionThrown);
+        assertFalse(this.hasDBusExceptionBeenThrown);
+        assertFalse(this.hasNoSuchElementExceptionThrown);
+        assertFalse(this.hasNullPointerExceptionThrown);
+        assertFalse(this.hasKuraExceptionThrown);
     }
 
     public void thenDBusExceptionIsThrown() {
-        assertTrue(hasDBusExceptionBeenThrown);
+        assertTrue(this.hasDBusExceptionBeenThrown);
     }
 
     public void thenNullPointerExceptionIsThrown() {
-        assertTrue(hasNullPointerExceptionThrown);
+        assertTrue(this.hasNullPointerExceptionThrown);
     }
 
     public void thenNoSuchElementExceptionIsThrown() {
-        assertTrue(hasNoSuchElementExceptionThrown);
+        assertTrue(this.hasNoSuchElementExceptionThrown);
     }
 
     public void thenGetDbusConnectionReturns(DBusConnection dbusConnection) {

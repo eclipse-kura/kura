@@ -87,6 +87,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private static final int TRANSPORT_TASK_TIMEOUT = 1; // In seconds
 
+    private static final long MESSAGE_STORE_RECONNECT_INITIAL_DELAY = 30; // In seconds
+    private static final long MESSAGE_STORE_RECONNECT_INTERVAL = 30; // In seconds
+
     private DataServiceOptions dataServiceOptions;
 
     private DataTransportService dataTransportService;
@@ -793,16 +796,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             logger.info("Message Store reconnect task already running");
         }
 
-        int reconnectInterval = this.dataServiceOptions.getConnectDelay();
-        // add a delay on the reconnect
-        int maxDelay = reconnectInterval / 5;
-        maxDelay = maxDelay > 0 ? maxDelay : 1;
-
-        int initialDelay = Math.max(this.random.nextInt(maxDelay), RECONNECTION_MIN_DELAY);
-
-        logger.info("Starting Message Store reconnecting task with initial delay {}", initialDelay);
+        logger.info("Starting Message Store reconnecting task with initial delay {}",
+                MESSAGE_STORE_RECONNECT_INITIAL_DELAY);
         this.messageStoreConnectionMonitorFuture = this.messageStoreConnectionMonitorExecutor.scheduleAtFixedRate(
-                new MessageStoreReconnectTask(), initialDelay, reconnectInterval, TimeUnit.SECONDS);
+                new MessageStoreReconnectTask(), MESSAGE_STORE_RECONNECT_INITIAL_DELAY,
+                MESSAGE_STORE_RECONNECT_INTERVAL, TimeUnit.SECONDS);
 
     }
 

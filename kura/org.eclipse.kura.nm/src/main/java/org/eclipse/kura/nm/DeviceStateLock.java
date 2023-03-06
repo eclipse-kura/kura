@@ -2,6 +2,7 @@ package org.eclipse.kura.nm;
 
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -31,7 +32,10 @@ public class DeviceStateLock {
 
     public void waitForSignal() throws DBusException {
         try {
-            latch.await();
+            boolean countdownCompleted = latch.await(5, TimeUnit.SECONDS);
+            if (!countdownCompleted) {
+                logger.warn("Timeout elapsed. Exiting anyway");
+            }
         } catch (InterruptedException e) {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();

@@ -63,6 +63,8 @@ The SQLite DB provides the following configuration parameters:
 
 * **Connection pool max size**: The implementation manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. If a new connection is requested 
 
+* **Delete Database Files On Failure**: If set to true, the database files will be deleted in case of failure in opening a persisted database. This is intended as a last resort measure for keeping the database service operational, especially in the case when it is used as a cloud connection message store.
+
 * **Debug Shell Access Enabled**: Enables or disables the interaction with this database instance using the `sqlitedbg:excuteQuery` OSGi console command. (see #debug-shell)
 
 ### Selecting a database instance for existing components

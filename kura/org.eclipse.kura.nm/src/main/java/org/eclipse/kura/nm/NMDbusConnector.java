@@ -90,7 +90,7 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
-        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+        configurationEnforcementEnable();
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -212,7 +212,7 @@ public class NMDbusConnector {
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
         try {
-            this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+            configurationEnforcementDisable();
 
             NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
@@ -222,7 +222,7 @@ public class NMDbusConnector {
             List<Device> availableInterfaces = getAllDevices();
             manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
         } finally {
-            this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+            configurationEnforcementEnable();
         }
     }
 
@@ -441,5 +441,13 @@ public class NMDbusConnector {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();
         }
+    }
+
+    private void configurationEnforcementEnable() throws DBusException {
+        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+    }
+
+    private void configurationEnforcementDisable() throws DBusException {
+        this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
     }
 }

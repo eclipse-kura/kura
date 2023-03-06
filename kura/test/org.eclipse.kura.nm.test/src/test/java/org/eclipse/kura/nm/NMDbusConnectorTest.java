@@ -470,11 +470,11 @@ public class NMDbusConnectorTest {
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
-		when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
-					.thenReturn(this.mockedNetworkManager);
+        when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
+                    .thenReturn(this.mockedNetworkManager);
 
-		this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
-	}
+        this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
+    }
 
     public void givenMockedPermissions() {
 

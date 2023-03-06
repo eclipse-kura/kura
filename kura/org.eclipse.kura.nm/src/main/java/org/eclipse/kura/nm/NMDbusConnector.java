@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -256,7 +255,13 @@ public class NMDbusConnector {
         logger.info("Settings iface \"{}\":{}", iface, deviceType);
 
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-            disable(device);
+            NMDeviceState currentState = getDeviceState(device);
+            if (currentState != NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
+                DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                        NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+                disable(device);
+                dsLock.waitForSignal();
+            }
         } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
             logger.info("Iface \"{}\" set as Kura UNMANAGED. Skipping configuration.", iface);
         } else { // NMDeviceEnable.ENABLED
@@ -270,10 +275,8 @@ public class NMDbusConnector {
 
             logger.info("New settings: {}", newConnectionSettings);
 
-            // Arm signal handler
-            CountDownLatch latch = new CountDownLatch(1);
-            NMDeviceStateChangeHandler stateHandler = new NMDeviceStateChangeHandler(latch, device.getObjectPath());
-            this.dbusConnection.addSigHandler(Device.StateChanged.class, stateHandler);
+            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                    NMDeviceState.NM_DEVICE_STATE_CONFIG);
 
             if (connection.isPresent()) {
                 logger.info("Current settings: {}", connection.get().GetSettings());
@@ -286,18 +289,7 @@ public class NMDbusConnector {
                         new DBusPath("/"));
             }
 
-            try {
-                // Wait for signal
-                latch.await();
-            } catch (InterruptedException e) {
-                logger.warn("Wait interrupted for {} interface because:", iface, e);
-                Thread.currentThread().interrupt();
-            } finally {
-                // Disarm signal handler
-                logger.info("Wait complete");
-                this.dbusConnection.removeSigHandler(Device.StateChanged.class, stateHandler);
-            }
-
+            dsLock.waitForSignal();
         }
     }
 

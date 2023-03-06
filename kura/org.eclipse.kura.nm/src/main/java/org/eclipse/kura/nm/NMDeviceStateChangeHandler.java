@@ -23,12 +23,14 @@ public class NMDeviceStateChangeHandler implements DBusSigHandler<Device.StateCh
 
     private static final Logger logger = LoggerFactory.getLogger(NMDeviceStateChangeHandler.class);
 
-    private CountDownLatch latch;
-    private String path;
+    private final CountDownLatch latch;
+    private final String path;
+    private final NMDeviceState expectedState;
 
-    public NMDeviceStateChangeHandler(CountDownLatch latch, String path) {
+    public NMDeviceStateChangeHandler(CountDownLatch latch, String path, NMDeviceState expectedNmDeviceState) {
         this.latch = latch;
         this.path = path;
+        this.expectedState = expectedNmDeviceState;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class NMDeviceStateChangeHandler implements DBusSigHandler<Device.StateCh
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
 
         logger.info("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
-        if (s.getPath().equals(path) && newState == NMDeviceState.NM_DEVICE_STATE_CONFIG) {
+        if (s.getPath().equals(path) && newState == this.expectedState) {
             logger.info("Notify waiting thread");
             latch.countDown();
         }

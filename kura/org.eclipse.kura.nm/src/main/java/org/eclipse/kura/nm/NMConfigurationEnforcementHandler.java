@@ -28,7 +28,7 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         NMDeviceState oldState = NMDeviceState.fromUInt32(s.getOldState());
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
 
-        logger.info("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
+        logger.debug("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
         if ((oldState != NMDeviceState.NM_DEVICE_STATE_FAILED && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED)
                 || newState == NMDeviceState.NM_DEVICE_STATE_CONFIG) {
 
@@ -37,7 +37,8 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());
                 nm.apply();
             } catch (DBusException e) {
-                logger.error("Failed to handle DeviceAdded event for device: {}. Caused by:", s.getPath(), e);
+                logger.error("Failed to handle network configuration change event for device: {}. Caused by:",
+                        s.getPath(), e);
             }
         }
     }

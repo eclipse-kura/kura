@@ -40,7 +40,6 @@ public class DeviceStateLock {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();
         } finally {
-            // Disarm signal handler
             this.dbusConnection.removeSigHandler(Device.StateChanged.class, stateHandler);
         }
     }

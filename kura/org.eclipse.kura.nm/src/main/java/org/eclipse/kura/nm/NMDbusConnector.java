@@ -270,6 +270,7 @@ public class NMDbusConnector {
 
             logger.info("New settings: {}", newConnectionSettings);
 
+            // Arm signal handler
             CountDownLatch latch = new CountDownLatch(1);
             NMDeviceStateChangeHandler stateHandler = new NMDeviceStateChangeHandler(latch, device.getObjectPath());
             this.dbusConnection.addSigHandler(Device.StateChanged.class, stateHandler);
@@ -286,14 +287,17 @@ public class NMDbusConnector {
             }
 
             try {
+                // Wait for signal
                 latch.await();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.warn("Wait interrupted for {} interface because:", iface, e);
+                Thread.currentThread().interrupt();
+            } finally {
+                // Disarm signal handler
+                logger.info("Wait complete");
+                this.dbusConnection.removeSigHandler(Device.StateChanged.class, stateHandler);
             }
 
-            logger.info("Wait complete");
-            this.dbusConnection.removeSigHandler(Device.StateChanged.class, stateHandler);
         }
     }
 

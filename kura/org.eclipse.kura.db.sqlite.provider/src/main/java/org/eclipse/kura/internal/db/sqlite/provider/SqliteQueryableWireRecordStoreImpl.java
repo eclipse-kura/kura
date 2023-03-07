@@ -40,7 +40,7 @@ public class SqliteQueryableWireRecordStoreImpl extends AbstractJdbcQueryableWir
 
         if ("INT".equals(typeName)) {
             dbExtractedData = resultSet.getInt(columnIndex);
-        } else if ("BIGINT".equals(typeName)) {
+        } else if ("BIGINT".equals(typeName) || "INTEGER".equals(typeName)) {
             dbExtractedData = resultSet.getLong(columnIndex);
         } else if ("BOOLEAN".equals(typeName)) {
             dbExtractedData = resultSet.getBoolean(columnIndex);

@@ -29,9 +29,12 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
 
         logger.debug("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
-        if ((oldState != NMDeviceState.NM_DEVICE_STATE_FAILED && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED)
-                || newState == NMDeviceState.NM_DEVICE_STATE_CONFIG) {
 
+        boolean deviceDisconnectedBecauseOfConfigurationEvent = oldState != NMDeviceState.NM_DEVICE_STATE_FAILED
+                && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED;
+        boolean deviceIsConnectingToANewNetwork = newState == NMDeviceState.NM_DEVICE_STATE_CONFIG;
+
+        if (deviceIsConnectingToANewNetwork || deviceDisconnectedBecauseOfConfigurationEvent) {
             try {
                 NMDbusConnector nm = NMDbusConnector.getInstance();
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());

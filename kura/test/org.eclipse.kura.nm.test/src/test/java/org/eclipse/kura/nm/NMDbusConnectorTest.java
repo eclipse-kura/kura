@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -469,6 +470,31 @@ public class NMDbusConnectorTest {
         thenNetInterfaceTypeIs(NetworkInterfaceType.ETHERNET);
     }
 
+    @Test
+    public void configurationEnforcementShouldWorkWithExternalChangeSignal() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_CONFIG), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        // thenConnectionUpdateIsCalledFor("eth0"); <- BUG
+        thenActivateConnectionIsCalledFor("eth0");
+    }
+
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
                     .thenReturn(this.mockedNetworkManager);
@@ -615,6 +641,20 @@ public class NMDbusConnectorTest {
         when(this.networkService.getUsbNetDevice(any())).thenReturn(Optional.empty());
     }
 
+    public void givenApplyWasCalledOnceWith(Map<String, Object> networkConfig) throws DBusException {
+        try {
+            this.instanceNMDbusConnector.apply(networkConfig);
+        } catch (DBusException e) {
+            this.hasDBusExceptionBeenThrown = true;
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionThrown = true;
+        } catch (NullPointerException e) {
+            this.hasNullPointerExceptionThrown = true;
+        }
+
+        clearInvocations(this.mockedNetworkManager);
+    }
+
     public void whenGetDbusConnectionIsRun() {
         this.dbusConnectionInternal = this.instanceNMDbusConnector.getDbusConnection();
     }
@@ -672,6 +712,24 @@ public class NMDbusConnectorTest {
             this.hasNullPointerExceptionThrown = true;
         } catch (KuraException e) {
             this.hasKuraExceptionThrown = true;
+        }
+    }
+
+    private void whenDeviceStateChangeSignalAppearsWith(String dbusPath, UInt32 oldState, UInt32 newState,
+            UInt32 stateReason) throws DBusException {
+
+        Device.StateChanged signal = new Device.StateChanged(dbusPath, newState, oldState, stateReason);
+
+        try {
+            Field handlerField = NMDbusConnector.class.getDeclaredField("configurationEnforcementHandler");
+            handlerField.setAccessible(true);
+            NMConfigurationEnforcementHandler handler = (NMConfigurationEnforcementHandler) handlerField
+                    .get(this.instanceNMDbusConnector);
+            handler.handle(signal);
+            handlerField.setAccessible(false);
+
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.db.sqlite.provider;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -46,7 +49,23 @@ public class DatabaseLoader {
         this.cryptoService = cryptoService;
     }
 
-    protected SQLiteDataSource openDataSource() throws SQLException, KuraException {
+    public SQLiteDataSource openDataSource() throws SQLException, KuraException {
+        try {
+            return openDataSourceInternal();
+        } catch (final Exception e) {
+
+            if (this.newOptions.isDeleteDbFilesOnFailure() && this.newOptions.getMode() != Mode.IN_MEMORY) {
+                logger.warn("failed to open database, deleting database files and retrying", e);
+                deleteDbFiles(newOptions.getPath());
+                return openDataSourceInternal();
+            }
+
+            throw e;
+        }
+
+    }
+
+    protected SQLiteDataSource openDataSourceInternal() throws SQLException, KuraException {
 
         final String dbUrl = this.newOptions.getDbUrl();
 
@@ -185,6 +204,19 @@ public class DatabaseLoader {
         }
     }
 
+    protected void deleteDbFiles(final String dbPath) {
+        final List<String> paths = Arrays.asList(dbPath, dbPath + "-wal", dbPath + "-journal", dbPath + "-shm");
+
+        for (final String path : paths) {
+            try {
+                logger.info("deleting database file: {}", path);
+                deleteFile(new File(path));
+            } catch (final Exception e) {
+                logger.warn("failed to delete database file", e);
+            }
+        }
+    }
+
     protected void executeQuery(final SQLiteDataSource dataSource, final String query) throws SQLException {
         try (final Connection conn = dataSource.getConnection(); final Statement stmt = conn.createStatement()) {
             stmt.execute(query);
@@ -193,6 +225,12 @@ public class DatabaseLoader {
 
     protected SQLiteDataSource buildDataSource(final SQLiteConfig config) {
         return new SQLiteDataSource(config);
+    }
+
+    protected void deleteFile(final File file) throws IOException {
+        if (file.exists()) {
+            Files.delete(file.toPath());
+        }
     }
 
 }

@@ -66,7 +66,7 @@
          </AD>
 
          <AD id="db.defrag.interval.seconds"
-            name="Defrag interval (seconds)"
+            name="Defrag Interval (seconds)"
             type="Long"
             cardinality="0" 
             required="true"
@@ -84,13 +84,21 @@
             description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
 
          <AD id="db.connection.pool.max.size"
-            name="Connection pool max size"
+            name="Connection Pool Max Size"
             type="Integer"
             cardinality="0" 
             required="true"
             default="10"
             min="1"
             description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. Only 1 connection is available in In Memory mode."/>
+
+        <AD id="delete.db.files.on.failure"
+            name="Delete Database Files On Failure"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true"
+            description="If set to true, the database files will be deleted in case of failure in opening a persisted database. This is intended as a last resort measure for keeping the database service operational, especially in the case when it is used as a cloud connection message store."/>
 
         <AD id="debug.shell.access.enabled"
             name="Debug Shell Access Enabled"

@@ -94,8 +94,8 @@ class SqliteDbServiceOptions {
 
     }
 
-    private static final Property<String> MODE_PROPERTY = new Property<>("db.mode", Mode.PERSISTED.name());
-    private static final Property<String> PATH_PROPERTY = new Property<>("db.path", "mydb");
+    private static final Property<String> MODE_PROPERTY = new Property<>("db.mode", Mode.IN_MEMORY.name());
+    private static final Property<String> PATH_PROPERTY = new Property<>("db.path", "/opt/mydb.sqlite");
     private static final Property<Integer> CONNECTION_POOL_MAX_SIZE_PROPERTY = new Property<>(
             "db.connection.pool.max.size", 10);
     private static final Property<String> JOURNAL_MODE_PROPERTY = new Property<>("db.journal.mode",
@@ -109,6 +109,8 @@ class SqliteDbServiceOptions {
     private static final Property<String> ENCRYPTION_KEY_PROPERTY = new Property<>("db.key", String.class);
     private static final Property<String> ENCRYPTION_KEY_FORMAT_PROPERTY = new Property<>("db.key.format",
             EncryptionKeyFormat.ASCII.name());
+    private static final Property<Boolean> DELETE_DB_FILES_ON_FAILURE = new Property<>("delete.db.files.on.failure",
+            true);
     private static final Property<String> KURA_SERVICE_PID_PROPERTY = new Property<>(
             ConfigurationService.KURA_SERVICE_PID, "sqlitedb");
 
@@ -122,10 +124,11 @@ class SqliteDbServiceOptions {
     private final JournalMode journalMode;
     private final Optional<String> encryptionKey;
     private final EncryptionKeyFormat encryptionKeyFormat;
+    private final boolean deleteDbFilesOnFailure;
 
     public SqliteDbServiceOptions(Map<String, Object> properties) {
         this.mode = extractMode(properties);
-        this.path = PATH_PROPERTY.get(properties);
+        this.path = sanitizePath(PATH_PROPERTY.get(properties));
         this.kuraServicePid = KURA_SERVICE_PID_PROPERTY.get(properties);
         this.maxConnectionPoolSize = CONNECTION_POOL_MAX_SIZE_PROPERTY.get(properties);
         this.defragIntervalSeconds = DEFRAG_INTERVAL_SECONDS_PROPERTY.get(properties);
@@ -134,6 +137,7 @@ class SqliteDbServiceOptions {
         this.isDebugShellAccessEnabled = DEBUG_SHELL_ACCESS_ENABLED_PROPERTY.get(properties);
         this.encryptionKey = ENCRYPTION_KEY_PROPERTY.getOptional(properties).filter(s -> !s.trim().isEmpty());
         this.encryptionKeyFormat = extractEncryptionKeyFormat(properties);
+        this.deleteDbFilesOnFailure = DELETE_DB_FILES_ON_FAILURE.get(properties);
     }
 
     public Mode getMode() {
@@ -170,6 +174,10 @@ class SqliteDbServiceOptions {
 
     public EncryptionKeyFormat getEncryptionKeyFormat() {
         return encryptionKeyFormat;
+    }
+
+    public boolean isDeleteDbFilesOnFailure() {
+        return deleteDbFilesOnFailure;
     }
 
     public Optional<EncryptionKeySpec> getEncryptionKey(final CryptoService cryptoService) throws KuraException {
@@ -225,10 +233,20 @@ class SqliteDbServiceOptions {
         }
     }
 
+    private static final String sanitizePath(final String path) {
+        final int index = path.indexOf('?');
+
+        if (index != -1) {
+            return path.substring(0, index);
+        } else {
+            return path;
+        }
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(defragIntervalSeconds, encryptionKey, encryptionKeyFormat, journalMode, kuraServicePid,
-                maxConnectionPoolSize, mode, path, walCheckpointIntervalSeconds);
+        return Objects.hash(defragIntervalSeconds, deleteDbFilesOnFailure, encryptionKey, encryptionKeyFormat,
+                journalMode, kuraServicePid, maxConnectionPoolSize, mode, path, walCheckpointIntervalSeconds);
     }
 
     @Override
@@ -241,6 +259,7 @@ class SqliteDbServiceOptions {
         }
         SqliteDbServiceOptions other = (SqliteDbServiceOptions) obj;
         return defragIntervalSeconds == other.defragIntervalSeconds
+                && deleteDbFilesOnFailure == other.deleteDbFilesOnFailure
                 && Objects.equals(encryptionKey, other.encryptionKey)
                 && encryptionKeyFormat == other.encryptionKeyFormat && journalMode == other.journalMode
                 && Objects.equals(kuraServicePid, other.kuraServicePid)

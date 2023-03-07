@@ -23,6 +23,7 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
+import org.freedesktop.dbus.errors.UnknownMethod;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.slf4j.Logger;
@@ -90,6 +91,10 @@ public class NMStatusServiceImpl implements NetworkStatusService {
             if (Objects.nonNull(status)) {
                 networkInterfaceStatus = Optional.of(status);
             }
+        } catch (UnknownMethod e) {
+            logger.warn(
+                    "Could not retrieve status for \"{}\" interface from NM because the DBus object path references got invalidated.",
+                    interfaceName);
         } catch (DBusException | KuraException e) {
             logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
         }

@@ -40,6 +40,7 @@ import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.usb.UsbNetDevice;
+import org.freedesktop.dbus.errors.UnknownMethod;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.junit.Test;
 
@@ -57,6 +58,13 @@ public class NMStatusServiceImplTest {
     public void shouldReturnEmptyIfInterfaceDoesNotExist() throws DBusException, UnknownHostException, KuraException {
         givenNMStatusServiceImplWithNonExistingInterface();
         whenInterfaceStatusIsRetrieved("non-existing-interface");
+        thenInterfaceStatusIsEmpty();
+    }
+
+    @Test
+    public void shouldReturnEmptyIfDBusObjectVanishes() throws DBusException, UnknownHostException, KuraException {
+        givenNMStatusServiceImplThrowingUnknownMethod();
+        whenInterfaceStatusIsRetrieved("wlan1");
         thenInterfaceStatusIsEmpty();
     }
 
@@ -143,6 +151,12 @@ public class NMStatusServiceImplTest {
         createTestObjects();
         when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", networkService,
                 this.commandExecutorService)).thenThrow(DBusException.class);
+    }
+
+    private void givenNMStatusServiceImplThrowingUnknownMethod() throws DBusException, KuraException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", networkService, this.commandExecutorService))
+                .thenThrow(UnknownMethod.class);
     }
 
     private void givenNMStatusServiceImplWithEthernetInterface()

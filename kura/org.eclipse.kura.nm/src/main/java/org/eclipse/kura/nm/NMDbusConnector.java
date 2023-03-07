@@ -82,15 +82,13 @@ public class NMDbusConnector {
     private final DBusConnection dbusConnection;
     private final NetworkManager nm;
 
-    private final NMConfigurationEnforcementHandler nmConfigEnforcement = new NMConfigurationEnforcementHandler();
-
     private Map<String, Object> cachedConfiguration = null;
+
+    private NMConfigurationEnforcementHandler configurationEnforcementHandler = null;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
-
-        configurationEnforcementEnable();
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -444,10 +442,13 @@ public class NMDbusConnector {
     }
 
     private void configurationEnforcementEnable() throws DBusException {
-        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+        this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this.instance);
+        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
     }
 
     private void configurationEnforcementDisable() throws DBusException {
-        this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.nmConfigEnforcement);
+        if (Objects.nonNull(this.configurationEnforcementHandler)) {
+            this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
+        }
     }
 }

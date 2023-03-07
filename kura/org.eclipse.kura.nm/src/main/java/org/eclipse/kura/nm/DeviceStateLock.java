@@ -14,7 +14,6 @@ public class DeviceStateLock {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceStateLock.class);
 
-    // Arm signal handler
     private final CountDownLatch latch = new CountDownLatch(1);
     private NMDeviceStateChangeHandler stateHandler;
     private final DBusConnection dbusConnection;

@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.nm;
 
+import java.util.Objects;
+
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.networkmanager.Device;
@@ -21,6 +23,11 @@ import org.slf4j.LoggerFactory;
 public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.StateChanged> {
 
     private static final Logger logger = LoggerFactory.getLogger(NMConfigurationEnforcementHandler.class);
+    private final NMDbusConnector nm;
+
+    public NMConfigurationEnforcementHandler(NMDbusConnector nmDbusConnector) {
+        this.nm = Objects.requireNonNull(nmDbusConnector);
+    }
 
     @Override
     public void handle(Device.StateChanged s) {
@@ -36,7 +43,6 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
 
         if (deviceIsConnectingToANewNetwork || deviceDisconnectedBecauseOfConfigurationEvent) {
             try {
-                NMDbusConnector nm = NMDbusConnector.getInstance();
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());
                 nm.apply();
             } catch (DBusException e) {

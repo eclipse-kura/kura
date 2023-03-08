@@ -544,6 +544,10 @@ public class NMDbusConnectorTest {
         thenNetworkSettingsDidNotChangeForDevice("eth0");
     }
 
+    /*
+     * Given
+     */
+
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
                     .thenReturn(this.mockedNetworkManager);
@@ -695,6 +699,10 @@ public class NMDbusConnectorTest {
         clearInvocations(this.mockedNetworkManager);
     }
 
+    /*
+     * When
+     */
+
     public void whenGetDbusConnectionIsRun() {
         this.dbusConnectionInternal = this.instanceNMDbusConnector.getDbusConnection();
     }
@@ -772,6 +780,10 @@ public class NMDbusConnectorTest {
             throw new RuntimeException(e);
         }
     }
+
+    /*
+     * Then
+     */
 
     public void thenNoExceptionIsThrown() {
         assertFalse(this.hasDBusExceptionBeenThrown);

@@ -169,6 +169,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.dataTransportService.addDataTransportListener(this);
 
         createAutoConnectStrategy();
+        startMessageStoreConnectionMonitor();
     }
 
     private void restartDbServiceTracker(String kuraServicePid) {
@@ -339,7 +340,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     public synchronized void setMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
         this.storeState = Optional.of(new MessageStoreState(messageStoreProvider, this, this.dataServiceOptions));
-        startMessageStoreConnectionMonitor();
         startDbStore();
         signalPublisher();
     }

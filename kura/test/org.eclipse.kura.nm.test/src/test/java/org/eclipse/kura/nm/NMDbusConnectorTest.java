@@ -472,6 +472,37 @@ public class NMDbusConnectorTest {
     }
 
     @Test
+    public void configurationEnforcementShouldNotBeActiveOnCreation() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        thenNoExceptionIsThrown();
+        thenConfigurationEnforcementIsActive(false);
+    }
+
+    @Test
+    public void configurationEnforcementShouldBeActiveAfterFirstApplyCall() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConfigurationEnforcementIsActive(true);
+    }
+
+    @Test
     public void configurationEnforcementShouldTriggerWithExternalChangeSignal() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
@@ -857,6 +888,10 @@ public class NMDbusConnectorTest {
 
     public void thenNetInterfaceTypeIs(NetworkInterfaceType type) {
         assertEquals(type, this.netInterface.getType());
+    }
+
+    public void thenConfigurationEnforcementIsActive(boolean expectedValue) {
+        assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

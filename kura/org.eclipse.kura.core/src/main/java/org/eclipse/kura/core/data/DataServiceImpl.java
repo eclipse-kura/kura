@@ -185,10 +185,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             Object service = DataServiceImpl.this.componentContext.getBundleContext()
                                     .getService(reference);
 
-                            if (service instanceof MessageStoreProvider) {
-                                setMessageStoreProvider((MessageStoreProvider) service);
-                            } else if (service instanceof H2DbService) {
+                            if (service instanceof H2DbService) { // high priority
                                 setH2DbService((H2DbService) service);
+                            } else if (service instanceof MessageStoreProvider) {
+                                setMessageStoreProvider((MessageStoreProvider) service);
                             } else {
                                 DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                                 return null;
@@ -260,7 +260,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             }
         } catch (KuraStoreException e) {
             logger.error("Failed to start store", e);
-            DataServiceImpl.this.disconnectDataTransportIfConnected();
+            DataServiceImpl.this.disconnectDataTransportAndLog(e);
         }
     }
 
@@ -470,7 +470,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     }
                 } catch (KuraStoreException e) {
                     logger.error("Failed to drop in-flight messages", e);
-                    DataServiceImpl.this.disconnectDataTransportIfConnected();
+                    DataServiceImpl.this.disconnectDataTransportAndLog(e);
                 }
             }
         }
@@ -561,7 +561,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }
             } catch (KuraStoreException e) {
                 logger.error("Cannot confirm message to store", e);
-                disconnectDataTransportIfConnected();
+                disconnectDataTransportAndLog(e);
             }
 
             // Notify the listeners
@@ -580,10 +580,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         signalPublisher();
     }
 
-    private void disconnectDataTransportIfConnected() {
-        if (this.dataTransportService.isConnected()) {
-            this.dataTransportService.disconnect(0);
-        }
+    private void disconnectDataTransportAndLog(Throwable e) {
+        logger.error("Disconnecting the data trasporti service cause: " + e.getMessage());
+        this.dataTransportService.disconnect(0);
     }
 
     @Override
@@ -677,13 +676,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 return messageId;
             } catch (KuraStoreException e) {
-                disconnectDataTransportIfConnected();
-
+                disconnectDataTransportAndLog(e);
                 throw e;
             }
 
         } else {
-            throw new KuraStoreException(MESSAGE_STORE_NOT_PRESENT_MESSAGE);
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_PRESENT_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
         }
 
     }
@@ -694,8 +694,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getUnpublishedMessages();
             return buildMessageIds(messages, topicRegex);
         } else {
-            disconnectDataTransportIfConnected();
-            throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
+
         }
     }
 
@@ -705,8 +707,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getInFlightMessages();
             return buildMessageIds(messages, topicRegex);
         } else {
-            disconnectDataTransportIfConnected();
-            throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
         }
     }
 
@@ -717,8 +720,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getDroppedMessages();
             return buildMessageIds(messages, topicRegex);
         } else {
-            disconnectDataTransportIfConnected();
-            throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
         }
     }
 
@@ -984,7 +988,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     MessageStore store = DataServiceImpl.this.storeState.get().openMessageStore();
                 }
             } catch (KuraStoreException e) {
-                DataServiceImpl.this.disconnectDataTransportIfConnected();
+                DataServiceImpl.this.disconnectDataTransportAndLog(e);
                 logger.info("Unable to connect to the Message Store instance", e);
             }
 
@@ -1138,7 +1142,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                     }
 
                 } catch (KuraStoreException e) {
-                    DataServiceImpl.this.disconnectDataTransportIfConnected();
+                    DataServiceImpl.this.disconnectDataTransportAndLog(e);
                 }
 
             } else {
@@ -1192,7 +1196,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
             }
         } catch (Exception e) {
-            DataServiceImpl.this.disconnectDataTransportIfConnected();
+            DataServiceImpl.this.disconnectDataTransportAndLog(e);
             logger.error("Probably an unrecoverable exception", e);
         }
         return message;

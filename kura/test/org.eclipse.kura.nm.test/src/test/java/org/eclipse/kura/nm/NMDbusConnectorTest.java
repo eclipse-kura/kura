@@ -471,7 +471,7 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void configurationEnforcementShouldWorkWithExternalChangeSignal() throws DBusException, IOException {
+    public void configurationEnforcementShouldTriggerWithExternalChangeSignal() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
                 true);
@@ -493,6 +493,55 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         // thenConnectionUpdateIsCalledFor("eth0"); <- BUG
         thenActivateConnectionIsCalledFor("eth0");
+    }
+
+    @Test
+    public void configurationEnforcementShouldTriggerWithExternalDisconnect() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        // thenConnectionUpdateIsCalledFor("eth0"); <- BUG
+        thenActivateConnectionIsCalledFor("eth0");
+    }
+
+    @Test
+    public void configurationEnforcementShouldNotTriggerWithDisconnectAfterFailure() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_FAILED),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        thenNetworkSettingsDidNotChangeForDevice("eth0");
     }
 
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
@@ -642,16 +691,7 @@ public class NMDbusConnectorTest {
     }
 
     public void givenApplyWasCalledOnceWith(Map<String, Object> networkConfig) throws DBusException {
-        try {
-            this.instanceNMDbusConnector.apply(networkConfig);
-        } catch (DBusException e) {
-            this.hasDBusExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionThrown = true;
-        } catch (NullPointerException e) {
-            this.hasNullPointerExceptionThrown = true;
-        }
-
+        this.instanceNMDbusConnector.apply(networkConfig);
         clearInvocations(this.mockedNetworkManager);
     }
 

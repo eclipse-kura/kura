@@ -581,8 +581,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     private void disconnectDataTransportAndLog(Throwable e) {
-        logger.error("Disconnecting the data trasporti service cause: " + e.getMessage());
-        this.dataTransportService.disconnect(0);
+        logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
+        if (this.dataTransportService != null) {
+            this.dataTransportService.disconnect(0);
+        }
     }
 
     @Override

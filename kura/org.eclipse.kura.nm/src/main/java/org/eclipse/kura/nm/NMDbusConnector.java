@@ -449,7 +449,7 @@ public class NMDbusConnector {
 
     private void configurationEnforcementEnable() throws DBusException {
         if (Objects.isNull(this.configurationEnforcementHandler)) {
-            this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this.instance);
+            this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this);
         }
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
         this.configurationEnforcementHandlerIsArmed = true;

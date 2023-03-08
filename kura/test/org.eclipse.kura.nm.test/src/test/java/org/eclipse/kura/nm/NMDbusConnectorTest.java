@@ -525,6 +525,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("eth0");
         thenActivateConnectionIsCalledFor("eth0");
+        thenConfigurationEnforcementIsActive(true);
     }
 
     @Test
@@ -550,6 +551,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("eth0");
         thenActivateConnectionIsCalledFor("eth0");
+        thenConfigurationEnforcementIsActive(true);
     }
 
     @Test
@@ -574,6 +576,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenNetworkSettingsDidNotChangeForDevice("eth0");
+        thenConfigurationEnforcementIsActive(true);
     }
 
     /*

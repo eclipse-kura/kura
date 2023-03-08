@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraConnectException;
@@ -42,12 +44,122 @@ import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.watchdog.WatchdogService;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 public class DataServiceImplTest {
+
+    private DataServiceImpl dataServiceImpl;
+    private DataTransportService dataTransportServiceMock;
+
+    @Before
+    public void cleanUp() {
+        this.dataServiceImpl = null;
+        this.dataTransportServiceMock = null;
+    }
+
+    @Test
+    public void shouldHandleMessageStoreConnectedEvent() {
+
+        givenDataService();
+        givenDataTrasportServiceDisconnected();
+        givenMessageStoreConnectionState(false);
+        givenIsActive();
+
+        whenMessageStoreConnectionEventHappen();
+
+        thenDataTrasportIsConnected();
+    }
+
+    @Test
+    public void shouldHandleMessageStoreDisconnectedEvent() {
+        givenDataService();
+        givenDataTrasportServiceConnected();
+        givenMessageStoreConnectionState(true);
+        givenIsActive();
+
+        whenMessageStoreDisconnectionEventHappen();
+
+        thenDataTrasportIsDisconnected();
+    }
+
+    private void givenIsActive() {
+        ComponentContext ctxMock = mock(ComponentContext.class);
+        when(ctxMock.getBundleContext()).thenReturn(mock(BundleContext.class));
+        Map<String, Object> properties = new HashMap<>();
+
+        this.dataServiceImpl.activate(ctxMock, properties);
+
+    }
+
+    private void givenDataTrasportServiceConnected() {
+        this.dataTransportServiceMock = mock(DataTransportService.class);
+        try {
+            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", dataTransportServiceMock);
+            when(dataTransportServiceMock.isConnected()).thenReturn(true);
+        } catch (NoSuchFieldException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void givenDataTrasportServiceDisconnected() {
+        this.dataTransportServiceMock = mock(DataTransportService.class);
+        try {
+            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", dataTransportServiceMock);
+            when(dataTransportServiceMock.isConnected()).thenReturn(false);
+        } catch (NoSuchFieldException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void givenDataService() {
+        this.dataServiceImpl = new DataServiceImpl();
+
+        try {
+            DataServiceOptions dataServiceOptions = new DataServiceOptions(Collections.emptyMap());
+            MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
+            MessageStore messageStoreMock = mock(MessageStore.class);
+            CloudConnectionStatusService ccssMock = mock(CloudConnectionStatusService.class);
+            initMockMessageStore(messageStoreProviderMock, messageStoreMock);
+            TestUtil.setFieldValue(this.dataServiceImpl, "dataServiceOptions", dataServiceOptions);
+            this.dataServiceImpl.setMessageStoreProvider(messageStoreProviderMock);
+            this.dataServiceImpl.setCloudConnectionStatusService(ccssMock);
+        } catch (NoSuchFieldException | KuraStoreException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    private void givenMessageStoreConnectionState(boolean connectionState) {
+        try {
+            TestUtil.setFieldValue(this.dataServiceImpl, "messageStoreConnected", new AtomicBoolean(connectionState));
+        } catch (NoSuchFieldException e) {
+            fail();
+        }
+    }
+
+    private void whenMessageStoreDisconnectionEventHappen() {
+        this.dataServiceImpl.disconnected();
+    }
+
+    private void whenMessageStoreConnectionEventHappen() {
+        this.dataServiceImpl.connected();
+    }
+
+    private void thenDataTrasportIsDisconnected() {
+        verify(this.dataTransportServiceMock, times(1)).disconnect(0);
+    }
+
+    private void thenDataTrasportIsConnected() {
+        try {
+            verify(this.dataTransportServiceMock, times(1)).connect();
+        } catch (KuraConnectException e) {
+            fail();
+        }
+    }
 
     @Test
     public void testStartDbStore() throws Throwable {
@@ -562,11 +674,9 @@ public class DataServiceImplTest {
 
     private void initMockMessageStore(final MessageStoreProvider messageStoreProviderMock,
             final MessageStore messageStoreMock, List<StoredMessage> unpublished,
-            List<StoredMessage> inFlight,
-            List<StoredMessage> dropped) throws KuraStoreException {
+            List<StoredMessage> inFlight, List<StoredMessage> dropped) throws KuraStoreException {
 
-        when(messageStoreProviderMock.openMessageStore(Mockito.any()))
-                .thenReturn(messageStoreMock);
+        when(messageStoreProviderMock.openMessageStore(Mockito.any())).thenReturn(messageStoreMock);
 
         when(messageStoreMock.getUnpublishedMessages()).thenReturn(unpublished);
         when(messageStoreMock.getInFlightMessages()).thenReturn(inFlight);

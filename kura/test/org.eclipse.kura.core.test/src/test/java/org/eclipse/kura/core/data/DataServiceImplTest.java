@@ -86,6 +86,7 @@ public class DataServiceImplTest {
 
         verify(messageStoreProviderMock, times(1)).openMessageStore("foo");
 
+        @SuppressWarnings("unchecked")
         Map<DataTransportToken, Integer> ifMsgs = (Map<DataTransportToken, Integer>) TestUtil.getFieldValue(svc,
                 "inFlightMsgIds");
 
@@ -122,6 +123,7 @@ public class DataServiceImplTest {
 
         svc.setMessageStoreProvider(messageStoreProviderMock);
 
+        @SuppressWarnings("unchecked")
         Map<DataTransportToken, Integer> inFlightMsgIds = mock(Map.class);
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
@@ -157,6 +159,7 @@ public class DataServiceImplTest {
 
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
 
+        @SuppressWarnings("unchecked")
         Map<DataTransportToken, Integer> inFlightMsgIds = mock(Map.class);
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
@@ -193,6 +196,7 @@ public class DataServiceImplTest {
 
         svc.setMessageStoreProvider(messageStoreProviderMock);
 
+        @SuppressWarnings("unchecked")
         Map<DataTransportToken, Integer> inFlightMsgIds = mock(Map.class);
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
@@ -228,6 +232,7 @@ public class DataServiceImplTest {
 
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
 
+        @SuppressWarnings("unchecked")
         Map<DataTransportToken, Integer> inFlightMsgIds = mock(Map.class);
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
@@ -569,8 +574,8 @@ public class DataServiceImplTest {
 
     }
 
-    private void initMockMessageStore(final MessageStoreProvider messageStoreProvider,
-            final MessageStore messageStore) throws KuraStoreException {
+    private void initMockMessageStore(final MessageStoreProvider messageStoreProvider, final MessageStore messageStore)
+            throws KuraStoreException {
         initMockMessageStore(messageStoreProvider, messageStore, Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
     }

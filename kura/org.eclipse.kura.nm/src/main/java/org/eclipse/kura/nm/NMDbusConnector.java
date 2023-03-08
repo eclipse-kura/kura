@@ -86,6 +86,8 @@ public class NMDbusConnector {
 
     private NMConfigurationEnforcementHandler configurationEnforcementHandler = null;
 
+    private boolean configurationEnforcementHandlerIsArmed = false;
+
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
@@ -105,6 +107,10 @@ public class NMDbusConnector {
 
     public DBusConnection getDbusConnection() {
         return this.dbusConnection;
+    }
+
+    public boolean configurationEnforcementIsActive() {
+        return Objects.nonNull(this.configurationEnforcementHandler) && this.configurationEnforcementHandlerIsArmed;
     }
 
     public void checkPermissions() {
@@ -446,11 +452,13 @@ public class NMDbusConnector {
             this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this.instance);
         }
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
+        this.configurationEnforcementHandlerIsArmed = true;
     }
 
     private void configurationEnforcementDisable() throws DBusException {
         if (Objects.nonNull(this.configurationEnforcementHandler)) {
             this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
         }
+        this.configurationEnforcementHandlerIsArmed = false;
     }
 }

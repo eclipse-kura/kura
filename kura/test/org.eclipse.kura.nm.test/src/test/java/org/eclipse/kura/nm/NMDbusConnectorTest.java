@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -84,6 +85,7 @@ public class NMDbusConnectorTest {
     NetworkService networkService;
 
     Map<String, Device> mockDevices = new HashMap<>();
+    Connection mockConnection;
 
     List<String> internalStringList;
     Map<String, Object> netConfig = new HashMap<>();
@@ -469,6 +471,120 @@ public class NMDbusConnectorTest {
         thenNetInterfaceTypeIs(NetworkInterfaceType.ETHERNET);
     }
 
+    @Test
+    public void configurationEnforcementShouldNotBeActiveWithEmptyConfigurationCache()
+            throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        thenNoExceptionIsThrown();
+        thenConfigurationEnforcementIsActive(false);
+    }
+
+    @Test
+    public void configurationEnforcementShouldBeActiveAfterConfigurationCacheGetsPopulated()
+            throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConfigurationEnforcementIsActive(true);
+    }
+
+    @Test
+    public void configurationEnforcementShouldTriggerWithExternalChangeSignal() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_CONFIG), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("eth0");
+        thenActivateConnectionIsCalledFor("eth0");
+        thenConfigurationEnforcementIsActive(true);
+    }
+
+    @Test
+    public void configurationEnforcementShouldTriggerWithExternalDisconnect() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DEACTIVATING),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("eth0");
+        thenActivateConnectionIsCalledFor("eth0");
+        thenConfigurationEnforcementIsActive(true);
+    }
+
+    @Test
+    public void configurationEnforcementShouldNotTriggerWithDisconnectAfterFailure() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenDeviceStateChangeSignalAppearsWith("/org/freedesktop/NetworkManager/Devices/5",
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_FAILED),
+                NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), new UInt32(1));
+
+        thenNoExceptionIsThrown();
+        thenNetworkSettingsDidNotChangeForDevice("eth0");
+        thenConfigurationEnforcementIsActive(true);
+    }
+
+    /*
+     * Given
+     */
+
     public void givenBasicMockedDbusConnector() throws DBusException, IOException {
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"), eq("/org/freedesktop/NetworkManager"), any()))
                     .thenReturn(this.mockedNetworkManager);
@@ -548,11 +664,11 @@ public class NMDbusConnectorTest {
                 eq("/org/freedesktop/NetworkManager/Settings"), eq(Settings.class));
         doReturn(mockedProperties1).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                 eq("/mock/device/" + interfaceName), eq(Properties.class));
-        if (hasAssociatedConnection) {
-            Connection mockedDevice1Connection = mock(Connection.class, RETURNS_SMART_NULLS);
-            when(mockedDevice1Connection.GetSettings()).thenReturn(mockedDevice1ConnectionSetting);
+        if (Boolean.TRUE.equals(hasAssociatedConnection)) {
+            this.mockConnection = mock(Connection.class, RETURNS_SMART_NULLS);
+            when(this.mockConnection.GetSettings()).thenReturn(mockedDevice1ConnectionSetting);
 
-            doReturn(mockedDevice1Connection).when(this.dbusConnection).getRemoteObject(
+            doReturn(this.mockConnection).when(this.dbusConnection).getRemoteObject(
                     eq("org.freedesktop.NetworkManager"), eq("/mock/device/" + interfaceName), eq(Connection.class));
         } else {
             doThrow(new DBusExecutionException("initiate mocked throw")).when(this.dbusConnection).getRemoteObject(
@@ -615,6 +731,17 @@ public class NMDbusConnectorTest {
         when(this.networkService.getUsbNetDevice(any())).thenReturn(Optional.empty());
     }
 
+    public void givenApplyWasCalledOnceWith(Map<String, Object> networkConfig) throws DBusException {
+        this.instanceNMDbusConnector.apply(networkConfig);
+        clearInvocations(this.mockedNetworkManager);
+        clearInvocations(this.dbusConnection);
+        clearInvocations(this.mockConnection);
+    }
+
+    /*
+     * When
+     */
+
     public void whenGetDbusConnectionIsRun() {
         this.dbusConnectionInternal = this.instanceNMDbusConnector.getDbusConnection();
     }
@@ -675,6 +802,28 @@ public class NMDbusConnectorTest {
         }
     }
 
+    private void whenDeviceStateChangeSignalAppearsWith(String dbusPath, UInt32 oldState, UInt32 newState,
+            UInt32 stateReason) throws DBusException {
+
+        Device.StateChanged signal = new Device.StateChanged(dbusPath, newState, oldState, stateReason);
+
+        try {
+            Field handlerField = NMDbusConnector.class.getDeclaredField("configurationEnforcementHandler");
+            handlerField.setAccessible(true);
+            NMConfigurationEnforcementHandler handler = (NMConfigurationEnforcementHandler) handlerField
+                    .get(this.instanceNMDbusConnector);
+            handler.handle(signal);
+            handlerField.setAccessible(false);
+
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+     * Then
+     */
+
     public void thenNoExceptionIsThrown() {
         assertFalse(this.hasDBusExceptionBeenThrown);
         assertFalse(this.hasNoSuchElementExceptionThrown);
@@ -716,9 +865,7 @@ public class NMDbusConnectorTest {
     }
 
     public void thenConnectionUpdateIsCalledFor(String netInterface) throws DBusException {
-        Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
-                "/mock/device/" + netInterface, Connection.class);
-        verify(connect).Update(any());
+        verify(this.mockConnection).Update(any());
     }
 
     public void thenActivateConnectionIsCalledFor(String netInterface) throws DBusException {
@@ -730,9 +877,7 @@ public class NMDbusConnectorTest {
     }
 
     public void thenNetworkSettingsDidNotChangeForDevice(String netInterface) throws DBusException {
-        Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
-                "/mock/device/" + netInterface, Connection.class);
-        verify(connect, never()).Update(any());
+        verify(this.mockConnection, never()).Update(any());
         verify(this.mockDevices.get(netInterface), never()).Disconnect();
         verify(this.mockedNetworkManager, never()).ActivateConnection(any(), any(), any());
         verify(this.mockedNetworkManager, never()).AddAndActivateConnection(any(), any(), any());
@@ -748,6 +893,10 @@ public class NMDbusConnectorTest {
 
     public void thenNetInterfaceTypeIs(NetworkInterfaceType type) {
         assertEquals(type, this.netInterface.getType());
+    }
+
+    public void thenConfigurationEnforcementIsActive(boolean expectedValue) {
+        assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

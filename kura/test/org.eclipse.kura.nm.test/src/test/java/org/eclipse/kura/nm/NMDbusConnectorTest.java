@@ -472,7 +472,8 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void configurationEnforcementShouldNotBeActiveOnCreation() throws DBusException, IOException {
+    public void configurationEnforcementShouldNotBeActiveWithEmptyConfigurationCache()
+            throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
                 true);
@@ -483,7 +484,8 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void configurationEnforcementShouldBeActiveAfterFirstApplyCall() throws DBusException, IOException {
+    public void configurationEnforcementShouldBeActiveAfterConfigurationCacheGetsPopulated()
+            throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
                 true);

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -238,12 +237,6 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
             throw new IllegalStateException(e);
         }
 
-    }
-
-    @Override
-    public <T> T withConnection(ConnectionCallable<T> task, Set<ConnectionListener> listeners) throws SQLException {
-        this.listenerManager.addAll(listeners);
-        return withConnection(task);
     }
 
     @Override

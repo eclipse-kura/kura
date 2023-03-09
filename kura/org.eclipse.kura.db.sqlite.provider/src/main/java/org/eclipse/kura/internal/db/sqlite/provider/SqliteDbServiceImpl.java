@@ -49,6 +49,8 @@ import org.sqlite.SQLiteJDBCLoader;
 public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
         WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
+    private static final Set<String> OPEN_URLS = new HashSet<>();
+
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceImpl.class);
 
     private CryptoService cryptoService;
@@ -126,7 +128,6 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                 this.listenerManager.dispatchDisconnected();
                 throw e;
             }
-            this.listenerManager.dispatchConnected();
             return connection;
         } else {
             this.listenerManager.dispatchDisconnected();
@@ -135,13 +136,11 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
 
     }
 
-    private static class DbState {
+    private class DbState {
 
         private static final String DEFRAG_STATEMENT = "VACUUM;";
 
         private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
-
-        private static final Set<String> OPEN_URLS = new HashSet<>();
 
         private final Optional<ScheduledExecutorService> executor;
         private final ConnectionPoolManager connectionPool;
@@ -180,6 +179,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                 }
 
                 logger.info("opening database with url: {}...done", options.getDbUrl());
+                SqliteDbServiceImpl.this.listenerManager.dispatchConnected();
             } catch (final Exception e) {
                 releaseFile();
                 throw e;

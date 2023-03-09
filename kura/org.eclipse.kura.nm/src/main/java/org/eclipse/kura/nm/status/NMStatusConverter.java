@@ -46,6 +46,7 @@ import org.eclipse.kura.nm.NM80211Mode;
 import org.eclipse.kura.nm.NMDeviceState;
 import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.eclipse.kura.usb.UsbNetDevice;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -60,6 +61,7 @@ public class NMStatusConverter {
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
+    private static final String NM_DEVICE_WIRED_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wired";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
 
@@ -69,72 +71,98 @@ public class NMStatusConverter {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName, Properties deviceProperties,
-            Optional<Properties> ip4configProperties, Optional<UsbNetDevice> usbNetDevice) {
+    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
+            Optional<UsbNetDevice> usbNetDevice) {
+
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
-        NMDeviceState deviceState = NMDeviceState
-                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(
+                devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
         builder.withIsLinkUp(NMDeviceState.isConnected(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
 
-        setDeviceStatus(builder, deviceProperties);
+        setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
 
         return builder.build();
 
     }
 
-    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName, Properties deviceProperties,
-            Optional<Properties> ip4configProperties) {
+    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(true);
 
-        NMDeviceState deviceState = NMDeviceState
-                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(
+                devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
 
-        setDeviceStatus(builder, deviceProperties);
+        setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
 
         return builder.build();
     }
 
-    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName, WirelessProperties deviceProperties,
-            Optional<Properties> ip4configProperties, AccessPointsProperties accessPointsProperties,
-            Optional<UsbNetDevice> usbNetDevice, SupportedChannelsProperties supportedChannelsProperties) {
+    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
+            AccessPointsProperties accessPointsProperties, Optional<UsbNetDevice> usbNetDevice,
+            SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withName(interfaceName).withVirtual(false);
 
-        NMDeviceState deviceState = NMDeviceState
-                .fromUInt32(deviceProperties.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
+        NMDeviceState deviceState = NMDeviceState.fromUInt32(
+                devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
         builder.withState(deviceStateConvert(deviceState));
 
         builder.withUsbNetDevice(usbNetDevice);
 
-        setDeviceStatus(builder, deviceProperties.getDeviceProperties());
+        setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
-        setWifiStatus(builder, deviceProperties.getWirelessDeviceProperties(),
+        setWifiStatus(builder, devicePropertiesWrapper.getDeviceSpecificProperties().get(),
                 accessPointsProperties.getActiveAccessPoint(), accessPointsProperties.getAvailableAccessPoints(),
                 supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
         return builder.build();
     }
 
-    private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder, Properties deviceProperties) {
-        builder.withAutoConnect(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
-        builder.withFirmwareVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
-        builder.withDriver(deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver"));
-        builder.withDriverVersion(deviceProperties.Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
+    private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder,
+            DevicePropertiesWrapper devicePropertiesWrapper) {
+        builder.withAutoConnect(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "Autoconnect"));
+        builder.withFirmwareVersion(
+                devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "FirmwareVersion"));
+        builder.withDriver(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "Driver"));
+        builder.withDriverVersion(
+                devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "DriverVersion"));
 
-        UInt32 mtu = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Mtu");
+        UInt32 mtu = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "Mtu");
         builder.withMtu(mtu.intValue());
 
-        String hwAddress = deviceProperties.Get(NM_DEVICE_BUS_NAME, "HwAddress");
-        builder.withHardwareAddress(getMacAddressBytes(hwAddress));
+        try {
+            String hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "HwAddress");
+            builder.withHardwareAddress(getMacAddressBytes(hwAddress));
+        } catch (DBusExecutionException e) {
+            logger.debug("NetworkManager version equal or lower then 1.24 detected.");
+            switch (devicePropertiesWrapper.getDeviceType()) {
+            case NM_DEVICE_TYPE_ETHERNET:
+                builder.withHardwareAddress(getMacAddressBytes(
+                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, "HwAddress")));
+                break;
+            case NM_DEVICE_TYPE_WIFI:
+                builder.withHardwareAddress(getMacAddressBytes(
+                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, "HwAddress")));
+                break;
+            case NM_DEVICE_TYPE_GENERIC:
+            case NM_DEVICE_TYPE_LOOPBACK:
+            default:
+                logger.debug("Setting HW Address to blank.");
+                break;
+
+            }
+        }
     }
 
     private static void setIP4Status(NetworkInterfaceStatusBuilder<?> builder,

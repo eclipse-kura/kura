@@ -28,9 +28,9 @@ import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
+import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
-import org.eclipse.kura.nm.status.WirelessProperties;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -43,6 +43,7 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
@@ -167,10 +168,22 @@ public class NMDbusConnector {
 
         Optional<UsbNetDevice> usbNetDevice = networkService.getUsbNetDevice(interfaceName);
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            return NMStatusConverter.buildEthernetStatus(interfaceName, deviceProperties, ip4configProperties,
+
+            // new EthernetProperties(deviceProperties);
+            Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(), Wired.class);
+            Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    wiredDevice.getObjectPath(), Properties.class);
+
+            DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                    Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+
+            return NMStatusConverter.buildEthernetStatus(interfaceName, ethernetPropertiesWrapper, ip4configProperties,
                     usbNetDevice);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
-            return NMStatusConverter.buildLoopbackStatus(interfaceName, deviceProperties, ip4configProperties);
+            DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                    Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+
+            return NMStatusConverter.buildLoopbackStatus(interfaceName, loopbackPropertiesWrapper, ip4configProperties);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                     Wireless.class);
@@ -191,8 +204,10 @@ public class NMDbusConnector {
                         activeAccessPointPath.getPath(), Properties.class));
             }
 
-            return NMStatusConverter.buildWirelessStatus(interfaceName,
-                    new WirelessProperties(deviceProperties, wirelessDeviceProperties), ip4configProperties,
+            DevicePropertiesWrapper wirelessPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                    Optional.of(wirelessDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+            return NMStatusConverter.buildWirelessStatus(interfaceName, wirelessPropertiesWrapper, ip4configProperties,
                     new AccessPointsProperties(activeAccessPoint, accessPoints), usbNetDevice,
                     new SupportedChannelsProperties(countryCode, supportedChannels));
         }

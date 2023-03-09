@@ -101,7 +101,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private Optional<MessageStoreState> storeState = Optional.empty();
 
-    private Map<DataTransportToken, Integer> inFlightMsgIds;
+    private Map<DataTransportToken, Integer> inFlightMsgIds = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService congestionExecutor;
     private ScheduledFuture<?> congestionFuture;
@@ -189,10 +189,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                         @Override
                         public void modifiedService(ServiceReference<Object> reference, Object service) {
-                            logger.info("Message store instance updated, recreating table if needed...");
                             if (service instanceof MessageStoreProvider) {
                                 return;
                             }
+                            logger.info("Message store instance updated, recreating table if needed...");
+
                             synchronized (DataServiceImpl.this) {
                                 if (DataServiceImpl.this.storeState.isPresent()) {
                                     DataServiceImpl.this.storeState.get()
@@ -327,6 +328,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     public synchronized void setMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
         this.storeState = Optional.of(new MessageStoreState(messageStoreProvider, this, this.dataServiceOptions));
+        messageStoreProvider.addListener(this);
         startDbStore();
         signalPublisher();
     }
@@ -335,6 +337,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         disconnect();
 
         if (this.storeState.isPresent()) {
+            this.storeState.get().getMessageStoreProvider().removeListener(this);
             this.storeState.get().shutdown();
             this.storeState = Optional.empty();
         }
@@ -577,6 +580,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         if (!this.storeState.isPresent()) {
             throw new KuraConnectException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+        }
+
+        try {
+            this.storeState.get().getOrOpenMessageStore();
+        } catch (KuraStoreException e) {
+            throw new KuraConnectException(e, MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
         }
 
         if (!this.dataTransportService.isConnected()) {
@@ -1131,6 +1140,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void connected() {
+        logger.info("Message store with PID {} connected.", this.dataServiceOptions.getDbServiceInstancePid());
         if (this.connectionMonitorFuture != null && !this.connectionMonitorFuture.isDone()) {
             stopConnectionTask();
             startConnectionTask();
@@ -1140,6 +1150,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void disconnected() {
+        logger.info("Message store with PID {} disconnected.", this.dataServiceOptions.getDbServiceInstancePid());
         if (this.storeState.isPresent()) {
             this.storeState.get().shutdown();
         }

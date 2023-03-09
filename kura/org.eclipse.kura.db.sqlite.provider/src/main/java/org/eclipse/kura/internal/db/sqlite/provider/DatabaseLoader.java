@@ -218,7 +218,6 @@ public class DatabaseLoader {
 
         for (final String path : paths) {
             try {
-                logger.info("deleting database file: {}", path);
                 deleteFile(new File(path));
             } catch (final Exception e) {
                 logger.warn("failed to delete database file", e);
@@ -238,6 +237,7 @@ public class DatabaseLoader {
 
     protected void deleteFile(final File file) throws IOException {
         if (file.exists()) {
+            logger.info("deleting database file: {}", file.getAbsolutePath());
             Files.delete(file.toPath());
         }
     }

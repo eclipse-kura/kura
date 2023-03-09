@@ -14,9 +14,11 @@ package org.eclipse.kura.core.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraConnectException;
@@ -54,31 +55,32 @@ public class DataServiceImplTest {
 
     private DataServiceImpl dataServiceImpl;
     private DataTransportService dataTransportServiceMock;
+    private Map<String, Object> properties;
 
     @Before
     public void cleanUp() {
         this.dataServiceImpl = null;
         this.dataTransportServiceMock = null;
+        this.properties = Collections.emptyMap();
     }
 
     @Test
-    public void shouldHandleMessageStoreConnectedEvent() {
+    public void shouldHandleMessageStoreConnectedEventWithDtDisconnected() {
 
         givenDataService();
         givenDataTrasportServiceDisconnected();
-        givenMessageStoreConnectionState(false);
+        givenAlwaysConnectedStrategy();
         givenIsActive();
 
         whenMessageStoreConnectionEventHappen();
 
-        thenDataTrasportIsConnected();
+        thenStartConnectionTaskIsInvoked();
     }
 
     @Test
-    public void shouldHandleMessageStoreDisconnectedEvent() {
+    public void shouldHandleMessageStoreDisconnectedEventWithDtConnected() {
         givenDataService();
         givenDataTrasportServiceConnected();
-        givenMessageStoreConnectionState(true);
         givenIsActive();
 
         whenMessageStoreDisconnectionEventHappen();
@@ -89,10 +91,12 @@ public class DataServiceImplTest {
     private void givenIsActive() {
         ComponentContext ctxMock = mock(ComponentContext.class);
         when(ctxMock.getBundleContext()).thenReturn(mock(BundleContext.class));
-        Map<String, Object> properties = new HashMap<>();
 
-        this.dataServiceImpl.activate(ctxMock, properties);
+        this.dataServiceImpl.activate(ctxMock, this.properties);
+    }
 
+    private void givenAlwaysConnectedStrategy() {
+        this.properties.put("connect.auto-on-startup", true);
     }
 
     private void givenDataTrasportServiceConnected() {
@@ -116,7 +120,7 @@ public class DataServiceImplTest {
     }
 
     private void givenDataService() {
-        this.dataServiceImpl = new DataServiceImpl();
+        this.dataServiceImpl = spy(new DataServiceImpl());
 
         try {
             DataServiceOptions dataServiceOptions = new DataServiceOptions(Collections.emptyMap());
@@ -133,14 +137,6 @@ public class DataServiceImplTest {
 
     }
 
-    private void givenMessageStoreConnectionState(boolean connectionState) {
-        try {
-            TestUtil.setFieldValue(this.dataServiceImpl, "messageStoreConnected", new AtomicBoolean(connectionState));
-        } catch (NoSuchFieldException e) {
-            fail();
-        }
-    }
-
     private void whenMessageStoreDisconnectionEventHappen() {
         this.dataServiceImpl.disconnected();
     }
@@ -150,7 +146,7 @@ public class DataServiceImplTest {
     }
 
     private void thenDataTrasportIsDisconnected() {
-        verify(this.dataTransportServiceMock, times(1)).disconnect(0);
+        verify(this.dataTransportServiceMock, times(1)).disconnect(anyLong());
     }
 
     private void thenDataTrasportIsConnected() {
@@ -159,6 +155,10 @@ public class DataServiceImplTest {
         } catch (KuraConnectException e) {
             fail();
         }
+    }
+
+    private void thenStartConnectionTaskIsInvoked() {
+        verify(this.dataServiceImpl, times(1)).startConnectionTask();
     }
 
     @Test

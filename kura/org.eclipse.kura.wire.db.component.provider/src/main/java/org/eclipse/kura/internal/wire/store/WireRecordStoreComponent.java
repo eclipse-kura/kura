@@ -191,7 +191,7 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State onWireRecordStoreDisconnected() {
-            return new Unsatisfied();
+            return this;
         }
 
         @Override

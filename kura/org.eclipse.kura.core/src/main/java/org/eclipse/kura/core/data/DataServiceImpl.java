@@ -186,10 +186,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             Object service = DataServiceImpl.this.componentContext.getBundleContext()
                                     .getService(reference);
 
-                            if (service instanceof H2DbService) { // high priority
-                                setH2DbService((H2DbService) service);
-                            } else if (service instanceof MessageStoreProvider) {
+                            if (service instanceof MessageStoreProvider) {
                                 setMessageStoreProvider((MessageStoreProvider) service);
+                            } else if (service instanceof H2DbService) {
+                                setH2DbService((H2DbService) service);
                             } else {
                                 DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                                 return null;

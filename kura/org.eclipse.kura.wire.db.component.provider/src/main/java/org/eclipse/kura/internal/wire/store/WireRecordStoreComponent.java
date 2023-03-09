@@ -55,8 +55,10 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
     }
 
     public synchronized void unbindWireRecordStoreProvider(final WireRecordStoreProvider wireRecordStoreProvider) {
-        wireRecordStoreProvider.removeListener(this);
-        updateState(s -> s.unsetWireRecordStoreProvider(wireRecordStoreProvider));
+        if (state.getWireRecordStoreProvider().equals(Optional.of(wireRecordStoreProvider))) {
+            wireRecordStoreProvider.removeListener(this);
+            updateState(s -> s.unsetWireRecordStoreProvider(wireRecordStoreProvider));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -89,11 +91,6 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
-
-        if (!this.state.isConnected()) {
-            logger.warn("Wire Record Store not connected");
-            return;
-        }
 
         final List<WireRecord> records = wireEvelope.getRecords();
 
@@ -138,13 +135,13 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         public State unsetWireRecordStoreProvider(final WireRecordStoreProvider wireRecordStoreProvider);
 
-        public void store(final List<WireRecord> records) throws KuraStoreException;
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider();
 
-        public boolean isConnected();
+        public void store(final List<WireRecord> records) throws KuraStoreException;
 
         public void shutdown();
 
-        public void setConnected(boolean b);
+        public State onWireRecordStoreDisconnected();
     }
 
     private static class Unsatisfied implements State {
@@ -168,9 +165,7 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State unsetWireRecordStoreProvider(WireRecordStoreProvider wireRecordStoreProvider) {
-            if (this.provider.equals(Optional.of(wireRecordStoreProvider))) {
-                this.provider = Optional.empty();
-            }
+            this.provider = Optional.empty();
 
             return checkSatisfied();
         }
@@ -195,13 +190,13 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         }
 
         @Override
-        public boolean isConnected() {
-            return false;
+        public State onWireRecordStoreDisconnected() {
+            return new Unsatisfied();
         }
 
         @Override
-        public void setConnected(boolean isConnected) {
-            // nothing to do
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider() {
+            return this.provider;
         }
 
     }
@@ -236,11 +231,7 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State unsetWireRecordStoreProvider(WireRecordStoreProvider wireRecordStoreProvider) {
-            if (this.provider == wireRecordStoreProvider) {
-                return new Unsatisfied().setOptions(this.options);
-            } else {
-                return this;
-            }
+            return new Unsatisfied().setOptions(this.options);
         }
 
         @Override
@@ -288,28 +279,25 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         }
 
         @Override
-        public void setConnected(boolean isConnected) {
-            this.connected = isConnected;
+        public State onWireRecordStoreDisconnected() {
+            this.shutdown();
+            return this;
         }
 
         @Override
-        public boolean isConnected() {
-            return this.connected;
-        }
-
-    }
-
-    @Override
-    public void connected() {
-        if (!this.state.isConnected()) {
-            this.state.setConnected(true);
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider() {
+            return Optional.of(this.provider);
         }
     }
 
     @Override
     public void disconnected() {
-        if (this.state.isConnected()) {
-            this.state.setConnected(false);
-        }
+        updateState(State::onWireRecordStoreDisconnected);
+    }
+
+    @Override
+    public void connected() {
+        // TODO Auto-generated method stub
+
     }
 }

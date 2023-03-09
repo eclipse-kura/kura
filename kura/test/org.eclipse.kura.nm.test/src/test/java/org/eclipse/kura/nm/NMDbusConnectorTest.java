@@ -63,6 +63,7 @@ import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.GetAppliedConnectionTuple;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
@@ -647,6 +648,14 @@ public class NMDbusConnectorTest {
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             simulateIwCommandOutputs(interfaceName, mockedProperties1);
+        } 
+        
+        if (type == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+            Wired wiredDevice = mock(Wired.class);
+            when(wiredDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
+            
+            doReturn(wiredDevice).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+                    eq("/mock/device/" + interfaceName), eq(Wired.class));
         }
 
         when(mockedProperties1.Get(eq("org.freedesktop.NetworkManager.Device"), eq("DeviceType")))

@@ -358,7 +358,11 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
             logger.info("updating...done");
         } catch (Exception e) {
-            disposeConnectionPool();
+            try {
+                shutdownDb();
+            } catch (SQLException sqlException) {
+                disposeConnectionPool();
+            }
             stopCheckpointTask();
             logger.error("Database initialization failed", e);
         } finally {

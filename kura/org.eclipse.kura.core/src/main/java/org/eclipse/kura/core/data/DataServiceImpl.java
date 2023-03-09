@@ -1220,6 +1220,10 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void disconnected() {
+        if (this.storeState.isPresent()) {
+            this.storeState.get().shutdown();
+            this.storeState = Optional.empty();
+        }
         boolean wasConnected = this.messageStoreConnected.getAndSet(false);
         if (wasConnected && this.dataTransportService.isConnected()) {
             this.dataTransportService.disconnect(0);

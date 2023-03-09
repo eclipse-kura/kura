@@ -127,6 +127,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
 
     private final Random random = new SecureRandom();
+    private AtomicBoolean disconnectionGuard = new AtomicBoolean();
 
     // ----------------------------------------------------------------
     //
@@ -568,10 +569,12 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     private void disconnectDataTransportAndLog(Throwable e) {
-        logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
-        if (this.dataTransportService != null) {
-            this.dataTransportService.disconnect(0);
+        if (this.disconnectionGuard.compareAndSet(false, true)) {
+            logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
+            this.disconnect();
+            this.disconnectionGuard.set(false);
         }
+
     }
 
     @Override
@@ -1155,7 +1158,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             this.storeState.get().shutdown();
         }
         if (this.dataTransportService.isConnected()) {
-            this.dataTransportService.disconnect(0);
+            this.disconnect();
             logger.info("Message store disconnected. Trying to shutdown the DataTransportService.");
         }
     }

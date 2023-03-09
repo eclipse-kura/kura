@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.EncryptionKeyFormat;
@@ -54,7 +55,11 @@ public class DatabaseLoader {
             return openDataSourceInternal();
         } catch (final Exception e) {
 
-            if (this.newOptions.isDeleteDbFilesOnFailure() && this.newOptions.getMode() != Mode.IN_MEMORY) {
+            final boolean isConfigurationAttributeInvalidException = (e instanceof KuraException
+                    && ((KuraException) e).getCode() == KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+
+            if (this.newOptions.isDeleteDbFilesOnFailure() && this.newOptions.getMode() != Mode.IN_MEMORY
+                    && !isConfigurationAttributeInvalidException) {
                 logger.warn("failed to open database, deleting database files and retrying", e);
                 deleteDbFiles(newOptions.getPath());
                 return openDataSourceInternal();
@@ -80,8 +85,12 @@ public class DatabaseLoader {
         addEncryptionKey(applicableEncryptionKeys, keyFromNewOptions, "key from new options");
 
         if (this.oldOptions.isPresent()) {
-            addEncryptionKey(applicableEncryptionKeys, this.oldOptions.get().getEncryptionKey(cryptoService),
-                    "key from old options");
+            try {
+                addEncryptionKey(applicableEncryptionKeys, this.oldOptions.get().getEncryptionKey(cryptoService),
+                        "key from old options");
+            } catch (final Exception e) {
+                logger.warn("failed to get key from old options", e);
+            }
         }
 
         addEncryptionKey(applicableEncryptionKeys, getCryptoServiceEntry(newOptions.getPath()),

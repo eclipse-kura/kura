@@ -14,9 +14,7 @@ package org.eclipse.kura.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
 
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -60,28 +58,6 @@ public interface H2DbService extends BaseDbService {
      * @since 2.0
      */
     public <T> T withConnection(ConnectionCallable<T> task) throws SQLException;
-
-    /**
-     * Executes the provided {@link ConnectionCallable} task on the current thread, and returns the result.
-     * In addition adds a Set of {@link ConnectionListener} to the current instance which will be invoked.
-     * It is not necessary to close the {@link Connection} received as argument. If an exception is thrown by the task,
-     * the connection will be rolled back automatically.
-     *
-     * This method guarantees that the execution of the provided task will not be affected by the defragmentation
-     * process.
-     * Performing long running operations in the provided tasks might delay the defragmentation
-     * process.
-     *
-     * @param task
-     *            the task to be executed.
-     * @param listeners
-     *            a set of listeners to invoke.
-     * @return the result of the executed task.
-     * @throws SQLException
-     *             if the provided task throws a {@link SQLException}.
-     * @since 2.0
-     */
-    public <T> T withConnection(ConnectionCallable<T> task, Set<ConnectionListener> listeners) throws SQLException;
 
     /**
      * Represents a task that can be executed using the {@link H2DbService#withConnection(ConnectionCallable)} method.

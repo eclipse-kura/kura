@@ -25,14 +25,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.Set;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.db.H2DbMessageStoreImpl;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
 import org.junit.Before;
@@ -324,11 +322,6 @@ public class DbDataStoreStorageTest {
 
         @Override
         public <T> T withConnection(ConnectionCallable<T> task) throws SQLException {
-            return task.call(this.getConnection());
-        }
-
-        @Override
-        public <T> T withConnection(ConnectionCallable<T> task, Set<ConnectionListener> listeners) throws SQLException {
             return task.call(this.getConnection());
         }
 

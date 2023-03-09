@@ -206,7 +206,6 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         private final WireRecordStoreComponentOptions options;
         private final WireRecordStoreProvider provider;
         private Optional<WireRecordStore> store = Optional.empty();
-        private boolean connected = false;
 
         public Satisfied(final WireRecordStoreComponentOptions options, final WireRecordStoreProvider provider) {
             this.options = options;
@@ -237,9 +236,9 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         @Override
         public void store(final List<WireRecord> records) throws KuraStoreException {
             try {
-                if (!this.connected) {
-                    storeInternal(records);
-                }
+
+                storeInternal(records);
+
             } catch (final Exception e) {
                 logger.warn("failed to store records, attempting to reopen store...");
                 shutdown();

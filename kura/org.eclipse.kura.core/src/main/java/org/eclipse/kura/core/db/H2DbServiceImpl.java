@@ -164,12 +164,13 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         this.isOnExecutor.remove();
         this.executorService.shutdown();
         awaitExecutorServiceTermination();
+
         try {
             shutdownDb();
-            this.listenerManager.dispatchDisconnected();
         } catch (SQLException e) {
             logger.warn("got exception while shutting down the database", e);
         }
+        this.listenerManager.shutdown();
         logger.info("deactivate...done");
     }
 

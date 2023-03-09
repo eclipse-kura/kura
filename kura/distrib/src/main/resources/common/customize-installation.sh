@@ -42,7 +42,7 @@ if [ ${BOARD} = "generic-device" ]; then
     # replace snapshot_0, iptables.init, and kura.properties with correct interface names
     if python3 -V > /dev/null 2>&1
     then
-        python3 /opt/eclipse/kura/install/find-net-interfaces.py /opt/eclipse/kura/user/snapshots/snapshot_0.xml /opt/eclipse/kura/install/iptables.init 
+        python3 /opt/eclipse/kura/install/find-net-interfaces.py /opt/eclipse/kura/user/snapshots/snapshot_0.xml /opt/eclipse/kura/.data/iptables
     else
         echo "python3 not found. snapshot_0.xml, and iptables.init files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
     fi

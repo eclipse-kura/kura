@@ -168,8 +168,6 @@ public class NMDbusConnector {
 
         Optional<UsbNetDevice> usbNetDevice = networkService.getUsbNetDevice(interfaceName);
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-
-            // new EthernetProperties(deviceProperties);
             Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(), Wired.class);
             Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     wiredDevice.getObjectPath(), Properties.class);

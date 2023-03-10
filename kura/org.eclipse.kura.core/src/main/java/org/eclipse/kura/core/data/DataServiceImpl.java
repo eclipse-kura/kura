@@ -438,35 +438,38 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // in the DataPublisherService persistence.
 
         if (newSession) {
-            if (this.dataServiceOptions.isPublishInFlightMessages()) {
-                logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
-                        + "this may cause duplicate messages.");
-                try {
-                    if (this.storeState.isPresent()) {
-                        this.storeState.get().getOrOpenMessageStore().unpublishAllInFlighMessages();
-                        this.inFlightMsgIds.clear();
-                    }
-                } catch (KuraStoreException e) {
-                    logger.error("Failed to unpublish in-flight messages", e);
-                }
-            } else {
-                logger.info("New session established. Dropping all in-flight messages.");
-                try {
-                    if (this.storeState.isPresent()) {
-                        this.storeState.get().getOrOpenMessageStore().dropAllInFlightMessages();
-                        this.inFlightMsgIds.clear();
-                    }
-                } catch (KuraStoreException e) {
-                    logger.error("Failed to drop in-flight messages", e);
-                    DataServiceImpl.this.disconnectDataTransportAndLog(e);
-                }
-            }
+            unpublishOrDropInFlightMessages(this.dataServiceOptions.isPublishInFlightMessages());
         }
 
         // Notify the listeners
         this.dataServiceListeners.onConnectionEstablished();
 
         signalPublisher();
+    }
+
+    private void unpublishOrDropInFlightMessages(boolean publishInFlightMessages) {
+
+        if (publishInFlightMessages && this.storeState.isPresent()) {
+            logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
+                    + "this may cause duplicate messages.");
+            try {
+                this.storeState.get().getOrOpenMessageStore().unpublishAllInFlighMessages();
+                this.inFlightMsgIds.clear();
+            } catch (KuraStoreException e) {
+                logger.error("Failed to unpublish in-flight messages", e);
+                DataServiceImpl.this.disconnectDataTransportAndLog(e);
+            }
+        } else if (this.storeState.isPresent()) {
+            logger.info("New session established. Dropping all in-flight messages.");
+            try {
+                this.storeState.get().getOrOpenMessageStore().dropAllInFlightMessages();
+                this.inFlightMsgIds.clear();
+            } catch (KuraStoreException e) {
+                logger.error("Failed to drop in-flight messages", e);
+                DataServiceImpl.this.disconnectDataTransportAndLog(e);
+            }
+        }
+
     }
 
     @Override

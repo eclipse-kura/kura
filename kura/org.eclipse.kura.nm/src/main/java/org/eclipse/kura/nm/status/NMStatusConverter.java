@@ -146,7 +146,7 @@ public class NMStatusConverter {
             String hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_HW_ADDRESS);
             builder.withHardwareAddress(getMacAddressBytes(hwAddress));
         } catch (DBusExecutionException e) {
-            logger.debug("NetworkManager version equal or lower then 1.24 detected.");
+            logger.debug("NetworkManager version lower then 1.24 detected.");
             switch (devicePropertiesWrapper.getDeviceType()) {
             case NM_DEVICE_TYPE_ETHERNET:
                 builder.withHardwareAddress(getMacAddressBytes(

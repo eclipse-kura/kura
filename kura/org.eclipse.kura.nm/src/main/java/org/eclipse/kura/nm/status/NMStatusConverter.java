@@ -64,7 +64,7 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_WIRED_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wired";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
-    private static final String NM_HW_ADDRESS = "HwAddress";
+    private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
 
     private static final String NM_DEVICE_PROPERTY_STATE = "State";
 
@@ -143,18 +143,18 @@ public class NMStatusConverter {
         builder.withMtu(mtu.intValue());
 
         try {
-            String hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_HW_ADDRESS);
+            String hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
             builder.withHardwareAddress(getMacAddressBytes(hwAddress));
         } catch (DBusExecutionException e) {
             logger.debug("NetworkManager version lower then 1.24 detected.");
             switch (devicePropertiesWrapper.getDeviceType()) {
             case NM_DEVICE_TYPE_ETHERNET:
                 builder.withHardwareAddress(getMacAddressBytes(
-                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, NM_HW_ADDRESS)));
+                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS)));
                 break;
             case NM_DEVICE_TYPE_WIFI:
                 builder.withHardwareAddress(getMacAddressBytes(
-                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_HW_ADDRESS)));
+                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS)));
                 break;
             case NM_DEVICE_TYPE_GENERIC:
             case NM_DEVICE_TYPE_LOOPBACK:
@@ -245,7 +245,7 @@ public class NMStatusConverter {
         NM80211Mode mode = NM80211Mode.fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Mode"));
         builder.withMode(wifiModeConvert(mode));
 
-        String rawHwAddress = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, NM_HW_ADDRESS);
+        String rawHwAddress = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         builder.withHardwareAddress(getMacAddressBytes(rawHwAddress));
 
         UInt32 uintFrequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");

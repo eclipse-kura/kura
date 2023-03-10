@@ -334,6 +334,7 @@ public class DataServiceImplTest {
 
         MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
         MessageStore messageStoreMock = mock(MessageStore.class);
+        DataTransportService dataTransportServiceMock = mock(DataTransportService.class);
         initMockMessageStore(messageStoreProviderMock, messageStoreMock);
 
         doThrow(new KuraStoreException("test")).when(messageStoreMock).unpublishAllInFlighMessages();
@@ -353,6 +354,7 @@ public class DataServiceImplTest {
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
         svc.setMessageStoreProvider(messageStoreProviderMock);
+        svc.setDataTransportService(dataTransportServiceMock);
         svc.onConnectionEstablished(true);
 
         verify(ccssMock, times(1)).updateStatus(svc, CloudConnectionStatusEnum.ON);

@@ -47,7 +47,7 @@ import org.eclipse.kura.watchdog.WatchdogService;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -61,7 +61,7 @@ public class DataServiceImplTest {
     public void cleanUp() {
         this.dataServiceImpl = null;
         this.dataTransportServiceMock = null;
-        this.properties = Collections.emptyMap();
+        this.properties = new HashMap<>();
     }
 
     @Test
@@ -102,8 +102,8 @@ public class DataServiceImplTest {
     private void givenDataTrasportServiceConnected() {
         this.dataTransportServiceMock = mock(DataTransportService.class);
         try {
-            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", dataTransportServiceMock);
-            when(dataTransportServiceMock.isConnected()).thenReturn(true);
+            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", this.dataTransportServiceMock);
+            when(this.dataTransportServiceMock.isConnected()).thenReturn(true);
         } catch (NoSuchFieldException e) {
             fail(e.getMessage());
         }
@@ -112,8 +112,8 @@ public class DataServiceImplTest {
     private void givenDataTrasportServiceDisconnected() {
         this.dataTransportServiceMock = mock(DataTransportService.class);
         try {
-            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", dataTransportServiceMock);
-            when(dataTransportServiceMock.isConnected()).thenReturn(false);
+            TestUtil.setFieldValue(this.dataServiceImpl, "dataTransportService", this.dataTransportServiceMock);
+            when(this.dataTransportServiceMock.isConnected()).thenReturn(false);
         } catch (NoSuchFieldException e) {
             fail(e.getMessage());
         }
@@ -127,10 +127,12 @@ public class DataServiceImplTest {
             MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
             MessageStore messageStoreMock = mock(MessageStore.class);
             CloudConnectionStatusService ccssMock = mock(CloudConnectionStatusService.class);
+            WatchdogService watchdogServiceMock = mock(WatchdogService.class);
             initMockMessageStore(messageStoreProviderMock, messageStoreMock);
             TestUtil.setFieldValue(this.dataServiceImpl, "dataServiceOptions", dataServiceOptions);
             this.dataServiceImpl.setMessageStoreProvider(messageStoreProviderMock);
             this.dataServiceImpl.setCloudConnectionStatusService(ccssMock);
+            this.dataServiceImpl.setWatchdogService(watchdogServiceMock);
         } catch (NoSuchFieldException | KuraStoreException e) {
             fail(e.getMessage());
         }
@@ -158,7 +160,7 @@ public class DataServiceImplTest {
     }
 
     private void thenStartConnectionTaskIsInvoked() {
-        verify(this.dataServiceImpl, times(1)).startConnectionTask();
+        verify(this.dataServiceImpl, times(2)).startConnectionTask();
     }
 
     @Test
@@ -257,6 +259,7 @@ public class DataServiceImplTest {
 
         MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
         MessageStore messageStoreMock = mock(MessageStore.class);
+        DataTransportService dataTransportServiceMock = mock(DataTransportService.class);
         initMockMessageStore(messageStoreProviderMock, messageStoreMock);
 
         doThrow(new KuraStoreException("test")).when(messageStoreMock).dropAllInFlightMessages();
@@ -275,6 +278,7 @@ public class DataServiceImplTest {
         Map<DataTransportToken, Integer> inFlightMsgIds = mock(Map.class);
         TestUtil.setFieldValue(svc, "inFlightMsgIds", inFlightMsgIds);
 
+        svc.setDataTransportService(dataTransportServiceMock);
         svc.setMessageStoreProvider(messageStoreProviderMock);
         svc.onConnectionEstablished(true);
 
@@ -535,6 +539,7 @@ public class DataServiceImplTest {
 
         MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
         MessageStore messageStoreMock = mock(MessageStore.class);
+        DataTransportService dataTransportServiceMock = mock(DataTransportService.class);
         initMockMessageStore(messageStoreProviderMock, messageStoreMock);
 
         doThrow(new KuraStoreException("test")).when(messageStoreMock).markAsConfirmed(msgId);
@@ -544,6 +549,7 @@ public class DataServiceImplTest {
         DataServiceOptions dataServiceOptions = new DataServiceOptions(properties);
 
         TestUtil.setFieldValue(svc, "dataServiceOptions", dataServiceOptions);
+        svc.setDataTransportService(dataTransportServiceMock);
 
         svc.setMessageStoreProvider(messageStoreProviderMock);
 
@@ -676,7 +682,7 @@ public class DataServiceImplTest {
             final MessageStore messageStoreMock, List<StoredMessage> unpublished,
             List<StoredMessage> inFlight, List<StoredMessage> dropped) throws KuraStoreException {
 
-        when(messageStoreProviderMock.openMessageStore(Mockito.any())).thenReturn(messageStoreMock);
+        when(messageStoreProviderMock.openMessageStore(ArgumentMatchers.any())).thenReturn(messageStoreMock);
 
         when(messageStoreMock.getUnpublishedMessages()).thenReturn(unpublished);
         when(messageStoreMock.getInFlightMessages()).thenReturn(inFlight);

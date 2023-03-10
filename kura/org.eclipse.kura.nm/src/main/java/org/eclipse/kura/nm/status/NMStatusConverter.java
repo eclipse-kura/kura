@@ -150,29 +150,28 @@ public class NMStatusConverter {
 
     private static String getHwAddressFrom(DevicePropertiesWrapper devicePropertiesWrapper) {
         try {
-            return devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME,
-                    NM_DEVICE_PROPERTY_HW_ADDRESS);
+            return devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         } catch (DBusExecutionException e) {
-            
             logger.debug("NetworkManager version lower then 1.24 detected.");
-            if (!devicePropertiesWrapper.getDeviceSpecificProperties().isPresent()) {
-                logger.debug("No device specific properties provided. Assuming Loopback. Setting HW Address to blank.");
-                return EMPTY_MAC_ADDRESS;
-            }
-            
-            switch (devicePropertiesWrapper.getDeviceType()) {
-            case NM_DEVICE_TYPE_ETHERNET:
-                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRED_BUS_NAME,
-                        NM_DEVICE_PROPERTY_HW_ADDRESS);
-            case NM_DEVICE_TYPE_WIFI:
-                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRELESS_BUS_NAME,
-                        NM_DEVICE_PROPERTY_HW_ADDRESS);
-            case NM_DEVICE_TYPE_GENERIC:
-            case NM_DEVICE_TYPE_LOOPBACK:
-            default:
-                logger.debug("Setting HW Address to blank.");
-                return EMPTY_MAC_ADDRESS;
-            }
+        }
+        
+        if (!devicePropertiesWrapper.getDeviceSpecificProperties().isPresent()) {
+            logger.debug("No device specific properties provided. Assuming Loopback. Setting HW Address to blank.");
+            return EMPTY_MAC_ADDRESS;
+        }
+
+        switch (devicePropertiesWrapper.getDeviceType()) {
+        case NM_DEVICE_TYPE_ETHERNET:
+            return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRED_BUS_NAME,
+                    NM_DEVICE_PROPERTY_HW_ADDRESS);
+        case NM_DEVICE_TYPE_WIFI:
+            return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                    NM_DEVICE_PROPERTY_HW_ADDRESS);
+        case NM_DEVICE_TYPE_GENERIC:
+        case NM_DEVICE_TYPE_LOOPBACK:
+        default:
+            logger.debug("Setting HW Address to blank.");
+            return EMPTY_MAC_ADDRESS;
         }
     }
 

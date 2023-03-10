@@ -141,29 +141,34 @@ public class NMStatusConverter {
 
         UInt32 mtu = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "Mtu");
         builder.withMtu(mtu.intValue());
-
+        
+        String hwAddress = getHwAddressFrom(devicePropertiesWrapper); 
+        builder.withHardwareAddress(getMacAddressBytes(hwAddress));
+        
+    }
+    
+    private static String getHwAddressFrom(DevicePropertiesWrapper devicePropertiesWrapper) {
+        String hwAddress = "00:00:00:00:00:00";
         try {
-            String hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
-            builder.withHardwareAddress(getMacAddressBytes(hwAddress));
+            hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         } catch (DBusExecutionException e) {
             logger.debug("NetworkManager version lower then 1.24 detected.");
             switch (devicePropertiesWrapper.getDeviceType()) {
             case NM_DEVICE_TYPE_ETHERNET:
-                builder.withHardwareAddress(getMacAddressBytes(
-                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS)));
+                hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
                 break;
             case NM_DEVICE_TYPE_WIFI:
-                builder.withHardwareAddress(getMacAddressBytes(
-                        devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS)));
+                hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
                 break;
             case NM_DEVICE_TYPE_GENERIC:
             case NM_DEVICE_TYPE_LOOPBACK:
             default:
                 logger.debug("Setting HW Address to blank.");
                 break;
-
             }
         }
+        
+        return hwAddress;
     }
 
     private static void setIP4Status(NetworkInterfaceStatusBuilder<?> builder,

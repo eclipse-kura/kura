@@ -305,13 +305,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
 
             H2DbServiceOptions newConfiguration = new H2DbServiceOptions(properties);
 
-            if (this.configuration != null) {
-                final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
-                final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
-                if (urlChanged || userChanged) {
-                    shutdownDb();
-                }
-            }
+            shutdownIfUrlOrUserChanged(newConfiguration);
 
             if (newConfiguration.isRemote()) {
                 throw new IllegalArgumentException("Remote databases are not supported");
@@ -368,6 +362,16 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         } finally {
             lock.unlock();
             this.pendingUpdates.decrementAndGet();
+        }
+    }
+
+    private void shutdownIfUrlOrUserChanged(H2DbServiceOptions newConfiguration) throws SQLException {
+        if (this.configuration != null) {
+            final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
+            final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
+            if (urlChanged || userChanged) {
+                shutdownDb();
+            }
         }
     }
 

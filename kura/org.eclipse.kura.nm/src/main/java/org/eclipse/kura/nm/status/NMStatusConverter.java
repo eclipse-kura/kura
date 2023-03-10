@@ -65,6 +65,7 @@ public class NMStatusConverter {
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
     private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
+    private static final String EMPTY_MAC_ADDRESS = "00:00:00:00:00:00";
 
     private static final String NM_DEVICE_PROPERTY_STATE = "State";
 
@@ -141,34 +142,38 @@ public class NMStatusConverter {
 
         UInt32 mtu = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, "Mtu");
         builder.withMtu(mtu.intValue());
-        
-        String hwAddress = getHwAddressFrom(devicePropertiesWrapper); 
+
+        String hwAddress = getHwAddressFrom(devicePropertiesWrapper);
         builder.withHardwareAddress(getMacAddressBytes(hwAddress));
-        
+
     }
-    
+
     private static String getHwAddressFrom(DevicePropertiesWrapper devicePropertiesWrapper) {
-        String hwAddress = "00:00:00:00:00:00";
         try {
-            hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
+            return devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME,
+                    NM_DEVICE_PROPERTY_HW_ADDRESS);
         } catch (DBusExecutionException e) {
+            
             logger.debug("NetworkManager version lower then 1.24 detected.");
+            if (!devicePropertiesWrapper.getDeviceSpecificProperties().isPresent()) {
+                logger.debug("No device specific properties provided. Assuming Loopback. Setting HW Address to blank.");
+                return EMPTY_MAC_ADDRESS;
+            }
+            
             switch (devicePropertiesWrapper.getDeviceType()) {
             case NM_DEVICE_TYPE_ETHERNET:
-                hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
-                break;
+                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRED_BUS_NAME,
+                        NM_DEVICE_PROPERTY_HW_ADDRESS);
             case NM_DEVICE_TYPE_WIFI:
-                hwAddress = devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
-                break;
+                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                        NM_DEVICE_PROPERTY_HW_ADDRESS);
             case NM_DEVICE_TYPE_GENERIC:
             case NM_DEVICE_TYPE_LOOPBACK:
             default:
                 logger.debug("Setting HW Address to blank.");
-                break;
+                return EMPTY_MAC_ADDRESS;
             }
         }
-        
-        return hwAddress;
     }
 
     private static void setIP4Status(NetworkInterfaceStatusBuilder<?> builder,

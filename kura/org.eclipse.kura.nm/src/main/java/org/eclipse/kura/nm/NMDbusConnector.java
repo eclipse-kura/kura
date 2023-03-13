@@ -418,9 +418,22 @@ public class NMDbusConnector {
         return deviceType;
     }
 
-    private String getDeviceInterface(Device device) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                Properties.class);
+    public List<String> getManagedDevices() {
+        if (Objects.isNull(this.cachedConfiguration)) {
+            return Arrays.asList();
+        }
+
+        NetworkProperties properties = new NetworkProperties(this.cachedConfiguration);
+
+        return properties.getStringList("net.interfaces");
+    }
+
+    public String getDeviceInterface(Device device) throws DBusException {
+        return getDeviceInterface(device.getObjectPath());
+    }
+
+    public String getDeviceInterface(String dbusPath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
 
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }

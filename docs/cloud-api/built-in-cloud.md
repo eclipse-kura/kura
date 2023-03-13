@@ -38,30 +38,6 @@ The CloudService provides the following configuration parameters:
 - `birth.cert.policy` - specify the birth certificate policy. The options are _Disable publishing_, _Publish birth on connect_ and _Publish birth on connect and reconnect_.
 - `payload.encoding` - Specify the message payload encoding. The possible options are _Kura Protobuf_ and _Simple JSON_.
 
-## DataService
-
-The DataService provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. The DataService delegates to the MqttDataTransport service the implementation of the transport protocol that is used to interact with the remote server.
-
-The DataService also adds the capability of storing published messages in a persistent store function and sending them over the wire at a later time. The purpose of this feature is to relieve service users from implementing their own persistent store. Service users may publish messages independently on the DataService connection status.
-
-In order to overcome the potential latencies introduced by buffering messages, the DataService allows a priority level to be assigned for each published message. Depending on the store configuration, there are certain guarantees that stored messages are not lost due to sudden crashes or power outages.
-
-To use this service, select the **DataService** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.
-
-![](images/dataService.png){ style="border-radius: 7px;"}
-
-The DataService offers methods and configuration options to manage the connection to the remote server including the following (all required) parameters described below.
-
-- `connect.auto-on-startup` - when set to true, the service tries to auto-connect to the remote server on start-up and restore the connection every time the device is disconnected. These attempts are made at the frequency defined in the _connect.retry-interval_ parameter until the connection is established.
-- `disconnect.quiesce-timeout` - allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.
-- `store.housekeeper-interval` - defines the interval in seconds used to run the Data Store housekeeper task.
-- `store.purge-age` - defines the age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (minimum 5).
-- `store.capacity` - defines the maximum number of messages persisted in the Data Store.
-- `in-flight-messages` parameters - define the management of messages that have been published and not yet confirmed, including:
-  - `in-flight-messages.republish-on-new-session`
-  - `in-flight-messages.max-number`
-  - `in-flight-messages.congestion-timeout`
-
 ## MqttDataTransport
 
 The MqttDataTransport service provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. To use this service, select the **MqttDataTransport** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.

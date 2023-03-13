@@ -62,6 +62,9 @@ public class NMSettingsConverter {
                     .build80211WirelessSecuritySettings(properties, iface);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
             newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, iface);
+            newConnectionSettings.put("gsm", gsmSettingsMap);
         }
 
         return newConnectionSettings;
@@ -185,6 +188,24 @@ public class NMSettingsConverter {
         return settings;
     }
 
+    public static Map<String, Variant<?>> buildGsmSettings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        String apn = props.get(Password.class, "net.interface.%s.config.apn", iface).toString();
+        settings.put("apn", new Variant<>(apn));
+
+        Optional<String> username = props.getOpt(String.class, "net.interface.%s.config.username", iface);
+        username.ifPresent(usernameString -> settings.put("username", new Variant<>(usernameString)));
+
+        Optional<Password> password = props.getOpt(Password.class, "net.interface.%s.config.password", iface);
+        password.ifPresent(passwordString -> settings.put("password", new Variant<>(passwordString.toString())));
+
+        Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", iface);
+        number.ifPresent(numberString -> settings.put("number", new Variant<>(numberString)));
+
+        return settings;
+    }
+
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
@@ -300,6 +321,8 @@ public class NMSettingsConverter {
             return "802-3-ethernet";
         case NM_DEVICE_TYPE_WIFI:
             return "802-11-wireless";
+        case NM_DEVICE_TYPE_MODEM:
+            return "gsm";
         // ... WIP
         default:
             throw new IllegalArgumentException(String

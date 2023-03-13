@@ -147,7 +147,7 @@ public class NMDbusConnector {
 
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName, NetworkService networkService,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
-        Device device = getDeviceByIpIface(interfaceName);
+        Device device = getDeviceByInterface(interfaceName);
         NMDeviceType deviceType = getDeviceType(device);
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
@@ -246,7 +246,7 @@ public class NMDbusConnector {
 
     private synchronized void manageConfiguredInterface(String iface, NetworkProperties properties)
             throws DBusException {
-        Device device = getDeviceByIpIface(iface);
+        Device device = getDeviceByInterface(iface);
         NMDeviceType deviceType = getDeviceType(device);
 
         KuraIpStatus ip4Status = KuraIpStatus
@@ -302,7 +302,7 @@ public class NMDbusConnector {
             List<Device> availableInterfaces) throws DBusException {
         for (Device device : availableInterfaces) {
             NMDeviceType deviceType = getDeviceType(device);
-            String ipInterface = getDeviceIpInterface(device);
+            String ipInterface = getDeviceInterface(device);
 
             if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
                 logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
@@ -418,16 +418,28 @@ public class NMDbusConnector {
         return deviceType;
     }
 
-    private String getDeviceIpInterface(Device device) throws DBusException {
+    private String getDeviceInterface(Device device) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }
 
-    private Device getDeviceByIpIface(String iface) throws DBusException {
-        DBusPath ifaceDevicePath = this.nm.GetDeviceByIpIface(iface);
-        return this.dbusConnection.getRemoteObject(NM_BUS_NAME, ifaceDevicePath.getPath(), Device.class);
+    private Device getDeviceByInterface(String iface) throws DBusException {
+        List<DBusPath> devicePaths = this.nm.GetAllDevices();
+
+        for (DBusPath devicePath : devicePaths) {
+            Properties deviceProp = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath.getPath(),
+                    Properties.class);
+
+            String interfaceName = deviceProp.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+
+            if (interfaceName.equals(iface)) {
+                return this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath.getPath(), Device.class);
+            }
+        }
+
+        throw new IllegalArgumentException(String.format("Device \"%s\" does not exists", iface));
     }
 
     private Optional<Connection> getAppliedConnection(Device dev) throws DBusException {

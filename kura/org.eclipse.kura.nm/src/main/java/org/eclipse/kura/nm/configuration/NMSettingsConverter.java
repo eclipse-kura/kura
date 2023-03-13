@@ -191,7 +191,7 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> buildGsmSettings(NetworkProperties props, String iface) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String apn = props.get(Password.class, "net.interface.%s.config.apn", iface).toString();
+        String apn = props.get(String.class, "net.interface.%s.config.apn", iface);
         settings.put("apn", new Variant<>(apn));
 
         Optional<String> username = props.getOpt(String.class, "net.interface.%s.config.username", iface);

@@ -64,7 +64,9 @@ public class NMSettingsConverter {
             newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, iface);
+            Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, iface);
             newConnectionSettings.put("gsm", gsmSettingsMap);
+            newConnectionSettings.put("ppp", pppSettingsMap);
         }
 
         return newConnectionSettings;
@@ -206,6 +208,21 @@ public class NMSettingsConverter {
         return settings;
     }
 
+    public static Map<String, Variant<?>> buildPPPSettings(NetworkProperties props, String iface) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        Optional<Integer> lcpEchoInterval = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoInterval",
+                iface);
+        lcpEchoInterval.ifPresent(interval -> settings.put("lcp-echo-interval", new Variant<>(interval)));
+        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure", iface);
+        lcpEchoFailure.ifPresent(failure -> settings.put("lcp-echo-failure", new Variant<>(failure)));
+
+        Optional<String> authType = props.getOpt(String.class, "net.interface.%s.config.authType", iface);
+        authType.ifPresent(authenticationType -> setAuthenticationType(authenticationType, settings));
+
+        return settings;
+    }
+
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
@@ -234,6 +251,35 @@ public class NMSettingsConverter {
         connectionMap.put("interface-name", new Variant<>(iface));
 
         return connectionMap;
+    }
+
+    private static void setAuthenticationType(String authenticationType, Map<String, Variant<?>> settings) {
+        if (authenticationType.equals("AUTO")) {
+            return;
+        }
+
+        if (authenticationType.equals("NONE")) {
+            settings.put("refuse-eap", new Variant<>(true));
+            settings.put("refuse-chap", new Variant<>(true));
+            settings.put("refuse-pap", new Variant<>(true));
+            settings.put("refuse-mschap", new Variant<>(true));
+            settings.put("refuse-mschapv2", new Variant<>(true));
+        } else if (authenticationType.equals("CHAP")) {
+            settings.put("refuse-eap", new Variant<>(true));
+            settings.put("refuse-chap", new Variant<>(false));
+            settings.put("refuse-pap", new Variant<>(true));
+            settings.put("refuse-mschap", new Variant<>(true));
+            settings.put("refuse-mschapv2", new Variant<>(true));
+        } else if (authenticationType.equals("PAP")) {
+            settings.put("refuse-eap", new Variant<>(true));
+            settings.put("refuse-chap", new Variant<>(true));
+            settings.put("refuse-pap", new Variant<>(false));
+            settings.put("refuse-mschap", new Variant<>(true));
+            settings.put("refuse-mschapv2", new Variant<>(true));
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported PPP authentication method: \"%s\"", authenticationType));
+        }
     }
 
     private static List<UInt32> convertIp4(List<String> ipAddrList) {

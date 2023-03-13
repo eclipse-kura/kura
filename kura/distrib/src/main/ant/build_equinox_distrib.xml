@@ -287,11 +287,6 @@
         <!-- Set web UI port -->
         <antcall target="set-http-port" />
 
-        <!-- Copy selinux policy change -->
-        <copy file="src/main/resources/${build.name}/selinuxKura.pp"
-            tofile="${project.build.directory}/${build.output.name}/selinuxKura.pp"
-            failonerror="false" />
-
         <!-- Create the Kura start scripts -->
         <echo file="${project.build.directory}/${build.output.name}/start_kura.sh"
             append="false"><![CDATA[#!/bin/sh

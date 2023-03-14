@@ -41,7 +41,8 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED;
         boolean deviceIsConnectingToANewNetwork = newState == NMDeviceState.NM_DEVICE_STATE_CONFIG;
 
-        if (deviceIsConnectingToANewNetwork || deviceDisconnectedBecauseOfConfigurationEvent) {
+        if (deviceIsManaged(s.getPath())
+                && (deviceIsConnectingToANewNetwork || deviceDisconnectedBecauseOfConfigurationEvent)) {
             try {
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());
                 nm.apply();
@@ -50,5 +51,18 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
                         s.getPath(), e);
             }
         }
+    }
+
+    private boolean deviceIsManaged(String path) {
+        try {
+            String deviceIface = nm.getDeviceIpInterface(path);
+
+            return nm.getManagedDevices().contains(deviceIface);
+        } catch (DBusException e) {
+            logger.warn(
+                    "Could not retrieve interface name from device \"{}\". Triggering configuration roll-back. Caused by:",
+                    path, e);
+        }
+        return true;
     }
 }

@@ -607,7 +607,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 setBandFromRadioMode(radioModeValue);
             } else {
                 for (int i = 0; i < this.radio.getItemCount(); i++) {
-                    if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))) {
+                    if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))
+                            || this.radio.getItemText(i).equals(radioModeValue)) {
                         this.radio.setSelectedIndex(i);
                         break;
                     }

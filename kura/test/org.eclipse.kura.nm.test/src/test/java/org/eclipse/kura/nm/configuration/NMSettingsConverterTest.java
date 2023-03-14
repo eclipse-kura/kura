@@ -403,6 +403,94 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildPPPSettingsShouldNotThrowWithEmptyMap() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+    }
+
+    @Test
+    public void buildPPPSettingsShouldWorkWhenGivenOptionalLcpParameters() {
+        givenMapWith("net.interface.ttyACM0.config.lcpEchoInterval", 30);
+        givenMapWith("net.interface.ttyACM0.config.lcpEchoFailure", 5);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("lcp-echo-interval", 30);
+        thenResultingMapContains("lcp-echo-failure", 5);
+    }
+
+    @Test
+    public void buildPPPSettingsShouldWorkWithAuthTypeAuto() {
+        givenMapWith("net.interface.ttyACM0.config.authType", "AUTO");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        // TODO
+    }
+
+    @Test
+    public void buildPPPSettingsShouldWorkWithAuthTypeNone() {
+        givenMapWith("net.interface.ttyACM0.config.authType", "NONE");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("refuse-eap", true);
+        thenResultingMapContains("refuse-chap", true);
+        thenResultingMapContains("refuse-pap", true);
+        thenResultingMapContains("refuse-mschap", true);
+        thenResultingMapContains("refuse-mschapv2", true);
+    }
+
+    @Test
+    public void buildPPPSettingsShouldWorkWithAuthTypeChap() {
+        givenMapWith("net.interface.ttyACM0.config.authType", "CHAP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("refuse-eap", true);
+        thenResultingMapContains("refuse-chap", false);
+        thenResultingMapContains("refuse-pap", true);
+        thenResultingMapContains("refuse-mschap", true);
+        thenResultingMapContains("refuse-mschapv2", true);
+    }
+
+    @Test
+    public void buildPPPSettingsShouldWorkWithAuthTypePap() {
+        givenMapWith("net.interface.ttyACM0.config.authType", "PAP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("refuse-eap", true);
+        thenResultingMapContains("refuse-chap", true);
+        thenResultingMapContains("refuse-pap", false);
+        thenResultingMapContains("refuse-mschap", true);
+        thenResultingMapContains("refuse-mschapv2", true);
+    }
+
+    @Test
+    public void buildPPPSettingsShouldThrowWithUnsupportedAuthType() {
+        givenMapWith("net.interface.ttyACM0.config.authType", "ROFL");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
     public void buildConnectionSettingsShouldWorkWithWifi() {
         whenBuildConnectionSettings(Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
@@ -976,6 +1064,18 @@ public class NMSettingsConverterTest {
     private void whenBuildGsmSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildGsmSettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+
+    private void whenBuildPPPSettingsIsRunWith(NetworkProperties props, String iface) {
+        try {
+            this.resultMap = NMSettingsConverter.buildPPPSettings(props, iface);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

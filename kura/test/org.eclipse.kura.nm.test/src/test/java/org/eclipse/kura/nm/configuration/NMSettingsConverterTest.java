@@ -371,6 +371,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("type", "802-11-wireless");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test
@@ -379,6 +380,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("type", "802-3-ethernet");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test
@@ -398,6 +400,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("test", "test");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test

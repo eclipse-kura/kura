@@ -21,7 +21,6 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.data.DataServiceOptions;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +34,7 @@ public class MessageStoreState {
     private Optional<MessageStore> messageStore = Optional.empty();
     private Optional<ScheduledExecutorService> houseKeeperExecutor = Optional.empty();
 
-    public MessageStoreState(final MessageStoreProvider messageStoreProvider,
-            final ConnectionListener connectionListener, final DataServiceOptions options) {
+    public MessageStoreState(final MessageStoreProvider messageStoreProvider, final DataServiceOptions options) {
 
         this.messageStoreProvider = messageStoreProvider;
 

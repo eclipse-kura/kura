@@ -16,10 +16,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DoubleValue;
@@ -36,14 +34,6 @@ import org.eclipse.kura.util.wire.store.JdbcWireRecordStoreQueries;
 public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
 
     private static final Map<Class<? extends TypedValue<?>>, String> TYPE_MAPPING = buildTypeMapping();
-
-    public H2DbWireRecordStoreImpl(ConnectionProvider provider, String tableName, Set<ConnectionListener> listeners)
-            throws KuraStoreException {
-        super(provider, tableName, listeners);
-
-        super.createTable();
-        super.createTimestampIndex();
-    }
 
     public H2DbWireRecordStoreImpl(final ConnectionProvider provider, final String tableName)
             throws KuraStoreException {
@@ -67,8 +57,8 @@ public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
                 .withSqlInsertRecord("INSERT INTO " + super.escapedTableName + " ({0}) VALUES ({1});")
                 .withSqlTruncateTable("TRUNCATE TABLE " + super.escapedTableName + ";")
                 .withSqlCreateTimestampIndex(
-                        "CREATE INDEX IF NOT EXISTS " + super.escapeIdentifier(tableName + "_TIMESTAMP") + " ON "
-                                + super.escapedTableName + " (TIMESTAMP DESC);")
+                        "CREATE INDEX IF NOT EXISTS " + super.escapeIdentifier(tableName + "_TIMESTAMP")
+                                + " ON " + super.escapedTableName + " (TIMESTAMP DESC);")
                 .build();
     }
 
@@ -89,10 +79,6 @@ public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
         result.put(ByteArrayValue.class, "BLOB");
 
         return Collections.unmodifiableMap(result);
-    }
-
-    private Optional<String> getJdbcType(final TypedValue<?> value) {
-        return Optional.ofNullable(value).flatMap(v -> Optional.ofNullable(TYPE_MAPPING.get(v.getClass())));
     }
 
 }

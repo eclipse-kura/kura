@@ -13,12 +13,14 @@
 
 package org.eclipse.kura.store.listener;
 
+import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Listener interface to be implemented by applications that needs to be notified about connection events in the
- * {@link MessageStore}.
- * All registered listeners are called synchronously by the {@link MessageStore} implementation at the occurrence of the
+ * {@link MessageStoreProvider} and {@link WireRecordStoreProvider}.
+ * All registered listeners are called sequentially by the implementations at the occurrence of the
  * event.
  *
  * @since 2.5.0
@@ -27,12 +29,14 @@ import org.osgi.annotation.versioning.ConsumerType;
 public interface ConnectionListener {
 
     /**
-     * Notifies the listener that the connection to the {@link MessageStore} has been established.
+     * Notifies the listener that the connection to the {@link MessageStoreProvider} or {@link WireRecordStoreProvider}
+     * has been established.
      */
     public void connected();
 
     /**
-     * Notifies the listener that the connection to the {@link MessageStore} has been closed.
+     * Notifies the listener that the connection to the {@link MessageStoreProvider} or {@link WireRecordStoreProvider}
+     * has been closed.
      */
     public void disconnected();
 }

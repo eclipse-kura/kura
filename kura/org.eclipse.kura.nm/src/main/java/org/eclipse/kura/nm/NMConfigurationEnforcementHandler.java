@@ -53,15 +53,12 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         }
     }
 
-    private boolean deviceIsManaged(String path) {
+    private boolean deviceIsManaged(String dbusPath) {
         try {
-            String deviceIface = nm.getDeviceIpInterface(path);
-
-            return nm.getManagedDevices().contains(deviceIface);
+            return !nm.deviceIsUnmanaged(dbusPath);
         } catch (DBusException e) {
-            logger.warn(
-                    "Could not retrieve interface name from device \"{}\". Triggering configuration roll-back. Caused by:",
-                    path, e);
+            logger.warn("Could not retrieve device informations for \"{}\", assuming Kura managed. Caused by:",
+                    dbusPath, e);
         }
         return true;
     }

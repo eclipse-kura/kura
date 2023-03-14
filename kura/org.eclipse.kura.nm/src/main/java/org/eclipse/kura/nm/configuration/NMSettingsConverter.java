@@ -199,6 +199,10 @@ public class NMSettingsConverter {
             }
         }
 
+        connectionMap.put("autoconnect-retries", new Variant<>(1)); // Prevent retries on failure to avoid
+                                                                    // triggering the configuration
+                                                                    // enforcement mechanism
+
         return connectionMap;
     }
 

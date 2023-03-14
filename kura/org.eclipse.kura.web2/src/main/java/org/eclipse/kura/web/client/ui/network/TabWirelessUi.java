@@ -516,8 +516,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void changeRadioModeToBand(boolean isNet2) {
-        this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
-        this.labelRadio.setText(MSGS.netWifiBand());
+        if (isNet2) {
+            this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
+            this.labelRadio.setText(MSGS.netWifiBand());
+        }
     }
 
     private void update() {
@@ -607,7 +609,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 setBandFromRadioMode(radioModeValue);
             } else {
                 for (int i = 0; i < this.radio.getItemCount(); i++) {
-                    if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))) {
+                    if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))
+                            || this.radio.getItemText(i).equals(radioModeValue)) {
                         this.radio.setSelectedIndex(i);
                         break;
                     }
@@ -617,11 +620,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void setBandFromRadioMode(String radioModeValue) {
-        boolean isValue5GHz = radioModeValue.equals(WIFI_RADIO_ANAC_MESSAGE);
-        boolean isValue2GHz = radioModeValue.equals(WIFI_RADIO_B_MESSAGE)
-                || radioModeValue.equals(WIFI_RADIO_BG_MESSAGE)
-                || radioModeValue.equals(WIFI_RADIO_BGN_MESSAGE);
-        boolean isValueBoth = radioModeValue.equals(WIFI_RADIO_A_MESSAGE);
+        boolean isValue5GHz = radioModeValue.equals(WIFI_RADIO_ANAC_MESSAGE)
+                || radioModeValue.equals(WIFI_RADIO_A_MESSAGE);
+        boolean isValue2GHz = radioModeValue.equals(WIFI_RADIO_BG_MESSAGE)
+                || radioModeValue.equals(WIFI_RADIO_B_MESSAGE);
+        boolean isValueBoth = radioModeValue.equals(WIFI_RADIO_BGN_MESSAGE);
 
         for (int i = 0; i < this.radio.getItemCount(); i++) {
             String selectedText = this.radio.getItemText(i);
@@ -1827,9 +1830,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 this.radio.addItem(MessageUtils.get(mode.name()));
             }
         } else {
-            this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_B_MESSAGE);
-            this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_ANAC_MESSAGE);
-            this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_A_MESSAGE);
+            this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_BG_MESSAGE);
+            this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_A_MESSAGE);
+            this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_BGN_MESSAGE);
         }
     }
 

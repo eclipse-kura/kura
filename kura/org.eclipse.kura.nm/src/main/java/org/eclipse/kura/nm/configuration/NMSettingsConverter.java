@@ -134,25 +134,56 @@ public class NMSettingsConverter {
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
 
         String mode = wifiModeConvert(propMode);
+        settings.put("mode", new Variant<>(mode));
+
         String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
+        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
+
         String band = wifiBandConvert(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
-        Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
+        String channel = props.get(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
                 propMode.toLowerCase());
+        setRadioSettings(band, channel, settings);
+
         Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", iface,
                 propMode.toLowerCase());
-
-        settings.put("mode", new Variant<>(mode));
-        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
-        settings.put("band", new Variant<>(band));
-        if (channel.isPresent()) {
-            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
-        }
         if (hidden.isPresent()) {
             settings.put("hidden", new Variant<>(hidden.get()));
         }
 
         return settings;
+    }
+
+    private static void setRadioSettings(String band, String channel, Map<String, Variant<?>> settings) {
+        boolean bandIsAuto = band.isEmpty();
+        boolean channelIsAuto = channel.equals("0");
+
+        if (bandIsAuto && channelIsAuto) {
+            // Full auto, don't set anything and let NM do its job
+            return;
+        }
+
+        if (!bandIsAuto && channelIsAuto) {
+            settings.put("band", new Variant<>(band));
+            settings.put("channel", new Variant<>(new UInt32(0)));
+        } else if (bandIsAuto && !channelIsAuto) {
+            String inferredBand = inferBandFrom(channel);
+            settings.put("band", new Variant<>(inferredBand));
+            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel))));
+        } else { // !bandIsAuto && !channelIsAuto
+            settings.put("band", new Variant<>(band));
+            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel))));
+        }
+    }
+
+    private static String inferBandFrom(String channel) {
+        int intChannel = Integer.parseInt(channel);
+
+        if (intChannel < 32) {
+            return "bg";
+        } else {
+            return "a";
+        }
     }
 
     public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String iface) {
@@ -250,6 +281,7 @@ public class NMSettingsConverter {
     }
 
     private static String wifiBandConvert(String kuraBand) {
+        logger.info("Band: {}", kuraBand);
         switch (kuraBand) {
         case "RADIO_MODE_80211a":
         case "RADIO_MODE_80211_AC":
@@ -260,7 +292,7 @@ public class NMSettingsConverter {
         case "RADIO_MODE_80211nHT20":
         case "RADIO_MODE_80211nHT40below":
         case "RADIO_MODE_80211nHT40above":
-            return "bg"; // TBD
+            return ""; // leave empty
         default:
             throw new IllegalArgumentException(String.format("Unsupported WiFi band \"%s\"", kuraBand));
         }

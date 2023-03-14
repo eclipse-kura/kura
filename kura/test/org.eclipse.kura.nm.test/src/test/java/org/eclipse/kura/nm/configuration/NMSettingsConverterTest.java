@@ -366,6 +366,43 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildGsmSettingsShouldThrowWithMissingRequiredArgument() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoSuchElementExceptionThrown();
+    }
+
+    @Test
+    public void buildGsmSettingsShouldWorkWhenGivenExpectedMap() {
+        givenMapWith("net.interface.ttyACM0.config.apn", "mobile.provider.com");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("apn", "mobile.provider.com");
+    }
+
+    @Test
+    public void buildGsmSettingsShouldWorkWhenGivenExpectedMapAndOptionalParameters() {
+        givenMapWith("net.interface.ttyACM0.config.apn", "mobile.provider.com");
+        givenMapWith("net.interface.ttyACM0.config.username", "username");
+        givenMapWith("net.interface.ttyACM0.config.password", new Password("password"));
+        givenMapWith("net.interface.ttyACM0.config.dialString", "unaStringaPerMe");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("apn", "mobile.provider.com");
+        thenResultingMapContains("username", "username");
+        thenResultingMapContains("password", "password");
+        thenResultingMapContains("number", "unaStringaPerMe");
+    }
+
+    @Test
     public void buildConnectionSettingsShouldWorkWithWifi() {
         whenBuildConnectionSettings(Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
@@ -927,6 +964,18 @@ public class NMSettingsConverterTest {
     public void whenBuild80211WirelessSecuritySettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+
+    private void whenBuildGsmSettingsIsRunWith(NetworkProperties props, String iface) {
+        try {
+            this.resultMap = NMSettingsConverter.buildGsmSettings(props, iface);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

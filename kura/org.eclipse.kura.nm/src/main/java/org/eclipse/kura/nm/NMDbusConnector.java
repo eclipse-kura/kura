@@ -139,6 +139,14 @@ public class NMDbusConnector {
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }
 
+    public List<String> getManagedDevices() {
+        if (Objects.isNull(this.cachedConfiguration)) {
+            return Arrays.asList();
+        }
+
+        return new NetworkProperties(this.cachedConfiguration).getStringList("net.interfaces");
+    }
+
     public synchronized List<String> getInterfaces() throws DBusException {
         List<Device> availableDevices = getAllDevices();
 

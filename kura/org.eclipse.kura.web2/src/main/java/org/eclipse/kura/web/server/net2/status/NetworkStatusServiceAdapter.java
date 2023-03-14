@@ -102,6 +102,9 @@ public class NetworkStatusServiceAdapter {
 
         List<GwtWifiChannelFrequency> gwtChannels = new ArrayList<>();
 
+        GwtWifiChannelFrequency autoChannel = new GwtWifiChannelFrequency(0, 0);
+        gwtChannels.add(autoChannel);
+
         for (WifiChannel channel : channels) {
             GwtWifiChannelFrequency gwtChannel = new GwtWifiChannelFrequency(channel.getChannel(),
                     channel.getFrequency());

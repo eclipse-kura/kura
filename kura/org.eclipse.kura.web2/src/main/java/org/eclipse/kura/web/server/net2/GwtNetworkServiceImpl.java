@@ -211,8 +211,10 @@ public class GwtNetworkServiceImpl {
 
             for (GwtWifiChannelFrequency supportedChannel : allSupportedChannels) {
                 boolean channelIsfive5Ghz = supportedChannel.getFrequency() > 2501;
+                boolean isAutomaticChannelSelection = supportedChannel.getFrequency() == 0;
 
-                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz
+                        || isAutomaticChannelSelection) {
                     displayedChannels.add(supportedChannel);
                 }
             }

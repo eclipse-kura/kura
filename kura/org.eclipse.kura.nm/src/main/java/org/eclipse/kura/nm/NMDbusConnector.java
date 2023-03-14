@@ -429,11 +429,8 @@ public class NMDbusConnector {
     }
 
     public String getDeviceInterface(Device device) throws DBusException {
-        return getDeviceInterface(device.getObjectPath());
-    }
-
-    public String getDeviceInterface(String dbusPath) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                Properties.class);
 
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@
  *
  */
 /**
- * Provides APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework.
+ * Provides APIs to acquire and use connections and functionality to different databases running in the framework.
  *
  */
 package org.eclipse.kura.db;

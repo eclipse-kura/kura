@@ -432,7 +432,11 @@ public class NMSettingsConverterTest {
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
 
         thenNoExceptionsHaveBeenThrown();
-        // TODO
+        thenResultingMapNotContains("refuse-eap");
+        thenResultingMapNotContains("refuse-chap");
+        thenResultingMapNotContains("refuse-pap");
+        thenResultingMapNotContains("refuse-mschap");
+        thenResultingMapNotContains("refuse-mschapv2");
     }
 
     @Test

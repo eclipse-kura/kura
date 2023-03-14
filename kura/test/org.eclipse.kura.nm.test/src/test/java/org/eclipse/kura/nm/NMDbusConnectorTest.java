@@ -90,6 +90,7 @@ public class NMDbusConnectorTest {
 
     List<String> internalStringList;
     Map<String, Object> netConfig = new HashMap<>();
+    List<String> managedDevices;
 
     private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"
             + "    (2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
@@ -473,6 +474,49 @@ public class NMDbusConnectorTest {
     }
 
     @Test
+    public void getManagedDevicesShouldReturnEmptyWithEmptyConfigurationCache() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDeviceList();
+
+        whenGetManagedDevicesIsCalled();
+
+        thenNoExceptionIsThrown();
+        thenManagedDevicesSizeIs(0);
+    }
+
+    @Test
+    public void getManagedDevicesShouldWorkAfterConfigurationCacheGetsPopulated() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                true);
+        givenMockedDevice("eth1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0,eth1");
+
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
+
+        givenNetworkConfigMapWith("net.interface.eth1.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
+
+        givenApplyWasCalledOnceWith(this.netConfig);
+
+        whenGetManagedDevicesIsCalled();
+
+        thenNoExceptionIsThrown();
+        thenManagedDevicesSizeIs(2);
+        thenManagedDevicesContaines("eth0");
+        thenManagedDevicesContaines("eth1");
+    }
+
+    @Test
     public void configurationEnforcementShouldNotBeActiveWithEmptyConfigurationCache()
             throws DBusException, IOException {
         givenBasicMockedDbusConnector();
@@ -648,12 +692,12 @@ public class NMDbusConnectorTest {
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             simulateIwCommandOutputs(interfaceName, mockedProperties1);
-        } 
-        
+        }
+
         if (type == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             Wired wiredDevice = mock(Wired.class);
             when(wiredDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
-            
+
             doReturn(wiredDevice).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                     eq("/mock/device/" + interfaceName), eq(Wired.class));
         }
@@ -829,6 +873,10 @@ public class NMDbusConnectorTest {
         }
     }
 
+    private void whenGetManagedDevicesIsCalled() {
+        this.managedDevices = this.instanceNMDbusConnector.getManagedDevices();
+    }
+
     /*
      * Then
      */
@@ -906,6 +954,14 @@ public class NMDbusConnectorTest {
 
     public void thenConfigurationEnforcementIsActive(boolean expectedValue) {
         assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
+    }
+
+    private void thenManagedDevicesSizeIs(int expectedSize) {
+        assertEquals(expectedSize, this.managedDevices.size());
+    }
+
+    private void thenManagedDevicesContaines(String expectedDevice) {
+        assertTrue(this.managedDevices.contains(expectedDevice));
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

@@ -516,8 +516,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void changeRadioModeToBand(boolean isNet2) {
-        this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
-        this.labelRadio.setText(MSGS.netWifiBand());
+        if (isNet2) {
+            this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
+            this.labelRadio.setText(MSGS.netWifiBand());
+        }
     }
 
     private void update() {

@@ -26,7 +26,9 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface MessageStoreProvider {
 
     /**
-     * Opens or creates a {@link MessageStore} instance with the given name.
+     * Opens or creates a {@link MessageStore} instance with the given name. Invoking
+     * this method could allocate the resources required to support the returned {@link MessageStore} instance (for
+     * example tables in a RDBMS).*
      * 
      * @param name
      *            the store name.
@@ -36,7 +38,8 @@ public interface MessageStoreProvider {
     public MessageStore openMessageStore(String name) throws KuraStoreException;
 
     /**
-     * Adds a {@link ConnectionListener}
+     * Adds a {@link ConnectionListener}. A typical behavior of a client of this listener is to close the currently open
+     * {@link MessageStore} instances when a {@link ConnectionListener#disconnected()} event is received.
      *
      * @param listener
      *            to add

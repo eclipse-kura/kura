@@ -37,28 +37,23 @@ public interface MessageStore {
      * the <code>createdOn</code> message parameter to the current time.
      * <br>
      * 
-     * @param topic
-     *            the value of the <code>topic</code> parameter.
-     * @param payload
-     *            topic the value of the <code>payload</code> parameter.
-     * @param qos
-     *            topic the value of the <code>QoS</code> parameter.
-     * @param retain
-     *            topic the value of the <code>retain</code> parameter.
-     * @param priority
-     *            topic the value of the <code>priority</code> parameter.
+     * @param topic    the value of the <code>topic</code> parameter.
+     * @param payload  topic the value of the <code>payload</code> parameter.
+     * @param qos      topic the value of the <code>QoS</code> parameter.
+     * @param retain   topic the value of the <code>retain</code> parameter.
+     * @param priority topic the value of the <code>priority</code> parameter.
      * @return An identifier for the stored message.
      * @throws KuraStoreException
      */
-    public int store(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException;
+    public int store(String topic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraStoreException;
 
     /**
      * Sets the value of the <code>publishedOn</code> parameter to the current time.
      * <br>
      * This method must be used for messages with QoS = 0.
      *
-     * @param msgId
-     *            the message identifier
+     * @param msgId the message identifier
      * @throws KuraStoreException
      */
     public void markAsPublished(int msgId) throws KuraStoreException;
@@ -70,10 +65,8 @@ public interface MessageStore {
      * <br>
      * This method must be used for messages with QoS >= 1.
      *
-     * @param msgId
-     *            the message identifier.
-     * @param dataTransportToken
-     *            the {@link DataTransportToken}.
+     * @param msgId              the message identifier.
+     * @param dataTransportToken the {@link DataTransportToken}.
      * @throws KuraStoreException
      */
     public void markAsPublished(int msgId, DataTransportToken dataTransportToken) throws KuraStoreException;
@@ -83,8 +76,7 @@ public interface MessageStore {
      * <br>
      * This method must be used for messages with QoS >= 1.
      *
-     * @param msgId
-     *            the message identifier.
+     * @param msgId the message identifier.
      * @throws KuraStoreException
      */
     public void markAsConfirmed(int msgId) throws KuraStoreException;
@@ -113,8 +105,7 @@ public interface MessageStore {
     /**
      * Retrieves the message with the given identifier from the store.
      * 
-     * @param msgId
-     *            the message identifier.
+     * @param msgId the message identifier.
      * @return the retrieved message, or empty if there is no message in the store
      *         with the given identifier.
      * @throws KuraStoreException
@@ -215,8 +206,7 @@ public interface MessageStore {
      * past.</li>
      * </ul>
      *
-     * @param purgeAgeSeconds
-     *            the purge age in seconds.
+     * @param purgeAgeSeconds the purge age in seconds.
      * @throws KuraStoreException
      */
     public void deleteStaleMessages(int purgeAgeSeconds) throws KuraStoreException;
@@ -225,5 +215,4 @@ public interface MessageStore {
      * Closes the message store, releasing any runtime resources allocated for it.
      */
     public void close();
-
 }

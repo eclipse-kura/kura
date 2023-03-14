@@ -103,7 +103,8 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
 
             final long result;
 
-            try (PreparedStatement pstmt = c.prepareStatement(this.queries.getSqlStore(), new String[] { "id" })) {
+            try (PreparedStatement pstmt = c.prepareStatement(this.queries.getSqlStore(),
+                    new String[] { "id" })) {
 
                 pstmt.setString(1, topic);
                 pstmt.setInt(2, qos);
@@ -339,5 +340,4 @@ public abstract class AbstractJdbcMessageStoreImpl implements MessageStore {
     protected ConnectionProvider getConnectionProvider() {
         return connectionProvider;
     }
-
 }

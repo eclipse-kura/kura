@@ -328,7 +328,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     public synchronized void setMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
-        this.storeState = Optional.of(new MessageStoreState(messageStoreProvider, this, this.dataServiceOptions));
+        this.storeState = Optional.of(new MessageStoreState(messageStoreProvider, this.dataServiceOptions));
         messageStoreProvider.addListener(this);
         startDbStore();
         signalPublisher();
@@ -572,6 +572,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     private void disconnectDataTransportAndLog(Throwable e) {
+
+        if (e instanceof KuraStoreCapacityReachedException) {
+            return;
+        }
+
         if (this.disconnectionGuard.compareAndSet(false, true)) {
             logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
             this.disconnect();

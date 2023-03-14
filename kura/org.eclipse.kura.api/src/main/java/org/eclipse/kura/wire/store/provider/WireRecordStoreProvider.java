@@ -26,7 +26,9 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface WireRecordStoreProvider {
 
     /**
-     * Opens or creates a {@link WireRecordStore} instance with the given name.
+     * Opens or creates a {@link WireRecordStore} instance with the given name. Invoking
+     * this method could allocate the resources required to support the returned {@link WireRecordStore} instance (for
+     * example tables in a RDBMS).*
      * 
      * @param name
      *            the store name
@@ -36,7 +38,9 @@ public interface WireRecordStoreProvider {
     public WireRecordStore openWireRecordStore(String name) throws KuraStoreException;
 
     /**
-     * Adds a {@link ConnectionListener}
+     * Adds a {@link ConnectionListener}. A typical behavior of a client of this listener is to close the currently
+     * open
+     * {@link WireRecordStore} instances when a {@link ConnectionListener#disconnected()} event is received.
      *
      * @param listener
      *            to add

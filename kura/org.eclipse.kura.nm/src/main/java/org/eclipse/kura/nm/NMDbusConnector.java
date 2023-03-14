@@ -129,22 +129,26 @@ public class NMDbusConnector {
         logger.info("NM Version: {}", nmVersion);
     }
 
-    public String getDeviceIpInterface(Device device) throws DBusException {
-        return getDeviceIpInterface(device.getObjectPath());
-    }
-
-    public String getDeviceIpInterface(String dbusPath) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
-
-        return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
-    }
-
-    public List<String> getManagedDevices() {
+    public boolean deviceIsUnmanaged(String dbusPath) throws DBusException {
         if (Objects.isNull(this.cachedConfiguration)) {
-            return Arrays.asList();
+            return false;
         }
 
-        return new NetworkProperties(this.cachedConfiguration).getStringList("net.interfaces");
+        String ifname = getDeviceIpInterface(dbusPath);
+
+        NetworkProperties properties = new NetworkProperties(this.cachedConfiguration);
+        List<String> managedDevices = properties.getStringList("net.interfaces");
+
+        if (!managedDevices.contains(ifname)) {
+            return false;
+        }
+
+        KuraIpStatus ip4Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", ifname));
+        KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
+
+        return interfaceStatus == KuraInterfaceStatus.UNMANAGED;
     }
 
     public synchronized List<String> getInterfaces() throws DBusException {
@@ -449,6 +453,16 @@ public class NMDbusConnector {
         return deviceType;
     }
 
+    private String getDeviceIpInterface(Device device) throws DBusException {
+        return getDeviceIpInterface(device.getObjectPath());
+    }
+
+    private String getDeviceIpInterface(String dbusPath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
+
+        return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+    }
+
     private Device getDeviceByIpIface(String iface) throws DBusException {
         DBusPath ifaceDevicePath = this.nm.GetDeviceByIpIface(iface);
         return this.dbusConnection.getRemoteObject(NM_BUS_NAME, ifaceDevicePath.getPath(), Device.class);
@@ -485,4 +499,5 @@ public class NMDbusConnector {
         }
         this.configurationEnforcementHandlerIsArmed = false;
     }
+
 }

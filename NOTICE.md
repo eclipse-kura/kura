@@ -197,6 +197,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.graalvm.truffle/truffle-api/21.3.5, UPL-1.0, approved, #6718
 * maven/mavencentral/org.graalvm.regex/regex/21.3.5, UPL-1.0 AND Unicode-TOU, approved, #6719
 * maven/mavencentral/org.graalvm.sdk/launcher-common/21.3.5, UPL-1.0, approved, #6720
+* maven/mavencentral/com.ibm.icu/icu4j/72.1, ICU, approved, #4354
 * maven/mavencentral/com.github.hypfvieh/dbus-java/3.3.2, MIT, approved, CQ23190
 * maven/mavencentral/com.github.jnr/jffi/1.3.9, Apache-2.0 OR LGPL-3.0-or-later, approved, CQ23196
 * maven/mavencentral/com.github.jnr/jnr-a64asm/1.0.0, Apache-2.0, approved, CQ22814

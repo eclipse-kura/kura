@@ -40,6 +40,7 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
                 reason);
 
         boolean deviceDisconnectedBecauseOfConfigurationEvent = oldState != NMDeviceState.NM_DEVICE_STATE_FAILED
+                && oldState != NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED;
         boolean deviceIsConnectingToANewNetwork = newState == NMDeviceState.NM_DEVICE_STATE_CONFIG;
 

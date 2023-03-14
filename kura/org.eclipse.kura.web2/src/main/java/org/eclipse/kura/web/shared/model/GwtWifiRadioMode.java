@@ -15,10 +15,10 @@ package org.eclipse.kura.web.shared.model;
 public enum GwtWifiRadioMode {
 
     netWifiRadioModeANAC("ac", false, true),
-    netWifiRadioModeBGN("n", true, false),
+    netWifiRadioModeBGN("n", true, true),
     netWifiRadioModeBG("g", true, false),
     netWifiRadioModeB("b", true, false),
-    netWifiRadioModeA("a", true, true);
+    netWifiRadioModeA("a", false, true);
 
     private final String radioMode;
     private final boolean twoDotFourGhz;

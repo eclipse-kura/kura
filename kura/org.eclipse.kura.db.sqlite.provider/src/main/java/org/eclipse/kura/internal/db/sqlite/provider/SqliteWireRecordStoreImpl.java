@@ -48,7 +48,7 @@ public class SqliteWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
         return JdbcWireRecordStoreQueries.builder()
                 .withSqlAddColumn("ALTER TABLE " + super.escapedTableName + " ADD COLUMN {0} {1};")
                 .withSqlCreateTable("CREATE TABLE IF NOT EXISTS " + super.escapedTableName
-                        + " (ID INTEGER PRIMARY KEY, TIMESTAMP BIGINT);")
+                        + " (ID INTEGER PRIMARY KEY AUTOINCREMENT, TIMESTAMP BIGINT);")
                 .withSqlRowCount("SELECT COUNT(*) FROM " + super.escapedTableName + ";")
                 .withSqlDeleteRangeTable("DELETE FROM " + super.escapedTableName + " WHERE ID IN (SELECT ID FROM "
                         + super.escapedTableName + " ORDER BY ID ASC LIMIT {0});")

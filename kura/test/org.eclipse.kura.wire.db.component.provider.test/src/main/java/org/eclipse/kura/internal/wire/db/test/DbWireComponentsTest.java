@@ -228,6 +228,19 @@ public class DbWireComponentsTest extends DbComponentsTestBase {
         thenFilterEmitsEnvelopeWithProperty("foo", TypedValues.newIntegerValue(24));
     }
 
+    @Test
+    public void shouldNotResetIdIfTableIsEmpty()
+            throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 1);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(23));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(24));
+
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\";");
+
+        thenEnvelopeRecordCountIs(0, 1);
+        thenFilterEmitsEnvelopeWithProperty("ID", TypedValues.newLongValue(2));
+    }
+
     @Parameters(name = "{0} with {1}")
     public static Collection<Object[]> targets() {
         return Arrays.asList(new Object[][] {

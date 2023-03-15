@@ -13,8 +13,6 @@
 
 package org.eclipse.kura.store.listener;
 
-import org.eclipse.kura.message.store.provider.MessageStoreProvider;
-import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**

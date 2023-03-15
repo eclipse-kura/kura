@@ -92,13 +92,13 @@ public class NMStatusConverter {
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
     private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
-    private static final String EMPTY_MAC_ADDRESS = "00:00:00:00:00:00";
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_BUS_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_BEARER_BUS_NAME = "org.freedesktop.ModemManager1.Bearer";
     private static final String MM_MODEM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
     private static final String MM_MODEM_3GPP_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Modem3gpp";
-    private static final byte[] DEFAULT_MAC = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    private static final String EMPTY_MAC_ADDRESS = "00:00:00:00:00:00";
+    private static final byte[] EMPTY_MAC_ADDRESS_BYTES = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     private static final String STATE = "State";
 
     private NMStatusConverter() {
@@ -173,9 +173,11 @@ public class NMStatusConverter {
     }
 
     public static NetworkInterfaceStatus buildModemStatus(String interfaceName,
-            Properties deviceProperties, Optional<Properties> ip4configProperties, Optional<Properties> modemProperties,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
             List<Properties> simProperties, List<Properties> bearerProperties) {
         ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
+        Properties deviceProperties = devicePropertiesWrapper.getDeviceProperties();
+        Optional<Properties> modemProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
         setModemName(interfaceName, modemProperties, builder);
         setModemInterfaceName(interfaceName, deviceProperties, modemProperties, builder);
         builder.withVirtual(false);
@@ -184,7 +186,7 @@ public class NMStatusConverter {
                 .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, STATE));
         builder.withState(deviceStateConvert(deviceState));
 
-//        setDeviceStatus(builder, deviceProperties);
+        setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
         setModemStatus(builder, modemProperties, simProperties, bearerProperties);
 
@@ -246,18 +248,20 @@ public class NMStatusConverter {
             logger.debug("NetworkManager version lower then 1.24 detected.");
         }
 
-        if (!devicePropertiesWrapper.getDeviceSpecificProperties().isPresent()) {
+        Optional<Properties> specificProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
+        if (!specificProperties.isPresent()) {
             logger.debug("No device specific properties provided. Assuming Loopback. Setting HW Address to blank.");
             return EMPTY_MAC_ADDRESS;
         }
 
         switch (devicePropertiesWrapper.getDeviceType()) {
             case NM_DEVICE_TYPE_ETHERNET:
-                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRED_BUS_NAME,
+                return specificProperties.get().Get(NM_DEVICE_WIRED_BUS_NAME,
                         NM_DEVICE_PROPERTY_HW_ADDRESS);
             case NM_DEVICE_TYPE_WIFI:
-                return devicePropertiesWrapper.getDeviceSpecificProperties().get().Get(NM_DEVICE_WIRELESS_BUS_NAME,
+                return specificProperties.get().Get(NM_DEVICE_WIRELESS_BUS_NAME,
                         NM_DEVICE_PROPERTY_HW_ADDRESS);
+            case NM_DEVICE_TYPE_MODEM:
             case NM_DEVICE_TYPE_GENERIC:
             case NM_DEVICE_TYPE_LOOPBACK:
             default:
@@ -721,7 +725,7 @@ public class NMStatusConverter {
 
     private static byte[] getMacAddressBytes(String macAddress) {
         if (Objects.isNull(macAddress) || macAddress.isEmpty()) {
-            return DEFAULT_MAC;
+            return EMPTY_MAC_ADDRESS_BYTES;
         }
         String[] macAddressParts = macAddress.split(":");
         byte[] macAddressBytes = new byte[6];
@@ -732,11 +736,11 @@ public class NMStatusConverter {
                     macAddressBytes[i] = hex.byteValue();
                 }
             } else {
-                return DEFAULT_MAC;
+                return EMPTY_MAC_ADDRESS_BYTES;
             }
         } catch (NumberFormatException e) {
             logger.warn("Cannot parse Hardware address", e);
-            return DEFAULT_MAC;
+            return EMPTY_MAC_ADDRESS_BYTES;
         }
         return macAddressBytes;
     }

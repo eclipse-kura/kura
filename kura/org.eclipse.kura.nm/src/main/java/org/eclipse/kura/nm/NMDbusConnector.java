@@ -151,8 +151,7 @@ public class NMDbusConnector {
     }
 
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceName,
-            CommandExecutorService commandExecutorService)
-            throws DBusException, KuraException {
+            CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
         Optional<Device> device = getDeviceByInterfaceName(interfaceName);
         if (device.isPresent()) {
@@ -185,16 +184,14 @@ public class NMDbusConnector {
                             Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
                     networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceName,
-                            ethernetPropertiesWrapper,
-                            ip4configProperties);
+                            ethernetPropertiesWrapper, ip4configProperties);
                     break;
                 case NM_DEVICE_TYPE_LOOPBACK:
                     DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                             Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
                     networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceName,
-                            loopbackPropertiesWrapper,
-                            ip4configProperties);
+                            loopbackPropertiesWrapper, ip4configProperties);
                     break;
                 case NM_DEVICE_TYPE_WIFI:
                     networkInterfaceStatus = createWirelessStatus(interfaceName, commandExecutorService, device.get(),
@@ -215,18 +212,20 @@ public class NMDbusConnector {
             Properties deviceProperties, Optional<Properties> ip4configProperties) throws DBusException {
         NetworkInterfaceStatus networkInterfaceStatus;
         Optional<String> modemPath = getModemPath(device.getObjectPath());
-        Optional<Properties> modemProperties = Optional.empty();
+        Optional<Properties> modemDeviceProperties = Optional.empty();
         List<Properties> simProperties = Collections.emptyList();
         List<Properties> bearerProperties = Collections.emptyList();
         if (modemPath.isPresent()) {
-            modemProperties = getModemProperties(modemPath.get());
-            if (modemProperties.isPresent()) {
-                simProperties = getModemSimProperties(modemProperties.get());
-                bearerProperties = getModemBearersProperties(modemPath.get(), modemProperties.get());
+            modemDeviceProperties = getModemProperties(modemPath.get());
+            if (modemDeviceProperties.isPresent()) {
+                simProperties = getModemSimProperties(modemDeviceProperties.get());
+                bearerProperties = getModemBearersProperties(modemPath.get(), modemDeviceProperties.get());
             }
         }
-        networkInterfaceStatus = NMStatusConverter.buildModemStatus(interfaceName, deviceProperties,
-                ip4configProperties, modemProperties, simProperties, bearerProperties);
+        DevicePropertiesWrapper modemPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                modemDeviceProperties, NMDeviceType.NM_DEVICE_TYPE_MODEM);
+        networkInterfaceStatus = NMStatusConverter.buildModemStatus(interfaceName, modemPropertiesWrapper,
+                ip4configProperties, simProperties, bearerProperties);
         return networkInterfaceStatus;
     }
 
@@ -235,8 +234,7 @@ public class NMDbusConnector {
             Optional<Properties> ip4configProperties) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
         Wireless wirelessDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                device.getObjectPath(),
-                Wireless.class);
+                device.getObjectPath(), Wireless.class);
         Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 wirelessDevice.getObjectPath(), Properties.class);
 
@@ -245,7 +243,6 @@ public class NMDbusConnector {
         DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME,
                 "ActiveAccessPoint");
         Optional<Properties> activeAccessPoint = Optional.empty();
-
         String countryCode = IwCapabilityTool.getWifiCountryCode(commandExecutorService);
         List<WifiChannel> supportedChannels = IwCapabilityTool.probeChannels(interfaceName,
                 commandExecutorService);
@@ -253,15 +250,13 @@ public class NMDbusConnector {
         if (!activeAccessPointPath.getPath().equals("/")) {
             activeAccessPoint = Optional.of(this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     activeAccessPointPath.getPath(), Properties.class));
-
-            DevicePropertiesWrapper wirelessPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
-                    Optional.of(wirelessDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_WIFI);
-
-            networkInterfaceStatus = NMStatusConverter.buildWirelessStatus(interfaceName, wirelessPropertiesWrapper,
-                    ip4configProperties,
-                    new AccessPointsProperties(activeAccessPoint, accessPoints),
-                    new SupportedChannelsProperties(countryCode, supportedChannels));
         }
+        DevicePropertiesWrapper wirelessPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                Optional.of(wirelessDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+        networkInterfaceStatus = NMStatusConverter.buildWirelessStatus(interfaceName, wirelessPropertiesWrapper,
+                ip4configProperties, new AccessPointsProperties(activeAccessPoint, accessPoints),
+                new SupportedChannelsProperties(countryCode, supportedChannels));
         return networkInterfaceStatus;
     }
 

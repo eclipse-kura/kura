@@ -497,6 +497,35 @@ public class NMDbusConnectorTest {
         thenModemStatusHasCorrectValues(true, true);
     }
 
+    public void getModemInterfaceStatusWithoutBearersShouldWork() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, false,
+                true);
+        givenMockedDeviceList();
+
+        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
+
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNotNull();
+        thenNetInterfaceTypeIs(NetworkInterfaceType.MODEM);
+        thenModemStatusHasCorrectValues(false, true);
+    }
+
+    @Test
+    public void getModemInterfaceStatusWithoutSimsShouldWork() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
+                false);
+        givenMockedDeviceList();
+
+        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
+
+        thenNoExceptionIsThrown();
+        thenInterfaceStatusIsNotNull();
+        thenNetInterfaceTypeIs(NetworkInterfaceType.MODEM);
+        thenModemStatusHasCorrectValues(true, false);
+    }
+
     @Test
     public void configurationEnforcementShouldNotBeActiveWithEmptyConfigurationCache()
             throws DBusException, IOException {
@@ -605,35 +634,6 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenNetworkSettingsDidNotChangeForDevice("eth0");
         thenConfigurationEnforcementIsActive(true);
-    }
-
-    public void getModemInterfaceStatusWithoutBearersShouldWorkModem() throws DBusException, IOException {
-        givenBasicMockedDbusConnector();
-        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, false,
-                true);
-        givenMockedDeviceList();
-
-        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
-
-        thenNoExceptionIsThrown();
-        thenInterfaceStatusIsNotNull();
-        thenNetInterfaceTypeIs(NetworkInterfaceType.MODEM);
-        thenModemStatusHasCorrectValues(false, true);
-    }
-
-    @Test
-    public void getModemInterfaceStatusWithoutSimsShouldWorkModem() throws DBusException, IOException {
-        givenBasicMockedDbusConnector();
-        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
-                false);
-        givenMockedDeviceList();
-
-        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
-
-        thenNoExceptionIsThrown();
-        thenInterfaceStatusIsNotNull();
-        thenNetInterfaceTypeIs(NetworkInterfaceType.MODEM);
-        thenModemStatusHasCorrectValues(true, false);
     }
 
     /*

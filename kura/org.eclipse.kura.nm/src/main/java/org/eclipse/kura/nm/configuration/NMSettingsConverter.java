@@ -40,6 +40,12 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_IPV4_METHOD = "method";
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
 
+    private static final String PPP_REFUSE_EAP = "refuse-eap";
+    private static final String PPP_REFUSE_CHAP = "refuse-chap";
+    private static final String PPP_REFUSE_PAP = "refuse-pap";
+    private static final String PPP_REFUSE_MSCHAP = "refuse-mschap";
+    private static final String PPP_REFUSE_MSCHAPV2 = "refuse-mschapv2";
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -251,34 +257,28 @@ public class NMSettingsConverter {
     }
 
     private static void setAuthenticationType(String authenticationType, Map<String, Variant<?>> settings) {
-        final String REFUSE_EAP = "refuse-eap";
-        final String REFUSE_CHAP = "refuse-chap";
-        final String REFUSE_PAP = "refuse-pap";
-        final String REFUSE_MSCHAP = "refuse-mschap";
-        final String REFUSE_MSCHAPV2 = "refuse-mschapv2";
-
         if (authenticationType.equals("AUTO")) {
             return;
         }
 
         if (authenticationType.equals("NONE")) {
-            settings.put(REFUSE_EAP, new Variant<>(true));
-            settings.put(REFUSE_CHAP, new Variant<>(true));
-            settings.put(REFUSE_PAP, new Variant<>(true));
-            settings.put(REFUSE_MSCHAP, new Variant<>(true));
-            settings.put(REFUSE_MSCHAPV2, new Variant<>(true));
+            settings.put(PPP_REFUSE_EAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_PAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
         } else if (authenticationType.equals("CHAP")) {
-            settings.put(REFUSE_EAP, new Variant<>(true));
-            settings.put(REFUSE_CHAP, new Variant<>(false));
-            settings.put(REFUSE_PAP, new Variant<>(true));
-            settings.put(REFUSE_MSCHAP, new Variant<>(true));
-            settings.put(REFUSE_MSCHAPV2, new Variant<>(true));
+            settings.put(PPP_REFUSE_EAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_CHAP, new Variant<>(false));
+            settings.put(PPP_REFUSE_PAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
         } else if (authenticationType.equals("PAP")) {
-            settings.put(REFUSE_EAP, new Variant<>(true));
-            settings.put(REFUSE_CHAP, new Variant<>(true));
-            settings.put(REFUSE_PAP, new Variant<>(false));
-            settings.put(REFUSE_MSCHAP, new Variant<>(true));
-            settings.put(REFUSE_MSCHAPV2, new Variant<>(true));
+            settings.put(PPP_REFUSE_EAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_PAP, new Variant<>(false));
+            settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
+            settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
         } else {
             throw new IllegalArgumentException(
                     String.format("Unsupported PPP authentication method: \"%s\"", authenticationType));

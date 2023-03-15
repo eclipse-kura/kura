@@ -31,7 +31,6 @@ import org.eclipse.kura.nm.NetworkProperties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 

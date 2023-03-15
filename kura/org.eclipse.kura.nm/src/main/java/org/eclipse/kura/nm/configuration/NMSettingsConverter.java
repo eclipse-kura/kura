@@ -146,13 +146,11 @@ public class NMSettingsConverter {
         Optional<String> band = wifiBandConvert(
                 props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()),
                 channel);
-        band.ifPresent(bandString -> settings.put("band", new Variant<>(band)));
+        band.ifPresent(bandString -> settings.put("band", new Variant<>(bandString)));
 
         Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", iface,
                 propMode.toLowerCase());
-        if (hidden.isPresent()) {
-            settings.put("hidden", new Variant<>(hidden.get()));
-        }
+        hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
         return settings;
     }

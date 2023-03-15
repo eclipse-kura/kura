@@ -264,7 +264,7 @@
                                 <artifactItem>
                                     <groupId>commons-fileupload</groupId>
                                     <artifactId>commons-fileupload</artifactId>
-                                    <version>${org.apache.commons.fileupload.version}</version>
+                                    <version>${commons-fileupload.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.commons</groupId>

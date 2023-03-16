@@ -14,7 +14,8 @@
  *
  */
 /**
- * Provides APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework.
+ * Provides APIs to use functionalities offered by the key-value databases running in the framework.
  *
  */
-package org.eclipse.kura.db;
+
+package org.eclipse.kura.db.keyvalue;

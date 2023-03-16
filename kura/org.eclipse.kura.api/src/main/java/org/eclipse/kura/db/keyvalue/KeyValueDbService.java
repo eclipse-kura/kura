@@ -1,4 +1,4 @@
-package org.eclipse.kura.db;
+package org.eclipse.kura.db.keyvalue;
 
 import org.eclipse.kura.KuraConnectException;
 

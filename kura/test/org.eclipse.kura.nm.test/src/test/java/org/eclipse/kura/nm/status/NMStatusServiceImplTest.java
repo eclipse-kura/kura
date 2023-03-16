@@ -21,17 +21,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
-import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
@@ -42,6 +47,22 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.modem.AccessTechnology;
+import org.eclipse.kura.net.status.modem.Bearer;
+import org.eclipse.kura.net.status.modem.BearerIpType;
+import org.eclipse.kura.net.status.modem.ESimStatus;
+import org.eclipse.kura.net.status.modem.ModemBand;
+import org.eclipse.kura.net.status.modem.ModemCapability;
+import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
+import org.eclipse.kura.net.status.modem.ModemModePair;
+import org.eclipse.kura.net.status.modem.ModemPortType;
+import org.eclipse.kura.net.status.modem.ModemPowerState;
+import org.eclipse.kura.net.status.modem.RegistrationStatus;
+import org.eclipse.kura.net.status.modem.Sim;
+import org.eclipse.kura.net.status.modem.SimType;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
@@ -51,7 +72,6 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusB
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.nm.NMDbusConnector;
-import org.eclipse.kura.usb.UsbNetDevice;
 import org.freedesktop.dbus.errors.UnknownMethod;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.junit.Test;
@@ -60,7 +80,6 @@ public class NMStatusServiceImplTest {
 
     private NMStatusServiceImpl statusService;
     private NMDbusConnector nmDbusConnector;
-    private NetworkService networkService;
     private CommandExecutorService commandExecutorService;
     private Optional<NetworkInterfaceStatus> status;
     private List<NetworkInterfaceStatus> statuses;
@@ -158,29 +177,46 @@ public class NMStatusServiceImplTest {
         thenRetrievedLoopbackInterfaceStatusHasFullProperties();
     }
 
+    @Test
+    public void shouldReturnExistingModemInterfaceStatus()
+            throws UnknownHostException, DBusException, KuraException {
+        givenNMStatusServiceImplWithModemInterface();
+        whenInterfaceStatusIsRetrieved("wwan0");
+        thenInterfaceStatusIsReturned();
+    }
+
+    @Test
+    public void shouldReturnFullModemInterfaceStatus() throws DBusException, UnknownHostException, KuraException {
+        givenNMStatusServiceImplWithModemInterface();
+        whenInterfaceStatusIsRetrieved("wwan0");
+        thenInterfaceStatusIsReturned();
+        thenModemInterfaceStatusIsRetrieved();
+        thenRetrievedModemkInterfaceStatusHasFullProperties();
+    }
+
     private void givenNMStatusServiceImplWithNonExistingInterface()
             throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", networkService,
-                this.commandExecutorService)).thenThrow(DBusException.class);
+        when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", this.commandExecutorService))
+                .thenThrow(DBusException.class);
     }
 
     private void givenNMStatusServiceImplThrowingUnknownMethod() throws DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
                 .thenThrow(UnknownMethod.class);
     }
 
     private void givenNMStatusServiceImplWithEthernetInterface()
             throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
     }
 
     private void givenNMStatusServiceImplWithWifiInterface() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
                 .thenReturn(buildWifiInterfaceStatus("wlan0"));
     }
 
@@ -192,17 +228,24 @@ public class NMStatusServiceImplTest {
     private void givenNMStatusServiceImplWithInterfaces() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
         when(this.nmDbusConnector.getInterfaces()).thenReturn(Arrays.asList("abcd0", "wlan0"));
-        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
                 .thenReturn(buildWifiInterfaceStatus("wlan0"));
     }
 
     private void givenNMStatusServiceImplWithLoopbackInterface()
             throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("lo", this.networkService, this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("lo", this.commandExecutorService))
                 .thenReturn(buildLoopbackInterfaceStatus("lo"));
+    }
+
+    private void givenNMStatusServiceImplWithModemInterface()
+            throws UnknownHostException, DBusException, KuraException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaceStatus("wwan0", this.commandExecutorService))
+                .thenReturn(buildModemInterfaceStatus("wwan0"));
     }
 
     private void whenInterfaceStatusIsRetrieved(String interfaceName) {
@@ -236,8 +279,6 @@ public class NMStatusServiceImplTest {
         EthernetInterfaceStatus ethStatus = (EthernetInterfaceStatus) this.status.get();
         assertEquals("abcd0", ethStatus.getName());
         assertCommonProperties(ethStatus);
-        assertEquals(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "abcd0"),
-                ethStatus.getUsbNetDevice().get());
         assertTrue(ethStatus.isLinkUp());
         assertEquals(buildEthernetInterfaceStatus("abcd0"), ethStatus);
         assertEquals(buildEthernetInterfaceStatus("abcd0").hashCode(), ethStatus.hashCode());
@@ -252,8 +293,6 @@ public class NMStatusServiceImplTest {
         WifiInterfaceStatus wifiStatus = (WifiInterfaceStatus) this.status.get();
         assertEquals("wlan0", wifiStatus.getName());
         assertCommonProperties(wifiStatus);
-        assertEquals(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "wlan0"),
-                wifiStatus.getUsbNetDevice().get());
         assertEquals(2, wifiStatus.getCapabilities().size());
         assertEquals(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ), wifiStatus.getCapabilities());
         assertEquals(4, wifiStatus.getChannels().size());
@@ -300,6 +339,11 @@ public class NMStatusServiceImplTest {
         assertEquals(NetworkInterfaceType.LOOPBACK, this.status.get().getType());
     }
 
+    private void thenModemInterfaceStatusIsRetrieved() {
+        assertTrue(this.status.get() instanceof ModemInterfaceStatus);
+        assertEquals(NetworkInterfaceType.MODEM, this.status.get().getType());
+    }
+
     private void thenRetrievedLoopbackInterfaceStatusHasFullProperties() throws UnknownHostException {
         LoopbackInterfaceStatus loStatus = (LoopbackInterfaceStatus) this.status.get();
         assertEquals("lo", loStatus.getName());
@@ -315,9 +359,27 @@ public class NMStatusServiceImplTest {
         assertEquals(buildIp4Address(), loStatus.getInterfaceIp4Addresses().get());
         assertTrue(loStatus.getInterfaceIp6Addresses().isPresent());
         assertEquals(buildIp6Address(), loStatus.getInterfaceIp6Addresses().get());
-        assertFalse(loStatus.getUsbNetDevice().isPresent());
         assertEquals(buildLoopbackInterfaceStatus("lo"), loStatus);
         assertEquals(buildLoopbackInterfaceStatus("lo").hashCode(), loStatus.hashCode());
+    }
+
+    private void thenRetrievedModemkInterfaceStatusHasFullProperties() throws UnknownHostException {
+        ModemInterfaceStatus modemStatus = (ModemInterfaceStatus) this.status.get();
+        assertEquals("wwan0", modemStatus.getName());
+        assertTrue(Arrays.equals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, modemStatus.getHardwareAddress()));
+        assertEquals("EthDriver", modemStatus.getDriver());
+        assertEquals("EthDriverVersion", modemStatus.getDriverVersion());
+        assertEquals("1234", modemStatus.getFirmwareVersion());
+        assertFalse(modemStatus.isVirtual());
+        assertEquals(NetworkInterfaceState.ACTIVATED, modemStatus.getState());
+        assertTrue(modemStatus.isAutoConnect());
+        assertEquals(1500, modemStatus.getMtu());
+        assertTrue(modemStatus.getInterfaceIp4Addresses().isPresent());
+        assertEquals(buildIp4Address(), modemStatus.getInterfaceIp4Addresses().get());
+        assertTrue(modemStatus.getInterfaceIp6Addresses().isPresent());
+        assertEquals(buildIp6Address(), modemStatus.getInterfaceIp6Addresses().get());
+        assertEquals(buildModemInterfaceStatus("wwan0"), modemStatus);
+        assertEquals(buildModemInterfaceStatus("wwan0").hashCode(), modemStatus.hashCode());
     }
 
     private void assertCommonProperties(NetworkInterfaceStatus networkStatus) throws UnknownHostException {
@@ -336,14 +398,11 @@ public class NMStatusServiceImplTest {
         assertTrue(networkStatus.getInterfaceIp6Addresses().isPresent());
         assertEquals(buildIp6Address(), networkStatus.getInterfaceIp6Addresses().get());
         assertEqualsIp6AddressStatus(networkStatus.getInterfaceIp6Addresses().get());
-        assertTrue(networkStatus.getUsbNetDevice().isPresent());
     }
 
     private EthernetInterfaceStatus buildEthernetInterfaceStatus(String interfaceName) throws UnknownHostException {
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
         buildCommonProperties(interfaceName, builder);
-        builder.withUsbNetDevice(
-                Optional.of(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "abcd0")));
         builder.withIsLinkUp(true);
         return builder.build();
     }
@@ -351,8 +410,6 @@ public class NMStatusServiceImplTest {
     private WifiInterfaceStatus buildWifiInterfaceStatus(String interfaceName) throws UnknownHostException {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         buildCommonProperties(interfaceName, builder);
-        builder.withUsbNetDevice(
-                Optional.of(new UsbNetDevice("1234", "5678", "CoolManufacturer", "VeryCoolModem", "1", "3", "wlan0")));
         builder.withCapabilities(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ));
         builder.withWifiChannels(Arrays.asList(new WifiChannel(1, 2412), new WifiChannel(2, 2417),
                 new WifiChannel(3, 2422), new WifiChannel(4, 2432)));
@@ -368,6 +425,91 @@ public class NMStatusServiceImplTest {
         buildCommonProperties(interfaceName, builder);
         builder.withVirtual(true);
         return builder.build();
+    }
+
+    private ModemInterfaceStatus buildModemInterfaceStatus(String interfaceName) throws UnknownHostException {
+        ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
+        buildCommonProperties(interfaceName, builder);
+        builder.withVirtual(false);
+        builder.withModel("CoolModel");
+        builder.withManufacturer("CoolManufacturer");
+        builder.withSerialNumber("1234AB");
+        builder.withSoftwareRevision("TheBestOne");
+        builder.withHardwareRevision("NaN");
+        builder.withPrimaryPort("Port1");
+        builder.withPorts(getPorts());
+        builder.withSupportedModemCapabilities(getSupportedModemCapabilities());
+        builder.withCurrentModemCapabilities(getCurrentModemCapabilities());
+        builder.withPowerState(ModemPowerState.LOW);
+        builder.withSupportedModes(getSupportedModemModes());
+        builder.withCurrentModes(
+                new ModemModePair(EnumSet.of(ModemMode.MODE_2G, ModemMode.MODE_3G), ModemMode.MODE_3G));
+        builder.withSupportedBands(getSupportedModemBands());
+        builder.withCurrentBands(getCurrentModemBands());
+        builder.withGpsSupported(false);
+        builder.withAvailableSims(getAvailableSims());
+        builder.withActiveSimIndex(1);
+        builder.withSimLocked(false);
+        builder.withBearers(getBearers());
+        builder.withConnectionType(ModemConnectionType.DirectIP);
+        builder.withConnectionStatus(ModemConnectionStatus.REGISTERED);
+        builder.withAccessTechnologies(getAccessTechnologies());
+        builder.withSignalQuality(99);
+        builder.withRegistrationStatus(RegistrationStatus.EMERGENCY_ONLY);
+        builder.withOperatorName("WhoCares?");
+        builder.withRssi(10);
+
+        return builder.build();
+    }
+
+    private Map<String, ModemPortType> getPorts() {
+        Map<String, ModemPortType> ports = new HashMap<>();
+        ports.put("Port1", ModemPortType.AT);
+        ports.put("Port2", ModemPortType.NET);
+        ports.put("Port3", ModemPortType.QMI);
+        ports.put("Port4", ModemPortType.UNKNOWN);
+        return ports;
+    }
+
+    private Set<ModemCapability> getSupportedModemCapabilities() {
+        return EnumSet.of(ModemCapability.GSM_UMTS, ModemCapability.LTE, ModemCapability.IRIDIUM);
+    }
+
+    private Set<ModemCapability> getCurrentModemCapabilities() {
+        return EnumSet.noneOf(ModemCapability.class);
+    }
+
+    private Set<ModemModePair> getSupportedModemModes() {
+        Set<ModemModePair> modes = new HashSet<>();
+        modes.add(new ModemModePair(EnumSet.of(ModemMode.CS, ModemMode.MODE_5G), ModemMode.MODE_5G));
+        modes.add(new ModemModePair(EnumSet.of(ModemMode.MODE_2G, ModemMode.MODE_3G), ModemMode.MODE_3G));
+        return modes;
+    }
+
+    private Set<ModemBand> getSupportedModemBands() {
+        return EnumSet.of(ModemBand.CDMA_BC15, ModemBand.EUTRAN_2, ModemBand.NGRAN_1);
+    }
+
+    private Set<ModemBand> getCurrentModemBands() {
+        return EnumSet.of(ModemBand.NGRAN_1);
+    }
+
+    private List<Sim> getAvailableSims() {
+        List<Sim> sims = new ArrayList<>();
+        sims.add(new Sim(false, "1234", "5678", "90", "VeryCoolMobile", SimType.PHYSICAL, ESimStatus.UNKNOWN));
+        sims.add(new Sim(true, "ABCD", "DEFG", "HI", "UglyMobile", SimType.PHYSICAL, ESimStatus.UNKNOWN));
+        return sims;
+    }
+
+    private List<Bearer> getBearers() {
+        List<Bearer> bearers = new ArrayList<>();
+        bearers.add(new Bearer("Bearer1", false, "web.verycoolmobile.com", EnumSet.of(BearerIpType.IPV4V6), 0, 0));
+        bearers.add(new Bearer("Bearer2", false, "web.uglymobile.com", EnumSet.of(BearerIpType.IPV4), 0, 0));
+        return bearers;
+    }
+
+    private Set<AccessTechnology> getAccessTechnologies() {
+        return EnumSet.of(AccessTechnology.EDGE, AccessTechnology.LTE_NB_IOT);
     }
 
     private void buildCommonProperties(String interfaceName, NetworkInterfaceStatusBuilder<?> builder)
@@ -466,11 +608,9 @@ public class NMStatusServiceImplTest {
     }
 
     private void createTestObjects() {
-        this.networkService = mock(NetworkService.class);
         this.nmDbusConnector = mock(NMDbusConnector.class);
         this.commandExecutorService = mock(CommandExecutorService.class);
         this.statusService = new NMStatusServiceImpl(this.nmDbusConnector);
-        this.statusService.setNetworkService(this.networkService);
         this.statusService.setCommandExecutorService(this.commandExecutorService);
     }
 }

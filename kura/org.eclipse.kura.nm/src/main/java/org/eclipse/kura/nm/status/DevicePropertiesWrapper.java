@@ -23,10 +23,10 @@ public class DevicePropertiesWrapper {
     private final Optional<Properties> deviceSpecificProperties;
     private final NMDeviceType deviceType;
 
-    public DevicePropertiesWrapper(Properties deviceProps, Optional<Properties> wirelessProps,
+    public DevicePropertiesWrapper(Properties deviceProps, Optional<Properties> specificProperties,
             NMDeviceType deviceType) {
         this.deviceProperties = deviceProps;
-        this.deviceSpecificProperties = wirelessProps;
+        this.deviceSpecificProperties = specificProperties;
         this.deviceType = deviceType;
     }
 

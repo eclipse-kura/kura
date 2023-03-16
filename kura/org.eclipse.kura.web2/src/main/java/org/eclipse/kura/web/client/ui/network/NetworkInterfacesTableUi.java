@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -150,9 +150,9 @@ public class NetworkInterfacesTableUi extends Composite {
             public String getValue(GwtNetInterfaceConfig object) {
                 if (object.getHwTypeEnum().equals(GwtNetIfType.MODEM) && object instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig modemObject = (GwtModemInterfaceConfig) object;
-                    return "ppp" + modemObject.getPppNum() + " (" + modemObject.getName() + ")";
+                    return modemObject.getInterfaceName() + " (" + modemObject.getName() + ")";
                 } else {
-                    return object.getName();
+                    return object.getInterfaceName();
                 }
             }
         };

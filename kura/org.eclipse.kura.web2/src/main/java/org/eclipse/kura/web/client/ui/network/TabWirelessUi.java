@@ -1422,7 +1422,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
 
         if (channelFrequency.getChannel() == 0 && channelFrequency.getFrequency() == 0) {
-            this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
+            this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION, "0");
             return;
         }
 
@@ -1524,6 +1524,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         for (int i = 0; i < this.channelList.getItemCount(); i++) {
             String value = this.channelList.getItemText(i);
             String[] values = value.split(" ");
+
             int channel = Integer.parseInt(values[1]);
             if (channel == channelValue) {
                 return i;
@@ -1648,7 +1649,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private GwtWifiRadioMode radioValueToRadioMode(String radioValue) {
 
         for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-            if (MessageUtils.get(mode.name()).equals(radioValue)) {
+            if (mode.name().equals(radioValue)) {
                 return mode;
             }
         }
@@ -1734,6 +1735,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
                     GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
+
                     TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
                             new AsyncCallback<List<GwtWifiChannelFrequency>>() {
@@ -1799,7 +1801,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                             @Override
                             public void onSuccess(Boolean acSupported) {
 
-                                String selectedRadioModeText = TabWirelessUi.this.radio.getSelectedValue() != null
+                                String selectedRadioMode = TabWirelessUi.this.radio.getSelectedValue() != null
                                         ? TabWirelessUi.this.radio.getSelectedValue()
                                         : null;
 
@@ -1807,9 +1809,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 fillRadioMode(acSupported);
 
-                                if (selectedRadioModeText != null) {
-                                    logger.info("selectedRadioModeText: " + selectedRadioModeText);
-                                    setRadioModeByValue(selectedRadioModeText);
+                                if (selectedRadioMode != null) {
+                                    logger.info("selectedRadioModeText: " + selectedRadioMode);
+                                    setRadioModeByValue(selectedRadioMode);
                                 } else {
                                     logger.info("TabWirelessUi.this.activeConfig.getRadioMode(): "
                                             + TabWirelessUi.this.activeConfig.getRadioMode());
@@ -1835,7 +1837,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         } else {
             this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_BG);
-            this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_ANAC);
+            this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_A);
             this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_BGN);
         }
     }

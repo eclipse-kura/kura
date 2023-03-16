@@ -219,6 +219,15 @@ public class GwtNetworkServiceImpl {
                 }
             }
 
+            if (logger.isDebugEnabled()) {
+                StringBuilder toDisplay = new StringBuilder();
+                for (GwtWifiChannelFrequency channel : displayedChannels) {
+                    toDisplay.append(channel.getChannel());
+                    toDisplay.append(" ");
+                }
+                logger.debug("Find frequencies for {}: {}", interfaceName, toDisplay.toString().trim());
+            }
+
             return displayedChannels;
         } catch (GwtKuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);

@@ -151,7 +151,7 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
-        setWifiStatus(builder, devicePropertiesWrapper.getDeviceSpecificProperties().get(),
+        setWifiStatus(builder, devicePropertiesWrapper.getDeviceSpecificProperties(),
                 accessPointsProperties.getActiveAccessPoint(), accessPointsProperties.getAvailableAccessPoints(),
                 supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
@@ -285,16 +285,19 @@ public class NMStatusConverter {
         });
     }
 
-    private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Properties wirelessDeviceProperties,
+    private static void setWifiStatus(WifiInterfaceStatusBuilder builder, Optional<Properties> wirelessDeviceProperties,
             Optional<Properties> activeAccessPoint, List<Properties> accessPoints, String countryCode,
             List<WifiChannel> supportedChannels) {
-        NM80211Mode mode = NM80211Mode.fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
-        builder.withMode(wifiModeConvert(mode));
+        if (wirelessDeviceProperties.isPresent()) {
+            NM80211Mode mode = NM80211Mode
+                    .fromUInt32(wirelessDeviceProperties.get().Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
+            builder.withMode(wifiModeConvert(mode));
 
-        List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
-                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
-        builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
-
+            List<NMDeviceWifiCapabilities> capabilities = NMDeviceWifiCapabilities
+                    .fromUInt32(
+                            wirelessDeviceProperties.get().Get(NM_DEVICE_WIRELESS_BUS_NAME, "WirelessCapabilities"));
+            builder.withCapabilities(wifiCapabilitiesConvert(capabilities));
+        }
         List<org.eclipse.kura.net.status.wifi.WifiChannel> kuraSupportedChannels = wifiChannelsConvert(
                 supportedChannels);
         builder.withWifiChannels(kuraSupportedChannels);

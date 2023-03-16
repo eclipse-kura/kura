@@ -1187,11 +1187,18 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private List<GwtWifiHotspotEntry> getChannelFrequencyByIndex(int selectedIndex) {
-        String[] itemtext = this.channelList.getItemText(selectedIndex).split(" ");
-        GwtWifiHotspotEntry frequencyEntry = new GwtWifiHotspotEntry();
+        String selectedItem = this.channelList.getItemText(selectedIndex);
 
-        frequencyEntry.setChannel(Integer.parseInt(itemtext[1]));
-        frequencyEntry.setFrequency(Integer.parseInt(itemtext[3]));
+        GwtWifiHotspotEntry frequencyEntry = new GwtWifiHotspotEntry();
+        
+        if (selectedItem.equals(AUTOMATIC_CHANNEL_DESCRIPTION)) {
+            frequencyEntry.setChannel(0);
+            frequencyEntry.setFrequency(0);
+        } else {
+            String[] itemtext = selectedItem.split(" ");
+            frequencyEntry.setChannel(Integer.parseInt(itemtext[1]));
+            frequencyEntry.setFrequency(Integer.parseInt(itemtext[3]));
+        }
 
         return Collections.singletonList(frequencyEntry);
     }
@@ -1422,7 +1429,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
 
         if (channelFrequency.getChannel() == 0 && channelFrequency.getFrequency() == 0) {
-            this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION, "0");
+            this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
             return;
         }
 
@@ -1515,19 +1522,21 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private int getChannelIndexFromValue(int channelValue) {
         
-        logger.info("getChannelIndexFromValue");
+        logger.info("getChannelIndexFromValue for channel: " + channelValue);
 
         if (channelValue == 0) {
             return 0;
         }
 
         for (int i = 0; i < this.channelList.getItemCount(); i++) {
-            String value = this.channelList.getItemText(i);
-            String[] values = value.split(" ");
+            String[] values = this.channelList.getItemText(i).split(" ");
 
-            int channel = Integer.parseInt(values[1]);
-            if (channel == channelValue) {
-                return i;
+            try {
+                int channel = Integer.parseInt(values[1]);
+                if (channel == channelValue) {
+                    return i;
+                }
+            } catch (NumberFormatException automaticChannel) {
             }
         }
         return -1;
@@ -1753,6 +1762,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                     TabWirelessUi.this.channelList.clear();
 
+                                    addAutomaticChannel(freqChannels);
+
                                     freqChannels.stream().forEach(TabWirelessUi.this::addItemChannelList);
 
                                     int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);
@@ -1776,6 +1787,23 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             });
         }
 
+    }
+
+    private void addAutomaticChannel(List<GwtWifiChannelFrequency> freqs) {
+        if (!containsChannel0(freqs)) {
+            GwtWifiChannelFrequency automaticChannel = new GwtWifiChannelFrequency(0, 0);
+            freqs.add(0, automaticChannel);
+        }
+    }
+
+    private boolean containsChannel0(List<GwtWifiChannelFrequency> freqs) {
+        for (GwtWifiChannelFrequency freq : freqs) {
+            if (freq.getChannel() == 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void loadRadioMode() {

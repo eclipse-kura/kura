@@ -85,6 +85,18 @@ sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/f
 systemctl daemon-reload
 systemctl enable firewall
 
+# disables cloud-init if exists and allows interface management to network-manager
+if [ -d /etc/cloud/cloud.cfg.d ]; then
+    echo "network: {config: disabled}" | sudo tee -a /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null
+fi
+if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
+    TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )
+    
+    if [ -f "${TO_REMOVE}" ]; then
+        rm "${TO_REMOVE}"
+    fi
+fi
+
 # disable NTP service
 if command -v timedatectl > /dev/null ;
   then

@@ -57,10 +57,8 @@ public class NetworkConfigurationServiceAdapter {
      * @return a new {@link GwtNetInterfaceConfig}
      */
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifName) {
-        GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
+        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
                 .forInterface(ifName).build();
-        logger.debug("Got GWT Network Configuration for interface {}:\n{}\n", ifName, gwtConfig.getProperties());
-        return gwtConfig;
     }
 
     /**
@@ -72,10 +70,8 @@ public class NetworkConfigurationServiceAdapter {
      * @return a new {@link GwtNetInterfaceConfig}
      */
     public GwtNetInterfaceConfig getDefaultGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
-        GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfigBuilder()
+        return new GwtNetInterfaceConfigBuilder()
                 .forInterface(ifName).forType(ifType).build();
-        logger.debug("Created GWT Network Configuration for interface {} and type {}", ifName, ifType);
-        return gwtConfig;
     }
 
     /**

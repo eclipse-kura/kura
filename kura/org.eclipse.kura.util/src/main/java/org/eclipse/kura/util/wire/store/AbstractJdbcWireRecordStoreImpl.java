@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraStoreException;
+import org.eclipse.kura.store.listener.ConnectionListener;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.JdbcUtil;
@@ -48,6 +50,8 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
     protected final ConnectionProvider connectionProvider;
     protected final JdbcWireRecordStoreQueries queries;
 
+    private Set<ConnectionListener> connectionListeners;
+
     protected AbstractJdbcWireRecordStoreImpl(final ConnectionProvider connectionProvider, final String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {
             throw new IllegalArgumentException("Table name cannot be null or empty.");
@@ -56,6 +60,13 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
         this.connectionProvider = requireNonNull(connectionProvider, "Connection provider cannot be null");
         this.escapedTableName = escapeIdentifier(tableName);
         this.queries = buildSqlWireRecordStoreQueries();
+    }
+
+    protected AbstractJdbcWireRecordStoreImpl(ConnectionProvider connectionProvider, String tableName,
+            Set<ConnectionListener> listeners) {
+        this(connectionProvider, tableName);
+
+        this.connectionListeners = listeners;
     }
 
     protected abstract Optional<String> getMappedSqlType(final TypedValue<?> value);
@@ -161,8 +172,7 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
         if (!columnTypes.containsKey(escapedColName)) {
 
             logger.debug("creating new column: {} {}", name, mappedType.get());
-            execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName,
-                    mappedType.get()));
+            execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName, mappedType.get()));
 
         } else {
             final String actualColumnType = columnTypes.get(escapedColName);
@@ -172,8 +182,7 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
                 logger.debug("changing column type: {} {}", name, mappedType.get());
 
                 execute(c, MessageFormat.format(queries.getSqlDropColumn(), escapedColName));
-                execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName,
-                        mappedType.get()));
+                execute(c, MessageFormat.format(queries.getSqlAddColumn(), escapedColName, mappedType.get()));
             }
         }
     }
@@ -252,8 +261,7 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
             sbVals.append(", ?");
         }
 
-        return MessageFormat.format(queries.getSqlInsertRecord(), sbCols.toString(),
-                sbVals.toString());
+        return MessageFormat.format(queries.getSqlInsertRecord(), sbCols.toString(), sbVals.toString());
     }
 
     protected void setParameterValue(final PreparedStatement stmt, final int index, final Object value)
@@ -279,10 +287,9 @@ public abstract class AbstractJdbcWireRecordStoreImpl implements WireRecordStore
 
     protected int getTableSize(final Connection c) throws SQLException {
         try (final Statement stmt = c.createStatement();
-                final ResultSet rset = stmt
-                        .executeQuery(this.queries.getSqlRowCount())) {
-            return JdbcUtil.getFirstColumnValue(() -> stmt
-                    .executeQuery(this.queries.getSqlRowCount()), ResultSet::getInt);
+                final ResultSet rset = stmt.executeQuery(this.queries.getSqlRowCount())) {
+            return JdbcUtil.getFirstColumnValue(() -> stmt.executeQuery(this.queries.getSqlRowCount()),
+                    ResultSet::getInt);
         }
     }
 

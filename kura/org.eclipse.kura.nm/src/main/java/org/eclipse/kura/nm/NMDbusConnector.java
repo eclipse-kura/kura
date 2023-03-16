@@ -81,7 +81,7 @@ public class NMDbusConnector {
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
-            NMDeviceType.NM_DEVICE_TYPE_PPP, NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
@@ -497,16 +497,14 @@ public class NMDbusConnector {
 
     private Optional<Device> getDeviceByInterfaceName(String interfaceName) throws DBusException {
         Optional<Device> device = Optional.empty();
-        if (!interfaceName.startsWith("ppp")) {
-            for (DBusPath path : this.nm.GetAllDevices()) {
-                Device d = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class);
-                Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, d.getObjectPath(),
-                        Properties.class);
-                String iface = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
-                logger.debug("Found interface {}", iface);
-                if (iface.equals(interfaceName)) {
-                    device = Optional.of(d);
-                }
+        for (DBusPath path : this.nm.GetAllDevices()) {
+            Device d = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class);
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, d.getObjectPath(),
+                    Properties.class);
+            String iface = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+            logger.debug("Found interface {}", iface);
+            if (iface.equals(interfaceName)) {
+                device = Optional.of(d);
             }
         }
         return device;

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.nm.status;
 
 import java.util.Optional;
@@ -11,9 +23,10 @@ public class DevicePropertiesWrapper {
     private final Optional<Properties> deviceSpecificProperties;
     private final NMDeviceType deviceType;
 
-    public DevicePropertiesWrapper(Properties deviceProps, Optional<Properties> wirelessProps, NMDeviceType deviceType) {
+    public DevicePropertiesWrapper(Properties deviceProps, Optional<Properties> specificProperties,
+            NMDeviceType deviceType) {
         this.deviceProperties = deviceProps;
-        this.deviceSpecificProperties = wirelessProps;
+        this.deviceSpecificProperties = specificProperties;
         this.deviceType = deviceType;
     }
 
@@ -24,8 +37,8 @@ public class DevicePropertiesWrapper {
     public Optional<Properties> getDeviceSpecificProperties() {
         return this.deviceSpecificProperties;
     }
-    
-    public NMDeviceType getDeviceType() { 
+
+    public NMDeviceType getDeviceType() {
         return this.deviceType;
     }
 

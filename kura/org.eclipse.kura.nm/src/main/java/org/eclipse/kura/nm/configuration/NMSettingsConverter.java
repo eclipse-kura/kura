@@ -179,6 +179,12 @@ public class NMSettingsConverter {
         settings.put("psk", new Variant<>(psk));
         settings.put("key-mgmt", new Variant<>(keyMgmt));
 
+        if ("wpa-psk".equals(keyMgmt)) {
+            List<String> proto = wifiProtoConvert(props.get(String.class,
+                    "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
+            settings.put("proto", new Variant<>(proto, "as"));
+        }
+
         Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", iface,
                 propMode.toLowerCase());
         if (group.isPresent()) {
@@ -242,6 +248,10 @@ public class NMSettingsConverter {
                 connectionMap.put(key, connectionSettings.get(NM_SETTINGS_CONNECTION).get(key));
             }
         }
+
+        connectionMap.put("autoconnect-retries", new Variant<>(1)); // Prevent retries on failure to avoid
+                                                                    // triggering the configuration
+                                                                    // enforcement mechanism
 
         return connectionMap;
     }
@@ -364,6 +374,20 @@ public class NMSettingsConverter {
         default:
             throw new IllegalArgumentException(
                     String.format("Unsupported WiFi key management \"%s\"", kuraSecurityType));
+        }
+    }
+
+    private static List<String> wifiProtoConvert(String kuraSecurityProto) {
+        switch (kuraSecurityProto) {
+        case "SECURITY_WPA":
+            return Arrays.asList("wpa");
+        case "SECURITY_WPA2":
+            return Arrays.asList("rsn");
+        case "SECURITY_WPA_WPA2":
+            return Arrays.asList();
+        default:
+            throw new IllegalArgumentException(
+                    String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
         }
     }
 

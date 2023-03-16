@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
@@ -36,11 +35,6 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     private CommandExecutorService commandExecutorService;
 
     private NMDbusConnector nmDbusConnector;
-    private NetworkService networkService;
-
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -86,7 +80,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName) {
         Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService,
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName,
                     this.commandExecutorService);
             if (Objects.nonNull(status)) {
                 networkInterfaceStatus = Optional.of(status);

@@ -279,6 +279,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("group", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
         thenResultingMapContains("pairwise", new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
     }
 
     @Test
@@ -298,6 +299,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("group", new Variant<>(Arrays.asList("tkip"), "as").getValue());
         thenResultingMapContains("pairwise", new Variant<>(Arrays.asList("tkip"), "as").getValue());
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
     }
 
     @Test
@@ -317,10 +319,11 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("group", new Variant<>(Arrays.asList("tkip", "ccmp"), "as").getValue());
         thenResultingMapContains("pairwise", new Variant<>(Arrays.asList("tkip", "ccmp"), "as").getValue());
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
     }
 
     @Test
-    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMapAndMalformedCiphers() {
+    public void build80211WirelessSecuritySettingsShouldThrowWhenGivenMalformedCiphers() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
@@ -335,7 +338,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMapNone() {
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeNone() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
@@ -348,10 +351,62 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "none");
+        thenResultingMapNotContains("proto");
+    }
+    
+    @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWep() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WEP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("key-mgmt", "none");
+        thenResultingMapNotContains("proto");
+    }
+    
+    @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWpa() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("key-mgmt", "wpa-psk");
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList("wpa"), "as").getValue());
+    }
+    
+    @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWpa2() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA2");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("key-mgmt", "wpa-psk");
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList("rsn"), "as").getValue());
     }
 
     @Test
-    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMapMalformedSecurity() {
+    public void build80211WirelessSecuritySettingsShouldThrowWhenGivenMalformedSecurity() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
@@ -500,6 +555,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("type", "802-11-wireless");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test
@@ -508,6 +564,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("type", "802-3-ethernet");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test
@@ -527,6 +584,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("test", "test");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test

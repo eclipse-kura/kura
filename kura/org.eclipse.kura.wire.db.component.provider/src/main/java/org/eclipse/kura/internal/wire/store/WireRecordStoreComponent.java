@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.store.listener.ConnectionListener;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;

@@ -13,7 +13,7 @@
 package org.eclipse.kura.wire.store.provider;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.store.listener.ConnectionListener;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

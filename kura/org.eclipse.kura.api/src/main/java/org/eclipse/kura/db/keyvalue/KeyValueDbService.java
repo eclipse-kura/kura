@@ -1,7 +1,5 @@
 package org.eclipse.kura.db.keyvalue;
 
-import org.eclipse.kura.KuraConnectException;
-
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
  *
@@ -16,6 +14,7 @@ import org.eclipse.kura.KuraConnectException;
  *******************************************************************************/
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -28,28 +27,24 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface KeyValueDbService {
 
     /**
-     * Connects to the configured KeyValue database.
+     * Adds a {@link ConnectionListener}.
+     *
+     * @param listener
+     *            to add
+     *
+     * @since 2.5.0
      */
-    public void connect() throws KuraConnectException;
+    public void addListener(ConnectionListener listener);
 
     /**
-     * Immediately close the connection from the configured KeyValue database.
+     * Removes a {@link ConnectionListener}
+     *
+     * @param listener
+     *            to remove
+     *
+     * @since 2.5.0
      */
-    public void close();
-
-    /**
-     * Close the connection to the configured KeyValue database.
-     * 
-     * @param quiesceTimeout
-     *            the quiet period to disconnect gracefully.
-     * 
-     */
-    public void close(long quiesceTimeout);
-
-    /**
-     * Returns whether the connection to the database is closed or not.
-     */
-    public boolean isClose();
+    public void removeListener(ConnectionListener listener);
 
     /**
      * Returns whether the database is connected or not.

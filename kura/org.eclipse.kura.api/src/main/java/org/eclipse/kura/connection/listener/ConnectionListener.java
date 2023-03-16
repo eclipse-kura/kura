@@ -11,13 +11,12 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.store.listener;
+package org.eclipse.kura.connection.listener;
 
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * Listener interface to be implemented by applications that needs to be notified about connection events in the
- * {@link MessageStoreProvider} and {@link WireRecordStoreProvider}.
+ * Listener interface to be implemented by applications that needs to be notified about connection.
  * All registered listeners are called sequentially by the implementations at the occurrence of the
  * event.
  *
@@ -27,14 +26,12 @@ import org.osgi.annotation.versioning.ConsumerType;
 public interface ConnectionListener {
 
     /**
-     * Notifies the listener that the connection to the {@link MessageStoreProvider} or {@link WireRecordStoreProvider}
-     * has been established.
+     * Notifies the listener that the connection has been established.
      */
     public void connected();
 
     /**
-     * Notifies the listener that the connection to the {@link MessageStoreProvider} or {@link WireRecordStoreProvider}
-     * has been closed.
+     * Notifies the listener that the connection has been closed.
      */
     public void disconnected();
 }

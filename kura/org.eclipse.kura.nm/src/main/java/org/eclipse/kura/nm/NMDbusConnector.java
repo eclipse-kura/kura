@@ -211,7 +211,7 @@ public class NMDbusConnector {
     private NetworkInterfaceStatus createModemStatus(String interfaceName, Device device,
             Properties deviceProperties, Optional<Properties> ip4configProperties) throws DBusException {
         NetworkInterfaceStatus networkInterfaceStatus;
-        Optional<String> modemPath = getModemPath(device.getObjectPath());
+        Optional<String> modemPath = getModemPathFromMM(device.getObjectPath());
         Optional<Properties> modemDeviceProperties = Optional.empty();
         List<Properties> simProperties = Collections.emptyList();
         List<Properties> bearerProperties = Collections.emptyList();
@@ -550,7 +550,7 @@ public class NMDbusConnector {
         return deviceId;
     }
 
-    private Map<DBusPath, Map<String, Map<String, Variant<?>>>> getManagedObjects() throws DBusException {
+    private Map<DBusPath, Map<String, Map<String, Variant<?>>>> getManagedObjectsFromMM() throws DBusException {
         ObjectManager objectManager = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
                 MM_BUS_PATH, ObjectManager.class);
         Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = objectManager.GetManagedObjects();
@@ -558,7 +558,7 @@ public class NMDbusConnector {
         return managedObjects;
     }
 
-    private Optional<String> getModemPathFromMM(Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects,
+    private Optional<String> getModemPathFromManagedObjects(Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects,
             String deviceId) {
         Optional<String> modemPath = Optional.empty();
         Optional<Entry<DBusPath, Map<String, Map<String, Variant<?>>>>> modemEntry = managedObjects.entrySet()
@@ -574,10 +574,10 @@ public class NMDbusConnector {
         return modemPath;
     }
 
-    private Optional<String> getModemPath(String devicePath) throws DBusException {
+    private Optional<String> getModemPathFromMM(String devicePath) throws DBusException {
         String deviceId = getDeviceIdFromNM(devicePath);
-        Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = getManagedObjects();
-        return getModemPathFromMM(managedObjects, deviceId);
+        Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = getManagedObjectsFromMM();
+        return getModemPathFromManagedObjects(managedObjects, deviceId);
     }
 
     private Optional<Properties> getModemProperties(String modemPath) throws DBusException {

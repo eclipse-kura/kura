@@ -74,8 +74,8 @@ public class NMDbusConnector {
 
     private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
 
-    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays
-            .asList(NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI);
+    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
+            NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
             KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
@@ -372,7 +372,7 @@ public class NMDbusConnector {
             List<Device> availableInterfaces) throws DBusException {
         for (Device device : availableInterfaces) {
             NMDeviceType deviceType = getDeviceType(device);
-            String ipInterface = getDeviceIpInterface(device);
+            String ipInterface = getDeviceInterface(device);
 
             if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
                 logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
@@ -488,7 +488,7 @@ public class NMDbusConnector {
         return deviceType;
     }
 
-    private String getDeviceIpInterface(Device device) throws DBusException {
+    private String getDeviceInterface(Device device) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 

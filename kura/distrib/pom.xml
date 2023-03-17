@@ -638,6 +638,11 @@
                                     <artifactId>org.eclipse.kura.event.publisher</artifactId>
                                     <version>${org.eclipse.kura.event.publisher.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.network.status.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -791,6 +796,7 @@
                                 <move file="target/plugins/org.eclipse.kura.ai.triton.server.jar" tofile="target/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.configuration.change.manager.jar" tofile="target/plugins/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.event.publisher.jar" tofile="target/plugins/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.network.status.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar" />
                             </target>
                         </configuration>
                     </execution>

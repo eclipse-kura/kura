@@ -267,23 +267,23 @@ public class NMSettingsConverter {
     }
 
     private static void setAuthenticationType(String authenticationType, Map<String, Variant<?>> settings) {
-        if (authenticationType.equals("AUTO")) {
+        if (authenticationType.equals("netModemAuthAUTO")) {
             return;
         }
 
-        if (authenticationType.equals("NONE")) {
+        if (authenticationType.equals("netModemAuthNONE")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("CHAP")) {
+        } else if (authenticationType.equals("netModemAuthCHAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(false));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("PAP")) {
+        } else if (authenticationType.equals("netModemAuthPAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(false));
@@ -397,8 +397,7 @@ public class NMSettingsConverter {
         case "SECURITY_WPA_WPA2":
             return Arrays.asList();
         default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
+            throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
         }
     }
 

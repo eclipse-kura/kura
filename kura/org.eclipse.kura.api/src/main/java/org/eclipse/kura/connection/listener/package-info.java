@@ -16,4 +16,4 @@
  * @since 2.5
  *
  */
-package org.eclipse.kura.store.listener;
+package org.eclipse.kura.connection.listener;

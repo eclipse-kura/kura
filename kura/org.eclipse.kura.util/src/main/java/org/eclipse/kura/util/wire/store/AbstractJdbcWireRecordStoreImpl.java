@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.store.listener.ConnectionListener;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.JdbcUtil;

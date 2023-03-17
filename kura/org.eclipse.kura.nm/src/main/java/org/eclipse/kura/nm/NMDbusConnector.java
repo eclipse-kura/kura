@@ -453,18 +453,11 @@ public class NMDbusConnector {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH,
                     Settings.class);
             
-           
             List<DBusPath> connectionPath = settings.ListConnections();
-            
-            
-            //get name
             
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(), Properties.class);
             String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE); 
             String targetConnectionName = String.format("kura-%s-connection", interfaceName);
-            
-            // end get name
-
 
             boolean isFirst = true;
             for (DBusPath path : connectionPath) {
@@ -475,10 +468,6 @@ public class NMDbusConnector {
                 
                 String workingConnectionName = (String) workingSettings.get("connection").get("id").getValue();
                 String workingConnectionId = (String) workingSettings.get("connection").get("uuid").getValue();
-
-                
-                logger.error("GREG connection Name: {}", workingConnectionName);
-                logger.error("GREG Built interface Name: {}", targetConnectionName);
                 
                 if (workingConnectionName.contains(targetConnectionName)) {
                     if (isFirst) {

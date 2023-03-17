@@ -134,23 +134,23 @@ public class NMSettingsConverter {
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
 
         String mode = wifiModeConvert(propMode);
+        settings.put("mode", new Variant<>(mode));
+
         String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
-        String band = wifiBandConvert(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()));
-        Optional<String> channel = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.channel", iface,
-                propMode.toLowerCase());
+        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
+
+        short channel = Short.parseShort(
+                props.get(String.class, "net.interface.%s.config.wifi.%s.channel", iface, propMode.toLowerCase()));
+        settings.put("channel", new Variant<>(new UInt32(channel)));
+
+        Optional<String> band = wifiBandConvert(
+                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()),
+                channel);
+        band.ifPresent(bandString -> settings.put("band", new Variant<>(bandString)));
+
         Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", iface,
                 propMode.toLowerCase());
-
-        settings.put("mode", new Variant<>(mode));
-        settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
-        settings.put("band", new Variant<>(band));
-        if (channel.isPresent()) {
-            settings.put("channel", new Variant<>(new UInt32(Short.parseShort(channel.get()))));
-        }
-        if (hidden.isPresent()) {
-            settings.put("hidden", new Variant<>(hidden.get()));
-        }
+        hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
         return settings;
     }
@@ -259,18 +259,29 @@ public class NMSettingsConverter {
         }
     }
 
-    private static String wifiBandConvert(String kuraBand) {
+    private static Optional<String> wifiBandConvert(String kuraBand, short channel) {
+        List<String> bothFrequencyBands = Arrays.asList("RADIO_MODE_80211nHT20", "RADIO_MODE_80211nHT40below",
+                "RADIO_MODE_80211nHT40above");
+        boolean automaticChannelSelection = channel == 0;
+        boolean automaticBandSelection = bothFrequencyBands.contains(kuraBand);
+
+        if (automaticBandSelection && automaticChannelSelection) {
+            // Omit band if full-auto
+            return Optional.empty();
+        }
+
+        if (automaticBandSelection && !automaticChannelSelection) {
+            // Our own interpretation of the Wifi standard
+            return channel < 32 ? Optional.of("bg") : Optional.of("a");
+        }
+
         switch (kuraBand) {
         case "RADIO_MODE_80211a":
         case "RADIO_MODE_80211_AC":
-            return "a";
+            return Optional.of("a");
         case "RADIO_MODE_80211b":
         case "RADIO_MODE_80211g":
-            return "bg";
-        case "RADIO_MODE_80211nHT20":
-        case "RADIO_MODE_80211nHT40below":
-        case "RADIO_MODE_80211nHT40above":
-            return "bg"; // TBD
+            return Optional.of("bg");
         default:
             throw new IllegalArgumentException(String.format("Unsupported WiFi band \"%s\"", kuraBand));
         }

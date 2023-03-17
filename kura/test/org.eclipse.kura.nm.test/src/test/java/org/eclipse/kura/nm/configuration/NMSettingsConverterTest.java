@@ -263,6 +263,96 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void build80211WirelessSettingsShouldWorkWithChannel0And2Ghz() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211b");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "0");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mode", "infrastructure");
+        thenResultingMapContainsBytes("ssid", "ssidtest");
+        thenResultingMapContains("band", "bg");
+        thenResultingMapContains("channel", new UInt32(0));
+    }
+
+    @Test
+    public void build80211WirelessSettingsShouldWorkWithChannel0And5Ghz() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "0");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mode", "infrastructure");
+        thenResultingMapContainsBytes("ssid", "ssidtest");
+        thenResultingMapContains("band", "a");
+        thenResultingMapContains("channel", new UInt32(0));
+    }
+
+    @Test
+    public void build80211WirelessSettingsAutomaticBandSelectionShouldWorkWithChannel0() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211nHT20");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "0");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mode", "infrastructure");
+        thenResultingMapContainsBytes("ssid", "ssidtest");
+        thenResultingMapContains("channel", new UInt32(0));
+        thenResultingMapNotContains("band");
+    }
+
+    @Test
+    public void build80211WirelessSettingsAutomaticBandSelectionShouldWorkWithChannel2Ghz() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211nHT20");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "1");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mode", "infrastructure");
+        thenResultingMapContainsBytes("ssid", "ssidtest");
+        thenResultingMapContains("band", "bg");
+        thenResultingMapContains("channel", new UInt32(1));
+    }
+
+    @Test
+    public void build80211WirelessSettingsAutomaticBandSelectionShouldWorkWithChannel5Ghz() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211nHT20");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "44");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mode", "infrastructure");
+        thenResultingMapContainsBytes("ssid", "ssidtest");
+        thenResultingMapContains("band", "a");
+        thenResultingMapContains("channel", new UInt32(44));
+    }
+
+    @Test
     public void build80211WirelessSecuritySettingsShouldWorkWhenGivenExpectedMap() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");

@@ -2868,64 +2868,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><img alt="Data Service" src="../images/data-service.png" /></p>
 <p>The <strong>DataService</strong> offers methods and configuration options to manage the connection to the remote server including the following (all required) parameters described below.</p>
 <ul>
-<li>
-<p><strong>connect.auto-on-startup</strong>: when set to true, the service tries to auto-connect to the remote server on start-up and restore the connection every time the device is disconnected. These attempts are made at the frequency defined in the <em>connect.retry-interval</em> parameter until the connection is established.</p>
-</li>
-<li>
-<p><strong>connect.retry-interval</strong>: specifies the connection retry frequency after a disconnection.</p>
-</li>
-<li>
-<p><strong>enable.recovery.on.connection.failure</strong>: when enabled, activates the recovery feature on connection failure: if the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well.</p>
-</li>
-<li>
-<p><strong>connection.recovery.max.failures</strong>: related to the previous parameter. It specifies the number of failures before a reboot is requested.</p>
-</li>
-<li>
-<p><strong>disconnect.quiesce-timeout</strong>: allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.</p>
-</li>
-<li>
-<p><strong>store.db.service.pid</strong>: The Kura Service PID of the persistent store instance to be used. The PID of the default instance is org.eclipse.kura.db.H2DbService. The target service must implement <code>org.eclipse.kura.message.store.provider.MessageStoreProvider</code>.</p>
-</li>
-<li>
-<p><strong>store.housekeeper-interval</strong>: defines the interval in seconds used to run the Data Store housekeeper task.</p>
-</li>
-<li>
-<p><strong>store.purge-age</strong>: defines the age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS &gt; 0) after which they are deleted (minimum 5).</p>
-</li>
-<li>
-<p><strong>store.capacity</strong>: defines the maximum number of messages persisted in the Data Store.</p>
-</li>
-<li>
-<p><strong>in-flight-messages.republish-on-new-session</strong>: it specifies whether to republish in-flight messages on a new MQTT session.</p>
-</li>
-<li>
-<p><strong>in-flight-messages.max-number</strong>: it specifies the maximum number of in-flight messages.</p>
-</li>
-<li>
-<p><strong>in-flight-messages.congestion-timeout</strong>: timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect.</p>
-</li>
-<li>
-<p><strong>enable.rate.limit</strong>: Enables the token bucket message rate limiting.</p>
-</li>
-<li>
-<p><strong>rate.limit.average</strong>: The average message publishing rate. It is intended as the number of messages per unit of time.</p>
-<div class="admonition danger">
-<p class="admonition-title">Danger</p>
-<p>The maximum allowed message rate is <strong>1 message per millisecond</strong>, so the following limitations are applied:</p>
-<ul>
-<li>86400000 per DAY</li>
-<li>3600000 per HOUR</li>
-<li>60000 messages per MINUTE</li>
-<li>1000 messages per SECOND</li>
-</ul>
-</div>
-</li>
-<li>
-<p><strong>rate.limit.time.unit</strong>: The time unit for the rate.limit.average.</p>
-</li>
-<li>
-<p><strong>rate.limit.burst.size</strong>: The token bucket burst size.</p>
-</li>
+<li><strong>Connect Auto-on-startup</strong> - When set to true, the service tries to auto-connect to the remote server on start-up and restore the connection every time the device is disconnected. These attempts are made at the frequency defined in the <strong>Connect Retry-interval</strong> parameter until the connection is established.
+Using the Connect/Disconnect button disables this function.</li>
+<li><strong>Connect Retry-interval</strong> - Frequency in seconds to retry a connection of the Data Publishers after a disconnect.</li>
+<li><strong>Enable Recovery On Connection Failure</strong> - Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well.</li>
+<li><strong>Connection Recovery Max Failure</strong> - Number of failures in Data Publishers connection before forcing a reboot.</li>
+<li><strong>Disconnect Quiesce-timeout</strong> - Allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.</li>
+<li><strong>Message Store Provider Service PID</strong> - The Kura service pid of the Message Store instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService. The Message Store instance must implement the <code>org.eclipse.kura.message.store.provider.MessageStoreProvider</code> interface.</li>
+<li><strong>Store Housekeeper-interval</strong> - Defines the interval in seconds used to run the Data Store housekeeper task.</li>
+<li><strong>Store Purge-age</strong> - defines the age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS &gt; 0) after which they are deleted (minimum 5).</li>
+<li><strong>Store Capacity</strong> - Defines the maximum number of messages persisted in the Data Store.</li>
+<li><strong>In-flight-messages</strong> parameters - Define the management of messages that have been published and not yet confirmed, including:</li>
+<li><strong>In-flight-messages Republish-on-new-session</strong> - Whether to republish in-flight messages on a new MQTT session.</li>
+<li><strong>In-flight-messages Max-number</strong> - The maximum number of in-flight messages.</li>
+<li><strong>In-flight-messages Congestion-timeout</strong> - Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable).</li>
 </ul>
 <h2 id="connection-monitors">Connection Monitors</h2>
 <p>The DataService offers methods and configuration options to monitor the connection to the remote server and, eventually, cause a system reboot to recover from transient network problems.</p>
@@ -2936,10 +2892,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>To configure this functionality, the System Administrator needs to specify the following configuration elements:</p>
 <ul>
 <li>
-<p><strong>enable.recovery.on.connection.failure</strong>: when enabled, activates the recovery feature on connection failure: if the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well.</p>
+<p><strong>Enable Recovery On Connection Failure</strong>: when enabled, activates the recovery feature on connection failure: if the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well.</p>
 </li>
 <li>
-<p><strong>connection.recovery.max.failures</strong>: related to the previous parameter. It specifies the number of failures before a reboot is requested.
+<p><strong>Connection Recovery Max Failure</strong>: related to the previous parameter. It specifies the number of failures before a reboot is requested.
     !!! warning
         To be fully working, this feature needs the enabling of the Watchdog Service.</p>
 </li>
@@ -2950,17 +2906,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>In the image below, the parameters that need to be tuned, in the Data Service, to take advantage of this feature:</p>
 <p><img alt="Data Service Backoff Delay" src="../images/data-service-backoff-delay.png" /></p>
 <ul>
+<li><strong>Enable Rate Limit</strong> - Enables the token bucket message rate limiting.</li>
 <li>
-<p><strong>enable.rate.limit</strong>: Enables the token bucket message rate limiting.</p>
-</li>
-<li>
-<p><strong>rate.limit.average</strong>: The average message publishing rate. It is intended as the number of messages per unit of time.</p>
-</li>
-<li>
-<p><strong>rate.limit.time.unit</strong>: The time unit for the rate.limit.average.</p>
-</li>
-<li>
-<p><strong>rate.limit.burst.size</strong>: The token bucket burst size.</p>
+<p><strong>Rate Limit Average</strong> - he average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE).</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>The maximum allowed message rate is <strong>1 message per millisecond</strong>, so the following limitations are applied:</p>
+<ul>
+<li>86400000 per DAY</li>
+<li>3600000 per HOUR</li>
+<li>60000 messages per MINUTE</li>
+<li>1000 messages per SECOND</li>
+</ul>
+</div>
+<ul>
+<li><strong>Rate Limit Time Unit</strong> - The time unit for the Rate Limit Average.</li>
+<li><strong>Rate Limit Burst Size</strong> - The token bucket burst size.</li>
+</ul>
 </li>
 </ul>
 <p>The default setup limits the data flow to <strong>1 message per second with a bucket size of 1 token</strong>.</p>
@@ -2987,13 +2949,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The relevant configuration parameters are the following:</p>
 <ul>
 <li>
-<p><strong>connection.schedule.enabled</strong>: Enables or disables the connection schedule feature. Please note that in order to enable the connection logic, the <strong>connect.auto-on-startup</strong> parameter must be set to true as well.</p>
+<p><strong>Enable Connection Schedule</strong>: Enables or disables the connection schedule feature. Please note that in order to enable the connection logic, the <strong>Connect Auto-on-startup</strong> parameter must be set to true as well.</p>
 </li>
 <li>
-<p><strong>connection.schedule.expression</strong>: The Cron Expression to be used.</p>
+<p><strong>Connection Schedule CRON Expression</strong>: A CRON expression that specifies the instants when the gateway should perform a connection attempt. This parameter is only used if Enable Connection Schedule is set to true. The default expression schedules a connection every day at midnight.</p>
 </li>
 <li>
-<p><strong>connection.schedule.inactivity.interval.seconds</strong>: The inactivity interval duration in seconds.</p>
+<p><strong>Allow priority message to overide connection schedule</strong> - Allows messages beyond a specified priority to force a connection and be sent regardless of connection schedule.</p>
+</li>
+<li>
+<p><strong>Message schedule priority override threshold</strong> - A message with a priority equal to or less than this threshold will cause the framework to automatically re-connect and send regardless of the connection schedule.</p>
+</li>
+<li>
+<p><strong>Connection Schedule Disconnect Inactivity Interval Second</strong>: Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if <strong>Enable Connection Schedule</strong> is set to true.</p>
 </li>
 </ul>
 

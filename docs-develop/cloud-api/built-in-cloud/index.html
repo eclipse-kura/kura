@@ -1316,13 +1316,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#dataservice" class="md-nav__link">
-    DataService
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#mqttdatatransport" class="md-nav__link">
     MqttDataTransport
   </a>
@@ -2827,13 +2820,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#dataservice" class="md-nav__link">
-    DataService
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#mqttdatatransport" class="md-nav__link">
     MqttDataTransport
   </a>
@@ -2888,24 +2874,6 @@ See the <a href="../overview/">section</a> describing the Kura 4.0 cloud connect
 <li><code>enable.default.subscriptions</code> - when set to true, the gateway will not be remotely manageable.</li>
 <li><code>birth.cert.policy</code> - specify the birth certificate policy. The options are <em>Disable publishing</em>, <em>Publish birth on connect</em> and <em>Publish birth on connect and reconnect</em>.</li>
 <li><code>payload.encoding</code> - Specify the message payload encoding. The possible options are <em>Kura Protobuf</em> and <em>Simple JSON</em>.</li>
-</ul>
-<h2 id="dataservice">DataService</h2>
-<p>The DataService provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. The DataService delegates to the MqttDataTransport service the implementation of the transport protocol that is used to interact with the remote server.</p>
-<p>The DataService also adds the capability of storing published messages in a persistent store function and sending them over the wire at a later time. The purpose of this feature is to relieve service users from implementing their own persistent store. Service users may publish messages independently on the DataService connection status.</p>
-<p>In order to overcome the potential latencies introduced by buffering messages, the DataService allows a priority level to be assigned for each published message. Depending on the store configuration, there are certain guarantees that stored messages are not lost due to sudden crashes or power outages.</p>
-<p>To use this service, select the <strong>DataService</strong> option located in the <strong>System</strong> area and select the <strong>CloudService</strong> tab as shown in the screen capture below.</p>
-<p><img alt="" src="../images/dataService.png" style="border-radius: 7px;" /></p>
-<p>The DataService offers methods and configuration options to manage the connection to the remote server including the following (all required) parameters described below.</p>
-<ul>
-<li><code>connect.auto-on-startup</code> - when set to true, the service tries to auto-connect to the remote server on start-up and restore the connection every time the device is disconnected. These attempts are made at the frequency defined in the <em>connect.retry-interval</em> parameter until the connection is established.</li>
-<li><code>disconnect.quiesce-timeout</code> - allows the delivery of in-flight messages to be completed before disconnecting from the broker when a disconnection from the broker is being forced.</li>
-<li><code>store.housekeeper-interval</code> - defines the interval in seconds used to run the Data Store housekeeper task.</li>
-<li><code>store.purge-age</code> - defines the age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS &gt; 0) after which they are deleted (minimum 5).</li>
-<li><code>store.capacity</code> - defines the maximum number of messages persisted in the Data Store.</li>
-<li><code>in-flight-messages</code> parameters - define the management of messages that have been published and not yet confirmed, including:</li>
-<li><code>in-flight-messages.republish-on-new-session</code></li>
-<li><code>in-flight-messages.max-number</code></li>
-<li><code>in-flight-messages.congestion-timeout</code></li>
 </ul>
 <h2 id="mqttdatatransport">MqttDataTransport</h2>
 <p>The MqttDataTransport service provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. To use this service, select the <strong>MqttDataTransport</strong> option located in the <strong>System</strong> area and select the <strong>CloudService</strong> tab as shown in the screen capture below.</p>

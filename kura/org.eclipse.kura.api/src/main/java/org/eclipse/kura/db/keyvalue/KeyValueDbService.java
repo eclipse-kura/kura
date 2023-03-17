@@ -18,7 +18,7 @@ import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * {@link KeyValueDbService} provides APIs to use the functionalities a of a KeyValue database.
+ * {@link KeyValueDbService} provides APIs to use the functionalities a of a database capable of storing data in form of key-value pairs.
  *
  * @since 2.5.0
  * @noimplement This interface is not intended to be implemented by clients.

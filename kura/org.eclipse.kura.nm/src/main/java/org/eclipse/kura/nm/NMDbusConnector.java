@@ -228,7 +228,7 @@ public class NMDbusConnector {
             modemDeviceProperties = getModemProperties(modemPath.get());
             if (modemDeviceProperties.isPresent()) {
                 simProperties = getModemSimProperties(modemDeviceProperties.get());
-//                bearerProperties = getModemBearersProperties(modemPath.get(), modemDeviceProperties.get());
+                bearerProperties = getModemBearersProperties(modemPath.get(), modemDeviceProperties.get());
             }
         }
         DevicePropertiesWrapper modemPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,

@@ -277,7 +277,7 @@ public class NMStatusServiceImplTest {
 
     private void thenRetrievedEthernetInterfaceStatusHasFullProperties() throws UnknownHostException {
         EthernetInterfaceStatus ethStatus = (EthernetInterfaceStatus) this.status.get();
-        assertEquals("abcd0", ethStatus.getName());
+        assertEquals("abcd0", ethStatus.getId());
         assertCommonProperties(ethStatus);
         assertTrue(ethStatus.isLinkUp());
         assertEquals(buildEthernetInterfaceStatus("abcd0"), ethStatus);
@@ -291,7 +291,7 @@ public class NMStatusServiceImplTest {
 
     private void thenRetrievedWifiInterfaceStatusHasFullProperties() throws UnknownHostException {
         WifiInterfaceStatus wifiStatus = (WifiInterfaceStatus) this.status.get();
-        assertEquals("wlan0", wifiStatus.getName());
+        assertEquals("wlan0", wifiStatus.getId());
         assertCommonProperties(wifiStatus);
         assertEquals(2, wifiStatus.getCapabilities().size());
         assertEquals(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ), wifiStatus.getCapabilities());
@@ -330,7 +330,7 @@ public class NMStatusServiceImplTest {
         assertFalse(this.statuses.isEmpty());
         assertEquals(2, this.statuses.size());
         this.statuses.forEach(status -> {
-            assertTrue(status.getName().equals("wlan0") || status.getName().equals("abcd0"));
+            assertTrue(status.getId().equals("wlan0") || status.getId().equals("abcd0"));
         });
     }
 
@@ -346,7 +346,7 @@ public class NMStatusServiceImplTest {
 
     private void thenRetrievedLoopbackInterfaceStatusHasFullProperties() throws UnknownHostException {
         LoopbackInterfaceStatus loStatus = (LoopbackInterfaceStatus) this.status.get();
-        assertEquals("lo", loStatus.getName());
+        assertEquals("lo", loStatus.getId());
         assertTrue(Arrays.equals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, loStatus.getHardwareAddress()));
         assertEquals("EthDriver", loStatus.getDriver());
         assertEquals("EthDriverVersion", loStatus.getDriverVersion());
@@ -365,7 +365,7 @@ public class NMStatusServiceImplTest {
 
     private void thenRetrievedModemkInterfaceStatusHasFullProperties() throws UnknownHostException {
         ModemInterfaceStatus modemStatus = (ModemInterfaceStatus) this.status.get();
-        assertEquals("wwan0", modemStatus.getName());
+        assertEquals("wwan0", modemStatus.getId());
         assertTrue(Arrays.equals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, modemStatus.getHardwareAddress()));
         assertEquals("EthDriver", modemStatus.getDriver());
         assertEquals("EthDriverVersion", modemStatus.getDriverVersion());
@@ -514,7 +514,7 @@ public class NMStatusServiceImplTest {
 
     private void buildCommonProperties(String interfaceName, NetworkInterfaceStatusBuilder<?> builder)
             throws UnknownHostException {
-        builder.withName(interfaceName);
+        builder.withId(interfaceName);
         builder.withHardwareAddress(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 });
         builder.withDriver("EthDriver").withDriverVersion("EthDriverVersion").withFirmwareVersion("1234");
         builder.withVirtual(false).withState(NetworkInterfaceState.ACTIVATED).withAutoConnect(true).withMtu(1500);

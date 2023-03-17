@@ -109,7 +109,7 @@ public class NMStatusConverter {
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
 
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
+        builder.withId(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -126,7 +126,7 @@ public class NMStatusConverter {
     public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(true);
+        builder.withId(interfaceName).withInterfaceName(interfaceName).withVirtual(true);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -143,7 +143,7 @@ public class NMStatusConverter {
             AccessPointsProperties accessPointsProperties,
             SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
+        builder.withId(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -207,10 +207,10 @@ public class NMStatusConverter {
             String modemDeviceProperty = ((String) properties.Get(MM_MODEM_BUS_NAME, "Device"));
             String modemDeviceResourcePath = modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
             if (Objects.nonNull(modemDeviceResourcePath) && !modemDeviceResourcePath.isEmpty()) {
-                builder.withName(modemDeviceResourcePath);
+                builder.withId(modemDeviceResourcePath);
 
             } else {
-                builder.withName(interfaceName);
+                builder.withId(interfaceName);
             }
         });
     }

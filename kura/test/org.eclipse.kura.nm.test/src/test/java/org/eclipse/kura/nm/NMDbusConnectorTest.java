@@ -1068,7 +1068,7 @@ public class NMDbusConnectorTest {
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {
         assertTrue(this.netInterface instanceof ModemInterfaceStatus);
         ModemInterfaceStatus modemStatus = (ModemInterfaceStatus) this.netInterface;
-        assertEquals("1-5", modemStatus.getName());
+        assertEquals("1-5", modemStatus.getId());
         assertEquals("wwan0", modemStatus.getInterfaceName());
         assertEquals("AwesomeModel", modemStatus.getModel());
         assertEquals("TheBestInTheWorld", modemStatus.getManufacturer());

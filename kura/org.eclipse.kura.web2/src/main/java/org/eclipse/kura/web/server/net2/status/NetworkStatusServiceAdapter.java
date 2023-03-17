@@ -176,12 +176,12 @@ public class NetworkStatusServiceAdapter {
     private void setCommonStateProperties(GwtNetInterfaceConfig gwtConfig,
             NetworkInterfaceStatus networkInterfaceStatus) {
 
-        gwtConfig.setName(networkInterfaceStatus.getName());
+        gwtConfig.setName(networkInterfaceStatus.getId());
         gwtConfig.setInterfaceName(networkInterfaceStatus.getInterfaceName());
         gwtConfig.setHwState(networkInterfaceStatus.getState().name());
         gwtConfig.setHwType(networkInterfaceStatus.getType().name());
         gwtConfig.setHwAddress(NetUtil.hardwareAddressToString(networkInterfaceStatus.getHardwareAddress()));
-        gwtConfig.setHwName(networkInterfaceStatus.getName());
+        gwtConfig.setHwName(networkInterfaceStatus.getId());
         gwtConfig.setHwDriver(networkInterfaceStatus.getDriver());
         gwtConfig.setHwDriverVersion(networkInterfaceStatus.getDriverVersion());
         gwtConfig.setHwFirmware(networkInterfaceStatus.getFirmwareVersion());

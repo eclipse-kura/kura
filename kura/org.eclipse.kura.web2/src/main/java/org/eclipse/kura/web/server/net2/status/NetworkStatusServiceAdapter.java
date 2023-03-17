@@ -48,8 +48,6 @@ import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Adapter to convert status-related properties to a
@@ -57,8 +55,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class NetworkStatusServiceAdapter {
-
-    private static final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
 
     private final NetworkStatusService networkStatusService;
 
@@ -186,9 +182,6 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setHwDriverVersion(networkInterfaceStatus.getDriverVersion());
         gwtConfig.setHwFirmware(networkInterfaceStatus.getFirmwareVersion());
         gwtConfig.setHwMTU(networkInterfaceStatus.getMtu());
-
-        logger.debug("GWT common state properties for interface {}:\n{}\n", gwtConfig.getName(),
-                gwtConfig.getProperties());
     }
 
     private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig,

@@ -16,7 +16,7 @@ package org.eclipse.kura.connection.listener;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * Listener interface to be implemented by applications that needs to be notified about connection.
+ * Listener interface to be implemented by applications that needs to be notified about connection events.
  * All registered listeners are called sequentially by the implementations at the occurrence of the
  * event.
  *

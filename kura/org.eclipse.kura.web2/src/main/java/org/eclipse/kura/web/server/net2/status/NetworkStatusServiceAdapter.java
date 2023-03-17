@@ -67,7 +67,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     public List<String> getNetInterfaces() {
-        return this.networkStatusService.getInterfaceNames();
+        return this.networkStatusService.getInterfaceIds();
     }
 
     public void fillWithStatusProperties(String ifName, GwtNetInterfaceConfig gwtConfigToUpdate) {

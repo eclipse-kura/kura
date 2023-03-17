@@ -257,7 +257,7 @@ public class NMStatusServiceImplTest {
     }
 
     private void whenInterfaceNameListIsRetrived() {
-        this.interfaceNames = this.statusService.getInterfaceNames();
+        this.interfaceNames = this.statusService.getInterfaceIds();
     }
 
     private void thenInterfaceStatusIsEmpty() {

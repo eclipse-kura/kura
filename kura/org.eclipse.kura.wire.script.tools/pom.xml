@@ -81,6 +81,12 @@
                                     <artifactId>launcher-common</artifactId>
                                     <version>${graalvm.version}</version>
                                 </artifactItem>
+                                <!-- Transitive dependencies -->
+                                <artifactItem>
+                                    <groupId>com.ibm.icu</groupId>
+                                    <artifactId>icu4j</artifactId>
+                                    <version>72.1</version>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                         <goals>

@@ -65,19 +65,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public List<NetworkInterfaceStatus> getNetworkStatus() {
-        List<String> availableInterfaces = getInterfaceIds();
-
-        List<NetworkInterfaceStatus> interfaceStatuses = new ArrayList<>();
-        for (String id : availableInterfaces) {
-            getNetworkStatus(id).ifPresent(interfaceStatuses::add);
-        }
-
-        return interfaceStatuses;
-    }
-
-    @Override
-    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) {
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) throws KuraException {
         Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
             NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id,
@@ -97,7 +85,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public List<String> getInterfaceIds() {
+    public List<String> getInterfaceIds() throws KuraException {
         List<String> interfaces = new ArrayList<>();
         try {
             interfaces = this.nmDbusConnector.getDeviceIds();

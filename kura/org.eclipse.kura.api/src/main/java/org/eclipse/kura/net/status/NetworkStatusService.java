@@ -16,6 +16,7 @@ package org.eclipse.kura.net.status;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -27,14 +28,6 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface NetworkStatusService {
 
     /**
-     * Return the list of the {@link NetworkInterfaceStatus} of all network
-     * interfaces detected in the system.
-     * 
-     * @return a list containing the status of all the network interfaces
-     */
-    public List<NetworkInterfaceStatus> getNetworkStatus();
-
-    /**
      * Return an optional {@link NetworkInterfaceStatus} of the given network
      * interface selected by its id. For Ethernet and WiFi interfaces, the
      * identifier is typically the interface name. For the modems, instead,
@@ -43,8 +36,10 @@ public interface NetworkStatusService {
      * 
      * @param id the identifier of the network interface
      * @return the {@link NetworkInterfaceStatus}
+     * @throws KuraException when an error occurs while retrieving the status of the
+     *                       given interface
      */
-    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id);
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName) throws KuraException;
 
     /**
      * Return the identifiers of the network interfaces detected in the
@@ -53,6 +48,6 @@ public interface NetworkStatusService {
      * 
      * @return a list containing the network interface identifiers
      */
-    public List<String> getInterfaceIds();
+    public List<String> getInterfaceIds() throws KuraException;
 
 }

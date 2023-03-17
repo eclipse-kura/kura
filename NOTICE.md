@@ -61,7 +61,7 @@ This project leverages the following third party content.
 * maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
 * maven/mavencentral/commons-codec/commons-codec/1.13, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
-* maven/mavencentral/commons-fileupload/commons-fileupload/1.3.3, Apache-2.0, approved, CQ13884
+* maven/mavencentral/commons-fileupload/commons-fileupload/1.5, Apache-2.0, approved, #7109
 * maven/mavencentral/commons-io/commons-io/2.11.0, Apache-2.0, approved, CQ23745
 * maven/mavencentral/commons-io/commons-io/2.6, Apache-2.0, approved, CQ19090
 * maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183

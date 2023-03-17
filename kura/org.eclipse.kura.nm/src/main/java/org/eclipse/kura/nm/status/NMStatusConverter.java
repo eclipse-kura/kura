@@ -78,6 +78,7 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.PropertyPortsStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -532,11 +533,9 @@ public class NMStatusConverter {
 
     private static Map<String, ModemPortType> getPorts(Properties properties) {
         Map<String, ModemPortType> ports = new HashMap<>();
-        List<Object[]> rawPorts = properties.Get(MM_MODEM_BUS_NAME, "Ports");
+        List<PropertyPortsStruct> rawPorts = properties.Get(MM_MODEM_BUS_NAME, "Ports");
         rawPorts.forEach(portArray -> {
-            if (portArray.length >= 2) {
-                ports.put(String.class.cast(portArray[0]), MMModemPortType.toModemPortType((UInt32) portArray[1]));
-            }
+            ports.put(portArray.getMember0(), MMModemPortType.toModemPortType(portArray.getMember1()));
         });
         return ports;
     }

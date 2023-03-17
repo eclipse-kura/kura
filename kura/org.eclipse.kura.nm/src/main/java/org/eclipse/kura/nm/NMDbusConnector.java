@@ -173,35 +173,37 @@ public class NMDbusConnector {
             }
 
             switch (deviceType) {
-            case NM_DEVICE_TYPE_ETHERNET:
-                Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
-                        Wired.class);
-                Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                        wiredDevice.getObjectPath(), Properties.class);
+                case NM_DEVICE_TYPE_ETHERNET:
+                    Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
+                            Wired.class);
+                    Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                            wiredDevice.getObjectPath(), Properties.class);
 
-                DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
-                        Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+                    DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                            Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-                networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId, ethernetPropertiesWrapper,
-                        ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_LOOPBACK:
-                DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
-                        Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+                    networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId,
+                            ethernetPropertiesWrapper,
+                            ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_LOOPBACK:
+                    DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                            Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
-                networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId, loopbackPropertiesWrapper,
-                        ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_WIFI:
-                networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
-                        deviceProperties, ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_MODEM:
-                networkInterfaceStatus = createModemStatus(interfaceId, device.get(), deviceProperties,
-                        ip4configProperties);
-                break;
-            default:
-                break;
+                    networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId,
+                            loopbackPropertiesWrapper,
+                            ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_WIFI:
+                    networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
+                            deviceProperties, ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_MODEM:
+                    networkInterfaceStatus = createModemStatus(interfaceId, device.get(), deviceProperties,
+                            ip4configProperties);
+                    break;
+                default:
+                    break;
             }
         }
         return networkInterfaceStatus;
@@ -605,7 +607,7 @@ public class NMDbusConnector {
     private List<Properties> getModemSimProperties(Properties modemProperties) throws DBusException {
         List<Properties> simProperties = new ArrayList<>();
         try {
-            DBusPath[] simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
+            List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
             for (DBusPath path : simPaths) {
                 if (!path.getPath().equals("/")) {
                     simProperties

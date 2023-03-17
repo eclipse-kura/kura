@@ -32,7 +32,6 @@ public interface KeyValueDbService {
      * @param listener
      *            to add
      *
-     * @since 2.5.0
      */
     public void addListener(ConnectionListener listener);
 
@@ -42,7 +41,6 @@ public interface KeyValueDbService {
      * @param listener
      *            to remove
      *
-     * @since 2.5.0
      */
     public void removeListener(ConnectionListener listener);
 

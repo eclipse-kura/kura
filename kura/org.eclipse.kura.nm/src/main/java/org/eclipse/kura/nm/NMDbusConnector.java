@@ -140,18 +140,7 @@ public class NMDbusConnector {
         for (Device device : availableDevices) {
             NMDeviceType deviceType = getDeviceType(device);
             if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-                    Optional<String> modemPath = getModemPathFromMM(device.getObjectPath());
-                    if (modemPath.isPresent()) {
-                        Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
-                        modemDeviceProperties.ifPresent(properties -> supportedDeviceNames
-                                .add(NMStatusConverter.getModemDeviceHwPath(properties)));
-                    }
-                } else {
-                    Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                            device.getObjectPath(), Properties.class);
-                    supportedDeviceNames.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE));
-                }
+                supportedDeviceNames.add(getDeviceId(device));
             }
 
         }
@@ -301,7 +290,9 @@ public class NMDbusConnector {
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
             NetworkProperties properties) throws DBusException {
-        List<String> availableInterfaces = getAllDeviceInterfaceNames();
+        List<String> availableInterfaces = getInterfaces();
+
+        logger.info("Mbeh??? {}", availableInterfaces);
 
         for (String iface : configuredInterfaces) {
             if (!availableInterfaces.contains(iface)) {
@@ -381,7 +372,7 @@ public class NMDbusConnector {
             List<Device> availableInterfaces) throws DBusException {
         for (Device device : availableInterfaces) {
             NMDeviceType deviceType = getDeviceType(device);
-            String ipInterface = getDeviceInterface(device);
+            String ipInterface = getDeviceId(device);
 
             if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
                 logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
@@ -396,6 +387,28 @@ public class NMDbusConnector {
                 logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
                 disable(device);
             }
+        }
+    }
+
+    private String getDeviceId(Device device) throws DBusException {
+        NMDeviceType deviceType = getDeviceType(device);
+        if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
+            Optional<String> modemPath = getModemPathFromMM(device.getObjectPath());
+            if (!modemPath.isPresent()) {
+                throw new IllegalStateException(
+                        String.format("Cannot retrieve modem path for: %s.", device.getObjectPath()));
+            }
+            Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
+            if (!modemDeviceProperties.isPresent()) {
+                throw new IllegalStateException(
+                        String.format("Cannot retrieve modem properties for: %s.", device.getObjectPath()));
+
+            }
+            return NMStatusConverter.getModemDeviceHwPath(modemDeviceProperties.get());
+        } else {
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Properties.class);
+            return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
         }
     }
 

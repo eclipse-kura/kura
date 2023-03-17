@@ -443,8 +443,61 @@ public class NMDbusConnector {
                     .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
-            return Optional.empty();
         }
+
+        Optional<Connection> connectionToReturn = Optional.empty();
+        
+        try {
+            logger.info("Active connection not found, looking for avaliable connections.");
+
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH,
+                    Settings.class);
+            
+           
+            List<DBusPath> connectionPath = settings.ListConnections();
+            
+            
+            //get name
+            
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(), Properties.class);
+            String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE); 
+            String targetConnectionName = String.format("kura-%s-connection", interfaceName);
+            
+            // end get name
+
+
+            boolean isFirst = true;
+            for (DBusPath path : connectionPath) {
+
+                Connection workingConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Connection.class);
+                
+                Map<String, Map<String, Variant<?>>> workingSettings = workingConnection.GetSettings();
+                
+                String workingConnectionName = (String) workingSettings.get("connection").get("id").getValue();
+                String workingConnectionId = (String) workingSettings.get("connection").get("uuid").getValue();
+
+                
+                logger.error("GREG connection Name: {}", workingConnectionName);
+                logger.error("GREG Built interface Name: {}", targetConnectionName);
+                
+                if (workingConnectionName.contains(targetConnectionName)) {
+                    if (isFirst) {
+                        logger.info("Using avaliable connection uuid: {}", workingConnectionId);
+                        connectionToReturn = Optional
+                                .of(workingConnection);
+                        isFirst = false;
+                    } else {
+                        logger.info("Deleting extra connection with uuid: {}", workingConnectionId);
+                        workingConnection.Delete();
+                    }                    
+                }
+            }
+
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+        }
+
+        return connectionToReturn;
     }
 
     private void configurationEnforcementEnable() throws DBusException {

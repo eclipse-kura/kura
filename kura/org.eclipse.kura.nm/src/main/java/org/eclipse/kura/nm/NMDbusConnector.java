@@ -337,16 +337,16 @@ public class NMDbusConnector {
         }
     }
 
-    private void enableInterface(String iface, NetworkProperties properties, Device device,
-            NMDeviceType deviceType) throws DBusException {
+    private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
+            throws DBusException {
         if (Boolean.FALSE.equals(isDeviceManaged(device))) {
             setDeviceManaged(device, true);
         }
+        String interfaceName = getDeviceInterface(device);
 
         Optional<Connection> connection = getAppliedConnection(device);
-        Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(
-                properties,
-                connection, iface, deviceType);
+        Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
+                connection, deviceId, interfaceName, deviceType);
 
         logger.info("New settings: {}", newConnectionSettings);
 

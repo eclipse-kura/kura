@@ -34,7 +34,7 @@ public class MMModemLocationSourceTest {
     public static class MMModemLocationSourceToMMModemLocationSourceTest {
 
         @Parameters
-        public static Collection<Object[]> LocationSourceParams() {
+        public static Collection<Object[]> locationSourceParams() {
             List<Object[]> params = new ArrayList<>();
             params.add(new Object[] { new UInt32(0x00000000L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE });
             params.add(new Object[] { new UInt32(0x00000001L),
@@ -83,7 +83,7 @@ public class MMModemLocationSourceTest {
     public static class MMModemLocationSourceToMMModemLocationSourceFromBitMaskTest {
 
         @Parameters
-        public static Collection<Object[]> LocationSourceParams() {
+        public static Collection<Object[]> locationSourceParams() {
             List<Object[]> params = new ArrayList<>();
             params.add(new Object[] { new UInt32(0x00000000L),
                     EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE) });
@@ -115,16 +115,16 @@ public class MMModemLocationSourceTest {
         }
 
         @Test
-        public void shouldReturnCorrectIpFamily() {
-            whenCalculatedBearerIpType();
-            thenCalculatedBearerIpTypeIsCorrect();
+        public void shouldReturnCorrectLocationSourceSet() {
+            whenConversionMethodIsCalled();
+            thenCalculatedLocationSourceSetMatches();
         }
 
-        private void whenCalculatedBearerIpType() {
+        private void whenConversionMethodIsCalled() {
             calculatedLocationSource = MMModemLocationSource.toMMModemLocationSourceFromBitMask(this.inputIntValue);
         }
 
-        private void thenCalculatedBearerIpTypeIsCorrect() {
+        private void thenCalculatedLocationSourceSetMatches() {
             assertEquals(this.expectedLocationSource, calculatedLocationSource);
         }
 

@@ -15,11 +15,13 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -41,6 +43,7 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.Modem;
+import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
@@ -63,6 +66,7 @@ public class NMDbusConnector {
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
     private static final String MM_BUS_PATH = "/org/freedesktop/ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
+    private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
     private static final String NM_PROPERTY_VERSION = "Version";
 
@@ -362,8 +366,53 @@ public class NMDbusConnector {
                     new DBusPath("/"));
         }
 
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
+                    deviceId);
+            handleModemManagerGPSSetup(device, enableGPS);
+        }
+
         dsLock.waitForSignal();
 
+    }
+
+    private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
+        Optional<String> modemDevicePath = getModemPathFromMM(device.getObjectPath());
+
+        if (!modemDevicePath.isPresent()) {
+            logger.warn("Cannot retrieve MM.Modem from NM.Modem at path: {}. Skipping GPS configuration.",
+                    device.getObjectPath());
+            return;
+        }
+
+        boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
+
+        Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
+                Location.class);
+        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
+                modemLocation.getObjectPath(), Properties.class);
+
+        Set<MMModemLocationSource> availableLocationSources = MMModemLocationSource
+                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
+        Set<MMModemLocationSource> enabledLocationSources = MMModemLocationSource
+                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
+
+        EnumSet<MMModemLocationSource> desiredLocationSources = EnumSet.noneOf(MMModemLocationSource.class);
+        if (availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
+                && isGPSSourceEnabled) {
+            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW);
+        }
+        if (availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)
+                && isGPSSourceEnabled) {
+            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
+        }
+        if (enabledLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)) {
+            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
+        }
+
+        logger.info("Modem location setup {} for modem {}", desiredLocationSources, device.getObjectPath());
+
+        modemLocation.Setup(MMModemLocationSource.toBitmask(desiredLocationSources), false);
     }
 
     private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,

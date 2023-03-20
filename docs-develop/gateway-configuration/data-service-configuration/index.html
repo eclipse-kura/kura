@@ -652,6 +652,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#payload-size-limiting" class="md-nav__link">
+    Payload size limiting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2842,6 +2849,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#payload-size-limiting" class="md-nav__link">
+    Payload size limiting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2964,6 +2978,12 @@ Using the Connect/Disconnect button disables this function.</li>
 <p><strong>Connection Schedule Disconnect Inactivity Interval Second</strong>: Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if <strong>Enable Connection Schedule</strong> is set to true.</p>
 </li>
 </ul>
+<h2 id="payload-size-limiting">Payload size limiting</h2>
+<p>Starting from Kura 5.3.0, the DataService allows to limit the maximum payload size for published messages. Attempts to publish a payload larger than the configured threshold will fail with a KuraStoreException. The threshold can be configured with the following parameter:</p>
+<ul>
+<li><strong>Maximum Payload Size</strong>: The maximum allowed size in bytes for the message payload.</li>
+</ul>
+<p>In order to keep backwards compatibility, the default value for the parameter is set to 16777216 bytes, which is the maximum allowed size by the current H2DbService implementation.</p>
 
               
             </article>

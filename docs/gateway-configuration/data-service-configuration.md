@@ -106,6 +106,12 @@ The relevant configuration parameters are the following:
 
 - **Connection Schedule Disconnect Inactivity Interval Second**: Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if **Enable Connection Schedule** is set to true.
 
+## Payload size limiting
 
+Starting from Kura 5.3.0, the DataService allows to limit the maximum payload size for published messages. Attempts to publish a payload larger than the configured threshold will fail with a KuraStoreException. The threshold can be configured with the following parameter:
+
+- **Maximum Payload Size**: The maximum allowed size in bytes for the message payload.
+
+In order to keep backwards compatibility, the default value for the parameter is set to 16777216 bytes, which is the maximum allowed size by the current H2DbService implementation.
 
 

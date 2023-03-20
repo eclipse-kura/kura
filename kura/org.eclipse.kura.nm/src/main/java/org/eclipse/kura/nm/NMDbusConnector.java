@@ -609,20 +609,21 @@ public class NMDbusConnector {
         try {
             List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
             for (DBusPath path : simPaths) {
-                if (!path.getPath().equals("/")) {
-                    simProperties
-                            .add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, path.getPath(), Properties.class));
-                }
+                addSimPath(simProperties, path);
             }
         } catch (DBusExecutionException e) {
             // Get only the active sim if any
             DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
-            if (!simPath.getPath().equals("/")) {
-                simProperties
-                        .add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(), Properties.class));
-            }
+            addSimPath(simProperties, simPath);
         }
         return simProperties;
+    }
+
+    private void addSimPath(List<Properties> simProperties, DBusPath path) throws DBusException {
+        if (!path.getPath().equals("/")) {
+            simProperties.add(
+                    this.dbusConnection.getRemoteObject(MM_BUS_NAME, path.getPath(), Properties.class));
+        }
     }
 
     private List<Properties> getModemBearersProperties(String modemPath, Properties modemProperties)
@@ -636,8 +637,8 @@ public class NMDbusConnector {
             }
         } catch (DBusExecutionException e) {
             try {
-                DBusPath[] bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
-                bearerProperties = getBearersPropertiesFromPaths(Arrays.asList(bearerPaths));
+                List<DBusPath> bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
+                bearerProperties = getBearersPropertiesFromPaths(bearerPaths);
             } catch (DBusExecutionException e1) {
                 logger.warn("Cannot get bearers for modem {}", modemPath, e1);
             }

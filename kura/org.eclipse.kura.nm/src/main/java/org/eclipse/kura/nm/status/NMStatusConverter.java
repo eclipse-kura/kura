@@ -15,7 +15,6 @@ package org.eclipse.kura.nm.status;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +37,6 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInte
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.Bearer;
-import org.eclipse.kura.net.status.modem.BearerIpType;
 import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
@@ -57,7 +55,6 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusB
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.net.wifi.WifiChannel;
-import org.eclipse.kura.nm.MMBearerIpFamily;
 import org.eclipse.kura.nm.MMModem3gppRegistrationState;
 import org.eclipse.kura.nm.MMModemAccessTechnology;
 import org.eclipse.kura.nm.MMModemBand;
@@ -76,9 +73,10 @@ import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.PropertyCurrentModesStruct;
 import org.freedesktop.modemmanager1.PropertyPortsStruct;
+import org.freedesktop.modemmanager1.PropertySupportedModesStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +92,6 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_BUS_NAME = "org.freedesktop.ModemManager1.Sim";
-    private static final String MM_BEARER_BUS_NAME = "org.freedesktop.ModemManager1.Bearer";
     private static final String MM_MODEM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
     private static final String MM_MODEM_3GPP_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Modem3gpp";
     private static final String EMPTY_MAC_ADDRESS = "00:00:00:00:00:00";
@@ -514,7 +511,7 @@ public class NMStatusConverter {
             builder.withCurrentModes(getCurrentModemMode(properties));
             builder.withSupportedBands(getModemBands(properties, "SupportedBands"));
             builder.withCurrentBands(getModemBands(properties, "CurrentBands"));
-            builder.withGpsSupported(isGpsSupported(properties));
+            builder.withGpsSupported(isGpsSupported(properties)); // QUI!!!!!!
             builder.withActiveSimIndex(getActiveSimIndex(properties));
             builder.withSimLocked(isSimLocked(properties));
             builder.withConnectionStatus(MMModemState.toModemState(properties.Get(MM_MODEM_BUS_NAME, STATE)));
@@ -534,9 +531,7 @@ public class NMStatusConverter {
     private static Map<String, ModemPortType> getPorts(Properties properties) {
         Map<String, ModemPortType> ports = new HashMap<>();
         List<PropertyPortsStruct> rawPorts = properties.Get(MM_MODEM_BUS_NAME, "Ports");
-        rawPorts.forEach(portArray -> {
-            ports.put(portArray.getMember0(), MMModemPortType.toModemPortType(portArray.getMember1()));
-        });
+        rawPorts.forEach(port -> ports.put(port.getMember0(), MMModemPortType.toModemPortType(port.getMember1())));
         return ports;
     }
 
@@ -554,26 +549,20 @@ public class NMStatusConverter {
 
     private static Set<ModemModePair> getSupportedModemModes(Properties properties) {
         Set<ModemModePair> modes = new HashSet<>();
-        List<Object[]> rawModes = properties.Get(MM_MODEM_BUS_NAME, "SupportedModes");
+        List<PropertySupportedModesStruct> rawModes = properties.Get(MM_MODEM_BUS_NAME, "SupportedModes");
         rawModes.forEach(mode -> {
-            if (mode.length >= 2) {
-                Set<ModemMode> modemModes = MMModemMode.toModemModeFromBitMask((UInt32) mode[0]);
-                ModemMode preferredMode = MMModemMode.toModemMode((UInt32) mode[1]);
-                modes.add(new ModemModePair(modemModes, preferredMode));
-            }
+            Set<ModemMode> modemModes = MMModemMode.toModemModeFromBitMask(mode.getMember0());
+            ModemMode preferredMode = MMModemMode.toModemMode(mode.getMember1());
+            modes.add(new ModemModePair(modemModes, preferredMode));
         });
         return modes;
     }
 
     private static ModemModePair getCurrentModemMode(Properties properties) {
-        ModemModePair mode = new ModemModePair(Collections.emptySet(), ModemMode.NONE);
-        Object[] rawMode = properties.Get(MM_MODEM_BUS_NAME, "CurrentModes");
-        if (rawMode.length >= 2) {
-            Set<ModemMode> modemModes = MMModemMode.toModemModeFromBitMask((UInt32) rawMode[0]);
-            ModemMode preferredMode = MMModemMode.toModemMode((UInt32) rawMode[1]);
-            mode = new ModemModePair(modemModes, preferredMode);
-        }
-        return mode;
+        PropertyCurrentModesStruct mode = properties.Get(MM_MODEM_BUS_NAME, "CurrentModes");
+        Set<ModemMode> modemModes = MMModemMode.toModemModeFromBitMask(mode.getMember0());
+        ModemMode preferredMode = MMModemMode.toModemMode(mode.getMember1());
+        return new ModemModePair(modemModes, preferredMode);
     }
 
     private static Set<ModemBand> getModemBands(Properties properties, String name) {
@@ -657,24 +646,24 @@ public class NMStatusConverter {
 
     private static List<Bearer> getBearers(List<Properties> properties) {
         List<Bearer> bearers = new ArrayList<>();
-        for (Properties bearerProperties : properties) {
-            String name = bearerProperties.Get(MM_BEARER_BUS_NAME, "Interface");
-            boolean connected = bearerProperties.Get(MM_BEARER_BUS_NAME, "Connected");
-            Map<String, Variant<?>> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
-            String apn = String.class.cast(settings.get("apn").getValue());
-            Set<BearerIpType> bearerTypes = MMBearerIpFamily
-                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type").getValue()));
-            long bytesTransmitted = 0L;
-            long bytesReceived = 0L;
-            try {
-                Map<String, Variant<?>> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
-                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes").getValue()).longValue();
-                bytesReceived = UInt64.class.cast(stats.get("rx-bytes").getValue()).longValue();
-            } catch (DBusExecutionException e) {
-                logger.warn("Bearer statistics not found.");
-            }
-            bearers.add(new Bearer(name, connected, apn, bearerTypes, bytesTransmitted, bytesReceived));
-        }
+//        for (Properties bearerProperties : properties) {
+//            String name = bearerProperties.Get(MM_BEARER_BUS_NAME, "Interface");
+//            boolean connected = bearerProperties.Get(MM_BEARER_BUS_NAME, "Connected");
+//            Map<String, Variant<?>> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
+//            String apn = String.class.cast(settings.get("apn").getValue());
+//            Set<BearerIpType> bearerTypes = MMBearerIpFamily
+//                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type").getValue()));
+//            long bytesTransmitted = 0L;
+//            long bytesReceived = 0L;
+//            try {
+//                Map<String, Variant<?>> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
+//                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes").getValue()).longValue();
+//                bytesReceived = UInt64.class.cast(stats.get("rx-bytes").getValue()).longValue();
+//            } catch (DBusExecutionException e) {
+//                logger.warn("Bearer statistics not found.");
+//            }
+//            bearers.add(new Bearer(name, connected, apn, bearerTypes, bytesTransmitted, bytesReceived));
+//        }
         return bearers;
     }
 

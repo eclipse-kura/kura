@@ -543,7 +543,11 @@ public class NMDbusConnector {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();
         }
-
+        
+        return getAvaliableConnection(dev);
+    }
+    
+    private Optional<Connection> getAvaliableConnection(Device dev) throws DBusException {
         Optional<Connection> connectionToReturn = Optional.empty();
         
         try {
@@ -585,7 +589,7 @@ public class NMDbusConnector {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
         }
 
-        return connectionToReturn;
+        return connectionToReturn; 
     }
 
     private void configurationEnforcementEnable() throws DBusException {

@@ -18,7 +18,7 @@ Depends: openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temu
  setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
  polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
- ntpdate, chrony, chronyc, cron | cronie,
+ ntpdate, chrony, chronyc | chrony, cron | cronie,
  network-manager | networkmanager, bind9 | bind, isc-dhcp-server | dhcp-server, isc-dhcp-server | dhcp-client, iw, iptables, modemmanager,
  logrotate,
  gpsd

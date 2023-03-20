@@ -2,6 +2,7 @@ site_name: Eclipse Kura™ Documentation
 
 nav:
     - Getting Started:
+      - Install Kura: getting-started/install-kura.md
       - Raspberry Pi - Raspberry Pi OS Quick Start: getting-started/raspberry-pi-raspberryos-quick-start.md
       - Raspberry Pi - Ubuntu 20 Quick Start: getting-started/raspberry-pi-ubuntu-20-quick-start.md
       - Docker Quick Start: getting-started/docker-quick-start.md

@@ -292,8 +292,6 @@ public class NMDbusConnector {
             NetworkProperties properties) throws DBusException {
         List<String> availableInterfaces = getInterfaces();
 
-        logger.info("Mbeh??? {}", availableInterfaces);
-
         for (String iface : configuredInterfaces) {
             if (!availableInterfaces.contains(iface)) {
                 logger.debug("Configured device \"{}\" not available on the system. Ignoring configuration.", iface);

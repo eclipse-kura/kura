@@ -436,19 +436,6 @@ public class NMDbusConnector {
         return devices;
     }
 
-    private List<String> getAllDeviceInterfaceNames() throws DBusException {
-        List<DBusPath> devicePaths = this.nm.GetAllDevices();
-
-        List<String> devices = new ArrayList<>();
-        for (DBusPath path : devicePaths) {
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
-                    Properties.class);
-            devices.add(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE));
-        }
-
-        return devices;
-    }
-
     private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
         List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
 

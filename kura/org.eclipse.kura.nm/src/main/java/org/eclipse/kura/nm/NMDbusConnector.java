@@ -543,6 +543,49 @@ public class NMDbusConnector {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
             return Optional.empty();
         }
+
+        Optional<Connection> connectionToReturn = Optional.empty();
+        
+        try {
+            logger.info("Active connection not found, looking for avaliable connections.");
+
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH,
+                    Settings.class);
+            
+            List<DBusPath> connectionPath = settings.ListConnections();
+            
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(), Properties.class);
+            String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE); 
+            String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
+
+            boolean isFirst = true;
+            for (DBusPath path : connectionPath) {
+
+                Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Connection.class);
+                
+                Map<String, Map<String, Variant<?>>> workingSettings = availableConnection.GetSettings();
+                
+                String availableConnectionId = (String) workingSettings.get("connection").get("id").getValue();
+                String availableConnectionUuid = (String) workingSettings.get("connection").get("uuid").getValue();
+                
+                if (availableConnectionId.equals(expectedConnectionName)) {
+                    if (isFirst) {
+                        logger.debug("Using avaliable connection uuid: {}", availableConnectionUuid);
+                        connectionToReturn = Optional
+                                .of(availableConnection);
+                        isFirst = false;
+                    } else {
+                        logger.debug("Deleting extra connection with uuid: {}", availableConnectionUuid);
+                        availableConnection.Delete();
+                    }                    
+                }
+            }
+
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+        }
+
+        return connectionToReturn;
     }
 
     private void configurationEnforcementEnable() throws DBusException {

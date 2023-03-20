@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager.device;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -50,7 +51,7 @@ public interface WifiP2P extends DBusInterface {
         }
 
         public DBusPath getPeer() {
-            return peer;
+            return this.peer;
         }
 
     }
@@ -65,7 +66,7 @@ public interface WifiP2P extends DBusInterface {
         }
 
         public DBusPath getPeer() {
-            return peer;
+            return this.peer;
         }
 
     }

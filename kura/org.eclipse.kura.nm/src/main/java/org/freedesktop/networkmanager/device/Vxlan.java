@@ -13,6 +13,7 @@
 package org.freedesktop.networkmanager.device;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -57,7 +58,7 @@ public interface Vxlan extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

@@ -13,13 +13,13 @@
 package org.freedesktop.modemmanager1;
 
 import java.util.List;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.modemmanager1.PropertyValidityStruct;
 
 /**
  * Auto-generated class.

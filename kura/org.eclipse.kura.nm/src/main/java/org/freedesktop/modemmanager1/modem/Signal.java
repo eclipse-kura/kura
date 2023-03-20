@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;

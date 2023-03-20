@@ -14,6 +14,7 @@ package org.freedesktop;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -123,7 +124,7 @@ public interface NetworkManager extends DBusInterface {
         }
 
         public UInt32 getState() {
-            return state;
+            return this.state;
         }
 
     }
@@ -142,7 +143,7 @@ public interface NetworkManager extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }
@@ -157,7 +158,7 @@ public interface NetworkManager extends DBusInterface {
         }
 
         public DBusPath getDevicePath() {
-            return devicePath;
+            return this.devicePath;
         }
 
     }
@@ -172,7 +173,7 @@ public interface NetworkManager extends DBusInterface {
         }
 
         public DBusPath getDevicePath() {
-            return devicePath;
+            return this.devicePath;
         }
 
     }

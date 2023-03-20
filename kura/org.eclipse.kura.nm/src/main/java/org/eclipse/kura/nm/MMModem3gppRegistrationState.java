@@ -46,63 +46,63 @@ public enum MMModem3gppRegistrationState {
 
     public static MMModem3gppRegistrationState toMMModem3gppRegistrationState(UInt32 type) {
         switch (type.intValue()) {
-            case 0:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_IDLE;
-            case 1:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME;
-            case 2:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_SEARCHING;
-            case 3:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_DENIED;
-            case 4:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN;
-            case 5:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING;
-            case 6:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_SMS_ONLY;
-            case 7:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_SMS_ONLY;
-            case 8:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_EMERGENCY_ONLY;
-            case 9:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_CSFB_NOT_PREFERRED;
-            case 10:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_CSFB_NOT_PREFERRED;
-            case 11:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ATTACHED_RLOS;
-            default:
-                return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN;
+        case 0:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_IDLE;
+        case 1:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME;
+        case 2:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_SEARCHING;
+        case 3:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_DENIED;
+        case 4:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN;
+        case 5:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING;
+        case 6:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_SMS_ONLY;
+        case 7:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_SMS_ONLY;
+        case 8:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_EMERGENCY_ONLY;
+        case 9:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_CSFB_NOT_PREFERRED;
+        case 10:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_CSFB_NOT_PREFERRED;
+        case 11:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ATTACHED_RLOS;
+        default:
+            return MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN;
         }
     }
 
     public static RegistrationStatus toRegistrationStatus(UInt32 type) {
         switch (type.intValue()) {
-            case 0:
-                return RegistrationStatus.IDLE;
-            case 1:
-                return RegistrationStatus.HOME;
-            case 2:
-                return RegistrationStatus.SEARCHING;
-            case 3:
-                return RegistrationStatus.DENIED;
-            case 4:
-                return RegistrationStatus.UNKNOWN;
-            case 5:
-                return RegistrationStatus.ROAMING;
-            case 6:
-                return RegistrationStatus.HOME_SMS_ONLY;
-            case 7:
-                return RegistrationStatus.ROAMING_SMS_ONLY;
-            case 8:
-                return RegistrationStatus.EMERGENCY_ONLY;
-            case 9:
-                return RegistrationStatus.HOME_CSFB_NOT_PREFERRED;
-            case 10:
-                return RegistrationStatus.ROAMING_CSFB_NOT_PREFERRED;
-            case 11:
-                return RegistrationStatus.ATTACHED_RLOS;
-            default:
-                return RegistrationStatus.UNKNOWN;
+        case 0:
+            return RegistrationStatus.IDLE;
+        case 1:
+            return RegistrationStatus.HOME;
+        case 2:
+            return RegistrationStatus.SEARCHING;
+        case 3:
+            return RegistrationStatus.DENIED;
+        case 4:
+            return RegistrationStatus.UNKNOWN;
+        case 5:
+            return RegistrationStatus.ROAMING;
+        case 6:
+            return RegistrationStatus.HOME_SMS_ONLY;
+        case 7:
+            return RegistrationStatus.ROAMING_SMS_ONLY;
+        case 8:
+            return RegistrationStatus.EMERGENCY_ONLY;
+        case 9:
+            return RegistrationStatus.HOME_CSFB_NOT_PREFERRED;
+        case 10:
+            return RegistrationStatus.ROAMING_CSFB_NOT_PREFERRED;
+        case 11:
+            return RegistrationStatus.ATTACHED_RLOS;
+        default:
+            return RegistrationStatus.UNKNOWN;
         }
     }
 }

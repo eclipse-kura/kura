@@ -31,19 +31,19 @@ public class GetLoggingTuple extends Tuple {
     }
 
     public void setLevel(String arg) {
-        level = arg;
+        this.level = arg;
     }
 
     public String getLevel() {
-        return level;
+        return this.level;
     }
 
     public void setDomains(String arg) {
-        domains = arg;
+        this.domains = arg;
     }
 
     public String getDomains() {
-        return domains;
+        return this.domains;
     }
 
 }

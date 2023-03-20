@@ -72,8 +72,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) throws KuraException {
         Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id,
-                    this.commandExecutorService);
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id, this.commandExecutorService);
             if (Objects.nonNull(status)) {
                 networkInterfaceStatus = Optional.of(status);
             }

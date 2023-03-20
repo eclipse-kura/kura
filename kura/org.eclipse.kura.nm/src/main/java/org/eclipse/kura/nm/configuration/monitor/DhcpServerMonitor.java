@@ -29,7 +29,7 @@ public class DhcpServerMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerMonitor.class);
 
-    private Map<String, Boolean> dhcpServerInterfaceConfiguration;
+    private final Map<String, Boolean> dhcpServerInterfaceConfiguration;
     protected DhcpServerManager dhcpServerManager;
     private ScheduledExecutorService worker;
     private ScheduledFuture<?> handle;

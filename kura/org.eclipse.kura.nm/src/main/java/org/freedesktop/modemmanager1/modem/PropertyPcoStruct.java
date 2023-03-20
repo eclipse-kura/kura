@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
+
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.types.UInt32;
@@ -36,15 +37,15 @@ public class PropertyPcoStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public boolean getMember1() {
-        return member1;
+        return this.member1;
     }
 
     public List<Byte> getMember2() {
-        return member2;
+        return this.member2;
     }
 
 }

@@ -638,6 +638,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
+        if (priority < 0) {
+            throw new IllegalArgumentException("Priority cannot be negative");
+        }
+
+        if ((long) payload.length > this.dataServiceOptions.getMaximumPayloadSizeBytes()) {
+            throw new KuraStoreException("Payload size exceeds configured limit");
+        }
+
         if (this.autoConnectStrategy.isPresent()) {
             this.autoConnectStrategy.get().onPublishRequested(topic, payload, qos, retain, priority);
         }

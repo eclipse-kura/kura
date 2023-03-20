@@ -88,12 +88,12 @@ import org.junit.Test;
 public class NMDbusConnectorTest {
 
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
-    private DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
-    private NetworkManager mockedNetworkManager = mock(NetworkManager.class);
-    private ModemManager1 mockedModemManager = mock(ModemManager1.class);
+    private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
+    private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
+    private final ModemManager1 mockedModemManager = mock(ModemManager1.class);
     private NMDbusConnector instanceNMDbusConnector;
     private DBusConnection dbusConnectionInternal;
-    private CommandExecutorService commandExecutorService = mock(CommandExecutorService.class);
+    private final CommandExecutorService commandExecutorService = mock(CommandExecutorService.class);
 
     private Boolean hasDBusExceptionBeenThrown = false;
     private Boolean hasNoSuchElementExceptionThrown = false;
@@ -102,11 +102,11 @@ public class NMDbusConnectorTest {
 
     private NetworkInterfaceStatus netInterface;
 
-    private Map<String, Device> mockDevices = new HashMap<>();
+    private final Map<String, Device> mockDevices = new HashMap<>();
     private Connection mockConnection;
 
     private List<String> internalStringList;
-    private Map<String, Object> netConfig = new HashMap<>();
+    private final Map<String, Object> netConfig = new HashMap<>();
 
     private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"
             + "    (2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
@@ -721,8 +721,7 @@ public class NMDbusConnectorTest {
                 .thenReturn(NMDeviceType.toUInt32(type));
         when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "State"))
                 .thenReturn(NMDeviceState.toUInt32(state));
-        when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "Interface"))
-                .thenReturn(interfaceId);
+        when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "Interface")).thenReturn(interfaceId);
 
         when(this.mockedNetworkManager.GetDeviceByIpIface(interfaceId)).thenReturn(mockedPath1);
 
@@ -736,11 +735,11 @@ public class NMDbusConnectorTest {
             this.mockConnection = mock(Connection.class, RETURNS_SMART_NULLS);
             when(this.mockConnection.GetSettings()).thenReturn(mockedDevice1ConnectionSetting);
 
-            doReturn(this.mockConnection).when(this.dbusConnection).getRemoteObject(
-                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceId, Connection.class);
+            doReturn(this.mockConnection).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
+                    "/mock/device/" + interfaceId, Connection.class);
         } else {
-            doThrow(new DBusExecutionException("initiate mocked throw")).when(this.dbusConnection).getRemoteObject(
-                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceId, Connection.class);
+            doThrow(new DBusExecutionException("initiate mocked throw")).when(this.dbusConnection)
+                    .getRemoteObject("org.freedesktop.NetworkManager", "/mock/device/" + interfaceId, Connection.class);
         }
 
         doReturn(mockedDevice1Generic).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
@@ -780,7 +779,7 @@ public class NMDbusConnectorTest {
         when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "IpInterface")).thenReturn("wwan0");
 
         Map<String, Variant<?>> managedObjectProperties = new HashMap<>();
-        managedObjectProperties.put("DeviceIdentifier", new Variant<String>("abcd1234"));
+        managedObjectProperties.put("DeviceIdentifier", new Variant<>("abcd1234"));
         Map<String, Map<String, Variant<?>>> managedObject = new HashMap<>();
         managedObject.put(MM_MODEM_BUS_NAME, managedObjectProperties);
         Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = new HashMap<>();
@@ -803,8 +802,8 @@ public class NMDbusConnectorTest {
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "HardwareRevision")).thenReturn("S");
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimaryPort")).thenReturn("ttyACM17");
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "Ports"))
-                .thenReturn(Arrays.asList(new Object[] { (Object) "ttyACM17", new UInt32(2) },
-                        new Object[] { (Object) "ttyACM3", new UInt32(4) }));
+                .thenReturn(Arrays.asList(new Object[] { "ttyACM17", new UInt32(2) },
+                        new Object[] { "ttyACM3", new UInt32(4) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SupportedCapabilities"))
                 .thenReturn(Arrays.asList(new UInt32(4), new UInt32(8)));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "CurrentCapabilities"))
@@ -875,12 +874,12 @@ public class NMDbusConnectorTest {
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Interface")).thenReturn("ttyACM17");
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Connected")).thenReturn(true);
             Map<String, Variant<?>> settings = new HashMap<>();
-            settings.put("apn", new Variant<String>("VeryCoolMobile.com"));
-            settings.put("ip-type", new Variant<UInt32>(new UInt32(8)));
+            settings.put("apn", new Variant<>("VeryCoolMobile.com"));
+            settings.put("ip-type", new Variant<>(new UInt32(8)));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Properties")).thenReturn(settings);
             Map<String, Variant<?>> stats = new HashMap<>();
-            stats.put("tx-bytes", new Variant<UInt64>(new UInt64(190)));
-            stats.put("rx-bytes", new Variant<UInt64>(new UInt64(290)));
+            stats.put("tx-bytes", new Variant<>(new UInt64(190)));
+            stats.put("rx-bytes", new Variant<>(new UInt64(290)));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Stats")).thenReturn(stats);
         } else {
             when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers"))

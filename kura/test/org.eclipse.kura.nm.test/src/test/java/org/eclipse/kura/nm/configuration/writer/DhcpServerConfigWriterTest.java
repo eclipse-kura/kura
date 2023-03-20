@@ -18,8 +18,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,7 +122,10 @@ public class DhcpServerConfigWriterTest {
 
     private void givenDhcpConfigWriterWithEmptyProperties() {
         this.interfaceName = "eth0";
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(new HashMap<String, Object>())) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName,
+                new NetworkProperties(new HashMap<String, Object>())) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/etc/dhcpd-eth0.conf";
             }
@@ -143,7 +144,7 @@ public class DhcpServerConfigWriterTest {
 
     private void givenDhcpConfigWriterWithDefaultProperties() {
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
@@ -153,7 +154,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -164,7 +167,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
@@ -173,7 +176,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -184,7 +189,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         properties.put("net.interface.eth0.config.dhcpServer4.passDns", true);
@@ -193,7 +198,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -204,7 +211,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.passDns", true);
@@ -213,7 +220,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -224,7 +233,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
@@ -233,7 +242,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -244,7 +255,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
@@ -253,7 +264,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
         properties.put("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -264,7 +277,7 @@ public class DhcpServerConfigWriterTest {
         this.isUnknownHostException = false;
         this.isKuraException = false;
         this.interfaceName = "eth0";
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("net.interface.eth0.config.dhcpServer4.enabled", true);
         properties.put("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         properties.put("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
@@ -273,7 +286,9 @@ public class DhcpServerConfigWriterTest {
         properties.put("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
         properties.put("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
 
-        this.writer = new DhcpServerConfigWriter(interfaceName, new NetworkProperties(properties)) {
+        this.writer = new DhcpServerConfigWriter(this.interfaceName, new NetworkProperties(properties)) {
+
+            @Override
             protected String getConfigFilename() {
                 return "/tmp/dhcpd-eth0.conf";
             }
@@ -306,40 +321,20 @@ public class DhcpServerConfigWriterTest {
     private void thenDhcpdConfigFileIsCorrect() throws IOException {
         File dhcpConfigFile = new File("/tmp/dhcpd-eth0.conf");
         String content = FileUtils.readFileToString(dhcpConfigFile, "UTF-8");
-        String expectedContent = "# enabled? true\n"
-                + "# prefix: 24\n"
-                + "# pass DNS? true\n"
-                + "\n"
-                + "subnet 192.168.0.0 netmask 255.255.255.0 {\n"
-                + "    option domain-name-servers 192.168.0.11;\n"
-                + "\n"
-                + "    interface eth0;\n"
-                + "    option routers 192.168.0.11;\n"
-                + "    default-lease-time 900;\n"
-                + "    max-lease-time 1000;\n"
-                + "    pool {\n"
-                + "        range 192.168.0.111 192.168.0.120;\n"
-                + "    }\n"
-                + "}\n";
+        String expectedContent = "# enabled? true\n" + "# prefix: 24\n" + "# pass DNS? true\n" + "\n"
+                + "subnet 192.168.0.0 netmask 255.255.255.0 {\n" + "    option domain-name-servers 192.168.0.11;\n"
+                + "\n" + "    interface eth0;\n" + "    option routers 192.168.0.11;\n"
+                + "    default-lease-time 900;\n" + "    max-lease-time 1000;\n" + "    pool {\n"
+                + "        range 192.168.0.111 192.168.0.120;\n" + "    }\n" + "}\n";
         assertEquals(expectedContent, content);
     }
 
     private void thenUdhcpdConfigFileIsCorrect() throws IOException {
         File dhcpConfigFile = new File("/tmp/dhcpd-eth0.conf");
         String content = FileUtils.readFileToString(dhcpConfigFile, "UTF-8");
-        String expectedContent = "start 192.168.0.111\n"
-                + "end 192.168.0.120\n"
-                + "interface eth0\n"
-                + "pidfile null\n"
-                + "max_leases 9\n"
-                + "auto_time 0\n"
-                + "decline_time 900\n"
-                + "conflict_time 900\n"
-                + "offer_time 900\n"
-                + "min_lease 900\n"
-                + "opt subnet 255.255.255.0\n"
-                + "opt router 192.168.0.11\n"
-                + "opt lease 900\n"
+        String expectedContent = "start 192.168.0.111\n" + "end 192.168.0.120\n" + "interface eth0\n" + "pidfile null\n"
+                + "max_leases 9\n" + "auto_time 0\n" + "decline_time 900\n" + "conflict_time 900\n" + "offer_time 900\n"
+                + "min_lease 900\n" + "opt subnet 255.255.255.0\n" + "opt router 192.168.0.11\n" + "opt lease 900\n"
                 + "opt dns 192.168.0.11\n";
         assertEquals(expectedContent, content);
     }

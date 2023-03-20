@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -36,7 +37,6 @@ import org.eclipse.kura.net.status.wifi.WifiChannel;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
-import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -48,6 +48,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapter to convert status-related properties to a
@@ -56,17 +58,18 @@ import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
  */
 public class NetworkStatusServiceAdapter {
 
+    private final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
     private final NetworkStatusService networkStatusService;
 
     public NetworkStatusServiceAdapter() throws GwtKuraException {
         this.networkStatusService = ServiceLocator.getInstance().getService(NetworkStatusService.class);
     }
 
-    public List<String> getNetInterfaces() {
+    public List<String> getNetInterfaces() throws KuraException {
         return this.networkStatusService.getInterfaceIds();
     }
 
-    public void fillWithStatusProperties(String ifName, GwtNetInterfaceConfig gwtConfigToUpdate) {
+    public void fillWithStatusProperties(String ifName, GwtNetInterfaceConfig gwtConfigToUpdate) throws KuraException {
         Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifName);
 
         if (networkInterfaceInfo.isPresent()) {
@@ -78,7 +81,7 @@ public class NetworkStatusServiceAdapter {
 
     }
 
-    public Optional<NetworkInterfaceType> getNetInterfaceType(String ifName) {
+    public Optional<NetworkInterfaceType> getNetInterfaceType(String ifName) throws KuraException {
         Optional<NetworkInterfaceStatus> networkInterfaceInfo = this.networkStatusService.getNetworkStatus(ifName);
         Optional<NetworkInterfaceType> ifType = Optional.empty();
         if (networkInterfaceInfo.isPresent()) {
@@ -87,7 +90,7 @@ public class NetworkStatusServiceAdapter {
         return ifType;
     }
 
-    public List<GwtWifiChannelFrequency> getAllSupportedChannels(String ifname) {
+    public List<GwtWifiChannelFrequency> getAllSupportedChannels(String ifname) throws KuraException {
         Optional<NetworkInterfaceStatus> netInterface = this.networkStatusService.getNetworkStatus(ifname);
         if (!netInterface.isPresent() || !(netInterface.get() instanceof WifiInterfaceStatus)) {
             return new ArrayList<>();
@@ -124,19 +127,24 @@ public class NetworkStatusServiceAdapter {
         return gwtChannels;
     }
 
-    public String getWifiCountryCode() {
-        List<NetworkInterfaceStatus> netInterfaces = this.networkStatusService.getNetworkStatus();
-
-        for (NetworkInterfaceStatus ifaceStatus : netInterfaces) {
-            if (ifaceStatus instanceof WifiInterfaceStatus) {
-                return ((WifiInterfaceStatus) ifaceStatus).getCountryCode();
+    public String getWifiCountryCode() throws KuraException {
+        List<String> interfaceNames = this.networkStatusService.getInterfaceIds();
+        for (String interfaceName : interfaceNames) {
+            try {
+                Optional<NetworkInterfaceStatus> ifaceStatus = this.networkStatusService
+                        .getNetworkStatus(interfaceName);
+                if (ifaceStatus.isPresent() && ifaceStatus.get() instanceof WifiInterfaceStatus) {
+                    return ((WifiInterfaceStatus) ifaceStatus.get()).getCountryCode();
+                }
+            } catch (KuraException e) {
+                logger.error("Cannot retrieve wifi country code", e);
             }
         }
 
         return "";
     }
 
-    public List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) {
+    public List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws KuraException {
         List<GwtWifiHotspotEntry> result = new ArrayList<>();
 
         Optional<NetworkInterfaceStatus> ifStatus = this.networkStatusService.getNetworkStatus(interfaceName);

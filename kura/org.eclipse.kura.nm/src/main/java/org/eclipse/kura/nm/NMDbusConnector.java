@@ -472,6 +472,12 @@ public class NMDbusConnector {
         if (connection.isPresent()) {
             connection.get().Delete();
         }
+
+        NMDeviceType deviceType = getDeviceType(device);
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            handleModemManagerGPSSetup(device, Optional.of(false));
+        }
+
     }
 
     private List<Device> getAllDevices() throws DBusException {

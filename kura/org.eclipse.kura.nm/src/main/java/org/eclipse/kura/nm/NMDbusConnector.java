@@ -66,6 +66,7 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";
     private static final String NM_DEVICE_PROPERTY_STATE = "State";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
+    private static final String NM_DEVICE_PROPERTY_CONFIGURATION = "connection";
 
     private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
 
@@ -434,7 +435,7 @@ public class NMDbusConnector {
         try {
             Map<String, Map<String, Variant<?>>> connectionSettings = dev.GetAppliedConnection(new UInt32(0))
                     .getConnection();
-            String uuid = String.valueOf(connectionSettings.get("connection").get("uuid").getValue());
+            String uuid = String.valueOf(connectionSettings.get(NM_DEVICE_PROPERTY_CONFIGURATION).get("uuid").getValue());
 
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 
@@ -470,8 +471,8 @@ public class NMDbusConnector {
                 
                 Map<String, Map<String, Variant<?>>> workingSettings = availableConnection.GetSettings();
                 
-                String availableConnectionId = (String) workingSettings.get("connection").get("id").getValue();
-                String availableConnectionUuid = (String) workingSettings.get("connection").get("uuid").getValue();
+                String availableConnectionId = (String) workingSettings.get(NM_DEVICE_PROPERTY_CONFIGURATION).get("id").getValue();
+                String availableConnectionUuid = (String) workingSettings.get(NM_DEVICE_PROPERTY_CONFIGURATION).get("uuid").getValue();
                 
                 if (availableConnectionId.equals(expectedConnectionName)) {
                     if (isFirst) {

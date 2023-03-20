@@ -457,27 +457,27 @@ public class NMDbusConnector {
             
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(), Properties.class);
             String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE); 
-            String targetConnectionName = String.format("kura-%s-connection", interfaceName);
+            String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
 
             boolean isFirst = true;
             for (DBusPath path : connectionPath) {
 
-                Connection workingConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Connection.class);
+                Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Connection.class);
                 
-                Map<String, Map<String, Variant<?>>> workingSettings = workingConnection.GetSettings();
+                Map<String, Map<String, Variant<?>>> workingSettings = availableConnection.GetSettings();
                 
-                String workingConnectionName = (String) workingSettings.get("connection").get("id").getValue();
-                String workingConnectionId = (String) workingSettings.get("connection").get("uuid").getValue();
+                String availableConnectionId = (String) workingSettings.get("connection").get("id").getValue();
+                String availableConnectionUuid = (String) workingSettings.get("connection").get("uuid").getValue();
                 
-                if (workingConnectionName.contains(targetConnectionName)) {
+                if (availableConnectionId.equals(expectedConnectionName)) {
                     if (isFirst) {
-                        logger.info("Using avaliable connection uuid: {}", workingConnectionId);
+                        logger.debug("Using avaliable connection uuid: {}", availableConnectionUuid);
                         connectionToReturn = Optional
-                                .of(workingConnection);
+                                .of(availableConnection);
                         isFirst = false;
                     } else {
-                        logger.info("Deleting extra connection with uuid: {}", workingConnectionId);
-                        workingConnection.Delete();
+                        logger.debug("Deleting extra connection with uuid: {}", availableConnectionUuid);
+                        availableConnection.Delete();
                     }                    
                 }
             }

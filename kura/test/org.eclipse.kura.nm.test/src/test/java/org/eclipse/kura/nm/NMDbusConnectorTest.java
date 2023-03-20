@@ -485,11 +485,11 @@ public class NMDbusConnectorTest {
     @Test
     public void getModemInterfaceStatusShouldWork() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
+        givenMockedDevice("1-5", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
                 true);
         givenMockedDeviceList();
 
-        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
+        whenGetInterfaceStatus("1-5", this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -497,13 +497,14 @@ public class NMDbusConnectorTest {
         thenModemStatusHasCorrectValues(true, true);
     }
 
+    @Test
     public void getModemInterfaceStatusWithoutBearersShouldWork() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, false,
+        givenMockedDevice("1-5", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, false,
                 true);
         givenMockedDeviceList();
 
-        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
+        whenGetInterfaceStatus("1-5", this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -514,11 +515,11 @@ public class NMDbusConnectorTest {
     @Test
     public void getModemInterfaceStatusWithoutSimsShouldWork() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
+        givenMockedDevice("1-5", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true, true,
                 false);
         givenMockedDeviceList();
 
-        whenGetInterfaceStatus("wwan0", this.commandExecutorService);
+        whenGetInterfaceStatus("1-5", this.commandExecutorService);
 
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
@@ -672,19 +673,19 @@ public class NMDbusConnectorTest {
                 "/org/freedesktop/NetworkManager", Properties.class);
     }
 
-    private void givenMockedDevice(String interfaceName, NMDeviceType type, NMDeviceState state,
+    private void givenMockedDevice(String interfaceId, NMDeviceType type, NMDeviceState state,
             Boolean hasAssociatedConnection, boolean hasBearers, boolean hasSims) throws DBusException, IOException {
         Device mockedDevice1 = mock(Device.class);
 
-        this.mockDevices.put(interfaceName, mockedDevice1);
+        this.mockDevices.put(interfaceId, mockedDevice1);
 
-        when(mockedDevice1.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
+        when(mockedDevice1.getObjectPath()).thenReturn("/mock/device/" + interfaceId);
 
         Generic mockedDevice1Generic = mock(Generic.class);
-        when(mockedDevice1Generic.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
+        when(mockedDevice1Generic.getObjectPath()).thenReturn("/mock/device/" + interfaceId);
 
         DBusPath mockedPath1 = mock(DBusPath.class);
-        when(mockedPath1.getPath()).thenReturn("/mock/device/" + interfaceName);
+        when(mockedPath1.getPath()).thenReturn("/mock/device/" + interfaceId);
 
         Map<String, Map<String, Variant<?>>> mockedDevice1ConnectionSetting = new HashMap<>();
         mockedDevice1ConnectionSetting.put("connection",
@@ -700,20 +701,20 @@ public class NMDbusConnectorTest {
 
         Properties mockedProperties1 = mock(Properties.class);
 
-        if (type == NMDeviceType.NM_DEVICE_TYPE_GENERIC && interfaceName.equals("lo")) {
+        if (type == NMDeviceType.NM_DEVICE_TYPE_GENERIC && interfaceId.equals("lo")) {
             when(mockedProperties1.Get(any(), any())).thenReturn("loopback");
         }
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
-            simulateIwCommandOutputs(interfaceName, mockedProperties1);
+            simulateIwCommandOutputs(interfaceId, mockedProperties1);
         }
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             Wired wiredDevice = mock(Wired.class);
-            when(wiredDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceName);
+            when(wiredDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceId);
 
             doReturn(wiredDevice).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
-                    "/mock/device/" + interfaceName, Wired.class);
+                    "/mock/device/" + interfaceId, Wired.class);
         }
 
         when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "DeviceType"))
@@ -721,35 +722,35 @@ public class NMDbusConnectorTest {
         when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "State"))
                 .thenReturn(NMDeviceState.toUInt32(state));
         when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "Interface"))
-                .thenReturn(interfaceName);
+                .thenReturn(interfaceId);
 
-        when(this.mockedNetworkManager.GetDeviceByIpIface(interfaceName)).thenReturn(mockedPath1);
+        when(this.mockedNetworkManager.GetDeviceByIpIface(interfaceId)).thenReturn(mockedPath1);
 
         doReturn(mockedDevice1).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
-                "/mock/device/" + interfaceName, Device.class);
+                "/mock/device/" + interfaceId, Device.class);
         doReturn(mockedDevice1Settings).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
                 "/org/freedesktop/NetworkManager/Settings", Settings.class);
         doReturn(mockedProperties1).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
-                "/mock/device/" + interfaceName, Properties.class);
+                "/mock/device/" + interfaceId, Properties.class);
         if (hasAssociatedConnection) {
             this.mockConnection = mock(Connection.class, RETURNS_SMART_NULLS);
             when(this.mockConnection.GetSettings()).thenReturn(mockedDevice1ConnectionSetting);
 
             doReturn(this.mockConnection).when(this.dbusConnection).getRemoteObject(
-                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceName, Connection.class);
+                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceId, Connection.class);
         } else {
             doThrow(new DBusExecutionException("initiate mocked throw")).when(this.dbusConnection).getRemoteObject(
-                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceName, Connection.class);
+                    "org.freedesktop.NetworkManager", "/mock/device/" + interfaceId, Connection.class);
         }
 
         doReturn(mockedDevice1Generic).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
                 "/mock/device/lo", Generic.class);
 
         Properties mockedProperties = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
-                "/mock/device/" + interfaceName, Properties.class);
-        givenExtraStatusMocksFor(interfaceName, state, mockedProperties);
+                "/mock/device/" + interfaceId, Properties.class);
+        givenExtraStatusMocksFor(interfaceId, state, mockedProperties);
         if (type == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            givenModemMocksFor(interfaceName, mockedProperties, hasBearers, hasSims);
+            givenModemMocksFor(interfaceId, mockedProperties, hasBearers, hasSims);
         }
     }
 
@@ -930,7 +931,7 @@ public class NMDbusConnectorTest {
 
     private void whenGetInterfacesIsCalled() {
         try {
-            this.internalStringList = this.instanceNMDbusConnector.getInterfaces();
+            this.internalStringList = this.instanceNMDbusConnector.getDeviceIds();
         } catch (DBusException e) {
             this.hasDBusExceptionBeenThrown = true;
         }
@@ -1068,7 +1069,7 @@ public class NMDbusConnectorTest {
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {
         assertTrue(this.netInterface instanceof ModemInterfaceStatus);
         ModemInterfaceStatus modemStatus = (ModemInterfaceStatus) this.netInterface;
-        assertEquals("1-5", modemStatus.getName());
+        assertEquals("1-5", modemStatus.getId());
         assertEquals("wwan0", modemStatus.getInterfaceName());
         assertEquals("AwesomeModel", modemStatus.getModel());
         assertEquals("TheBestInTheWorld", modemStatus.getManufacturer());

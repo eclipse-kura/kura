@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -105,11 +104,11 @@ public class NMStatusConverter {
         throw new IllegalStateException("Utility class");
     }
 
-    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceName,
+    public static NetworkInterfaceStatus buildEthernetStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
 
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
+        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -123,10 +122,10 @@ public class NMStatusConverter {
 
     }
 
-    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceName,
+    public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(true);
+        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -138,12 +137,12 @@ public class NMStatusConverter {
         return builder.build();
     }
 
-    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceName,
+    public static NetworkInterfaceStatus buildWirelessStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
             AccessPointsProperties accessPointsProperties,
             SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
-        builder.withName(interfaceName).withInterfaceName(interfaceName).withVirtual(false);
+        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(
                 devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -172,15 +171,14 @@ public class NMStatusConverter {
         builder.withHardwareAddress(getMacAddressBytes(hwAddress));
     }
 
-    public static NetworkInterfaceStatus buildModemStatus(String interfaceName,
+    public static NetworkInterfaceStatus buildModemStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
             List<Properties> simProperties, List<Properties> bearerProperties) {
         ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
         Properties deviceProperties = devicePropertiesWrapper.getDeviceProperties();
         Optional<Properties> modemProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
-        setModemName(interfaceName, modemProperties, builder);
-        setModemInterfaceName(interfaceName, deviceProperties, modemProperties, builder);
-        builder.withVirtual(false);
+        builder.withId(interfaceId).withVirtual(false);
+        setModemInterfaceName(interfaceId, deviceProperties, builder);
 
         NMDeviceState deviceState = NMDeviceState
                 .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, STATE));
@@ -200,45 +198,25 @@ public class NMStatusConverter {
         return builder.build();
     }
 
-    // Set the name as the path of the modem in the device (usb path, pci path, ...)
-    private static void setModemName(String interfaceName, Optional<Properties> modemProperties,
-            ModemInterfaceStatusBuilder builder) {
-        modemProperties.ifPresent(properties -> {
-            String modemDeviceProperty = ((String) properties.Get(MM_MODEM_BUS_NAME, "Device"));
-            String modemDeviceResourcePath = modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
-            if (Objects.nonNull(modemDeviceResourcePath) && !modemDeviceResourcePath.isEmpty()) {
-                builder.withName(modemDeviceResourcePath);
-
-            } else {
-                builder.withName(interfaceName);
-            }
-        });
-    }
-
     // Set the interface name as the interface used for the connection if available
-    private static void setModemInterfaceName(String interfaceName, Properties deviceProperties,
-            Optional<Properties> modemProperties,
+    private static void setModemInterfaceName(String interfaceId, Properties deviceProperties,
             ModemInterfaceStatusBuilder builder) {
         try {
             String ipInterface = deviceProperties.Get(NM_DEVICE_BUS_NAME, "IpInterface");
             if (Objects.nonNull(ipInterface) && !ipInterface.isEmpty()) {
                 builder.withInterfaceName(ipInterface);
             } else {
-                modemProperties.ifPresent(properties -> {
-                    Map<String, ModemPortType> ports = getPorts(properties);
-                    Optional<Entry<String, ModemPortType>> netPort = ports.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(ModemPortType.NET)).findFirst();
-                    if (netPort.isPresent()) {
-                        builder.withInterfaceName(netPort.get().getKey());
-                    } else {
-                        builder.withInterfaceName(interfaceName);
-                    }
-                });
+                builder.withInterfaceName("");
             }
         } catch (DBusExecutionException e) {
-            logger.debug("Cannot retrieve IpInterface for " + interfaceName + " interface", e);
-            builder.withInterfaceName(interfaceName);
+            logger.debug("Cannot retrieve IpInterface for " + interfaceId + " interface", e);
+            builder.withInterfaceName("");
         }
+    }
+
+    public static String getModemDeviceHwPath(Properties modemProperties) {
+        String modemDeviceProperty = ((String) modemProperties.Get(MM_MODEM_BUS_NAME, "Device"));
+        return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
     }
 
     private static String getHwAddressFrom(DevicePropertiesWrapper devicePropertiesWrapper) {

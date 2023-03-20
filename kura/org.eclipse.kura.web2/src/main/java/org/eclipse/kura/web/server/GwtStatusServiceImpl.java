@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
@@ -342,9 +343,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                 String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
+                String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
                 String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
-                String name = interfaceName + " ("
-                        + gwtNetInterfaceConfig.getName() + ")";
+                if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
+                    name = name + " (" + interfaceName + ")";
+                }
                 if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {

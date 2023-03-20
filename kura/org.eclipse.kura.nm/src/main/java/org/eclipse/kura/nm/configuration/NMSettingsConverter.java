@@ -51,26 +51,27 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Map<String, Variant<?>>> buildSettings(NetworkProperties properties,
-            Optional<Connection> oldConnection, String iface, NMDeviceType deviceType) {
+            Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType) {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
         Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
         newConnectionSettings.put(NM_SETTINGS_CONNECTION, connectionMap);
 
-        Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, iface);
-        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, iface);
+        Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, deviceId);
+        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, deviceId);
         newConnectionSettings.put("ipv4", ipv4Map);
         newConnectionSettings.put("ipv6", ipv6Map);
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
-            Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter.build80211WirelessSettings(properties, iface);
+            Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter.build80211WirelessSettings(properties,
+                    deviceId);
             Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
-                    .build80211WirelessSecuritySettings(properties, iface);
+                    .build80211WirelessSecuritySettings(properties, deviceId);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
             newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, iface);
-            Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, iface);
+            Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, deviceId);
+            Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, deviceId);
             newConnectionSettings.put("gsm", gsmSettingsMap);
             newConnectionSettings.put("ppp", pppSettingsMap);
         }
@@ -78,26 +79,26 @@ public class NMSettingsConverter {
         return newConnectionSettings;
     }
 
-    public static Map<String, Variant<?>> buildIpv4Settings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> buildIpv4Settings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", iface);
+        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", deviceId);
 
         KuraIpStatus ip4Status = KuraIpStatus
-                .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", iface));
+                .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
 
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
             settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("manual"));
 
-            String address = props.get(String.class, "net.interface.%s.config.ip4.address", iface);
-            Short prefix = props.get(Short.class, "net.interface.%s.config.ip4.prefix", iface);
+            String address = props.get(String.class, "net.interface.%s.config.ip4.address", deviceId);
+            Short prefix = props.get(Short.class, "net.interface.%s.config.ip4.prefix", deviceId);
 
             Map<String, Variant<?>> addressEntry = new HashMap<>();
             addressEntry.put("address", new Variant<>(address));
             addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
 
             if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
-                Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", iface);
+                Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip4.gateway", deviceId);
                 gateway.ifPresent(gatewayAddress -> settings.put("gateway", new Variant<>(gatewayAddress)));
             }
 
@@ -111,14 +112,14 @@ public class NMSettingsConverter {
             settings.put("ignore-auto-dns", new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
         } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
-            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", iface);
+            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", deviceId);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
                 settings.put("ignore-auto-dns", new Variant<>(true));
             }
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",
-                    iface);
+                    deviceId);
             if (wanPriority.isPresent()) {
                 Long supportedByNM = wanPriority.get().longValue();
                 settings.put("route-metric", new Variant<>(supportedByNM));
@@ -130,7 +131,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         // Disabled for now
@@ -139,60 +140,60 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
+        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
 
         String mode = wifiModeConvert(propMode);
         settings.put("mode", new Variant<>(mode));
 
-        String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", iface, propMode.toLowerCase());
+        String ssid = props.get(String.class, "net.interface.%s.config.wifi.%s.ssid", deviceId, propMode.toLowerCase());
         settings.put("ssid", new Variant<>(ssid.getBytes(StandardCharsets.UTF_8)));
 
         short channel = Short.parseShort(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.channel", iface, propMode.toLowerCase()));
+                props.get(String.class, "net.interface.%s.config.wifi.%s.channel", deviceId, propMode.toLowerCase()));
         settings.put("channel", new Variant<>(new UInt32(channel)));
 
         Optional<String> band = wifiBandConvert(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", iface, propMode.toLowerCase()),
+                props.get(String.class, "net.interface.%s.config.wifi.%s.radioMode", deviceId, propMode.toLowerCase()),
                 channel);
         band.ifPresent(bandString -> settings.put("band", new Variant<>(bandString)));
 
-        Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", iface,
+        Optional<Boolean> hidden = props.getOpt(Boolean.class, "net.interface.%s.config.wifi.%s.ignoreSSID", deviceId,
                 propMode.toLowerCase());
         hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
         return settings;
     }
 
-    public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", iface);
+        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
 
         String psk = props
-                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", iface, propMode.toLowerCase())
+                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
                 .toString();
         String keyMgmt = wifiKeyMgmtConvert(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
+                props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));
         settings.put("key-mgmt", new Variant<>(keyMgmt));
 
         if ("wpa-psk".equals(keyMgmt)) {
             List<String> proto = wifiProtoConvert(props.get(String.class,
-                    "net.interface.%s.config.wifi.%s.securityType", iface, propMode.toLowerCase()));
+                    "net.interface.%s.config.wifi.%s.securityType", deviceId, propMode.toLowerCase()));
             settings.put("proto", new Variant<>(proto, "as"));
         }
 
-        Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", iface,
+        Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", deviceId,
                 propMode.toLowerCase());
         if (group.isPresent()) {
             List<String> nmGroup = wifiCipherConvert(group.get());
             settings.put("group", new Variant<>(nmGroup, "as"));
         }
 
-        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers", iface,
+        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers", deviceId,
                 propMode.toLowerCase());
         if (pairwise.isPresent()) {
             List<String> nmPairwise = wifiCipherConvert(pairwise.get());
@@ -202,34 +203,34 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildGsmSettings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> buildGsmSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String apn = props.get(String.class, "net.interface.%s.config.apn", iface);
+        String apn = props.get(String.class, "net.interface.%s.config.apn", deviceId);
         settings.put("apn", new Variant<>(apn));
 
-        Optional<String> username = props.getOpt(String.class, "net.interface.%s.config.username", iface);
+        Optional<String> username = props.getOpt(String.class, "net.interface.%s.config.username", deviceId);
         username.ifPresent(usernameString -> settings.put("username", new Variant<>(usernameString)));
 
-        Optional<Password> password = props.getOpt(Password.class, "net.interface.%s.config.password", iface);
+        Optional<Password> password = props.getOpt(Password.class, "net.interface.%s.config.password", deviceId);
         password.ifPresent(passwordString -> settings.put("password", new Variant<>(passwordString.toString())));
 
-        Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", iface);
+        Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", deviceId);
         number.ifPresent(numberString -> settings.put("number", new Variant<>(numberString)));
 
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildPPPSettings(NetworkProperties props, String iface) {
+    public static Map<String, Variant<?>> buildPPPSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         Optional<Integer> lcpEchoInterval = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoInterval",
-                iface);
+                deviceId);
         lcpEchoInterval.ifPresent(interval -> settings.put("lcp-echo-interval", new Variant<>(interval)));
-        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure", iface);
+        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure", deviceId);
         lcpEchoFailure.ifPresent(failure -> settings.put("lcp-echo-failure", new Variant<>(failure)));
 
-        Optional<String> authType = props.getOpt(String.class, "net.interface.%s.config.authType", iface);
+        Optional<String> authType = props.getOpt(String.class, "net.interface.%s.config.authType", deviceId);
         authType.ifPresent(authenticationType -> setAuthenticationType(authenticationType, settings));
 
         return settings;
@@ -267,23 +268,23 @@ public class NMSettingsConverter {
     }
 
     private static void setAuthenticationType(String authenticationType, Map<String, Variant<?>> settings) {
-        if (authenticationType.equals("AUTO")) {
+        if (authenticationType.equals("netModemAuthAUTO")) {
             return;
         }
 
-        if (authenticationType.equals("NONE")) {
+        if (authenticationType.equals("netModemAuthNONE")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("CHAP")) {
+        } else if (authenticationType.equals("netModemAuthCHAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(false));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("PAP")) {
+        } else if (authenticationType.equals("netModemAuthPAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(false));
@@ -397,8 +398,7 @@ public class NMSettingsConverter {
         case "SECURITY_WPA_WPA2":
             return Arrays.asList();
         default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
+            throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
         }
     }
 

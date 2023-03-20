@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -150,9 +151,13 @@ public class NetworkInterfacesTableUi extends Composite {
             public String getValue(GwtNetInterfaceConfig object) {
                 if (object.getHwTypeEnum().equals(GwtNetIfType.MODEM) && object instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig modemObject = (GwtModemInterfaceConfig) object;
-                    return modemObject.getInterfaceName() + " (" + modemObject.getName() + ")";
+                    if (Objects.nonNull(modemObject.getInterfaceName()) && !modemObject.getInterfaceName().isEmpty()) {
+                        return modemObject.getName() + " (" + modemObject.getInterfaceName() + ")";
+                    } else {
+                        return object.getName();
+                    }
                 } else {
-                    return object.getInterfaceName();
+                    return object.getName();
                 }
             }
         };

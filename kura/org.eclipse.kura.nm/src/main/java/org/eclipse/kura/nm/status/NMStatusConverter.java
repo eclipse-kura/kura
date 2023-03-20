@@ -209,7 +209,7 @@ public class NMStatusConverter {
                 builder.withInterfaceName("");
             }
         } catch (DBusExecutionException e) {
-            logger.debug("Cannot retrieve IpInterface for " + interfaceId + " interface", e);
+            logger.debug("Cannot retrieve IpInterface for {} interface Id", interfaceId, e);
             builder.withInterfaceName("");
         }
     }

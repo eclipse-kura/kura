@@ -120,8 +120,10 @@ public class NMDbusConnector {
 
     public void checkPermissions() {
         Map<String, String> getPermissions = this.nm.GetPermissions();
-        for (Entry<String, String> entry : getPermissions.entrySet()) {
-            logger.info("Permission for {}: {}", entry.getKey(), entry.getValue());
+        if (logger.isDebugEnabled()) {
+            for (Entry<String, String> entry : getPermissions.entrySet()) {
+                logger.debug("Permission for {}: {}", entry.getKey(), entry.getValue());
+            }
         }
     }
 
@@ -130,7 +132,7 @@ public class NMDbusConnector {
 
         String nmVersion = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
 
-        logger.info("NM Version: {}", nmVersion);
+        logger.debug("NM Version: {}", nmVersion);
     }
 
     public synchronized List<String> getDeviceIds() throws DBusException {
@@ -328,7 +330,7 @@ public class NMDbusConnector {
             if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
                 disable(device.get());
             } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
-                logger.info("Iface \"{}\" set as Kura UNMANAGED. Skipping configuration.", iface);
+                logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", iface);
             } else { // NMDeviceEnable.ENABLED
                 enableInterface(iface, properties, device.get(), deviceType);
             }
@@ -346,13 +348,13 @@ public class NMDbusConnector {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
                 connection, deviceId, interfaceName, deviceType);
 
-        logger.info("New settings: {}", newConnectionSettings);
+        logger.info("New settings parsed");
 
         DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
                 NMDeviceState.NM_DEVICE_STATE_CONFIG);
 
         if (connection.isPresent()) {
-            logger.info("Current settings: {}", connection.get().GetSettings());
+            logger.info("Current settings available");
 
             connection.get().Update(newConnectionSettings);
             this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
@@ -641,7 +643,7 @@ public class NMDbusConnector {
                 DBusPath[] bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
                 bearerProperties = getBearersPropertiesFromPaths(Arrays.asList(bearerPaths));
             } catch (DBusExecutionException e1) {
-                logger.warn("Cannot get bearers for modem " + modemPath, e1);
+                logger.warn("Cannot get bearers for modem {}", modemPath, e1);
             }
         }
         return bearerProperties;

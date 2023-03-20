@@ -84,6 +84,7 @@ public class DhcpServerMonitor {
         } catch (KuraException e) {
             logger.warn("Failed to start DHCP server for the interface " + interfaceName, e);
         }
+        logger.debug("Starting DHCP server for {}. Done.", interfaceName);
     }
 
     private void stopDhcpServer(String interfaceName) {
@@ -93,6 +94,7 @@ public class DhcpServerMonitor {
         } catch (KuraException e) {
             logger.warn("Failed to stop DHCP server for the interface " + interfaceName, e);
         }
+        logger.debug("Stopping DHCP server for {}. Done.", interfaceName);
     }
 
 }

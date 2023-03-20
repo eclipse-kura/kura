@@ -53,15 +53,18 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     public void activate() {
-        logger.debug("Activate NMStatusService...");
+        logger.info("Activate NMStatusService...");
+        logger.info("Activate NMStatusService... Done.");
     }
 
     public void update() {
         logger.info("Update NMStatusService...");
+        logger.info("Update NMStatusService... Done.");
     }
 
     public void deactivate() {
-        logger.debug("Deactivate NMStatusService...");
+        logger.info("Deactivate NMStatusService...");
+        logger.info("Deactivate NMStatusService... Done.");
     }
 
     @Override

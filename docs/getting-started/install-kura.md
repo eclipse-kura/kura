@@ -34,11 +34,17 @@ kura-<kura-version>_generic-<arch>_installer.deb/rpm
 
 where `<arch>` is one of the **supported architectures**: *x86_64*, *arm32*, and *arm64*. A generic Kura profile can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
 
-If installing the generic package on a non supported device (see [Supported Devices](#supported-devices)), only one ethernet interface and one wifi interface (if present) are configured. Recommended further configurations are:
+If installing the generic package on a non supported device (see [Supported Devices](#supported-devices)), only one ethernet interface and one wifi interface (if present) are configured. The firewall will be set up as follows:
+
+![](./images/firewall-generic.png)
+
+Where `eth0` and `wlan0` will be replaced with the detected primary ethernet and wireless interfaces.
+
+On unsupported devices, Kura will install an empty `jdk.dio.properties` file. Hence, for having the complete set of Kura features, further configurations are recommended after installation:
 
 - other network interfaces, if any, from the web UI;
 - the system firewall from the web UI;
-- edit `/opt/eclipse/kura/framework/jdk.dio.properties` for correct GPIO mappings.
+- editing of `/opt/eclipse/kura/framework/jdk.dio.properties` for correct GPIO mappings.
 
 ### Kura dependencies
 

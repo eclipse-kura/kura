@@ -83,22 +83,29 @@ public class NMStatusServiceImplTest {
     private NMDbusConnector nmDbusConnector;
     private CommandExecutorService commandExecutorService;
     private Optional<NetworkInterfaceStatus> status;
-    private List<NetworkInterfaceStatus> statuses = new ArrayList<>();
     private List<String> interfaceNames = new ArrayList<>();
     private boolean exceptionCaught = false;
 
     @Test
-    public void shouldReturnEmptyIfInterfaceDoesNotExist() throws DBusException, UnknownHostException, KuraException {
+    public void shouldReturnEmptyStatusIfInterfaceDoesNotExist()
+            throws DBusException, UnknownHostException, KuraException {
         givenNMStatusServiceImplWithNonExistingInterface();
         whenInterfaceStatusIsRetrieved("non-existing-interface");
         thenInterfaceStatusIsEmpty();
     }
 
     @Test
-    public void shouldReturnEmptyIfDBusObjectVanishes() throws DBusException, UnknownHostException, KuraException {
-        givenNMStatusServiceImplThrowingUnknownMethod();
+    public void shouldThrowKuraExceptionOnStatusRetrivingIfDBusObjectVanishes() throws DBusException, KuraException {
+        givenNMStatusServiceImplThrowingUnknownMethodOnGetInterfaceStatus();
         whenInterfaceStatusIsRetrieved("wlan1");
-        thenInterfaceStatusIsEmpty();
+        thenKuraExceptionIsCaught();
+    }
+
+    @Test
+    public void shouldThrowKuraExceptionOnStatusRetrivingIfErrorOccours() throws DBusException, KuraException {
+        givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaceStatus();
+        whenInterfaceStatusIsRetrieved("wlan1");
+        thenKuraExceptionIsCaught();
     }
 
     @Test
@@ -110,7 +117,7 @@ public class NMStatusServiceImplTest {
     }
 
     @Test
-    public void shouldReturnFullEthernetInterfaceStatus() throws DBusException, UnknownHostException, KuraException {
+    public void shouldReturnFullEthernetInterfaceStatus() throws UnknownHostException, DBusException, KuraException {
         givenNMStatusServiceImplWithEthernetInterface();
         whenInterfaceStatusIsRetrieved("abcd0");
         thenInterfaceStatusIsReturned();
@@ -135,22 +142,8 @@ public class NMStatusServiceImplTest {
     }
 
     @Test
-    public void shouldReturnEmptyListIfInterfacesDoNotExist()
-            throws DBusException, UnknownHostException, KuraException {
-        givenNMStatusServiceImplWithoutInterfaces();
-        whenInterfaceStatusesAreRetrieved();
-        thenInterfaceStatusListIsEmpty();
-    }
-
-    @Test
-    public void shouldReturnExistingInterfaceStatuses() throws DBusException, UnknownHostException, KuraException {
-        givenNMStatusServiceImplWithInterfaces();
-        whenInterfaceStatusesAreRetrieved();
-        thenInterfaceStatusListIsReturned();
-    }
-
-    @Test
-    public void shouldReturnEmptyInterfaceNameList() throws UnknownHostException, DBusException, KuraException {
+    public void shouldReturnEmptyInterfaceNameListIfNoInterfaces()
+            throws UnknownHostException, DBusException, KuraException {
         givenNMStatusServiceImplWithoutInterfaces();
         whenInterfaceNameListIsRetrived();
         thenInterfaceNameListIsEmpty();
@@ -164,18 +157,10 @@ public class NMStatusServiceImplTest {
     }
 
     @Test
-    public void shouldThrowKuraExceptionOnRetrivingBrokenInterfaceNameList()
+    public void shouldThrowKuraExceptionIfInterfaceNameListCannotBeRetrieved()
             throws UnknownHostException, DBusException, KuraException {
-        givenNMStatusServiceImplBroken();
+        givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaces();
         whenInterfaceNameListIsRetrived();
-        thenKuraExceptionIsCaught();
-    }
-
-    @Test
-    public void shouldThrowKuraExceptionOnRetrivingBrokenInterfaceStatus()
-            throws UnknownHostException, DBusException, KuraException {
-        givenNMStatusServiceImplWithInterfaces();
-        whenInterfaceStatusIsRetrieved("broken-interface");
         thenKuraExceptionIsCaught();
     }
 
@@ -220,10 +205,18 @@ public class NMStatusServiceImplTest {
                 .thenReturn(null);
     }
 
-    private void givenNMStatusServiceImplThrowingUnknownMethod() throws DBusException, KuraException {
+    private void givenNMStatusServiceImplThrowingUnknownMethodOnGetInterfaceStatus()
+            throws DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan1", this.commandExecutorService))
                 .thenThrow(UnknownMethod.class);
+    }
+
+    private void givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaceStatus()
+            throws DBusException, KuraException {
+        createTestObjects();
+        when(this.nmDbusConnector.getInterfaceStatus("wlan1", this.commandExecutorService))
+                .thenThrow(DBusException.class);
     }
 
     private void givenNMStatusServiceImplWithEthernetInterface()
@@ -269,7 +262,8 @@ public class NMStatusServiceImplTest {
                 .thenReturn(buildModemInterfaceStatus("wwan0"));
     }
 
-    private void givenNMStatusServiceImplBroken() throws UnknownHostException, DBusException, KuraException {
+    private void givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaces()
+            throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
         when(this.nmDbusConnector.getDeviceIds())
                 .thenThrow(new DBusException("Cannot retrieve interface list."));
@@ -280,17 +274,6 @@ public class NMStatusServiceImplTest {
             this.status = this.statusService.getNetworkStatus(interfaceName);
         } catch (KuraException e) {
             this.exceptionCaught = true;
-        }
-    }
-
-    private void whenInterfaceStatusesAreRetrieved() throws KuraException {
-        for (String interfaceName : this.statusService.getInterfaceIds()) {
-            try {
-                Optional<NetworkInterfaceStatus> status = this.statusService.getNetworkStatus(interfaceName);
-                status.ifPresent(this.statuses::add);
-            } catch (KuraException e) {
-                // do nothing...
-            }
         }
     }
 
@@ -351,11 +334,6 @@ public class NMStatusServiceImplTest {
         assertEquals(buildWifiInterfaceStatus("wlan0").hashCode(), wifiStatus.hashCode());
     }
 
-    private void thenInterfaceStatusListIsEmpty() {
-        assertNotNull(this.statuses);
-        assertTrue(this.statuses.isEmpty());
-    }
-
     private void thenInterfaceNameListIsEmpty() {
         assertNotNull(this.interfaceNames);
         assertTrue(this.interfaceNames.isEmpty());
@@ -365,15 +343,6 @@ public class NMStatusServiceImplTest {
         assertNotNull(this.interfaceNames);
         assertFalse(this.interfaceNames.isEmpty());
         assertEquals(2, this.interfaceNames.size());
-    }
-
-    private void thenInterfaceStatusListIsReturned() {
-        assertNotNull(this.statuses);
-        assertFalse(this.statuses.isEmpty());
-        assertEquals(2, this.statuses.size());
-        this.statuses.forEach(status -> {
-            assertTrue(status.getId().equals("wlan0") || status.getId().equals("abcd0"));
-        });
     }
 
     private void thenLoopbackInterfaceStatusIsRetrieved() {

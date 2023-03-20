@@ -51,7 +51,7 @@ public class NetworkInterfaceIpAddress<T extends IPAddress> {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         NetworkInterfaceIpAddress<T> other = (NetworkInterfaceIpAddress<T>) obj;

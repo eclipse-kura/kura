@@ -955,6 +955,26 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildSettingsShouldWorkWithModemSettings() {
+        givenMapWith("net.interface.1-1.1.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.1-1.1.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.1-1.1.config.apn", "mobile.test.com");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "1-1.1", "ttyACM0",
+                NMDeviceType.NM_DEVICE_TYPE_MODEM);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+        thenResultingBuildAllMapContains("ipv4", "method", "auto");
+        thenResultingBuildAllMapContains("connection", "id", "kura-ttyACM0-connection");
+        thenResultingBuildAllMapContains("connection", "interface-name", "ttyACM0");
+        thenResultingBuildAllMapContains("connection", "type", "gsm");
+        thenResultingBuildAllMapContains("connection", "autoconnect-retries", 1);
+        thenResultingBuildAllMapContains("gsm", "apn", "mobile.test.com");
+    }
+
+    @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullIp() {
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");

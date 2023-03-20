@@ -133,7 +133,7 @@ public class NMDbusConnector {
         logger.info("NM Version: {}", nmVersion);
     }
 
-    public synchronized List<String> getInterfaces() throws DBusException {
+    public synchronized List<String> getDeviceIds() throws DBusException {
         List<Device> availableDevices = getAllDevices();
 
         List<String> supportedDeviceNames = new ArrayList<>();
@@ -290,7 +290,7 @@ public class NMDbusConnector {
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
             NetworkProperties properties) throws DBusException {
-        List<String> availableInterfaces = getInterfaces();
+        List<String> availableInterfaces = getDeviceIds();
 
         for (String iface : configuredInterfaces) {
             if (!availableInterfaces.contains(iface)) {

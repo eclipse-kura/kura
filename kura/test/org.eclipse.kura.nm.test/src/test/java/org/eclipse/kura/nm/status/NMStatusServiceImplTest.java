@@ -222,12 +222,12 @@ public class NMStatusServiceImplTest {
 
     private void givenNMStatusServiceImplWithoutInterfaces() throws DBusException, UnknownHostException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaces()).thenThrow(DBusException.class);
+        when(this.nmDbusConnector.getDeviceIds()).thenThrow(DBusException.class);
     }
 
     private void givenNMStatusServiceImplWithInterfaces() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaces()).thenReturn(Arrays.asList("abcd0", "wlan0"));
+        when(this.nmDbusConnector.getDeviceIds()).thenReturn(Arrays.asList("abcd0", "wlan0"));
         when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
         when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))

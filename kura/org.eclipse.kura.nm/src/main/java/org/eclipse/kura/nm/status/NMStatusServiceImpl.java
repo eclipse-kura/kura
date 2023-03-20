@@ -100,7 +100,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     public List<String> getInterfaceIds() {
         List<String> interfaces = new ArrayList<>();
         try {
-            interfaces = this.nmDbusConnector.getInterfaces();
+            interfaces = this.nmDbusConnector.getDeviceIds();
         } catch (DBusException e) {
             logger.warn("Could not retrieve interfaces from NM because: ", e);
         }

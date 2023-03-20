@@ -28,7 +28,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
-import org.eclipse.kura.network.status.provider.api.InterfaceNamesDTO;
+import org.eclipse.kura.network.status.provider.api.InterfaceIdsDTO;
 import org.eclipse.kura.network.status.provider.api.InterfaceStatusListDTO;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.service.useradmin.Role;
@@ -74,7 +74,7 @@ public class NetworkStatusRestServiceImpl {
 
     @GET
     @RolesAllowed("network.status")
-    @Path("/networkStatus")
+    @Path("/status")
     @Produces(MediaType.APPLICATION_JSON)
     public InterfaceStatusListDTO getNetworkStatus() {
         return new InterfaceStatusListDTO(this.networkStatusService.getNetworkStatus());
@@ -82,15 +82,15 @@ public class NetworkStatusRestServiceImpl {
 
     @POST
     @RolesAllowed("network.status")
-    @Path("/networkStatus/byInterfaceName")
+    @Path("/status/byInterfaceId")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public InterfaceStatusListDTO getNetworkStatus(final InterfaceNamesDTO interfaces) {
+    public InterfaceStatusListDTO getNetworkStatus(final InterfaceIdsDTO interfaceIds) {
 
         final List<NetworkInterfaceStatus> result = new ArrayList<>();
 
-        for (final String interfaceName : interfaces.getInterfaceNames()) {
-            networkStatusService.getNetworkStatus(interfaceName).ifPresent(result::add);
+        for (final String interfaceId : interfaceIds.getInterfaceIds()) {
+            networkStatusService.getNetworkStatus(interfaceId).ifPresent(result::add);
         }
 
         return new InterfaceStatusListDTO(result);
@@ -98,10 +98,10 @@ public class NetworkStatusRestServiceImpl {
 
     @GET
     @RolesAllowed("network.status")
-    @Path("/interfaceNames")
+    @Path("/interfaceIds")
     @Produces(MediaType.APPLICATION_JSON)
-    public InterfaceNamesDTO getInterfaceNames() {
-        return new InterfaceNamesDTO(networkStatusService.getInterfaceNames());
+    public InterfaceIdsDTO getInterfaceNames() {
+        return new InterfaceIdsDTO(networkStatusService.getInterfaceIds());
     }
 
 }

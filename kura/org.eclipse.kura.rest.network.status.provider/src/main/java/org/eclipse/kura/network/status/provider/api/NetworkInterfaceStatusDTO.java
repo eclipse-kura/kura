@@ -22,7 +22,7 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 @SuppressWarnings("unused")
 public class NetworkInterfaceStatusDTO {
 
-    private final String name;
+    private final String id;
     private final String interfaceName;
     private final String hardwareAddress;
     private final NetworkInterfaceType type;
@@ -37,7 +37,7 @@ public class NetworkInterfaceStatusDTO {
     private final NetworkInterfaceIpAddressStatusDTO interfaceIp6Addresses;
 
     protected NetworkInterfaceStatusDTO(final NetworkInterfaceStatus status) {
-        this.name = status.getName();
+        this.id = status.getId();
         this.interfaceName = status.getInterfaceName();
         this.hardwareAddress = AddressUtil.formatHardwareAddress(status.getHardwareAddress());
         this.type = status.getType();

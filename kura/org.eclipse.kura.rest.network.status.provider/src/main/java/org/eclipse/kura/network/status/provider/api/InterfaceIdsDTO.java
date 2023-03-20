@@ -14,15 +14,15 @@ package org.eclipse.kura.network.status.provider.api;
 
 import java.util.List;
 
-public class InterfaceNamesDTO {
+public class InterfaceIdsDTO {
 
-    private final List<String> interfaceNames;
+    private final List<String> interfaceIds;
 
-    public InterfaceNamesDTO(final List<String> interfaceNames) {
-        this.interfaceNames = interfaceNames;
+    public InterfaceIdsDTO(final List<String> interfaceIds) {
+        this.interfaceIds = interfaceIds;
     }
 
-    public List<String> getInterfaceNames() {
-        return interfaceNames;
+    public List<String> getInterfaceIds() {
+        return interfaceIds;
     }
 }

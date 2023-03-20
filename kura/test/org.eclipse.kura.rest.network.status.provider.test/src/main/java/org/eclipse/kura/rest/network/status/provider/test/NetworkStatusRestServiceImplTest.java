@@ -77,22 +77,22 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldReturnNonEmptyInterfaceList() {
-        givenInterfaceNames("foo", "bar");
+        givenInterfaceIds("foo", "bar");
 
-        whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_NAMES_PATH);
+        whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_IDS_PATH);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaceNames\": [\"foo\",\"bar\"]}");
+        thenResponseBodyEqualsJson("{\"interfaceIds\": [\"foo\",\"bar\"]}");
     }
 
     @Test
     public void shouldReturnEmptyInterfaceList() {
-        givenInterfaceNames();
+        givenInterfaceIds();
 
-        whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_NAMES_PATH);
+        whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_IDS_PATH);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaceNames\": []}");
+        thenResponseBodyEqualsJson("{\"interfaceIds\": []}");
     }
 
     @Test
@@ -103,7 +103,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\": \"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -118,15 +118,15 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     @Test
-    public void shouldEncodeLoopbackInterfaceStatusWithDefaultsByName() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName("lo0"));
+    public void shouldEncodeLoopbackInterfaceStatusWithDefaultsById() {
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_NAME_PATH,
-                "{\"interfaceNames\":[\"lo0\"]}");
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"lo0\"]}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"lo0\"," //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\": \"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -142,14 +142,14 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldNotReturnMissingInterfaces() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_NAME_PATH,
-                "{\"interfaceNames\":[\"lo0\",\"foo\"]}");
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"lo0\",\"foo\"]}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"lo0\"," //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\": \"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -165,10 +165,10 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldReturnEmptyListIfNoInterfacesMatch() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_NAME_PATH,
-                "{\"interfaceNames\":[\"foo\"]}");
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"foo\"]}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[]}");
@@ -176,10 +176,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldReuturnEmptyListWithEmptyRequestList() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_NAME_PATH,
-                "{\"interfaceNames\":[]}");
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH, "{\"interfaceIds\":[]}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[]}");
@@ -188,7 +187,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     @Test
     public void shouldEncodeLoopbackInterfaceStatusWithCustomParams() {
         givenNetworkStatus(LoopbackInterfaceStatus.builder() //
-                .withName("lo0") //
+                .withId("lo0") //
                 .withInterfaceName("lo1") //
                 .withHardwareAddress(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, (byte) 0xff }) //
                 .withDriver("fooDriver") //
@@ -204,7 +203,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"lo0\"," //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"lo1\"," //
                 + "\"hardwareAddress\":\"01:02:03:04:05:FF\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -227,7 +226,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"lo0\"," //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"" //
@@ -256,7 +255,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaces\":[{" + "\"name\":\"lo0\"," //
+        thenResponseBodyEqualsJson("{\"interfaces\":[{" //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -283,7 +283,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
-                + "\"name\":\"lo0\"," //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"" //
@@ -312,7 +312,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaces\":[{" + "\"name\":\"lo0\"," //
+        thenResponseBodyEqualsJson("{\"interfaces\":[{" //
+                + "\"id\":\"lo0\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"LOOPBACK\"," //
@@ -339,7 +340,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
                 + "\"linkUp\":false," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"ETHERNET\"," //
@@ -362,7 +363,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaces\":[{" //
                 + "\"linkUp\":true," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"ETHERNET\"," //
@@ -389,7 +390,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"countryCode\":\"00\"," //
                 + "\"mode\":\"UNKNOWN\"," //
                 + "\"availableWifiAccessPoints\":[]," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -420,7 +421,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"countryCode\":\"foo\"," //
                 + "\"mode\":\"MASTER\"," //
                 + "\"availableWifiAccessPoints\":[]," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -448,8 +449,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "[{\"channel\":1,\"frequency\":2}]," //
                 + "\"countryCode\":\"00\"," //
                 + "\"mode\":\"UNKNOWN\"," //
-                + "\"availableWifiAccessPoints\":[]" //
-                + ",\"name\":\"N/A\"," //
+                + "\"availableWifiAccessPoints\":[]," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -487,8 +488,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"radarDetection\":true}]," //
                 + "\"countryCode\":\"00\"," //
                 + "\"mode\":\"UNKNOWN\"," //
-                + "\"availableWifiAccessPoints\":[]" //
-                + ",\"name\":\"N/A\"," //
+                + "\"availableWifiAccessPoints\":[]," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -532,7 +533,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
                 + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}," //
                 + "\"availableWifiAccessPoints\":[]," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -575,7 +576,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"signalQuality\":12," //
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
                 + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}]," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"WIFI\"," //
@@ -623,7 +624,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
                 + "\"rssi\":-113," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"MODEM\"," //
@@ -698,7 +699,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"registrationStatus\":\"ROAMING\"," //
                 + "\"operatorName\":\"oper\"," //
                 + "\"rssi\":1221," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"MODEM\"," //
@@ -760,7 +761,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
                 + "\"rssi\":-113," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"MODEM\"," //
@@ -824,7 +825,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
                 + "\"rssi\":-113," //
-                + "\"name\":\"N/A\"," //
+                + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
                 + "\"type\":\"MODEM\"," //
@@ -838,16 +839,16 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "}]}");
     }
 
-    private static final String INTERFACE_NAMES_PATH = "/interfaceNames";
-    private static final String NETWORK_STATUS_PATH = "/networkStatus";
-    private static final String NETWORK_STATUS_BY_INTERFACE_NAME_PATH = "/networkStatus/byInterfaceName";
+    private static final String INTERFACE_IDS_PATH = "/interfaceIds";
+    private static final String NETWORK_STATUS_PATH = "/status";
+    private static final String NETWORK_STATUS_BY_INTERFACE_ID_PATH = "/status/byInterfaceId";
 
     private static final NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
     private static ServiceRegistration<NetworkStatusService> reg;
     private final Map<String, NetworkInterfaceStatus> currentStatus = new LinkedHashMap<>();
 
-    private void givenInterfaceNames(final String... interfaceNames) {
-        Mockito.when(networkStatusService.getInterfaceNames()).thenReturn(Arrays.asList(interfaceNames));
+    private void givenInterfaceIds(final String... interfaceIds) {
+        Mockito.when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(interfaceIds));
     }
 
     public NetworkStatusRestServiceImplTest(Transport transport)
@@ -857,7 +858,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         Mockito.when(networkStatusService.getNetworkStatus()).thenAnswer(i -> new ArrayList<>(currentStatus.values()));
         Mockito.when(networkStatusService.getNetworkStatus(Mockito.anyString()))
                 .thenAnswer(i -> Optional.ofNullable(currentStatus.get(i.getArgument(0))));
-        Mockito.when(networkStatusService.getInterfaceNames()).thenAnswer(i -> new ArrayList<>(currentStatus.keySet()));
+        Mockito.when(networkStatusService.getInterfaceIds()).thenAnswer(i -> new ArrayList<>(currentStatus.keySet()));
     }
 
     @BeforeClass
@@ -884,12 +885,12 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private void givenNetworkStatus(final NetworkInterfaceStatus.NetworkInterfaceStatusBuilder<?> builder) {
         final NetworkInterfaceStatus status = builder.build();
 
-        currentStatus.put(status.getName(), status);
+        currentStatus.put(status.getId(), status);
     }
 
-    private void givenLoopbackInterfaceWithFilledIP4Address(final String name) throws UnknownHostException {
+    private void givenLoopbackInterfaceWithFilledIP4Address(final String id) throws UnknownHostException {
         givenNetworkStatus(
-                LoopbackInterfaceStatus.builder().withName(name)
+                LoopbackInterfaceStatus.builder().withId(id)
                         .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder()
                                 .withAddresses(Arrays.asList(
                                         new NetworkInterfaceIpAddress<>(ipV4Address(1, 2, 3, 4), (short) 16),
@@ -899,8 +900,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                                 .build())));
     }
 
-    private void givenLoopbackInterfaceWithFilledIP6Address(final String name) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName(name)
+    private void givenLoopbackInterfaceWithFilledIP6Address(final String id) throws UnknownHostException {
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
                 .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder()
                         .withAddresses(Arrays.asList(
                                 new NetworkInterfaceIpAddress<>(ipV6Address(1, 2, 3, 4, 5, 0), (short) 16),
@@ -911,13 +912,13 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                         .build())));
     }
 
-    private void givenLoopbackInterfaceWithUnFilledIP4Address(final String name) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName(name)
+    private void givenLoopbackInterfaceWithUnFilledIP4Address(final String id) throws UnknownHostException {
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
                 .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder().build())));
     }
 
-    private void givenLoopbackInterfaceWithUnFilledIP6Address(final String name) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withName(name)
+    private void givenLoopbackInterfaceWithUnFilledIP6Address(final String id) throws UnknownHostException {
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
                 .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder().build())));
     }
 

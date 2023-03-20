@@ -109,6 +109,20 @@ public class DataServiceImplTest {
         thenExceptionIsThrown(IllegalArgumentException.class);
         thenStoredMessageCountIs(0);
     }
+    
+    @Test
+    public void shouldStoreMessagesWithNullPayload() throws KuraStoreException {
+        givenDataService();
+        givenMessageStoreProvider();
+        givenDataTrasportServiceConnected();
+        givenConfigurationProperty("maximum.payload.size", 4L);
+        givenIsActive();
+
+        whenMessageIsPublished("foo", null, 0, false, 9);
+
+        thenNoExceptionIsTrown();
+        thenMessageIsStored(0, "foo", null, 0, false, 9);
+    }
 
     @Test
     public void shouldStoreMessagesWithPayloadSizeLessThanConfiguredThreshold() throws KuraStoreException {

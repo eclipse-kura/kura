@@ -642,7 +642,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             throw new IllegalArgumentException("Priority cannot be negative");
         }
 
-        if ((long) payload.length > this.dataServiceOptions.getMaximumPayloadSizeBytes()) {
+        if (payload != null && (long) payload.length > this.dataServiceOptions.getMaximumPayloadSizeBytes()) {
             throw new KuraStoreException("Payload size exceeds configured limit");
         }
 

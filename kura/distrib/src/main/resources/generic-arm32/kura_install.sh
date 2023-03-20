@@ -35,11 +35,6 @@ fi
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-# setup /etc/sysconfig folder for iptables configuration file
-if [ ! -d /etc/sysconfig ]; then
-    mkdir /etc/sysconfig
-fi
-
 # execute patch_sysctl.sh (required for disabling ipv6))
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
@@ -71,19 +66,15 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
-# replace snapshot_0 and iptables.init with correct interface names
-if python3 -V > /dev/null 2>&1
-then
-    python3 ${INSTALL_DIR}/kura/install/find-net-interfaces.py ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/framework/kura.properties
-else
-    echo "python3 not found. snapshot_0.xml, iptables.init, and kura.properties files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
-fi
+bash "${INSTALL_DIR}/kura/install/customize-installation.sh"
 
 # copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 # set up default firewall configuration
-cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
+if [ ! -d /etc/sysconfig ]; then
+    mkdir /etc/sysconfig
+fi
 chmod 644 ${INSTALL_DIR}/kura/.data/iptables
 cp ${INSTALL_DIR}/kura/.data/iptables /etc/sysconfig/iptables
 cp ${INSTALL_DIR}/kura/install/firewall.init ${INSTALL_DIR}/kura/bin/firewall
@@ -93,6 +84,14 @@ chmod 644 /lib/systemd/system/firewall.service
 sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
 systemctl daemon-reload
 systemctl enable firewall
+
+# disables cloud-init if exists and allows interface management to network-manager
+if [ -d /etc/cloud/cloud.cfg.d ]; then
+    echo "network: {config: disabled}" | sudo tee -a /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null
+fi
+if [ -f /usr/lib/NetworkManager/conf.d/10-globally-managed-devices.conf ]; then
+    rm /usr/lib/NetworkManager/conf.d/10-globally-managed-devices.conf
+fi
 
 # disable NTP service
 if command -v timedatectl > /dev/null ;
@@ -120,5 +119,3 @@ chmod a+rx /opt/eclipse
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit
-
-bash "${INSTALL_DIR}/kura/install/customize-installation.sh"

@@ -17,11 +17,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.net.modem.ModemConnectionType;
-import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.osgi.annotation.versioning.ProviderType;
@@ -39,17 +37,15 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final String serialNumber;
     private final String softwareRevision;
     private final String hardwareRevision;
-    private final Optional<ModemDevice> modemDevice;
     private final String primaryPort;
     private final Map<String, ModemPortType> ports;
     private final Set<ModemCapability> supportedModemCapabilities;
     private final Set<ModemCapability> currentModemCapabilities;
     private final ModemPowerState powerState;
-    private final Set<ModemMode> supportedModes;
-    private final Set<ModemMode> currentModes;
+    private final Set<ModemModePair> supportedModes;
+    private final ModemModePair currentModes;
     private final Set<ModemBand> supportedBands;
     private final Set<ModemBand> currentBands;
-    private final String imei;
     private final boolean gpsSupported;
     private final List<Sim> availableSims;
     private final int activeSimIndex;
@@ -62,9 +58,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final RegistrationStatus registrationStatus;
     private final String operatorName;
     private final int rssi;
-    private final String plmnid;
-    private final String lac;
-    private final String ci;
 
     private ModemInterfaceStatus(ModemInterfaceStatusBuilder builder) {
         super(builder);
@@ -73,7 +66,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.serialNumber = builder.serialNumber;
         this.softwareRevision = builder.softwareRevision;
         this.hardwareRevision = builder.hardwareRevision;
-        this.modemDevice = builder.modemDevice;
         this.primaryPort = builder.primaryPort;
         this.ports = builder.ports;
         this.supportedModemCapabilities = builder.supportedModemCapabilities;
@@ -83,7 +75,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.currentModes = builder.currentModes;
         this.supportedBands = builder.supportedBands;
         this.currentBands = builder.currentBands;
-        this.imei = builder.imei;
         this.gpsSupported = builder.gpsSupported;
         this.availableSims = builder.availableSims;
         this.activeSimIndex = builder.activeSimIndex;
@@ -96,9 +87,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.registrationStatus = builder.registrationStatus;
         this.operatorName = builder.operatorName;
         this.rssi = builder.rssi;
-        this.plmnid = builder.plmnid;
-        this.lac = builder.lac;
-        this.ci = builder.ci;
     }
 
     public String getModel() {
@@ -121,10 +109,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.hardwareRevision;
     }
 
-    public Optional<ModemDevice> getModemDevice() {
-        return this.modemDevice;
-    }
-
     public String getPrimaryPort() {
         return this.primaryPort;
     }
@@ -145,11 +129,11 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.powerState;
     }
 
-    public Set<ModemMode> getSupportedModes() {
+    public Set<ModemModePair> getSupportedModes() {
         return this.supportedModes;
     }
 
-    public Set<ModemMode> getCurrentModes() {
+    public ModemModePair getCurrentModes() {
         return this.currentModes;
     }
 
@@ -159,10 +143,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
     public Set<ModemBand> getCurrentBands() {
         return this.currentBands;
-    }
-
-    public String getImei() {
-        return this.imei;
     }
 
     public Boolean isGpsSupported() {
@@ -213,18 +193,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.rssi;
     }
 
-    public String getPlmnid() {
-        return this.plmnid;
-    }
-
-    public String getLac() {
-        return this.lac;
-    }
-
-    public String getCi() {
-        return this.ci;
-    }
-
     public static ModemInterfaceStatusBuilder builder() {
         return new ModemInterfaceStatusBuilder();
     }
@@ -237,17 +205,15 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private String serialNumber = NA;
         private String softwareRevision = NA;
         private String hardwareRevision = NA;
-        private Optional<ModemDevice> modemDevice = Optional.empty();
         private String primaryPort = NA;
         private Map<String, ModemPortType> ports = Collections.emptyMap();
         private Set<ModemCapability> supportedModemCapabilities = EnumSet.of(ModemCapability.NONE);
         private Set<ModemCapability> currentModemCapabilities = EnumSet.of(ModemCapability.NONE);
         private ModemPowerState powerState = ModemPowerState.UNKNOWN;
-        private Set<ModemMode> supportedModes = EnumSet.of(ModemMode.NONE);
-        private Set<ModemMode> currentModes = EnumSet.of(ModemMode.NONE);
+        private Set<ModemModePair> supportedModes = Collections.emptySet();
+        private ModemModePair currentModes = new ModemModePair(Collections.emptySet(), ModemMode.NONE);
         private Set<ModemBand> supportedBands = EnumSet.of(ModemBand.UNKNOWN);
         private Set<ModemBand> currentBands = EnumSet.of(ModemBand.UNKNOWN);
-        private String imei = NA;
         private boolean gpsSupported = false;
         private List<Sim> availableSims = Collections.emptyList();
         private int activeSimIndex = 0;
@@ -260,9 +226,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private RegistrationStatus registrationStatus = RegistrationStatus.UNKNOWN;
         private String operatorName = NA;
         private int rssi = -113;
-        private String plmnid = NA;
-        private String lac = NA;
-        private String ci = NA;
 
         public ModemInterfaceStatusBuilder withModel(String model) {
             this.model = model;
@@ -286,11 +249,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         public ModemInterfaceStatusBuilder withHardwareRevision(String hardwareRevision) {
             this.hardwareRevision = hardwareRevision;
-            return getThis();
-        }
-
-        public ModemInterfaceStatusBuilder withModemDevice(ModemDevice modemDevice) {
-            this.modemDevice = Optional.of(modemDevice);
             return getThis();
         }
 
@@ -321,12 +279,12 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withSupportedModes(Set<ModemMode> supportedModes) {
+        public ModemInterfaceStatusBuilder withSupportedModes(Set<ModemModePair> supportedModes) {
             this.supportedModes = supportedModes;
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withCurrentModes(Set<ModemMode> currentModes) {
+        public ModemInterfaceStatusBuilder withCurrentModes(ModemModePair currentModes) {
             this.currentModes = currentModes;
             return getThis();
         }
@@ -338,11 +296,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         public ModemInterfaceStatusBuilder withCurrentBands(Set<ModemBand> currentBands) {
             this.currentBands = currentBands;
-            return getThis();
-        }
-
-        public ModemInterfaceStatusBuilder withImei(String imei) {
-            this.imei = imei;
             return getThis();
         }
 
@@ -406,21 +359,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withPlmnid(String plmnid) {
-            this.plmnid = plmnid;
-            return getThis();
-        }
-
-        public ModemInterfaceStatusBuilder withLac(String lac) {
-            this.lac = lac;
-            return getThis();
-        }
-
-        public ModemInterfaceStatusBuilder withCi(String ci) {
-            this.ci = ci;
-            return getThis();
-        }
-
         @Override
         public ModemInterfaceStatus build() {
             withType(NetworkInterfaceType.MODEM);
@@ -438,11 +376,11 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result
-                + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims, this.bearers, this.ci,
+                + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims, this.bearers,
                         this.connectionStatus, this.connectionType, this.currentBands, this.currentModemCapabilities,
                         this.currentModes, this.gpsSupported,
-                        this.hardwareRevision, this.imei, this.lac, this.manufacturer, this.model, this.modemDevice,
-                        this.operatorName, this.plmnid, this.ports, this.powerState,
+                        this.hardwareRevision, this.manufacturer, this.model,
+                        this.operatorName, this.ports, this.powerState,
                         this.primaryPort, this.registrationStatus, this.rssi, this.serialNumber, this.signalQuality,
                         this.simLocked, this.softwareRevision,
                         this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
@@ -462,15 +400,14 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
                 && this.activeSimIndex == other.activeSimIndex
                 && Objects.equals(this.availableSims, other.availableSims)
                 && Objects.equals(this.bearers, other.bearers)
-                && Objects.equals(this.ci, other.ci) && this.connectionStatus == other.connectionStatus
+                && this.connectionStatus == other.connectionStatus
                 && this.connectionType == other.connectionType && Objects.equals(this.currentBands, other.currentBands)
                 && Objects.equals(this.currentModemCapabilities, other.currentModemCapabilities)
                 && Objects.equals(this.currentModes, other.currentModes) && this.gpsSupported == other.gpsSupported
                 && Objects.equals(this.hardwareRevision, other.hardwareRevision)
-                && Objects.equals(this.imei, other.imei)
-                && Objects.equals(this.lac, other.lac) && Objects.equals(this.manufacturer, other.manufacturer)
-                && Objects.equals(this.model, other.model) && Objects.equals(this.modemDevice, other.modemDevice)
-                && Objects.equals(this.operatorName, other.operatorName) && Objects.equals(this.plmnid, other.plmnid)
+                && Objects.equals(this.manufacturer, other.manufacturer)
+                && Objects.equals(this.model, other.model)
+                && Objects.equals(this.operatorName, other.operatorName)
                 && Objects.equals(this.ports, other.ports) && this.powerState == other.powerState
                 && Objects.equals(this.primaryPort, other.primaryPort)
                 && this.registrationStatus == other.registrationStatus

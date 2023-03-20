@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.core.data.store.MessageStoreState;
 import org.eclipse.kura.core.db.H2DbMessageStoreImpl;
 import org.eclipse.kura.core.internal.data.TokenBucket;
@@ -75,7 +77,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
-        CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager {
+        CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager, ConnectionListener {
+
+    private static final String MESSAGE_STORE_NOT_CONNECTED_MESSAGE = "Message store instance not connected, not connecting";
+    public static final String MESSAGE_STORE_NOT_PRESENT_MESSAGE = "Message store instance not configured properly, not connecting";
 
     private static final int RECONNECTION_MIN_DELAY = 1;
 
@@ -94,9 +99,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     // A dedicated executor for the publishing task
     private ExecutorService publisherExecutor;
 
-    private MessageStoreState store;
+    private Optional<MessageStoreState> storeState = Optional.empty();
 
-    private Map<DataTransportToken, Integer> inFlightMsgIds;
+    private Map<DataTransportToken, Integer> inFlightMsgIds = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService congestionExecutor;
     private ScheduledFuture<?> congestionFuture;
@@ -122,6 +127,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private Optional<AutoConnectStrategy> autoConnectStrategy = Optional.empty();
 
     private final Random random = new SecureRandom();
+    private AtomicBoolean disconnectionGuard = new AtomicBoolean();
 
     // ----------------------------------------------------------------
     //
@@ -167,8 +173,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         @Override
                         public Object addingService(ServiceReference<Object> reference) {
                             logger.info("Message store instance found");
-                            Object service = DataServiceImpl.this.componentContext
-                                    .getBundleContext()
+                            Object service = DataServiceImpl.this.componentContext.getBundleContext()
                                     .getService(reference);
 
                             if (service instanceof MessageStoreProvider) {
@@ -176,8 +181,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                             } else if (service instanceof H2DbService) {
                                 setH2DbService((H2DbService) service);
                             } else {
-                                DataServiceImpl.this.componentContext
-                                        .getBundleContext().ungetService(reference);
+                                DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                                 return null;
                             }
 
@@ -185,18 +189,22 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                         }
 
                         @Override
-                        public void modifiedService(ServiceReference<Object> reference,
-                                Object service) {
+                        public void modifiedService(ServiceReference<Object> reference, Object service) {
+                            if (service instanceof MessageStoreProvider) {
+                                return;
+                            }
                             logger.info("Message store instance updated, recreating table if needed...");
+
                             synchronized (DataServiceImpl.this) {
-                                DataServiceImpl.this.store.update(
-                                        DataServiceImpl.this.dataServiceOptions);
+                                if (DataServiceImpl.this.storeState.isPresent()) {
+                                    DataServiceImpl.this.storeState.get()
+                                            .update(DataServiceImpl.this.dataServiceOptions);
+                                }
                             }
                         }
 
                         @Override
-                        public void removedService(ServiceReference<Object> reference,
-                                Object service) {
+                        public void removedService(ServiceReference<Object> reference, Object service) {
                             logger.info("Message store instance removed");
                             unsetMessageStoreProvider();
                             DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
@@ -217,8 +225,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     private synchronized void startDbStore() {
         try {
+            List<StoredMessage> inFlightMsgs = Collections.emptyList();
             // The initial list of in-flight messages
-            List<StoredMessage> inFlightMsgs = this.store.getMessageStore().getInFlightMessages();
+            if (DataServiceImpl.this.storeState.isPresent()) {
+                inFlightMsgs = this.storeState.get().getOrOpenMessageStore().getInFlightMessages();
+            }
 
             // The map associating a DataTransportToken with a message ID
             this.inFlightMsgIds = new ConcurrentHashMap<>();
@@ -241,6 +252,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             }
         } catch (KuraStoreException e) {
             logger.error("Failed to start store", e);
+            DataServiceImpl.this.disconnectDataTransportAndLog(e);
         }
     }
 
@@ -258,8 +270,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         final String currentDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
 
         if (oldDbServicePid.equals(currentDbServicePid)) {
-            if (this.store != null) {
-                this.store.update(this.dataServiceOptions);
+            if (DataServiceImpl.this.storeState.isPresent()) {
+                this.storeState.get().update(this.dataServiceOptions);
             }
         } else {
             restartDbServiceTracker(currentDbServicePid);
@@ -294,7 +306,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         this.dataTransportService.removeDataTransportListener(this);
 
-        this.store.shutdown();
+        if (storeState.isPresent()) {
+            this.storeState.get().shutdown();
+        }
 
         stopDbServiceTracker();
     }
@@ -314,26 +328,51 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     public synchronized void setMessageStoreProvider(MessageStoreProvider messageStoreProvider) {
-        this.store = new MessageStoreState(messageStoreProvider, this.dataServiceOptions);
+        this.storeState = Optional.of(new MessageStoreState(messageStoreProvider, this.dataServiceOptions));
+        messageStoreProvider.addListener(this);
         startDbStore();
         signalPublisher();
     }
 
     public synchronized void unsetMessageStoreProvider() {
         disconnect();
-        this.store.shutdown();
-        this.store = null;
+
+        if (this.storeState.isPresent()) {
+            this.storeState.get().getMessageStoreProvider().removeListener(this);
+            this.storeState.get().shutdown();
+            this.storeState = Optional.empty();
+        }
+
     }
 
     public synchronized void setH2DbService(H2DbService dbService) {
-        setMessageStoreProvider(name -> new H2DbMessageStoreImpl(
-                new ConnectionProvider() {
+        setMessageStoreProvider(new MessageStoreProvider() {
+
+            @SuppressWarnings("restriction")
+            @Override
+            public MessageStore openMessageStore(String name) throws KuraStoreException {
+                return new H2DbMessageStoreImpl(new ConnectionProvider() {
 
                     @Override
                     public <T> T withConnection(final SQLFunction<Connection, T> task) throws SQLException {
                         return dbService.withConnection(task::call);
                     }
-                }, name));
+                }, name);
+            }
+
+            @Override
+            public void addListener(ConnectionListener listener) {
+                // Do nothing
+
+            }
+
+            @Override
+            public void removeListener(ConnectionListener listener) {
+                // Do nothin
+
+            }
+        });
+
     }
 
     public synchronized void unsetH2DbService(H2DbService dbService) {
@@ -399,30 +438,38 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         // in the DataPublisherService persistence.
 
         if (newSession) {
-            if (this.dataServiceOptions.isPublishInFlightMessages()) {
-                logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
-                        + "this may cause duplicate messages.");
-                try {
-                    this.store.getMessageStore().unpublishAllInFlighMessages();
-                    this.inFlightMsgIds.clear();
-                } catch (KuraStoreException e) {
-                    logger.error("Failed to unpublish in-flight messages", e);
-                }
-            } else {
-                logger.info("New session established. Dropping all in-flight messages.");
-                try {
-                    this.store.getMessageStore().dropAllInFlightMessages();
-                    this.inFlightMsgIds.clear();
-                } catch (KuraStoreException e) {
-                    logger.error("Failed to drop in-flight messages", e);
-                }
-            }
+            unpublishOrDropInFlightMessages(this.dataServiceOptions.isPublishInFlightMessages());
         }
 
         // Notify the listeners
         this.dataServiceListeners.onConnectionEstablished();
 
         signalPublisher();
+    }
+
+    private void unpublishOrDropInFlightMessages(boolean publishInFlightMessages) {
+
+        if (publishInFlightMessages && this.storeState.isPresent()) {
+            logger.info("New session established. Unpublishing all in-flight messages. Disregarding the QoS level, "
+                    + "this may cause duplicate messages.");
+            try {
+                this.storeState.get().getOrOpenMessageStore().unpublishAllInFlighMessages();
+                this.inFlightMsgIds.clear();
+            } catch (KuraStoreException e) {
+                logger.error("Failed to unpublish in-flight messages", e);
+                DataServiceImpl.this.disconnectDataTransportAndLog(e);
+            }
+        } else if (this.storeState.isPresent()) {
+            logger.info("New session established. Dropping all in-flight messages.");
+            try {
+                this.storeState.get().getOrOpenMessageStore().dropAllInFlightMessages();
+                this.inFlightMsgIds.clear();
+            } catch (KuraStoreException e) {
+                logger.error("Failed to drop in-flight messages", e);
+                DataServiceImpl.this.disconnectDataTransportAndLog(e);
+            }
+        }
+
     }
 
     @Override
@@ -499,10 +546,13 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             Optional<StoredMessage> confirmedMessage = Optional.empty();
             try {
                 logger.info("Confirmed message ID: {} to store", messageId);
-                this.store.getMessageStore().markAsConfirmed(messageId);
-                confirmedMessage = this.store.getMessageStore().get(messageId);
+                if (this.storeState.isPresent()) {
+                    this.storeState.get().getOrOpenMessageStore().markAsConfirmed(messageId);
+                    confirmedMessage = this.storeState.get().getOrOpenMessageStore().get(messageId);
+                }
             } catch (KuraStoreException e) {
                 logger.error("Cannot confirm message to store", e);
+                disconnectDataTransportAndLog(e);
             }
 
             // Notify the listeners
@@ -521,11 +571,32 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         signalPublisher();
     }
 
+    private void disconnectDataTransportAndLog(Throwable e) {
+
+        if (e instanceof KuraStoreCapacityReachedException) {
+            return;
+        }
+
+        if (this.disconnectionGuard.compareAndSet(false, true)) {
+            logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
+            this.disconnect();
+            this.disconnectionGuard.set(false);
+        }
+
+    }
+
     @Override
     public void connect() throws KuraConnectException {
         shutdownAutoConnectStrategy();
-        if (this.store == null) {
-            throw new KuraConnectException("Message store instance not attached, not connecting");
+
+        if (!this.storeState.isPresent()) {
+            throw new KuraConnectException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+        }
+
+        try {
+            this.storeState.get().getOrOpenMessageStore();
+        } catch (KuraStoreException e) {
+            throw new KuraConnectException(e, MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
         }
 
         if (!this.dataTransportService.isConnected()) {
@@ -567,56 +638,98 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
+        if (priority < 0) {
+            throw new IllegalArgumentException("Priority cannot be negative");
+        }
+
+        if (payload != null && (long) payload.length > this.dataServiceOptions.getMaximumPayloadSizeBytes()) {
+            throw new KuraStoreException("Payload size exceeds configured limit");
+        }
+
         if (this.autoConnectStrategy.isPresent()) {
             this.autoConnectStrategy.get().onPublishRequested(topic, payload, qos, retain, priority);
         }
 
-        logger.info("Storing message on topic: {}, priority: {}", topic, priority);
+        if (this.storeState.isPresent()) {
 
-        final MessageStore currentStore = this.store.getMessageStore();
-        final int messageId;
+            try {
+                logger.info("Storing message on topic: {}, priority: {}", topic, priority);
 
-        synchronized (currentStore) {
-            // Priority 0 are used for life-cycle messages like birth and death
-            // certificates.
-            // Priority 1 are used for remove management by Cloudlet applications.
-            // For those messages, bypass the maximum message count check of the DB cache.
-            // We want to publish those message even if the DB is full, so allow their
-            // storage.
-            if (priority != 0 && priority != 1) {
-                int count = currentStore.getMessageCount();
-                logger.debug("Store message count: {}", count);
-                if (count >= this.dataServiceOptions.getStoreCapacity()) {
-                    logger.error("Store capacity exceeded");
-                    throw new KuraStoreCapacityReachedException("Store capacity exceeded");
+                final MessageStore currentStore = this.storeState.get().getOrOpenMessageStore();
+                final int messageId;
+
+                synchronized (currentStore) {
+                    // Priority 0 are used for life-cycle messages like birth and death
+                    // certificates.
+                    // Priority 1 are used for remove management by Cloudlet applications.
+                    // For those messages, bypass the maximum message count check of the DB cache.
+                    // We want to publish those message even if the DB is full, so allow their
+                    // storage.
+                    if (priority != 0 && priority != 1) {
+                        int count = currentStore.getMessageCount();
+                        logger.debug("Store message count: {}", count);
+                        if (count >= this.dataServiceOptions.getStoreCapacity()) {
+                            logger.error("Store capacity exceeded");
+                            throw new KuraStoreCapacityReachedException("Store capacity exceeded");
+                        }
+                    }
+
+                    messageId = currentStore.store(topic, payload, qos, retain, priority);
+                    logger.info("Stored message on topic: {}, priority: {}", topic, priority);
                 }
+
+                signalPublisher();
+
+                return messageId;
+            } catch (KuraStoreException e) {
+                disconnectDataTransportAndLog(e);
+                throw e;
             }
 
-            messageId = currentStore.store(topic, payload, qos, retain, priority);
-            logger.info("Stored message on topic: {}, priority: {}", topic, priority);
+        } else {
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_PRESENT_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
         }
 
-        signalPublisher();
-
-        return messageId;
     }
 
     @Override
     public List<Integer> getUnpublishedMessageIds(String topicRegex) throws KuraStoreException {
-        List<StoredMessage> messages = this.store.getMessageStore().getUnpublishedMessages();
-        return buildMessageIds(messages, topicRegex);
+        if (this.storeState.isPresent()) {
+            List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getUnpublishedMessages();
+            return buildMessageIds(messages, topicRegex);
+        } else {
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
+
+        }
     }
 
     @Override
     public List<Integer> getInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<StoredMessage> messages = this.store.getMessageStore().getInFlightMessages();
-        return buildMessageIds(messages, topicRegex);
+        if (this.storeState.isPresent()) {
+            List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getInFlightMessages();
+            return buildMessageIds(messages, topicRegex);
+        } else {
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
+        }
     }
 
     @Override
     public List<Integer> getDroppedInFlightMessageIds(String topicRegex) throws KuraStoreException {
-        List<StoredMessage> messages = this.store.getMessageStore().getDroppedMessages();
-        return buildMessageIds(messages, topicRegex);
+
+        if (this.storeState.isPresent()) {
+            List<StoredMessage> messages = this.storeState.get().getOrOpenMessageStore().getDroppedMessages();
+            return buildMessageIds(messages, topicRegex);
+        } else {
+            KuraStoreException e = new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            disconnectDataTransportAndLog(e);
+            throw e;
+        }
     }
 
     private void signalPublisher() {
@@ -689,64 +802,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             int initialDelay = Math.max(this.random.nextInt(maxDelay), RECONNECTION_MIN_DELAY);
 
             logger.info("Starting reconnect task with initial delay {}", initialDelay);
-            this.connectionMonitorFuture = this.connectionMonitorExecutor.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("DataServiceImpl:ReconnectTask:"
-                            + DataServiceImpl.this.dataServiceOptions.getKuraServicePid());
-                    boolean connected = false;
-                    try {
-                        if (DataServiceImpl.this.store == null) {
-                            logger.warn("Message store instance not attached, not connecting");
-                            return;
-                        }
-                        logger.info("Connecting...");
-                        if (DataServiceImpl.this.dataTransportService.isConnected()) {
-                            logger.info("Already connected. Reconnect task will be terminated.");
-
-                        } else {
-                            DataServiceImpl.this.dataTransportService.connect();
-                            logger.info("Connected. Reconnect task will be terminated.");
-                        }
-                        connected = true;
-                    } catch (KuraConnectException e) {
-                        logger.warn("Connect failed", e);
-
-                        if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
-                            if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
-                                    .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
-                                            .getRecoveryMaximumAllowedFailures()) {
-                                logger.info("Checkin done.");
-                                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
-                            } else {
-                                logger.info("Maximum number of connection attempts reached. Requested reboot...");
-                            }
-                        }
-                    } finally {
-                        if (connected) {
-                            unregisterAsCriticalComponent();
-                            // Throwing an exception will suppress subsequent executions of this periodic
-                            // task.
-                            throw new RuntimeException("Connected. Reconnect task will be terminated.");
-                        }
-                    }
-                }
-
-                private boolean isAuthenticationException(KuraConnectException e) {
-                    boolean authenticationException = false;
-                    if (e.getCause() instanceof MqttException) {
-                        MqttException mqttException = (MqttException) e.getCause();
-                        if (mqttException.getReasonCode() == MqttException.REASON_CODE_FAILED_AUTHENTICATION
-                                || mqttException.getReasonCode() == MqttException.REASON_CODE_INVALID_CLIENT_ID
-                                || mqttException.getReasonCode() == MqttException.REASON_CODE_NOT_AUTHORIZED) {
-                            logger.info("Authentication exception encountered.");
-                            authenticationException = true;
-                        }
-                    }
-                    return authenticationException;
-                }
-            }, initialDelay, reconnectInterval, TimeUnit.SECONDS);
+            this.connectionMonitorFuture = this.connectionMonitorExecutor.scheduleAtFixedRate(new ReconnectTask(),
+                    initialDelay, reconnectInterval, TimeUnit.SECONDS);
         } else {
             // Change notification status to off. Connection is not expected to happen in
             // the future
@@ -794,39 +851,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.publisherExecutor.execute(new PublishManager());
     }
 
-    // It's very important that the publishInternal and messageConfirmed methods are
-    // synchronized
-    private synchronized void publishInternal(StoredMessage message) throws KuraException {
-
-        String topic = message.getTopic();
-        byte[] payload = message.getPayload();
-        int qos = message.getQos();
-        boolean retain = message.isRetain();
-        int msgId = message.getId();
-
-        logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic, message.getPriority());
-
-        DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos,
-                retain);
-
-        if (token == null) {
-            DataServiceImpl.this.store.getMessageStore().markAsPublished(msgId);
-            logger.debug("Published message with ID: {}", msgId);
-        } else {
-
-            // Check if the token is already tracked in the map (in which case we are in
-            // trouble)
-            Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
-            if (trackedMsgId != null) {
-                logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
-            }
-
-            DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
-            DataServiceImpl.this.store.getMessageStore().markAsPublished(msgId, token);
-            logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId, token.getMessageId());
-        }
-    }
-
     private List<Integer> buildMessageIds(List<StoredMessage> messages, String topicRegex) {
         Pattern topicPattern = Pattern.compile(topicRegex);
         List<Integer> ids = new ArrayList<>();
@@ -864,6 +888,69 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.notificationStatus = status;
     }
 
+    private final class ReconnectTask implements Runnable {
+
+        @Override
+        public void run() {
+            Thread.currentThread().setName(
+                    "DataServiceImpl:ReconnectTask:" + DataServiceImpl.this.dataServiceOptions.getKuraServicePid());
+            boolean connected = false;
+            try {
+                if (!DataServiceImpl.this.storeState.isPresent()) {
+                    logger.warn(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+                    return;
+                }
+
+                DataServiceImpl.this.storeState.get().getOrOpenMessageStore();
+
+                logger.info("Connecting...");
+                if (DataServiceImpl.this.dataTransportService.isConnected()) {
+                    logger.info("Already connected. Reconnect task will be terminated.");
+
+                } else {
+                    DataServiceImpl.this.dataTransportService.connect();
+                    logger.info("Connected. Reconnect task will be terminated.");
+                }
+                connected = true;
+            } catch (KuraConnectException | KuraStoreException e) {
+                logger.warn("Connect failed", e);
+
+                if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
+
+                    if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
+                            .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
+                                    .getRecoveryMaximumAllowedFailures()) {
+                        logger.info("Checkin done.");
+                        DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
+                    } else {
+                        logger.info("Maximum number of connection attempts reached. Requested reboot...");
+                    }
+                }
+            } finally {
+                if (connected) {
+                    unregisterAsCriticalComponent();
+                    // Throwing an exception will suppress subsequent executions of this periodic
+                    // task.
+                    throw new RuntimeException("Connected. Reconnect task will be terminated.");
+                }
+            }
+        }
+
+        private boolean isAuthenticationException(KuraException e) {
+            boolean authenticationException = false;
+            if (e.getCause() instanceof MqttException) {
+                MqttException mqttException = (MqttException) e.getCause();
+                if (mqttException.getReasonCode() == MqttException.REASON_CODE_FAILED_AUTHENTICATION
+                        || mqttException.getReasonCode() == MqttException.REASON_CODE_INVALID_CLIENT_ID
+                        || mqttException.getReasonCode() == MqttException.REASON_CODE_NOT_AUTHORIZED) {
+                    logger.info("Authentication exception encountered.");
+                    authenticationException = true;
+                }
+            }
+            return authenticationException;
+        }
+    }
+
     private final class PublishManager implements Runnable {
 
         @Override
@@ -875,19 +962,21 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 if (DataServiceImpl.this.dataTransportService.isConnected()) {
                     try {
-                        final Optional<StoredMessage> message = DataServiceImpl.this.store.getMessageStore()
-                                .getNextMessage();
+                        if (DataServiceImpl.this.storeState.isPresent()) {
+                            final Optional<StoredMessage> message = DataServiceImpl.this.storeState.get()
+                                    .getOrOpenMessageStore().getNextMessage();
 
-                        if (message.isPresent()) {
-                            checkInFlightMessages(message.get());
+                            if (message.isPresent()) {
+                                checkInFlightMessages(message.get());
 
-                            if (DataServiceImpl.this.dataServiceOptions.isRateLimitEnabled()
-                                    && message.get().getPriority() >= 5) {
-                                messagePublished = publishMessageTokenBucket(message.get());
-                                sleepingTime = DataServiceImpl.this.throttle.getTokenWaitTime();
-                            } else {
-                                publishMessageUnbound(message.get());
-                                messagePublished = true;
+                                if (DataServiceImpl.this.dataServiceOptions.isRateLimitEnabled()
+                                        && message.get().getPriority() >= 5) {
+                                    messagePublished = publishMessageTokenBucket(message.get());
+                                    sleepingTime = DataServiceImpl.this.throttle.getTokenWaitTime();
+                                } else {
+                                    publishMessageUnbound(message.get());
+                                    messagePublished = true;
+                                }
                             }
                         }
                     } catch (KuraNotConnectedException e) {
@@ -971,6 +1060,51 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }, timeout, TimeUnit.SECONDS);
             }
         }
+
+        // It's very important that the publishInternal and messageConfirmed methods are
+        // synchronized
+        private synchronized void publishInternal(StoredMessage message) throws KuraException {
+
+            String topic = message.getTopic();
+            byte[] payload = message.getPayload();
+            int qos = message.getQos();
+            boolean retain = message.isRetain();
+            int msgId = message.getId();
+
+            logger.debug("Publishing message with ID: {} on topic: {}, priority: {}", msgId, topic,
+                    message.getPriority());
+
+            DataTransportToken token = DataServiceImpl.this.dataTransportService.publish(topic, payload, qos, retain);
+
+            if (DataServiceImpl.this.storeState.isPresent()) {
+                try {
+                    if (token == null) {
+                        DataServiceImpl.this.storeState.get().getOrOpenMessageStore().markAsPublished(msgId);
+                        logger.debug("Published message with ID: {}", msgId);
+                    } else {
+
+                        // Check if the token is already tracked in the map (in which case we are in
+                        // trouble)
+                        Integer trackedMsgId = DataServiceImpl.this.inFlightMsgIds.get(token);
+                        if (trackedMsgId != null) {
+                            logger.error("Token already tracked: {} - {}", token.getSessionId(), token.getMessageId());
+                        }
+
+                        DataServiceImpl.this.inFlightMsgIds.put(token, msgId);
+                        DataServiceImpl.this.storeState.get().getOrOpenMessageStore().markAsPublished(msgId, token);
+                        logger.debug("Published message with ID: {} and MQTT message ID: {}", msgId,
+                                token.getMessageId());
+                    }
+
+                } catch (KuraStoreException e) {
+                    DataServiceImpl.this.disconnectDataTransportAndLog(e);
+                }
+
+            } else {
+                throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            }
+
+        }
     }
 
     @Override
@@ -1011,11 +1145,38 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public Optional<StoredMessage> getNextMessage() {
         Optional<StoredMessage> message = Optional.empty();
         try {
-            message = DataServiceImpl.this.store.getMessageStore().getNextMessage();
+            if (DataServiceImpl.this.storeState.isPresent()) {
+                message = DataServiceImpl.this.storeState.get().getOrOpenMessageStore().getNextMessage();
+            } else {
+                throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
+            }
         } catch (Exception e) {
+            DataServiceImpl.this.disconnectDataTransportAndLog(e);
             logger.error("Probably an unrecoverable exception", e);
         }
         return message;
+    }
+
+    @Override
+    public void connected() {
+        logger.info("Message store with PID {} connected.", this.dataServiceOptions.getDbServiceInstancePid());
+        if (this.connectionMonitorFuture != null && !this.connectionMonitorFuture.isDone()) {
+            stopConnectionTask();
+            startConnectionTask();
+        }
+
+    }
+
+    @Override
+    public void disconnected() {
+        logger.info("Message store with PID {} disconnected.", this.dataServiceOptions.getDbServiceInstancePid());
+        if (this.storeState.isPresent()) {
+            this.storeState.get().shutdown();
+        }
+        if (this.dataTransportService.isConnected()) {
+            this.disconnect();
+            logger.info("Message store disconnected. Trying to shutdown the DataTransportService.");
+        }
     }
 
 }

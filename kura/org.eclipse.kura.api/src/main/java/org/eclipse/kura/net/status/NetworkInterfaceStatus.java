@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
-import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,11 +25,22 @@ import org.osgi.annotation.versioning.ProviderType;
  * network interface. Specific interfaces, like ethernet or wifi, must extend
  * this class.
  *
+ * A network interface is identified by Kura using the id field. It is used
+ * to internally manage the interface.
+ * The interfaceName, instead, is the IP interface as it may appear on the
+ * system.
+ * For Ethernet and WiFi interfaces the two values coincide (i.e. eth0, wlp1s0,
+ * ...).
+ * For modems, instead, the id is typically the usb or pci path, while the
+ * interfaceName is the IP interface created when they are connected.
+ * When the modem is disconnected the interfaceName can have a different value.
+ * 
  */
 @ProviderType
 public abstract class NetworkInterfaceStatus {
 
-    private final String name;
+    private final String id;
+    private final String interfaceName;
     private final byte[] hardwareAddress;
     private final NetworkInterfaceType type;
     private final String driver;
@@ -40,12 +50,12 @@ public abstract class NetworkInterfaceStatus {
     private final NetworkInterfaceState state;
     private final boolean autoConnect;
     private final int mtu;
-    private final Optional<UsbNetDevice> usbNetDevice;
     private final Optional<NetworkInterfaceIpAddressStatus<IP4Address>> interfaceIp4Addresses;
     private final Optional<NetworkInterfaceIpAddressStatus<IP6Address>> interfaceIp6Addresses;
 
     protected NetworkInterfaceStatus(NetworkInterfaceStatusBuilder<?> builder) {
-        this.name = builder.name;
+        this.id = builder.id;
+        this.interfaceName = builder.interfaceName;
         this.hardwareAddress = builder.hardwareAddress;
         this.type = builder.type;
         this.driver = builder.driver;
@@ -55,13 +65,16 @@ public abstract class NetworkInterfaceStatus {
         this.state = builder.state;
         this.autoConnect = builder.autoConnect;
         this.mtu = builder.mtu;
-        this.usbNetDevice = builder.usbNetDevice;
         this.interfaceIp4Addresses = builder.interfaceIp4Addresses;
         this.interfaceIp6Addresses = builder.interfaceIp6Addresses;
     }
 
-    public String getName() {
-        return this.name;
+    public String getId() {
+        return this.id;
+    }
+
+    public String getInterfaceName() {
+        return this.interfaceName;
     }
 
     public byte[] getHardwareAddress() {
@@ -100,10 +113,6 @@ public abstract class NetworkInterfaceStatus {
         return this.mtu;
     }
 
-    public Optional<UsbNetDevice> getUsbNetDevice() {
-        return this.usbNetDevice;
-    }
-
     public Optional<NetworkInterfaceIpAddressStatus<IP4Address>> getInterfaceIp4Addresses() {
         return this.interfaceIp4Addresses;
     }
@@ -120,7 +129,8 @@ public abstract class NetworkInterfaceStatus {
     public abstract static class NetworkInterfaceStatusBuilder<T extends NetworkInterfaceStatusBuilder<T>> {
 
         private static final String NA = "N/A";
-        private String name = NA;
+        private String id = NA;
+        private String interfaceName = NA;
         private byte[] hardwareAddress = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private NetworkInterfaceType type = NetworkInterfaceType.UNKNOWN;
         private String driver = NA;
@@ -130,12 +140,16 @@ public abstract class NetworkInterfaceStatus {
         private NetworkInterfaceState state = NetworkInterfaceState.UNKNOWN;
         private boolean autoConnect = false;
         private int mtu = 0;
-        private Optional<UsbNetDevice> usbNetDevice = Optional.empty();
         private Optional<NetworkInterfaceIpAddressStatus<IP4Address>> interfaceIp4Addresses = Optional.empty();
         private Optional<NetworkInterfaceIpAddressStatus<IP6Address>> interfaceIp6Addresses = Optional.empty();
 
-        public T withName(String name) {
-            this.name = name;
+        public T withId(String id) {
+            this.id = id;
+            return getThis();
+        }
+
+        public T withInterfaceName(String interfacenName) {
+            this.interfaceName = interfacenName;
             return getThis();
         }
 
@@ -184,11 +198,6 @@ public abstract class NetworkInterfaceStatus {
             return getThis();
         }
 
-        public T withUsbNetDevice(Optional<UsbNetDevice> usbNetDevice) {
-            this.usbNetDevice = usbNetDevice;
-            return getThis();
-        }
-
         public T withInterfaceIp4Addresses(
                 Optional<NetworkInterfaceIpAddressStatus<IP4Address>> interfaceIp4Addresses) {
             this.interfaceIp4Addresses = interfaceIp4Addresses;
@@ -211,9 +220,11 @@ public abstract class NetworkInterfaceStatus {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
-                this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.name, this.state, this.type,
-                this.usbNetDevice, this.virtual);
+        result = prime * result
+                + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
+                        this.interfaceName,
+                        this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.id, this.state,
+                        this.type, this.virtual);
         return result;
     }
 
@@ -230,10 +241,11 @@ public abstract class NetworkInterfaceStatus {
                 && Objects.equals(this.driverVersion, other.driverVersion)
                 && Objects.equals(this.firmwareVersion, other.firmwareVersion)
                 && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+                && Objects.equals(this.interfaceName, other.interfaceName)
                 && Objects.equals(this.interfaceIp4Addresses, other.interfaceIp4Addresses)
                 && Objects.equals(this.interfaceIp6Addresses, other.interfaceIp6Addresses) && this.mtu == other.mtu
-                && Objects.equals(this.name, other.name) && this.state == other.state && this.type == other.type
-                && Objects.equals(this.usbNetDevice, other.usbNetDevice) && this.virtual == other.virtual;
+                && Objects.equals(this.id, other.id) && this.state == other.state && this.type == other.type
+                && this.virtual == other.virtual;
     }
 
 }

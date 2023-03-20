@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
@@ -36,11 +35,6 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     private CommandExecutorService commandExecutorService;
 
     private NMDbusConnector nmDbusConnector;
-    private NetworkService networkService;
-
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -72,21 +66,21 @@ public class NMStatusServiceImpl implements NetworkStatusService {
 
     @Override
     public List<NetworkInterfaceStatus> getNetworkStatus() {
-        List<String> availableInterfaces = getInterfaceNames();
+        List<String> availableInterfaces = getInterfaceIds();
 
         List<NetworkInterfaceStatus> interfaceStatuses = new ArrayList<>();
-        for (String iface : availableInterfaces) {
-            getNetworkStatus(iface).ifPresent(interfaceStatuses::add);
+        for (String id : availableInterfaces) {
+            getNetworkStatus(id).ifPresent(interfaceStatuses::add);
         }
 
         return interfaceStatuses;
     }
 
     @Override
-    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName) {
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) {
         Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceName, networkService,
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id,
                     this.commandExecutorService);
             if (Objects.nonNull(status)) {
                 networkInterfaceStatus = Optional.of(status);
@@ -94,19 +88,19 @@ public class NMStatusServiceImpl implements NetworkStatusService {
         } catch (UnknownMethod e) {
             logger.warn(
                     "Could not retrieve status for \"{}\" interface from NM because the DBus object path references got invalidated.",
-                    interfaceName);
+                    id);
         } catch (DBusException | KuraException e) {
-            logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
+            logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", id, e);
         }
 
         return networkInterfaceStatus;
     }
 
     @Override
-    public List<String> getInterfaceNames() {
+    public List<String> getInterfaceIds() {
         List<String> interfaces = new ArrayList<>();
         try {
-            interfaces = this.nmDbusConnector.getInterfaces();
+            interfaces = this.nmDbusConnector.getDeviceIds();
         } catch (DBusException e) {
             logger.warn("Could not retrieve interfaces from NM because: ", e);
         }

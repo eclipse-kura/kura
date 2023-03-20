@@ -22,5 +22,4 @@ public enum ModemPowerState {
     OFF,
     LOW,
     ON;
-
 }

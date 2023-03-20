@@ -40,11 +40,13 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
+import org.eclipse.kura.util.store.listener.ConnectionListenerManager;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
@@ -56,9 +58,8 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class H2DbServiceImpl
-        implements H2DbService, MessageStoreProvider, WireRecordStoreProvider, ConfigurableComponent,
-        QueryableWireRecordStoreProvider {
+public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
+        ConfigurableComponent, QueryableWireRecordStoreProvider {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());
@@ -95,13 +96,9 @@ public class H2DbServiceImpl
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final AtomicInteger pendingUpdates = new AtomicInteger();
-    private final ThreadLocal<Boolean> isOnExecutor = new ThreadLocal<Boolean>() {
+    private final ThreadLocal<Boolean> isOnExecutor = ThreadLocal.withInitial(() -> false);
 
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
+    private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
     private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>());
@@ -163,13 +160,16 @@ public class H2DbServiceImpl
             Thread.currentThread().interrupt();
         }
 
+        this.isOnExecutor.remove();
         this.executorService.shutdown();
         awaitExecutorServiceTermination();
+
         try {
             shutdownDb();
         } catch (SQLException e) {
             logger.warn("got exception while shutting down the database", e);
         }
+        this.listenerManager.shutdown();
         logger.info("deactivate...done");
     }
 
@@ -217,7 +217,7 @@ public class H2DbServiceImpl
             syncWithExecutor();
         }
 
-        if (this.isOnExecutor.get()) {
+        if (Boolean.TRUE.equals(this.isOnExecutor.get())) {
             return withConnectionInternal(callable);
         }
 
@@ -305,13 +305,7 @@ public class H2DbServiceImpl
 
             H2DbServiceOptions newConfiguration = new H2DbServiceOptions(properties);
 
-            if (this.configuration != null) {
-                final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
-                final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
-                if (urlChanged || userChanged) {
-                    shutdownDb();
-                }
-            }
+            shutdownIfUrlOrUserChanged(newConfiguration);
 
             if (newConfiguration.isRemote()) {
                 throw new IllegalArgumentException("Remote databases are not supported");
@@ -358,12 +352,26 @@ public class H2DbServiceImpl
 
             logger.info("updating...done");
         } catch (Exception e) {
-            disposeConnectionPool();
+            try {
+                shutdownDb();
+            } catch (SQLException sqlException) {
+                disposeConnectionPool();
+            }
             stopCheckpointTask();
             logger.error("Database initialization failed", e);
         } finally {
             lock.unlock();
             this.pendingUpdates.decrementAndGet();
+        }
+    }
+
+    private void shutdownIfUrlOrUserChanged(H2DbServiceOptions newConfiguration) throws SQLException {
+        if (this.configuration != null) {
+            final boolean urlChanged = !this.configuration.getDbUrl().equals(newConfiguration.getDbUrl());
+            final boolean userChanged = !this.configuration.getUser().equalsIgnoreCase(newConfiguration.getUser());
+            if (urlChanged || userChanged) {
+                shutdownDb();
+            }
         }
     }
 
@@ -409,7 +417,8 @@ public class H2DbServiceImpl
             conn = this.connectionPool.getConnection();
         } catch (SQLException e) {
             logger.error("Error getting connection", e);
-            throw e;
+            this.listenerManager.dispatchDisconnected();
+            throw new SQLException("Error getting connection");
         }
         return conn;
     }
@@ -452,6 +461,7 @@ public class H2DbServiceImpl
         }
 
         disposeConnectionPool();
+        this.listenerManager.dispatchDisconnected();
         activeInstances.remove(this.configuration.getBaseUrl());
     }
 
@@ -473,6 +483,7 @@ public class H2DbServiceImpl
         Connection conn = null;
         try {
             conn = getConnectionInternal();
+            this.listenerManager.dispatchConnected();
         } catch (SQLException e) {
             logger.error("Failed to open database", e);
             if (deleteDbOnError && configuration.isFileBased()) {
@@ -625,7 +636,6 @@ public class H2DbServiceImpl
     }
 
     @Override
-    @SuppressWarnings("restriction")
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
         return new H2DbQueryableWireRecordStoreImpl(this::withConnectionAdapter).performQuery(query);
@@ -636,4 +646,17 @@ public class H2DbServiceImpl
 
         return this.withConnection(callable::call);
     }
+
+    @Override
+    public void addListener(ConnectionListener listener) {
+        this.listenerManager.add(listener);
+
+    }
+
+    @Override
+    public void removeListener(ConnectionListener listener) {
+        this.listenerManager.remove(listener);
+
+    }
+
 }

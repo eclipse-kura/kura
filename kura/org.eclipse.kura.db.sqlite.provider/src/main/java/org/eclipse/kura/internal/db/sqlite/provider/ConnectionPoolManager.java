@@ -51,14 +51,13 @@ public class ConnectionPoolManager {
         this.hikariDatasource = new HikariDataSource(config);
     }
 
-    public synchronized Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         logger.debug("getting connection");
 
         return this.hikariDatasource.getConnection();
-
     }
 
-    synchronized void withExclusiveConnection(final Consumer<Connection> consumer) {
+    void withExclusiveConnection(final Consumer<Connection> consumer) {
 
         HikariPoolMXBean hikariPoolMXBean = this.hikariDatasource.getHikariPoolMXBean();
 
@@ -82,7 +81,7 @@ public class ConnectionPoolManager {
         waitCondition(() -> hikariPoolMXBean.getActiveConnections() <= 0, timeoutMs);
     }
 
-    public synchronized void shutdown(final Optional<Long> waitIdleTimeoutMs) {
+    public void shutdown(final Optional<Long> waitIdleTimeoutMs) {
 
         HikariPoolMXBean hikariPoolMXBean = this.hikariDatasource.getHikariPoolMXBean();
 
@@ -97,7 +96,7 @@ public class ConnectionPoolManager {
         this.hikariDatasource.close();
     }
 
-    private synchronized boolean waitCondition(final BooleanSupplier condition, final Optional<Long> timeoutMs) {
+    private boolean waitCondition(final BooleanSupplier condition, final Optional<Long> timeoutMs) {
 
         final long end = timeoutMs.map(t -> System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(t))
                 .orElse(Long.MAX_VALUE);
@@ -109,7 +108,7 @@ public class ConnectionPoolManager {
             }
 
             try {
-                this.wait(100);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

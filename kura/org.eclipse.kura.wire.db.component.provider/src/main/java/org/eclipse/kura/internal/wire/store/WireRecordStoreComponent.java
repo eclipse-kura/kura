@@ -1,15 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- * 
+ *
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.store;
 
@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -36,7 +37,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
-public class WireRecordStoreComponent implements WireEmitter, WireReceiver, ConfigurableComponent {
+public class WireRecordStoreComponent implements WireEmitter, WireReceiver, ConfigurableComponent, ConnectionListener {
 
     private static final Logger logger = LogManager.getLogger(WireRecordStoreComponent.class);
 
@@ -49,11 +50,15 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
     }
 
     public synchronized void bindWireRecordStoreProvider(final WireRecordStoreProvider wireRecordStoreProvider) {
+        wireRecordStoreProvider.addListener(this);
         updateState(s -> s.setWireRecordStoreProvider(wireRecordStoreProvider));
     }
 
     public synchronized void unbindWireRecordStoreProvider(final WireRecordStoreProvider wireRecordStoreProvider) {
-        updateState(s -> s.unsetWireRecordStoreProvider(wireRecordStoreProvider));
+        if (state.getWireRecordStoreProvider().equals(Optional.of(wireRecordStoreProvider))) {
+            wireRecordStoreProvider.removeListener(this);
+            updateState(s -> s.unsetWireRecordStoreProvider(wireRecordStoreProvider));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -86,6 +91,7 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
+
         final List<WireRecord> records = wireEvelope.getRecords();
 
         try {
@@ -129,9 +135,13 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         public State unsetWireRecordStoreProvider(final WireRecordStoreProvider wireRecordStoreProvider);
 
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider();
+
         public void store(final List<WireRecord> records) throws KuraStoreException;
 
         public void shutdown();
+
+        public State onWireRecordStoreDisconnected();
     }
 
     private static class Unsatisfied implements State {
@@ -155,9 +165,7 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State unsetWireRecordStoreProvider(WireRecordStoreProvider wireRecordStoreProvider) {
-            if (this.provider.equals(Optional.of(wireRecordStoreProvider))) {
-                this.provider = Optional.empty();
-            }
+            this.provider = Optional.empty();
 
             return checkSatisfied();
         }
@@ -179,6 +187,16 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         @Override
         public void shutdown() {
             // nothing to shutdown
+        }
+
+        @Override
+        public State onWireRecordStoreDisconnected() {
+            return this;
+        }
+
+        @Override
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider() {
+            return this.provider;
         }
 
     }
@@ -212,17 +230,15 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public State unsetWireRecordStoreProvider(WireRecordStoreProvider wireRecordStoreProvider) {
-            if (this.provider == wireRecordStoreProvider) {
-                return new Unsatisfied().setOptions(this.options);
-            } else {
-                return this;
-            }
+            return new Unsatisfied().setOptions(this.options);
         }
 
         @Override
         public void store(final List<WireRecord> records) throws KuraStoreException {
             try {
+
                 storeInternal(records);
+
             } catch (final Exception e) {
                 logger.warn("failed to store records, attempting to reopen store...");
                 shutdown();
@@ -233,8 +249,9 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
         private void storeInternal(final List<WireRecord> records) throws KuraStoreException {
             final WireRecordStore currentStore = getWireRecordStore();
 
-            if (currentStore.getSize() >= options.getMaximumStoreSize()) {
-                final int recordsToKeep = Math.min(options.getCleanupRecordsKeep(), options.getMaximumStoreSize());
+            if (currentStore.getSize() >= this.options.getMaximumStoreSize()) {
+                final int recordsToKeep = Math.min(this.options.getCleanupRecordsKeep(),
+                        this.options.getMaximumStoreSize());
 
                 currentStore.truncate(Math.max(0, recordsToKeep - 1));
             }
@@ -244,21 +261,42 @@ public class WireRecordStoreComponent implements WireEmitter, WireReceiver, Conf
 
         @Override
         public void shutdown() {
-            if (store.isPresent()) {
-                store.get().close();
-                store = Optional.empty();
+            if (this.store.isPresent()) {
+                this.store.get().close();
+                this.store = Optional.empty();
             }
         }
 
         private WireRecordStore getWireRecordStore() throws KuraStoreException {
-            if (store.isPresent()) {
-                return store.get();
+            if (this.store.isPresent()) {
+                return this.store.get();
             }
 
-            this.store = Optional.of(this.provider.openWireRecordStore(options.getStoreName()));
+            this.store = Optional.of(this.provider.openWireRecordStore(this.options.getStoreName()));
 
             return getWireRecordStore();
         }
+
+        @Override
+        public State onWireRecordStoreDisconnected() {
+            this.shutdown();
+            return this;
+        }
+
+        @Override
+        public Optional<WireRecordStoreProvider> getWireRecordStoreProvider() {
+            return Optional.of(this.provider);
+        }
+    }
+
+    @Override
+    public void disconnected() {
+        updateState(State::onWireRecordStoreDisconnected);
+    }
+
+    @Override
+    public void connected() {
+        // TODO Auto-generated method stub
 
     }
 }

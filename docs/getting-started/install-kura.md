@@ -50,10 +50,12 @@ On unsupported devices, Kura will install an empty `jdk.dio.properties` file. He
 
 To have all the Kura features working, the following dependencies are required:
 
-- General: `telnet`, `dos2unix`, `unzip`.
-- Bluetooth: `bluez`, `bluez-hcidump`.
-- Time: `ntpdate`, `chrony`, `cron`.
-- Networking: `network-manager`, `bind9`, `isc-dhcp-server`, `iw`, `iptables`, `modemmanager`.
+- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`.
+- Security: `polkit` or `policykit-1`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`.
+- Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`.
+- Time: `ntpdate`, `chrony`, `chronyc`, `cron` or `cronie`.
+- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`.
+- Logs: `logrotate`.
 - Gps: `gpsd`.
 - Python: `python3`.
 - Java: `openjdk-8-jre-headless` or `temurin-8-jdk` or `openjdk-17-jre-headless` or `temurin-17-jdk`.

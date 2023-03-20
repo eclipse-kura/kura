@@ -412,7 +412,7 @@ public class NMDbusConnector {
 
         logger.info("Modem location setup {} for modem {}", desiredLocationSources, device.getObjectPath());
 
-        modemLocation.Setup(MMModemLocationSource.toBitmask(desiredLocationSources), false);
+        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources), false);
     }
 
     private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,

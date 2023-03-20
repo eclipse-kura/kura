@@ -54,7 +54,8 @@ public class NMSettingsConverterTest {
     @Test
     public void buildSettingsShouldThrowWhenGivenEmptyMap() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
         thenNoSuchElementExceptionThrown();
     }
 
@@ -696,7 +697,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingBuildAllMapContains("ipv6", "method", "disabled");
@@ -737,7 +739,8 @@ public class NMSettingsConverterTest {
 
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingBuildAllMapContains("ipv6", "method", "disabled");
@@ -777,7 +780,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingBuildAllMapContains("ipv6", "method", "disabled");
@@ -818,7 +822,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingBuildAllMapContains("ipv6", "method", "disabled");
@@ -860,7 +865,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingBuildAllMapContains("ipv6", "method", "disabled");
@@ -892,7 +898,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoExceptionsHaveBeenThrown();
@@ -914,7 +920,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoExceptionsHaveBeenThrown();
@@ -936,7 +942,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoExceptionsHaveBeenThrown();
@@ -958,7 +964,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoSuchElementExceptionThrown();
@@ -974,7 +980,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoSuchElementExceptionThrown();
@@ -990,7 +996,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.eth0.config.ip4.gateway", "192.168.0.1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0",
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
         thenNoSuchElementExceptionThrown();
@@ -1016,7 +1022,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoSuchElementExceptionThrown();
     }
@@ -1041,7 +1048,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoSuchElementExceptionThrown();
     }
@@ -1066,7 +1074,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI);
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoSuchElementExceptionThrown();
     }
@@ -1141,9 +1150,10 @@ public class NMSettingsConverterTest {
      */
 
     public void whenBuildSettingsIsRunWith(NetworkProperties properties, Optional<Connection> oldConnection,
-            String iface, NMDeviceType deviceType) {
+            String deviceId, String iface, NMDeviceType deviceType) {
         try {
-            this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, iface, deviceType);
+            this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, deviceId, iface,
+                    deviceType);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

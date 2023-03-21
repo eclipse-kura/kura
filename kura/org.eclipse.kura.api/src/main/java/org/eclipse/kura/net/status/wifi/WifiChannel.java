@@ -93,7 +93,7 @@ public class WifiChannel {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         WifiChannel other = (WifiChannel) obj;

@@ -268,8 +268,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withCurrentModemCapabilities(
-                Set<ModemCapability> currentModemCapabilities) {
+        public ModemInterfaceStatusBuilder withCurrentModemCapabilities(Set<ModemCapability> currentModemCapabilities) {
             this.currentModemCapabilities = currentModemCapabilities;
             return getThis();
         }
@@ -375,15 +374,12 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims, this.bearers,
-                        this.connectionStatus, this.connectionType, this.currentBands, this.currentModemCapabilities,
-                        this.currentModes, this.gpsSupported,
-                        this.hardwareRevision, this.manufacturer, this.model,
-                        this.operatorName, this.ports, this.powerState,
-                        this.primaryPort, this.registrationStatus, this.rssi, this.serialNumber, this.signalQuality,
-                        this.simLocked, this.softwareRevision,
-                        this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
+        result = prime * result + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims,
+                this.bearers, this.connectionStatus, this.connectionType, this.currentBands,
+                this.currentModemCapabilities, this.currentModes, this.gpsSupported, this.hardwareRevision,
+                this.manufacturer, this.model, this.operatorName, this.ports, this.powerState, this.primaryPort,
+                this.registrationStatus, this.rssi, this.serialNumber, this.signalQuality, this.simLocked,
+                this.softwareRevision, this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
         return result;
     }
 
@@ -392,28 +388,24 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+        if (!super.equals(obj) || getClass() != obj.getClass()) {
             return false;
         }
         ModemInterfaceStatus other = (ModemInterfaceStatus) obj;
         return Objects.equals(this.accessTechnologies, other.accessTechnologies)
                 && this.activeSimIndex == other.activeSimIndex
                 && Objects.equals(this.availableSims, other.availableSims)
-                && Objects.equals(this.bearers, other.bearers)
-                && this.connectionStatus == other.connectionStatus
+                && Objects.equals(this.bearers, other.bearers) && this.connectionStatus == other.connectionStatus
                 && this.connectionType == other.connectionType && Objects.equals(this.currentBands, other.currentBands)
                 && Objects.equals(this.currentModemCapabilities, other.currentModemCapabilities)
                 && Objects.equals(this.currentModes, other.currentModes) && this.gpsSupported == other.gpsSupported
                 && Objects.equals(this.hardwareRevision, other.hardwareRevision)
-                && Objects.equals(this.manufacturer, other.manufacturer)
-                && Objects.equals(this.model, other.model)
-                && Objects.equals(this.operatorName, other.operatorName)
-                && Objects.equals(this.ports, other.ports) && this.powerState == other.powerState
-                && Objects.equals(this.primaryPort, other.primaryPort)
-                && this.registrationStatus == other.registrationStatus
-                && this.rssi == other.rssi && Objects.equals(this.serialNumber, other.serialNumber)
-                && this.signalQuality == other.signalQuality && this.simLocked == other.simLocked
-                && Objects.equals(this.softwareRevision, other.softwareRevision)
+                && Objects.equals(this.manufacturer, other.manufacturer) && Objects.equals(this.model, other.model)
+                && Objects.equals(this.operatorName, other.operatorName) && Objects.equals(this.ports, other.ports)
+                && this.powerState == other.powerState && Objects.equals(this.primaryPort, other.primaryPort)
+                && this.registrationStatus == other.registrationStatus && this.rssi == other.rssi
+                && Objects.equals(this.serialNumber, other.serialNumber) && this.signalQuality == other.signalQuality
+                && this.simLocked == other.simLocked && Objects.equals(this.softwareRevision, other.softwareRevision)
                 && Objects.equals(this.supportedBands, other.supportedBands)
                 && Objects.equals(this.supportedModemCapabilities, other.supportedModemCapabilities)
                 && Objects.equals(this.supportedModes, other.supportedModes);

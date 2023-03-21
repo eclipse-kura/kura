@@ -34,7 +34,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * For modems, instead, the id is typically the usb or pci path, while the
  * interfaceName is the IP interface created when they are connected.
  * When the modem is disconnected the interfaceName can have a different value.
- * 
+ *
  */
 @ProviderType
 public abstract class NetworkInterfaceStatus {
@@ -220,11 +220,9 @@ public abstract class NetworkInterfaceStatus {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result
-                + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
-                        this.interfaceName,
-                        this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.id, this.state,
-                        this.type, this.virtual);
+        result = prime * result + Objects.hash(this.autoConnect, this.driver, this.driverVersion, this.firmwareVersion,
+                this.interfaceName, this.interfaceIp4Addresses, this.interfaceIp6Addresses, this.mtu, this.id,
+                this.state, this.type, this.virtual);
         return result;
     }
 
@@ -233,7 +231,7 @@ public abstract class NetworkInterfaceStatus {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         NetworkInterfaceStatus other = (NetworkInterfaceStatus) obj;

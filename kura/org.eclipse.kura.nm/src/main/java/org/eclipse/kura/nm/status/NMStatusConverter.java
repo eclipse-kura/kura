@@ -37,6 +37,7 @@ import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus.EthernetInte
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus;
 import org.eclipse.kura.net.status.loopback.LoopbackInterfaceStatus.LoopbackInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.Bearer;
+import org.eclipse.kura.net.status.modem.BearerIpType;
 import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
@@ -55,6 +56,7 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusB
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 import org.eclipse.kura.net.wifi.WifiChannel;
+import org.eclipse.kura.nm.MMBearerIpFamily;
 import org.eclipse.kura.nm.MMModem3gppRegistrationState;
 import org.eclipse.kura.nm.MMModemAccessTechnology;
 import org.eclipse.kura.nm.MMModemBand;
@@ -73,9 +75,11 @@ import org.eclipse.kura.nm.NMDeviceWifiCapabilities;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.PropertyCurrentModesStruct;
 import org.freedesktop.modemmanager1.PropertyPortsStruct;
+import org.freedesktop.modemmanager1.PropertySignalQualityStruct;
 import org.freedesktop.modemmanager1.PropertySupportedModesStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +96,7 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_BUS_NAME = "org.freedesktop.ModemManager1.Sim";
+    private static final String MM_BEARER_BUS_NAME = "org.freedesktop.ModemManager1.Bearer";
     private static final String MM_MODEM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
     private static final String MM_MODEM_3GPP_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Modem3gpp";
     private static final String EMPTY_MAC_ADDRESS = "00:00:00:00:00:00";
@@ -511,7 +516,7 @@ public class NMStatusConverter {
             builder.withCurrentModes(getCurrentModemMode(properties));
             builder.withSupportedBands(getModemBands(properties, "SupportedBands"));
             builder.withCurrentBands(getModemBands(properties, "CurrentBands"));
-            builder.withGpsSupported(isGpsSupported(properties)); // QUI!!!!!!
+            builder.withGpsSupported(isGpsSupported(properties));
             builder.withActiveSimIndex(getActiveSimIndex(properties));
             builder.withSimLocked(isSimLocked(properties));
             builder.withConnectionStatus(MMModemState.toModemState(properties.Get(MM_MODEM_BUS_NAME, STATE)));
@@ -646,40 +651,37 @@ public class NMStatusConverter {
 
     private static List<Bearer> getBearers(List<Properties> properties) {
         List<Bearer> bearers = new ArrayList<>();
-//        for (Properties bearerProperties : properties) {
-//            String name = bearerProperties.Get(MM_BEARER_BUS_NAME, "Interface");
-//            boolean connected = bearerProperties.Get(MM_BEARER_BUS_NAME, "Connected");
-//            Map<String, Variant<?>> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
-//            String apn = String.class.cast(settings.get("apn").getValue());
-//            Set<BearerIpType> bearerTypes = MMBearerIpFamily
-//                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type").getValue()));
-//            long bytesTransmitted = 0L;
-//            long bytesReceived = 0L;
-//            try {
-//                Map<String, Variant<?>> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
-//                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes").getValue()).longValue();
-//                bytesReceived = UInt64.class.cast(stats.get("rx-bytes").getValue()).longValue();
-//            } catch (DBusExecutionException e) {
-//                logger.warn("Bearer statistics not found.");
-//            }
-//            bearers.add(new Bearer(name, connected, apn, bearerTypes, bytesTransmitted, bytesReceived));
-//        }
+        for (Properties bearerProperties : properties) {
+            String name = bearerProperties.Get(MM_BEARER_BUS_NAME, "Interface");
+            boolean connected = bearerProperties.Get(MM_BEARER_BUS_NAME, "Connected");
+            Map<String, Variant<?>> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
+            String apn = String.class.cast(settings.get("apn").getValue());
+            Set<BearerIpType> bearerTypes = MMBearerIpFamily
+                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type").getValue()));
+            long bytesTransmitted = 0L;
+            long bytesReceived = 0L;
+            try {
+                Map<String, Variant<?>> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
+                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes").getValue()).longValue();
+                bytesReceived = UInt64.class.cast(stats.get("rx-bytes").getValue()).longValue();
+            } catch (DBusExecutionException e) {
+                logger.warn("Bearer statistics not found.");
+            }
+            bearers.add(new Bearer(name, connected, apn, bearerTypes, bytesTransmitted, bytesReceived));
+        }
         return bearers;
     }
 
     private static int getSignalQuality(Properties properties) {
-        Object[] signalQuality = properties.Get(MM_MODEM_BUS_NAME, "SignalQuality");
-        if (signalQuality.length >= 1) {
-            return UInt32.class.cast(signalQuality[0]).intValue();
-        }
-        return 0;
+        PropertySignalQualityStruct signalQuality = properties.Get(MM_MODEM_BUS_NAME, "SignalQuality");
+        return signalQuality.getMember0().intValue();
     }
 
     private static void fill3gppProperties(ModemInterfaceStatusBuilder builder, Properties properties) {
         try {
             builder.withRegistrationStatus(MMModem3gppRegistrationState
                     .toRegistrationStatus(properties.Get(MM_MODEM_3GPP_BUS_NAME, "RegistrationState")));
-            builder.withOperatorName(String.class.cast(properties.Get(MM_MODEM_3GPP_BUS_NAME, "OperatorName")));
+            builder.withOperatorName(properties.Get(MM_MODEM_3GPP_BUS_NAME, "OperatorName"));
         } catch (DBusExecutionException e) {
             logger.warn("3gpp properties not found.");
         }

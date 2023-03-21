@@ -49,7 +49,7 @@ public class GwtNetworkServiceImpl {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
-    
+
     public static List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute)
             throws GwtKuraException {
         try {
@@ -205,7 +205,7 @@ public class GwtNetworkServiceImpl {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
-    
+
     public static List<GwtWifiChannelFrequency> findFrequencies(String interfaceName, GwtWifiRadioMode radioMode)
             throws GwtKuraException {
         try {
@@ -235,16 +235,16 @@ public class GwtNetworkServiceImpl {
             }
 
             return displayedChannels;
-        } catch (GwtKuraException e) {
+        } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
-    
+
     public static String getWifiCountryCode() throws GwtKuraException {
         try {
             NetworkStatusServiceAdapter status = new NetworkStatusServiceAdapter();
             return status.getWifiCountryCode();
-        } catch (GwtKuraException e) {
+        } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -254,7 +254,7 @@ public class GwtNetworkServiceImpl {
             List<GwtWifiHotspotEntry> aps = new NetworkStatusServiceAdapter().findWifiHotspots(interfaceName);
             logger.debug("Found APs: {}", aps);
             return aps;
-        } catch (GwtKuraException e) {
+        } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }

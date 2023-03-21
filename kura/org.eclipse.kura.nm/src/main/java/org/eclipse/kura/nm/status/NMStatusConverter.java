@@ -215,7 +215,7 @@ public class NMStatusConverter {
     }
 
     public static String getModemDeviceHwPath(Properties modemProperties) {
-        String modemDeviceProperty = ((String) modemProperties.Get(MM_MODEM_BUS_NAME, "Device"));
+        String modemDeviceProperty = (String) modemProperties.Get(MM_MODEM_BUS_NAME, "Device");
         return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
     }
 

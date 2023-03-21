@@ -542,7 +542,6 @@ public class NMDbusConnector {
                     .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
         } catch (DBusExecutionException e) {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
-            return Optional.empty();
         }
         
         return getAvaliableConnection(dev);

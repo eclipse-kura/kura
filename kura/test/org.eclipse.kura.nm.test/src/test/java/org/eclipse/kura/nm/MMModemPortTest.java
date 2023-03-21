@@ -147,11 +147,11 @@ public class MMModemPortTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputModemPortType.toUInt32();
+            this.calculatedUInt32 = this.inputModemPortType.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

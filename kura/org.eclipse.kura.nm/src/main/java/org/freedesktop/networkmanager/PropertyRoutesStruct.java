@@ -40,19 +40,19 @@ public class PropertyRoutesStruct extends Struct {
     }
 
     public List<Byte> getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public UInt32 getMember1() {
-        return member1;
+        return this.member1;
     }
 
     public List<Byte> getMember2() {
-        return member2;
+        return this.member2;
     }
 
     public UInt32 getMember3() {
-        return member3;
+        return this.member3;
     }
 
 }

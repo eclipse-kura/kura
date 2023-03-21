@@ -35,19 +35,19 @@ public class AddConnection2Tuple extends Tuple {
     }
 
     public void setPath(DBusPath arg) {
-        path = arg;
+        this.path = arg;
     }
 
     public DBusPath getPath() {
-        return path;
+        return this.path;
     }
 
     public void setResult(Map<String, Variant<?>> arg) {
-        result = arg;
+        this.result = arg;
     }
 
     public Map<String, Variant<?>> getResult() {
-        return result;
+        return this.result;
     }
 
 }

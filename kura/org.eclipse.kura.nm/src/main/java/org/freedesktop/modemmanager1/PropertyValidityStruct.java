@@ -33,11 +33,11 @@ public class PropertyValidityStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public Variant<?> getMember1() {
-        return member1;
+        return this.member1;
     }
 
 }

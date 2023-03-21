@@ -28,11 +28,11 @@ public class AccessPointsProperties {
     }
 
     public Optional<Properties> getActiveAccessPoint() {
-        return activeAccessPoint;
+        return this.activeAccessPoint;
     }
 
     public List<Properties> getAvailableAccessPoints() {
-        return availableAccessPoints;
+        return this.availableAccessPoints;
     }
 
 }

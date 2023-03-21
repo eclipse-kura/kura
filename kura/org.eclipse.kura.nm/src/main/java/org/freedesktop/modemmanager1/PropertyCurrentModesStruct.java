@@ -32,11 +32,11 @@ public class PropertyCurrentModesStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public UInt32 getMember1() {
-        return member1;
+        return this.member1;
     }
 
 }

@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -45,7 +46,7 @@ public interface Time extends DBusInterface {
         }
 
         public String getTime() {
-            return time;
+            return this.time;
         }
 
     }

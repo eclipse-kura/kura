@@ -37,27 +37,27 @@ public enum MMSimEsimStatus {
 
     public static MMSimEsimStatus toMMSimEsimStatus(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return MMSimEsimStatus.MM_SIM_ESIM_STATUS_UNKNOWN;
-            case 0x01:
-                return MMSimEsimStatus.MM_SIM_ESIM_STATUS_NO_PROFILES;
-            case 0x02:
-                return MMSimEsimStatus.MM_SIM_ESIM_STATUS_WITH_PROFILES;
-            default:
-                return MMSimEsimStatus.MM_SIM_ESIM_STATUS_UNKNOWN;
+        case 0x00:
+            return MMSimEsimStatus.MM_SIM_ESIM_STATUS_UNKNOWN;
+        case 0x01:
+            return MMSimEsimStatus.MM_SIM_ESIM_STATUS_NO_PROFILES;
+        case 0x02:
+            return MMSimEsimStatus.MM_SIM_ESIM_STATUS_WITH_PROFILES;
+        default:
+            return MMSimEsimStatus.MM_SIM_ESIM_STATUS_UNKNOWN;
         }
     }
 
     public static ESimStatus toESimStatus(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return ESimStatus.UNKNOWN;
-            case 0x01:
-                return ESimStatus.NO_PROFILES;
-            case 0x02:
-                return ESimStatus.WITH_PROFILES;
-            default:
-                return ESimStatus.UNKNOWN;
+        case 0x00:
+            return ESimStatus.UNKNOWN;
+        case 0x01:
+            return ESimStatus.NO_PROFILES;
+        case 0x02:
+            return ESimStatus.WITH_PROFILES;
+        default:
+            return ESimStatus.UNKNOWN;
         }
     }
 }

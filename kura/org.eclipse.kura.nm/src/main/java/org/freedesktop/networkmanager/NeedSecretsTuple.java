@@ -31,19 +31,19 @@ public class NeedSecretsTuple extends Tuple {
     }
 
     public void setUsername(String arg) {
-        username = arg;
+        this.username = arg;
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setPassword(String arg) {
-        password = arg;
+        this.password = arg;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
 }

@@ -17,12 +17,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
-import org.junit.After;
 import org.junit.Test;
 
 public class DhcpServerMonitorTest {
@@ -30,7 +27,7 @@ public class DhcpServerMonitorTest {
     private DhcpServerMonitor monitor;
     private CommandExecutorService cesMock;
     private DhcpServerManager managerMock;
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     @Test
     public void shouldStartDhcpServerTest() throws KuraException, InterruptedException {

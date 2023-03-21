@@ -35,19 +35,19 @@ public class GetAppliedConnectionTuple extends Tuple {
     }
 
     public void setConnection(Map<String, Map<String, Variant<?>>> arg) {
-        connection = arg;
+        this.connection = arg;
     }
 
     public Map<String, Map<String, Variant<?>>> getConnection() {
-        return connection;
+        return this.connection;
     }
 
     public void setVersionId(UInt64 arg) {
-        versionId = arg;
+        this.versionId = arg;
     }
 
     public UInt64 getVersionId() {
-        return versionId;
+        return this.versionId;
     }
 
 }

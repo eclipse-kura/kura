@@ -43,39 +43,39 @@ public enum MMBearerIpFamily {
 
     public static MMBearerIpFamily toMMBearerIpFamily(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NONE;
-            case 0x00000001:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV4;
-            case 0x00000002:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV6;
-            case 0x00000004:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV4V6;
-            case 0x00000008:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NON_IP;
-            case 0xFFFFFFF7:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_ANY;
-            default:
-                return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NONE;
+        case 0x00000000:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NONE;
+        case 0x00000001:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV4;
+        case 0x00000002:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV6;
+        case 0x00000004:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_IPV4V6;
+        case 0x00000008:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NON_IP;
+        case 0xFFFFFFF7:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_ANY;
+        default:
+            return MMBearerIpFamily.MM_BEARER_IP_FAMILY_NONE;
         }
     }
 
     public static BearerIpType toBearerIpType(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return BearerIpType.NONE;
-            case 0x00000001:
-                return BearerIpType.IPV4;
-            case 0x00000002:
-                return BearerIpType.IPV6;
-            case 0x00000004:
-                return BearerIpType.IPV4V6;
-            case 0x00000008:
-                return BearerIpType.NON_IP;
-            case 0xFFFFFFF7:
-                return BearerIpType.ANY;
-            default:
-                return BearerIpType.NONE;
+        case 0x00000000:
+            return BearerIpType.NONE;
+        case 0x00000001:
+            return BearerIpType.IPV4;
+        case 0x00000002:
+            return BearerIpType.IPV6;
+        case 0x00000004:
+            return BearerIpType.IPV4V6;
+        case 0x00000008:
+            return BearerIpType.NON_IP;
+        case 0xFFFFFFF7:
+            return BearerIpType.ANY;
+        default:
+            return BearerIpType.NONE;
         }
     }
 

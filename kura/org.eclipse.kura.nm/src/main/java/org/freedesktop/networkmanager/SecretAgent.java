@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.interfaces.DBusInterface;

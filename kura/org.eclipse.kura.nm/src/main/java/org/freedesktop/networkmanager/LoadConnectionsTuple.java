@@ -33,19 +33,19 @@ public class LoadConnectionsTuple extends Tuple {
     }
 
     public void setStatus(boolean arg) {
-        status = arg;
+        this.status = arg;
     }
 
     public boolean getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setFailures(List<String> arg) {
-        failures = arg;
+        this.failures = arg;
     }
 
     public List<String> getFailures() {
-        return failures;
+        return this.failures;
     }
 
 }

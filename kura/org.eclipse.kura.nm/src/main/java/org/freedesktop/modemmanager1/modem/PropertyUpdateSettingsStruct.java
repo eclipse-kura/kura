@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.types.UInt32;
@@ -34,11 +35,11 @@ public class PropertyUpdateSettingsStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public Map<String, Variant<?>> getMember1() {
-        return member1;
+        return this.member1;
     }
 
 }

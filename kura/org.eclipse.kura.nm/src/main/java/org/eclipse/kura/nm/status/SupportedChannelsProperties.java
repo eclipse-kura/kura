@@ -27,10 +27,10 @@ public class SupportedChannelsProperties {
     }
 
     public String getCountryCode() {
-        return countryCode;
+        return this.countryCode;
     }
 
     public List<WifiChannel> getSupportedChannels() {
-        return supportedChannels;
+        return this.supportedChannels;
     }
 }

@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
@@ -75,6 +76,7 @@ import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.Modem;
+import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.GetAppliedConnectionTuple;
 import org.freedesktop.networkmanager.Settings;
@@ -425,6 +427,22 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenNetworkSettingsDidNotChangeForDevice("lo");
+    }
+
+    @Test
+    public void applyShouldWorkWithDisabledModem() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusDisabled");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenDisconnectIsCalledFor("ttyACM17");
     }
 
     @Test
@@ -820,8 +838,6 @@ public class NMDbusConnectorTest {
                 .thenReturn(Arrays.asList(new UInt32[] { new UInt32(40), new UInt32(69), new UInt32(81) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "CurrentBands"))
                 .thenReturn(Arrays.asList(new UInt32[] { new UInt32(40), new UInt32(69) }));
-        when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Capabilities"))
-                .thenReturn(new UInt32(0x00000002));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimarySimSlot"))
                 .thenReturn(new UInt32(0));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "UnlockRequired"))
@@ -859,6 +875,21 @@ public class NMDbusConnectorTest {
             when(modemProperties.Get(MM_MODEM_BUS_NAME, "Sim"))
                     .thenReturn(new DBusPath("/"));
         }
+        
+        // Modem location
+        Location modemLocation = mock(Location.class);
+        doReturn(modemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
+                "/org/freedesktop/ModemManager1/Modem/3", Location.class);
+        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(modemLocation).getObjectPath();
+        
+        
+        Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
+        Set<MMModemLocationSource> enabledSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
+        when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Capabilities"))
+                .thenReturn(MMModemLocationSource.toBitMaskFromMMModemLocationSource(availableSources));
+        when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Enabled"))
+                .thenReturn(MMModemLocationSource.toBitMaskFromMMModemLocationSource(enabledSources));
+        // Modem location
 
         Modem modem = mock(Modem.class);
         doReturn(modem).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",

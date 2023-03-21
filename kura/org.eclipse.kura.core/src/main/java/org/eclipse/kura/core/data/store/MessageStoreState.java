@@ -29,15 +29,12 @@ public class MessageStoreState {
     private static final Logger logger = LoggerFactory.getLogger(MessageStoreState.class);
 
     private final MessageStoreProvider messageStoreProvider;
-
     private DataServiceOptions options;
     private Optional<MessageStore> messageStore = Optional.empty();
     private Optional<ScheduledExecutorService> houseKeeperExecutor = Optional.empty();
 
     public MessageStoreState(final MessageStoreProvider messageStoreProvider, final DataServiceOptions options) {
-
         this.messageStoreProvider = messageStoreProvider;
-
         update(options);
     }
 
@@ -59,15 +56,10 @@ public class MessageStoreState {
         return messageStoreProvider;
     }
 
-    public synchronized MessageStore getOrOpenMessageStore() throws KuraStoreException {
+    public synchronized MessageStore getMessageStore() throws KuraStoreException {
         if (this.messageStore.isPresent()) {
             return this.messageStore.get();
         }
-
-        return this.openMessageStore();
-    }
-
-    public synchronized MessageStore openMessageStore() throws KuraStoreException {
 
         final MessageStore result = this.messageStoreProvider.openMessageStore(this.options.getKuraServicePid());
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -151,11 +150,7 @@ public class NetworkInterfacesTableUi extends Composite {
             public String getValue(GwtNetInterfaceConfig object) {
                 if (object.getHwTypeEnum().equals(GwtNetIfType.MODEM) && object instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig modemObject = (GwtModemInterfaceConfig) object;
-                    if (Objects.nonNull(modemObject.getInterfaceName()) && !modemObject.getInterfaceName().isEmpty()) {
-                        return modemObject.getName() + " (" + modemObject.getInterfaceName() + ")";
-                    } else {
-                        return object.getName();
-                    }
+                    return "ppp" + modemObject.getPppNum() + " (" + modemObject.getName() + ")";
                 } else {
                     return object.getName();
                 }

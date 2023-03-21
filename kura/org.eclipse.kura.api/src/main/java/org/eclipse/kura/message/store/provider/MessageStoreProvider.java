@@ -13,7 +13,6 @@
 package org.eclipse.kura.message.store.provider;
 
 import org.eclipse.kura.KuraStoreException;
-import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,35 +25,11 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface MessageStoreProvider {
 
     /**
-     * Opens or creates a {@link MessageStore} instance with the given name. Invoking
-     * this method could allocate the resources required to support the returned {@link MessageStore} instance (for
-     * example tables in a RDBMS).*
+     * Opens or creates a {@link MessageStore} instance with the given name.
      * 
-     * @param name
-     *            the store name.
+     * @param name the store name.
      * @return the opened {@link MessageStore}
      * @throws KuraStoreException
      */
     public MessageStore openMessageStore(String name) throws KuraStoreException;
-
-    /**
-     * Adds a {@link ConnectionListener}. A typical behavior of a client of this listener is to close the currently open
-     * {@link MessageStore} instances when a {@link ConnectionListener#disconnected()} event is received.
-     *
-     * @param listener
-     *            to add
-     *
-     * @since 2.5.0
-     */
-    public void addListener(ConnectionListener listener);
-
-    /**
-     * Removes a {@link ConnectionListener}
-     *
-     * @param listener
-     *            to remove
-     *
-     * @since 2.5.0
-     */
-    public void removeListener(ConnectionListener listener);
 }

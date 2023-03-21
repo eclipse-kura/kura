@@ -36,23 +36,18 @@ public interface NetworkStatusService {
 
     /**
      * Return an optional {@link NetworkInterfaceStatus} of the given network
-     * interface selected by its id. For Ethernet and WiFi interfaces, the
-     * identifier is typically the interface name. For the modems, instead,
-     * it is the usb or pci path.
-     * If the interface doesn't exist, an Empty value is returned.
+     * interface. If the interface doesn't exist, an Empty value is returned.
      * 
-     * @param id the identifier of the network interface
+     * @param interfaceName the name of the network interface
      * @return the {@link NetworkInterfaceStatus}
      */
-    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id);
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceName);
 
     /**
-     * Return the identifiers of the network interfaces detected in the
-     * system. For Ethernet and WiFi interfaces, the identifier is typically
-     * the interface name. For the modems, instead, it is the usb or pci path.
+     * Return the names of the network interfaces detected in the system.
      * 
-     * @return a list containing the network interface identifiers
+     * @return a list containing the network interface names
      */
-    public List<String> getInterfaceIds();
+    public List<String> getInterfaceNames();
 
 }

@@ -53,11 +53,6 @@ public final class Utils {
         try {
             return future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
-
             if (onFailure != null) {
                 onFailure.accept(e);
             }

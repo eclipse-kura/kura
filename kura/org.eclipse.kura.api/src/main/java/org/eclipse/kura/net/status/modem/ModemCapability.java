@@ -42,5 +42,4 @@ public enum ModemCapability {
     TDS,
     /** The modem supports all capabilities. */
     ANY;
-
 }

@@ -26,6 +26,5 @@ public enum ModemPortType {
     QMI,
     MBIM,
     AUDIO,
-    IGNORED;
-
+    IGNORED
 }

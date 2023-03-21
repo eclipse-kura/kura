@@ -61,7 +61,7 @@ This project leverages the following third party content.
 * maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
 * maven/mavencentral/commons-codec/commons-codec/1.13, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
-* maven/mavencentral/commons-fileupload/commons-fileupload/1.5, Apache-2.0, approved, #7109
+* maven/mavencentral/commons-fileupload/commons-fileupload/1.3.3, Apache-2.0, approved, CQ13884
 * maven/mavencentral/commons-io/commons-io/2.11.0, Apache-2.0, approved, CQ23745
 * maven/mavencentral/commons-io/commons-io/2.6, Apache-2.0, approved, CQ19090
 * maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183
@@ -197,7 +197,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.graalvm.truffle/truffle-api/21.3.5, UPL-1.0, approved, #6718
 * maven/mavencentral/org.graalvm.regex/regex/21.3.5, UPL-1.0 AND Unicode-TOU, approved, #6719
 * maven/mavencentral/org.graalvm.sdk/launcher-common/21.3.5, UPL-1.0, approved, #6720
-* maven/mavencentral/com.ibm.icu/icu4j/72.1, ICU, approved, #4354
 * maven/mavencentral/com.github.hypfvieh/dbus-java/3.3.2, MIT, approved, CQ23190
 * maven/mavencentral/com.github.jnr/jffi/1.3.9, Apache-2.0 OR LGPL-3.0-or-later, approved, CQ23196
 * maven/mavencentral/com.github.jnr/jnr-a64asm/1.0.0, Apache-2.0, approved, CQ22814

@@ -19,8 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,8 +36,6 @@ import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Encry
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.EncryptionKeySpec;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConfig.HexKeyMode;
 import org.sqlite.SQLiteConfig.JournalMode;
@@ -47,7 +43,21 @@ import org.sqlite.SQLiteDataSource;
 
 public class DatabaseLoaderTest {
 
-    private static final String DB_KEY_FORMAT = "db.key.format";
+    private static final String TEST_DB_CRYPTO_ENTRY_KEY = "sqlite:db:foo";
+
+    private static final String PERSISTED = "PERSISTED";
+
+    private static final String TEST_ENCRYPTION_KEY = "foobar";
+
+    private static final String DB_KEY = "db.key";
+
+    private static final String DB_PATH = "db.path";
+
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
+
+    private static final String DB_MODE = "db.mode";
+
+    private static final String TEST_DB_URL = "jdbc:sqlite:file:foo";
 
     @Test
     public void shouldOpenInMemoryDatabase() {
@@ -187,11 +197,10 @@ public class DatabaseLoaderTest {
         givenNewOptionsProperty(DB_MODE, PERSISTED);
         givenNewOptionsProperty(DB_PATH, "foo");
         givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY, TEST_HEX_ENCRYPTION_KEY);
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SSE.name());
+        givenNewOptionsProperty(DB_KEY, TEST_ENCRYPTION_KEY);
+        givenNewOptionsProperty("db.key.format", EncryptionKeyFormat.HEX_SSE.name());
 
-        givenEncryptedDatabase(
-                new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SSE));
+        givenEncryptedDatabase(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.HEX_SSE));
 
         whenDataSourceIsCreated();
 
@@ -201,10 +210,10 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
         thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SSE)));
+                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.HEX_SSE)));
 
         thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY,
-                EncryptionKeyFormat.HEX_SSE.name() + ":" + TEST_HEX_ENCRYPTION_KEY.toUpperCase());
+                EncryptionKeyFormat.HEX_SSE.name() + ":" + TEST_ENCRYPTION_KEY);
     }
 
     @Test
@@ -212,11 +221,10 @@ public class DatabaseLoaderTest {
         givenNewOptionsProperty(DB_MODE, PERSISTED);
         givenNewOptionsProperty(DB_PATH, "foo");
         givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY, TEST_HEX_ENCRYPTION_KEY);
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SQLCIPHER.name());
+        givenNewOptionsProperty(DB_KEY, TEST_ENCRYPTION_KEY);
+        givenNewOptionsProperty("db.key.format", EncryptionKeyFormat.HEX_SQLCIPHER.name());
 
-        givenEncryptedDatabase(
-                new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SQLCIPHER));
+        givenEncryptedDatabase(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.HEX_SQLCIPHER));
 
         whenDataSourceIsCreated();
 
@@ -225,11 +233,11 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(1);
         thenOpenDataSourceInvocationUrlIs(0, TEST_DB_URL);
         thenOpenDataSourceInvocationJournalModeIs(0, JournalMode.WAL);
-        thenOpenDataSourceInvocationKeyIs(0, Optional
-                .of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY.toUpperCase(), EncryptionKeyFormat.HEX_SQLCIPHER)));
+        thenOpenDataSourceInvocationKeyIs(0,
+                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.HEX_SQLCIPHER)));
 
         thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY,
-                EncryptionKeyFormat.HEX_SQLCIPHER.name() + ":" + TEST_HEX_ENCRYPTION_KEY.toUpperCase());
+                EncryptionKeyFormat.HEX_SQLCIPHER.name() + ":" + TEST_ENCRYPTION_KEY);
     }
 
     @Test
@@ -322,38 +330,11 @@ public class DatabaseLoaderTest {
         givenNewOptionsProperty(DB_MODE, PERSISTED);
         givenNewOptionsProperty(DB_PATH, "foo");
         givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenOldOptionsProperty(DB_KEY, TEST_HEX_ENCRYPTION_KEY);
-        givenNewOptionsProperty(DB_KEY, "cc");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SSE.name());
+        givenOldOptionsProperty(DB_KEY, TEST_ENCRYPTION_KEY);
+        givenNewOptionsProperty(DB_KEY, "otherkey");
+        givenNewOptionsProperty("db.key.format", EncryptionKeyFormat.HEX_SSE.name());
 
-        givenEncryptedDatabase(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII));
-
-        whenDataSourceIsCreated();
-
-        thenNoExceptionIsThrown();
-
-        thenOpenDataSourceInvocationCountIs(3);
-
-        thenOpenDataSourceInvocationKeyIs(0, Optional.of(new EncryptionKeySpec("CC", EncryptionKeyFormat.HEX_SSE)));
-        thenOpenDataSourceInvocationKeyIs(1,
-                Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
-        thenOpenDataSourceInvocationKeyIs(2, Optional.of(new EncryptionKeySpec("CC", EncryptionKeyFormat.HEX_SSE)));
-
-        thenQueryIsExecuted(0, "PRAGMA hexrekey = 'CC';");
-
-        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "HEX_SSE:CC");
-    }
-
-    @Test
-    public void shouldSupportRekeyWithSqlcipherHexKey() {
-        givenNewOptionsProperty(DB_MODE, PERSISTED);
-        givenNewOptionsProperty(DB_PATH, "foo");
-        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenOldOptionsProperty(DB_KEY, TEST_HEX_ENCRYPTION_KEY);
-        givenNewOptionsProperty(DB_KEY, "bb");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SQLCIPHER.name());
-
-        givenEncryptedDatabase(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII));
+        givenEncryptedDatabase(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII));
 
         whenDataSourceIsCreated();
 
@@ -362,15 +343,44 @@ public class DatabaseLoaderTest {
         thenOpenDataSourceInvocationCountIs(3);
 
         thenOpenDataSourceInvocationKeyIs(0,
-                Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
+                Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.HEX_SSE)));
         thenOpenDataSourceInvocationKeyIs(1,
-                Optional.of(new EncryptionKeySpec(TEST_HEX_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
         thenOpenDataSourceInvocationKeyIs(2,
-                Optional.of(new EncryptionKeySpec("BB", EncryptionKeyFormat.HEX_SQLCIPHER)));
+                Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.HEX_SSE)));
 
-        thenQueryIsExecuted(0, "PRAGMA rekey = \"x'BB'\";");
+        thenQueryIsExecuted(0, "PRAGMA hexrekey = 'otherkey';");
 
-        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "HEX_SQLCIPHER:BB");
+        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "HEX_SSE:otherkey");
+    }
+
+    @Test
+    public void shouldSupportRekeyWithSqlcipherHexKey() {
+        givenNewOptionsProperty(DB_MODE, PERSISTED);
+        givenNewOptionsProperty(DB_PATH, "foo");
+        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
+        givenOldOptionsProperty(DB_KEY, TEST_ENCRYPTION_KEY);
+        givenNewOptionsProperty(DB_KEY, "otherkey");
+        givenNewOptionsProperty("db.key.format", EncryptionKeyFormat.HEX_SQLCIPHER.name());
+
+        givenEncryptedDatabase(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII));
+
+        whenDataSourceIsCreated();
+
+        thenNoExceptionIsThrown();
+
+        thenOpenDataSourceInvocationCountIs(3);
+
+        thenOpenDataSourceInvocationKeyIs(0,
+                Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.HEX_SQLCIPHER)));
+        thenOpenDataSourceInvocationKeyIs(1,
+                Optional.of(new EncryptionKeySpec(TEST_ENCRYPTION_KEY, EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(2,
+                Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.HEX_SQLCIPHER)));
+
+        thenQueryIsExecuted(0, "PRAGMA rekey = \"x'otherkey'\";");
+
+        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "HEX_SQLCIPHER:otherkey");
     }
 
     @Test
@@ -412,74 +422,6 @@ public class DatabaseLoaderTest {
         thenExceptionIsThrown(SQLException.class);
     }
 
-    @Test
-    public void shouldFailWithNonAsciiEncryptionKey() {
-        givenNewOptionsProperty(DB_MODE, PERSISTED);
-        givenNewOptionsProperty(DB_PATH, "foo");
-        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.ASCII.name());
-        givenNewOptionsProperty(DB_KEY, "🐖");
-
-        whenDataSourceIsCreated();
-
-        thenExceptionIsThrown(KuraException.class);
-        thenExceptionMessageContains("non ASCII");
-    }
-
-    @Test
-    public void shouldFailWithHexEncryptionKeyLengthNotAMultipleOfTwo() {
-        givenNewOptionsProperty(DB_MODE, PERSISTED);
-        givenNewOptionsProperty(DB_PATH, "foo");
-        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SSE.name());
-        givenNewOptionsProperty(DB_KEY, "abc");
-
-        whenDataSourceIsCreated();
-
-        thenExceptionIsThrown(KuraException.class);
-        thenExceptionMessageContains("multiple of 2");
-    }
-
-    @Test
-    public void shouldFailWithHexEncryptionKeyWithNotAllowedCharacters() {
-        givenNewOptionsProperty(DB_MODE, PERSISTED);
-        givenNewOptionsProperty(DB_PATH, "foo");
-        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SSE.name());
-        givenNewOptionsProperty(DB_KEY, "foobar");
-
-        whenDataSourceIsCreated();
-
-        thenExceptionIsThrown(KuraException.class);
-        thenExceptionMessageContains("only digits and or letters from \"a\" to \"f\"");
-    }
-
-    @Test
-    public void shouldNotDeleteDatabaseFilesIfKeyIsInvalid() {
-        givenNewOptionsProperty(DB_MODE, PERSISTED);
-        givenNewOptionsProperty(DB_PATH, "foo");
-        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
-        givenNewOptionsProperty(DB_KEY_FORMAT, EncryptionKeyFormat.HEX_SSE.name());
-        givenNewOptionsProperty(DB_KEY, "foobar");
-
-        whenDataSourceIsCreated();
-
-        thenExceptionIsThrown(KuraException.class);
-        thenDatabaseFilesHaveBeenDeleted(false);
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseLoaderTest.class);
-
-    private static final String TEST_DB_CRYPTO_ENTRY_KEY = "sqlite:db:foo";
-    private static final String PERSISTED = "PERSISTED";
-    private static final String TEST_ENCRYPTION_KEY = "foobar";
-    private static final String TEST_HEX_ENCRYPTION_KEY = "aaBB33";
-    private static final String DB_KEY = "db.key";
-    private static final String DB_PATH = "db.path";
-    private static final String KURA_SERVICE_PID = "kura.service.pid";
-    private static final String DB_MODE = "db.mode";
-    private static final String TEST_DB_URL = "jdbc:sqlite:file:foo";
-
     private final CryptoService cryptoService = mock(CryptoService.class);
 
     private Map<String, Object> currentProperties = new HashMap<>();
@@ -495,7 +437,6 @@ public class DatabaseLoaderTest {
     private final List<SQLiteDataSource> dataSources = new ArrayList<>();
     private final List<String> queries = new ArrayList<>();
     private int cryptoServiceUpdateCount = 0;
-    private boolean databaseFilesDeleted = false;
 
     public DatabaseLoaderTest() {
         when(cryptoService.getKeyStorePassword(any())).thenAnswer(i -> Optional
@@ -601,11 +542,6 @@ public class DatabaseLoaderTest {
                 }
 
             }
-
-            @Override
-            protected void deleteFile(File file) throws IOException {
-                databaseFilesDeleted = true;
-            }
         };
 
     }
@@ -615,7 +551,6 @@ public class DatabaseLoaderTest {
         try {
             this.loader.openDataSource();
         } catch (Exception e) {
-            logger.info("got exception", e);
             this.exception = Optional.of(e);
         }
     }
@@ -645,10 +580,6 @@ public class DatabaseLoaderTest {
                 JournalMode.valueOf(this.sqliteConfigs.get(index).toProperties().getProperty("journal_mode")));
     }
 
-    private void thenDatabaseFilesHaveBeenDeleted(final boolean deleted) {
-        assertEquals(deleted, this.databaseFilesDeleted);
-    }
-
     private void thenNoExceptionIsThrown() {
         if (this.exception.isPresent()) {
             this.exception.get().printStackTrace();
@@ -671,10 +602,6 @@ public class DatabaseLoaderTest {
         }
 
         assertEquals(classz, this.exception.get().getClass());
-    }
-
-    private void thenExceptionMessageContains(final String messageContent) {
-        assertTrue(this.exception.get().getMessage().contains(messageContent));
     }
 
     private Optional<EncryptionKeySpec> fromSqliteConfig(final SQLiteConfig config) {

@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
@@ -36,7 +35,6 @@ import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
-import org.eclipse.kura.util.store.listener.ConnectionListenerManager;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
@@ -49,15 +47,10 @@ import org.sqlite.SQLiteJDBCLoader;
 public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
         WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
-    private static final Set<String> OPEN_URLS = new HashSet<>();
-
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceImpl.class);
 
     private CryptoService cryptoService;
     private SqliteDebugShell debugShell;
-
-    private Optional<DbState> state = Optional.empty();
-    private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
     public void setDebugShell(final SqliteDebugShell debugShell) {
         this.debugShell = debugShell;
@@ -66,6 +59,8 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     public void setCryptoService(final CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
+
+    private Optional<DbState> state = Optional.empty();
 
     public void activate(final Map<String, Object> properties) {
 
@@ -113,34 +108,22 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         if (this.state.isPresent()) {
             this.state.get().shutdown();
             this.state = Optional.empty();
-            this.listenerManager.dispatchDisconnected();
         }
     }
 
     @Override
     public synchronized Connection getConnection() throws SQLException {
 
-        if (this.state.isPresent()) {
-            Connection connection;
-            try {
-                connection = this.state.get().getConnection();
-            } catch (SQLException e) {
-                this.listenerManager.dispatchDisconnected();
-                throw e;
-            }
-            return connection;
-        } else {
-            this.listenerManager.dispatchDisconnected();
-            throw new SQLException("Database is not initialized");
-        }
-
+        return this.state.orElseThrow(() -> new SQLException("Database is not initialized")).getConnection();
     }
 
-    private class DbState {
+    private static class DbState {
 
         private static final String DEFRAG_STATEMENT = "VACUUM;";
 
         private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
+
+        private static final Set<String> OPEN_URLS = new HashSet<>();
 
         private final Optional<ScheduledExecutorService> executor;
         private final ConnectionPoolManager connectionPool;
@@ -179,7 +162,6 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                 }
 
                 logger.info("opening database with url: {}...done", options.getDbUrl());
-                SqliteDbServiceImpl.this.listenerManager.dispatchConnected();
             } catch (final Exception e) {
                 releaseFile();
                 throw e;
@@ -359,18 +341,6 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         try (final Connection conn = this.getConnection()) {
             return callable.call(conn);
         }
-    }
-
-    @Override
-    public void addListener(ConnectionListener listener) {
-        this.listenerManager.add(listener);
-
-    }
-
-    @Override
-    public void removeListener(ConnectionListener listener) {
-        this.listenerManager.remove(listener);
-
     }
 
 }

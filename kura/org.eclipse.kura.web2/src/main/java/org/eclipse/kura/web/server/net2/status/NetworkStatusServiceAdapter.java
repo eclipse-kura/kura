@@ -36,7 +36,6 @@ import org.eclipse.kura.net.status.wifi.WifiChannel;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
-import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -48,6 +47,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapter to convert status-related properties to a
@@ -56,6 +57,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
  */
 public class NetworkStatusServiceAdapter {
 
+    private static final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
+
     private final NetworkStatusService networkStatusService;
 
     public NetworkStatusServiceAdapter() throws GwtKuraException {
@@ -63,7 +66,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     public List<String> getNetInterfaces() {
-        return this.networkStatusService.getInterfaceIds();
+        return this.networkStatusService.getInterfaceNames();
     }
 
     public void fillWithStatusProperties(String ifName, GwtNetInterfaceConfig gwtConfigToUpdate) {
@@ -138,9 +141,9 @@ public class NetworkStatusServiceAdapter {
 
     public List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) {
         List<GwtWifiHotspotEntry> result = new ArrayList<>();
-
+        
         Optional<NetworkInterfaceStatus> ifStatus = this.networkStatusService.getNetworkStatus(interfaceName);
-
+        
         if (ifStatus.isPresent() && ifStatus.get() instanceof WifiInterfaceStatus) {
             WifiInterfaceStatus wifiStatus = (WifiInterfaceStatus) ifStatus.get();
 
@@ -172,16 +175,19 @@ public class NetworkStatusServiceAdapter {
     private void setCommonStateProperties(GwtNetInterfaceConfig gwtConfig,
             NetworkInterfaceStatus networkInterfaceStatus) {
 
-        gwtConfig.setName(networkInterfaceStatus.getId());
-        gwtConfig.setInterfaceName(networkInterfaceStatus.getInterfaceName());
         gwtConfig.setHwState(networkInterfaceStatus.getState().name());
         gwtConfig.setHwType(networkInterfaceStatus.getType().name());
         gwtConfig.setHwAddress(NetUtil.hardwareAddressToString(networkInterfaceStatus.getHardwareAddress()));
-        gwtConfig.setHwName(networkInterfaceStatus.getId());
+        gwtConfig.setHwName(networkInterfaceStatus.getName());
         gwtConfig.setHwDriver(networkInterfaceStatus.getDriver());
         gwtConfig.setHwDriverVersion(networkInterfaceStatus.getDriverVersion());
         gwtConfig.setHwFirmware(networkInterfaceStatus.getFirmwareVersion());
         gwtConfig.setHwMTU(networkInterfaceStatus.getMtu());
+        networkInterfaceStatus.getUsbNetDevice()
+                .ifPresent(usbDevice -> gwtConfig.setHwUsbDevice(usbDevice.getUsbDevicePath()));
+
+        logger.debug("GWT common state properties for interface {}:\n{}\n", gwtConfig.getName(),
+                gwtConfig.getProperties());
     }
 
     private void setIpv4DhcpClientProperties(GwtNetInterfaceConfig gwtConfig,
@@ -226,11 +232,7 @@ public class NetworkStatusServiceAdapter {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
             ModemInterfaceStatus modemInterfaceInfo = (ModemInterfaceStatus) networkInterfaceInfo;
             int activeSimIndex = modemInterfaceInfo.getActiveSimIndex();
-            Sim activeSim = null;
-            List<Sim> availableSims = modemInterfaceInfo.getAvailableSims();
-            if (Objects.nonNull(availableSims) && !availableSims.isEmpty()) {
-                activeSim = modemInterfaceInfo.getAvailableSims().get(activeSimIndex);
-            }
+            Sim activeSim = modemInterfaceInfo.getAvailableSims().get(activeSimIndex);
 
             gwtModemConfig.setHwState(modemInterfaceInfo.getState().toString());
             gwtModemConfig.setHwSerial(modemInterfaceInfo.getSerialNumber());
@@ -238,11 +240,13 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setHwICCID(activeSim != null ? activeSim.getIccid() : "NA");
             gwtModemConfig.setHwIMSI(activeSim != null ? activeSim.getImsi() : "NA");
             gwtModemConfig.setHwRegistration(modemInterfaceInfo.getRegistrationStatus().toString());
+            gwtModemConfig.setHwPLMNID(modemInterfaceInfo.getPlmnid());
             gwtModemConfig.setHwNetwork(modemInterfaceInfo.getOperatorName());
             gwtModemConfig.setHwRadio(getModemAccessTechnologies(modemInterfaceInfo));
             gwtModemConfig.setHwBand(getModemBands(modemInterfaceInfo));
-            gwtModemConfig.setModel(ellipsis(modemInterfaceInfo.getModel(), 40));
-            gwtModemConfig.setManufacturer(ellipsis(modemInterfaceInfo.getManufacturer(), 20));
+            gwtModemConfig.setHwLAC(modemInterfaceInfo.getLac());
+            gwtModemConfig.setHwCI(modemInterfaceInfo.getCi());
+            gwtModemConfig.setModel(modemInterfaceInfo.getModel());
             gwtModemConfig.setGpsSupported(modemInterfaceInfo.isGpsSupported());
             gwtModemConfig.setHwFirmware(modemInterfaceInfo.getFirmwareVersion());
             gwtModemConfig.setConnectionType(modemInterfaceInfo.getConnectionType().toString());
@@ -268,14 +272,6 @@ public class NetworkStatusServiceAdapter {
         return sb.toString().substring(0, sb.toString().length() - 1);
     }
 
-    private String ellipsis(String text, int length) {
-        if (text.length() <= length) {
-            return text;
-        } else {
-            return text.substring(0, length) + "...";
-        }
-    }
-
     private void setWifiStateProperties(GwtNetInterfaceConfig gwtNetInterfaceConfig,
             NetworkInterfaceStatus networkInterfaceInfo) {
         if (gwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig
@@ -293,8 +289,7 @@ public class NetworkStatusServiceAdapter {
 
             if (wifiInterfaceInfo.getMode() == WifiMode.MASTER) {
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getAccessPointWifiConfig())) {
-                    gwtWifiNetInterfaceConfig.getAccessPointWifiConfig()
-                            .setChannels(channelsBuilder.getChannelsIntegers());
+                    gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().setChannels(channelsBuilder.getChannelsIntegers());
                 } else {
                     GwtWifiConfig gwtConfig = gwtWifiNetInterfaceConfig.getActiveWifiConfig();
                     gwtConfig.setChannels(channelsBuilder.getChannelsIntegers());
@@ -338,7 +333,7 @@ public class NetworkStatusServiceAdapter {
         } else if (isPairTKIP) {
             entryToModify.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
         }
-
+        
         entryToModify.setSecurity(wifiSecurityCollectionToString(supportedSecurity));
     }
 

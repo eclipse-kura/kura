@@ -34,10 +34,11 @@ public interface WireRecordStore {
      * <code>noOfRecordsToKeep</code>.
      * 
      * @param noOfRecordsToKeep
-     *            the no of records to keep in the table
+     *                          the no of records to keep in the table
      * @throws KuraStoreException
      */
-    public void truncate(int noOfRecordsToKeep) throws KuraStoreException;
+    public void truncate(int noOfRecordsToKeep)
+            throws KuraStoreException;
 
     /**
      * Returns the number of records currently in the store.
@@ -50,8 +51,7 @@ public interface WireRecordStore {
     /**
      * Insert the provided list of {@link WireRecord} instances in the store.
      * 
-     * @param records
-     *            the list of records to be inserted
+     * @param records the list of records to be inserted
      * @throws KuraStoreException
      */
     public void insertRecords(List<WireRecord> records) throws KuraStoreException;

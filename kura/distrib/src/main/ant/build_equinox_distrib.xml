@@ -164,7 +164,7 @@
         </condition>
 
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
-            tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" failonerror="false" />
+            tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
         <copy file="src/main/osgi/equinox_3.16.0/configuration/config.ini"
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
@@ -286,6 +286,11 @@
 
         <!-- Set web UI port -->
         <antcall target="set-http-port" />
+
+        <!-- Copy selinux policy change -->
+        <copy file="src/main/resources/${build.name}/selinuxKura.pp"
+            tofile="${project.build.directory}/${build.output.name}/selinuxKura.pp"
+            failonerror="false" />
 
         <!-- Create the Kura start scripts -->
         <echo file="${project.build.directory}/${build.output.name}/start_kura.sh"
@@ -583,14 +588,6 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            <zipfileset dir="src/main/resources/common/iptables"
-                prefix="${build.output.name}/${install.folder}">
-                <include name="*" />
-            </zipfileset>
-            <zipfileset dir="src/main/resources/common/snapshots"
-                prefix="${build.output.name}/${install.folder}">
-                <include name="*" />
-            </zipfileset>
             
             <zipfileset file="src/main/resources/common/named/named.conf"
                 prefix="${build.output.name}/${install.folder}" />
@@ -879,7 +876,7 @@ fi]]>
 
     <target name="copy-jdk-dio-resources" unless="is.docker">
         <copy file="src/main/resources/${build.name}/jdk.dio.properties"
-            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" failonerror="false" />
+            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
         <copy file="src/main/resources/common/jdk.dio.policy"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
     </target>
@@ -955,7 +952,7 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javax.servlet_${javax.servlet.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.commons-fileupload_${org.apache.commons.commons-fileupload.version}.jar@3:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.fileupload_${org.apache.commons.fileupload.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.commons-io_${org.apache.commons.commons-io.version}.jar@3:start" />
             <entry key="osgi.bundles" operation="+"

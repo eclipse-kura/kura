@@ -12,13 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.db.sqlite.provider;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -29,10 +26,7 @@ import org.sqlite.SQLiteConfig.HexKeyMode;
 
 class SqliteDbServiceOptions {
 
-    private static final String ENCRYPTION_KEY = "Encryption Key";
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceOptions.class);
-
-    private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]+");
 
     public enum Mode {
         IN_MEMORY,
@@ -188,13 +182,9 @@ class SqliteDbServiceOptions {
 
     public Optional<EncryptionKeySpec> getEncryptionKey(final CryptoService cryptoService) throws KuraException {
         if (this.encryptionKey.isPresent()) {
-            String decrypted = new String(cryptoService.decryptAes(this.encryptionKey.get().toCharArray()));
+            final String decrypted = new String(cryptoService.decryptAes(this.encryptionKey.get().toCharArray()));
 
-            final EncryptionKeyFormat format = getEncryptionKeyFormat();
-
-            decrypted = format == EncryptionKeyFormat.ASCII ? expectAscii(decrypted) : expectHexString(decrypted);
-
-            return Optional.of(new EncryptionKeySpec(decrypted, format));
+            return Optional.of(new EncryptionKeySpec(decrypted, getEncryptionKeyFormat()));
         } else {
             return Optional.empty();
         }
@@ -207,29 +197,6 @@ class SqliteDbServiceOptions {
 
     public boolean isPeriodicDefragEnabled() {
         return this.mode != Mode.IN_MEMORY && this.defragIntervalSeconds > 0;
-    }
-
-    private String expectAscii(final String value) throws KuraException {
-        if (StandardCharsets.US_ASCII.newEncoder().canEncode(value)) {
-            return value;
-        } else {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
-                    "Encryption key contains non ASCII characters");
-        }
-    }
-
-    private String expectHexString(final String string) throws KuraException {
-        if (string.length() % 2 != 0) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
-                    "Hex encryption key length must be a multiple of 2");
-        }
-
-        if (!HEX_PATTERN.matcher(string).matches()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, ENCRYPTION_KEY, "",
-                    "Hex encryption must contain only digits and or letters from \"a\" to \"f\"");
-        }
-
-        return string.toUpperCase();
     }
 
     private static Mode extractMode(final Map<String, Object> properties) {

@@ -32,14 +32,6 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("name", name);
     }
 
-    public String getInterfaceName() {
-        return get("interfaceName");
-    }
-
-    public void setInterfaceName(String interfaceName) {
-        set("interfaceName", interfaceName);
-    }
-
     public GwtNetIfStatus getStatusEnum() {
         return GwtNetIfStatus.valueOf(getStatus());
     }

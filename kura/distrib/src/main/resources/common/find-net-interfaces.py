@@ -21,12 +21,13 @@ WIRELESS_TYPES = ['wifi', 'wireless']
 def get_eth_wlan_interfaces_names():
     """Reads the network interface names using 'nmcli dev' command.
 
-    It is assumed that at least one ethernet interface is present.
+    It is assumed that interfaces are sorted according to priority and that at least one
+    ethernet interface is present.
 
     Returns:
         tuple of lists (eth_names, wlan_names) where:
-            'eth_names' are the found ethernet interface names ordered by name;
-            'wlan_names' are the found wireless interface names ordered by name, might be an empty list.
+            'eth_names' are the found ethernet interface names;
+            'wlan_names' are the found wireless interface names, might be an empty list.
     """
     cmd_output = subprocess.check_output(['nmcli', 'dev']).decode(sys.stdout.encoding).strip()
     # list comprehension to remove empty items
@@ -53,9 +54,6 @@ def get_eth_wlan_interfaces_names():
     if len(ethernet_inteface_names) < 1:
         print(LOG_MSG_PREFIX + 'ERROR: no ethernet interfaces found')
         sys.exit(1)
-    
-    ethernet_inteface_names.sort()
-    wireless_inteface_names.sort()
 
     print(LOG_MSG_PREFIX + 'Found ethernet interfaces: ', ethernet_inteface_names)
     print(LOG_MSG_PREFIX + 'Found wireless interfaces: ', wireless_inteface_names)

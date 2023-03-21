@@ -15,7 +15,6 @@ package org.eclipse.kura.web.server.net2;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
@@ -33,11 +32,9 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
-import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
-import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +81,6 @@ public class GwtNetworkServiceImpl {
                 }
             }
         }
-
-        logInterfaces("getConfigsAndStatuses", result);
 
         return result;
     }
@@ -216,22 +211,10 @@ public class GwtNetworkServiceImpl {
 
             for (GwtWifiChannelFrequency supportedChannel : allSupportedChannels) {
                 boolean channelIsfive5Ghz = supportedChannel.getFrequency() > 2501;
-                boolean isAutomaticChannelSelection = supportedChannel.getFrequency() == 0;
 
-                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz
-                        || isAutomaticChannelSelection) {
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
                     displayedChannels.add(supportedChannel);
                 }
-            }
-
-            if (logger.isDebugEnabled()) {
-                StringBuilder toDisplay = new StringBuilder();
-                for (GwtWifiChannelFrequency channel : displayedChannels) {
-                    toDisplay.append(channel.getChannel());
-                    toDisplay.append(" ");
-                }
-                logger.debug("Find frequencies for {}/{}: {}", interfaceName, radioMode.name(),
-                        toDisplay.toString().trim());
             }
 
             return displayedChannels;
@@ -256,41 +239,6 @@ public class GwtNetworkServiceImpl {
             return aps;
         } catch (GwtKuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    private static void logInterfaces(String origin, List<GwtNetInterfaceConfig> configs) {
-        if (logger.isDebugEnabled()) {
-            for (GwtNetInterfaceConfig config : configs) {
-                Map<String, Object> ifProperties = config.getProperties();
-
-                if (config instanceof GwtWifiNetInterfaceConfig) {
-                    GwtWifiNetInterfaceConfig wifi = (GwtWifiNetInterfaceConfig) config;
-                    
-                    switch (wifi.getWirelessModeEnum()) {
-                        case netWifiWirelessModeAccessPoint:
-                            ifProperties.putAll(wifi.getAccessPointWifiConfigProps());
-                            break;
-                        case netWifiWirelessModeAdHoc:
-                            ifProperties.putAll(wifi.getAdhocWifiConfigProps());
-                            break;
-                        case netWifiWirelessModeStation:
-                            ifProperties.putAll(wifi.getStationWifiConfigProps());
-                            break;
-                        case netWifiWirelessModeDisabled:
-                        default:
-                            break;
-                        
-                    }
-                }
-
-                if (config instanceof GwtModemInterfaceConfig) {
-                    GwtModemInterfaceConfig modem = (GwtModemInterfaceConfig) config;
-                    ifProperties.putAll(modem.getProperties());
-                }
-
-                logger.debug("{} returned for interface {}:\n\n{}\n\n", origin, config.getName(), ifProperties);
-            }
         }
     }
 

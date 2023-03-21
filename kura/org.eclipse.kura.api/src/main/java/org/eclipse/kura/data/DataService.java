@@ -132,7 +132,6 @@ public interface DataService {
      * messages that should be sent with the minimum latency.
      * For example Cloud life-cycle messages are published with priority 0
      * as soon the connection is established and just before disconnecting.
-     * Priority must be non-negative.
      * <br>
      * Data messages, tolerating an higher latency, may be published with a
      * lower priority. Within each priority level and each QoS level, messages
@@ -151,8 +150,7 @@ public interface DataService {
      * @param retain
      * @param priority
      * @return
-     * @throws KuraStoreException If the message cannot be stored.
-     * @throws IllegalArgumentException If the priority argument is negative.
+     * @throws KuraStoreException
      */
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException;
 

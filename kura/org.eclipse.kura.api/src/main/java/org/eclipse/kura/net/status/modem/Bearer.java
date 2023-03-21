@@ -13,7 +13,6 @@
 package org.eclipse.kura.net.status.modem;
 
 import java.util.Objects;
-import java.util.Set;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -27,17 +26,17 @@ public class Bearer {
     private final String name;
     private final boolean connected;
     private final String apn;
-    private final Set<BearerIpType> ipTypes;
+    private final BearerIpType ipType;
     private final long bytesTransmitted;
     private final long bytesReceived;
 
-    public Bearer(String name, boolean connected, String apn, Set<BearerIpType> ipTypes, long bytesTransmitted,
+    public Bearer(String name, boolean connected, String apn, BearerIpType ipType, long bytesTransmitted,
             long bytesReceived) {
         super();
         this.name = name;
         this.connected = connected;
         this.apn = apn;
-        this.ipTypes = ipTypes;
+        this.ipType = ipType;
         this.bytesTransmitted = bytesTransmitted;
         this.bytesReceived = bytesReceived;
     }
@@ -54,8 +53,8 @@ public class Bearer {
         return this.apn;
     }
 
-    public Set<BearerIpType> getIpTypes() {
-        return this.ipTypes;
+    public BearerIpType getIpType() {
+        return this.ipType;
     }
 
     public long getBytesTransmitted() {
@@ -68,7 +67,7 @@ public class Bearer {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.apn, this.bytesReceived, this.bytesTransmitted, this.connected, this.ipTypes,
+        return Objects.hash(this.apn, this.bytesReceived, this.bytesTransmitted, this.connected, this.ipType,
                 this.name);
     }
 
@@ -83,7 +82,8 @@ public class Bearer {
         Bearer other = (Bearer) obj;
         return Objects.equals(this.apn, other.apn) && this.bytesReceived == other.bytesReceived
                 && this.bytesTransmitted == other.bytesTransmitted && this.connected == other.connected
-                && Objects.equals(this.ipTypes, other.ipTypes) && Objects.equals(this.name, other.name);
+                && this.ipType == other.ipType
+                && Objects.equals(this.name, other.name);
     }
 
 }

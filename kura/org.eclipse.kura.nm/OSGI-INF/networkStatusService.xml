@@ -19,6 +19,7 @@
    <service>
       <provide interface="org.eclipse.kura.net.status.NetworkStatusService"/>
    </service>
+   <reference bind="setNetworkService" cardinality="1..1" interface="org.eclipse.kura.net.NetworkService" name="NetworkService" policy="static"/>
    <reference bind="setCommandExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" />
 </scr:component>
 

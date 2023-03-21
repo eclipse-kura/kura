@@ -24,5 +24,4 @@ Bundle-ClassPath: .,
  lib/js-scriptengine.jar,
  lib/launcher-common.jar,
  lib/truffle-api.jar,
- lib/regex.jar,
- lib/icu4j.jar
+ lib/regex.jar

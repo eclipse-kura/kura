@@ -27,9 +27,12 @@ import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtNetInterfaceConfigBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(GwtNetInterfaceConfigBuilder.class);
     private static final String NA = "N/A";
 
     private final NetworkConfigurationServiceProperties properties;
@@ -199,6 +202,8 @@ public class GwtNetInterfaceConfigBuilder {
         }
 
         ((GwtWifiNetInterfaceConfig) this.gwtConfig).setAccessPointWifiConfig(gwtWifiConfig);
+        logger.debug("GWT Wifi Master Configuration for interface {}:\n{}\n", this.ifName,
+                gwtWifiConfig.getProperties());
     }
 
     private void setWifiInfraProperties() {
@@ -231,6 +236,8 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setPingAccessPoint(this.properties.getWifiInfraPingAP(this.ifName));
 
         ((GwtWifiNetInterfaceConfig) this.gwtConfig).setStationWifiConfig(gwtWifiConfig);
+        logger.debug("GWT Wifi Infra Configuration for interface {}:\n{}\n", this.ifName,
+                gwtWifiConfig.getProperties());
     }
 
     private void setBgScanProperties(GwtWifiConfig gwtWifiConfig, Optional<String> bgScan) {
@@ -288,6 +295,9 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig.setModel(this.properties.getUsbProductId(this.ifName));
             gwtModemConfig.setHwUsbDevice(this.properties.getUsbDevicePath(this.ifName));
             gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+
+            logger.debug("GWT Modem Configuration for interface {}:\n{}\n", this.ifName,
+                    gwtModemConfig.getProperties());
         }
     }
 

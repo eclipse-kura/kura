@@ -55,19 +55,16 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
      */
     private static final int NUMERIC_VALUE_OUT_OF_RANGE_2 = 22004;
 
-    private String sqlSetNextId;
-    private String sqlGetFreeId;
+    private final String sqlSetNextId;
+    private final String sqlGetFreeId;
 
-    public H2DbMessageStoreImpl(final ConnectionProvider provider, final String table) throws KuraStoreException {
+    public H2DbMessageStoreImpl(final ConnectionProvider provider, final String table)
+            throws KuraStoreException {
         super(provider, table);
 
-        initDb();
-    }
-
-    private void initDb() throws KuraStoreException {
         this.sqlSetNextId = ALTER_TABLE + super.escapedTableName + " ALTER COLUMN id RESTART WITH ?;";
-        this.sqlGetFreeId = "SELECT A.X FROM SYSTEM_RANGE(1, 2147483647) AS A LEFT OUTER JOIN " + this.escapedTableName
-                + " AS B ON A.X = B.ID WHERE B.ID IS NULL LIMIT 1";
+        this.sqlGetFreeId = "SELECT A.X FROM SYSTEM_RANGE(1, 2147483647) AS A LEFT OUTER JOIN "
+                + this.escapedTableName + " AS B ON A.X = B.ID WHERE B.ID IS NULL LIMIT 1";
 
         super.createTable();
         super.createIndexes();
@@ -76,12 +73,12 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
     @Override
     protected JdbcMessageStoreQueries buildSqlMessageStoreQueries() {
 
-        return JdbcMessageStoreQueries.builder().withSqlCreateTable("CREATE TABLE IF NOT EXISTS "
-                + super.escapedTableName
-                + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
-                + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER,"
-                + " sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);")
+        return JdbcMessageStoreQueries.builder()
+                .withSqlCreateTable("CREATE TABLE IF NOT EXISTS " + super.escapedTableName
+                        + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
+                        + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
+                        + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER,"
+                        + " sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);")
                 .withSqlMessageCount("SELECT COUNT(*) FROM " + super.escapedTableName + ";")
                 .withSqlStore("INSERT INTO " + super.escapedTableName
                         + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, smallPayload, largePayload, priority, "
@@ -89,10 +86,12 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
                 .withSqlGetMessage(
                         "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, "
                                 + "smallPayload, largePayload, priority, sessionId, droppedOn FROM "
-                                + this.escapedTableName + " WHERE id = ?")
+                                + this.escapedTableName
+                                + " WHERE id = ?")
                 .withSqlGetNextMessage("SELECT a.id, a.topic, a.qos, a.retain, a.createdOn, a.publishedOn, "
                         + "a.publishedMessageId, a.confirmedOn, a.smallPayload, a.largePayload, a.priority, a.sessionId, a.droppedOn FROM "
-                        + this.escapedTableName + " AS a JOIN (SELECT id, publishedOn FROM " + super.escapedTableName
+                        + this.escapedTableName + " AS a JOIN (SELECT id, publishedOn FROM "
+                        + super.escapedTableName
                         + " ORDER BY publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC LIMIT 1) AS b "
                         + "WHERE a.id = b.id AND b.publishedOn IS NULL;")
                 .withSqlSetPublishedQoS1(UPDATE + super.escapedTableName
@@ -110,24 +109,27 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
                         + " SET publishedOn = NULL WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;")
                 .withSqlDropAllInFlightMessages(UPDATE + super.escapedTableName
                         + " SET droppedOn = ? WHERE publishedOn IS NOT NULL AND qos > 0 AND confirmedOn IS NULL;")
-                .withSqlDeleteDroppedMessages(DELETE_FROM + super.escapedTableName
-                        + " WHERE droppedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND droppedOn IS NOT NULL;")
-                .withSqlDeleteConfirmedMessages(DELETE_FROM + super.escapedTableName
-                        + " WHERE confirmedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND confirmedOn IS NOT NULL;")
+                .withSqlDeleteDroppedMessages(
+                        DELETE_FROM + super.escapedTableName
+                                + " WHERE droppedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND droppedOn IS NOT NULL;")
+                .withSqlDeleteConfirmedMessages(
+                        DELETE_FROM + super.escapedTableName
+                                + " WHERE confirmedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND confirmedOn IS NOT NULL;")
                 .withSqlDeletePublishedMessages(DELETE_FROM + super.escapedTableName
                         + " WHERE qos = 0 AND publishedOn <= DATEADD('MILLISECOND', ?, TIMESTAMP '1970-01-01 00:00:00') AND publishedOn IS NOT NULL;")
                 .withSqlCreateNextMessageIndex(
-                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_nextMsg") + " ON "
-                                + super.escapedTableName + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
+                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_nextMsg")
+                                + " ON " + super.escapedTableName
+                                + " (publishedOn ASC, priority ASC, createdOn ASC, qos);")
                 .withSqlCreatePublishedOnIndex(
-                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_PUBLISHEDON") + " ON "
-                                + this.escapedTableName + " (publishedOn DESC);")
+                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_PUBLISHEDON")
+                                + " ON " + this.escapedTableName + " (publishedOn DESC);")
                 .withSqlCreateConfirmedOnIndex(
-                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_CONFIRMEDON") + " ON "
-                                + this.escapedTableName + " (confirmedOn DESC);")
+                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_CONFIRMEDON")
+                                + " ON " + this.escapedTableName + " (confirmedOn DESC);")
                 .withSqlCreateDroppedOnIndex(
-                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_DROPPEDON") + " ON "
-                                + this.escapedTableName + " (droppedOn DESC);")
+                        CREATE_INDEX_IF_NOT_EXISTS + super.escapeIdentifier(super.tableName + "_DROPPEDON")
+                                + " ON " + this.escapedTableName + " (droppedOn DESC);")
                 .build();
     }
 
@@ -146,7 +148,8 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
     }
 
-    private void handleKuraStoreException(final KuraStoreException e) throws KuraStoreException {
+    private void handleKuraStoreException(final KuraStoreException e)
+            throws KuraStoreException {
 
         final Throwable cause = e.getCause();
 
@@ -175,7 +178,8 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
     }
 
     @Override
-    protected synchronized long storeInternal(String topic, byte[] payload, int qos, boolean retain, int priority)
+    protected synchronized long storeInternal(String topic, byte[] payload, int qos, boolean retain,
+            int priority)
             throws KuraStoreException {
 
         final Timestamp now = new Timestamp(new Date().getTime());
@@ -184,7 +188,8 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
 
             final long result;
 
-            try (PreparedStatement pstmt = c.prepareStatement(super.queries.getSqlStore(), new String[] { "id" })) {
+            try (PreparedStatement pstmt = c.prepareStatement(super.queries.getSqlStore(),
+                    new String[] { "id" })) {
                 pstmt.setString(1, topic);
                 pstmt.setInt(2, qos);
                 pstmt.setBoolean(3, retain);
@@ -232,7 +237,6 @@ public class H2DbMessageStoreImpl extends AbstractJdbcMessageStoreImpl {
         }
 
         return result;
-
     }
 
 }

@@ -179,7 +179,6 @@ public class GwtNetworkServiceImpl {
                 gwtNetConfig = createGwtNetConfig(netIfConfig);
 
                 gwtNetConfig.setName(netIfConfig.getName());
-                gwtNetConfig.setInterfaceName(netIfConfig.getName());
                 gwtNetConfig.setHwName(netIfConfig.getName());
                 if (netIfConfig.getType() != null) {
                     gwtNetConfig.setHwType(netIfConfig.getType().name());
@@ -662,9 +661,6 @@ public class GwtNetworkServiceImpl {
                                 } else {
                                     gwtModemConfig.setAuthType(GwtModemAuthType.netModemAuthNONE);
                                 }
-
-                                // Redefine interface name as ppp name
-                                gwtModemConfig.setInterfaceName("ppp" + modemConfig.getPppNumber());
 
                                 gwtModemConfig.setUsername(modemConfig.getUsername());
 

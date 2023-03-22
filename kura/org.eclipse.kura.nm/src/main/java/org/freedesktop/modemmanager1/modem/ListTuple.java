@@ -35,19 +35,19 @@ public class ListTuple extends Tuple {
     }
 
     public void setSelected(String arg) {
-        selected = arg;
+        this.selected = arg;
     }
 
     public String getSelected() {
-        return selected;
+        return this.selected;
     }
 
     public void setInstalled(List<Map<String, Variant<?>>> arg) {
-        installed = arg;
+        this.installed = arg;
     }
 
     public List<Map<String, Variant<?>>> getInstalled() {
-        return installed;
+        return this.installed;
     }
 
 }

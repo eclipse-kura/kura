@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -21,7 +22,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.modemmanager1.modem.PropertyPendingNetworkInitiatedSessionsStruct;
 
 /**
  * Auto-generated class.
@@ -61,15 +61,15 @@ public interface Oma extends DBusInterface {
         }
 
         public int getOldSessionState() {
-            return oldSessionState;
+            return this.oldSessionState;
         }
 
         public int getNewSessionState() {
-            return newSessionState;
+            return this.newSessionState;
         }
 
         public UInt32 getSessionStateFailedReason() {
-            return sessionStateFailedReason;
+            return this.sessionStateFailedReason;
         }
 
     }

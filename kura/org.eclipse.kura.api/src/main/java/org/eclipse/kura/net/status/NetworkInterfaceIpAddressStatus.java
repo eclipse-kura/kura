@@ -80,7 +80,7 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         NetworkInterfaceIpAddressStatus<T> other = (NetworkInterfaceIpAddressStatus<T>) obj;

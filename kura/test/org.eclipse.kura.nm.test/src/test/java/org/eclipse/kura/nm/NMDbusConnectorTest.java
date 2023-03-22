@@ -91,12 +91,12 @@ import org.junit.Test;
 public class NMDbusConnectorTest {
 
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
-    private DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
-    private NetworkManager mockedNetworkManager = mock(NetworkManager.class);
-    private ModemManager1 mockedModemManager = mock(ModemManager1.class);
+    private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
+    private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
+    private final ModemManager1 mockedModemManager = mock(ModemManager1.class);
     private NMDbusConnector instanceNMDbusConnector;
     private DBusConnection dbusConnectionInternal;
-    private CommandExecutorService commandExecutorService = mock(CommandExecutorService.class);
+    private final CommandExecutorService commandExecutorService = mock(CommandExecutorService.class);
 
     private Boolean hasDBusExceptionBeenThrown = false;
     private Boolean hasNoSuchElementExceptionThrown = false;
@@ -105,7 +105,7 @@ public class NMDbusConnectorTest {
 
     private NetworkInterfaceStatus netInterface;
 
-    private Map<String, Device> mockDevices = new HashMap<>();
+    private final Map<String, Device> mockDevices = new HashMap<>();
     private Connection mockConnection;
 
     private List<String> internalStringList;
@@ -844,7 +844,7 @@ public class NMDbusConnectorTest {
         when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "IpInterface")).thenReturn("wwan0");
 
         Map<String, Variant<?>> managedObjectProperties = new HashMap<>();
-        managedObjectProperties.put("DeviceIdentifier", new Variant<String>("abcd1234"));
+        managedObjectProperties.put("DeviceIdentifier", new Variant<>("abcd1234"));
         Map<String, Map<String, Variant<?>>> managedObject = new HashMap<>();
         managedObject.put(MM_MODEM_BUS_NAME, managedObjectProperties);
         Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = new HashMap<>();
@@ -952,12 +952,12 @@ public class NMDbusConnectorTest {
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Interface")).thenReturn(interfaceName);
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Connected")).thenReturn(true);
             Map<String, Variant<?>> settings = new HashMap<>();
-            settings.put("apn", new Variant<String>("VeryCoolMobile.com"));
-            settings.put("ip-type", new Variant<UInt32>(new UInt32(8)));
+            settings.put("apn", new Variant<>("VeryCoolMobile.com"));
+            settings.put("ip-type", new Variant<>(new UInt32(8)));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Properties")).thenReturn(settings);
             Map<String, Variant<?>> stats = new HashMap<>();
-            stats.put("tx-bytes", new Variant<UInt64>(new UInt64(190)));
-            stats.put("rx-bytes", new Variant<UInt64>(new UInt64(290)));
+            stats.put("tx-bytes", new Variant<>(new UInt64(190)));
+            stats.put("rx-bytes", new Variant<>(new UInt64(290)));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Stats")).thenReturn(stats);
         } else {
             when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers"))

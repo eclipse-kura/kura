@@ -38,31 +38,31 @@ public enum MMModemPowerState {
 
     public static MMModemPowerState toMMModemPowerState(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return MMModemPowerState.MM_MODEM_POWER_STATE_UNKNOWN;
-            case 0x01:
-                return MMModemPowerState.MM_MODEM_POWER_STATE_OFF;
-            case 0x02:
-                return MMModemPowerState.MM_MODEM_POWER_STATE_LOW;
-            case 0x03:
-                return MMModemPowerState.MM_MODEM_POWER_STATE_ON;
-            default:
-                return MMModemPowerState.MM_MODEM_POWER_STATE_UNKNOWN;
+        case 0x00:
+            return MMModemPowerState.MM_MODEM_POWER_STATE_UNKNOWN;
+        case 0x01:
+            return MMModemPowerState.MM_MODEM_POWER_STATE_OFF;
+        case 0x02:
+            return MMModemPowerState.MM_MODEM_POWER_STATE_LOW;
+        case 0x03:
+            return MMModemPowerState.MM_MODEM_POWER_STATE_ON;
+        default:
+            return MMModemPowerState.MM_MODEM_POWER_STATE_UNKNOWN;
         }
     }
 
     public static ModemPowerState toModemPowerState(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return ModemPowerState.UNKNOWN;
-            case 0x01:
-                return ModemPowerState.OFF;
-            case 0x02:
-                return ModemPowerState.LOW;
-            case 0x03:
-                return ModemPowerState.ON;
-            default:
-                return ModemPowerState.UNKNOWN;
+        case 0x00:
+            return ModemPowerState.UNKNOWN;
+        case 0x01:
+            return ModemPowerState.OFF;
+        case 0x02:
+            return ModemPowerState.LOW;
+        case 0x03:
+            return ModemPowerState.ON;
+        default:
+            return ModemPowerState.UNKNOWN;
         }
     }
 }

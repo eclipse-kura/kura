@@ -512,9 +512,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
 
             @Override
-            public void onSuccess(Boolean result) {
-                TabWirelessUi.this.isNet2 = result;
-                changeRadioModeToBand(result);
+            public void onSuccess(Boolean isNet2) {
+                TabWirelessUi.this.isNet2 = isNet2;
+                changeRadioModeToBand(isNet2);
             }
         });
     }
@@ -679,6 +679,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.radio.setEnabled(true);
             this.channelList.setEnabled(true);
             loadRadioMode();
+            
+            if (this.isNet2) {
+                this.buttonPassword.setVisible(false);
+            }
 
             // disable Password if security is none
             if (this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
@@ -949,6 +953,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(false);
         this.password.addMouseOutHandler(event -> resetHelp());
+        
         this.buttonPassword.addClickHandler(event -> {
             EntryClassUi.showWaitModal();
             TabWirelessUi.this.buttonPassword.setEnabled(false);

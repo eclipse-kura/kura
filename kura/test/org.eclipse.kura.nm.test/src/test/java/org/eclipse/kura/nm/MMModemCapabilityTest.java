@@ -113,7 +113,7 @@ public class MMModemCapabilityTest {
         }
 
         private void thenCalculatedModemCapabilityIsCorrect() {
-            assertEquals(this.expectedModemCapability, calculatedModemCapability);
+            assertEquals(this.expectedModemCapability, this.calculatedModemCapability);
         }
     }
 
@@ -129,9 +129,8 @@ public class MMModemCapabilityTest {
             params.add(new Object[] { new UInt32(0x00000006L),
                     EnumSet.of(ModemCapability.EVDO, ModemCapability.GSM_UMTS) });
             params.add(new Object[] { new UInt32(0x00000004L), EnumSet.of(ModemCapability.GSM_UMTS) });
-            params.add(new Object[] { new UInt32(0x0000000FL),
-                    EnumSet.of(ModemCapability.POTS, ModemCapability.EVDO, ModemCapability.GSM_UMTS,
-                            ModemCapability.LTE) });
+            params.add(new Object[] { new UInt32(0x0000000FL), EnumSet.of(ModemCapability.POTS, ModemCapability.EVDO,
+                    ModemCapability.GSM_UMTS, ModemCapability.LTE) });
             params.add(new Object[] { new UInt32(0xFFFFFFFFL), EnumSet.of(ModemCapability.ANY) });
             params.add(new Object[] { new UInt32(0x12345600L), EnumSet.noneOf(ModemCapability.class) });
             return params;
@@ -154,11 +153,11 @@ public class MMModemCapabilityTest {
         }
 
         private void whenCalculatedModemCapability() {
-            calculatedModemCapability = MMModemCapability.toModemCapabilitiesFromBitMask(this.inputIntValue);
+            this.calculatedModemCapability = MMModemCapability.toModemCapabilitiesFromBitMask(this.inputIntValue);
         }
 
         private void thenCalculatedModemCapabilityIsCorrect() {
-            assertEquals(this.expectedModemCapability, calculatedModemCapability);
+            assertEquals(this.expectedModemCapability, this.calculatedModemCapability);
         }
 
     }
@@ -197,11 +196,11 @@ public class MMModemCapabilityTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputModemCapability.toUInt32();
+            this.calculatedUInt32 = this.inputModemCapability.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

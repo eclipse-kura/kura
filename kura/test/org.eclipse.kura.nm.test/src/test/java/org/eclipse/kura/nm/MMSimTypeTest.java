@@ -99,7 +99,7 @@ public class MMSimTypeTest {
         }
 
         private void thenCalculatedSimTypeIsCorrect() {
-            assertEquals(this.expectedSimType, calculatedSimType);
+            assertEquals(this.expectedSimType, this.calculatedSimType);
         }
     }
 
@@ -131,11 +131,11 @@ public class MMSimTypeTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputSimType.toUInt32();
+            this.calculatedUInt32 = this.inputSimType.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

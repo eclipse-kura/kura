@@ -134,7 +134,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     //
     // ----------------------------------------------------------------
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.debug("Activate NetworkConfigurationService...");
+        logger.info("Activate NetworkConfigurationService...");
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
@@ -156,16 +156,19 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(properties)));
             update(this.networkProperties.getProperties());
         }
+        
+        logger.info("Activate NetworkConfigurationService... Done.");
     }
 
     public void deactivate(ComponentContext componentContext) {
-        logger.debug("Deactivate NetworkConfigurationService...");
+        logger.info("Deactivate NetworkConfigurationService...");
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+        logger.info("Deactivate NetworkConfigurationService... Done.");
     }
 
     public synchronized void update(Map<String, Object> receivedProperties) {
-        logger.debug("Update NetworkConfigurationService...");
+        logger.info("Update NetworkConfigurationService...");
         if (receivedProperties == null) {
             logger.debug("Received null properties...");
             return;
@@ -204,6 +207,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);
         }
+        logger.info("Update NetworkConfigurationService... Done.");
     }
 
     protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
@@ -338,7 +342,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         if (type.isPresent()
                 && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
-                && (isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
+                && isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent()
                 && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
             isValid = true;
         }
@@ -371,7 +375,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             logger.info("migrating configuration for interface: {}...", existingInterfaceName);
             final String migratedInterfaceName = this.networkService.getModemUsbPort(existingInterfaceName);
 
-            logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
+            logger.debug("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
             result = replaceModemPropertyKeys(migratedInterfaceName, existingInterfaceName, result);
             resultInterfaceNames.add(migratedInterfaceName);
 

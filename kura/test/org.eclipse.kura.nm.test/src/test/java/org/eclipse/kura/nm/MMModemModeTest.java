@@ -109,7 +109,7 @@ public class MMModemModeTest {
         }
 
         private void thenCalculatedModemModeIsCorrect() {
-            assertEquals(this.expectedModemMode, calculatedModemMode);
+            assertEquals(this.expectedModemMode, this.calculatedModemMode);
         }
     }
 
@@ -146,11 +146,11 @@ public class MMModemModeTest {
         }
 
         private void whenCalculatedModemModes() {
-            calculatedModemModes = MMModemMode.toModemModeFromBitMask(this.inputIntValue);
+            this.calculatedModemModes = MMModemMode.toModemModeFromBitMask(this.inputIntValue);
         }
 
         private void thenCalculatedModemModesIsCorrect() {
-            assertEquals(this.expectedModemModes, calculatedModemModes);
+            assertEquals(this.expectedModemModes, this.calculatedModemModes);
         }
 
     }
@@ -187,11 +187,11 @@ public class MMModemModeTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputModemMode.toUInt32();
+            this.calculatedUInt32 = this.inputModemMode.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

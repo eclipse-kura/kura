@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -97,7 +98,7 @@ public interface IP4Config extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

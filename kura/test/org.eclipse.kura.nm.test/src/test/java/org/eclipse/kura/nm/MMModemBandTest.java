@@ -337,7 +337,7 @@ public class MMModemBandTest {
         }
 
         private void thenCalculatedModemBandIsCorrect() {
-            assertEquals(this.expectedModemBand, calculatedModemBand);
+            assertEquals(this.expectedModemBand, this.calculatedModemBand);
         }
     }
 
@@ -489,11 +489,11 @@ public class MMModemBandTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputModemBand.toUInt32();
+            this.calculatedUInt32 = this.inputModemBand.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

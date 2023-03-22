@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -54,15 +55,15 @@ public interface ModemCdma extends DBusInterface {
         }
 
         public UInt32 getActivationState() {
-            return activationState;
+            return this.activationState;
         }
 
         public UInt32 getActivationError() {
-            return activationError;
+            return this.activationError;
         }
 
         public Map<String, Variant<?>> getStatusChanges() {
-            return statusChanges;
+            return this.statusChanges;
         }
 
     }

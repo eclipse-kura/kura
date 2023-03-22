@@ -120,12 +120,13 @@ public class MMModemLocationSourceTest {
             thenCalculatedLocationSourceSetMatches();
         }
 
-        private void whenConversionMethodIsCalled() {
-            calculatedLocationSource = MMModemLocationSource.toMMModemLocationSourceFromBitMask(this.inputIntValue);
+        private void whenCalculatedBearerIpType() {
+            this.calculatedLocationSource = MMModemLocationSource
+                    .toMMModemLocationSourceFromBitMask(this.inputIntValue);
         }
 
-        private void thenCalculatedLocationSourceSetMatches() {
-            assertEquals(this.expectedLocationSource, calculatedLocationSource);
+        private void thenCalculatedBearerIpTypeIsCorrect() {
+            assertEquals(this.expectedLocationSource, this.calculatedLocationSource);
         }
 
     }
@@ -229,11 +230,11 @@ public class MMModemLocationSourceTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputLocationSource.toUInt32();
+            this.calculatedUInt32 = this.inputLocationSource.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

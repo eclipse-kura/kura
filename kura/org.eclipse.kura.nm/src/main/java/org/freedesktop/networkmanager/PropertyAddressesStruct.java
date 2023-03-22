@@ -37,15 +37,15 @@ public class PropertyAddressesStruct extends Struct {
     }
 
     public List<Byte> getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public UInt32 getMember1() {
-        return member1;
+        return this.member1;
     }
 
     public List<Byte> getMember2() {
-        return member2;
+        return this.member2;
     }
 
 }

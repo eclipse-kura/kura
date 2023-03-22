@@ -13,6 +13,7 @@
 package org.freedesktop.networkmanager;
 
 import java.util.List;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;

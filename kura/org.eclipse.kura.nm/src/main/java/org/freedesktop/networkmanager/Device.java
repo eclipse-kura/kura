@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -25,7 +26,6 @@ import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.networkmanager.PropertyStateReasonStruct;
 
 /**
  * Auto-generated class.
@@ -94,15 +94,15 @@ public interface Device extends DBusInterface {
         }
 
         public UInt32 getNewState() {
-            return newState;
+            return this.newState;
         }
 
         public UInt32 getOldState() {
-            return oldState;
+            return this.oldState;
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }

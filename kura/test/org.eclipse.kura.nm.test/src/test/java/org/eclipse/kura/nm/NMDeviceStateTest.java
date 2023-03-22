@@ -183,7 +183,7 @@ public class NMDeviceStateTest {
         whenStateIsSetTo(NMDeviceState.NM_DEVICE_STATE_FAILED);
         thenIsConnectShouldReturn(true);
     }
-    
+
     @Test
     public void conversionWorksForStateUnknownToUINT() {
         whenNMDeviceStateIsPassed(NMDeviceState.NM_DEVICE_STATE_UNKNOWN);
@@ -271,7 +271,7 @@ public class NMDeviceStateTest {
     public void whenInt32StateIsPassed(UInt32 state) {
         this.state = NMDeviceState.fromUInt32(state);
     }
-    
+
     public void whenNMDeviceStateIsPassed(NMDeviceState state) {
         this.stateInt = NMDeviceState.toUInt32(state);
     }
@@ -283,7 +283,7 @@ public class NMDeviceStateTest {
     public void thenStateShouldBeEqualTo(NMDeviceState type) {
         assertEquals(this.state, type);
     }
-    
+
     public void thenStateUIntShouldBeEqualTo(UInt32 state) {
         assertEquals(this.stateInt, state);
     }

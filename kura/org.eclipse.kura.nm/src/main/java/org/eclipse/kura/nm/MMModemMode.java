@@ -44,43 +44,43 @@ public enum MMModemMode {
 
     public static MMModemMode toMMModemMode(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return MMModemMode.MM_MODEM_MODE_NONE;
-            case 0x00000001:
-                return MMModemMode.MM_MODEM_MODE_CS;
-            case 0x00000002:
-                return MMModemMode.MM_MODEM_MODE_2G;
-            case 0x00000004:
-                return MMModemMode.MM_MODEM_MODE_3G;
-            case 0x00000008:
-                return MMModemMode.MM_MODEM_MODE_4G;
-            case 0x00000010:
-                return MMModemMode.MM_MODEM_MODE_5G;
-            case 0xFFFFFFFF:
-                return MMModemMode.MM_MODEM_MODE_ANY;
-            default:
-                return MMModemMode.MM_MODEM_MODE_NONE;
+        case 0x00000000:
+            return MMModemMode.MM_MODEM_MODE_NONE;
+        case 0x00000001:
+            return MMModemMode.MM_MODEM_MODE_CS;
+        case 0x00000002:
+            return MMModemMode.MM_MODEM_MODE_2G;
+        case 0x00000004:
+            return MMModemMode.MM_MODEM_MODE_3G;
+        case 0x00000008:
+            return MMModemMode.MM_MODEM_MODE_4G;
+        case 0x00000010:
+            return MMModemMode.MM_MODEM_MODE_5G;
+        case 0xFFFFFFFF:
+            return MMModemMode.MM_MODEM_MODE_ANY;
+        default:
+            return MMModemMode.MM_MODEM_MODE_NONE;
         }
     }
 
     public static ModemMode toModemMode(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return ModemMode.NONE;
-            case 0x00000001:
-                return ModemMode.CS;
-            case 0x00000002:
-                return ModemMode.MODE_2G;
-            case 0x00000004:
-                return ModemMode.MODE_3G;
-            case 0x00000008:
-                return ModemMode.MODE_4G;
-            case 0x00000010:
-                return ModemMode.MODE_5G;
-            case 0xFFFFFFFF:
-                return ModemMode.ANY;
-            default:
-                return ModemMode.NONE;
+        case 0x00000000:
+            return ModemMode.NONE;
+        case 0x00000001:
+            return ModemMode.CS;
+        case 0x00000002:
+            return ModemMode.MODE_2G;
+        case 0x00000004:
+            return ModemMode.MODE_3G;
+        case 0x00000008:
+            return ModemMode.MODE_4G;
+        case 0x00000010:
+            return ModemMode.MODE_5G;
+        case 0xFFFFFFFF:
+            return ModemMode.ANY;
+        default:
+            return ModemMode.NONE;
         }
     }
 

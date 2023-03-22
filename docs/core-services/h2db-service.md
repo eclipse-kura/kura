@@ -124,9 +124,11 @@ The server, with the default configuration, will be listening on port 9123.
     This feature is intended to be used **only for debugging/development purposes**. The server created by H2 is **not running on a secure protocol**. Only enable the server for a limited time and make sure to properly secure the firewall ports on which it is running.
 
 In order to enable the H2 Web console, proceed as follows:
+
 1. Create a new H2DbServer instance.
 2. Set the **db.server.type** field to **WEB**.
-3. Enter appropriate parameters for the Web server in the **db.server.commandline** field. An example of valid settings can be `-webPort 9123 -webAllowOthers -ifExists -webExternalNames <device-ip>`.
+3. Enter appropriate parameters for the Web server in the **db.server.commandline** field. An example of valid settings can be:  
+`-webPort 9123 -webAllowOthers -ifExists -webExternalNames <device-ip>`.
 4. Set the **db.server.enabled** to **true**.
 
 The server is now listening on the specified port.

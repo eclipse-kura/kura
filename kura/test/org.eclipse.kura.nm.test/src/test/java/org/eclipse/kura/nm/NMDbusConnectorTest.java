@@ -445,8 +445,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
-                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
     }
 
     @Test
@@ -467,8 +466,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
-                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
     }
 
     @Test
@@ -489,11 +487,9 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
-                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
-                        MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
-                        MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)),
-                false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
     }
 
     @Test
@@ -1147,8 +1143,10 @@ public class NMDbusConnectorTest {
         assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
     }
 
-    private void thenLocationSetupWasCalledWith(UInt32 expectedBitmask, boolean expectedFlag) {
-        verify(this.mockModemLocation, times(1)).Setup(expectedBitmask, expectedFlag);
+    private void thenLocationSetupWasCalledWith(EnumSet<MMModemLocationSource> expectedLocationSources,
+            boolean expectedFlag) {
+        verify(this.mockModemLocation, times(1))
+                .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);
     }
 
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {

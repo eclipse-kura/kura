@@ -26,6 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -109,6 +110,7 @@ public class NMDbusConnectorTest {
 
     private List<String> internalStringList;
     private Map<String, Object> netConfig = new HashMap<>();
+    private Location mockModemLocation;
 
     private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"
             + "    (2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
@@ -443,6 +445,55 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
+                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)), false);
+    }
+
+    @Test
+    public void applyShouldWorkWithEnabledModem() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("ttyACM17");
+        thenActivateConnectionIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
+                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                        MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                        MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)),
+                false);
+    }
+
+    @Test
+    public void applyShouldWorkWithEnabledModemDisabledGPS() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", false);
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("ttyACM17");
+        thenActivateConnectionIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
+                EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)), false);
     }
 
     @Test
@@ -877,10 +928,10 @@ public class NMDbusConnectorTest {
         }
         
         // Modem location
-        Location modemLocation = mock(Location.class);
-        doReturn(modemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
+        this.mockModemLocation = mock(Location.class);
+        doReturn(mockModemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
                 "/org/freedesktop/ModemManager1/Modem/3", Location.class);
-        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(modemLocation).getObjectPath();
+        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(mockModemLocation).getObjectPath();
         
         
         Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
@@ -1094,6 +1145,10 @@ public class NMDbusConnectorTest {
 
     public void thenConfigurationEnforcementIsActive(boolean expectedValue) {
         assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
+    }
+
+    private void thenLocationSetupWasCalledWith(UInt32 expectedBitmask, boolean expectedFlag) {
+        verify(this.mockModemLocation, times(1)).Setup(expectedBitmask, expectedFlag);
     }
 
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {

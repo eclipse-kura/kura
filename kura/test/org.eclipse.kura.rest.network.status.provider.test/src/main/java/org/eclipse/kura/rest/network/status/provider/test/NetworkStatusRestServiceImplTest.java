@@ -125,6 +125,26 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     @Test
+    public void shouldRportGeneralExceptionGettingInterfaceList() {
+        givenExceptionThrownByNetworkStatusServiceMethods(new IllegalStateException("exception message"));
+
+        whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_IDS_PATH);
+
+        thenResponseCodeIs(500);
+        thenResponseBodyEqualsJson("{\"message\":\"exception message\"}");
+    }
+
+    @Test
+    public void shouldRportGeneralExceptionGettingAllInterfacesStatus() {
+        givenExceptionThrownByNetworkStatusServiceMethods(new IllegalStateException("exception message"));
+
+        whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
+
+        thenResponseCodeIs(500);
+        thenResponseBodyEqualsJson("{\"message\":\"exception message\"}");
+    }
+
+    @Test
     public void shouldReturnNonEmptyInterfaceList() {
         givenInterfaceIds("foo", "bar");
 
@@ -935,6 +955,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private static final NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
     private static ServiceRegistration<NetworkStatusService> reg;
     private final Map<String, Result> currentStatus = new LinkedHashMap<>();
+    private Optional<Exception> generalFailure = Optional.empty();
 
     public NetworkStatusRestServiceImplTest(Transport transport)
             throws InterruptedException, ExecutionException, TimeoutException {
@@ -942,6 +963,10 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
         try {
             Mockito.when(networkStatusService.getNetworkStatus(Mockito.anyString())).thenAnswer(i -> {
+                if (generalFailure.isPresent()) {
+                    throw generalFailure.get();
+                }
+
                 final String id = i.getArgument(0);
                 final Result result = currentStatus.get(id);
 
@@ -954,8 +979,13 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 return Optional.empty();
             });
 
-            Mockito.when(networkStatusService.getInterfaceIds())
-                    .thenAnswer(i -> new ArrayList<>(currentStatus.keySet()));
+            Mockito.when(networkStatusService.getInterfaceIds()).thenAnswer(i -> {
+                if (generalFailure.isPresent()) {
+                    throw generalFailure.get();
+                }
+
+                return new ArrayList<>(currentStatus.keySet());
+            });
         } catch (final Exception e) {
             fail("Unexpected exception");
         }
@@ -1037,6 +1067,10 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private void givenLoopbackInterfaceWithUnFilledIP6Address(final String id) throws UnknownHostException {
         givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
                 .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder().build())));
+    }
+
+    private void givenExceptionThrownByNetworkStatusServiceMethods(final Exception exception) {
+        this.generalFailure = Optional.of(exception);
     }
 
     private IP4Address ipV4Address(final int a, final int b, final int c, final int d) throws UnknownHostException {

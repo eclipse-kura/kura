@@ -120,12 +120,12 @@ public class MMModemLocationSourceTest {
             thenCalculatedLocationSourceSetMatches();
         }
 
-        private void whenCalculatedBearerIpType() {
+        private void whenConversionMethodIsCalled() {
             this.calculatedLocationSource = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(this.inputIntValue);
         }
 
-        private void thenCalculatedBearerIpTypeIsCorrect() {
+        private void thenCalculatedLocationSourceSetMatches() {
             assertEquals(this.expectedLocationSource, this.calculatedLocationSource);
         }
 

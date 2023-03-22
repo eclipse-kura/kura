@@ -3155,11 +3155,14 @@ The purpose of this is to allow changing the type of a column with a Wire Graph 
 <p class="admonition-title">Danger</p>
 <p>This feature is intended to be used <strong>only for debugging/development purposes</strong>. The server created by H2 is <strong>not running on a secure protocol</strong>. Only enable the server for a limited time and make sure to properly secure the firewall ports on which it is running.</p>
 </div>
-<p>In order to enable the H2 Web console, proceed as follows:
-1. Create a new H2DbServer instance.
-2. Set the <strong>db.server.type</strong> field to <strong>WEB</strong>.
-3. Enter appropriate parameters for the Web server in the <strong>db.server.commandline</strong> field. An example of valid settings can be <code>-webPort 9123 -webAllowOthers -ifExists -webExternalNames &lt;device-ip&gt;</code>.
-4. Set the <strong>db.server.enabled</strong> to <strong>true</strong>.</p>
+<p>In order to enable the H2 Web console, proceed as follows:</p>
+<ol>
+<li>Create a new H2DbServer instance.</li>
+<li>Set the <strong>db.server.type</strong> field to <strong>WEB</strong>.</li>
+<li>Enter appropriate parameters for the Web server in the <strong>db.server.commandline</strong> field. An example of valid settings can be:<br />
+<code>-webPort 9123 -webAllowOthers -ifExists -webExternalNames &lt;device-ip&gt;</code>.</li>
+<li>Set the <strong>db.server.enabled</strong> to <strong>true</strong>.</li>
+</ol>
 <p>The server is now listening on the specified port.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>

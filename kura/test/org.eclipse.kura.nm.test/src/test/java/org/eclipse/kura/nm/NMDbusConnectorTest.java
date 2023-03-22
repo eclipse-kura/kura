@@ -109,7 +109,7 @@ public class NMDbusConnectorTest {
     private Connection mockConnection;
 
     private List<String> internalStringList;
-    private Map<String, Object> netConfig = new HashMap<>();
+    private final Map<String, Object> netConfig = new HashMap<>();
     private Location mockModemLocation;
 
     private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"

@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.kura.rest.network.status.provider;bundle-version="1.
  org.eclipse.kura.http.server.manager;bundle-version="1.1.0",
  org.eclipse.kura.broker.artemis.core;bundle-version="1.2.0",
  org.eclipse.kura.broker.artemis.simple.mqtt;bundle-version="1.1.0"
-Import-Package: org.eclipse.kura.core.testutil.requesthandler,
+Import-Package: org.eclipse.kura;version="1.7.0",
+ org.eclipse.kura.core.testutil.requesthandler,
  org.eclipse.kura.core.testutil.service;version="1.0.0",
  org.eclipse.kura.net;version="2.4.0",
  org.eclipse.kura.net.modem;version="2.4.0",

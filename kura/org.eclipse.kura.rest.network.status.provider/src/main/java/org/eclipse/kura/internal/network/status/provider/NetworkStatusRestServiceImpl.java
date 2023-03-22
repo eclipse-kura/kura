@@ -23,13 +23,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
+import org.eclipse.kura.network.status.provider.api.FailureDTO;
 import org.eclipse.kura.network.status.provider.api.InterfaceIdsDTO;
 import org.eclipse.kura.network.status.provider.api.InterfaceStatusListDTO;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -77,7 +80,11 @@ public class NetworkStatusRestServiceImpl {
     @Path("/status")
     @Produces(MediaType.APPLICATION_JSON)
     public InterfaceStatusListDTO getNetworkStatus() {
-        return new InterfaceStatusListDTO(this.networkStatusService.getNetworkStatus());
+        try {
+            return getInterfaceStatusInternal(networkStatusService.getInterfaceIds());
+        } catch (final Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
     }
 
     @POST
@@ -86,14 +93,13 @@ public class NetworkStatusRestServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public InterfaceStatusListDTO getNetworkStatus(final InterfaceIdsDTO interfaceIds) {
+        try {
+            interfaceIds.validate();
 
-        final List<NetworkInterfaceStatus> result = new ArrayList<>();
-
-        for (final String interfaceId : interfaceIds.getInterfaceIds()) {
-            networkStatusService.getNetworkStatus(interfaceId).ifPresent(result::add);
+            return getInterfaceStatusInternal(interfaceIds.getInterfaceIds());
+        } catch (final Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-
-        return new InterfaceStatusListDTO(result);
     }
 
     @GET
@@ -101,7 +107,29 @@ public class NetworkStatusRestServiceImpl {
     @Path("/interfaceIds")
     @Produces(MediaType.APPLICATION_JSON)
     public InterfaceIdsDTO getInterfaceNames() {
-        return new InterfaceIdsDTO(networkStatusService.getInterfaceIds());
+        try {
+            return new InterfaceIdsDTO(networkStatusService.getInterfaceIds());
+        } catch (final Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    private InterfaceStatusListDTO getInterfaceStatusInternal(final List<String> interfaceIds) {
+        final List<NetworkInterfaceStatus> interfaces = new ArrayList<>();
+        final List<FailureDTO> failures = new ArrayList<>();
+
+        for (final String interfaceId : interfaceIds) {
+            try {
+                final NetworkInterfaceStatus status = networkStatusService.getNetworkStatus(interfaceId)
+                        .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "Interface not found"));
+
+                interfaces.add(status);
+            } catch (final Exception e) {
+                failures.add(new FailureDTO(interfaceId, e));
+            }
+        }
+
+        return new InterfaceStatusListDTO(interfaces, failures);
     }
 
 }

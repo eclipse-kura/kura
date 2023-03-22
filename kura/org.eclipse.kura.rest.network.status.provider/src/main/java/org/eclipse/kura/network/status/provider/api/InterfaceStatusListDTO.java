@@ -21,10 +21,12 @@ import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 public class InterfaceStatusListDTO {
 
     private final List<NetworkInterfaceStatusDTO> interfaces;
+    private final List<FailureDTO> failures;
 
-    public InterfaceStatusListDTO(final List<NetworkInterfaceStatus> interfaces) {
+    public InterfaceStatusListDTO(final List<NetworkInterfaceStatus> interfaces, final List<FailureDTO> failures) {
         this.interfaces = interfaces.stream().map(NetworkInterfaceStatusDTO::fromNetworkInterfaceStatus)
                 .collect(Collectors.toList());
+        this.failures = (failures == null || failures.isEmpty()) ? null : failures;
     }
 
 }

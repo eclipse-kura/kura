@@ -13,6 +13,10 @@
 package org.eclipse.kura.network.status.provider.api;
 
 import java.util.List;
+import java.util.Objects;
+
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 
 public class InterfaceIdsDTO {
 
@@ -24,5 +28,23 @@ public class InterfaceIdsDTO {
 
     public List<String> getInterfaceIds() {
         return interfaceIds;
+    }
+
+    public void validate() throws KuraException {
+        if (interfaceIds == null) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "interfaceIds must be specified");
+        }
+
+        if (interfaceIds.isEmpty()) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "interfaceIds cannot be empty");
+        }
+
+        if (interfaceIds.stream().anyMatch(Objects::isNull)) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "null interfaceIds are not allowed");
+        }
+
+        if (interfaceIds.stream().anyMatch(i -> i.trim().isEmpty())) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "empty interfaceIds are not allowed");
+        }
     }
 }

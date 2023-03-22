@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.network.status.provider.test;
 
+import static org.junit.Assert.fail;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -30,6 +33,7 @@ import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
@@ -76,6 +80,51 @@ import org.osgi.framework.ServiceRegistration;
 public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest {
 
     @Test
+    public void shouldRejectRequestWithMissingInterfeceIdField() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH, "{}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectRequestWithNullInterfeceIdField() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH, "{\"interfaceIds\":null}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectRequestWithEmptyInterfeceIdField() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH, "{\"interfaceIds\":[]}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectRequestWithNullInterfaceId() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"dfoo\",null]}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectRequestWithEmptyInterfaceId() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"dfoo\",\"\"]}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectRequestWithInterfaceIdConteiningOnlySpaces() {
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"dfoo\",\"  \"]}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
     public void shouldReturnNonEmptyInterfaceList() {
         givenInterfaceIds("foo", "bar");
 
@@ -86,13 +135,59 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     @Test
-    public void shouldReturnEmptyInterfaceList() {
+    public void shouldReturnEmptyInterfaceListIfNoInterfacesArePresent() {
         givenInterfaceIds();
 
         whenRequestIsPerformed(new MethodSpec("GET"), INTERFACE_IDS_PATH);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"interfaceIds\": []}");
+    }
+
+    @Test
+    public void shouldReportExceptionMessageGettingAllInterfaces() {
+        givenExceptionRetrievingInterfaceStatus("foo", new IllegalArgumentException("exception message"));
+
+        whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"interfaces\":[],\"failures\":[{\"interfaceId\":\"foo\",\"reason\":\"exception message\"}]}");
+    }
+
+    @Test
+    public void shouldReportExceptionMessageByInterfaceId() {
+        givenExceptionRetrievingInterfaceStatus("foo", new IllegalArgumentException("exception message"));
+
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"interfaces\":[],\"failures\":[{\"interfaceId\":\"foo\",\"reason\":\"exception message\"}]}");
+    }
+
+    @Test
+    public void shouldReportDefaultExceptionMessageGettingAllInterfaces() {
+        givenExceptionRetrievingInterfaceStatus("foo", new IllegalArgumentException());
+
+        whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"interfaces\":[],\"failures\":[{\"interfaceId\":\"foo\",\"reason\":\"Unknown error\"}]}");
+    }
+
+    @Test
+    public void shouldReportDefaultExceptionMessageByInterfaceId() {
+        givenExceptionRetrievingInterfaceStatus("foo", new IllegalArgumentException());
+
+        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
+                "{\"interfaceIds\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"interfaces\":[],\"failures\":[{\"interfaceId\":\"foo\",\"reason\":\"Unknown error\"}]}");
     }
 
     @Test
@@ -160,6 +255,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
+                + "}],\"failures\":[{" //
+                + "\"interfaceId\":\"foo\"," //
+                + "\"reason\":\"Not found.\""//
                 + "}]}");
     }
 
@@ -171,17 +269,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 "{\"interfaceIds\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaces\":[]}");
-    }
-
-    @Test
-    public void shouldReuturnEmptyListWithEmptyRequestList() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
-
-        whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH, "{\"interfaceIds\":[]}");
-
-        thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{\"interfaces\":[]}");
+        thenResponseBodyEqualsJson(
+                "{\"interfaces\":[],\"failures\":[{\"interfaceId\":\"foo\",\"reason\":\"Not found.\"}]}");
     }
 
     @Test
@@ -845,26 +934,41 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     private static final NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
     private static ServiceRegistration<NetworkStatusService> reg;
-    private final Map<String, NetworkInterfaceStatus> currentStatus = new LinkedHashMap<>();
-
-    private void givenInterfaceIds(final String... interfaceIds) {
-        Mockito.when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(interfaceIds));
-    }
+    private final Map<String, Result> currentStatus = new LinkedHashMap<>();
 
     public NetworkStatusRestServiceImplTest(Transport transport)
             throws InterruptedException, ExecutionException, TimeoutException {
         super(transport);
 
-        Mockito.when(networkStatusService.getNetworkStatus()).thenAnswer(i -> new ArrayList<>(currentStatus.values()));
-        Mockito.when(networkStatusService.getNetworkStatus(Mockito.anyString()))
-                .thenAnswer(i -> Optional.ofNullable(currentStatus.get(i.getArgument(0))));
-        Mockito.when(networkStatusService.getInterfaceIds()).thenAnswer(i -> new ArrayList<>(currentStatus.keySet()));
+        try {
+            Mockito.when(networkStatusService.getNetworkStatus(Mockito.anyString())).thenAnswer(i -> {
+                final String id = i.getArgument(0);
+                final Result result = currentStatus.get(id);
+
+                if (result instanceof Success) {
+                    return Optional.of(((Success) result).status);
+                } else if (result instanceof Failure) {
+                    throw ((Failure) result).exception;
+                }
+
+                return Optional.empty();
+            });
+
+            Mockito.when(networkStatusService.getInterfaceIds())
+                    .thenAnswer(i -> new ArrayList<>(currentStatus.keySet()));
+        } catch (final Exception e) {
+            fail("Unexpected exception");
+        }
     }
 
     @BeforeClass
-    public static void registerNetworkStatusService() {
+    public static void registerNetworkStatusService()
+            throws InterruptedException, ExecutionException, TimeoutException {
         reg = FrameworkUtil.getBundle(NetworkStatusRestServiceImplTest.class).getBundleContext()
                 .registerService(NetworkStatusService.class, networkStatusService, new Hashtable<>());
+
+        ServiceUtil.trackService("org.eclipse.kura.internal.network.status.provider.NetworkStatusRestServiceImpl",
+                Optional.empty()).get(30, TimeUnit.SECONDS);
     }
 
     @AfterClass
@@ -882,10 +986,23 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         return Arrays.asList(new RestTransport("networkStatus/v1"), new MqttTransport("NET-STATUS-V1"));
     }
 
+    private void givenInterfaceIds(final String... interfaceIds) {
+        try {
+            Mockito.when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(interfaceIds));
+        } catch (final Exception e) {
+            fail("Unexpected exception");
+        }
+    }
+
     private void givenNetworkStatus(final NetworkInterfaceStatus.NetworkInterfaceStatusBuilder<?> builder) {
         final NetworkInterfaceStatus status = builder.build();
 
-        currentStatus.put(status.getId(), status);
+        currentStatus.put(status.getId(), new Success(status));
+    }
+
+    private void givenExceptionRetrievingInterfaceStatus(final String interfaceId, final Exception exception) {
+
+        currentStatus.put(interfaceId, new Failure(exception));
     }
 
     private void givenLoopbackInterfaceWithFilledIP4Address(final String id) throws UnknownHostException {
@@ -934,6 +1051,27 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         }
 
         return (IP6Address) IPAddress.getByAddress(address);
+    }
+
+    private interface Result {
+    }
+
+    private static class Success implements Result {
+
+        private final NetworkInterfaceStatus status;
+
+        public Success(NetworkInterfaceStatus status) {
+            this.status = status;
+        }
+    }
+
+    private static class Failure implements Result {
+
+        private final Exception exception;
+
+        public Failure(final Exception exception) {
+            this.exception = exception;
+        }
     }
 
 }

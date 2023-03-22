@@ -89,7 +89,7 @@ public class CryptoServiceImpl implements CryptoService {
             byte[] iv = new byte[IV_SIZE];
             this.random.nextBytes(iv);
             c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
-            byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
+            byte[] encryptedBytes = c.doFinal(new String(value).getBytes(StandardCharsets.UTF_8));
 
             String ivString = base64Encode(iv);
             String encryptedMessage = base64Encode(encryptedBytes);
@@ -137,7 +137,7 @@ public class CryptoServiceImpl implements CryptoService {
             Cipher c = Cipher.getInstance(CIPHER);
             c.init(Cipher.DECRYPT_MODE, generateKey(), new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
             byte[] decryptedBytes = c.doFinal(decodedValue);
-            String decryptedValue = new String(decryptedBytes);
+            String decryptedValue = new String(decryptedBytes, StandardCharsets.UTF_8);
             return decryptedValue.toCharArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, DECRYPT_EXCEPTION_CAUSE);

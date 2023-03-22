@@ -301,7 +301,11 @@ public class NMDbusConnector {
                 continue;
             }
 
-            manageConfiguredInterface(iface, properties);
+            try {
+                manageConfiguredInterface(iface, properties);
+            } catch (Exception e) {
+                logger.error("Unable to configure iface {}, skipping", iface, e);
+            }
         }
     }
 
@@ -381,26 +385,32 @@ public class NMDbusConnector {
     private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,
             List<Device> availableInterfaces) throws DBusException {
         for (Device device : availableInterfaces) {
-            NMDeviceType deviceType = getDeviceType(device);
-            String ipInterface = getDeviceId(device);
+            try {
+                NMDeviceType deviceType = getDeviceType(device);
+                String ipInterface = getDeviceId(device);
 
-            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
-                continue;
-            }
-
-            if (Boolean.FALSE.equals(isDeviceManaged(device))) {
-                setDeviceManaged(device, true);
-            }
-
-            if (!configuredInterfaces.contains(ipInterface)) {
-                logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
-
-                disable(device);
-
-                if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-                    handleModemManagerGPSSetup(device, Optional.of(false));
+                if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+                    logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
+                    continue;
                 }
+
+                if (Boolean.FALSE.equals(isDeviceManaged(device))) {
+                    setDeviceManaged(device, true);
+                }
+
+                if (!configuredInterfaces.contains(ipInterface)) {
+                    logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
+
+                    disable(device);
+
+                    if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+                        handleModemManagerGPSSetup(device, Optional.of(false));
+                    }
+                }
+
+            } catch (Exception e) {
+                logger.error("Unable to handle the not configured device with path {}, skipping",
+                        device.getObjectPath(), e);
             }
         }
     }

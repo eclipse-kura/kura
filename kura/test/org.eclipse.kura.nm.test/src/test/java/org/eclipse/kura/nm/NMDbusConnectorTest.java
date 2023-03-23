@@ -865,25 +865,26 @@ public class NMDbusConnectorTest {
                 "/org/freedesktop/ModemManager1/Modem/3", Modem.class);
         doThrow(new DBusExecutionException("Method not supported")).when(modem).ListBearers();
         if (hasBearers) {
-            when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers"))
-                    .thenReturn(new DBusPath[] { new DBusPath("/org/freedesktop/ModemManager1/Bearer/0") });
+            List<DBusPath> paths = Arrays
+                    .asList(new DBusPath[] { new DBusPath("/org/freedesktop/ModemManager1/Bearer/0") });
+            when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers")).thenReturn(paths);
 
             Properties bearerProperties = mock(Properties.class);
             doReturn(bearerProperties).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
                     "/org/freedesktop/ModemManager1/Bearer/0", Properties.class);
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Interface")).thenReturn("ttyACM17");
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Connected")).thenReturn(true);
-            Map<String, Variant<?>> settings = new HashMap<>();
-            settings.put("apn", new Variant<>("VeryCoolMobile.com"));
-            settings.put("ip-type", new Variant<>(new UInt32(8)));
+            Map<String, Object> settings = new HashMap<>();
+            settings.put("apn", "VeryCoolMobile.com");
+            settings.put("ip-type", new UInt32(8));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Properties")).thenReturn(settings);
-            Map<String, Variant<?>> stats = new HashMap<>();
-            stats.put("tx-bytes", new Variant<>(new UInt64(190)));
-            stats.put("rx-bytes", new Variant<>(new UInt64(290)));
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("tx-bytes", new UInt64(190));
+            stats.put("rx-bytes", new UInt64(290));
             when(bearerProperties.Get("org.freedesktop.ModemManager1.Bearer", "Stats")).thenReturn(stats);
         } else {
-            when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers"))
-                    .thenReturn(new DBusPath[] { new DBusPath("/") });
+            List<DBusPath> paths = Arrays.asList(new DBusPath[] { new DBusPath("/") });
+            when(modemProperties.Get("org.freedesktop.ModemManager1", "Bearers")).thenReturn(paths);
         }
     }
 

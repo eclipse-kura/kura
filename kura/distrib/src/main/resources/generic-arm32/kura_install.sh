@@ -89,8 +89,12 @@ systemctl enable firewall
 if [ -d /etc/cloud/cloud.cfg.d ]; then
     echo "network: {config: disabled}" | sudo tee -a /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null
 fi
-if [ -f /usr/lib/NetworkManager/conf.d/10-globally-managed-devices.conf ]; then
-    rm /usr/lib/NetworkManager/conf.d/10-globally-managed-devices.conf
+if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
+    TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )
+    
+    if [ -f "${TO_REMOVE}" ]; then
+        rm "${TO_REMOVE}"
+    fi
 fi
 
 # disable NTP service

@@ -23,16 +23,19 @@ then
     echo "Customizing installation for Raspberry PI"
 fi
 
-if uname -a | grep -q 'intelup2' > /dev/null 2>&1
+if uname -a | grep -q 'up' > /dev/null 2>&1
 then
-    BOARD="intelup2"
-    echo "Customizing installation for Intel UP2"
+    if uname -n | grep 'intel' > /dev/null 2>&1
+    then
+        BOARD="intelup2"
+        echo "Customizing installation for Intel UP2"
+    fi
 fi
 
 if uname -a | grep -q 'nvidia' > /dev/null 2>&1
 then
     BOARD="jetson-nano"
-    echo "Customizing installation for Intel UP2"
+    echo "Customizing installation for NVIDIA Jetson Nano"
 fi
 
 if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then

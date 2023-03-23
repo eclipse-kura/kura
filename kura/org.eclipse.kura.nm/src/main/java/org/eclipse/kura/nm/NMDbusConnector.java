@@ -409,7 +409,7 @@ public class NMDbusConnector {
             desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
         }
 
-        logger.info("Modem location setup {} for modem {}", desiredLocationSources, device.getObjectPath());
+        logger.debug("Modem location setup {} for modem {}", desiredLocationSources, modemDevicePath.get());
 
         modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources), false);
     }

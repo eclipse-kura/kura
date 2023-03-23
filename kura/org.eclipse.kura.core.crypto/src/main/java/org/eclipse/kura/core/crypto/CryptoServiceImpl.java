@@ -22,7 +22,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
@@ -74,9 +73,6 @@ public class CryptoServiceImpl implements CryptoService {
     private CharsetEncoder utf8Encoder;
     private CharsetDecoder utf8Decoder;
 
-    private CharsetEncoder platformEncoder;
-    private CharsetDecoder platformDecoder;
-
     public CryptoServiceImpl() {
         this.utf8Encoder = StandardCharsets.UTF_8.newEncoder();
         this.utf8Encoder.onMalformedInput(CodingErrorAction.REPORT);
@@ -85,14 +81,6 @@ public class CryptoServiceImpl implements CryptoService {
         this.utf8Decoder = StandardCharsets.UTF_8.newDecoder();
         this.utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
         this.utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-
-        this.platformEncoder = Charset.defaultCharset().newEncoder();
-        this.platformEncoder.onMalformedInput(CodingErrorAction.REPLACE);
-        this.platformEncoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
-
-        this.platformDecoder = Charset.defaultCharset().newDecoder();
-        this.platformDecoder.onMalformedInput(CodingErrorAction.REPLACE);
-        this.platformDecoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
     }
 
     public void setSystemService(SystemService systemService) {
@@ -142,7 +130,7 @@ public class CryptoServiceImpl implements CryptoService {
             byteBuffer = this.utf8Encoder.encode(CharBuffer.wrap(value));
         } catch (CharacterCodingException e) {
             // fallback for backward compatibility
-            byteBuffer = this.platformEncoder.encode(CharBuffer.wrap(value));
+            byteBuffer = ByteBuffer.wrap(new String(value).getBytes());
         }
         byte[] encodedBytes = new byte[byteBuffer.limit()];
         byteBuffer.get(encodedBytes);
@@ -156,7 +144,7 @@ public class CryptoServiceImpl implements CryptoService {
             charBuffer = this.utf8Decoder.decode(ByteBuffer.wrap(value));
         } catch (CharacterCodingException e) {
             // fallback for backward compatibility
-            charBuffer = this.platformDecoder.decode(ByteBuffer.wrap(value));
+            charBuffer = CharBuffer.wrap(new String(value).toCharArray());
         }
         char[] decodedChar = new char[charBuffer.limit()];
         charBuffer.get(decodedChar);

@@ -87,12 +87,12 @@ public class CryptoServiceImpl implements CryptoService {
         this.utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
 
         this.platformEncoder = Charset.defaultCharset().newEncoder();
-        this.platformEncoder.onMalformedInput(CodingErrorAction.REPORT);
-        this.platformEncoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        this.platformEncoder.onMalformedInput(CodingErrorAction.REPLACE);
+        this.platformEncoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 
         this.platformDecoder = Charset.defaultCharset().newDecoder();
-        this.platformDecoder.onMalformedInput(CodingErrorAction.REPORT);
-        this.platformDecoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+        this.platformDecoder.onMalformedInput(CodingErrorAction.REPLACE);
+        this.platformDecoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
     }
 
     public void setSystemService(SystemService systemService) {
@@ -135,7 +135,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     }
 
-    private byte[] charArrayToByteArray(char[] value) throws CharacterCodingException {
+    private synchronized byte[] charArrayToByteArray(char[] value) throws CharacterCodingException {
 
         ByteBuffer byteBuffer;
         try {
@@ -150,7 +150,7 @@ public class CryptoServiceImpl implements CryptoService {
         return encodedBytes;
     }
 
-    private char[] byteArrayToCharArray(byte[] value) throws CharacterCodingException {
+    private synchronized char[] byteArrayToCharArray(byte[] value) throws CharacterCodingException {
         CharBuffer charBuffer;
         try {
             charBuffer = this.utf8Decoder.decode(ByteBuffer.wrap(value));

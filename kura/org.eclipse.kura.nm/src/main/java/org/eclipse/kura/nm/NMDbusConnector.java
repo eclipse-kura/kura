@@ -375,6 +375,49 @@ public class NMDbusConnector {
 
     }
 
+    private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,
+            List<Device> availableInterfaces) throws DBusException {
+        for (Device device : availableInterfaces) {
+            NMDeviceType deviceType = getDeviceType(device);
+            String ipInterface = getDeviceId(device);
+
+            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+                logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
+                continue;
+            }
+
+            if (Boolean.FALSE.equals(isDeviceManaged(device))) {
+                setDeviceManaged(device, true);
+            }
+
+            if (!configuredInterfaces.contains(ipInterface)) {
+                logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
+                disable(device);
+            }
+        }
+    }
+
+    private void disable(Device device) throws DBusException {
+        NMDeviceState deviceState = getDeviceState(device);
+        if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
+            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+            device.Disconnect();
+            dsLock.waitForSignal();
+        }
+
+        Optional<Connection> connection = getAppliedConnection(device);
+        if (connection.isPresent()) {
+            connection.get().Delete();
+        }
+
+        NMDeviceType deviceType = getDeviceType(device);
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            handleModemManagerGPSSetup(device, Optional.of(false));
+        }
+
+    }
+
     private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
         Optional<String> modemDevicePath = getModemPathFromMM(device.getObjectPath());
 
@@ -414,28 +457,6 @@ public class NMDbusConnector {
         modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources), false);
     }
 
-    private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,
-            List<Device> availableInterfaces) throws DBusException {
-        for (Device device : availableInterfaces) {
-            NMDeviceType deviceType = getDeviceType(device);
-            String ipInterface = getDeviceId(device);
-
-            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                logger.warn("Device \"{}\" of type \"{}\" currently not supported", ipInterface, deviceType);
-                continue;
-            }
-
-            if (Boolean.FALSE.equals(isDeviceManaged(device))) {
-                setDeviceManaged(device, true);
-            }
-
-            if (!configuredInterfaces.contains(ipInterface)) {
-                logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
-                disable(device);
-            }
-        }
-    }
-
     private String getDeviceId(Device device) throws DBusException {
         NMDeviceType deviceType = getDeviceType(device);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
@@ -456,27 +477,6 @@ public class NMDbusConnector {
                     Properties.class);
             return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
         }
-    }
-
-    private void disable(Device device) throws DBusException {
-        NMDeviceState deviceState = getDeviceState(device);
-        if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
-            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
-            device.Disconnect();
-            dsLock.waitForSignal();
-        }
-
-        Optional<Connection> connection = getAppliedConnection(device);
-        if (connection.isPresent()) {
-            connection.get().Delete();
-        }
-
-        NMDeviceType deviceType = getDeviceType(device);
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            handleModemManagerGPSSetup(device, Optional.of(false));
-        }
-
     }
 
     private List<Device> getAllDevices() throws DBusException {

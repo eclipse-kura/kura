@@ -440,12 +440,33 @@ public class NMDbusConnectorTest {
 
         givenNetworkConfigMapWith("net.interfaces", "1-5,");
         givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusDisabled");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", false);
 
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
+    }
+
+    @Test
+    public void applyShouldEnableGPSEvenIfModemIsDisabled() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusDisabled");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenDisconnectIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
     }
 
     @Test

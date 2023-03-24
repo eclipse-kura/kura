@@ -305,37 +305,47 @@ public class NMDbusConnector {
         }
     }
 
-    private synchronized void manageConfiguredInterface(String iface, NetworkProperties properties)
+    private synchronized void manageConfiguredInterface(String deviceId, NetworkProperties properties)
             throws DBusException {
-        Optional<Device> device = getDeviceByInterfaceId(iface);
-        if (device.isPresent()) {
-            NMDeviceType deviceType = getDeviceType(device.get());
-
-            KuraIpStatus ip4Status = KuraIpStatus
-                    .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
-            // Temporary solution while we wait to add complete IPv6 support
-            KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED
-                    : KuraIpStatus.DISABLED;
-            KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
-
-            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
-                logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", iface,
-                        deviceType, ip4Status, ip6Status);
-                return;
-            }
-
-            logger.info("Settings iface \"{}\":{}", iface, deviceType);
-
-            if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-                disable(device.get());
-            } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
-                logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", iface);
-            } else { // NMDeviceEnable.ENABLED
-                enableInterface(iface, properties, device.get(), deviceType);
-            }
+        Optional<Device> device = getDeviceByInterfaceId(deviceId);
+        if (!device.isPresent()) {
+            logger.warn("Device \"{}\" cannot be found. Skipping configuration.", deviceId);
+            return;
         }
+
+        NMDeviceType deviceType = getDeviceType(device.get());
+
+        KuraIpStatus ip4Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
+        // Temporary solution while we wait to add complete IPv6 support
+        KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
+
+        if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
+            logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", deviceId,
+                    deviceType, ip4Status, ip6Status);
+            return;
+        }
+
+        logger.info("Settings iface \"{}\":{}", deviceId, deviceType);
+
+        if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
+            disable(device.get());
+        } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
+            logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", deviceId);
+        } else { // NMDeviceEnable.ENABLED
+            enableInterface(deviceId, properties, device.get(), deviceType);
+        }
+
+        // Manage GPS independently of device ip status
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
+                    deviceId);
+            handleModemManagerGPSSetup(device.get(), enableGPS);
+        }
+
     }
 
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
@@ -364,13 +374,6 @@ public class NMDbusConnector {
             this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
                     new DBusPath("/"));
         }
-
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
-                    deviceId);
-            handleModemManagerGPSSetup(device, enableGPS);
-        }
-
         dsLock.waitForSignal();
 
     }
@@ -392,7 +395,12 @@ public class NMDbusConnector {
 
             if (!configuredInterfaces.contains(ipInterface)) {
                 logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
+
                 disable(device);
+
+                if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+                    handleModemManagerGPSSetup(device, Optional.of(false));
+                }
             }
         }
     }
@@ -410,12 +418,6 @@ public class NMDbusConnector {
         if (connection.isPresent()) {
             connection.get().Delete();
         }
-
-        NMDeviceType deviceType = getDeviceType(device);
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            handleModemManagerGPSSetup(device, Optional.of(false));
-        }
-
     }
 
     private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {

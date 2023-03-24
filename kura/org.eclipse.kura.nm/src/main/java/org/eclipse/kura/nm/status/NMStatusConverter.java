@@ -661,16 +661,19 @@ public class NMStatusConverter {
         for (Properties bearerProperties : properties) {
             String name = bearerProperties.Get(MM_BEARER_BUS_NAME, "Interface");
             boolean connected = bearerProperties.Get(MM_BEARER_BUS_NAME, "Connected");
-            Map<String, Variant<?>> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
-            String apn = String.class.cast(settings.get("apn").getValue());
+            // MM unwraps the Variant<?> object in the corresponding Java types.
+            // So the best option is to convert them to an Object and convert the value
+            // manually.
+            Map<String, Object> settings = bearerProperties.Get(MM_BEARER_BUS_NAME, "Properties");
+            String apn = String.class.cast(settings.get("apn"));
             Set<BearerIpType> bearerTypes = MMBearerIpFamily
-                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type").getValue()));
+                    .toBearerIpTypeFromBitMask(UInt32.class.cast(settings.get("ip-type")));
             long bytesTransmitted = 0L;
             long bytesReceived = 0L;
             try {
-                Map<String, Variant<?>> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
-                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes").getValue()).longValue();
-                bytesReceived = UInt64.class.cast(stats.get("rx-bytes").getValue()).longValue();
+                Map<String, Object> stats = bearerProperties.Get(MM_BEARER_BUS_NAME, "Stats");
+                bytesTransmitted = UInt64.class.cast(stats.get("tx-bytes")).longValue();
+                bytesReceived = UInt64.class.cast(stats.get("rx-bytes")).longValue();
             } catch (DBusExecutionException e) {
                 logger.warn("Bearer statistics not found.");
             }
@@ -691,7 +694,7 @@ public class NMStatusConverter {
         try {
             builder.withRegistrationStatus(MMModem3gppRegistrationState
                     .toRegistrationStatus(properties.Get(MM_MODEM_3GPP_BUS_NAME, "RegistrationState")));
-            builder.withOperatorName(String.class.cast(properties.Get(MM_MODEM_3GPP_BUS_NAME, "OperatorName")));
+            builder.withOperatorName(properties.Get(MM_MODEM_3GPP_BUS_NAME, "OperatorName"));
         } catch (DBusExecutionException e) {
             logger.warn("3gpp properties not found.");
         }

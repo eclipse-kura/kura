@@ -28,25 +28,25 @@ public class WifiChannel {
 
     private final int channel;
     private final int frequency;
-    private Optional<Boolean> disabled;
-    private Optional<Float> attenuation;
-    private Optional<Boolean> noInitiatingRadiation;
-    private Optional<Boolean> radarDetection;
+    private final Optional<Boolean> disabled;
+    private final Optional<Float> attenuation;
+    private final Optional<Boolean> noInitiatingRadiation;
+    private final Optional<Boolean> radarDetection;
 
-    public WifiChannel(int channel, int frequency) {
-        this.channel = channel;
-        this.frequency = frequency;
-        this.attenuation = Optional.empty();
-        this.noInitiatingRadiation = Optional.empty();
-        this.radarDetection = Optional.empty();
-        this.disabled = Optional.empty();
+    private WifiChannel(Builder builder) {
+        this.channel = builder.channel;
+        this.frequency = builder.frequency;
+        this.disabled = builder.disabled;
+        this.attenuation = builder.attenuation;
+        this.noInitiatingRadiation = builder.noInitiatingRadiation;
+        this.radarDetection = builder.radarDetection;
     }
 
-    public Integer getChannel() {
+    public int getChannel() {
         return this.channel;
     }
 
-    public Integer getFrequency() {
+    public int getFrequency() {
         return this.frequency;
     }
 
@@ -54,32 +54,16 @@ public class WifiChannel {
         return this.attenuation;
     }
 
-    public void setAttenuation(Float attenuation) {
-        this.attenuation = Optional.of(attenuation);
-    }
-
     public Optional<Boolean> getNoInitiatingRadiation() {
         return this.noInitiatingRadiation;
-    }
-
-    public void setNoInitiatingRadiation(Boolean noInitiatingRadiation) {
-        this.noInitiatingRadiation = Optional.of(noInitiatingRadiation);
     }
 
     public Optional<Boolean> getRadarDetection() {
         return this.radarDetection;
     }
 
-    public void setRadarDetection(Boolean radarDetection) {
-        this.radarDetection = Optional.of(radarDetection);
-    }
-
     public Optional<Boolean> getDisabled() {
         return this.disabled;
-    }
-
-    public void setDisabled(Boolean disabled) {
-        this.disabled = Optional.of(disabled);
     }
 
     @Override
@@ -101,6 +85,59 @@ public class WifiChannel {
                 && Objects.equals(this.disabled, other.disabled) && this.frequency == other.frequency
                 && Objects.equals(this.noInitiatingRadiation, other.noInitiatingRadiation)
                 && Objects.equals(this.radarDetection, other.radarDetection);
+    }
+
+    public static Builder builder(final int channel, final int frequency) {
+        return new Builder(channel, frequency);
+    }
+
+    public static final class Builder {
+
+        private int channel;
+        private int frequency;
+        private Optional<Boolean> disabled = Optional.empty();
+        private Optional<Float> attenuation = Optional.empty();
+        private Optional<Boolean> noInitiatingRadiation = Optional.empty();
+        private Optional<Boolean> radarDetection = Optional.empty();
+
+        private Builder(final int channel, final int frequency) {
+            this.channel = channel;
+            this.frequency = frequency;
+        }
+
+        public Builder withChannel(int channel) {
+            this.channel = channel;
+            return this;
+        }
+
+        public Builder withFrequency(int frequency) {
+            this.frequency = frequency;
+            return this;
+        }
+
+        public Builder withDisabled(final boolean disabled) {
+            this.disabled = Optional.of(disabled);
+            return this;
+        }
+
+        public Builder withAttenuation(final float attenuation) {
+            this.attenuation = Optional.of(attenuation);
+            return this;
+        }
+
+        public Builder withNoInitiatingRadiation(final boolean noInitiatingRadiation) {
+            this.noInitiatingRadiation = Optional.of(noInitiatingRadiation);
+            return this;
+        }
+
+        public Builder withRadarDetection(final boolean radarDetection) {
+            this.radarDetection = Optional.of(radarDetection);
+            return this;
+        }
+
+        public WifiChannel build() {
+            return new WifiChannel(this);
+        }
     }
 
 }

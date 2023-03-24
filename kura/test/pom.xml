@@ -13,7 +13,9 @@
 	 Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.kura</groupId>
@@ -70,7 +72,7 @@
             <activation>
                 <jdk>[1.8,15)</jdk>
             </activation>
-            
+
             <modules>
                 <module>org.eclipse.kura.wire.script.filter.provider.test</module>
                 <module>org.eclipse.kura.camel.test</module>
@@ -933,6 +935,7 @@
         <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.db.sqlite.provider.test</module>
         <module>org.eclipse.kura.message.store.provider.test</module>
+        <module>org.eclipse.kura.rest.network.status.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

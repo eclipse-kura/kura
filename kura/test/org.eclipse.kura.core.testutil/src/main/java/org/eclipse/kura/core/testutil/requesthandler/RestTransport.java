@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.core.testutil.requesthandler;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
@@ -103,6 +105,7 @@ public class RestTransport implements Transport {
                 connection.setRequestProperty("Authorization", "Basic " + encoded);
             });
             connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Connection", "close");
             connection.setRequestMethod(method.getRestMethod());
 
             if (requestBody != null) {
@@ -115,13 +118,20 @@ public class RestTransport implements Transport {
 
             final int status = connection.getResponseCode();
 
-            final String body = IOUtils.toString(
-                    ((status / 200) == 1) ? connection.getInputStream() : connection.getErrorStream(),
-                    StandardCharsets.UTF_8);
+            final String body = getBody(connection);
 
-            return new Response(status, body == null || body.isEmpty() ? Optional.empty() : Optional.of(body));
+            connection.disconnect();
+
+            return new Response(status, Optional.ofNullable(body).filter(b -> !b.isEmpty()));
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
+        }
+    }
+
+    private String getBody(final HttpURLConnection connection) throws IOException {
+        try (final InputStream in = ((connection.getResponseCode() / 200) == 1) ? connection.getInputStream()
+                : connection.getErrorStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
         }
     }
 

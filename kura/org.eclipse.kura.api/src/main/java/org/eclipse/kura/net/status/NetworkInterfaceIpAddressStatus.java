@@ -12,7 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,44 +30,25 @@ import org.osgi.annotation.versioning.ProviderType;
 public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
 
     private final List<NetworkInterfaceIpAddress<T>> addresses;
-    private Optional<T> gateway;
+    private final Optional<T> gateway;
     private final List<T> dnsServerAddresses;
 
-    public NetworkInterfaceIpAddressStatus() {
-        this.addresses = new ArrayList<>();
-        this.gateway = Optional.empty();
-        this.dnsServerAddresses = new ArrayList<>();
-    }
-
-    public NetworkInterfaceIpAddressStatus(NetworkInterfaceIpAddress<T> address) {
-        this.addresses = new ArrayList<>();
-        this.addresses.add(address);
-        this.gateway = Optional.empty();
-        this.dnsServerAddresses = new ArrayList<>();
+    private NetworkInterfaceIpAddressStatus(Builder<T> builder) {
+        this.addresses = builder.addresses;
+        this.gateway = builder.gateway;
+        this.dnsServerAddresses = builder.dnsServerAddresses;
     }
 
     public List<NetworkInterfaceIpAddress<T>> getAddresses() {
         return this.addresses;
     }
 
-    public void addAddress(NetworkInterfaceIpAddress<T> address) {
-        this.addresses.add(address);
-    }
-
     public Optional<T> getGateway() {
         return this.gateway;
     }
 
-    public void setGateway(T gateway) {
-        this.gateway = Optional.of(gateway);
-    }
-
     public List<T> getDnsServerAddresses() {
         return this.dnsServerAddresses;
-    }
-
-    public void addDnsServerAddress(T dnsServerAddress) {
-        this.dnsServerAddresses.add(dnsServerAddress);
     }
 
     @Override
@@ -87,6 +68,39 @@ public class NetworkInterfaceIpAddressStatus<T extends IPAddress> {
         return Objects.equals(this.addresses, other.addresses)
                 && Objects.equals(this.dnsServerAddresses, other.dnsServerAddresses)
                 && Objects.equals(this.gateway, other.gateway);
+    }
+
+    public static <U extends IPAddress> Builder<U> builder() {
+        return new Builder<>();
+    }
+
+    public static final class Builder<U extends IPAddress> {
+
+        private List<NetworkInterfaceIpAddress<U>> addresses = Collections.emptyList();
+        private Optional<U> gateway = Optional.empty();
+        private List<U> dnsServerAddresses = Collections.emptyList();
+
+        private Builder() {
+        }
+
+        public Builder<U> withAddresses(List<NetworkInterfaceIpAddress<U>> addresses) {
+            this.addresses = addresses;
+            return this;
+        }
+
+        public Builder<U> withGateway(Optional<U> gateway) {
+            this.gateway = gateway;
+            return this;
+        }
+
+        public Builder<U> withDnsServerAddresses(List<U> dnsServerAddresses) {
+            this.dnsServerAddresses = dnsServerAddresses;
+            return this;
+        }
+
+        public NetworkInterfaceIpAddressStatus<U> build() {
+            return new NetworkInterfaceIpAddressStatus<>(this);
+        }
     }
 
 }

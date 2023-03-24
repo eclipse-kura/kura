@@ -248,11 +248,12 @@ public class NMStatusConverter {
             Optional<Properties> ip4configProperties) {
         ip4configProperties.ifPresent(properties -> {
             try {
-                NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus = new NetworkInterfaceIpAddressStatus<>();
-                setIP4Gateway(properties, ip4AddressStatus);
-                setIP4DnsServers(properties, ip4AddressStatus);
-                setIP4Addresses(properties, ip4AddressStatus);
-                builder.withInterfaceIp4Addresses(Optional.of(ip4AddressStatus));
+                NetworkInterfaceIpAddressStatus.Builder<IP4Address> ip4AddressStatusBuilder = NetworkInterfaceIpAddressStatus
+                        .builder();
+                setIP4Gateway(properties, ip4AddressStatusBuilder);
+                setIP4DnsServers(properties, ip4AddressStatusBuilder);
+                setIP4Addresses(properties, ip4AddressStatusBuilder);
+                builder.withInterfaceIp4Addresses(Optional.of(ip4AddressStatusBuilder.build()));
             } catch (UnknownHostException e) {
                 logger.error("Failed to set IP4 address.", e);
             }
@@ -292,14 +293,24 @@ public class NMStatusConverter {
         List<org.eclipse.kura.net.status.wifi.WifiChannel> kuraChannels = new ArrayList<>();
 
         for (WifiChannel channel : supportedChannels) {
-            org.eclipse.kura.net.status.wifi.WifiChannel kuraChannel = new org.eclipse.kura.net.status.wifi.WifiChannel(
-                    channel.getChannel(), channel.getFrequency());
-            kuraChannel.setAttenuation(channel.getAttenuation());
-            kuraChannel.setDisabled(channel.isDisabled());
-            kuraChannel.setNoInitiatingRadiation(channel.isNoInitiatingRadiation());
-            kuraChannel.setRadarDetection(channel.isRadarDetection());
+            org.eclipse.kura.net.status.wifi.WifiChannel.Builder kuraChannel = org.eclipse.kura.net.status.wifi.WifiChannel
+                    .builder(channel.getChannel(), channel.getFrequency());
+            if (channel.getAttenuation() != null) {
+                kuraChannel.withAttenuation(channel.getAttenuation());
+            }
+            if (channel.isDisabled() != null) {
+                kuraChannel.withDisabled(channel.isDisabled());
+            }
 
-            kuraChannels.add(kuraChannel);
+            if (channel.isNoInitiatingRadiation() != null) {
+                kuraChannel.withNoInitiatingRadiation(channel.isNoInitiatingRadiation());
+            }
+
+            if (channel.isRadarDetection() != null) {
+                kuraChannel.withRadarDetection(channel.isRadarDetection());
+            }
+
+            kuraChannels.add(kuraChannel.build());
         }
 
         return kuraChannels;
@@ -331,7 +342,7 @@ public class NMStatusConverter {
         UInt32 uintFrequency = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Frequency");
         int frequency = uintFrequency.intValue();
         int channel = channelFrequencyConvert(frequency);
-        builder.withChannel(new org.eclipse.kura.net.status.wifi.WifiChannel(channel, frequency));
+        builder.withChannel(org.eclipse.kura.net.status.wifi.WifiChannel.builder(channel, frequency).build());
 
         UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
         builder.withMaxBitrate(maxBitrate.longValue());
@@ -467,31 +478,35 @@ public class NMStatusConverter {
     }
 
     private static void setIP4Addresses(Properties ip4configProperties,
-            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+            NetworkInterfaceIpAddressStatus.Builder<IP4Address> builder) throws UnknownHostException {
         List<Map<String, Variant<?>>> addressData = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+        final List<NetworkInterfaceIpAddress<IP4Address>> addresses = new ArrayList<>();
         for (Map<String, Variant<?>> data : addressData) {
             String addressStr = String.class.cast(data.get("address").getValue());
             UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
             NetworkInterfaceIpAddress<IP4Address> address = new NetworkInterfaceIpAddress<>(
                     (IP4Address) IPAddress.parseHostAddress(addressStr), prefix.shortValue());
-            ip4AddressStatus.addAddress(address);
+            addresses.add(address);
         }
+        builder.withAddresses(addresses);
     }
 
     private static void setIP4DnsServers(Properties ip4configProperties,
-            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+            NetworkInterfaceIpAddressStatus.Builder<IP4Address> builder) throws UnknownHostException {
         List<Map<String, Variant<?>>> nameserverData = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
+        final List<IP4Address> dnsAddresses = new ArrayList<>();
         for (Map<String, Variant<?>> dns : nameserverData) {
-            ip4AddressStatus.addDnsServerAddress(
-                    (IP4Address) IPAddress.parseHostAddress(String.class.cast(dns.get("address").getValue())));
+            dnsAddresses.add((IP4Address) IPAddress.parseHostAddress(String.class.cast(dns.get("address").getValue())));
         }
+        builder.withDnsServerAddresses(dnsAddresses);
     }
 
     private static void setIP4Gateway(Properties ip4configProperties,
-            NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus) throws UnknownHostException {
+            NetworkInterfaceIpAddressStatus.Builder<IP4Address> ip4AddressStatus) throws UnknownHostException {
         String gateway = ip4configProperties.Get(NM_IP4CONFIG_BUS_NAME, "Gateway");
         if (Objects.nonNull(gateway) && !gateway.isEmpty()) {
-            ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress(gateway));
+            final IP4Address address = (IP4Address) IPAddress.parseHostAddress(gateway);
+            ip4AddressStatus.withGateway(Optional.of(address));
         }
     }
 

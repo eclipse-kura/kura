@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -72,6 +72,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
@@ -229,7 +230,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -252,7 +255,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -323,7 +327,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"PREPARE\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":1500" //
-                + "}]}");
+                + "}]," + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -352,7 +357,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "{\"address\":\"5.6.7.255\",\"prefix\":32}]" //
                 + ",\"gateway\":\"5.6.7.255\"," //
                 + "\"dnsServerAddresses\":[\"1.2.3.4\",\"5.6.7.255\"" //
-                + "]}}]}");
+                + "]}}]," //
+                + "\"failures\":[]" //
+                + "}");
 
     }
 
@@ -379,7 +386,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"interfaceIp4Addresses\":{" //
                 + "\"addresses\":[]" //
                 + ",\"dnsServerAddresses\":[]" //
-                + "}}]}");
+                + "}}]," //
+                + "\"failures\":[]" //
+                + "}");
 
     }
 
@@ -409,7 +418,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "{\"address\":\"506:7ff:500:0:0:0:0:0\",\"prefix\":32}]," //
                 + "\"gateway\":\"506:7ff:500:0:0:0:0:0\"," //
                 + "\"dnsServerAddresses\":[\"102:304:500:0:0:0:0:0\",\"506:7ff:500:0:0:0:0:0\"" //
-                + "]}}]}");
+                + "]}}]," //
+                + "\"failures\":[]" //
+                + "}");
 
     }
 
@@ -436,7 +447,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"interfaceIp6Addresses\":{" //
                 + "\"addresses\":[]" //
                 + ",\"dnsServerAddresses\":[]" //
-                + "}}]}");
+                + "}}]," //
+                + "\"failures\":[]" //
+                + "}");
 
     }
 
@@ -460,7 +473,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -483,7 +498,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -510,7 +527,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -541,7 +560,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -570,7 +591,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -609,7 +632,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -653,7 +678,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0}" //
-                + "]}");
+                + "]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -696,7 +723,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -744,7 +773,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -819,7 +850,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -881,7 +914,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     @Test
@@ -945,7 +980,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"state\":\"UNKNOWN\"," //
                 + "\"autoConnect\":false," //
                 + "\"mtu\":0" //
-                + "}]}");
+                + "}]," //
+                + "\"failures\":[]" //
+                + "}");
     }
 
     private static final String INTERFACE_IDS_PATH = "/interfaceIds";
@@ -962,13 +999,13 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
         super(transport);
 
         try {
-            Mockito.when(networkStatusService.getNetworkStatus(Mockito.anyString())).thenAnswer(i -> {
-                if (generalFailure.isPresent()) {
-                    throw generalFailure.get();
+            Mockito.when(networkStatusService.getNetworkStatus(ArgumentMatchers.anyString())).thenAnswer(i -> {
+                if (this.generalFailure.isPresent()) {
+                    throw this.generalFailure.get();
                 }
 
                 final String id = i.getArgument(0);
-                final Result result = currentStatus.get(id);
+                final Result result = this.currentStatus.get(id);
 
                 if (result instanceof Success) {
                     return Optional.of(((Success) result).status);
@@ -980,11 +1017,11 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
             });
 
             Mockito.when(networkStatusService.getInterfaceIds()).thenAnswer(i -> {
-                if (generalFailure.isPresent()) {
-                    throw generalFailure.get();
+                if (this.generalFailure.isPresent()) {
+                    throw this.generalFailure.get();
                 }
 
-                return new ArrayList<>(currentStatus.keySet());
+                return new ArrayList<>(this.currentStatus.keySet());
             });
         } catch (final Exception e) {
             fail("Unexpected exception");
@@ -1027,12 +1064,12 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private void givenNetworkStatus(final NetworkInterfaceStatus.NetworkInterfaceStatusBuilder<?> builder) {
         final NetworkInterfaceStatus status = builder.build();
 
-        currentStatus.put(status.getId(), new Success(status));
+        this.currentStatus.put(status.getId(), new Success(status));
     }
 
     private void givenExceptionRetrievingInterfaceStatus(final String interfaceId, final Exception exception) {
 
-        currentStatus.put(interfaceId, new Failure(exception));
+        this.currentStatus.put(interfaceId, new Failure(exception));
     }
 
     private void givenLoopbackInterfaceWithFilledIP4Address(final String id) throws UnknownHostException {

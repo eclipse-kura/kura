@@ -26,7 +26,7 @@ public class InterfaceStatusListDTO {
     public InterfaceStatusListDTO(final List<NetworkInterfaceStatus> interfaces, final List<FailureDTO> failures) {
         this.interfaces = interfaces.stream().map(NetworkInterfaceStatusDTO::fromNetworkInterfaceStatus)
                 .collect(Collectors.toList());
-        this.failures = failures == null || failures.isEmpty() ? null : failures;
+        this.failures = failures;
     }
 
 }

@@ -139,7 +139,7 @@ public class GwtNetInterfaceConfigBuilder {
 
     private void setRouterMode() {
         boolean isDhcpServer = this.properties.getDhcpServer4Enabled(this.ifName);
-        boolean isNat = this.properties.getDhcpServer4PassDns(this.ifName);
+        boolean isNat = this.properties.getNatEnabled(this.ifName);
 
         if (isDhcpServer && isNat) {
             this.gwtConfig.setRouterMode(GwtNetRouterMode.netRouterDchpNat.name());

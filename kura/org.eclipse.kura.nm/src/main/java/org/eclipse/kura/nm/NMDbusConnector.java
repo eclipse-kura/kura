@@ -438,28 +438,23 @@ public class NMDbusConnector {
 
         Set<MMModemLocationSource> availableLocationSources = MMModemLocationSource
                 .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
-        Set<MMModemLocationSource> enabledLocationSources = MMModemLocationSource
+        Set<MMModemLocationSource> currentLocationSources = MMModemLocationSource
                 .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
-        EnumSet<MMModemLocationSource> desiredLocationSources = EnumSet.noneOf(MMModemLocationSource.class);
         EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
                 MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
                 MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
 
-        for (MMModemLocationSource enabledSource : enabledLocationSources) {
-            if (!managedLocationSources.contains(enabledSource)) {
-                desiredLocationSources.add(enabledSource);
-            }
-        }
-
         for (MMModemLocationSource managedSource : managedLocationSources) {
-            if (availableLocationSources.contains(managedSource) && isGPSSourceEnabled) {
-                desiredLocationSources.add(managedSource);
+            if (isGPSSourceEnabled && availableLocationSources.contains(managedSource)) {
+                currentLocationSources.add(managedSource);
+            } else {
+                currentLocationSources.remove(managedSource);
             }
         }
 
-        logger.debug("Modem location setup {} for modem {}", desiredLocationSources, modemDevicePath.get());
+        logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
-        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources), false);
+        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
     }
 
     private String getDeviceId(Device device) throws DBusException {

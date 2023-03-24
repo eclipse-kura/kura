@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -81,7 +81,7 @@ public class NetworkStatusRestServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public InterfaceStatusListDTO getNetworkStatus() {
         try {
-            return getInterfaceStatusInternal(networkStatusService.getInterfaceIds());
+            return getInterfaceStatusInternal(this.networkStatusService.getInterfaceIds());
         } catch (final Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -108,7 +108,7 @@ public class NetworkStatusRestServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public InterfaceIdsDTO getInterfaceNames() {
         try {
-            return new InterfaceIdsDTO(networkStatusService.getInterfaceIds());
+            return new InterfaceIdsDTO(this.networkStatusService.getInterfaceIds());
         } catch (final Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -120,7 +120,7 @@ public class NetworkStatusRestServiceImpl {
 
         for (final String interfaceId : interfaceIds) {
             try {
-                final NetworkInterfaceStatus status = networkStatusService.getNetworkStatus(interfaceId)
+                final NetworkInterfaceStatus status = this.networkStatusService.getNetworkStatus(interfaceId)
                         .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "Interface not found"));
 
                 interfaces.add(status);

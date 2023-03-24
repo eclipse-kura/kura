@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -22,7 +22,7 @@ import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 public class NetworkInterfaceIpAddressStatusDTO {
 
     private final List<NetworkInterfaceIpAddressDTO> addresses;
-    private String gateway;
+    private final String gateway;
     private final List<String> dnsServerAddresses;
 
     public NetworkInterfaceIpAddressStatusDTO(final NetworkInterfaceIpAddressStatus<? extends IPAddress> status) {

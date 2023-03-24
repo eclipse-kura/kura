@@ -440,18 +440,21 @@ public class NMDbusConnector {
                 .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
         Set<MMModemLocationSource> enabledLocationSources = MMModemLocationSource
                 .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
-
         EnumSet<MMModemLocationSource> desiredLocationSources = EnumSet.noneOf(MMModemLocationSource.class);
-        if (availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
-                && isGPSSourceEnabled) {
-            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW);
+        EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
+
+        for (MMModemLocationSource enabledSource : enabledLocationSources) {
+            if (!managedLocationSources.contains(enabledSource)) {
+                desiredLocationSources.add(enabledSource);
+            }
         }
-        if (availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)
-                && isGPSSourceEnabled) {
-            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
-        }
-        if (enabledLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI)) {
-            desiredLocationSources.add(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
+
+        for (MMModemLocationSource managedSource : managedLocationSources) {
+            if (availableLocationSources.contains(managedSource) && isGPSSourceEnabled) {
+                desiredLocationSources.add(managedSource);
+            }
         }
 
         logger.debug("Modem location setup {} for modem {}", desiredLocationSources, modemDevicePath.get());

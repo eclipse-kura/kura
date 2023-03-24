@@ -104,6 +104,17 @@ public class DhcpServerConfigWriter {
                 pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
 
                 addDNSServersOption(dhcpServerConfig, pw);
+            } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+                pw.println("interface=" + dhcpServerConfig.getInterfaceName());
+                pw.println("dhcp-option=3,0.0.0.0");
+                pw.println("dhcp-option=6,0.0.0.0");
+                pw.println("port=0"); // disable DNS since managed by bind/bind9
+                
+                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")
+                    .append(dhcpServerConfig.getRangeStart())
+                    .append(",").append(dhcpServerConfig.getRangeEnd()).append(",")
+                    .append(dhcpServerConfig.getMaximumLeaseTime()).append("s");
+                pw.println(dhcpRangeProp.toString());
             }
             pw.flush();
             fos.getFD().sync();

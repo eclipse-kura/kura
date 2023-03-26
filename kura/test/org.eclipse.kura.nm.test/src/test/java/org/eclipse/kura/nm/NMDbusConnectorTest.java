@@ -751,7 +751,7 @@ public class NMDbusConnectorTest {
     @Test
     public void applyingConfigurationShouldDeleteExistingExtraAvailableConnections() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
         givenMockedDeviceList();
         
         givenMockedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");

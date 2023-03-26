@@ -406,21 +406,6 @@ public class NMDbusConnector {
         }
     }
 
-    private void disable(Device device) throws DBusException {
-        NMDeviceState deviceState = getDeviceState(device);
-        if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
-            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
-            device.Disconnect();
-            dsLock.waitForSignal();
-        }
-
-        Optional<Connection> connection = getAppliedConnection(device);
-        if (connection.isPresent()) {
-            connection.get().Delete();
-        }
-    }
-
     private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
         Optional<String> modemDevicePath = getModemPathFromMM(device.getObjectPath());
 

@@ -76,7 +76,7 @@ public class EthernetInterfaceStatus extends NetworkInterfaceStatus {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+        if (!super.equals(obj) || getClass() != obj.getClass()) {
             return false;
         }
         EthernetInterfaceStatus other = (EthernetInterfaceStatus) obj;

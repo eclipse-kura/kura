@@ -158,11 +158,11 @@ public class WifiAccessPoint {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         WifiAccessPoint other = (WifiAccessPoint) obj;
-        return Objects.equals(channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
+        return Objects.equals(this.channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
                 && this.maxBitrate == other.maxBitrate && this.mode == other.mode
                 && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
                 && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.wpaSecurity, other.wpaSecurity);

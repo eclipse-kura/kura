@@ -45,7 +45,7 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         if (deviceIsConnectingToANewNetwork || deviceDisconnectedBecauseOfConfigurationEvent) {
             try {
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());
-                nm.apply();
+                this.nm.apply();
             } catch (DBusException e) {
                 logger.error("Failed to handle network configuration change event for device: {}. Caused by:",
                         s.getPath(), e);

@@ -14,6 +14,7 @@ package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -60,7 +61,7 @@ public interface Voice extends DBusInterface {
         }
 
         public DBusPath getDbusPath() {
-            return dbusPath;
+            return this.dbusPath;
         }
 
     }
@@ -75,7 +76,7 @@ public interface Voice extends DBusInterface {
         }
 
         public DBusPath getDbusPath() {
-            return dbusPath;
+            return this.dbusPath;
         }
 
     }

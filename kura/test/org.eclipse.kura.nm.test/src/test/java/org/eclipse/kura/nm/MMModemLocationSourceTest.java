@@ -34,26 +34,24 @@ public class MMModemLocationSourceTest {
     public static class MMModemLocationSourceToMMModemLocationSourceTest {
 
         @Parameters
-        public static Collection<Object[]> LocationSourceParams() {
+        public static Collection<Object[]> locationSourceParams() {
             List<Object[]> params = new ArrayList<>();
-            params.add(new Object[] { new UInt32(0x00000000L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE });
+            params.add(new Object[] { new UInt32(0x00000000L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE });
             params.add(new Object[] { new UInt32(0x00000001L),
                     MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI });
-            params.add(new Object[] { new UInt32(0x00000002L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW });
-            params.add(new Object[] { new UInt32(0x00000004L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA });
-            params.add(new Object[] { new UInt32(0x00000008L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_CDMA_BS });
+            params.add(
+                    new Object[] { new UInt32(0x00000002L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW });
+            params.add(
+                    new Object[] { new UInt32(0x00000004L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA });
+            params.add(
+                    new Object[] { new UInt32(0x00000008L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_CDMA_BS });
             params.add(new Object[] { new UInt32(0x00000010L),
                     MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED });
-            params.add(new Object[] { new UInt32(0x00000020L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSA });
-            params.add(new Object[] { new UInt32(0x00000040L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSB });
-            params.add(new Object[] { new UInt32(0x12345600L),
-                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE });
+            params.add(
+                    new Object[] { new UInt32(0x00000020L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSA });
+            params.add(
+                    new Object[] { new UInt32(0x00000040L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSB });
+            params.add(new Object[] { new UInt32(0x12345600L), MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE });
             return params;
         }
 
@@ -85,7 +83,7 @@ public class MMModemLocationSourceTest {
     public static class MMModemLocationSourceToMMModemLocationSourceFromBitMaskTest {
 
         @Parameters
-        public static Collection<Object[]> LocationSourceParams() {
+        public static Collection<Object[]> locationSourceParams() {
             List<Object[]> params = new ArrayList<>();
             params.add(new Object[] { new UInt32(0x00000000L),
                     EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE) });
@@ -117,17 +115,77 @@ public class MMModemLocationSourceTest {
         }
 
         @Test
-        public void shouldReturnCorrectIpFamily() {
-            whenCalculatedBearerIpType();
-            thenCalculatedBearerIpTypeIsCorrect();
+        public void shouldReturnCorrectLocationSourceSet() {
+            whenConversionMethodIsCalled();
+            thenCalculatedLocationSourceSetMatches();
         }
 
-        private void whenCalculatedBearerIpType() {
-            calculatedLocationSource = MMModemLocationSource.toMMModemLocationSourceFromBitMask(this.inputIntValue);
+        private void whenConversionMethodIsCalled() {
+            this.calculatedLocationSource = MMModemLocationSource
+                    .toMMModemLocationSourceFromBitMask(this.inputIntValue);
         }
 
-        private void thenCalculatedBearerIpTypeIsCorrect() {
-            assertEquals(this.expectedLocationSource, calculatedLocationSource);
+        private void thenCalculatedLocationSourceSetMatches() {
+            assertEquals(this.expectedLocationSource, this.calculatedLocationSource);
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    public static class MMModemLocationSourceToBitMaskFromMMModemLocationSourceTest {
+
+        @Parameters
+        public static Collection<Object[]> locationSourceParams() {
+            List<Object[]> params = new ArrayList<>();
+            params.add(new Object[] { EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE),
+                    new UInt32(0x00000000L) });
+            params.add(
+                    new Object[] {
+                            EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW),
+                            new UInt32(0x00000003L), });
+            params.add(
+                    new Object[] {
+                            EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA),
+                            new UInt32(0x00000007L) });
+            params.add(
+                    new Object[] {
+                            EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA),
+                            new UInt32(0x00000006L) });
+            params.add(new Object[] { EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA),
+                    new UInt32(0x00000004L) });
+            params.add(new Object[] { EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
+                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA,
+                    MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_CDMA_BS), new UInt32(0x0000000FL) });
+            return params;
+        }
+
+        private final Set<MMModemLocationSource> inputSet;
+        private final UInt32 expectedBitmask;
+        private UInt32 calculatedBitmask;
+
+        public MMModemLocationSourceToBitMaskFromMMModemLocationSourceTest(Set<MMModemLocationSource> locationSources,
+                UInt32 bitmask) {
+            this.inputSet = locationSources;
+            this.expectedBitmask = bitmask;
+        }
+
+        @Test
+        public void shouldReturnCorrectBitmask() {
+            whenMethodIsCalled();
+            thenCalculatedAndExpectedBitmaskMatch();
+        }
+
+        private void whenMethodIsCalled() {
+            this.calculatedBitmask = MMModemLocationSource.toBitMaskFromMMModemLocationSource(this.inputSet);
+        }
+
+        private void thenCalculatedAndExpectedBitmaskMatch() {
+            assertEquals(this.expectedBitmask, this.calculatedBitmask);
         }
 
     }
@@ -138,22 +196,21 @@ public class MMModemLocationSourceTest {
         @Parameters
         public static Collection<Object[]> LocationSourceParams() {
             List<Object[]> params = new ArrayList<>();
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE,
-                    new UInt32(0x00000000L) });
+            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE, new UInt32(0x00000000L) });
             params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
                     new UInt32(0x00000001L) });
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
-                    new UInt32(0x00000002L) });
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA,
-                    new UInt32(0x00000004L) });
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_CDMA_BS,
-                    new UInt32(0x00000008L) });
+            params.add(
+                    new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, new UInt32(0x00000002L) });
+            params.add(
+                    new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA, new UInt32(0x00000004L) });
+            params.add(
+                    new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_CDMA_BS, new UInt32(0x00000008L) });
             params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED,
                     new UInt32(0x00000010L) });
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSA,
-                    new UInt32(0x00000020L) });
-            params.add(new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSB,
-                    new UInt32(0x00000040L) });
+            params.add(
+                    new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSA, new UInt32(0x00000020L) });
+            params.add(
+                    new Object[] { MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_AGPS_MSB, new UInt32(0x00000040L) });
             return params;
         }
 
@@ -173,11 +230,11 @@ public class MMModemLocationSourceTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputLocationSource.toUInt32();
+            this.calculatedUInt32 = this.inputLocationSource.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

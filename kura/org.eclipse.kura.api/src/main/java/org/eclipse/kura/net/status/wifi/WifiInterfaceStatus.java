@@ -132,9 +132,8 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + Objects.hash(this.activeWifiAccessPoint, this.availableWifiAccessPoints, this.capabilities,
-                        this.countryCode, this.mode, this.channels);
+        result = prime * result + Objects.hash(this.activeWifiAccessPoint, this.availableWifiAccessPoints,
+                this.capabilities, this.countryCode, this.mode, this.channels);
         return result;
     }
 
@@ -143,15 +142,15 @@ public class WifiInterfaceStatus extends NetworkInterfaceStatus {
         if (this == obj) {
             return true;
         }
-        if (!super.equals(obj) || (getClass() != obj.getClass())) {
+        if (!super.equals(obj) || getClass() != obj.getClass()) {
             return false;
         }
         WifiInterfaceStatus other = (WifiInterfaceStatus) obj;
         return Objects.equals(this.activeWifiAccessPoint, other.activeWifiAccessPoint)
                 && Objects.equals(this.availableWifiAccessPoints, other.availableWifiAccessPoints)
                 && Objects.equals(this.capabilities, other.capabilities)
-                && Objects.equals(this.countryCode, other.countryCode)
-                && this.mode == other.mode && Objects.equals(this.channels, other.channels);
+                && Objects.equals(this.countryCode, other.countryCode) && this.mode == other.mode
+                && Objects.equals(this.channels, other.channels);
     }
 
 }

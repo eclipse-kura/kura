@@ -342,7 +342,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         if (type.isPresent()
                 && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
-                && (isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
+                && isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent()
                 && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
             isValid = true;
         }

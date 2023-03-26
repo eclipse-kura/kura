@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -60,7 +61,7 @@ public interface Call extends DBusInterface {
         }
 
         public String getDtmf() {
-            return dtmf;
+            return this.dtmf;
         }
 
     }
@@ -79,15 +80,15 @@ public interface Call extends DBusInterface {
         }
 
         public int getOld() {
-            return old;
+            return this.old;
         }
 
         public int getNewparam() {
-            return newparam;
+            return this.newparam;
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }

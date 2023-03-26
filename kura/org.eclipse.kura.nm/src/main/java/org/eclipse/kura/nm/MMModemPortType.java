@@ -43,51 +43,51 @@ public enum MMModemPortType {
 
     public static MMModemPortType toMMModemPortType(UInt32 type) {
         switch (type.intValue()) {
-            case 0x01:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_UNKNOWN;
-            case 0x02:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_NET;
-            case 0x03:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_AT;
-            case 0x04:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_QCDM;
-            case 0x05:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_GPS;
-            case 0x06:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_QMI;
-            case 0x07:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_MBIM;
-            case 0x08:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_AUDIO;
-            case 0x09:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_IGNORED;
-            default:
-                return MMModemPortType.MM_MODEM_PORT_TYPE_UNKNOWN;
+        case 0x01:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_UNKNOWN;
+        case 0x02:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_NET;
+        case 0x03:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_AT;
+        case 0x04:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_QCDM;
+        case 0x05:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_GPS;
+        case 0x06:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_QMI;
+        case 0x07:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_MBIM;
+        case 0x08:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_AUDIO;
+        case 0x09:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_IGNORED;
+        default:
+            return MMModemPortType.MM_MODEM_PORT_TYPE_UNKNOWN;
         }
     }
 
     public static ModemPortType toModemPortType(UInt32 type) {
         switch (type.intValue()) {
-            case 0x01:
-                return ModemPortType.UNKNOWN;
-            case 0x02:
-                return ModemPortType.NET;
-            case 0x03:
-                return ModemPortType.AT;
-            case 0x04:
-                return ModemPortType.QCDM;
-            case 0x05:
-                return ModemPortType.GPS;
-            case 0x06:
-                return ModemPortType.QMI;
-            case 0x07:
-                return ModemPortType.MBIM;
-            case 0x08:
-                return ModemPortType.AUDIO;
-            case 0x09:
-                return ModemPortType.IGNORED;
-            default:
-                return ModemPortType.UNKNOWN;
+        case 0x01:
+            return ModemPortType.UNKNOWN;
+        case 0x02:
+            return ModemPortType.NET;
+        case 0x03:
+            return ModemPortType.AT;
+        case 0x04:
+            return ModemPortType.QCDM;
+        case 0x05:
+            return ModemPortType.GPS;
+        case 0x06:
+            return ModemPortType.QMI;
+        case 0x07:
+            return ModemPortType.MBIM;
+        case 0x08:
+            return ModemPortType.AUDIO;
+        case 0x09:
+            return ModemPortType.IGNORED;
+        default:
+            return ModemPortType.UNKNOWN;
         }
     }
 }

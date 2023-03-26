@@ -27,7 +27,7 @@ public class DeviceStateLock {
     private static final Logger logger = LoggerFactory.getLogger(DeviceStateLock.class);
 
     private final CountDownLatch latch = new CountDownLatch(1);
-    private NMDeviceStateChangeHandler stateHandler;
+    private final NMDeviceStateChangeHandler stateHandler;
     private final DBusConnection dbusConnection;
 
     public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState)
@@ -36,14 +36,14 @@ public class DeviceStateLock {
             throw new IllegalArgumentException(String.format("Illegat DBus path for DeviceSateLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
-        this.stateHandler = new NMDeviceStateChangeHandler(latch, dbusPath, expectedNmDeviceState);
+        this.stateHandler = new NMDeviceStateChangeHandler(this.latch, dbusPath, expectedNmDeviceState);
 
-        this.dbusConnection.addSigHandler(Device.StateChanged.class, stateHandler);
+        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.stateHandler);
     }
 
     public void waitForSignal() throws DBusException {
         try {
-            boolean countdownCompleted = latch.await(5, TimeUnit.SECONDS);
+            boolean countdownCompleted = this.latch.await(5, TimeUnit.SECONDS);
             if (!countdownCompleted) {
                 logger.warn("Timeout elapsed. Exiting anyway");
             }
@@ -51,7 +51,7 @@ public class DeviceStateLock {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();
         } finally {
-            this.dbusConnection.removeSigHandler(Device.StateChanged.class, stateHandler);
+            this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.stateHandler);
         }
     }
 

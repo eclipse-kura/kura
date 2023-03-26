@@ -37,27 +37,27 @@ public enum MMSimType {
 
     public static MMSimType toMMSimType(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return MMSimType.MM_SIM_TYPE_UNKNOWN;
-            case 0x01:
-                return MMSimType.MM_SIM_TYPE_PHYSICAL;
-            case 0x02:
-                return MMSimType.MM_SIM_TYPE_ESIM;
-            default:
-                return MMSimType.MM_SIM_TYPE_UNKNOWN;
+        case 0x00:
+            return MMSimType.MM_SIM_TYPE_UNKNOWN;
+        case 0x01:
+            return MMSimType.MM_SIM_TYPE_PHYSICAL;
+        case 0x02:
+            return MMSimType.MM_SIM_TYPE_ESIM;
+        default:
+            return MMSimType.MM_SIM_TYPE_UNKNOWN;
         }
     }
 
     public static SimType toSimType(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00:
-                return SimType.UNKNOWN;
-            case 0x01:
-                return SimType.PHYSICAL;
-            case 0x02:
-                return SimType.ESIM;
-            default:
-                return SimType.UNKNOWN;
+        case 0x00:
+            return SimType.UNKNOWN;
+        case 0x01:
+            return SimType.PHYSICAL;
+        case 0x02:
+            return SimType.ESIM;
+        default:
+            return SimType.UNKNOWN;
         }
     }
 }

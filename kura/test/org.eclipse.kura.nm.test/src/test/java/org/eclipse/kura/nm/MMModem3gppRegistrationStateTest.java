@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.eclipse.kura.net.status.modem.RegistrationStatus;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
@@ -129,7 +130,7 @@ public class MMModem3gppRegistrationStateTest {
         }
 
         private void thenCalculatedRegistrationStatusTypeIsCorrect() {
-            assertEquals(this.expectedRegistrationStatus, calculatedRegistrationStatus);
+            assertEquals(this.expectedRegistrationStatus, this.calculatedRegistrationStatus);
         }
     }
 
@@ -143,28 +144,28 @@ public class MMModem3gppRegistrationStateTest {
                     new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_IDLE, new UInt32(0) });
             params.add(
                     new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME, new UInt32(1) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_SEARCHING, new UInt32(2) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_DENIED, new UInt32(3) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN, new UInt32(4) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING, new UInt32(5) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_SMS_ONLY, new UInt32(6) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_SMS_ONLY, new UInt32(7) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_EMERGENCY_ONLY, new UInt32(8) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_SEARCHING,
+                    new UInt32(2) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_DENIED,
+                    new UInt32(3) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN,
+                    new UInt32(4) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING,
+                    new UInt32(5) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_SMS_ONLY,
+                    new UInt32(6) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_SMS_ONLY,
+                    new UInt32(7) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_EMERGENCY_ONLY,
+                    new UInt32(8) });
             params.add(new Object[] {
                     MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_HOME_CSFB_NOT_PREFERRED,
                     new UInt32(9) });
             params.add(new Object[] {
                     MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ROAMING_CSFB_NOT_PREFERRED,
                     new UInt32(10) });
-            params.add(new Object[] {
-                    MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ATTACHED_RLOS, new UInt32(11) });
+            params.add(new Object[] { MMModem3gppRegistrationState.MM_MODEM_3GPP_REGISTRATION_STATE_ATTACHED_RLOS,
+                    new UInt32(11) });
             return params;
         }
 
@@ -185,11 +186,11 @@ public class MMModem3gppRegistrationStateTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputRegistrationState.toUInt32();
+            this.calculatedUInt32 = this.inputRegistrationState.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

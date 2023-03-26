@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager.vpn;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -58,7 +59,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public UInt32 getState() {
-            return state;
+            return this.state;
         }
 
     }
@@ -75,11 +76,11 @@ public interface Plugin extends DBusInterface {
         }
 
         public String getMessage() {
-            return message;
+            return this.message;
         }
 
         public List<String> getSecrets() {
-            return secrets;
+            return this.secrets;
         }
 
     }
@@ -94,7 +95,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getConfig() {
-            return config;
+            return this.config;
         }
 
     }
@@ -109,7 +110,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getIp4config() {
-            return ip4config;
+            return this.ip4config;
         }
 
     }
@@ -124,7 +125,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getIp6config() {
-            return ip6config;
+            return this.ip6config;
         }
 
     }
@@ -139,7 +140,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public String getBanner() {
-            return banner;
+            return this.banner;
         }
 
     }
@@ -154,7 +155,7 @@ public interface Plugin extends DBusInterface {
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }

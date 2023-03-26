@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -22,8 +23,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.networkmanager.PropertyAddressesStruct;
-import org.freedesktop.networkmanager.PropertyRoutesStruct;
 
 /**
  * Auto-generated class.
@@ -83,7 +82,7 @@ public interface IP6Config extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

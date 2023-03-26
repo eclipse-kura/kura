@@ -112,7 +112,8 @@ public class NMSettingsConverter {
             settings.put("ignore-auto-dns", new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
         } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
-            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers", deviceId);
+            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers",
+                    deviceId);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
                 settings.put("ignore-auto-dns", new Variant<>(true));
@@ -175,8 +176,8 @@ public class NMSettingsConverter {
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
                 .toString();
-        String keyMgmt = wifiKeyMgmtConvert(
-                props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId, propMode.toLowerCase()));
+        String keyMgmt = wifiKeyMgmtConvert(props.get(String.class, "net.interface.%s.config.wifi.%s.securityType",
+                deviceId, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));
         settings.put("key-mgmt", new Variant<>(keyMgmt));
 
@@ -193,8 +194,8 @@ public class NMSettingsConverter {
             settings.put("group", new Variant<>(nmGroup, "as"));
         }
 
-        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers", deviceId,
-                propMode.toLowerCase());
+        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers",
+                deviceId, propMode.toLowerCase());
         if (pairwise.isPresent()) {
             List<String> nmPairwise = wifiCipherConvert(pairwise.get());
             settings.put("pairwise", new Variant<>(nmPairwise, "as"));
@@ -227,7 +228,8 @@ public class NMSettingsConverter {
         Optional<Integer> lcpEchoInterval = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoInterval",
                 deviceId);
         lcpEchoInterval.ifPresent(interval -> settings.put("lcp-echo-interval", new Variant<>(interval)));
-        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure", deviceId);
+        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure",
+                deviceId);
         lcpEchoFailure.ifPresent(failure -> settings.put("lcp-echo-failure", new Variant<>(failure)));
 
         Optional<String> authType = props.getOpt(String.class, "net.interface.%s.config.authType", deviceId);

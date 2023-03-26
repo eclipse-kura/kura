@@ -56,14 +56,14 @@ import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
 import org.eclipse.kura.net.status.modem.ModemPortType;
 import org.eclipse.kura.net.status.modem.ModemPowerState;
 import org.eclipse.kura.net.status.modem.RegistrationStatus;
 import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.modem.SimType;
-import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
-import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
@@ -182,8 +182,7 @@ public class NMStatusServiceImplTest {
     }
 
     @Test
-    public void shouldReturnExistingModemInterfaceStatus()
-            throws UnknownHostException, DBusException, KuraException {
+    public void shouldReturnExistingModemInterfaceStatus() throws UnknownHostException, DBusException, KuraException {
         givenNMStatusServiceImplWithModemInterface();
         whenInterfaceStatusIsRetrieved("wwan0");
         thenInterfaceStatusIsReturned();
@@ -321,8 +320,10 @@ public class NMStatusServiceImplTest {
         assertEquals(2, wifiStatus.getCapabilities().size());
         assertEquals(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ), wifiStatus.getCapabilities());
         assertEquals(4, wifiStatus.getChannels().size());
-        assertEquals(Arrays.asList(new WifiChannel(1, 2412), new WifiChannel(2, 2417), new WifiChannel(3, 2422),
-                new WifiChannel(4, 2432)), wifiStatus.getChannels());
+        assertEquals(
+                Arrays.asList(WifiChannel.builder(1, 2412).build(), WifiChannel.builder(2, 2417).build(),
+                        WifiChannel.builder(3, 2422).build(), WifiChannel.builder(4, 2432).build()),
+                wifiStatus.getChannels());
         assertEquals("IT", wifiStatus.getCountryCode());
         assertEquals(WifiMode.INFRA, wifiStatus.getMode());
         assertTrue(wifiStatus.getActiveWifiAccessPoint().isPresent());
@@ -426,8 +427,9 @@ public class NMStatusServiceImplTest {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         buildCommonProperties(interfaceName, builder);
         builder.withCapabilities(EnumSet.of(WifiCapability.AP, WifiCapability.FREQ_2GHZ));
-        builder.withWifiChannels(Arrays.asList(new WifiChannel(1, 2412), new WifiChannel(2, 2417),
-                new WifiChannel(3, 2422), new WifiChannel(4, 2432)));
+        builder.withWifiChannels(
+                Arrays.asList(WifiChannel.builder(1, 2412).build(), WifiChannel.builder(2, 2417).build(),
+                        WifiChannel.builder(3, 2422).build(), WifiChannel.builder(4, 2432).build()));
         builder.withCountryCode("IT");
         builder.withMode(WifiMode.INFRA);
         builder.withActiveWifiAccessPoint(Optional.of(buildAP()));
@@ -538,33 +540,36 @@ public class NMStatusServiceImplTest {
     }
 
     private NetworkInterfaceIpAddressStatus<IP4Address> buildIp4Address() throws UnknownHostException {
-        NetworkInterfaceIpAddress<IP4Address> ip4Address = new NetworkInterfaceIpAddress<IP4Address>(
+        NetworkInterfaceIpAddress<IP4Address> ip4Address = new NetworkInterfaceIpAddress<>(
                 (IP4Address) IPAddress.parseHostAddress("172.16.2.100"), (short) 16);
-        NetworkInterfaceIpAddressStatus<IP4Address> ip4AddressStatus = new NetworkInterfaceIpAddressStatus<>(
-                ip4Address);
-        ip4AddressStatus.setGateway((IP4Address) IPAddress.parseHostAddress("172.16.2.1"));
-        ip4AddressStatus.addDnsServerAddress((IP4Address) IPAddress.parseHostAddress("172.16.2.23"));
+        NetworkInterfaceIpAddressStatus.Builder<IP4Address> builder = NetworkInterfaceIpAddressStatus.builder();
+        builder.withAddresses(Collections.singletonList(ip4Address));
+        builder.withGateway(Optional.of((IP4Address) IPAddress.parseHostAddress("172.16.2.1")));
+        builder.withDnsServerAddresses(
+                Collections.singletonList((IP4Address) IPAddress.parseHostAddress("172.16.2.23")));
 
-        return ip4AddressStatus;
+        return builder.build();
     }
 
     private NetworkInterfaceIpAddressStatus<IP6Address> buildIp6Address() throws UnknownHostException {
-        NetworkInterfaceIpAddress<IP6Address> ip6Address = new NetworkInterfaceIpAddress<IP6Address>(
+        NetworkInterfaceIpAddress<IP6Address> ip6Address = new NetworkInterfaceIpAddress<>(
                 (IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b5"), (short) 64);
-        NetworkInterfaceIpAddressStatus<IP6Address> ip6AddressStatus = new NetworkInterfaceIpAddressStatus<>();
-        ip6AddressStatus.addAddress(ip6Address);
-        ip6AddressStatus.setGateway((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6"));
-        ip6AddressStatus
-                .addDnsServerAddress((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b7"));
 
-        return ip6AddressStatus;
+        NetworkInterfaceIpAddressStatus.Builder<IP6Address> builder = NetworkInterfaceIpAddressStatus.builder();
+        builder.withAddresses(Collections.singletonList(ip6Address));
+        builder.withGateway(
+                Optional.of((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6")));
+        builder.withDnsServerAddresses(Collections
+                .singletonList((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b7")));
+
+        return builder.build();
     }
 
     private WifiAccessPoint buildAP() {
         WifiAccessPointBuilder builder = WifiAccessPoint.builder();
         builder.withSsid("MyCoolAP");
         builder.withHardwareAddress(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 });
-        builder.withChannel(new WifiChannel(7, 2442));
+        builder.withChannel(WifiChannel.builder(7, 2442).build());
         builder.withMode(WifiMode.INFRA);
         builder.withMaxBitrate(54);
         builder.withSignalQuality(78);
@@ -576,7 +581,7 @@ public class NMStatusServiceImplTest {
     private void assertEqualAPProperties(WifiAccessPoint ap) {
         assertEquals("MyCoolAP", ap.getSsid());
         assertArrayEquals(new byte[] { 0x00, 0x11, 0x02, 0x33, 0x44, 0x55 }, ap.getHardwareAddress());
-        assertEquals(new WifiChannel(7, 2442), ap.getChannel());
+        assertEquals(WifiChannel.builder(7, 2442).build(), ap.getChannel());
         assertEquals(WifiMode.INFRA, ap.getMode());
         assertEquals(54, ap.getMaxBitrate());
         assertEquals(78, ap.getSignalQuality());
@@ -591,12 +596,12 @@ public class NMStatusServiceImplTest {
         assertInterfaceIp4AddressEquals(ip4AddressStatus.getAddresses().get(0));
         assertIp4AddressEquals(ip4AddressStatus.getDnsServerAddresses().get(0));
         assertTrue(ip4AddressStatus.getGateway().isPresent());
-        assertEquals((IP4Address) IPAddress.parseHostAddress("172.16.2.1"), ip4AddressStatus.getGateway().get());
+        assertEquals(IPAddress.parseHostAddress("172.16.2.1"), ip4AddressStatus.getGateway().get());
     }
 
     private void assertInterfaceIp4AddressEquals(NetworkInterfaceIpAddress<IP4Address> address)
             throws UnknownHostException {
-        assertEquals(IP4Address.parseHostAddress("172.16.2.100"), address.getAddress());
+        assertEquals(IPAddress.parseHostAddress("172.16.2.100"), address.getAddress());
         assertEquals(16, address.getPrefix());
     }
 
@@ -608,7 +613,7 @@ public class NMStatusServiceImplTest {
             throws UnknownHostException {
         assertInterfaceIp6AddressEquals(ip6AddressStatus.getAddresses().get(0));
         assertIp6AddressEquals(ip6AddressStatus.getDnsServerAddresses().get(0));
-        assertEquals((IP6Address) IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6"),
+        assertEquals(IPAddress.parseHostAddress("2345:425:2CA1:0000:0000:567:5673:23b6"),
                 ip6AddressStatus.getGateway().get());
     }
 

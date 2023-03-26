@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager.device;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -59,7 +60,7 @@ public interface Wireless extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }
@@ -74,7 +75,7 @@ public interface Wireless extends DBusInterface {
         }
 
         public DBusPath getAccessPoint() {
-            return accessPoint;
+            return this.accessPoint;
         }
 
     }
@@ -89,7 +90,7 @@ public interface Wireless extends DBusInterface {
         }
 
         public DBusPath getAccessPoint() {
-            return accessPoint;
+            return this.accessPoint;
         }
 
     }

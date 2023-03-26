@@ -13,6 +13,7 @@
 package org.freedesktop;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;

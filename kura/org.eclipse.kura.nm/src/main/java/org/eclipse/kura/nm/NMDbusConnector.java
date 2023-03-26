@@ -15,11 +15,13 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -41,6 +43,7 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.Modem;
+import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
@@ -63,6 +66,7 @@ public class NMDbusConnector {
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
     private static final String MM_BUS_PATH = "/org/freedesktop/ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
+    private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
     private static final String NM_PROPERTY_VERSION = "Version";
 
@@ -302,37 +306,47 @@ public class NMDbusConnector {
         }
     }
 
-    private synchronized void manageConfiguredInterface(String iface, NetworkProperties properties)
+    private synchronized void manageConfiguredInterface(String deviceId, NetworkProperties properties)
             throws DBusException {
-        Optional<Device> device = getDeviceByInterfaceId(iface);
-        if (device.isPresent()) {
-            NMDeviceType deviceType = getDeviceType(device.get());
-
-            KuraIpStatus ip4Status = KuraIpStatus
-                    .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", iface));
-            // Temporary solution while we wait to add complete IPv6 support
-            KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED
-                    : KuraIpStatus.DISABLED;
-            KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
-
-            if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
-                    || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
-                logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", iface,
-                        deviceType, ip4Status, ip6Status);
-                return;
-            }
-
-            logger.info("Settings iface \"{}\":{}", iface, deviceType);
-
-            if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-                disable(device.get());
-            } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
-                logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", iface);
-            } else { // NMDeviceEnable.ENABLED
-                enableInterface(iface, properties, device.get(), deviceType);
-            }
+        Optional<Device> device = getDeviceByInterfaceId(deviceId);
+        if (!device.isPresent()) {
+            logger.warn("Device \"{}\" cannot be found. Skipping configuration.", deviceId);
+            return;
         }
+
+        NMDeviceType deviceType = getDeviceType(device.get());
+
+        KuraIpStatus ip4Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
+        // Temporary solution while we wait to add complete IPv6 support
+        KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
+
+        if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip4Status)
+                || !CONFIGURATION_SUPPORTED_STATUSES.contains(ip6Status)) {
+            logger.warn("Device \"{}\" of type \"{}\" with status \"{}\"/\"{}\" currently not supported", deviceId,
+                    deviceType, ip4Status, ip6Status);
+            return;
+        }
+
+        logger.info("Settings iface \"{}\":{}", deviceId, deviceType);
+
+        if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
+            disable(device.get());
+        } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
+            logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", deviceId);
+        } else { // NMDeviceEnable.ENABLED
+            enableInterface(deviceId, properties, device.get(), deviceType);
+        }
+
+        // Manage GPS independently of device ip status
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
+                    deviceId);
+            handleModemManagerGPSSetup(device.get(), enableGPS);
+        }
+
     }
 
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
@@ -361,7 +375,6 @@ public class NMDbusConnector {
             this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
                     new DBusPath("/"));
         }
-
         dsLock.waitForSignal();
 
     }
@@ -383,9 +396,66 @@ public class NMDbusConnector {
 
             if (!configuredInterfaces.contains(ipInterface)) {
                 logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", ipInterface, deviceType);
+
                 disable(device);
+
+                if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+                    handleModemManagerGPSSetup(device, Optional.of(false));
+                }
             }
         }
+    }
+
+    private void disable(Device device) throws DBusException {
+        NMDeviceState deviceState = getDeviceState(device);
+        if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
+            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+            device.Disconnect();
+            dsLock.waitForSignal();
+        }
+
+        Optional<Connection> connection = getAppliedConnection(device);
+        if (connection.isPresent()) {
+            connection.get().Delete();
+        }
+    }
+
+    private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
+        Optional<String> modemDevicePath = getModemPathFromMM(device.getObjectPath());
+
+        if (!modemDevicePath.isPresent()) {
+            logger.warn("Cannot retrieve MM.Modem from NM.Modem at path: {}. Skipping GPS configuration.",
+                    device.getObjectPath());
+            return;
+        }
+
+        boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
+
+        Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
+                Location.class);
+        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
+                modemLocation.getObjectPath(), Properties.class);
+
+        Set<MMModemLocationSource> availableLocationSources = MMModemLocationSource
+                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
+        Set<MMModemLocationSource> currentLocationSources = MMModemLocationSource
+                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
+        EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
+
+        for (MMModemLocationSource managedSource : managedLocationSources) {
+            if (isGPSSourceEnabled && availableLocationSources.contains(managedSource)) {
+                currentLocationSources.add(managedSource);
+            } else {
+                currentLocationSources.remove(managedSource);
+            }
+        }
+
+        logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
+
+        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
     }
 
     private String getDeviceId(Device device) throws DBusException {
@@ -699,22 +769,22 @@ public class NMDbusConnector {
     private List<Properties> getModemSimProperties(Properties modemProperties) throws DBusException {
         List<Properties> simProperties = new ArrayList<>();
         try {
-            DBusPath[] simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
+            List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
             for (DBusPath path : simPaths) {
-                if (!path.getPath().equals("/")) {
-                    simProperties
-                            .add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, path.getPath(), Properties.class));
-                }
+                addSimPath(simProperties, path);
             }
         } catch (DBusExecutionException e) {
             // Get only the active sim if any
             DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
-            if (!simPath.getPath().equals("/")) {
-                simProperties
-                        .add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(), Properties.class));
-            }
+            addSimPath(simProperties, simPath);
         }
         return simProperties;
+    }
+
+    private void addSimPath(List<Properties> simProperties, DBusPath path) throws DBusException {
+        if (!path.getPath().equals("/")) {
+            simProperties.add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, path.getPath(), Properties.class));
+        }
     }
 
     private List<Properties> getModemBearersProperties(String modemPath, Properties modemProperties)
@@ -728,8 +798,8 @@ public class NMDbusConnector {
             }
         } catch (DBusExecutionException e) {
             try {
-                DBusPath[] bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
-                bearerProperties = getBearersPropertiesFromPaths(Arrays.asList(bearerPaths));
+                List<DBusPath> bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
+                bearerProperties = getBearersPropertiesFromPaths(bearerPaths);
             } catch (DBusExecutionException e1) {
                 logger.warn("Cannot get bearers for modem {}", modemPath, e1);
             }

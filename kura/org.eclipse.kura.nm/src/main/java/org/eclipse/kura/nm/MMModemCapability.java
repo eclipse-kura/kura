@@ -46,51 +46,51 @@ public enum MMModemCapability {
 
     public static MMModemCapability toMMModemCapability(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return MMModemCapability.MM_MODEM_CAPABILITY_NONE;
-            case 0x00000001:
-                return MMModemCapability.MM_MODEM_CAPABILITY_POTS;
-            case 0x00000002:
-                return MMModemCapability.MM_MODEM_CAPABILITY_CDMA_EVDO;
-            case 0x00000004:
-                return MMModemCapability.MM_MODEM_CAPABILITY_GSM_UMTS;
-            case 0x00000008:
-                return MMModemCapability.MM_MODEM_CAPABILITY_LTE;
-            case 0x00000020:
-                return MMModemCapability.MM_MODEM_CAPABILITY_IRIDIUM;
-            case 0x00000040:
-                return MMModemCapability.MM_MODEM_CAPABILITY_5GNR;
-            case 0x00000080:
-                return MMModemCapability.MM_MODEM_CAPABILITY_TDS;
-            case 0xFFFFFFFF:
-                return MMModemCapability.MM_MODEM_CAPABILITY_ANY;
-            default:
-                return MMModemCapability.MM_MODEM_CAPABILITY_NONE;
+        case 0x00000000:
+            return MMModemCapability.MM_MODEM_CAPABILITY_NONE;
+        case 0x00000001:
+            return MMModemCapability.MM_MODEM_CAPABILITY_POTS;
+        case 0x00000002:
+            return MMModemCapability.MM_MODEM_CAPABILITY_CDMA_EVDO;
+        case 0x00000004:
+            return MMModemCapability.MM_MODEM_CAPABILITY_GSM_UMTS;
+        case 0x00000008:
+            return MMModemCapability.MM_MODEM_CAPABILITY_LTE;
+        case 0x00000020:
+            return MMModemCapability.MM_MODEM_CAPABILITY_IRIDIUM;
+        case 0x00000040:
+            return MMModemCapability.MM_MODEM_CAPABILITY_5GNR;
+        case 0x00000080:
+            return MMModemCapability.MM_MODEM_CAPABILITY_TDS;
+        case 0xFFFFFFFF:
+            return MMModemCapability.MM_MODEM_CAPABILITY_ANY;
+        default:
+            return MMModemCapability.MM_MODEM_CAPABILITY_NONE;
         }
     }
 
     public static ModemCapability toModemCapability(UInt32 type) {
         switch (type.intValue()) {
-            case 0x00000000:
-                return ModemCapability.NONE;
-            case 0x00000001:
-                return ModemCapability.POTS;
-            case 0x00000002:
-                return ModemCapability.EVDO;
-            case 0x00000004:
-                return ModemCapability.GSM_UMTS;
-            case 0x00000008:
-                return ModemCapability.LTE;
-            case 0x00000020:
-                return ModemCapability.IRIDIUM;
-            case 0x00000040:
-                return ModemCapability.FIVE_GNR;
-            case 0x00000080:
-                return ModemCapability.TDS;
-            case 0xFFFFFFFF:
-                return ModemCapability.ANY;
-            default:
-                return ModemCapability.NONE;
+        case 0x00000000:
+            return ModemCapability.NONE;
+        case 0x00000001:
+            return ModemCapability.POTS;
+        case 0x00000002:
+            return ModemCapability.EVDO;
+        case 0x00000004:
+            return ModemCapability.GSM_UMTS;
+        case 0x00000008:
+            return ModemCapability.LTE;
+        case 0x00000020:
+            return ModemCapability.IRIDIUM;
+        case 0x00000040:
+            return ModemCapability.FIVE_GNR;
+        case 0x00000080:
+            return ModemCapability.TDS;
+        case 0xFFFFFFFF:
+            return ModemCapability.ANY;
+        default:
+            return ModemCapability.NONE;
         }
     }
 

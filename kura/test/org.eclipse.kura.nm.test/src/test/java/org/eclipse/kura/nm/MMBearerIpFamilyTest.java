@@ -107,7 +107,7 @@ public class MMBearerIpFamilyTest {
         }
 
         private void thenCalculatedBearerIpTypeIsCorrect() {
-            assertEquals(this.expectedIpFamily, calculatedIpFamily);
+            assertEquals(this.expectedIpFamily, this.calculatedIpFamily);
         }
     }
 
@@ -144,11 +144,11 @@ public class MMBearerIpFamilyTest {
         }
 
         private void whenCalculatedBearerIpType() {
-            calculatedIpFamily = MMBearerIpFamily.toBearerIpTypeFromBitMask(this.inputIntValue);
+            this.calculatedIpFamily = MMBearerIpFamily.toBearerIpTypeFromBitMask(this.inputIntValue);
         }
 
         private void thenCalculatedBearerIpTypeIsCorrect() {
-            assertEquals(this.expectedIpFamilies, calculatedIpFamily);
+            assertEquals(this.expectedIpFamilies, this.calculatedIpFamily);
         }
 
     }
@@ -184,11 +184,11 @@ public class MMBearerIpFamilyTest {
         }
 
         private void whenCalculatedUInt32() {
-            calculatedUInt32 = this.inputIpFamily.toUInt32();
+            this.calculatedUInt32 = this.inputIpFamily.toUInt32();
         }
 
         private void thenCalculatedUInt32IsCorrect() {
-            assertEquals(this.expectedIntValue, calculatedUInt32);
+            assertEquals(this.expectedIntValue, this.calculatedUInt32);
         }
     }
 }

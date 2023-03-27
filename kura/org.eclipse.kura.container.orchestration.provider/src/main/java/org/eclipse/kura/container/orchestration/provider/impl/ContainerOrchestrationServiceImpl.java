@@ -743,7 +743,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 continue;
             }
             for (String tag : image.getRepoTags()) {
-                if (tag.equalsIgnoreCase(requiredImage)) {
+                if (tag.equals(requiredImage)) {
                     return true;
                 }
             }

@@ -632,7 +632,7 @@ public class NMDbusConnector {
     }
 
     private List<Connection> getAvaliableConnections(Device dev) throws DBusException {
-        List<Connection> connections = Arrays.asList();
+        List<Connection> connections = new ArrayList<>();
 
         try {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);

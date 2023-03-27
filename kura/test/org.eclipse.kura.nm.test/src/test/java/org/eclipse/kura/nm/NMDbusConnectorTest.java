@@ -1035,21 +1035,21 @@ public class NMDbusConnectorTest {
         variantConfig.put("uuid", new Variant<>(connectionUuid));
         connectionSettings.put("connection", variantConfig);
 
-        Connection mockConnection = mock(Connection.class);
-        when(mockConnection.GetSettings()).thenReturn(connectionSettings);
-        when(mockConnection.getObjectPath()).thenReturn(connectionPath);
+        Connection mockNewConnection = mock(Connection.class);
+        when(mockNewConnection.GetSettings()).thenReturn(connectionSettings);
+        when(mockNewConnection.getObjectPath()).thenReturn(connectionPath);
         
         
         
-        doReturn(mockConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
+        doReturn(mockNewConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
         
-        mockedConnections.put(connectionPath, mockConnection);
+        mockedConnections.put(connectionPath, mockNewConnection);
         
     }
     
     public void givenMockedAssociatedConnection(String connectionId, String connectionUuid, String interfaceName, String connectionPath) throws DBusException {
         
-        Connection mockConnection = mock(Connection.class);
+        Connection mockAssociatedConnection = mock(Connection.class);
         
         if (mockedConnectionDbusPathList.isEmpty()) {
             Settings settings = mock(Settings.class);
@@ -1063,7 +1063,7 @@ public class NMDbusConnectorTest {
             
             when(settings.GetConnectionByUuid(any())).thenReturn(mockUuidPath);
             
-            doReturn(mockConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+            doReturn(mockAssociatedConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                     eq("/path/to/Associated/Connection"), eq(Connection.class));         
         }
         
@@ -1080,14 +1080,14 @@ public class NMDbusConnectorTest {
         variantConfig.put("uuid", new Variant<>(connectionUuid));
         connectionSettings.put("connection", variantConfig);
 
-        when(mockConnection.GetSettings()).thenReturn(connectionSettings);
-        when(mockConnection.getObjectPath()).thenReturn(connectionPath);
+        when(mockAssociatedConnection.GetSettings()).thenReturn(connectionSettings);
+        when(mockAssociatedConnection.getObjectPath()).thenReturn(connectionPath);
         
         
         
-        doReturn(mockConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
+        doReturn(mockAssociatedConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
         
-        mockedConnections.put(connectionPath, mockConnection);
+        mockedConnections.put(connectionPath, mockAssociatedConnection);
         
     }
 

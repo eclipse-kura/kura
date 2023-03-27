@@ -805,7 +805,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withSignalQuality(12) //
                 .withRegistrationStatus(RegistrationStatus.ROAMING) //
                 .withOperatorName("oper") //
-                .withRssi(1221) //
+                .withSignalStrength(1221) //
         );
 
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);

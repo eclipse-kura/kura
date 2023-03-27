@@ -242,7 +242,7 @@ public class NetworkStatusServiceAdapter {
 
             gwtModemConfig.setHwState(modemInterfaceInfo.getState().toString());
             gwtModemConfig.setHwSerial(modemInterfaceInfo.getSerialNumber());
-            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getRssi()));
+            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getSignalStrength()));
             gwtModemConfig.setHwICCID(activeSim != null ? activeSim.getIccid() : "NA");
             gwtModemConfig.setHwIMSI(activeSim != null ? activeSim.getImsi() : "NA");
             gwtModemConfig.setHwRegistration(modemInterfaceInfo.getRegistrationStatus().toString());

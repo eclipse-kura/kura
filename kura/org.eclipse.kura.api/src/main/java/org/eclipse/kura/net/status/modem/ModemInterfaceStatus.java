@@ -55,9 +55,9 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final ModemConnectionStatus connectionStatus;
     private final Set<AccessTechnology> accessTechnologies;
     private final int signalQuality;
+    private final int signalStrength;
     private final RegistrationStatus registrationStatus;
     private final String operatorName;
-    private final int rssi;
 
     private ModemInterfaceStatus(ModemInterfaceStatusBuilder builder) {
         super(builder);
@@ -86,7 +86,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.signalQuality = builder.signalQuality;
         this.registrationStatus = builder.registrationStatus;
         this.operatorName = builder.operatorName;
-        this.rssi = builder.rssi;
+        this.signalStrength = builder.signalStrength;
     }
 
     public String getModel() {
@@ -189,8 +189,8 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.operatorName;
     }
 
-    public int getRssi() {
-        return this.rssi;
+    public int getSignalStrength() {
+        return this.signalStrength;
     }
 
     public static ModemInterfaceStatusBuilder builder() {
@@ -225,7 +225,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private int signalQuality = 0;
         private RegistrationStatus registrationStatus = RegistrationStatus.UNKNOWN;
         private String operatorName = NA;
-        private int rssi = -113;
+        private int signalStrength = -113;
 
         public ModemInterfaceStatusBuilder withModel(String model) {
             this.model = model;
@@ -353,8 +353,8 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withRssi(int rssi) {
-            this.rssi = rssi;
+        public ModemInterfaceStatusBuilder withSignalStrength(int signalStrength) {
+            this.signalStrength = signalStrength;
             return getThis();
         }
 
@@ -378,7 +378,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
                 this.bearers, this.connectionStatus, this.connectionType, this.currentBands,
                 this.currentModemCapabilities, this.currentModes, this.gpsSupported, this.hardwareRevision,
                 this.manufacturer, this.model, this.operatorName, this.ports, this.powerState, this.primaryPort,
-                this.registrationStatus, this.rssi, this.serialNumber, this.signalQuality, this.simLocked,
+                this.registrationStatus, this.signalStrength, this.serialNumber, this.signalQuality, this.simLocked,
                 this.softwareRevision, this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
         return result;
     }
@@ -403,7 +403,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
                 && Objects.equals(this.manufacturer, other.manufacturer) && Objects.equals(this.model, other.model)
                 && Objects.equals(this.operatorName, other.operatorName) && Objects.equals(this.ports, other.ports)
                 && this.powerState == other.powerState && Objects.equals(this.primaryPort, other.primaryPort)
-                && this.registrationStatus == other.registrationStatus && this.rssi == other.rssi
+                && this.registrationStatus == other.registrationStatus && this.signalStrength == other.signalStrength
                 && Objects.equals(this.serialNumber, other.serialNumber) && this.signalQuality == other.signalQuality
                 && this.simLocked == other.simLocked && Objects.equals(this.softwareRevision, other.softwareRevision)
                 && Objects.equals(this.supportedBands, other.supportedBands)

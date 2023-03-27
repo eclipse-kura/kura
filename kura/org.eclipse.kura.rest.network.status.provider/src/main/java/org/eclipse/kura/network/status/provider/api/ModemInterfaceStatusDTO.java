@@ -86,7 +86,7 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
         this.signalQuality = status.getSignalQuality();
         this.registrationStatus = status.getRegistrationStatus();
         this.operatorName = status.getOperatorName();
-        this.rssi = status.getRssi();
+        this.rssi = status.getSignalStrength();
     }
 
 }

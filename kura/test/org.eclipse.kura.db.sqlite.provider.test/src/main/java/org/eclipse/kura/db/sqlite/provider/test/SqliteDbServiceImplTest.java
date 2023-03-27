@@ -143,8 +143,7 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "ROLLBACK_JOURNAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L, //
-                "db.defrag.enabled", false //
+                "db.defrag.interval.seconds", 5L //
         ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");

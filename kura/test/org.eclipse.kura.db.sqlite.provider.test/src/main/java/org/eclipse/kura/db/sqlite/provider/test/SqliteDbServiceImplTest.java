@@ -115,13 +115,36 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
     }
 
     @Test
+    public void shouldDisableWalCheckpoint()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "WAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite", //
+                "db.wal.checkpoint.interval.seconds", 5L, //
+                "db.wal.checkpoint.enabled", false));
+
+        givenExecutedQuery("CREATE TABLE FOO (BAR INTEGER);");
+        givenExecutedQuery("INSERT INTO FOO VALUES (1);");
+        givenExecutedQuery("INSERT INTO FOO VALUES (1);");
+        givenExecutedQuery("INSERT INTO FOO VALUES (2);");
+        givenExecutedQuery("INSERT INTO FOO VALUES (3);");
+
+        whenTimePasses(10, TimeUnit.SECONDS);
+
+        thenFileExists(temporaryDirectory() + "/test.sqlite-wal");
+        thenFileSizeIsNotZero(temporaryDirectory() + "/test.sqlite-wal");
+    }
+
+    @Test
     public void shouldSupporDefragInRollbackJournalMode()
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
         givenSqliteDbService(map( //
                 "db.mode", "PERSISTED", //
                 "db.journal.mode", "ROLLBACK_JOURNAL", //
                 "db.path", temporaryDirectory() + "/test.sqlite", //
-                "db.defrag.interval.seconds", 5L //
+                "db.defrag.interval.seconds", 5L, //
+                "db.defrag.enabled", false //
         ));
 
         givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
@@ -135,6 +158,56 @@ public class SqliteDbServiceImplTest extends SqliteDbServiceTestBase {
         whenTimePasses(10, TimeUnit.SECONDS);
 
         thenFileSizeDecreased(temporaryDirectory() + "/test.sqlite");
+    }
+
+    @Test
+    public void shouldDisableDefragInRollbackJournalMode()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "ROLLBACK_JOURNAL", //
+                "db.path", temporaryDirectory() + "/test.sqlite", //
+                "db.defrag.interval.seconds", 5L, //
+                "db.defrag.enabled", false //
+        ));
+
+        givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
+        givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
+        givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
+        givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
+        givenExecutedQuery("INSERT INTO FOO VALUES ('" + largeText(20000) + "');");
+        givenInitialFileSize(temporaryDirectory() + "/test.sqlite");
+        givenExecutedQuery("DELETE FROM FOO;");
+
+        whenTimePasses(10, TimeUnit.SECONDS);
+
+        thenFileSizeDidNotChange(temporaryDirectory() + "/test.sqlite");
+    }
+
+    @Test
+    public void shouldDisableDefragInWalMode()
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        givenSqliteDbService(map( //
+                "db.mode", "PERSISTED", //
+                "db.journal.mode", "WAL", //
+                "db.path", temporaryDirectory() + "/waldefrag.sqlite", //
+                "db.defrag.interval.seconds", 5L, //
+                "db.defrag.enabled", false //
+        ));
+
+        givenExecutedQuery("CREATE TABLE FOO (BAR TEXT);");
+        givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
+        givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
+        givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
+        givenExecutedQuery("INSERT INTO FOO (BAR) VALUES ('" + largeText(2000) + "');");
+        givenExecutedQuery("PRAGMA wal_checkpoint(TRUNCATE);");
+        givenInitialFileSize(temporaryDirectory() + "/waldefrag.sqlite");
+        givenExecutedQuery("DELETE FROM FOO;");
+        givenExecutedQuery("PRAGMA wal_checkpoint(TRUNCATE);");
+
+        whenTimePasses(10, TimeUnit.SECONDS);
+
+        thenFileSizeDidNotChange(temporaryDirectory() + "/waldefrag.sqlite");
     }
 
     @Test

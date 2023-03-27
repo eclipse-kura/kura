@@ -85,13 +85,26 @@ sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/f
 systemctl daemon-reload
 systemctl enable firewall
 
-# disables cloud-init if exists and allows interface management to network-manager
+# disables cloud-init network management if exists, sets netplan network renderer to NetworkManager allowing interface management to NetworkManager
 if [ -d /etc/cloud/cloud.cfg.d ]; then
     echo "network: {config: disabled}" | sudo tee -a /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null
 fi
+if [ -d /etc/netplan/ ]; then
+    cp /etc/netplan/00-installer-config.yaml /etc/netplan/00-installer-config.yaml.BAK
+    cat << EOF >> /etc/netplan/00-installer-config.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: NetworkManager
+EOF
+    netplan generate
+    netplan apply
+    systemctl restart NetworkManager
+fi
 if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
     TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )
-    
+
     if [ -f "${TO_REMOVE}" ]; then
         rm "${TO_REMOVE}"
     fi

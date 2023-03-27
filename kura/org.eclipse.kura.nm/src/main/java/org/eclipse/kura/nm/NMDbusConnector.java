@@ -33,6 +33,7 @@ import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
+import org.freedesktop.AddAndActivateConnectionTuple;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -372,9 +373,23 @@ public class NMDbusConnector {
             this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                     new DBusPath(device.getObjectPath()), new DBusPath("/"));
         } else {
-            this.nm.AddAndActivateConnection(newConnectionSettings, new DBusPath(device.getObjectPath()),
-                    new DBusPath("/"));
+            AddAndActivateConnectionTuple createdConnectionTuple = this.nm.AddAndActivateConnection(
+                    newConnectionSettings, new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            Connection createdConnection = this.dbusConnection.getRemoteObject(createdConnectionTuple.getPath(), ""); // TODO:
+                                                                                                                      // Complete
+                                                                                                                      // this
+                                                                                                                      // one
+            connection = Optional.of(createdConnection);
         }
+
+        // Housekeeping
+        List<Connection> availableConnections = getAvaliableConnections(device);
+        for (Connection availableConnection : availableConnections) {
+            if (!connection.get().getObjectPath().equals(availableConnection.getObjectPath())) {
+                availableConnection.Delete();
+            }
+        }
+
         dsLock.waitForSignal();
 
     }
@@ -474,9 +489,10 @@ public class NMDbusConnector {
             dsLock.waitForSignal();
         }
 
-        Optional<Connection> connection = getAssociatedConnection(device);
-        if (connection.isPresent()) {
-            connection.get().Delete();
+        // Housekeeping
+        List<Connection> availableConnections = getAvaliableConnections(device);
+        for (Connection connection : availableConnections) {
+            connection.Delete();
         }
     }
 
@@ -586,8 +602,16 @@ public class NMDbusConnector {
         if (appliedConnection.isPresent()) {
             return appliedConnection;
         } else {
-            cleanAvaliableConnections(dev);
-            return getFirstAvaliableConnection(dev);
+            logger.info("Active connection not found, looking for avaliable connections.");
+
+            List<Connection> availableConnections = getAvaliableConnections(dev);
+
+            if (!availableConnections.isEmpty()) {
+                return Optional.of(availableConnections.get(0));
+
+            } else {
+                return Optional.empty();
+            }
         }
     }
 
@@ -609,12 +633,10 @@ public class NMDbusConnector {
         return Optional.empty();
     }
 
-    private Optional<Connection> getFirstAvaliableConnection(Device dev) throws DBusException {
-        Optional<Connection> connectionToReturn = Optional.empty();
+    private List<Connection> getAvaliableConnections(Device dev) throws DBusException {
+        List<Connection> connections = Arrays.asList();
 
         try {
-            logger.info("Active connection not found, looking for avaliable connections.");
-
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
 
             List<DBusPath> connectionPath = settings.ListConnections();
@@ -629,66 +651,16 @@ public class NMDbusConnector {
                 Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
                         Connection.class);
 
-                Map<String, Map<String, Variant<?>>> workingSettings = availableConnection.GetSettings();
+                // TODO check connection name
 
-                String availableConnectionId = (String) workingSettings.get(NM_SETTING_CONNECTION_KEY).get("id")
-                        .getValue();
-                String availableConnectionUuid = (String) workingSettings.get(NM_SETTING_CONNECTION_KEY).get("uuid")
-                        .getValue();
-
-                if (availableConnectionId.equals(expectedConnectionName)) {
-                    logger.debug("Using avaliable connection uuid: {}", availableConnectionUuid);
-                    return Optional.of(availableConnection);
-                }
+                connections.add(availableConnection);
             }
 
         } catch (DBusExecutionException e) {
             logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
         }
 
-        return connectionToReturn;
-    }
-
-    private void cleanAvaliableConnections(Device dev) throws DBusException {
-
-        try {
-
-            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
-
-            List<DBusPath> connectionPath = settings.ListConnections();
-
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(),
-                    Properties.class);
-            String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
-            String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
-
-            boolean isFirst = true;
-            for (DBusPath path : connectionPath) {
-
-                Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
-                        Connection.class);
-
-                Map<String, Map<String, Variant<?>>> workingSettings = availableConnection.GetSettings();
-
-                String availableConnectionId = (String) workingSettings.get(NM_SETTING_CONNECTION_KEY).get("id")
-                        .getValue();
-                String availableConnectionUuid = (String) workingSettings.get(NM_SETTING_CONNECTION_KEY).get("uuid")
-                        .getValue();
-
-                if (availableConnectionId.equals(expectedConnectionName)) {
-                    if (isFirst) {
-                        logger.debug("Skipping avaliable connection uuid: {}", availableConnectionUuid);
-                        isFirst = false;
-                    } else {
-                        logger.debug("Deleting extra connection with uuid: {}", availableConnectionUuid);
-                        availableConnection.Delete();
-                    }
-                }
-            }
-
-        } catch (DBusExecutionException e) {
-            logger.debug("Could not find any applied connection for {}, caused by", dev.getObjectPath(), e);
-        }
+        return connections;
     }
 
     private void configurationEnforcementEnable() throws DBusException {

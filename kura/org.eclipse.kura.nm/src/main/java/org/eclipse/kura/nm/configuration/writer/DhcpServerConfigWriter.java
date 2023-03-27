@@ -106,8 +106,13 @@ public class DhcpServerConfigWriter {
                 addDNSServersOption(dhcpServerConfig, pw);
             } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
                 pw.println("interface=" + dhcpServerConfig.getInterfaceName());
+                pw.println("bind-interfaces");
                 pw.println("dhcp-option=3,0.0.0.0");
-                pw.println("dhcp-option=6,0.0.0.0");
+
+                if (dhcpServerConfig.isPassDns()) {
+                    pw.println("dhcp-option=6,0.0.0.0");
+                }
+
                 pw.println("port=0"); // disable DNS since managed by bind/bind9
                 
                 StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")

@@ -375,10 +375,8 @@ public class NMDbusConnector {
         } else {
             AddAndActivateConnectionTuple createdConnectionTuple = this.nm.AddAndActivateConnection(
                     newConnectionSettings, new DBusPath(device.getObjectPath()), new DBusPath("/"));
-            Connection createdConnection = this.dbusConnection.getRemoteObject(createdConnectionTuple.getPath(), ""); // TODO:
-                                                                                                                      // Complete
-                                                                                                                      // this
-                                                                                                                      // one
+            Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    createdConnectionTuple.getPath().getPath(), Connection.class);
             connection = Optional.of(createdConnection);
         }
 
@@ -651,9 +649,14 @@ public class NMDbusConnector {
                 Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
                         Connection.class);
 
-                // TODO check connection name
+                Map<String, Map<String, Variant<?>>> availableConnectionSettings = availableConnection.GetSettings();
+                String availableConnectionId = (String) availableConnectionSettings.get(NM_SETTING_CONNECTION_KEY)
+                        .get("id").getValue();
 
-                connections.add(availableConnection);
+                if (availableConnectionId.equals(expectedConnectionName)) {
+                    connections.add(availableConnection);
+                }
+
             }
 
         } catch (DBusExecutionException e) {

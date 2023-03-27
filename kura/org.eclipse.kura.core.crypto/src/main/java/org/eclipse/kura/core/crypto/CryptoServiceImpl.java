@@ -70,19 +70,6 @@ public class CryptoServiceImpl implements CryptoService {
     private final SecureRandom random = new SecureRandom();
     private SystemService systemService;
 
-    private CharsetEncoder utf8Encoder;
-    private CharsetDecoder utf8Decoder;
-
-    public CryptoServiceImpl() {
-        this.utf8Encoder = StandardCharsets.UTF_8.newEncoder();
-        this.utf8Encoder.onMalformedInput(CodingErrorAction.REPORT);
-        this.utf8Encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-
-        this.utf8Decoder = StandardCharsets.UTF_8.newDecoder();
-        this.utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        this.utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-    }
-
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -123,11 +110,11 @@ public class CryptoServiceImpl implements CryptoService {
 
     }
 
-    private synchronized byte[] charArrayToByteArray(char[] value) throws CharacterCodingException {
+    private byte[] charArrayToByteArray(char[] value) throws CharacterCodingException {
 
         ByteBuffer byteBuffer;
         try {
-            byteBuffer = this.utf8Encoder.encode(CharBuffer.wrap(value));
+            byteBuffer = getUtf8Encoder().encode(CharBuffer.wrap(value));
         } catch (CharacterCodingException e) {
             // fallback for backward compatibility
             byteBuffer = ByteBuffer.wrap(new String(value).getBytes());
@@ -138,10 +125,10 @@ public class CryptoServiceImpl implements CryptoService {
         return encodedBytes;
     }
 
-    private synchronized char[] byteArrayToCharArray(byte[] value) throws CharacterCodingException {
+    private char[] byteArrayToCharArray(byte[] value) throws CharacterCodingException {
         CharBuffer charBuffer;
         try {
-            charBuffer = this.utf8Decoder.decode(ByteBuffer.wrap(value));
+            charBuffer = getUtf8Decoder().decode(ByteBuffer.wrap(value));
         } catch (CharacterCodingException e) {
             // fallback for backward compatibility
             charBuffer = CharBuffer.wrap(new String(value).toCharArray());
@@ -150,6 +137,22 @@ public class CryptoServiceImpl implements CryptoService {
         charBuffer.get(decodedChar);
 
         return decodedChar;
+    }
+
+    private CharsetEncoder getUtf8Encoder() {
+        CharsetEncoder encoder = StandardCharsets.UTF_8.newEncoder();
+        encoder.onMalformedInput(CodingErrorAction.REPORT);
+        encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        return encoder;
+    }
+
+    private CharsetDecoder getUtf8Decoder() {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        return decoder;
     }
 
     private byte[] base64Decode(String internalStringValue) {

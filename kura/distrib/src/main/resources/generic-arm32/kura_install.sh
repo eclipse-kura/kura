@@ -98,7 +98,6 @@ network:
   version: 2
   renderer: NetworkManager
 EOF
-    netplan generate
 fi
 if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
     TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )

@@ -915,20 +915,13 @@ public class NMDbusConnectorTest {
         mockedConnectionDbusPathList.add(mockPath);
         
         Map<String, Map<String, Variant<?>>> connectionSettings = new HashMap<>();
-        
-        Map<String, Variant<?>> varientConfig = new HashMap<>();
-        
-        Variant<String> id = mock(Variant.class);
-        when(id.getValue()).thenReturn(connectionId);
-        varientConfig.put("id", id);
-        
-        Variant<String> uuid = mock(Variant.class);
-        when(uuid.getValue()).thenReturn(connectionUuid);
-        varientConfig.put("uuid", uuid);
-        
-        
-        connectionSettings.put("connection", varientConfig);
-        
+
+        Map<String, Variant<?>> variantConfig = new HashMap<>();
+
+        variantConfig.put("id", new Variant<>(connectionId));
+        variantConfig.put("uuid", new Variant<>(connectionUuid));
+        connectionSettings.put("connection", variantConfig);
+
         Connection mockConnection = mock(Connection.class);
         when(mockConnection.GetSettings()).thenReturn(connectionSettings);
         

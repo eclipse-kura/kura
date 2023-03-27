@@ -28,14 +28,23 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class WifiAccessPoint {
 
+    /** The Service Set IDentifier of the WiFi network */
     private final String ssid;
+    /** The Basic Service Set IDentifier of the WiFi access point */
     private final byte[] hardwareAddress;
+    /** The {@link WifiChannel} used by the WiFi access point */
     private final WifiChannel channel;
+    /** The {@link WifiMode} of the wireless interface */
     private final WifiMode mode;
+    /** The maximum bitrate this access point is capable of */
     private final long maxBitrate;
+    /** The current signal quality of the access point in percentage */
     private final int signalQuality;
+    /** The current signal strength of the access point in dBm */
     private final int signalStrength;
+    /** The WPA capabilities of the access point */
     private final Set<WifiSecurity> wpaSecurity;
+    /** The RSN capabilities of the access point */
     private final Set<WifiSecurity> rsnSecurity;
 
     private WifiAccessPoint(WifiAccessPointBuilder builder) {

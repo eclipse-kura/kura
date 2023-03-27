@@ -107,10 +107,12 @@ public class DhcpServerConfigWriter {
             } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
                 pw.println("interface=" + dhcpServerConfig.getInterfaceName());
                 pw.println("bind-interfaces");
-                pw.println("dhcp-option=3,0.0.0.0");
+                pw.println("dhcp-authoritative");
+
+                pw.println("dhcp-option=3,0.0.0.0"); // default gateway
 
                 if (dhcpServerConfig.isPassDns()) {
-                    pw.println("dhcp-option=6,0.0.0.0");
+                    pw.println("dhcp-option=6,0.0.0.0"); // dns servers to announce
                 }
 
                 pw.println("port=0"); // disable DNS since managed by bind/bind9

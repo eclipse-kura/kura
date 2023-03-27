@@ -158,7 +158,7 @@ public class NetworkStatusServiceAdapter {
                 entry.setFrequency(ap.getChannel().getFrequency());
                 entry.setMacAddress(NetworkUtil.macToString(ap.getHardwareAddress()));
                 entry.setSSID(ap.getSsid());
-                entry.setsignalStrength(ap.getSignalQuality());
+                entry.setsignalStrength(ap.getSignalStrength());
 
                 // because of GwtWifiHotspotEntry interface does not discriminate RSN/WPA,
                 // order here is important:
@@ -311,7 +311,7 @@ public class NetworkStatusServiceAdapter {
             } else if (wifiInterfaceInfo.getMode() == WifiMode.INFRA) {
                 AtomicReference<String> rssi = new AtomicReference<>("N/A");
                 wifiInterfaceInfo.getActiveWifiAccessPoint()
-                        .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalQuality())));
+                        .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalStrength())));
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
 
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getStationWifiConfig())) {

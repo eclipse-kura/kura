@@ -347,8 +347,9 @@ public class NMStatusConverter {
         UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
         builder.withMaxBitrate(maxBitrate.longValue());
 
-        Byte strength = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
-        builder.withSignalQuality(strength.intValue());
+        Byte signalQuality = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
+        builder.withSignalQuality(signalQuality.intValue());
+        builder.withSignalStrength(convertToSignalStrength(signalQuality.intValue()));
 
         List<NM80211ApSecurityFlags> wpaSecurityFlags = NM80211ApSecurityFlags
                 .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "WpaFlags"));
@@ -783,5 +784,19 @@ public class NMStatusConverter {
         default:
             return NetworkInterfaceState.UNKNOWN;
         }
+    }
+
+    /** 
+     * The conversion from signal quality [%] and signal strength [dBm]
+     * is performed using the algorithm presented in
+     * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L4305
+     * and
+     * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L11664
+     */
+    private static int convertToSignalStrength(int signalQuality) {
+        int rssiMax = -20;
+        int rssiMin = -85;
+        int deltaRssi = rssiMax - rssiMin;
+        return rssiMax + (signalQuality-100) * deltaRssi / 77;
     }
 }

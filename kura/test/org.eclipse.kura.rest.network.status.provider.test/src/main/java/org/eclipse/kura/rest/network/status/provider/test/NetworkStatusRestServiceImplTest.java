@@ -645,6 +645,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withChannel(WifiChannel.builder(1, 2).build()) //
                 .withMaxBitrate(123) //
                 .withSignalQuality(12) //
+                .withSignalStrength(-94) //
                 .withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.KEY_MGMT_SAE)) //
                 .withRsnSecurity(EnumSet.of(WifiSecurity.KEY_MGMT_EAP_SUITE_B_192)) //
                 .build())) //
@@ -664,6 +665,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"channel\":{\"channel\":1,\"frequency\":2}," //
                 + "\"maxBitrate\":123," //
                 + "\"signalQuality\":12," //
+                + "\"signalStrength\":-94," //
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
                 + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}," //
                 + "\"availableWifiAccessPoints\":[]," //
@@ -692,6 +694,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                         .withChannel(WifiChannel.builder(1, 2).build()) //
                         .withMaxBitrate(123) //
                         .withSignalQuality(12) //
+                        .withSignalStrength(-94) //
                         .withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.KEY_MGMT_SAE)) //
                         .withRsnSecurity(EnumSet.of(WifiSecurity.KEY_MGMT_EAP_SUITE_B_192)) //
                         .build())));
@@ -710,6 +713,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"channel\":{\"channel\":1,\"frequency\":2}," //
                 + "\"maxBitrate\":123," //
                 + "\"signalQuality\":12," //
+                + "\"signalStrength\":-94," //
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
                 + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}]," //
                 + "\"id\":\"N/A\"," //
@@ -759,9 +763,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"connectionStatus\":\"UNKNOWN\"," //
                 + "\"accessTechnologies\":[\"UNKNOWN\"]," //
                 + "\"signalQuality\":0," //
+                + "\"signalStrength\":-113," //
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
-                + "\"rssi\":-113," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
@@ -803,9 +807,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withConnectionStatus(ModemConnectionStatus.DISCONNECTING) //
                 .withAccessTechnologies(EnumSet.of(AccessTechnology.EVDO0, AccessTechnology.GPRS)) //
                 .withSignalQuality(12) //
+                .withSignalStrength(-94) //
                 .withRegistrationStatus(RegistrationStatus.ROAMING) //
                 .withOperatorName("oper") //
-                .withSignalStrength(1221) //
         );
 
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
@@ -836,9 +840,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"connectionStatus\":\"DISCONNECTING\"," //
                 + "\"accessTechnologies\":[\"GPRS\",\"EVDO0\"]," //
                 + "\"signalQuality\":12," //
+                + "\"signalStrength\":-94," //
                 + "\"registrationStatus\":\"ROAMING\"," //
                 + "\"operatorName\":\"oper\"," //
-                + "\"rssi\":1221," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
@@ -900,9 +904,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"connectionStatus\":\"UNKNOWN\"," //
                 + "\"accessTechnologies\":[\"UNKNOWN\"]," //
                 + "\"signalQuality\":0," //
+                + "\"signalStrength\":-113," //
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
-                + "\"rssi\":-113," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //
@@ -966,9 +970,9 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"connectionStatus\":\"UNKNOWN\"," //
                 + "\"accessTechnologies\":[\"UNKNOWN\"]," //
                 + "\"signalQuality\":0," //
+                + "\"signalStrength\":-113," //
                 + "\"registrationStatus\":\"UNKNOWN\"," //
                 + "\"operatorName\":\"N/A\"," //
-                + "\"rssi\":-113," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //

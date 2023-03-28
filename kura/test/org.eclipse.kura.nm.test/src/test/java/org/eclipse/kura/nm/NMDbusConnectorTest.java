@@ -105,10 +105,10 @@ public class NMDbusConnectorTest {
     private Boolean hasNullPointerExceptionThrown = false;
     private Boolean hasKuraExceptionThrown = false;
 
-    NetworkInterfaceStatus netInterface;
+    private NetworkInterfaceStatus netInterface;
 
-    Map<String, Connection> mockedConnections = new HashMap<>();
-    List<DBusPath> mockedConnectionDbusPathList = new ArrayList<>();
+    private Map<String, Connection> mockedConnections = new HashMap<>();
+    private List<DBusPath> mockedConnectionDbusPathList = new ArrayList<>();
 
     private final Map<String, Device> mockDevices = new HashMap<>();
     private Connection mockConnection;

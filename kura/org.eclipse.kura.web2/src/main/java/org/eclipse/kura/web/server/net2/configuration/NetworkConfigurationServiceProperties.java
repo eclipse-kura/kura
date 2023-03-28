@@ -67,7 +67,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public boolean getNatEnabled(String ifname) {
-        return (boolean) this.properties.get(String.format(NET_INTERFACE_CONFIG_NAT_ENABLED, ifname));
+        return (boolean) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_NAT_ENABLED, ifname), false);
     }
 
     public void setNatEnabled(String ifname, boolean natEnabled) {

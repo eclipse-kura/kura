@@ -80,7 +80,7 @@
             required="false"
             default="900"
             min="60"
-            description="SqliteDbService instances support running periodic defragmentation using the VACUUM command (https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in seconds beetween two consecutive defragmentations, set to zero to disable. This parameter is only relevant for persisted databases."/>
+            description="SqliteDbService instances support running periodic defragmentation using the VACUUM command (https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in seconds beetween two consecutive defragmentations. This parameter is only relevant for persisted databases."/>
 
          <AD id="db.wal.checkpoint.enabled"
             name="Checkpoint enabled"

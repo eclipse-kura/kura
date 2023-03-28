@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -736,14 +736,16 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         List<Image> images = this.dockerClient.listImagesCmd().exec();
 
-        for (Image image : images) {
-            if (image.getRepoTags() != null) {
-                for (String tags : image.getRepoTags()) {
-                    if (tags.contains(imageName + ":" + imageTag)) {
-                        return true;
-                    }
-                }
+        String requiredImage = imageName + ":" + imageTag;
 
+        for (Image image : images) {
+            if (isNull(image.getRepoTags())) {
+                continue;
+            }
+            for (String tag : image.getRepoTags()) {
+                if (tag.equals(requiredImage)) {
+                    return true;
+                }
             }
         }
 
@@ -891,7 +893,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private String getImageTag(Image image) {
         if (image.getRepoTags() == null || image.getRepoTags().length < 1
-                || (image.getRepoTags()[0].split(":").length < 2)) {
+                || image.getRepoTags()[0].split(":").length < 2) {
             return "";
         }
 

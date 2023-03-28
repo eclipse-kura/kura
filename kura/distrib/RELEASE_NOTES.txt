@@ -1,4 +1,4 @@
-Eclipse Kura - [ERROR] [ERROR] Some problems were encountered while processing the POMs: - March 2023
+Eclipse Kura - 5.3.0 - March 2023
 -------------------------------------------------------------------------------------------------
 Description:
 [TODO]

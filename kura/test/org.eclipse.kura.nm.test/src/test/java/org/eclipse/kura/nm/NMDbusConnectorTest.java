@@ -44,7 +44,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -753,30 +752,21 @@ public class NMDbusConnectorTest {
     public void applyingConfigurationShouldCleanUnusedConnectionsIfActiveConnectionExists()
             throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+        givenMockedDevice("eth1", "eth1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
 
-        givenMockedAssociatedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/0");
-        givenMockedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
-        givenMockedConnection("kura-wlan0-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
-        givenMockedConnection("kura-wlan0-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
-        givenMockedConnection("kura-wlan0-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
+        givenMockedAssociatedConnection("kura-eth1-connection", "uuid-1234", "eth1", "/connection/path/mock/0");
+        givenMockedConnection("kura-eth1-connection", "uuid-1234", "eth1", "/connection/path/mock/1");
+        givenMockedConnection("kura-eth1-connection", "uuid-4345", "eth1", "/connection/path/mock/2");
+        givenMockedConnection("kura-eth1-connection", "uuid-5466", "eth1", "/connection/path/mock/3");
+        givenMockedConnection("kura-eth1-connection", "uuid-3453", "eth1", "/connection/path/mock/4");
         givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
 
-        givenNetworkConfigMapWith("net.interfaces", "wlan0");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusDisabled");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusDisabled");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "TKIP");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "TKIP");
+        givenNetworkConfigMapWith("net.interfaces", "eth1");
+        givenNetworkConfigMapWith("net.interface.eth1.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip6.status", "netIPv4StatusDisabled");
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -791,29 +781,20 @@ public class NMDbusConnectorTest {
     @Test
     public void applyingConfigurationShouldDeleteExistingExtraAvailableConnections() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+        givenMockedDevice("eth1", "eth1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
 
-        givenMockedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
-        givenMockedConnection("kura-wlan0-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
-        givenMockedConnection("kura-wlan0-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
-        givenMockedConnection("kura-wlan0-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
+        givenMockedConnection("kura-eth1-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
+        givenMockedConnection("kura-eth1-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
+        givenMockedConnection("kura-eth1-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
+        givenMockedConnection("kura-eth1-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
         givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
 
-        givenNetworkConfigMapWith("net.interfaces", "wlan0");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusDisabled");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusDisabled");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "TKIP");
-        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "TKIP");
+        givenNetworkConfigMapWith("net.interfaces", "eth1");
+        givenNetworkConfigMapWith("net.interface.eth1.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip6.status", "netIPv4StatusDisabled");
 
         whenApplyIsCalledWith(this.netConfig);
 

@@ -1558,8 +1558,8 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>${project.basedir}/src/main/resources/common/99kura-nm.conf</src>
-                                            <dst>/etc/NetworkManager/conf.d/99kura-nm.conf</dst>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>
                                     </dataSet>
@@ -1657,8 +1657,8 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>${project.basedir}/src/main/resources/common/99kura-nm.conf</src>
-                                            <dst>/etc/NetworkManager/conf.d/99kura-nm.conf</dst>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>
                                     </dataSet>
@@ -1756,8 +1756,8 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>${project.basedir}/src/main/resources/common/99kura-nm.conf</src>
-                                            <dst>/etc/NetworkManager/conf.d/99kura-nm.conf</dst>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>
                                     </dataSet>

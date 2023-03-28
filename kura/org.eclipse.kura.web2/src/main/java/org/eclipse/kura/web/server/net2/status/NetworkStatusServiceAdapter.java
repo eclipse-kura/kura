@@ -256,6 +256,7 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setConnectionType(modemInterfaceInfo.getConnectionType().toString());
             gwtModemConfig.setNetworkTechnology(
                     modemInterfaceInfo.getAccessTechnologies().stream().map(Enum::name).collect(Collectors.toList()));
+            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getSignalStrength()));
 
             // this is a duplication because the GwtModemInterfaceConfig is poorly designed
             gwtModemConfig.setIpAddress(gwtConfig.getIpAddress());

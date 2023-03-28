@@ -71,7 +71,7 @@
             cardinality="0"
             required="true"
             default="true"
-            description="Enables or disables the database defragmantation." />
+            description="Enables or disables the database defragmantation. Use the Defrag Interval parameter to specifiy the interval." />
 
          <AD id="db.defrag.interval.seconds"
             name="Defrag Interval (seconds)"
@@ -88,7 +88,7 @@
             cardinality="0"
             required="true"
             default="true"
-            description="Enables or disables checkpoints in WAL journal mode."/>
+            description="Enables or disables checkpoints in WAL journal mode. Use the WAL Checkpoint Interval parameter to specifiy the interval."/>
 
          <AD id="db.wal.checkpoint.interval.seconds"
             name="WAL Checkpoint Interval (Seconds)"

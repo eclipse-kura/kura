@@ -5,7 +5,8 @@ This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduc
 
 
 Features:
-  * 5743b23ee4 - [dhcp-server] added dnsmasq support [Backport] (#4498) (Marcello Rinaldo Martina)
+  * bb2c0daae3 - Added db.defrag.enabled and db.wal.checkpoint.enabled fields. [Backport] (#4500) (Matteo Maiero)
+  * 5743b23ee4 - [dhcp-server] added dnsmasq support [Backport] (#4498) (Matteo Maiero)
   * 7a54e07345 - First implementation of NetworkStatusService REST APIs (#4461) (nicolatimeus)
   * 94c91459b4 - [nm] add GPS enable/disable support (#4476) (Mattia Dal Ben)
   * 287c648ed3 - [web2] added automatic channel selection support for WiFi on net2 (#4448) (Marcello Rinaldo Martina)
@@ -61,6 +62,9 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * fa77118f1d - [nm] Settings leak on connection activation failure [Backport] (#4502) (Matteo Maiero)
+  * 1293607a58 - Overriding NM unmanaged-devices policy  [Backport] (#4501) (Matteo Maiero)
+  * ce63dc20d1 - Improved local image existence test with exact match [backport release-5.3.0] (#4499) (github-actions[bot])
   * b7d85c4635 - [distrib] manage netplan configuration on installation [backport release-5.3.0] (#4494) (github-actions[bot])
   * a8086cda1c - Fixed polkit rules (#4487) (Salvatore Coppola)
   * b9e78a08a9 - [core.crypto] UTF characters wrongly encoded/decoded with AES (#4482) (Salvatore Coppola)
@@ -269,7 +273,11 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
-  * 5743b23ee4 - feat(dhcp-server): added dnsmasq support [Backport] (#4498) (Marcello Rinaldo Martina)
+  * fa77118f1d - fix(nm): Settings leak on connection activation failure [Backport] (#4502) (Matteo Maiero)
+  * 1293607a58 - fix: Overriding NM unmanaged-devices policy  [Backport] (#4501) (Matteo Maiero)
+  * bb2c0daae3 - feat: Added db.defrag.enabled and db.wal.checkpoint.enabled fields. [Backport] (#4500) (Matteo Maiero)
+  * ce63dc20d1 - fix: Improved local image existence test with exact match [backport release-5.3.0] (#4499) (github-actions[bot])
+  * 5743b23ee4 - feat(dhcp-server): added dnsmasq support [Backport] (#4498) (Matteo Maiero)
   * 56800061a5 - chore: Updated libsocket-can-osgi version (#4495) (nicolatimeus)
   * b7d85c4635 - fix(distrib): manage netplan configuration on installation [backport release-5.3.0] (#4494) (github-actions[bot])
   * 98395f0fed - chore: Upticked versions for 5.3.0 release  (#4493) (nicolatimeus)

@@ -1,7 +1,7 @@
 Eclipse Kura - 5.3.0 - March 2023
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces a new framework compatibility with Java 17, a completely renewed networking that leverages Linux NetworkManager, a new set of APIs and abstarctions for SQL and noSQL databases, the availability of SQLite as a database option (H2 still available for compatibility reasons), an improved Container Management feature with UDP ports support, a refreshed Asset implementation with the new data publishing on change and, finally, the new Kura Data Service Connection Policy.
+This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces a new framework compatibility with Java 17, a completely renewed networking that leverages Linux NetworkManager, a new set of APIs and abstractions for SQL and noSQL databases, the availability of SQLite as a database option (H2 still available for compatibility reasons), an improved Container Management feature with UDP ports support, a refreshed Asset implementation with the new data publishing on change and, finally, the new Kura Data Service Connection Policy.
 
 
 Features:

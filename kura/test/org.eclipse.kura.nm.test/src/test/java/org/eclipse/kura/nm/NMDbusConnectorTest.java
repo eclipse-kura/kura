@@ -65,6 +65,7 @@ import org.eclipse.kura.net.status.modem.ModemPowerState;
 import org.eclipse.kura.net.status.modem.RegistrationStatus;
 import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.modem.SimType;
+import org.freedesktop.AddAndActivateConnectionTuple;
 import org.freedesktop.ModemManager1;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -104,6 +105,9 @@ public class NMDbusConnectorTest {
     private Boolean hasKuraExceptionThrown = false;
 
     private NetworkInterfaceStatus netInterface;
+
+    private Map<String, Connection> mockedConnections = new HashMap<>();
+    private List<DBusPath> mockedConnectionDbusPathList = new ArrayList<>();
 
     private final Map<String, Device> mockDevices = new HashMap<>();
     private Connection mockConnection;
@@ -369,6 +373,7 @@ public class NMDbusConnectorTest {
         givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
         givenMockedDeviceList();
+        givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
@@ -743,6 +748,116 @@ public class NMDbusConnectorTest {
         thenConfigurationEnforcementIsActive(true);
     }
 
+    @Test
+    public void applyingConfigurationShouldCleanUnusedConnectionsIfActiveConnectionExists()
+            throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth1", "eth1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenMockedAssociatedConnection("kura-eth1-connection", "uuid-1234", "eth1", "/connection/path/mock/0");
+        givenMockedConnection("kura-eth1-connection", "uuid-1234", "eth1", "/connection/path/mock/1");
+        givenMockedConnection("kura-eth1-connection", "uuid-4345", "eth1", "/connection/path/mock/2");
+        givenMockedConnection("kura-eth1-connection", "uuid-5466", "eth1", "/connection/path/mock/3");
+        givenMockedConnection("kura-eth1-connection", "uuid-3453", "eth1", "/connection/path/mock/4");
+        givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
+
+        givenNetworkConfigMapWith("net.interfaces", "eth1");
+        givenNetworkConfigMapWith("net.interface.eth1.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip6.status", "netIPv4StatusDisabled");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenConnectionIsNotDeleted("/connection/path/mock/0");
+        thenConnectionIsDeleted("/connection/path/mock/1");
+        thenConnectionIsDeleted("/connection/path/mock/2");
+        thenConnectionIsDeleted("/connection/path/mock/3");
+        thenConnectionIsDeleted("/connection/path/mock/4");
+        thenConnectionIsNotDeleted("/connection/path/mock/5");
+    }
+
+    @Test
+    public void applyingConfigurationShouldDeleteExistingExtraAvailableConnections() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth1", "eth1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenMockedConnection("kura-eth1-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
+        givenMockedConnection("kura-eth1-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
+        givenMockedConnection("kura-eth1-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
+        givenMockedConnection("kura-eth1-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
+        givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
+
+        givenNetworkConfigMapWith("net.interfaces", "eth1");
+        givenNetworkConfigMapWith("net.interface.eth1.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth1.config.ip6.status", "netIPv4StatusDisabled");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenConnectionIsNotDeleted("/connection/path/mock/1");
+        thenConnectionIsDeleted("/connection/path/mock/2");
+        thenConnectionIsDeleted("/connection/path/mock/3");
+        thenConnectionIsDeleted("/connection/path/mock/4");
+        thenConnectionIsNotDeleted("/connection/path/mock/5");
+    }
+
+    @Test
+    public void applyingDisableConfigurationShouldCleanUnusedAssociatedConnections() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenMockedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
+        givenMockedConnection("kura-wlan0-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
+        givenMockedConnection("kura-wlan0-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
+        givenMockedConnection("kura-wlan0-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
+        givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
+
+        givenNetworkConfigMapWith("net.interfaces", "wlan0");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusDisabled");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenConnectionIsDeleted("/connection/path/mock/1");
+        thenConnectionIsDeleted("/connection/path/mock/2");
+        thenConnectionIsDeleted("/connection/path/mock/3");
+        thenConnectionIsDeleted("/connection/path/mock/4");
+        thenConnectionIsNotDeleted("/connection/path/mock/5");
+    }
+
+    @Test
+    public void applyingDisableConfigurationShouldCleanUnusedConnectionsIfActiveConnectionExists()
+            throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenMockedAssociatedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/0");
+        givenMockedConnection("kura-wlan0-connection", "uuid-1234", "wlan0", "/connection/path/mock/1");
+        givenMockedConnection("kura-wlan0-connection", "uuid-4345", "wlan0", "/connection/path/mock/2");
+        givenMockedConnection("kura-wlan0-connection", "uuid-5466", "wlan0", "/connection/path/mock/3");
+        givenMockedConnection("kura-wlan0-connection", "uuid-3453", "wlan0", "/connection/path/mock/4");
+        givenMockedConnection("kura-eth0-connection", "uuid-3454", "eth0", "/connection/path/mock/5");
+
+        givenNetworkConfigMapWith("net.interfaces", "wlan0");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusDisabled");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenConnectionIsDeleted("/connection/path/mock/0");
+        thenConnectionIsDeleted("/connection/path/mock/1");
+        thenConnectionIsDeleted("/connection/path/mock/2");
+        thenConnectionIsDeleted("/connection/path/mock/3");
+        thenConnectionIsDeleted("/connection/path/mock/4");
+        thenConnectionIsNotDeleted("/connection/path/mock/5");
+    }
+
     /*
      * Given
      */
@@ -857,6 +972,108 @@ public class NMDbusConnectorTest {
         if (type == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             givenModemMocksFor(deviceId, interfaceId, mockedProperties, hasBearers, hasSims);
         }
+
+    }
+
+    public void givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection() throws DBusException {
+        DBusPath newConnectionPath = mock(DBusPath.class);
+        when(newConnectionPath.getPath()).thenReturn("/mock/Connection/path/newly/created");
+
+        AddAndActivateConnectionTuple addAndActivateConnectionTuple = mock(AddAndActivateConnectionTuple.class);
+        when(addAndActivateConnectionTuple.getPath()).thenReturn(newConnectionPath);
+
+        when(this.mockedNetworkManager.AddAndActivateConnection(any(), any(), any()))
+                .thenReturn(addAndActivateConnectionTuple);
+
+        doReturn(mock(Connection.class)).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
+                "/mock/Connection/path/newly/created", Connection.class);
+    }
+
+    public void givenMockedConnection(String connectionId, String connectionUuid, String interfaceName,
+            String connectionPath) throws DBusException {
+
+        if (this.mockedConnectionDbusPathList.isEmpty()) {
+            Settings settings = mock(Settings.class);
+            when(settings.ListConnections()).thenReturn(this.mockedConnectionDbusPathList);
+
+            doReturn(settings).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+                    eq("/org/freedesktop/NetworkManager/Settings"), eq(Settings.class));
+
+            DBusPath mockUuidPath = mock(DBusPath.class);
+            when(mockUuidPath.getPath()).thenReturn("/unused/connection/path");
+
+            when(settings.GetConnectionByUuid(any())).thenReturn(mockUuidPath);
+
+            doThrow(DBusExecutionException.class).when(this.dbusConnection).getRemoteObject(
+                    eq("org.freedesktop.NetworkManager"), eq("/unused/connection/path"), eq(Connection.class));
+        }
+
+        DBusPath mockPath = mock(DBusPath.class);
+        when(mockPath.getPath()).thenReturn(connectionPath);
+
+        this.mockedConnectionDbusPathList.add(mockPath);
+
+        Map<String, Map<String, Variant<?>>> connectionSettings = new HashMap<>();
+
+        Map<String, Variant<?>> variantConfig = new HashMap<>();
+
+        variantConfig.put("id", new Variant<>(connectionId));
+        variantConfig.put("uuid", new Variant<>(connectionUuid));
+        connectionSettings.put("connection", variantConfig);
+
+        Connection mockNewConnection = mock(Connection.class);
+        when(mockNewConnection.GetSettings()).thenReturn(connectionSettings);
+        when(mockNewConnection.getObjectPath()).thenReturn(connectionPath);
+
+        doReturn(mockNewConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+                eq(connectionPath), eq(Connection.class));
+
+        this.mockedConnections.put(connectionPath, mockNewConnection);
+
+    }
+
+    public void givenMockedAssociatedConnection(String connectionId, String connectionUuid, String interfaceName,
+            String connectionPath) throws DBusException {
+
+        Connection mockAssociatedConnection = mock(Connection.class);
+
+        if (this.mockedConnectionDbusPathList.isEmpty()) {
+            Settings settings = mock(Settings.class);
+            when(settings.ListConnections()).thenReturn(this.mockedConnectionDbusPathList);
+
+            doReturn(settings).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
+                    eq("/org/freedesktop/NetworkManager/Settings"), eq(Settings.class));
+
+            DBusPath mockUuidPath = mock(DBusPath.class);
+            when(mockUuidPath.getPath()).thenReturn("/path/to/Associated/Connection");
+
+            when(settings.GetConnectionByUuid(any())).thenReturn(mockUuidPath);
+
+            doReturn(mockAssociatedConnection).when(this.dbusConnection).getRemoteObject(
+                    eq("org.freedesktop.NetworkManager"), eq("/path/to/Associated/Connection"), eq(Connection.class));
+        }
+
+        DBusPath mockPath = mock(DBusPath.class);
+        when(mockPath.getPath()).thenReturn(connectionPath);
+
+        this.mockedConnectionDbusPathList.add(mockPath);
+
+        Map<String, Map<String, Variant<?>>> connectionSettings = new HashMap<>();
+
+        Map<String, Variant<?>> variantConfig = new HashMap<>();
+
+        variantConfig.put("id", new Variant<>(connectionId));
+        variantConfig.put("uuid", new Variant<>(connectionUuid));
+        connectionSettings.put("connection", variantConfig);
+
+        when(mockAssociatedConnection.GetSettings()).thenReturn(connectionSettings);
+        when(mockAssociatedConnection.getObjectPath()).thenReturn(connectionPath);
+
+        doReturn(mockAssociatedConnection).when(this.dbusConnection)
+                .getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
+
+        this.mockedConnections.put(connectionPath, mockAssociatedConnection);
+
     }
 
     private void givenExtraStatusMocksFor(String interfaceName, NMDeviceState state, Properties mockedProperties)
@@ -908,8 +1125,8 @@ public class NMDbusConnectorTest {
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "HardwareRevision")).thenReturn("S");
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimaryPort")).thenReturn(interfaceName);
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "Ports"))
-                .thenReturn(Arrays.asList(new Object[] { (Object) interfaceName, new UInt32(2) },
-                        new Object[] { (Object) "ttyACM3", new UInt32(4) }));
+                .thenReturn(Arrays.asList(new Object[] { interfaceName, new UInt32(2) },
+                        new Object[] { "ttyACM3", new UInt32(4) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SupportedCapabilities"))
                 .thenReturn(Arrays.asList(new UInt32(4), new UInt32(8)));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "CurrentCapabilities"))
@@ -963,14 +1180,14 @@ public class NMDbusConnectorTest {
             when(modemProperties.Get(MM_MODEM_BUS_NAME, "Sim"))
                     .thenReturn(new DBusPath("/"));
         }
-        
+
         // Modem location
         this.mockModemLocation = mock(Location.class);
-        doReturn(mockModemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
+        doReturn(this.mockModemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
                 "/org/freedesktop/ModemManager1/Modem/3", Location.class);
-        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(mockModemLocation).getObjectPath();
-        
-        
+        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(this.mockModemLocation).getObjectPath();
+
+
         Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
         Set<MMModemLocationSource> enabledSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
         when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Capabilities"))
@@ -1183,6 +1400,14 @@ public class NMDbusConnectorTest {
 
     public void thenConfigurationEnforcementIsActive(boolean expectedValue) {
         assertEquals(expectedValue, this.instanceNMDbusConnector.configurationEnforcementIsActive());
+    }
+
+    private void thenConnectionIsDeleted(String path) {
+        verify(this.mockedConnections.get(path)).Delete();
+    }
+
+    private void thenConnectionIsNotDeleted(String path) {
+        verify(this.mockedConnections.get(path), times(0)).Delete();
     }
 
     private void thenLocationSetupWasCalledWith(EnumSet<MMModemLocationSource> expectedLocationSources,

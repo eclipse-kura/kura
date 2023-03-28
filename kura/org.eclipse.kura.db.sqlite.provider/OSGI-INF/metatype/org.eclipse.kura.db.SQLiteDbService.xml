@@ -65,23 +65,39 @@
             <Option label="WAL" value="WAL"/>
          </AD>
 
+         <AD id="db.defrag.enabled"
+            name="Defrag enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enables or disables the database defragmantation. Use the Defrag Interval parameter to specifiy the interval." />
+
          <AD id="db.defrag.interval.seconds"
             name="Defrag Interval (seconds)"
             type="Long"
             cardinality="0" 
-            required="true"
+            required="false"
             default="900"
             min="60"
-            description="SqliteDbService instances support running periodic defragmentation using the VACUUM command (https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in seconds beetween two consecutive defragmentations, set to zero to disable. This parameter is only relevant for persisted databases."/>
+            description="SqliteDbService instances support running periodic defragmentation using the VACUUM command (https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in seconds beetween two consecutive defragmentations. This parameter is only relevant for persisted databases."/>
+
+         <AD id="db.wal.checkpoint.enabled"
+            name="Checkpoint enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enables or disables checkpoints in WAL journal mode. Use the WAL Checkpoint Interval parameter to specifiy the interval."/>
 
          <AD id="db.wal.checkpoint.interval.seconds"
             name="WAL Checkpoint Interval (Seconds)"
             type="Long"
             cardinality="0" 
-            required="true"
+            required="false"
             default="600"
-            min="0"
-            description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
+            min="60"
+            description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
 
          <AD id="db.connection.pool.max.size"
             name="Connection Pool Max Size"

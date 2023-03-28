@@ -223,9 +223,9 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private ModemConnectionStatus connectionStatus = ModemConnectionStatus.UNKNOWN;
         private Set<AccessTechnology> accessTechnologies = EnumSet.of(AccessTechnology.UNKNOWN);
         private int signalQuality = 0;
+        private int signalStrength = -113;
         private RegistrationStatus registrationStatus = RegistrationStatus.UNKNOWN;
         private String operatorName = NA;
-        private int signalStrength = -113;
 
         public ModemInterfaceStatusBuilder withModel(String model) {
             this.model = model;
@@ -343,6 +343,11 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
+        public ModemInterfaceStatusBuilder withSignalStrength(int signalStrength) {
+            this.signalStrength = signalStrength;
+            return getThis();
+        }
+
         public ModemInterfaceStatusBuilder withRegistrationStatus(RegistrationStatus registrationStatus) {
             this.registrationStatus = registrationStatus;
             return getThis();
@@ -350,11 +355,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         public ModemInterfaceStatusBuilder withOperatorName(String operatorName) {
             this.operatorName = operatorName;
-            return getThis();
-        }
-
-        public ModemInterfaceStatusBuilder withSignalStrength(int signalStrength) {
-            this.signalStrength = signalStrength;
             return getThis();
         }
 

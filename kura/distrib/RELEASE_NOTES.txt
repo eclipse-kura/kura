@@ -48,15 +48,17 @@ Features:
   * 79589e791b - add Temurin JDK as alternative JVM in .deb dependencies (#4190) (Mattia Dal Ben)
 
 Target Environments:
-* Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
-    * Raspberry Pi 3/4 based on Ubuntu 20.04 (64 bits) (Kura networking)
-    * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
-    * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
-    * Generic x86_64 (NetworkManager)
-    * Generic arm32 (NetworkManager)
-    * Generic arm64 (NetworkManager)
-  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
+ Kura is released as pre-compiled binary installers for the following platforms:
+
+  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
+  * Raspberry Pi 3/4 based on 64 bits OS (Kura networking)
+  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
+  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
+  * Generic Debian Package for x86_64 (NetworkManager)
+  * Generic Debian Package for arm32 (NetworkManager)
+  * Generic Debian Package for arm64 (NetworkManager)
+
+ Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
   * b7d85c4635 - [distrib] manage netplan configuration on installation [backport release-5.3.0] (#4494) (github-actions[bot])

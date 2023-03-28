@@ -97,7 +97,7 @@
             required="false"
             default="600"
             min="60"
-            description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
+            description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
 
          <AD id="db.connection.pool.max.size"
             name="Connection Pool Max Size"

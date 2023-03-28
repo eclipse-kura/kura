@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -74,16 +74,16 @@ class SqliteDbServiceOptions {
         }
 
         public String getKey() {
-            return key;
+            return this.key;
         }
 
         public EncryptionKeyFormat getFormat() {
-            return format;
+            return this.format;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(format, key);
+            return Objects.hash(this.format, this.key);
         }
 
         @Override
@@ -95,7 +95,7 @@ class SqliteDbServiceOptions {
                 return false;
             }
             EncryptionKeySpec other = (EncryptionKeySpec) obj;
-            return format == other.format && Objects.equals(key, other.key);
+            return this.format == other.format && Objects.equals(this.key, other.key);
         }
 
     }
@@ -106,8 +106,12 @@ class SqliteDbServiceOptions {
             "db.connection.pool.max.size", 10);
     private static final Property<String> JOURNAL_MODE_PROPERTY = new Property<>("db.journal.mode",
             JournalMode.WAL.name());
+    private static final Property<Boolean> DEFRAG_ENABLED_PROPERTY = new Property<>("db.defrag.enabled", true);
     private static final Property<Long> DEFRAG_INTERVAL_SECONDS_PROPERTY = new Property<>("db.defrag.interval.seconds",
             900L);
+    private static final Property<Boolean> WAL_CHECHPOINT_ENABLED_PROPERTY = new Property<>("db.wal.checkpoint.enabled",
+            true);
+
     private static final Property<Long> WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY = new Property<>(
             "db.wal.checkpoint.interval.seconds", 600L);
     private static final Property<Boolean> DEBUG_SHELL_ACCESS_ENABLED_PROPERTY = new Property<>(
@@ -124,7 +128,9 @@ class SqliteDbServiceOptions {
     private final String path;
     private final String kuraServicePid;
     private final boolean isDebugShellAccessEnabled;
+    private final boolean defragEnabled;
     private final long defragIntervalSeconds;
+    private final boolean walCheckpointEnabled;
     private final long walCheckpointIntervalSeconds;
     private final int maxConnectionPoolSize;
     private final JournalMode journalMode;
@@ -137,7 +143,9 @@ class SqliteDbServiceOptions {
         this.path = sanitizePath(PATH_PROPERTY.get(properties));
         this.kuraServicePid = KURA_SERVICE_PID_PROPERTY.get(properties);
         this.maxConnectionPoolSize = CONNECTION_POOL_MAX_SIZE_PROPERTY.get(properties);
+        this.defragEnabled = DEFRAG_ENABLED_PROPERTY.get(properties);
         this.defragIntervalSeconds = DEFRAG_INTERVAL_SECONDS_PROPERTY.get(properties);
+        this.walCheckpointEnabled = WAL_CHECHPOINT_ENABLED_PROPERTY.get(properties);
         this.walCheckpointIntervalSeconds = WAL_CHECKPOINT_INTERVAL_SECONDS_PROPERTY.get(properties);
         this.journalMode = extractJournalMode(properties);
         this.isDebugShellAccessEnabled = DEBUG_SHELL_ACCESS_ENABLED_PROPERTY.get(properties);
@@ -147,11 +155,11 @@ class SqliteDbServiceOptions {
     }
 
     public Mode getMode() {
-        return mode;
+        return this.mode;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public int getConnectionPoolMaxSize() {
@@ -159,31 +167,31 @@ class SqliteDbServiceOptions {
     }
 
     public boolean isDebugShellAccessEnabled() {
-        return isDebugShellAccessEnabled;
+        return this.isDebugShellAccessEnabled;
     }
 
     public long getDefragIntervalSeconds() {
-        return defragIntervalSeconds;
+        return this.defragIntervalSeconds;
     }
 
     public JournalMode getJournalMode() {
-        return journalMode;
+        return this.journalMode;
     }
 
     public String getKuraServicePid() {
-        return kuraServicePid;
+        return this.kuraServicePid;
     }
 
     public long getWalCheckpointIntervalSeconds() {
-        return walCheckpointIntervalSeconds;
+        return this.walCheckpointIntervalSeconds;
     }
 
     public EncryptionKeyFormat getEncryptionKeyFormat() {
-        return encryptionKeyFormat;
+        return this.encryptionKeyFormat;
     }
 
     public boolean isDeleteDbFilesOnFailure() {
-        return deleteDbFilesOnFailure;
+        return this.deleteDbFilesOnFailure;
     }
 
     public Optional<EncryptionKeySpec> getEncryptionKey(final CryptoService cryptoService) throws KuraException {
@@ -201,12 +209,11 @@ class SqliteDbServiceOptions {
     }
 
     public boolean isPeriodicWalCheckpointEnabled() {
-        return this.mode != Mode.IN_MEMORY && this.journalMode == JournalMode.WAL
-                && this.walCheckpointIntervalSeconds > 0;
+        return this.mode != Mode.IN_MEMORY && this.journalMode == JournalMode.WAL && this.walCheckpointEnabled;
     }
 
     public boolean isPeriodicDefragEnabled() {
-        return this.mode != Mode.IN_MEMORY && this.defragIntervalSeconds > 0;
+        return this.mode != Mode.IN_MEMORY && this.defragEnabled;
     }
 
     private String expectAscii(final String value) throws KuraException {
@@ -251,10 +258,10 @@ class SqliteDbServiceOptions {
     }
 
     public String getDbUrl() {
-        if (mode == Mode.PERSISTED) {
+        if (this.mode == Mode.PERSISTED) {
             return "jdbc:sqlite:file:" + this.path;
         } else {
-            return "jdbc:sqlite:file:" + kuraServicePid + "?mode=memory&cache=shared";
+            return "jdbc:sqlite:file:" + this.kuraServicePid + "?mode=memory&cache=shared";
         }
     }
 
@@ -276,10 +283,20 @@ class SqliteDbServiceOptions {
         }
     }
 
+    public boolean isDefragEnabled() {
+        return this.defragEnabled;
+    }
+
+    public boolean isWalCheckpointEnabled() {
+        return this.walCheckpointEnabled;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(defragIntervalSeconds, deleteDbFilesOnFailure, encryptionKey, encryptionKeyFormat,
-                journalMode, kuraServicePid, maxConnectionPoolSize, mode, path, walCheckpointIntervalSeconds);
+        return Objects.hash(this.defragEnabled, this.defragIntervalSeconds, this.deleteDbFilesOnFailure,
+                this.encryptionKey, this.encryptionKeyFormat, this.isDebugShellAccessEnabled, this.journalMode,
+                this.kuraServicePid, this.maxConnectionPoolSize, this.mode, this.path, this.walCheckpointEnabled,
+                this.walCheckpointIntervalSeconds);
     }
 
     @Override
@@ -287,18 +304,19 @@ class SqliteDbServiceOptions {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof SqliteDbServiceOptions)) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         SqliteDbServiceOptions other = (SqliteDbServiceOptions) obj;
-        return defragIntervalSeconds == other.defragIntervalSeconds
-                && deleteDbFilesOnFailure == other.deleteDbFilesOnFailure
-                && Objects.equals(encryptionKey, other.encryptionKey)
-                && encryptionKeyFormat == other.encryptionKeyFormat && journalMode == other.journalMode
-                && Objects.equals(kuraServicePid, other.kuraServicePid)
-                && maxConnectionPoolSize == other.maxConnectionPoolSize && mode == other.mode
-                && Objects.equals(path, other.path)
-                && walCheckpointIntervalSeconds == other.walCheckpointIntervalSeconds;
+        return this.defragEnabled == other.defragEnabled && this.defragIntervalSeconds == other.defragIntervalSeconds
+                && this.deleteDbFilesOnFailure == other.deleteDbFilesOnFailure
+                && Objects.equals(this.encryptionKey, other.encryptionKey)
+                && this.encryptionKeyFormat == other.encryptionKeyFormat
+                && this.isDebugShellAccessEnabled == other.isDebugShellAccessEnabled
+                && this.journalMode == other.journalMode && Objects.equals(this.kuraServicePid, other.kuraServicePid)
+                && this.maxConnectionPoolSize == other.maxConnectionPoolSize && this.mode == other.mode
+                && Objects.equals(this.path, other.path) && this.walCheckpointEnabled == other.walCheckpointEnabled
+                && this.walCheckpointIntervalSeconds == other.walCheckpointIntervalSeconds;
     }
 
 }

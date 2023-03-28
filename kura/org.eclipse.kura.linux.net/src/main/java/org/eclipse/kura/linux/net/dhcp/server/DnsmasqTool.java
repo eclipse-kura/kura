@@ -13,8 +13,10 @@
 package org.eclipse.kura.linux.net.dhcp.server;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -22,10 +24,15 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DnsmasqTool implements DhcpLinuxTool {
 
+    private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
+
     private CommandExecutorService executorService;
+    private Set<String> activeInterfaces = Collections.synchronizedSet(new HashSet<>());
 
     public DnsmasqTool(CommandExecutorService service) {
         this.executorService = service;
@@ -35,30 +42,46 @@ public class DnsmasqTool implements DhcpLinuxTool {
     public boolean isRunning(String interfaceName) {
         CommandStatus status = this.executorService.execute(
                 new Command(new String[] { "systemctl", "is-active", "--quiet", DhcpServerTool.DNSMASQ.getValue() }));
-        return status.getExitStatus().isSuccessful();
+        boolean isRunning = status.getExitStatus().isSuccessful() && this.activeInterfaces.contains(interfaceName);
+
+        logger.debug("DNSMASQ - Is dnsmasq running for interface {}? {}", interfaceName, isRunning);
+
+        return isRunning;
     }
 
     @Override
     public CommandStatus startInterface(String interfaceName) {
-        List<String> command = new ArrayList<>();
+        logger.debug("DNSMASQ - starting dnsmasq service for interface {}.", interfaceName);
+        this.activeInterfaces.add(interfaceName);
 
-        command.add("systemctl");
-        command.add("start");
-        command.add(DhcpServerTool.DNSMASQ.getValue());
-
-        Command cmd = new Command(command.toArray(new String[0]));
-
-        return this.executorService.execute(cmd);
+        return this.executorService.execute(systemctlRestartCommand());
     }
 
     @Override
     public boolean disableInterface(String interfaceName) throws KuraProcessExecutionErrorException {
-        File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
-        configFile.delete();
+        try {
+            File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
 
-        CommandStatus status = this.executorService.execute(
-                new Command(new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() }));
-        return status.getExitStatus().isSuccessful();
+            boolean isInterfaceDisabled = true;
+
+            if (Files.deleteIfExists(configFile.toPath())) {
+                CommandStatus status = this.executorService.execute(systemctlRestartCommand());
+                isInterfaceDisabled = status.getExitStatus().isSuccessful();
+            }
+            
+            this.activeInterfaces.remove(interfaceName);
+
+            logger.debug("DNSMASQ - Disabled dhcp server on interface {}. Success? {}", interfaceName,
+                    isInterfaceDisabled);
+    
+            return isInterfaceDisabled;
+        } catch (Exception e) {
+            throw new KuraProcessExecutionErrorException("Failed to disable DHCP server: " + e.getMessage());
+        }
+    }
+
+    private Command systemctlRestartCommand() {
+        return new Command(new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
     }
 
 }

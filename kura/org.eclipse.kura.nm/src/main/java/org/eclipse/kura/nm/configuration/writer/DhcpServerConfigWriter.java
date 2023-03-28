@@ -104,6 +104,29 @@ public class DhcpServerConfigWriter {
                 pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
 
                 addDNSServersOption(dhcpServerConfig, pw);
+            } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+                pw.println("interface=" + dhcpServerConfig.getInterfaceName());
+                pw.println("bind-interfaces");
+                pw.println("dhcp-option=1," + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
+                pw.println("dhcp-option=3," + dhcpServerConfig.getRouterAddress().toString());
+
+                if (dhcpServerConfig.isPassDns()) {
+                    // announce DNS servers on this device
+                    pw.println("dhcp-option=6,0.0.0.0");
+                }
+
+                // all subnets are local
+                pw.println("dhcp-option=27,1");
+                pw.println("dhcp-lease-max=" + dhcpServerConfig.getMaximumLeaseTime());
+                // disable DNS server since managed by NetworkManager
+                pw.println("port=0");
+                
+                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")
+                    .append(dhcpServerConfig.getRangeStart())
+                    .append(",")
+                    .append(dhcpServerConfig.getRangeEnd()).append(",")
+                    .append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
+                pw.println(dhcpRangeProp.toString());
             }
             pw.flush();
             fos.getFD().sync();

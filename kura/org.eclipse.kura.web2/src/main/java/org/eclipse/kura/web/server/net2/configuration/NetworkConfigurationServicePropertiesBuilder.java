@@ -107,9 +107,16 @@ public class NetworkConfigurationServicePropertiesBuilder {
     }
 
     private void setIpv4DhcpServerProperties() {
-        boolean isDhcpServer = this.gwtConfig.getConfigMode().equals(GwtNetIfConfigMode.netIPv4ConfigModeManual.name())
-                && !this.gwtConfig.getRouterMode().equals(GwtNetRouterMode.netRouterOff.name());
+        boolean isManualAddress = this.gwtConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeManual;
+        boolean isDhcpServer = isManualAddress
+                && this.gwtConfig.getRouterModeEnum() != GwtNetRouterMode.netRouterOff
+                && this.gwtConfig.getRouterModeEnum() != GwtNetRouterMode.netRouterNat;
+        boolean isNatEnabled = isManualAddress
+                && (this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterNat
+                        || this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchpNat);
+
         this.properties.setDhcpServer4Enabled(this.ifname, isDhcpServer);
+        this.properties.setNatEnabled(this.ifname, isNatEnabled);
 
         if (isDhcpServer) {
             this.properties.setDhcpServer4RangeStart(this.ifname, this.gwtConfig.getRouterDhcpBeginAddress());

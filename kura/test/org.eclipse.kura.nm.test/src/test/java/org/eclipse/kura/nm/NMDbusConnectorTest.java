@@ -1011,9 +1011,9 @@ public class NMDbusConnectorTest {
     public void givenMockedConnection(String connectionId, String connectionUuid, String interfaceName,
             String connectionPath) throws DBusException {
 
-        if (mockedConnectionDbusPathList.isEmpty()) {
+        if (this.mockedConnectionDbusPathList.isEmpty()) {
             Settings settings = mock(Settings.class);
-            when(settings.ListConnections()).thenReturn(mockedConnectionDbusPathList);
+            when(settings.ListConnections()).thenReturn(this.mockedConnectionDbusPathList);
 
             doReturn(settings).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                     eq("/org/freedesktop/NetworkManager/Settings"), eq(Settings.class));
@@ -1030,7 +1030,7 @@ public class NMDbusConnectorTest {
         DBusPath mockPath = mock(DBusPath.class);
         when(mockPath.getPath()).thenReturn(connectionPath);
 
-        mockedConnectionDbusPathList.add(mockPath);
+        this.mockedConnectionDbusPathList.add(mockPath);
 
         Map<String, Map<String, Variant<?>>> connectionSettings = new HashMap<>();
 
@@ -1047,7 +1047,7 @@ public class NMDbusConnectorTest {
         doReturn(mockNewConnection).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                 eq(connectionPath), eq(Connection.class));
 
-        mockedConnections.put(connectionPath, mockNewConnection);
+        this.mockedConnections.put(connectionPath, mockNewConnection);
 
     }
 
@@ -1056,9 +1056,9 @@ public class NMDbusConnectorTest {
 
         Connection mockAssociatedConnection = mock(Connection.class);
 
-        if (mockedConnectionDbusPathList.isEmpty()) {
+        if (this.mockedConnectionDbusPathList.isEmpty()) {
             Settings settings = mock(Settings.class);
-            when(settings.ListConnections()).thenReturn(mockedConnectionDbusPathList);
+            when(settings.ListConnections()).thenReturn(this.mockedConnectionDbusPathList);
 
             doReturn(settings).when(this.dbusConnection).getRemoteObject(eq("org.freedesktop.NetworkManager"),
                     eq("/org/freedesktop/NetworkManager/Settings"), eq(Settings.class));
@@ -1075,7 +1075,7 @@ public class NMDbusConnectorTest {
         DBusPath mockPath = mock(DBusPath.class);
         when(mockPath.getPath()).thenReturn(connectionPath);
 
-        mockedConnectionDbusPathList.add(mockPath);
+        this.mockedConnectionDbusPathList.add(mockPath);
 
         Map<String, Map<String, Variant<?>>> connectionSettings = new HashMap<>();
 
@@ -1091,7 +1091,7 @@ public class NMDbusConnectorTest {
         doReturn(mockAssociatedConnection).when(this.dbusConnection)
                 .getRemoteObject(eq("org.freedesktop.NetworkManager"), eq(connectionPath), eq(Connection.class));
 
-        mockedConnections.put(connectionPath, mockAssociatedConnection);
+        this.mockedConnections.put(connectionPath, mockAssociatedConnection);
 
     }
 
@@ -1144,8 +1144,8 @@ public class NMDbusConnectorTest {
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "HardwareRevision")).thenReturn("S");
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimaryPort")).thenReturn(interfaceName);
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "Ports"))
-                .thenReturn(Arrays.asList(new Object[] { (Object) interfaceName, new UInt32(2) },
-                        new Object[] { (Object) "ttyACM3", new UInt32(4) }));
+                .thenReturn(Arrays.asList(new Object[] { interfaceName, new UInt32(2) },
+                        new Object[] { "ttyACM3", new UInt32(4) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SupportedCapabilities"))
                 .thenReturn(Arrays.asList(new UInt32(4), new UInt32(8)));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "CurrentCapabilities"))
@@ -1199,14 +1199,14 @@ public class NMDbusConnectorTest {
             when(modemProperties.Get(MM_MODEM_BUS_NAME, "Sim"))
                     .thenReturn(new DBusPath("/"));
         }
-        
+
         // Modem location
         this.mockModemLocation = mock(Location.class);
-        doReturn(mockModemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
+        doReturn(this.mockModemLocation).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
                 "/org/freedesktop/ModemManager1/Modem/3", Location.class);
-        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(mockModemLocation).getObjectPath();
-        
-        
+        doReturn("/org/freedesktop/ModemManager1/Modem/3").when(this.mockModemLocation).getObjectPath();
+
+
         Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
         Set<MMModemLocationSource> enabledSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
         when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Capabilities"))
@@ -1422,11 +1422,11 @@ public class NMDbusConnectorTest {
     }
 
     private void thenConnectionIsDeleted(String path) {
-        verify(mockedConnections.get(path)).Delete();
+        verify(this.mockedConnections.get(path)).Delete();
     }
 
     private void thenConnectionIsNotDeleted(String path) {
-        verify(mockedConnections.get(path), times(0)).Delete();
+        verify(this.mockedConnections.get(path), times(0)).Delete();
     }
 
     private void thenLocationSetupWasCalledWith(EnumSet<MMModemLocationSource> expectedLocationSources,

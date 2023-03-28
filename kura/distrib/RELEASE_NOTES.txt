@@ -6,6 +6,7 @@ available on new generic x86_64, aarch64 and armv7hf distribution profiles; supp
 
 
 Features:
+  * 5743b23ee4 - [dhcp-server] added dnsmasq support [Backport] (#4498) (Marcello Rinaldo Martina)
   * 7a54e07345 - First implementation of NetworkStatusService REST APIs (#4461) (nicolatimeus)
   * 94c91459b4 - [nm] add GPS enable/disable support (#4476) (Mattia Dal Ben)
   * 287c648ed3 - [web2] added automatic channel selection support for WiFi on net2 (#4448) (Marcello Rinaldo Martina)
@@ -267,6 +268,7 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 5743b23ee4 - feat(dhcp-server): added dnsmasq support [Backport] (#4498) (Marcello Rinaldo Martina)
   * 56800061a5 - chore: Updated libsocket-can-osgi version (#4495) (nicolatimeus)
   * b7d85c4635 - fix(distrib): manage netplan configuration on installation [backport release-5.3.0] (#4494) (github-actions[bot])
   * 98395f0fed - chore: Upticked versions for 5.3.0 release  (#4493) (nicolatimeus)

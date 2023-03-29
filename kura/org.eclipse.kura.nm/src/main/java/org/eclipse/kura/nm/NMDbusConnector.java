@@ -101,11 +101,11 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
+    private Set<NMModemStateHandler> modemHandlers;
+
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
-
-        this.dbusConnection.addSigHandler(Device.StateChanged.class, new NMModemStateHandler(this));
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -285,6 +285,7 @@ public class NMDbusConnector {
         logger.info("Applying configuration using NetworkManager Dbus connector");
         try {
             configurationEnforcementDisable();
+            modemHandlersDisable();
 
             NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
@@ -296,6 +297,14 @@ public class NMDbusConnector {
         } finally {
             configurationEnforcementEnable();
         }
+    }
+
+    private void modemHandlersDisable() {
+        for (NMModemStateHandler handler : this.modemHandlers) {
+            handler.clearTimer();
+        }
+
+        modemHandlers.clear();
     }
 
     private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
@@ -355,6 +364,16 @@ public class NMDbusConnector {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
             handleModemManagerGPSSetup(device.get(), enableGPS);
+
+            int delay = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+            NMModemStateHandler resetHandler = new NMModemStateHandler(device.get().getObjectPath(), null, // WIP:
+                                                                                                           // Retrieve
+                                                                                                           // modem
+                                                                                                           // device
+                    delay * 60L * 1000L);
+
+            this.modemHandlers.add(resetHandler);
+            this.dbusConnection.addSigHandler(Device.StateChanged.class, resetHandler);
         }
 
     }
@@ -472,11 +491,6 @@ public class NMDbusConnector {
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
         modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
-    }
-
-    private String getDeviceId(String nmDBusPath) throws DBusException {
-        Device nmDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, nmDBusPath, Device.class);
-        return getDeviceId(nmDevice);
     }
 
     private String getDeviceId(Device device) throws DBusException {
@@ -823,19 +837,4 @@ public class NMDbusConnector {
         }
     }
 
-    public int getModemResetDelayMinutesConfiguration(String nmDBusDevicePath) {
-        if (Objects.isNull(this.cachedConfiguration)) {
-            return 0;
-        }
-
-        try {
-            String deviceId = getDeviceId(nmDBusDevicePath);
-
-            return (int) this.cachedConfiguration
-                    .getOrDefault(String.format("net.interface.%s.config.resetTimeout", deviceId), 0);
-        } catch (DBusException e) {
-            return 0;
-        }
-
-    }
 }

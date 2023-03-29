@@ -57,11 +57,18 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
                 logger.debug("Modem {} already scheduled for reset. Ignoring event...", modem.get().getObjectPath());
             }
 
-            logger.info("Modem {} disconnected. Scheduling modem reset...", modem.get().getObjectPath());
+            int delayMinutes = this.nm.getModemResetDelayMinutesConfiguration(s.getPath());
+            if (delayMinutes == 0) {
+                // Do not schedule reset
+                return;
+            }
 
+            logger.info("Modem {} disconnected. Scheduling modem reset in {} minutes ...", modem.get().getObjectPath(),
+                    delayMinutes);
+
+            long delayMilliseconds = delayMinutes * 60L * 1000L;
             this.scheduledTasks = new NMModemResetTimerTask(modem.get());
-            modemResetTimer.schedule(this.scheduledTasks, 45000L); // WIP: Delay should be set by
-                                                                   // configuration, using fixed one
+            modemResetTimer.schedule(this.scheduledTasks, delayMilliseconds);
         } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED) {
 
             if (!timerAlreadyScheduledFor(modem.get())) {

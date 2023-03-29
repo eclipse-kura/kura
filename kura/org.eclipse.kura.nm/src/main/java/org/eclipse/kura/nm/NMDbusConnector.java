@@ -474,6 +474,11 @@ public class NMDbusConnector {
         modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
     }
 
+    private String getDeviceId(String nmDBusPath) throws DBusException {
+        Device nmDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, nmDBusPath, Device.class);
+        return getDeviceId(nmDevice);
+    }
+
     private String getDeviceId(Device device) throws DBusException {
         NMDeviceType deviceType = getDeviceType(device);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
@@ -816,5 +821,21 @@ public class NMDbusConnector {
         } catch (DBusException e) {
             return Optional.empty();
         }
+    }
+
+    public int getModemResetDelayMinutesConfiguration(String nmDBusDevicePath) {
+        if (Objects.isNull(this.cachedConfiguration)) {
+            return 0;
+        }
+
+        try {
+            String deviceId = getDeviceId(nmDBusDevicePath);
+
+            return (int) this.cachedConfiguration
+                    .getOrDefault(String.format("net.interface.%s.config.resetTimeout", deviceId), 0);
+        } catch (DBusException e) {
+            return 0;
+        }
+
     }
 }

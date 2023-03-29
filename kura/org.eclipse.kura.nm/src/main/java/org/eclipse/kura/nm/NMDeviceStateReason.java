@@ -83,7 +83,7 @@ public enum NMDeviceStateReason {
         return new UInt32(this.value);
     }
 
-    public NMDeviceStateReason fromUInt32(UInt32 uValue) {
+    public static NMDeviceStateReason fromUInt32(UInt32 uValue) {
         switch (uValue.intValue()) {
         case 0:
             return NMDeviceStateReason.NM_DEVICE_STATE_REASON_NONE;

@@ -57,7 +57,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
             }
 
             this.scheduledTasks = new NMModemResetTimerTask(modem.get());
-            modemResetTimer.schedule(new NMModemResetTimerTask(modem.get()), 25000L); // TODO: Delay should be set by
+            modemResetTimer.schedule(new NMModemResetTimerTask(modem.get()), 25000L); // WIP: Delay should be set by
                                                                                       // configuration, using fixed one
                                                                                       // for now
         } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED

@@ -39,7 +39,8 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
         logger.info("Modem state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
                 s.getPath());
 
-        if (newState == NMDeviceState.NM_DEVICE_STATE_FAILED) {
+        if (oldState == NMDeviceState.NM_DEVICE_STATE_FAILED
+                && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
             logger.info("Modem {} disconnected. Scheduling modem reset...", s.getPath());
             // Schedule Modem reset
         } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED) {

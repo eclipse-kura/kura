@@ -158,7 +158,7 @@ public class NetworkStatusServiceAdapter {
                 entry.setFrequency(ap.getChannel().getFrequency());
                 entry.setMacAddress(NetworkUtil.macToString(ap.getHardwareAddress()));
                 entry.setSSID(ap.getSsid());
-                entry.setsignalStrength(ap.getSignalQuality());
+                entry.setsignalStrength(ap.getSignalStrength());
 
                 // because of GwtWifiHotspotEntry interface does not discriminate RSN/WPA,
                 // order here is important:
@@ -242,7 +242,7 @@ public class NetworkStatusServiceAdapter {
 
             gwtModemConfig.setHwState(modemInterfaceInfo.getState().toString());
             gwtModemConfig.setHwSerial(modemInterfaceInfo.getSerialNumber());
-            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getRssi()));
+            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getSignalStrength()));
             gwtModemConfig.setHwICCID(activeSim != null ? activeSim.getIccid() : "NA");
             gwtModemConfig.setHwIMSI(activeSim != null ? activeSim.getImsi() : "NA");
             gwtModemConfig.setHwRegistration(modemInterfaceInfo.getRegistrationStatus().toString());
@@ -256,6 +256,7 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setConnectionType(modemInterfaceInfo.getConnectionType().toString());
             gwtModemConfig.setNetworkTechnology(
                     modemInterfaceInfo.getAccessTechnologies().stream().map(Enum::name).collect(Collectors.toList()));
+            gwtModemConfig.setHwRssi(String.valueOf(modemInterfaceInfo.getSignalStrength()));
 
             // this is a duplication because the GwtModemInterfaceConfig is poorly designed
             gwtModemConfig.setIpAddress(gwtConfig.getIpAddress());
@@ -311,7 +312,7 @@ public class NetworkStatusServiceAdapter {
             } else if (wifiInterfaceInfo.getMode() == WifiMode.INFRA) {
                 AtomicReference<String> rssi = new AtomicReference<>("N/A");
                 wifiInterfaceInfo.getActiveWifiAccessPoint()
-                        .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalQuality())));
+                        .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalStrength())));
                 gwtWifiNetInterfaceConfig.setHwRssi(rssi.get());
 
                 if (Objects.nonNull(gwtWifiNetInterfaceConfig.getStationWifiConfig())) {

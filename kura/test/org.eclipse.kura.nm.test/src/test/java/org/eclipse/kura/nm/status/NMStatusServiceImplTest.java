@@ -471,10 +471,10 @@ public class NMStatusServiceImplTest {
         builder.withConnectionType(ModemConnectionType.DirectIP);
         builder.withConnectionStatus(ModemConnectionStatus.REGISTERED);
         builder.withAccessTechnologies(getAccessTechnologies());
-        builder.withSignalQuality(99);
+        builder.withSignalQuality(100);
+        builder.withSignalQuality(-53);
         builder.withRegistrationStatus(RegistrationStatus.EMERGENCY_ONLY);
         builder.withOperatorName("WhoCares?");
-        builder.withRssi(10);
 
         return builder.build();
     }

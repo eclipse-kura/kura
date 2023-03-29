@@ -27,6 +27,7 @@ public class WifiAccessPointDTO {
     private final WifiMode mode;
     private final long maxBitrate;
     private final int signalQuality;
+    private final int signalStrength;
     private final Set<WifiSecurity> wpaSecurity;
     private final Set<WifiSecurity> rsnSecurity;
 
@@ -37,6 +38,7 @@ public class WifiAccessPointDTO {
         this.mode = accessPoint.getMode();
         this.maxBitrate = accessPoint.getMaxBitrate();
         this.signalQuality = accessPoint.getSignalQuality();
+        this.signalStrength = accessPoint.getSignalStrength();
         this.wpaSecurity = accessPoint.getWpaSecurity();
         this.rsnSecurity = accessPoint.getRsnSecurity();
     }

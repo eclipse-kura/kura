@@ -347,8 +347,9 @@ public class NMStatusConverter {
         UInt32 maxBitrate = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "MaxBitrate");
         builder.withMaxBitrate(maxBitrate.longValue());
 
-        Byte strength = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
-        builder.withSignalQuality(strength.intValue());
+        Byte signalQuality = nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Strength");
+        builder.withSignalQuality(signalQuality.intValue());
+        builder.withSignalStrength(convertToWifiSignalStrength(signalQuality.intValue()));
 
         List<NM80211ApSecurityFlags> wpaSecurityFlags = NM80211ApSecurityFlags
                 .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "WpaFlags"));
@@ -426,7 +427,8 @@ public class NMStatusConverter {
         case NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192:
             return WifiSecurity.KEY_MGMT_EAP_SUITE_B_192;
         default:
-            throw new IllegalArgumentException(String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
+            throw new IllegalArgumentException(
+                    String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
         }
     }
 
@@ -534,7 +536,9 @@ public class NMStatusConverter {
             builder.withConnectionStatus(MMModemState.toModemState(properties.Get(MM_MODEM_BUS_NAME, STATE)));
             builder.withAccessTechnologies(MMModemAccessTechnology
                     .toAccessTechnologyFromBitMask(properties.Get(MM_MODEM_BUS_NAME, "AccessTechnologies")));
-            builder.withSignalQuality(getSignalQuality(properties));
+            int signalQuality = getSignalQuality(properties);
+            builder.withSignalQuality(signalQuality);
+            builder.withSignalStrength(convertToModemSignalStrength(signalQuality));
             fill3gppProperties(builder, properties);
         });
         if (Objects.nonNull(simProperties) && !simProperties.isEmpty()) {
@@ -783,5 +787,35 @@ public class NMStatusConverter {
         default:
             return NetworkInterfaceState.UNKNOWN;
         }
+    }
+
+    /**
+     * The conversion from signal quality [%] and signal strength [dBm]
+     * is performed using the algorithm presented in
+     * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L4305
+     * and
+     * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L11664
+     * 
+     * signalQuality = (100 * DeltaRSSI^2 - (RSSIMax - RSSI)*(15*DeltaRSSI + 62*DeltaRSSI))/DeltaRSSI^2
+     */
+    protected static int convertToWifiSignalStrength(int signalQuality) {
+        int rssiMax = -20;
+        int rssiMin = -85;
+        int deltaRssi = rssiMax - rssiMin;
+        return Math.round(rssiMax + (signalQuality - 100) * deltaRssi / 77F);
+    }
+
+    /**
+     * Since it seems that the modem signal quality [%] is derived by the output of
+     * the command at+csq (https://m2msupport.net/m2msupport/atcsq-signal-quality/),
+     * the following method converts the signalQuality to the csq value and finally
+     * convert this to the signal strength [dBm]:
+     * 
+     * signalQuality = 100/30 * csq
+     * signalStrength = -113 + 2 * csq
+     */
+    protected static int convertToModemSignalStrength(int signalQuality) {
+        float csqValue = signalQuality * 30F / 100F;
+        return Math.round(-113F + 2F * csqValue);
     }
 }

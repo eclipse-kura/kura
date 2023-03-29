@@ -283,6 +283,7 @@ Object that contains specific properties to describe the status of a WiFi interf
       "PAIR_CCMP"
     ],
     "signalQuality": 100,
+    "signalStrength": -20,
     "ssid": "MyAccessPoint",
     "wpaSecurity": [
       "NONE"
@@ -304,6 +305,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 100,
+      "signalStrength": -20,
       "ssid": "MyAccessPoint",
       "wpaSecurity": [
         "NONE"
@@ -323,6 +325,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 42,
+      "signalStrength": -69,
       "ssid": "OtherSSID",
       "wpaSecurity": [
         "NONE"
@@ -398,6 +401,7 @@ Object that contains specific properties to describe the status of a WiFi interf
       "PAIR_CCMP"
     ],
     "signalQuality": 0,
+    "signalStrength": -104,
     "ssid": "kura_gateway_raspberry_pi",
     "wpaSecurity": [
       "NONE"
@@ -419,6 +423,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 0,
+      "signalStrength": -104,
       "ssid": "kura_gateway_raspberry_pi",
       "wpaSecurity": [
         "NONE"
@@ -549,6 +554,8 @@ Object that contains specific properties to describe the status of a Modem inter
           * [AccessTechnology](#accesstechnology)
   
   * **signalQuality**: `number` 
+
+  * **signalStrength**: `number` 
   
   * **registrationStatus**: `string (enumerated)` 
       * [RegistrationStatus](#registrationstatus)
@@ -673,6 +680,7 @@ Object that contains specific properties to describe the status of a Modem inter
   "rssi": -113,
   "serialNumber": "111111111111111",
   "signalQuality": 55,
+  "signalStrength": -80,
   "simLocked": true,
   "softwareRevision": "EG25GGBR07A08M2G",
   "state": "ACTIVATED",
@@ -840,6 +848,8 @@ This object describes a Wifi Access Point. It can be used both for describing a 
   * **maxBitrate**: `number` 
   
   * **signalQuality**: `number` 
+
+  * **signalStrength**: `number` 
   
   * **wpaSecurity**: `array` 
       * array element type: `string (enumerated)`

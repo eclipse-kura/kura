@@ -28,23 +28,14 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class WifiAccessPoint {
 
-    /** The Service Set IDentifier of the WiFi network */
     private final String ssid;
-    /** The Basic Service Set IDentifier of the WiFi access point */
     private final byte[] hardwareAddress;
-    /** The {@link WifiChannel} used by the WiFi access point */
     private final WifiChannel channel;
-    /** The {@link WifiMode} of the wireless interface */
     private final WifiMode mode;
-    /** The maximum bitrate this access point is capable of */
     private final long maxBitrate;
-    /** The current signal quality of the access point in percentage */
     private final int signalQuality;
-    /** The current signal strength of the access point in dBm */
     private final int signalStrength;
-    /** The WPA capabilities of the access point */
     private final Set<WifiSecurity> wpaSecurity;
-    /** The RSN capabilities of the access point */
     private final Set<WifiSecurity> rsnSecurity;
 
     private WifiAccessPoint(WifiAccessPointBuilder builder) {
@@ -59,38 +50,83 @@ public class WifiAccessPoint {
         this.rsnSecurity = builder.rsnSecurity;
     }
 
+    /**
+     * Return the Service Set IDentifier of the WiFi network.
+     * 
+     * @return a string representing the ssid
+     */
     public String getSsid() {
         return this.ssid;
     }
 
+    /**
+     * Return the Basic Service Set IDentifier of the WiFi access point.
+     * 
+     * @return a string representing the the bssid
+     */
     public byte[] getHardwareAddress() {
         return this.hardwareAddress;
     }
 
+    /**
+     * Return the {@link WifiChannel} used by the WiFi access point.
+     * 
+     * @return a {@link WifiChannel} object
+     */
     public WifiChannel getChannel() {
         return this.channel;
     }
 
+    /**
+     * Return the {@link WifiMode} of the wireless interface.
+     * 
+     * @return a {@link WifiMode} entry
+     */
     public WifiMode getMode() {
         return this.mode;
     }
 
+    /**
+     * Return the maximum bitrate this access point is capable of.
+     * 
+     * @return a long value representing the bitrate
+     */
     public long getMaxBitrate() {
         return this.maxBitrate;
     }
 
+    /**
+     * Return the current signal quality of the access point in percentage.
+     * 
+     * @return an integer value between 0 and 100
+     */
     public int getSignalQuality() {
         return this.signalQuality;
     }
 
+    /**
+     * Return the current signal strength of the access point in dBm.
+     * 
+     * @return an integer value representing the rssi
+     */
     public int getSignalStrength() {
         return this.signalStrength;
     }
 
+    /**
+     * Return the WPA capabilities of the access point.
+     * 
+     * @return a set of {@link WifiSecurity} representing the capabilities
+     */
     public Set<WifiSecurity> getWpaSecurity() {
         return this.wpaSecurity;
     }
 
+    /**
+     * Return the RSN capabilities of the access point.
+     * 
+     * @return a set of {@link WifiSecurity} representing the capabilities
+     */
     public Set<WifiSecurity> getRsnSecurity() {
         return this.rsnSecurity;
     }

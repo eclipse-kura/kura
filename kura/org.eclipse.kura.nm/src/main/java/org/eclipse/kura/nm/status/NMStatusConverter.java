@@ -796,8 +796,7 @@ public class NMStatusConverter {
      * and
      * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L11664
      * 
-     * signalQuality = (100 * DeltaRSSI^2 - (RSSIMax - RSSI)*(15*DeltaRSSI +
-     * 62*DeltaRSSI))/DeltaRSSI^2
+     * signalQuality = (100 * DeltaRSSI^2 - (RSSIMax - RSSI)*(15*DeltaRSSI + 62*DeltaRSSI))/DeltaRSSI^2
      */
     protected static int convertToWifiSignalStrength(int signalQuality) {
         int rssiMax = -20;

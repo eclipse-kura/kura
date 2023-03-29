@@ -1,9 +1,12 @@
 package org.eclipse.kura.nm;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Timer;
 
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
+import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,10 @@ import org.slf4j.LoggerFactory;
 public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> {
 
     private static final Logger logger = LoggerFactory.getLogger(NMModemStateHandler.class);
+    private final Timer modemResetTimer = new Timer("ModemResetTimer");
     private final NMDbusConnector nm;
+
+    private NMModemResetTimerTask scheduledTasks = null;
 
     public NMModemStateHandler(NMDbusConnector nmDbusConnector) {
         this.nm = Objects.requireNonNull(nmDbusConnector);
@@ -42,12 +48,24 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
         if (oldState == NMDeviceState.NM_DEVICE_STATE_FAILED
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
             logger.info("Modem {} disconnected. Scheduling modem reset...", s.getPath());
-            // Schedule Modem reset
-        } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED) {
+
+            Optional<Modem> modem = this.nm.getModemDevice(s.getPath());
+
+            if (!modem.isPresent()) {
+                logger.warn("Cannot retrieve modem from path. Cannot schedule reset");
+                return;
+            }
+
+            this.scheduledTasks = new NMModemResetTimerTask(modem.get());
+            modemResetTimer.schedule(new NMModemResetTimerTask(modem.get()), 25000L); // TODO: Delay should be set by
+                                                                                      // configuration, using fixed one
+                                                                                      // for now
+        } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED
+                && this.scheduledTasks.getModemDbusPath().equals(s.getPath())) {
             logger.info("Modem {} reconnected. Cancelling scheduled modem reset...", s.getPath());
-            // Check dbus path
-            // If there's a scheduled modem reset for that path
-            // Cancel scheduled modem reset
+            this.scheduledTasks.cancel();
+            this.scheduledTasks = null;
+            this.modemResetTimer.purge();
         }
     }
 

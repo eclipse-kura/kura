@@ -796,4 +796,19 @@ public class NMDbusConnector {
         }
         return bearerProperties;
     }
+
+    public Optional<Modem> getModemDevice(String nmDevicePath) {
+        try {
+
+            Optional<String> mmModemPath = getModemPathFromMM(nmDevicePath);
+
+            if (!mmModemPath.isPresent()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(this.dbusConnection.getRemoteObject(MM_BUS_NAME, mmModemPath.get(), Modem.class));
+        } catch (DBusException e) {
+            return Optional.empty();
+        }
+    }
 }

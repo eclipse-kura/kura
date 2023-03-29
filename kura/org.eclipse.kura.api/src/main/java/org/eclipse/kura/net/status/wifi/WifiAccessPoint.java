@@ -170,7 +170,7 @@ public class WifiAccessPoint {
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
         result = prime * result + Objects.hash(this.channel, this.maxBitrate, this.mode, this.rsnSecurity,
-                this.signalQuality, this.signalQuality, this.ssid, this.wpaSecurity);
+                this.signalQuality, this.signalStrength, this.ssid, this.wpaSecurity);
         return result;
     }
 
@@ -186,7 +186,7 @@ public class WifiAccessPoint {
         return Objects.equals(this.channel, other.channel) && Arrays.equals(this.hardwareAddress, other.hardwareAddress)
                 && this.maxBitrate == other.maxBitrate && this.mode == other.mode
                 && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
-                && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.wpaSecurity, other.wpaSecurity)
+                && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.signalStrength, other.signalStrength)
                 && Objects.equals(this.wpaSecurity, other.wpaSecurity);
     }
 

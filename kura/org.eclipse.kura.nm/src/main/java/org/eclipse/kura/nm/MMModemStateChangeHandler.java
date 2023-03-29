@@ -15,7 +15,7 @@ public class MMModemStateChangeHandler implements DBusSigHandler<Modem.StateChan
         MMModemState newState = MMModemState.toMMModemState(s.getNewparam());
         MMModemStateChangeReason reason = MMModemStateChangeReason.fromUInt32(s.getReason());
 
-        logger.debug("Modem state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
+        logger.info("Modem state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
                 s.getPath());
     }
 }

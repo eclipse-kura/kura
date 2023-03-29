@@ -103,6 +103,8 @@ public class NMDbusConnector {
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
+
+        this.dbusConnection.addSigHandler(Modem.StateChanged.class, new MMModemStateChangeHandler());
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {

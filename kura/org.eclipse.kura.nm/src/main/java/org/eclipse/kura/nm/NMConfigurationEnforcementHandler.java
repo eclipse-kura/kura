@@ -36,7 +36,7 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
         NMDeviceStateReason reason = NMDeviceStateReason.fromUInt32(s.getReason());
 
-        logger.debug("Device state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
+        logger.info("Device state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
                 s.getPath());
 
         boolean deviceDisconnectedBecauseOfConfigurationEvent = oldState != NMDeviceState.NM_DEVICE_STATE_FAILED

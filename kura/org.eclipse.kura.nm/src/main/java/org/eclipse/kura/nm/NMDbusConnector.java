@@ -104,7 +104,7 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
-        this.dbusConnection.addSigHandler(Modem.StateChanged.class, new MMModemStateChangeHandler());
+        this.dbusConnection.addSigHandler(Device.StateChanged.class, new NMModemStateHandler(this));
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -557,8 +557,12 @@ public class NMDbusConnector {
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED);
     }
 
-    private NMDeviceType getDeviceType(Device device) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+    public NMDeviceType getDeviceType(Device device) throws DBusException {
+        return getDeviceType(device.getObjectPath());
+    }
+
+    public NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
                 Properties.class);
 
         NMDeviceType deviceType = NMDeviceType
@@ -566,8 +570,7 @@ public class NMDbusConnector {
 
         // Workaround to identify Loopback interface for NM versions prior to 1.42
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                    Generic.class);
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Generic.class);
             Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
             String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,

@@ -25,10 +25,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Enclosed.class)
-public class NMDbusConnectorSignalConverterTest {
+public class NMStatusConverterSignalConverterTest {
 
     @RunWith(Parameterized.class)
-    public static class NMDbusConnectorModemSignalStrengthConverterTest {
+    public static class ModemSignalStrengthConverterTest {
 
         @Parameters
         public static Collection<Object[]> ModemSignalQualityParams() {
@@ -141,7 +141,7 @@ public class NMDbusConnectorSignalConverterTest {
         private final int expectedSignalStrength;
         private int calculatedSignalStrength;
 
-        public NMDbusConnectorModemSignalStrengthConverterTest(int inputSignalQuality, int expectedSignalStrength) {
+        public ModemSignalStrengthConverterTest(int inputSignalQuality, int expectedSignalStrength) {
             this.inputSignalQuality = inputSignalQuality;
             this.expectedSignalStrength = expectedSignalStrength;
         }
@@ -162,7 +162,7 @@ public class NMDbusConnectorSignalConverterTest {
     }
 
     @RunWith(Parameterized.class)
-    public static class NMDbusConnectorWifiSignalStrengthConverterTest {
+    public static class WifiSignalStrengthConverterTest {
 
         @Parameters
         public static Collection<Object[]> WifiSignalQualityParams() {
@@ -275,7 +275,7 @@ public class NMDbusConnectorSignalConverterTest {
         private final int expectedSignalStrength;
         private int calculatedSignalStrength;
 
-        public NMDbusConnectorWifiSignalStrengthConverterTest(int inputSignalQuality, int expectedSignalStrength) {
+        public WifiSignalStrengthConverterTest(int inputSignalQuality, int expectedSignalStrength) {
             this.inputSignalQuality = inputSignalQuality;
             this.expectedSignalStrength = expectedSignalStrength;
         }

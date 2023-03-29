@@ -3,6 +3,7 @@ package org.eclipse.kura.nm;
 import java.util.Objects;
 import java.util.TimerTask;
 
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.modemmanager1.Modem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,11 @@ public class NMModemResetTimerTask extends TimerTask {
     @Override
     public void run() {
         logger.info("Modem reset timer expired. Resetting modem {} ...", modem.getObjectPath());
-        this.modem.Reset();
+        try {
+            this.modem.Reset();
+        } catch (DBusExecutionException e) {
+            logger.warn("Could not perform modem reset for {} because: ", this.modem.getObjectPath(), e);
+        }
         this.hasRun = true;
     }
 

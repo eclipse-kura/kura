@@ -97,6 +97,7 @@ public class NMDbusConnector {
     private Map<String, Object> cachedConfiguration = null;
 
     private NMConfigurationEnforcementHandler configurationEnforcementHandler = null;
+    private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
@@ -105,7 +106,6 @@ public class NMDbusConnector {
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
 
         this.dbusConnection.addSigHandler(Device.StateChanged.class, new NMModemStateHandler(this));
-        this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, new NMDeviceAddedHandler(this));
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -125,7 +125,8 @@ public class NMDbusConnector {
     }
 
     public boolean configurationEnforcementIsActive() {
-        return Objects.nonNull(this.configurationEnforcementHandler) && this.configurationEnforcementHandlerIsArmed;
+        return Objects.nonNull(this.configurationEnforcementHandler) && Objects.nonNull(this.deviceAddedHandler)
+                && this.configurationEnforcementHandlerIsArmed;
     }
 
     public void checkPermissions() {
@@ -687,16 +688,20 @@ public class NMDbusConnector {
     }
 
     private void configurationEnforcementEnable() throws DBusException {
-        if (Objects.isNull(this.configurationEnforcementHandler)) {
+        if (Objects.isNull(this.configurationEnforcementHandler) && Objects.isNull(this.deviceAddedHandler)) {
             this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this);
+            this.deviceAddedHandler = new NMDeviceAddedHandler(this);
         }
+
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
+        this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         this.configurationEnforcementHandlerIsArmed = true;
     }
 
     private void configurationEnforcementDisable() throws DBusException {
-        if (Objects.nonNull(this.configurationEnforcementHandler)) {
+        if (Objects.nonNull(this.configurationEnforcementHandler) && Objects.nonNull(this.deviceAddedHandler)) {
             this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
+            this.dbusConnection.removeSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         }
         this.configurationEnforcementHandlerIsArmed = false;
     }

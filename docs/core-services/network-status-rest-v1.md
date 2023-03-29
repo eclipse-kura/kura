@@ -283,6 +283,7 @@ Object that contains specific properties to describe the status of a WiFi interf
       "PAIR_CCMP"
     ],
     "signalQuality": 100,
+    "signalStrength": -20,
     "ssid": "MyAccessPoint",
     "wpaSecurity": [
       "NONE"
@@ -304,6 +305,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 100,
+      "signalStrength": -20,
       "ssid": "MyAccessPoint",
       "wpaSecurity": [
         "NONE"
@@ -323,6 +325,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 42,
+      "signalStrength": -69,
       "ssid": "OtherSSID",
       "wpaSecurity": [
         "NONE"
@@ -398,6 +401,7 @@ Object that contains specific properties to describe the status of a WiFi interf
       "PAIR_CCMP"
     ],
     "signalQuality": 0,
+    "signalStrength": -104,
     "ssid": "kura_gateway_raspberry_pi",
     "wpaSecurity": [
       "NONE"
@@ -419,6 +423,7 @@ Object that contains specific properties to describe the status of a WiFi interf
         "PAIR_CCMP"
       ],
       "signalQuality": 0,
+      "signalStrength": -104,
       "ssid": "kura_gateway_raspberry_pi",
       "wpaSecurity": [
         "NONE"
@@ -550,12 +555,12 @@ Object that contains specific properties to describe the status of a Modem inter
   
   * **signalQuality**: `number` 
   
+  * **signalStrength**: `number` 
+  
   * **registrationStatus**: `string (enumerated)` 
       * [RegistrationStatus](#registrationstatus)
   
   * **operatorName**: `string` 
-  
-  * **rssi**: `number` 
   
 
 ```json
@@ -670,9 +675,9 @@ Object that contains specific properties to describe the status of a Modem inter
   "powerState": "ON",
   "primaryPort": "cdc-wdm0",
   "registrationStatus": "HOME",
-  "rssi": -113,
   "serialNumber": "111111111111111",
   "signalQuality": 55,
+  "signalStrength": -80,
   "simLocked": true,
   "softwareRevision": "EG25GGBR07A08M2G",
   "state": "ACTIVATED",
@@ -827,6 +832,8 @@ This object describes a Wifi Access Point. It can be used both for describing a 
 <br>**Properties**:
 
   * **ssid**: `string` 
+      The Service Set IDentifier of the WiFi network
+
   
   * **hardwareAddress**: `string` 
       * [HardwareAddress](#hardwareaddress)
@@ -838,14 +845,26 @@ This object describes a Wifi Access Point. It can be used both for describing a 
       * [WifiMode](#wifimode)
   
   * **maxBitrate**: `number` 
+      The maximum bitrate this access point is capable of.
+
   
   * **signalQuality**: `number` 
+      The current signal quality of the access point in percentage.
+
+  
+  * **signalStrength**: `number` 
+      The current signal strength of the access point in dBm.
+
   
   * **wpaSecurity**: `array` 
+      The WPA capabilities of the access point
+
       * array element type: `string (enumerated)`
           * [WifiSecurity](#wifisecurity)
   
   * **rsnSecurity**: `array` 
+      The RSN capabilities of the access point
+
       * array element type: `string (enumerated)`
           * [WifiSecurity](#wifisecurity)
   

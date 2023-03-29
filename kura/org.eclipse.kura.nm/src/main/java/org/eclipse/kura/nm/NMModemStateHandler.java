@@ -79,7 +79,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
             return false;
         }
 
-        return modem.getObjectPath().equals(this.scheduledTasks.getModemDbusPath());
+        return modem.getObjectPath().equals(this.scheduledTasks.getModemDbusPath()) && !this.scheduledTasks.hasRun();
     }
 
 }

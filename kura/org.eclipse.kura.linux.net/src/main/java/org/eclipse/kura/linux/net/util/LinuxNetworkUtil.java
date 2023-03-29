@@ -265,7 +265,7 @@ public class LinuxNetworkUtil {
 
     public static boolean toolExists(String tool) {
         boolean ret = false;
-        final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/" };
+        final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" };
 
         if (TOOLS.contains(tool)) {
             ret = true;

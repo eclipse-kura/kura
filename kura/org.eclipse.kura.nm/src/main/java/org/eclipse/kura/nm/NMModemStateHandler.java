@@ -40,7 +40,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
 
         Optional<Modem> modem = this.nm.getModemDevice(s.getPath());
         if (!modem.isPresent()) {
-            logger.warn("Cannot retrieve modem from path. Cannot schedule reset");
+            logger.warn("Cannot retrieve modem from path {}. Cannot schedule reset", s.getPath());
             return;
         }
 
@@ -48,30 +48,29 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
         NMDeviceStateReason reason = NMDeviceStateReason.fromUInt32(s.getReason());
 
-        logger.info("Modem state change detected: {} -> {} (reason: {}), for device {}", oldState, newState, reason,
-                s.getPath());
+        logger.info("Modem state change detected: {} -> {} (reason: {}), for device {} (NM path: {})", oldState,
+                newState, reason, modem.get().getObjectPath(), s.getPath());
 
         if (oldState == NMDeviceState.NM_DEVICE_STATE_FAILED
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
             if (timerAlreadyScheduledFor(modem.get())) {
-                logger.debug("Modem {} already scheduled for reset. Ignoring event...", s.getPath());
+                logger.debug("Modem {} already scheduled for reset. Ignoring event...", modem.get().getObjectPath());
             }
 
-            logger.info("Modem {} disconnected. Scheduling modem reset...", s.getPath());
+            logger.info("Modem {} disconnected. Scheduling modem reset...", modem.get().getObjectPath());
 
             this.scheduledTasks = new NMModemResetTimerTask(modem.get());
-            modemResetTimer.schedule(new NMModemResetTimerTask(modem.get()), 25000L); // WIP: Delay should be set by
-                                                                                      // configuration, using fixed one
+            modemResetTimer.schedule(this.scheduledTasks, 45000L); // WIP: Delay should be set by
+                                                                   // configuration, using fixed one
         } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED) {
 
             if (!timerAlreadyScheduledFor(modem.get())) {
                 return;
             }
 
-            logger.info("Modem {} reconnected. Cancelling scheduled modem reset...", s.getPath());
+            logger.info("Modem {} reconnected. Cancelling scheduled modem reset...", modem.get().getObjectPath());
             this.scheduledTasks.cancel();
             this.scheduledTasks = null;
-            this.modemResetTimer.purge();
         }
     }
 

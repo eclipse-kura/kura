@@ -56,6 +56,8 @@ public class DhcpServerManager {
             }
         }
 
+        logger.info("Using {} as DHCP server.", dhcpServerTool.getValue());
+
         return dhcpServerTool;
     }
 

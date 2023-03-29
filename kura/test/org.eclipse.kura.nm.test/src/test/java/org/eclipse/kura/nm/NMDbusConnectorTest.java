@@ -553,7 +553,7 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void getloopbackInterfaceStatusShouldWork() throws DBusException, IOException {
+    public void getLoopbackInterfaceStatusShouldWork() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("lo", "lo", NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceState.NM_DEVICE_STATE_FAILED, true,
                 false, false);
@@ -1152,7 +1152,7 @@ public class NMDbusConnectorTest {
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "AccessTechnologies"))
                 .thenReturn(new UInt32(0));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SignalQuality"))
-                .thenReturn(new UInt32[] { new UInt32(90), new UInt32(2) });
+                .thenReturn(new UInt32[] { new UInt32(97), new UInt32(2) });
         when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Modem3gpp", "RegistrationState"))
                 .thenReturn(new UInt32(5));
         when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Modem3gpp", "OperatorName"))
@@ -1455,7 +1455,8 @@ public class NMDbusConnectorTest {
         assertEquals(ModemConnectionStatus.REGISTERED, modemStatus.getConnectionStatus());
         assertEquals(1, modemStatus.getAccessTechnologies().size());
         assertTrue(modemStatus.getAccessTechnologies().contains(AccessTechnology.UNKNOWN));
-        assertEquals(90, modemStatus.getSignalQuality());
+        assertEquals(97, modemStatus.getSignalQuality());
+        assertEquals(-55, modemStatus.getSignalStrength());
         assertEquals(RegistrationStatus.ROAMING, modemStatus.getRegistrationStatus());
         assertEquals("VeryCoolMobile", modemStatus.getOperatorName());
         if (hasSims) {

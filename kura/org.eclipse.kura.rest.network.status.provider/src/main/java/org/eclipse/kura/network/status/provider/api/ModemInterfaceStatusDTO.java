@@ -53,9 +53,9 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
     private final ModemConnectionStatus connectionStatus;
     private final Set<AccessTechnology> accessTechnologies;
     private final int signalQuality;
+    private final int signalStrength;
     private final RegistrationStatus registrationStatus;
     private final String operatorName;
-    private final int rssi;
 
     public ModemInterfaceStatusDTO(final ModemInterfaceStatus status) {
         super(status);
@@ -84,9 +84,9 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
         this.connectionStatus = status.getConnectionStatus();
         this.accessTechnologies = status.getAccessTechnologies();
         this.signalQuality = status.getSignalQuality();
+        this.signalStrength = status.getSignalStrength();
         this.registrationStatus = status.getRegistrationStatus();
         this.operatorName = status.getOperatorName();
-        this.rssi = status.getRssi();
     }
 
 }

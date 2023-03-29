@@ -58,7 +58,7 @@ public class NetworkInterfaceStatusDTO {
         if (status instanceof ModemInterfaceStatus) {
             return new ModemInterfaceStatusDTO((ModemInterfaceStatus) status);
         } else if (status instanceof WifiInterfaceStatus) {
-            return new WifiInterfcaceStatusDTO((WifiInterfaceStatus) status);
+            return new WifiInterfaceStatusDTO((WifiInterfaceStatus) status);
         } else if (status instanceof EthernetInterfaceStatus) {
             return new EthernetInterfaceStatusDTO((EthernetInterfaceStatus) status);
         } else {

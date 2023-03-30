@@ -57,6 +57,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
             if (timerAlreadyScheduled()) {
                 logger.debug("Modem {} already scheduled for reset. Ignoring event...", s.getPath());
+                return;
             }
 
             logger.info("Modem {} disconnected. Scheduling modem reset in {} minutes ...", s.getPath(),

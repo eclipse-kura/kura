@@ -45,6 +45,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
     @Override
     public void handle(Device.StateChanged s) {
         if (!s.getPath().equals(this.nmDevicePath)) {
+            // Ignore signals coming from other devices
             return;
         }
 

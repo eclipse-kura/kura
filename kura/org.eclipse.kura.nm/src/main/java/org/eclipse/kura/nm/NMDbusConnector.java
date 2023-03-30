@@ -400,7 +400,6 @@ public class NMDbusConnector {
 
         dsLock.waitForSignal();
 
-        // Setup modem monitor
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
 

@@ -15,6 +15,8 @@ package org.eclipse.kura.nm.configuration;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -42,6 +44,7 @@ import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
+import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
 import org.eclipse.kura.usb.UsbDevice;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
@@ -200,6 +203,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
+            writeFirewallNatRules(interfaces);
             writeDhcpServerConfiguration(interfaces);
             this.dhcpServerMonitor.start();
 
@@ -312,6 +316,59 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         } catch (DBusExecutionException | DBusException e) {
             logger.error("Couldn't apply network configuration settings due to: ", e);
         }
+    }
+
+    private void writeFirewallNatRules(Set<String> interfaceNames) {
+        List<String> wanInterfaces = new LinkedList<>();
+        List<String> natInterfaces = new LinkedList<>();
+
+        interfaceNames.forEach(interfaceName -> {
+            if (isWanInterface(interfaceName)) {
+                wanInterfaces.add(interfaceName);
+            }
+        });
+
+        interfaceNames.forEach(interfaceName -> {
+            if (isNatValid(interfaceName)) {
+                natInterfaces.add(interfaceName);
+            }
+        });
+
+        try {
+            FirewallNatConfigWriter firewallNatConfigWriter = new FirewallNatConfigWriter(this.commandExecutorService,
+                    wanInterfaces, natInterfaces);
+            firewallNatConfigWriter.writeConfiguration();
+        } catch (KuraException e) {
+            logger.error("Failed to write NAT configuration.", e);
+        }
+    }
+
+    private boolean isWanInterface(String interfaceName) {
+        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+
+        if (status.isPresent()) {
+            return status.get() == NetInterfaceStatus.netIPv4StatusEnabledWAN;
+        }
+        return false;
+    }
+
+    private boolean isNatValid(String interfaceName) {
+        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.getNetworkTypeFromProperties(interfaceName,
+                this.networkProperties.getProperties());
+        Optional<Boolean> isNatEnabled = this.networkProperties.getOpt(Boolean.class,
+                "net.interface.%s.config.nat.enabled", interfaceName);
+        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+
+        if (type.isPresent() && isNatEnabled.isPresent() && status.isPresent()) {
+            boolean isSupportedType = type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI
+                    || type.get() == NetInterfaceType.MODEM;
+            boolean isNat = isNatEnabled.get();
+            boolean isLan = status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
+
+            return isSupportedType && isNat && isLan;
+        }
+
+        return false;
     }
 
     private void writeDhcpServerConfiguration(Set<String> interfaceNames) {

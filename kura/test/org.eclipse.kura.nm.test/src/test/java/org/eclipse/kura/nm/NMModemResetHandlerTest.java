@@ -27,84 +27,87 @@ public class NMModemResetHandlerTest {
     private Modem mockMMModemDevice = mock(Modem.class);
     private NMModemResetHandler resetHandler = null;
 
-    @Test
-    public void modemShouldNotBeResetWhenModemDoesntDisconnect() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 50);
+    private static final String MOCK_DEVICE_DBUSPATH_9 = "/org/freedesktop/NetworkManager/Devices/9";
+    private static final String MOCK_DEVICE_DBUSPATH_5 = "/org/freedesktop/NetworkManager/Devices/5";
 
-        whenXSecondsHavePassed(1000);
+    @Test
+    public void modemShouldNotBeResetWhenModemDoesntDisconnect() {
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(false);
     }
 
     @Test
     public void modemShouldNotBeResetWhenADifferenctModemDisconnects() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 50);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/10",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_5, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
 
-        whenXSecondsHavePassed(1000);
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(false);
     }
 
     @Test
     public void modemShouldNotBeResetWhenAModemGenerateAnotherSignal() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 50);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_IP_CONFIG, NMDeviceState.NM_DEVICE_STATE_PREPARE);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_IP_CONFIG,
+                NMDeviceState.NM_DEVICE_STATE_PREPARE);
 
-        whenXSecondsHavePassed(1000);
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(false);
     }
 
     @Test
     public void modemShouldBeResetWhenModemDisconnectsAndTimeoutHasPassed() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 50);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
 
-        whenXSecondsHavePassed(1000);
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(true);
     }
 
     @Test
     public void modemShouldBeResetOnlyOnceWhenModemDisconnectsMultipleTimes() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 250);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 250);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
 
-        whenXSecondsHavePassed(3000);
+        whenThreadHasWaitedFor(3000);
 
         thenModemWasReset(true);
     }
 
     @Test
     public void modemShouldNotBeResetWhenItReconnectsBeforeTimeoutHasPassed() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 150);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, NMDeviceState.NM_DEVICE_STATE_SECONDARIES);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 150);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                NMDeviceState.NM_DEVICE_STATE_SECONDARIES);
 
-        whenXSecondsHavePassed(1000);
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(false);
     }
 
     @Test
     public void modemShouldNotBeResetWhenItDisconnectsButHandlerGetsCancelled() throws DBusException {
-        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 50);
-        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                NMDeviceState.NM_DEVICE_STATE_FAILED);
         givenNMModemResetHandlerGetsCancelled();
 
-        whenXSecondsHavePassed(1000);
+        whenThreadHasWaitedFor(1000);
 
         thenModemWasReset(false);
     }
@@ -134,11 +137,10 @@ public class NMModemResetHandlerTest {
      * When
      */
 
-    private void whenXSecondsHavePassed(long waitTime) {
+    private void whenThreadHasWaitedFor(long waitTime) {
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException e) {
-            e.printStackTrace(); // WIP
             Thread.currentThread().interrupt();
         }
     }

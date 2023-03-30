@@ -27,9 +27,9 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
     private final Timer modemResetTimer = new Timer("ModemResetTimer");
     private NMModemResetTimerTask scheduledTasks = null;
 
-    private String nmDevicePath;
-    private Modem mmModemDevice;
-    private long delay;
+    private final String nmDevicePath;
+    private final Modem mmModemDevice;
+    private final long delay;
 
     public NMModemResetHandler(String nmDeviceDBusPath, Modem mmModem, long modemResetDelayMilliseconds) {
         this.nmDevicePath = nmDeviceDBusPath;
@@ -65,7 +65,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
                     this.delay / (60 * 1000));
 
             this.scheduledTasks = new NMModemResetTimerTask(this.mmModemDevice);
-            modemResetTimer.schedule(this.scheduledTasks, this.delay);
+            this.modemResetTimer.schedule(this.scheduledTasks, this.delay);
         } else if (newState == NMDeviceState.NM_DEVICE_STATE_ACTIVATED) {
 
             if (!timerAlreadyScheduled()) {

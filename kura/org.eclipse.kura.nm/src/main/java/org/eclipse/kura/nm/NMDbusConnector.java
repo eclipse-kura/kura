@@ -101,7 +101,7 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
-    private List<NMModemResetHandler> modemHandlers = new ArrayList<>();
+    private final List<NMModemResetHandler> modemHandlers = new ArrayList<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -737,7 +737,7 @@ public class NMDbusConnector {
             }
         }
 
-        modemHandlers.clear();
+        this.modemHandlers.clear();
     }
 
     private String getDeviceIdFromNM(String devicePath) throws DBusException {

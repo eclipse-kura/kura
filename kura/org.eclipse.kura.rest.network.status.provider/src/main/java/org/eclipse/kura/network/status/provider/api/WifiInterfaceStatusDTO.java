@@ -21,7 +21,7 @@ import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 
 @SuppressWarnings("unused")
-public class WifiInterfcaceStatusDTO extends NetworkInterfaceStatusDTO {
+public class WifiInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
 
     private final Set<WifiCapability> capabilities;
     private final List<WifiChannelDTO> channels;
@@ -30,7 +30,7 @@ public class WifiInterfcaceStatusDTO extends NetworkInterfaceStatusDTO {
     private final WifiAccessPointDTO activeWifiAccessPoint;
     private final List<WifiAccessPointDTO> availableWifiAccessPoints;
 
-    public WifiInterfcaceStatusDTO(final WifiInterfaceStatus status) {
+    public WifiInterfaceStatusDTO(final WifiInterfaceStatus status) {
         super(status);
 
         this.capabilities = status.getCapabilities();

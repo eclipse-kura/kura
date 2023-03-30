@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
 package org.eclipse.kura.nm.configuration.writer;
 
 import java.util.HashSet;
@@ -17,6 +29,7 @@ public class FirewallNatConfigWriter {
     private static final Logger logger = LoggerFactory.getLogger(FirewallNatConfigWriter.class);
 
     private final CommandExecutorService executorService;
+    private LinuxFirewall firewall;
     private final List<String> wanInterfaceNames;
     private final List<String> natInterfaceNames;
 
@@ -24,6 +37,7 @@ public class FirewallNatConfigWriter {
         this.executorService = executorService;
         this.wanInterfaceNames = wanInterfaceNames;
         this.natInterfaceNames = natInterfaceNames;
+        this.firewall = LinuxFirewall.getInstance(this.executorService);
     }
 
     public void writeConfiguration() throws KuraException {
@@ -32,24 +46,28 @@ public class FirewallNatConfigWriter {
 
             for (String source : this.natInterfaceNames) {
                 for (String destination : this.wanInterfaceNames) {
-                    NATRule natRule = new NATRule();
-                    // new NATRule(source, destination, true, RuleType.GENERIC)
-                    natRule.setSourceInterface(source);
-                    natRule.setDestinationInterface(destination);
-                    natRule.setMasquerade(true);
-
-                    logger.info("Applying NAT rule {} -> {}: {}", source, destination, natRule);
-
-                    natRules.add(natRule);
+                    if (!source.equalsIgnoreCase(destination)) {
+                        natRules.add(createNATRule(source, destination));
+                    }
                 }
             }
 
-            LinuxFirewall firewall = LinuxFirewall.getInstance(this.executorService);
-            firewall.replaceAllNatRules(natRules);
+            this.firewall.replaceAllNatRules(natRules);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "Failed to replace all NAT rules with new ones for interfaces: " + this.natInterfaceNames, e);
         }
+    }
+
+    private NATRule createNATRule(String source, String destination) {
+        NATRule natRule = new NATRule();
+        natRule.setSourceInterface(source);
+        natRule.setDestinationInterface(destination);
+        natRule.setMasquerade(true);
+
+        logger.info("Applying NAT rule {} -> {}: {}", source, destination, natRule);
+
+        return natRule;
     }
 
 }

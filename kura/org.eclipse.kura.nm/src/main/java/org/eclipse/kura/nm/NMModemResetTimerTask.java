@@ -25,25 +25,25 @@ public class NMModemResetTimerTask extends TimerTask {
     private static final Logger logger = LoggerFactory.getLogger(NMModemResetTimerTask.class);
 
     private final Modem modem;
-    private boolean hasRun = false;
+    private boolean expired = false;
 
     public NMModemResetTimerTask(Modem modem) {
         this.modem = Objects.requireNonNull(modem);
     }
 
-    public boolean hasRun() {
-        return this.hasRun;
+    public boolean expired() {
+        return this.expired;
     }
 
     @Override
     public void run() {
         logger.info("Modem reset timer expired. Resetting modem {} ...", this.modem.getObjectPath());
+        this.expired = true;
         try {
             this.modem.Reset();
         } catch (DBusExecutionException e) {
             logger.warn("Could not perform modem reset for {} because: ", this.modem.getObjectPath(), e);
         }
-        this.hasRun = true;
     }
 
     public String getModemDbusPath() {

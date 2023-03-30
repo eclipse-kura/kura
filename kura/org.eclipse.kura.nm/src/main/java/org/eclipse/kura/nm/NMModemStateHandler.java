@@ -66,6 +66,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
     public void clearTimer() {
         if (timerAlreadyScheduled()) {
             this.scheduledTasks.cancel();
+            this.scheduledTasks = null;
         }
     }
 

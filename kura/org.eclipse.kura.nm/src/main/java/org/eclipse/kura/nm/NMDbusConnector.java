@@ -370,6 +370,7 @@ public class NMDbusConnector {
                     deviceId);
             handleModemManagerGPSSetup(device.get(), enableGPS);
         }
+
     }
 
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
@@ -834,5 +835,4 @@ public class NMDbusConnector {
         }
         return bearerProperties;
     }
-
 }

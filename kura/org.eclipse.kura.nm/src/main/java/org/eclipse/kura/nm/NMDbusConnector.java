@@ -101,7 +101,7 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
-    private List<NMModemStateHandler> modemHandlers = Arrays.asList();
+    private List<NMModemStateHandler> modemHandlers = new ArrayList<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);

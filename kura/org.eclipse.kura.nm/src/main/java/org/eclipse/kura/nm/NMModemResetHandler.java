@@ -9,9 +9,9 @@ import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> {
+public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NMModemStateHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NMModemResetHandler.class);
     private final Timer modemResetTimer = new Timer("ModemResetTimer");
     private NMModemResetTimerTask scheduledTasks = null;
 
@@ -19,7 +19,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
     private Modem mmModemDevice;
     private long delay;
 
-    public NMModemStateHandler(String nmDeviceDBusPath, Modem mmModem, long modemResetDelayMilliseconds) {
+    public NMModemResetHandler(String nmDeviceDBusPath, Modem mmModem, long modemResetDelayMilliseconds) {
         this.nmDevicePath = nmDeviceDBusPath;
         this.mmModemDevice = Objects.requireNonNull(mmModem);
         this.delay = modemResetDelayMilliseconds;

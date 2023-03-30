@@ -101,7 +101,7 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
-    private List<NMModemStateHandler> modemHandlers = new ArrayList<>();
+    private List<NMModemResetHandler> modemHandlers = new ArrayList<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -300,7 +300,7 @@ public class NMDbusConnector {
     }
 
     private void modemHandlersDisable() {
-        for (NMModemStateHandler handler : this.modemHandlers) {
+        for (NMModemResetHandler handler : this.modemHandlers) {
             handler.clearTimer();
             try {
                 this.dbusConnection.removeSigHandler(Device.StateChanged.class, handler);
@@ -428,7 +428,7 @@ public class NMDbusConnector {
                 logger.info("Reset timer delay set to 0. Skipping modem reset monitor setup.");
             }
 
-            NMModemStateHandler resetHandler = new NMModemStateHandler(device.getObjectPath(), mmModemDevice,
+            NMModemResetHandler resetHandler = new NMModemResetHandler(device.getObjectPath(), mmModemDevice,
                     delayMinutes * 60L * 1000L);
 
             this.modemHandlers.add(resetHandler);

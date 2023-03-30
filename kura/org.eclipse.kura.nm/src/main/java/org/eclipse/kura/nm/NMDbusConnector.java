@@ -364,18 +364,7 @@ public class NMDbusConnector {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
             handleModemManagerGPSSetup(device.get(), enableGPS);
-
-            int delay = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-            NMModemStateHandler resetHandler = new NMModemStateHandler(device.get().getObjectPath(), null, // WIP:
-                                                                                                           // Retrieve
-                                                                                                           // modem
-                                                                                                           // device
-                    delay * 60L * 1000L);
-
-            this.modemHandlers.add(resetHandler);
-            this.dbusConnection.addSigHandler(Device.StateChanged.class, resetHandler);
         }
-
     }
 
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
@@ -418,6 +407,23 @@ public class NMDbusConnector {
 
         dsLock.waitForSignal();
 
+        // Setup modem monitor
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            Optional<String> mmDBusPath = getModemPathFromMM(device.getObjectPath());
+            if (!mmDBusPath.isPresent()) {
+                logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
+                return;
+            }
+
+            Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, mmDBusPath.get(), Modem.class);
+
+            int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+            NMModemStateHandler resetHandler = new NMModemStateHandler(device.getObjectPath(), mmModemDevice,
+                    delayMinutes * 60L * 1000L);
+
+            this.modemHandlers.add(resetHandler);
+            this.dbusConnection.addSigHandler(Device.StateChanged.class, resetHandler);
+        }
     }
 
     private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,

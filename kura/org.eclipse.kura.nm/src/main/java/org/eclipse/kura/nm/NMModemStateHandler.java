@@ -26,6 +26,10 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
         logger.info("ModemStateHandler armed for {}", this.nmDevicePath);
     }
 
+    public String getNMDevicePath() {
+        return this.nmDevicePath;
+    }
+
     @Override
     public void handle(Device.StateChanged s) {
         if (!s.getPath().equals(this.nmDevicePath)) {

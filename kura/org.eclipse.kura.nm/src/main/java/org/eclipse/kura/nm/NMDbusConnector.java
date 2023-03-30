@@ -302,6 +302,11 @@ public class NMDbusConnector {
     private void modemHandlersDisable() {
         for (NMModemStateHandler handler : this.modemHandlers) {
             handler.clearTimer();
+            try {
+                this.dbusConnection.removeSigHandler(Device.StateChanged.class, handler);
+            } catch (DBusException e) {
+                logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
+            }
         }
 
         modemHandlers.clear();

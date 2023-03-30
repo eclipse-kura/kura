@@ -594,12 +594,8 @@ public class NMDbusConnector {
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED);
     }
 
-    public NMDeviceType getDeviceType(Device device) throws DBusException {
-        return getDeviceType(device.getObjectPath());
-    }
-
-    public NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
+    private NMDeviceType getDeviceType(Device device) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
 
         NMDeviceType deviceType = NMDeviceType
@@ -607,7 +603,8 @@ public class NMDbusConnector {
 
         // Workaround to identify Loopback interface for NM versions prior to 1.42
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Generic.class);
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                    Generic.class);
             Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
             String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
@@ -836,21 +833,6 @@ public class NMDbusConnector {
             }
         }
         return bearerProperties;
-    }
-
-    public Optional<Modem> getModemDevice(String nmDevicePath) {
-        try {
-
-            Optional<String> mmModemPath = getModemPathFromMM(nmDevicePath);
-
-            if (!mmModemPath.isPresent()) {
-                return Optional.empty();
-            }
-
-            return Optional.of(this.dbusConnection.getRemoteObject(MM_BUS_NAME, mmModemPath.get(), Modem.class));
-        } catch (DBusException e) {
-            return Optional.empty();
-        }
     }
 
 }

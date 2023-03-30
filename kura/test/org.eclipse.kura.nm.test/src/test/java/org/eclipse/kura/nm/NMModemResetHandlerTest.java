@@ -58,6 +58,21 @@ public class NMModemResetHandlerTest {
     }
 
     @Test
+    public void modemShouldBeResetOnlyOnceWhenModemDisconnectsMultipleTimes() throws DBusException {
+        givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 250);
+        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+        givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, NMDeviceState.NM_DEVICE_STATE_FAILED);
+
+        whenXSecondsHavePassed(3000);
+
+        thenModemWasReset(true);
+    }
+
+    @Test
     public void modemShouldNotBeResetWhenItReconnectsBeforeTimeoutHasPassed() throws DBusException {
         givenNMModemResetHandlerWith("/org/freedesktop/NetworkManager/Devices/9", this.mockMMModemDevice, 150);
         givenDeviceStateChangeSignal("/org/freedesktop/NetworkManager/Devices/9",

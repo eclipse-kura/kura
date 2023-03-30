@@ -285,7 +285,7 @@ public class NMDbusConnector {
         logger.info("Applying configuration using NetworkManager Dbus connector");
         try {
             configurationEnforcementDisable();
-            modemHandlersDisable();
+            modemResetHandlersDisable();
 
             NetworkProperties properties = new NetworkProperties(networkConfiguration);
 
@@ -405,7 +405,7 @@ public class NMDbusConnector {
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
 
             if (delayMinutes != 0) {
-                enableModemResetHandler(deviceId, delayMinutes, device);
+                modemResetHandlerEnable(deviceId, delayMinutes, device);
             }
         }
     }
@@ -712,7 +712,7 @@ public class NMDbusConnector {
         this.configurationEnforcementHandlerIsArmed = false;
     }
 
-    private void enableModemResetHandler(String deviceId, int delayMinutes, Device device) throws DBusException {
+    private void modemResetHandlerEnable(String deviceId, int delayMinutes, Device device) throws DBusException {
         Optional<String> mmDBusPath = getModemPathFromMM(device.getObjectPath());
         if (!mmDBusPath.isPresent()) {
             logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
@@ -728,7 +728,7 @@ public class NMDbusConnector {
         this.dbusConnection.addSigHandler(Device.StateChanged.class, resetHandler);
     }
 
-    private void modemHandlersDisable() {
+    private void modemResetHandlersDisable() {
         for (NMModemResetHandler handler : this.modemHandlers) {
             handler.clearTimer();
             try {

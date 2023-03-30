@@ -418,6 +418,11 @@ public class NMDbusConnector {
             Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, mmDBusPath.get(), Modem.class);
 
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+
+            if (delayMinutes == 0) {
+                logger.info("Reset timer delay set to 0. Skipping modem reset monitor setup.");
+            }
+
             NMModemStateHandler resetHandler = new NMModemStateHandler(device.getObjectPath(), mmModemDevice,
                     delayMinutes * 60L * 1000L);
 

@@ -23,6 +23,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
         this.nmDevicePath = nmDeviceDBusPath;
         this.mmModemDevice = Objects.requireNonNull(mmModem);
         this.delay = modemResetDelayMilliseconds;
+        logger.info("ModemStateHandler armed for {}", this.nmDevicePath);
     }
 
     @Override
@@ -68,6 +69,7 @@ public class NMModemStateHandler implements DBusSigHandler<Device.StateChanged> 
             this.scheduledTasks.cancel();
             this.scheduledTasks = null;
         }
+        logger.info("ModemStateHandler disarmed for {}", this.nmDevicePath);
     }
 
 }

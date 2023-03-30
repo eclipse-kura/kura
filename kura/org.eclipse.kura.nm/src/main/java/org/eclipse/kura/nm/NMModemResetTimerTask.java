@@ -24,12 +24,6 @@ public class NMModemResetTimerTask extends TimerTask {
     }
 
     @Override
-    public boolean cancel() {
-        logger.info("Modem reset timer cancelled for {}", modem.getObjectPath());
-        return super.cancel();
-    }
-
-    @Override
     public void run() {
         logger.info("Modem reset timer expired. Resetting modem {} ...", modem.getObjectPath());
         try {

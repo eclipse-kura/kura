@@ -23,7 +23,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
         this.nmDevicePath = nmDeviceDBusPath;
         this.mmModemDevice = Objects.requireNonNull(mmModem);
         this.delay = modemResetDelayMilliseconds;
-        logger.info("ModemStateHandler armed for {}", this.nmDevicePath);
+        logger.debug("ModemStateHandler armed for {}", this.nmDevicePath);
     }
 
     public String getNMDevicePath() {
@@ -39,7 +39,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
         NMDeviceState oldState = NMDeviceState.fromUInt32(s.getOldState());
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
 
-        logger.info("Modem state change detected: {} -> {}, for device {}", oldState, newState, s.getPath());
+        logger.debug("Modem state change detected: {} -> {}, for device {}", oldState, newState, s.getPath());
 
         if (oldState == NMDeviceState.NM_DEVICE_STATE_FAILED
                 && newState == NMDeviceState.NM_DEVICE_STATE_DISCONNECTED) {
@@ -73,7 +73,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
             this.scheduledTasks.cancel();
             this.scheduledTasks = null;
         }
-        logger.info("ModemStateHandler disarmed for {}", this.nmDevicePath);
+        logger.debug("ModemStateHandler disarmed for {}", this.nmDevicePath);
     }
 
 }

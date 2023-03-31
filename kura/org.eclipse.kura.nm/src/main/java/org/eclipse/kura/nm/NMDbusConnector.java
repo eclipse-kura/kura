@@ -460,7 +460,9 @@ public class NMDbusConnector {
             currentLocationSources = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
         } catch (DBusExecutionException e) {
-            logger.debug("Cannot retrive Modem.Location capabilities for {}.", modemLocationProperties.getObjectPath());
+            logger.debug("Cannot retrive Modem.Location capabilities for {}. Caused by: ",
+                    modemLocationProperties.getObjectPath(), e);
+            return;
         }
 
         EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
@@ -477,10 +479,7 @@ public class NMDbusConnector {
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
-        if (!currentLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE)) {
-            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources),
-                    false);
-        }
+        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
     }
 
     private String getDeviceId(Device device) throws DBusException {

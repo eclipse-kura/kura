@@ -108,11 +108,14 @@ public class DhcpServerConfigWriter {
                 pw.println("interface=" + dhcpServerConfig.getInterfaceName());
                 pw.println("bind-interfaces");
                 pw.println("dhcp-option=1," + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
-                pw.println("dhcp-option=3," + dhcpServerConfig.getRouterAddress().toString());
 
                 if (dhcpServerConfig.isPassDns()) {
+                    // router property
+                    pw.println("dhcp-option=3," + dhcpServerConfig.getRouterAddress().toString());
                     // announce DNS servers on this device
                     pw.println("dhcp-option=6,0.0.0.0");
+                } else {
+                    pw.println("dhcp-ignore-names");
                 }
 
                 // all subnets are local

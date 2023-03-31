@@ -184,35 +184,37 @@ public class NMDbusConnector {
             }
 
             switch (deviceType) {
-            case NM_DEVICE_TYPE_ETHERNET:
-                Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
-                        Wired.class);
-                Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                        wiredDevice.getObjectPath(), Properties.class);
+                case NM_DEVICE_TYPE_ETHERNET:
+                    Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
+                            Wired.class);
+                    Properties wiredDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                            wiredDevice.getObjectPath(), Properties.class);
 
-                DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
-                        Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+                    DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                            Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-                networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId, ethernetPropertiesWrapper,
-                        ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_LOOPBACK:
-                DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
-                        Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+                    networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId,
+                            ethernetPropertiesWrapper,
+                            ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_LOOPBACK:
+                    DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                            Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
-                networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId, loopbackPropertiesWrapper,
-                        ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_WIFI:
-                networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
-                        deviceProperties, ip4configProperties);
-                break;
-            case NM_DEVICE_TYPE_MODEM:
-                networkInterfaceStatus = createModemStatus(interfaceId, device.get(), deviceProperties,
-                        ip4configProperties);
-                break;
-            default:
-                break;
+                    networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId,
+                            loopbackPropertiesWrapper,
+                            ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_WIFI:
+                    networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
+                            deviceProperties, ip4configProperties);
+                    break;
+                case NM_DEVICE_TYPE_MODEM:
+                    networkInterfaceStatus = createModemStatus(interfaceId, device.get(), deviceProperties,
+                            ip4configProperties);
+                    break;
+                default:
+                    break;
             }
         }
         return networkInterfaceStatus;
@@ -288,44 +290,37 @@ public class NMDbusConnector {
             modemResetHandlersDisable();
 
             NetworkProperties properties = new NetworkProperties(networkConfiguration);
+            List<String> configuredInterfaceIds = properties.getStringList("net.interfaces");
 
-            List<String> configuredInterfaces = properties.getStringList("net.interfaces");
-            manageConfiguredInterfaces(configuredInterfaces, properties);
-
-            List<Device> availableInterfaces = getAllDevices();
-            manageNonConfiguredInterfaces(configuredInterfaces, availableInterfaces);
+            List<Device> availableDevices = getAllDevices();
+            availableDevices.forEach(device -> {
+                String deviceId = null;
+                try {
+                    deviceId = getDeviceId(device);
+                } catch (DBusException e) {
+                    logger.error("Unable to retrieve the device Id for device path {}", device.getObjectPath(), e);
+                }
+                if (Objects.nonNull(deviceId) && !deviceId.isEmpty()) {
+                    try {
+                        if (configuredInterfaceIds.contains(deviceId)) {
+                            manageConfiguredInterface(device, deviceId, properties);
+                        } else {
+                            manageNonConfiguredInterface(device, deviceId);
+                        }
+                    } catch (DBusException | DBusExecutionException | IllegalArgumentException
+                            | NoSuchElementException e) {
+                        logger.error("Unable to configure device {}, skipping", deviceId, e);
+                    }
+                }
+            });
         } finally {
             configurationEnforcementEnable();
         }
     }
 
-    private synchronized void manageConfiguredInterfaces(List<String> configuredInterfaces,
-            NetworkProperties properties) throws DBusException {
-        List<String> availableInterfaces = getDeviceIds();
-
-        for (String iface : configuredInterfaces) {
-            if (!availableInterfaces.contains(iface)) {
-                logger.debug("Configured device \"{}\" not available on the system. Ignoring configuration.", iface);
-                continue;
-            }
-
-            try {
-                manageConfiguredInterface(iface, properties);
-            } catch (DBusException | DBusExecutionException | IllegalArgumentException | NoSuchElementException e) {
-                logger.error("Unable to configure iface {}, skipping", iface, e);
-            }
-        }
-    }
-
-    private synchronized void manageConfiguredInterface(String deviceId, NetworkProperties properties)
+    private synchronized void manageConfiguredInterface(Device device, String deviceId, NetworkProperties properties)
             throws DBusException {
-        Optional<Device> device = getDeviceByInterfaceId(deviceId);
-        if (!device.isPresent()) {
-            logger.warn("Device \"{}\" cannot be found. Skipping configuration.", deviceId);
-            return;
-        }
-
-        NMDeviceType deviceType = getDeviceType(device.get());
+        NMDeviceType deviceType = getDeviceType(device);
 
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
@@ -344,18 +339,18 @@ public class NMDbusConnector {
         logger.info("Settings iface \"{}\":{}", deviceId, deviceType);
 
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-            disable(device.get());
+            disable(device);
         } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
             logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", deviceId);
         } else { // NMDeviceEnable.ENABLED
-            enableInterface(deviceId, properties, device.get(), deviceType);
+            enableInterface(deviceId, properties, device, deviceType);
         }
 
         // Manage GPS independently of device ip status
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
-            handleModemManagerGPSSetup(device.get(), enableGPS);
+            handleModemManagerGPSSetup(device, enableGPS);
         }
 
     }
@@ -409,21 +404,8 @@ public class NMDbusConnector {
         }
     }
 
-    private synchronized void manageNonConfiguredInterfaces(List<String> configuredInterfaces,
-            List<Device> availableInterfaces) throws DBusException {
-        for (Device device : availableInterfaces) {
-            try {
-                manageNonConfiguredInterface(configuredInterfaces, device);
-            } catch (DBusException | DBusExecutionException | IllegalArgumentException | NoSuchElementException e) {
-                logger.error("Unable to handle the not configured device with path {}, skipping",
-                        device.getObjectPath(), e);
-            }
-        }
-    }
-
-    private void manageNonConfiguredInterface(List<String> configuredInterfaces, Device device) throws DBusException {
+    private void manageNonConfiguredInterface(Device device, String deviceId) throws DBusException {
         NMDeviceType deviceType = getDeviceType(device);
-        String deviceId = getDeviceId(device);
 
         if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
             logger.warn("Device \"{}\" of type \"{}\" currently not supported", deviceId, deviceType);
@@ -434,14 +416,12 @@ public class NMDbusConnector {
             setDeviceManaged(device, true);
         }
 
-        if (!configuredInterfaces.contains(deviceId)) {
-            logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", deviceId, deviceType);
+        logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", deviceId, deviceType);
 
-            disable(device);
+        disable(device);
 
-            if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-                handleModemManagerGPSSetup(device, Optional.of(false));
-            }
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            handleModemManagerGPSSetup(device, Optional.of(false));
         }
     }
 

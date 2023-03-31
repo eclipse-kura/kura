@@ -51,6 +51,17 @@ public class NMModemResetHandlerTest {
     }
 
     @Test
+    public void modemShouldNotBeResetWhenAModemActivates() throws DBusException {
+        givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
+        givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                NMDeviceState.NM_DEVICE_STATE_PREPARE);
+
+        whenThreadHasWaitedFor(1000);
+
+        thenModemWasReset(false);
+    }
+
+    @Test
     public void modemShouldNotBeResetWhenAModemGenerateAnotherSignal() throws DBusException {
         givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
         givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_9, NMDeviceState.NM_DEVICE_STATE_IP_CONFIG,

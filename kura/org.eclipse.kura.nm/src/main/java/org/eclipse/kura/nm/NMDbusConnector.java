@@ -400,6 +400,7 @@ public class NMDbusConnector {
                 modemResetHandlerEnable(deviceId, delayMinutes, device);
             }
         }
+
     }
 
     private void manageNonConfiguredInterface(Device device, String deviceId) throws DBusException {

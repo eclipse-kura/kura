@@ -194,16 +194,14 @@ public class NMDbusConnector {
                             Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
                     networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId,
-                            ethernetPropertiesWrapper,
-                            ip4configProperties);
+                            ethernetPropertiesWrapper, ip4configProperties);
                     break;
                 case NM_DEVICE_TYPE_LOOPBACK:
                     DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                             Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
                     networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId,
-                            loopbackPropertiesWrapper,
-                            ip4configProperties);
+                            loopbackPropertiesWrapper, ip4configProperties);
                     break;
                 case NM_DEVICE_TYPE_WIFI:
                     networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),

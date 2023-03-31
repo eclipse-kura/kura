@@ -479,7 +479,10 @@ public class NMDbusConnector {
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
-        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
+        if (!currentLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE)) {
+            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources),
+                    false);
+        }
     }
 
     private String getDeviceId(Device device) throws DBusException {

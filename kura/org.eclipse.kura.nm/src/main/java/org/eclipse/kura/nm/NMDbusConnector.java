@@ -449,10 +449,20 @@ public class NMDbusConnector {
         Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
                 modemLocation.getObjectPath(), Properties.class);
 
-        Set<MMModemLocationSource> availableLocationSources = MMModemLocationSource
-                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
-        Set<MMModemLocationSource> currentLocationSources = MMModemLocationSource
-                .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
+        Set<MMModemLocationSource> availableLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+        Set<MMModemLocationSource> currentLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+
+        try {
+            availableLocationSources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
+                    modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
+            currentLocationSources = MMModemLocationSource
+                    .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
+        } catch (DBusExecutionException e) {
+            logger.debug("Cannot retrive Modem.Location capabilities for {}.", modemLocationProperties.getObjectPath());
+        }
+
         EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
                 MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
                 MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
@@ -467,7 +477,10 @@ public class NMDbusConnector {
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
-        modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources), false);
+        if (!currentLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE)) {
+            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources),
+                    false);
+        }
     }
 
     private String getDeviceId(Device device) throws DBusException {

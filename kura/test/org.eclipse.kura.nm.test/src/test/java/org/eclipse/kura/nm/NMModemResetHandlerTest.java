@@ -40,7 +40,7 @@ public class NMModemResetHandlerTest {
     }
 
     @Test
-    public void modemShouldNotBeResetWhenADifferenctModemDisconnects() throws DBusException {
+    public void modemShouldNotBeResetWhenADifferentModemDisconnects() throws DBusException {
         givenNMModemResetHandlerWith(MOCK_DEVICE_DBUSPATH_9, this.mockMMModemDevice, 50);
         givenDeviceStateChangeSignal(MOCK_DEVICE_DBUSPATH_5, NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
                 NMDeviceState.NM_DEVICE_STATE_FAILED);

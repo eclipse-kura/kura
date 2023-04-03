@@ -24,25 +24,26 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.freedesktop.dbus.errors.NotSupported;
+import org.eclipse.kura.configuration.Password;
 import org.junit.Test;
 
 public class NetworkPropertiesTest {
 
-    NetworkProperties netProps;
-    Map<String, Object> properties = new HashMap<>();
-    Optional<?> optResult;
-    String stringResult;
-    Boolean booleanResult;
-    Short shortResult;
-    Integer intResult;
-    Long longResult;
+    private NetworkProperties netProps;
+    private Map<String, Object> properties = new HashMap<>();
+    private Optional<?> optResult;
+    private String stringResult;
+    private Boolean booleanResult;
+    private Short shortResult;
+    private Integer intResult;
+    private Long longResult;
+    private Password passwordResult;
 
-    List<String> stringListResult;
-    Map<String, Object> resultMap;
+    private List<String> stringListResult;
+    private Map<String, Object> resultMap;
 
-    Boolean hasNullPointExceptionBeenThrown = false;
-    Boolean hasNoSuchElementExceptionBeenThrown = false;
+    private Boolean hasNullPointExceptionBeenThrown = false;
+    private Boolean hasNoSuchElementExceptionBeenThrown = false;
 
     @Test
     public void constructorShouldThrowWithNullMap() {
@@ -77,6 +78,15 @@ public class NetworkPropertiesTest {
     }
 
     @Test
+    public void getShouldWorkWithDecryptedPassword() {
+        givenMapWith("testKey1", new Password("testPassword1"));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("testKey1", Password.class);
+        thenNoExceptionsOccured();
+        thenPasswordResultEquals(new Password("testPassword1"));
+    }
+
+    @Test
     public void getShouldThrowWithNullValue() {
         givenMapWith("testKey1", null);
         givenNetworkPropertiesBuiltWith(this.properties);
@@ -97,6 +107,14 @@ public class NetworkPropertiesTest {
         givenMapWith("Empty-String", "");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("Empty-String", String.class);
+        thenANoSuchElementExceptionOccured();
+    }
+
+    @Test
+    public void getShouldThrowWithEmptyPassword() {
+        givenMapWith("Empty-Password", new Password(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Empty-Password", Password.class);
         thenANoSuchElementExceptionOccured();
     }
 
@@ -217,6 +235,24 @@ public class NetworkPropertiesTest {
         whenGetOptIsCalledWith("", String.class);
         thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.of("test value"));
+    }
+
+    @Test
+    public void getOptShouldWorkWithDecryptedPassword() {
+        givenMapWith("aPassword", new Password("superSecurePassword"));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("aPassword", Password.class);
+        thenNoExceptionsOccured();
+        thenOptionalPasswordResultEquals(Optional.of(new Password("superSecurePassword")));
+    }
+
+    @Test
+    public void getOptShouldWorkWithDecryptedEmptyPassword() {
+        givenMapWith("aPassword", new Password(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("aPassword", Password.class);
+        thenNoExceptionsOccured();
+        thenOptionalPasswordResultEquals(Optional.empty());
     }
 
     @Test
@@ -353,8 +389,10 @@ public class NetworkPropertiesTest {
                 this.intResult = this.netProps.get(Integer.class, key, "");
             } else if (clazz == Long.class) {
                 this.longResult = this.netProps.get(Long.class, key, "");
+            } else if (clazz == Password.class) {
+                this.passwordResult = this.netProps.get(Password.class, key, "");
             } else {
-                throw new NotSupported("Data type is not supported with this Test");
+                throw new IllegalArgumentException("Data type is not supported with this Test");
             }
 
         } catch (NullPointerException e) {
@@ -404,6 +442,10 @@ public class NetworkPropertiesTest {
         assertEquals(result, this.stringResult);
     }
 
+    private void thenPasswordResultEquals(Password result) {
+        assertEquals(result.toString(), this.passwordResult.toString());
+    }
+
     public void thenBooleanResultEquals(Boolean result) {
         assertEquals(result, this.booleanResult);
     }
@@ -430,6 +472,15 @@ public class NetworkPropertiesTest {
 
     public void thenStringListResultEquals(List<String> result) {
         assertEquals(result, this.stringListResult);
+    }
+
+    private void thenOptionalPasswordResultEquals(Optional<Password> optPasswordResult) {
+        if (optPasswordResult.isPresent()) {
+            // Workaround to compare Password.class since it doesn't have an equals method
+            assertEquals(optPasswordResult.get().toString(), this.optResult.get().toString());
+        } else {
+            assertEquals(optPasswordResult, this.optResult);
+        }
     }
 
     public void thenANullPointerExceptionOccured() {

@@ -549,6 +549,21 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildGsmSettingsShouldWorkWithEmptyUsernamePassword() {
+        givenMapWith("net.interface.ttyACM0.config.apn", "mobile.provider.com");
+        givenMapWith("net.interface.ttyACM0.config.username", "");
+        givenMapWith("net.interface.ttyACM0.config.password", new Password(""));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("apn", "mobile.provider.com");
+        thenResultingMapNotContains("username");
+        thenResultingMapNotContains("password");
+    }
+
+    @Test
     public void buildPPPSettingsShouldNotThrowWithEmptyMap() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 

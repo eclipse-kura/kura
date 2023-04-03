@@ -460,7 +460,7 @@ public class NMDbusConnector {
             currentLocationSources = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
         } catch (DBusExecutionException e) {
-            logger.debug("Cannot retrive Modem.Location capabilities for {}. Caused by: ",
+            logger.warn("Cannot retrive Modem.Location capabilities for {}. Caused by: ",
                     modemLocationProperties.getObjectPath(), e);
             return;
         }

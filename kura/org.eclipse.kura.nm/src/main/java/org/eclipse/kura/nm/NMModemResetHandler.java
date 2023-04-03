@@ -79,7 +79,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
     }
 
     private boolean timerAlreadyScheduled() {
-        return !Objects.isNull(this.scheduledTasks) && !this.scheduledTasks.expired();
+        return Objects.nonNull(this.scheduledTasks) && !this.scheduledTasks.expired();
     }
 
     public void clearTimer() {

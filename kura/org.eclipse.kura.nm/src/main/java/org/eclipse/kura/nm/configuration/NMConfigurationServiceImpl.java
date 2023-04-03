@@ -33,8 +33,6 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
@@ -45,7 +43,6 @@ import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
-import org.eclipse.kura.usb.UsbDevice;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
@@ -159,7 +156,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(properties)));
             update(this.networkProperties.getProperties());
         }
-        
+
         logger.info("Activate NetworkConfigurationService... Done.");
     }
 
@@ -291,20 +288,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
     }
 
-    private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = NetworkConfigurationServiceCommon
-                .getNetworkInterfaceNamesInConfig(this.networkProperties.getProperties());
-
-        final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
-
-        if (usbPort.isPresent() && interfaceNamesInConfig.contains(usbPort.get())) {
-            return usbPort.get();
-        } else if (interfaceNamesInConfig.contains(netInterface.getName())) {
-            return netInterface.getName();
-        }
-        return usbPort.orElse(netInterface.getName());
-    }
-
     private void writeNetworkConfigurationSettings(Map<String, Object> networkProperties) {
         if (Objects.isNull(this.nmDbusConnector)) {
             logger.error("Found null NMDbusConnector. Couldn't apply network configuration settings.");
@@ -326,7 +309,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             if (isWanInterface(interfaceName)) {
                 wanInterfaces.add(interfaceName);
             }
-            
+
             if (isNatValid(interfaceName)) {
                 natInterfaces.add(interfaceName);
             }
@@ -395,9 +378,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
         Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
 
-        if (type.isPresent()
+        if (Boolean.TRUE.equals(type.isPresent()
                 && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
-                && isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent()
+                && isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
                 && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
             isValid = true;
         }

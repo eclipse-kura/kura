@@ -42,7 +42,7 @@ public class DhcpServerConfigWriterTest {
     public TemporaryFolder mockFiles = new TemporaryFolder();
 
     private static MockedStatic<DhcpServerManager> dhcpServerMock;
-    private Map<String, Object> networkProperties;
+    private Map<String, Object> networkProperties = new HashMap<>();
     private DhcpServerTool selectedTool;
     private String configFilename;
     private DhcpServerConfigWriter writer;
@@ -56,7 +56,6 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldReturnDhcpConfigFileName() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().build();
         givenDhcpConfigWriter("eth0");
 
         whenGetConfigFilename();
@@ -67,7 +66,6 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldReturnUdhcpConfigFileName() throws Exception {
         givenDhcpTool(DhcpServerTool.UDHCPD);
-        givenNetworkProperties().build();
         givenDhcpConfigWriter("eth0");
 
         whenGetConfigFilename();
@@ -78,7 +76,6 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldReturnDnsmasqConfigFileName() throws Exception {
         givenDhcpTool(DhcpServerTool.DNSMASQ);
-        givenNetworkProperties().build();
         givenDhcpConfigWriter("eth0");
 
         whenGetConfigFilename();
@@ -89,7 +86,6 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldReturnEmptyConfigFileName() throws Exception {
         givenDhcpTool(DhcpServerTool.NONE);
-        givenNetworkProperties().build();
         givenDhcpConfigWriter("eth0");
 
         whenGetConfigFilename();
@@ -100,14 +96,14 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldWriteCorrectDhcpConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
         
         whenWriteConfiguration();
@@ -134,14 +130,14 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldWriteCorrectUDhcpConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.UDHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
         
         whenWriteConfiguration();
@@ -167,14 +163,14 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldWriteCorrectDnsmasqConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.DNSMASQ);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
         
         whenWriteConfiguration();
@@ -195,14 +191,14 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldWriteCorrectDnsmasqConfigurationFileWithoutPassDNS() throws Exception {
         givenDhcpTool(DhcpServerTool.DNSMASQ);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", false)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", false);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
         
         whenWriteConfiguration();
@@ -222,14 +218,14 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowUnknownHostExceptionWithoutAddressTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -240,13 +236,13 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowKuraExceptionWithoutDefaultLeaseTimeTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -257,13 +253,13 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowKuraExceptionWithoutMaxLeaseTimeTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -274,13 +270,13 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowKuraExceptionWithoutPrefixTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111")
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -291,13 +287,13 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowKuraExceptionWithoutRangeStartTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -308,13 +304,13 @@ public class DhcpServerConfigWriterTest {
     @Test
     public void shouldThrowKuraExceptionWithoutRangeStopTest() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
-        givenNetworkProperties().with("net.interface.eth0.config.dhcpServer4.enabled", true)
-                .with("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900)
-                .with("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000)
-                .with("net.interface.eth0.config.dhcpServer4.passDns", true)
-                .with("net.interface.eth0.config.ip4.address", "192.168.0.11")
-                .with("net.interface.eth0.config.dhcpServer4.prefix", (short) 24)
-                .with("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111").build();
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
         givenDhcpConfigWriter("eth0");
 
         whenWriteConfiguration();
@@ -351,8 +347,8 @@ public class DhcpServerConfigWriterTest {
         this.selectedTool = tool;
     }
 
-    private PropertiesBuilder givenNetworkProperties() {
-        return new PropertiesBuilder();
+    private void givenNetworkPropertiesWith(String key, Object value) {
+        this.networkProperties.put(key, value);
     }
 
     private void givenDhcpConfigWriter(String interfaceName) throws IOException {
@@ -431,26 +427,6 @@ public class DhcpServerConfigWriterTest {
     @After
     public void cleanUp() throws IOException {
         dhcpServerMock.close();
-        this.mockFiles.delete();
-        this.mockFiles.create();
-    }
-
-    private class PropertiesBuilder {
-
-        private final Map<String, Object> properties;
-
-        public PropertiesBuilder() {
-            this.properties = new HashMap<>();
-        }
-
-        public PropertiesBuilder with(String name, Object value) {
-            this.properties.put(name, value);
-            return this;
-        }
-
-        public void build() {
-            DhcpServerConfigWriterTest.this.networkProperties = this.properties;
-        }
     }
 
 }

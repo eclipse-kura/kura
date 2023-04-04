@@ -33,7 +33,8 @@ public class NMDeviceAddedHandler implements DBusSigHandler<NetworkManager.Devic
     public void handle(NetworkManager.DeviceAdded s) {
         try {
             logger.info("New network device connected at {}", s.getDevicePath());
-            this.nm.apply();
+            String deviceId = this.nm.getDeviceIdByDBusPath(s.getPath());
+            this.nm.apply(deviceId);
         } catch (DBusException e) {
             logger.error("Failed to handle DeviceAdded event for device: {}. Caused by:", s.getDevicePath(), e);
         }

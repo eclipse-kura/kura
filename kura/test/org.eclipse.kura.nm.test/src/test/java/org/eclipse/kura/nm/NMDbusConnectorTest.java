@@ -103,6 +103,7 @@ public class NMDbusConnectorTest {
     private Boolean hasNoSuchElementExceptionThrown = false;
     private Boolean hasNullPointerExceptionThrown = false;
     private Boolean hasKuraExceptionThrown = false;
+    private Boolean hasIllegalArgumentExceptionThrown = false;
 
     private NetworkInterfaceStatus netInterface;
 
@@ -316,7 +317,7 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void applyShouldThrowWithEmptyMap() throws DBusException, IOException {
+    public void applyShouldDoNothingWithEmptyMap() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
@@ -326,7 +327,53 @@ public class NMDbusConnectorTest {
 
         whenApplyIsCalledWith(new HashMap<String, Object>());
 
-        thenNoSuchElementExceptionIsThrown();
+        thenNoExceptionIsThrown();
+        thenNetworkSettingsDidNotChangeForDevice("eth0");
+        thenNetworkSettingsDidNotChangeForDevice("wlan0");
+    }
+
+    @Test
+    public void applyShouldDoNothingWithNonExistingDeviceId() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDeviceList();
+
+        whenApplySingleIsCalledWith("eth1");
+
+        thenNoExceptionIsThrown();
+        thenNetworkSettingsDidNotChangeForDevice("eth0");
+        thenNetworkSettingsDidNotChangeForDevice("wlan0");
+    }
+
+    @Test
+    public void applyShouldThrowWithNullDeviceId() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDeviceList();
+
+        whenApplySingleIsCalledWith(null);
+
+        thenIllegalArgumentExceptionIsThrown();
+    }
+
+    @Test
+    public void applyShouldThrowWithEmptyDeviceId() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDeviceList();
+
+        whenApplySingleIsCalledWith("");
+
+        thenIllegalArgumentExceptionIsThrown();
     }
 
     @Test
@@ -1298,6 +1345,20 @@ public class NMDbusConnectorTest {
         }
     }
 
+    private void whenApplySingleIsCalledWith(String deviceId) {
+        try {
+            this.instanceNMDbusConnector.apply(deviceId);
+        } catch (DBusException e) {
+            this.hasDBusExceptionBeenThrown = true;
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionThrown = true;
+        } catch (NullPointerException e) {
+            this.hasNullPointerExceptionThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasIllegalArgumentExceptionThrown = true;
+        }
+    }
+
     private void whenGetInterfaceStatus(String netInterface, CommandExecutorService commandExecutorService) {
         try {
             this.netInterface = this.instanceNMDbusConnector.getInterfaceStatus(netInterface, commandExecutorService);
@@ -1339,6 +1400,7 @@ public class NMDbusConnectorTest {
         assertFalse(this.hasNoSuchElementExceptionThrown);
         assertFalse(this.hasNullPointerExceptionThrown);
         assertFalse(this.hasKuraExceptionThrown);
+        assertFalse(this.hasIllegalArgumentExceptionThrown);
     }
 
     private void thenNullPointerExceptionIsThrown() {
@@ -1347,6 +1409,10 @@ public class NMDbusConnectorTest {
 
     private void thenNoSuchElementExceptionIsThrown() {
         assertTrue(this.hasNoSuchElementExceptionThrown);
+    }
+
+    private void thenIllegalArgumentExceptionIsThrown() {
+        assertTrue(this.hasIllegalArgumentExceptionThrown);
     }
 
     private void thenGetDbusConnectionReturns(DBusConnection dbusConnection) {

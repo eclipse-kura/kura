@@ -41,12 +41,14 @@ The SQLite DB provides the following configuration parameters:
 * **Encryption Key Format**: Allows to specify the format of the Encryption Key parameter value. The possible values are ASCII (an ASCII string), Hex SSE (the key is an hexadecimal string to be used with the SSE extension) or Hex SQLCipher (the key is an hexadecimal string to be used with the SQLCipher extension).
 
 * **Journal Mode**: The database journal mode. The following options are available:
-    
+  
     * **Rollback Journal**: The database instance will use the [rollback journal](https://www.sqlite.org/atomiccommit.html) for more details. More specifically, the DELETE argument will be passed to the [pragma journal_mode](https://www.sqlite.org/pragma.html#pragma_journal_mode) command.
     
     * **WAL**: The database instance will use [WAL mode](https://www.sqlite.org/wal.html). This is the default mode.
 
     The [WAL mode](https://www.sqlite.org/wal.html) description page contains a comparison of the two modes.
+    
+* **Defrag enabled**: Enables or disables the database defragmentation. Use the Defrag Interval parameter to specify the interval.
 
 
 * **Defrag interval (seconds)**: The implementation supports running periodic defragmentation using the [VACUUM command](https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in minutes between two successive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases.
@@ -56,9 +58,10 @@ The SQLite DB provides the following configuration parameters:
 
     * Defragmentation is implemented by copying all non-free database pages to a new file and then deleting the original file.
     * If transactions that involve a lot of data are performed, in case of rollback journal the old content of the modified pages will be stored in the journal until the transaction is completed, and in WAL mode the new content of modified pages will be stored to the WAL file until the next checkpoint is performed.
-
+    
     It is recommended to perform some tests to determine the maximum database files size that will be used by the application and ensure that the size of the partition containing the database is at least twice as the expected db size.
 
+* **Checkpoint enabled**: Enables or disables checkpoints in WAL journal mode. Use the WAL Checkpoint Interval parameter to specify the interval.
 * **WAL Checkpoint Interval (Seconds)**: The implementation supports running periodic periodic [WAL checkpoints](https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds between two consecutive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases in WAL Journal Mode. In WAL mode a checkpoint will be performed after a periodic defragmentation regardless of the value of this parameter.
 
 * **Connection pool max size**: The implementation manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. If a new connection is requested 

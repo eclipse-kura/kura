@@ -13,10 +13,14 @@
 package org.eclipse.kura.linux.net.dhcp.server;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -32,7 +36,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
 
     private CommandExecutorService executorService;
-    private Set<String> activeInterfaces = Collections.synchronizedSet(new HashSet<>());
+    private Map<String, Long> configsLastModifiedTimestamps = Collections.synchronizedMap(new HashMap<>());
 
     public DnsmasqTool(CommandExecutorService service) {
         this.executorService = service;
@@ -42,9 +46,10 @@ public class DnsmasqTool implements DhcpLinuxTool {
     public boolean isRunning(String interfaceName) {
         CommandStatus status = this.executorService.execute(
                 new Command(new String[] { "systemctl", "is-active", "--quiet", DhcpServerTool.DNSMASQ.getValue() }));
-        boolean isRunning = status.getExitStatus().isSuccessful() && this.activeInterfaces.contains(interfaceName);
 
-        logger.debug("DNSMASQ - Is dnsmasq running for interface {}? {}", interfaceName, isRunning);
+        boolean isRunning = status.getExitStatus().isSuccessful() && !isConfigFileAlteredOrNonExistent(interfaceName);
+
+        logger.debug("DNSMASQ - Is dnsmasq running updated for interface {}? {}", interfaceName, isRunning);
 
         return isRunning;
     }
@@ -52,7 +57,11 @@ public class DnsmasqTool implements DhcpLinuxTool {
     @Override
     public CommandStatus startInterface(String interfaceName) {
         logger.debug("DNSMASQ - starting dnsmasq service for interface {}.", interfaceName);
-        this.activeInterfaces.add(interfaceName);
+
+        this.configsLastModifiedTimestamps.put(interfaceName,
+                new File(DhcpServerManager.getConfigFilename(interfaceName)).lastModified());
+
+        writeGlobalConfig();
 
         return this.executorService.execute(systemctlRestartCommand());
     }
@@ -68,8 +77,8 @@ public class DnsmasqTool implements DhcpLinuxTool {
                 CommandStatus status = this.executorService.execute(systemctlRestartCommand());
                 isInterfaceDisabled = status.getExitStatus().isSuccessful();
             }
-            
-            this.activeInterfaces.remove(interfaceName);
+
+            this.configsLastModifiedTimestamps.remove(interfaceName);
 
             logger.debug("DNSMASQ - Disabled dhcp server on interface {}. Success? {}", interfaceName,
                     isInterfaceDisabled);
@@ -80,8 +89,31 @@ public class DnsmasqTool implements DhcpLinuxTool {
         }
     }
 
+    private boolean isConfigFileAlteredOrNonExistent(String interfaceName) {
+        File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
+
+        if (!configFile.exists()) {
+            return true;
+        }
+
+        if (configsLastModifiedTimestamps.containsKey(interfaceName)) {
+            return configFile.lastModified() > configsLastModifiedTimestamps.get(interfaceName);
+        } else {
+            return true;
+        }
+    }
+
     private Command systemctlRestartCommand() {
         return new Command(new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
+    }
+
+    private void writeGlobalConfig() {
+        try {
+            Path dnsmasqGlobalsPath = Paths.get("/etc/dnsmasq.d/dnsmasq-globals.conf");
+            Files.write(dnsmasqGlobalsPath, "port=0\nbind-interfaces\n".getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            logger.warn("DNSMASQ - Failed setting in DHCP-only mode.", e);
+        }
     }
 
 }

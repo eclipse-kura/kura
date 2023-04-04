@@ -153,7 +153,7 @@ public class NMDbusConnector {
         for (Device device : availableDevices) {
             NMDeviceType deviceType = getDeviceType(device.getObjectPath());
             if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                supportedDeviceNames.add(getDeviceId(device.getObjectPath()));
+                supportedDeviceNames.add(getDeviceIdByDBusPath(device.getObjectPath()));
             }
 
         }
@@ -269,8 +269,13 @@ public class NMDbusConnector {
     }
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
-        doApply(Optional.empty(), networkConfiguration);
-        this.cachedConfiguration = networkConfiguration;
+        try {
+            configurationEnforcementDisable();
+            doApply(networkConfiguration);
+            this.cachedConfiguration = networkConfiguration;
+        } finally {
+            configurationEnforcementEnable();
+        }
     }
 
     public synchronized void apply() throws DBusException {
@@ -278,60 +283,57 @@ public class NMDbusConnector {
             logger.warn("No cached network configuration found.");
             return;
         }
-        doApply(Optional.empty(), this.cachedConfiguration);
-    }
-
-    public synchronized void apply(String deviceId) throws DBusException {
-        if (Objects.isNull(this.cachedConfiguration)) {
-            logger.warn("No cached network configuration found.");
-            return;
-        }
-        if (Objects.nonNull(deviceId) && !deviceId.isEmpty()) {
-            doApply(Optional.of(deviceId), this.cachedConfiguration);
-        } else {
-            doApply(Optional.empty(), this.cachedConfiguration);
-        }
-    }
-
-    private synchronized void doApply(Optional<String> deviceIdToBeConfigured, Map<String, Object> networkConfiguration)
-            throws DBusException {
-        logger.info("Applying configuration using NetworkManager Dbus connector");
         try {
             configurationEnforcementDisable();
             modemResetHandlersDisable();
-
-            NetworkProperties properties = new NetworkProperties(networkConfiguration);
-            List<String> configuredInterfaceIds = properties.getStringList("net.interfaces");
-
-            List<Device> availableDevices = getAllDevices();
-            availableDevices.forEach(device -> {
-                String deviceId = null;
-                try {
-                    deviceId = getDeviceId(device.getObjectPath());
-                } catch (DBusException e) {
-                    logger.error("Unable to retrieve the device Id for device path {}", device.getObjectPath(), e);
-                }
-                if (shouldBeConfigured(deviceId, deviceIdToBeConfigured)) {
-                    try {
-                        if (configuredInterfaceIds.contains(deviceId)) {
-                            manageConfiguredInterface(device, deviceId, properties);
-                        } else {
-                            manageNonConfiguredInterface(device, deviceId);
-                        }
-                    } catch (DBusException | DBusExecutionException | IllegalArgumentException
-                            | NoSuchElementException e) {
-                        logger.error("Unable to configure device {}, skipping", deviceId, e);
-                    }
-                }
-            });
+            doApply(this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
         }
     }
 
-    private boolean shouldBeConfigured(String deviceId, Optional<String> deviceIdToBeConfigured) {
-        return Objects.nonNull(deviceId) && !deviceId.isEmpty() && (!deviceIdToBeConfigured.isPresent()
-                || deviceId.equals(deviceIdToBeConfigured.get()));
+    public synchronized void apply(String deviceId) throws DBusException {
+        if (Objects.isNull(deviceId) || deviceId.isEmpty()) {
+            throw new IllegalArgumentException("DeviceId cannot be null or empty.");
+        }
+        if (Objects.isNull(this.cachedConfiguration)) {
+            logger.warn("No cached network configuration found.");
+            return;
+        }
+        try {
+            configurationEnforcementDisable();
+            doApply(deviceId, this.cachedConfiguration);
+        } finally {
+            configurationEnforcementEnable();
+        }
+    }
+
+    private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
+        logger.info("Applying configuration using NetworkManager Dbus connector");
+        List<Device> availableDevices = getAllDevices();
+        availableDevices.forEach(device -> {
+            try {
+                String deviceId = getDeviceIdByDBusPath(device.getObjectPath());
+                doApply(deviceId, networkConfiguration);
+            } catch (DBusException | DBusExecutionException | IllegalArgumentException | NoSuchElementException e) {
+                logger.error("Unable to apply configuration to the device path {}", device.getObjectPath(), e);
+            }
+        });
+    }
+
+    private synchronized void doApply(String deviceIdToBeConfigured, Map<String, Object> networkConfiguration)
+            throws DBusException {
+        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+        List<String> configuredInterfaceIds = properties.getStringList("net.interfaces");
+
+        Optional<Device> device = getDeviceByInterfaceId(deviceIdToBeConfigured);
+        if (device.isPresent()) {
+            if (configuredInterfaceIds.contains(deviceIdToBeConfigured)) {
+                manageConfiguredInterface(device.get(), deviceIdToBeConfigured, properties);
+            } else {
+                manageNonConfiguredInterface(device.get(), deviceIdToBeConfigured);
+            }
+        }
     }
 
     private synchronized void manageConfiguredInterface(Device device, String deviceId, NetworkProperties properties)
@@ -494,23 +496,23 @@ public class NMDbusConnector {
         }
     }
 
-    protected String getDeviceId(String devicePath) throws DBusException {
-        NMDeviceType deviceType = getDeviceType(devicePath);
+    protected String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
+        NMDeviceType deviceType = getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-            Optional<String> modemPath = getModemPathFromMM(devicePath);
+            Optional<String> modemPath = getModemPathFromMM(dbusPath);
             if (!modemPath.isPresent()) {
                 throw new IllegalStateException(
-                        String.format("Cannot retrieve modem path for: %s.", devicePath));
+                        String.format("Cannot retrieve modem path for: %s.", dbusPath));
             }
             Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
             if (!modemDeviceProperties.isPresent()) {
                 throw new IllegalStateException(
-                        String.format("Cannot retrieve modem properties for: %s.", devicePath));
+                        String.format("Cannot retrieve modem properties for: %s.", dbusPath));
 
             }
             return NMStatusConverter.getModemDeviceHwPath(modemDeviceProperties.get());
         } else {
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath,
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath,
                     Properties.class);
             return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
         }

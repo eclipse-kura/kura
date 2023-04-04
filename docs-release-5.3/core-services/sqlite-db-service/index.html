@@ -3011,6 +3011,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The <a href="https://www.sqlite.org/wal.html">WAL mode</a> description page contains a comparison of the two modes.</p>
 </li>
 <li>
+<p><strong>Defrag enabled</strong>: Enables or disables the database defragmentation. Use the Defrag Interval parameter to specify the interval.</p>
+</li>
+<li>
 <p><strong>Defrag interval (seconds)</strong>: The implementation supports running periodic defragmentation using the <a href="https://www.sqlite.org/lang_vacuum.html">VACUUM command</a>. This parameter specifies the interval in minutes between two successive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases.</p>
 </li>
 </ul>
@@ -3024,6 +3027,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>It is recommended to perform some tests to determine the maximum database files size that will be used by the application and ensure that the size of the partition containing the database is at least twice as the expected db size.</p>
 </div>
 <ul>
+<li><strong>Checkpoint enabled</strong>: Enables or disables checkpoints in WAL journal mode. Use the WAL Checkpoint Interval parameter to specify the interval.</li>
 <li>
 <p><strong>WAL Checkpoint Interval (Seconds)</strong>: The implementation supports running periodic periodic <a href="https://www.sqlite.org/pragma.html#pragma_wal_checkpoint">WAL checkpoints</a>. Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds between two consecutive checkpoints, set to zero to disable. This parameter is only relevant for persisted databases in WAL Journal Mode. In WAL mode a checkpoint will be performed after a periodic defragmentation regardless of the value of this parameter.</p>
 </li>

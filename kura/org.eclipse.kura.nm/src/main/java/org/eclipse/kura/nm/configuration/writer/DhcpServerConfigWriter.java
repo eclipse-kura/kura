@@ -106,30 +106,32 @@ public class DhcpServerConfigWriter {
                 addDNSServersOption(dhcpServerConfig, pw);
             } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
                 pw.println("interface=" + dhcpServerConfig.getInterfaceName());
-                pw.println("bind-interfaces");
-                pw.println("dhcp-option=1," + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
+                
+                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")
+                        .append(this.interfaceName)
+                        .append(",")
+                        .append(dhcpServerConfig.getRangeStart())
+                        .append(",")
+                        .append(dhcpServerConfig.getRangeEnd())
+                        .append(",")
+                        .append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
+                pw.println(dhcpRangeProp.toString());
+                
+                pw.println("dhcp-option=" + this.interfaceName + ",1,"
+                        + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
 
                 if (dhcpServerConfig.isPassDns()) {
                     // router property
-                    pw.println("dhcp-option=3," + dhcpServerConfig.getRouterAddress().toString());
+                    pw.println("dhcp-option=" + this.interfaceName + ",3,"
+                            + dhcpServerConfig.getRouterAddress().toString());
                     // announce DNS servers on this device
-                    pw.println("dhcp-option=6,0.0.0.0");
+                    pw.println("dhcp-option=" + this.interfaceName + ",6,0.0.0.0");
                 } else {
-                    pw.println("dhcp-ignore-names");
+                    pw.println("dhcp-ignore-names=" + this.interfaceName);
                 }
 
                 // all subnets are local
-                pw.println("dhcp-option=27,1");
-                pw.println("dhcp-lease-max=" + dhcpServerConfig.getMaximumLeaseTime());
-                // disable DNS server since managed by NetworkManager
-                pw.println("port=0");
-                
-                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")
-                    .append(dhcpServerConfig.getRangeStart())
-                    .append(",")
-                    .append(dhcpServerConfig.getRangeEnd()).append(",")
-                    .append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
-                pw.println(dhcpRangeProp.toString());
+                pw.println("dhcp-option=" + this.interfaceName + ",27,1");
             }
             pw.flush();
             fos.getFD().sync();

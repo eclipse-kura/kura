@@ -581,8 +581,8 @@ public class NMDbusConnector {
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED);
     }
 
-    private NMDeviceType getDeviceType(String devicePath) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath,
+    private NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
                 Properties.class);
 
         NMDeviceType deviceType = NMDeviceType
@@ -590,7 +590,7 @@ public class NMDbusConnector {
 
         // Workaround to identify Loopback interface for NM versions prior to 1.42
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath,
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
                     Generic.class);
             Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
@@ -754,10 +754,10 @@ public class NMDbusConnector {
         this.modemHandlers.clear();
     }
 
-    private String getDeviceIdFromNM(String devicePath) throws DBusException {
-        Properties nmModemProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath, Properties.class);
+    private String getDeviceIdFromNM(String deviceDbusPath) throws DBusException {
+        Properties nmModemProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Properties.class);
         String deviceId = (String) nmModemProperties.Get(NM_DEVICE_BUS_NAME + ".Modem", "DeviceId");
-        logger.debug("Found DeviceId {} for device {}", deviceId, devicePath);
+        logger.debug("Found DeviceId {} for device {}", deviceId, deviceDbusPath);
         return deviceId;
     }
 

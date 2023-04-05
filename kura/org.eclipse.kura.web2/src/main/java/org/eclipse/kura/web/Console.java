@@ -38,6 +38,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.api.ClientExtensionBundle;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
@@ -51,6 +52,7 @@ import org.eclipse.kura.web.server.GwtKeystoreServiceImpl;
 import org.eclipse.kura.web.server.GwtLogServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImplFacade;
+import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
@@ -61,7 +63,6 @@ import org.eclipse.kura.web.server.GwtStatusServiceImpl;
 import org.eclipse.kura.web.server.GwtUserServiceImpl;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
-import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.server.servlet.FileServlet;
@@ -123,6 +124,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     private SystemService systemService;
     private CryptoService cryptoService;
+    private SslManagerService sslManagerService;
 
     private UserAdmin userAdmin;
 
@@ -147,6 +149,16 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     // Dependencies
     //
     // ----------------------------------------------------------------
+
+    public void setSslManagerService(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
+    }
+
+    public void unsetSslManagerService(SslManagerService sslManagerService) {
+        if (sslManagerService == this.sslManagerService) {
+            this.sslManagerService = null;
+        }
+    }
 
     public void setHttpService(HttpService httpService) {
         this.httpService = httpService;
@@ -477,8 +489,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/package", new GwtPackageServiceImpl(), null,
-                this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/package",
+                new GwtPackageServiceImpl(this.sslManagerService), null, this.sessionContext);
+
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/certificate", new GwtCertificatesServiceImpl(), null,

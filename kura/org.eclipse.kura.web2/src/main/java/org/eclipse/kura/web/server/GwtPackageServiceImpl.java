@@ -24,10 +24,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -64,6 +66,12 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
 
     private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
+
+    private final SslManagerService sslManagerService;
+
+    public GwtPackageServiceImpl(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
+    }
 
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -141,12 +149,13 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         GwtMarketplacePackageDescriptor descriptor = null;
         URL mpUrl = null;
-        HttpURLConnection connection = null;
+        HttpsURLConnection connection = null;
 
         try {
 
             mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
-            connection = (HttpURLConnection) mpUrl.openConnection();
+            connection = (HttpsURLConnection) mpUrl.openConnection();
+            connection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
 
             connection.setRequestMethod("GET");
             connection.connect();

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,7 +102,7 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
-    private final List<NMModemResetHandler> modemHandlers = new ArrayList<>();
+    private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -271,6 +272,7 @@ public class NMDbusConnector {
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();
+            modemResetHandlersDisable();
             doApply(networkConfiguration);
             this.cachedConfiguration = networkConfiguration;
         } finally {
@@ -302,6 +304,7 @@ public class NMDbusConnector {
         }
         try {
             configurationEnforcementDisable();
+            modemResetHandlersDisable(deviceId);
             doApply(deviceId, this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
@@ -737,12 +740,20 @@ public class NMDbusConnector {
         NMModemResetHandler resetHandler = new NMModemResetHandler(device.getObjectPath(), mmModemDevice,
                 delayMinutes * 60L * 1000L);
 
-        this.modemHandlers.add(resetHandler);
+        this.modemHandlers.put(deviceId, resetHandler);
         this.dbusConnection.addSigHandler(Device.StateChanged.class, resetHandler);
     }
 
     private void modemResetHandlersDisable() {
-        for (NMModemResetHandler handler : this.modemHandlers) {
+        for (String deviceId : this.modemHandlers.keySet()) {
+            modemResetHandlersDisable(deviceId);
+        }
+        this.modemHandlers.clear();
+    }
+
+    private void modemResetHandlersDisable(String deviceId) {
+        if (this.modemHandlers.containsKey(deviceId)) {
+            NMModemResetHandler handler = this.modemHandlers.get(deviceId);
             handler.clearTimer();
             try {
                 this.dbusConnection.removeSigHandler(Device.StateChanged.class, handler);
@@ -750,12 +761,11 @@ public class NMDbusConnector {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
         }
-
-        this.modemHandlers.clear();
     }
 
     private String getDeviceIdFromNM(String deviceDbusPath) throws DBusException {
-        Properties nmModemProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Properties.class);
+        Properties nmModemProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
+                Properties.class);
         String deviceId = (String) nmModemProperties.Get(NM_DEVICE_BUS_NAME + ".Modem", "DeviceId");
         logger.debug("Found DeviceId {} for device {}", deviceId, deviceDbusPath);
         return deviceId;

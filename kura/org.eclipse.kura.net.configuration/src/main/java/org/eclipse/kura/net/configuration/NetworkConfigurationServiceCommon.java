@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.net.configuration;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Scalar;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -110,6 +116,31 @@ public class NetworkConfigurationServiceCommon {
         }
 
         return tocd;
+    }
+
+        public static ComponentConfiguration getConfiguration(final String pid, final Map<String, Object> properties,
+            final Optional<List<UsbNetDevice>> usbNetDevices) throws KuraException {
+        final Tocd definition = getDefinition(properties, usbNetDevices);
+
+        return new ComponentConfigurationImpl(pid, definition, convertStringsToPasswords(definition, properties));
+    }
+
+    private static Map<String, Object> convertStringsToPasswords(final Tocd ocd, final Map<String, Object> properties) {
+        Optional<Map<String, Object>> result = Optional.empty();
+
+        for (final AD ad : ocd.getAD()) {
+            final String key = ad.getId();
+            final Object value = result.orElse(properties).get(ad.getId());
+
+            if (ad.getType() == Scalar.PASSWORD && value instanceof String) {
+                if (!result.isPresent()) {
+                    result = Optional.of(new HashMap<>(properties));
+                }
+                result.get().put(key, new Password(((String) value).toCharArray()));
+            }
+        }
+
+        return result.orElse(properties);
     }
 
     private static void getModemDefinition(Tocd tocd, String ifaceName) {

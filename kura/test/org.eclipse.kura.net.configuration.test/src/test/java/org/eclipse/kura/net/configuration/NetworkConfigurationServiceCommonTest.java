@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.configuration;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -33,6 +35,7 @@ public class NetworkConfigurationServiceCommonTest {
     private final Map<String, Object> properties = new HashMap<>();
     private Tocd tocd;
     private List<AD> ads;
+    private Map<String, Object> returnedProperties = new HashMap<>();
 
     @Test
     public void componentDefinitionShouldHaveBasicPropertiesTest() throws KuraException {
@@ -74,6 +77,54 @@ public class NetworkConfigurationServiceCommonTest {
         givenFullProperties();
         whenTocdIsRetrieved();
         thenPppNumIsInteger();
+    }
+
+    @Test
+    public void shouldWrapStringPasswords() throws KuraException {
+        givenFullProperties();
+        givenConfigurationProperty("net.interface.1-4.config.password", "foo");
+        givenConfigurationProperty("net.interface.wlp1s0.config.wifi.master.passphrase", "bar");
+        givenConfigurationProperty("net.interface.wlp1s0.config.wifi.infra.passphrase", "baz");
+
+        whenConfigurationPropertiesAreRetrieved();
+
+        thenReturnedPropertyEqualsPassword("net.interface.1-4.config.password",
+                new Password(new char[] { 'f', 'o', 'o' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.master.passphrase",
+                new Password(new char[] { 'b', 'a', 'r' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.infra.passphrase",
+                new Password(new char[] { 'b', 'a', 'z' }));
+
+    }
+
+    @Test
+    public void shouldNotChangeWrappedPasswords() throws KuraException {
+        givenFullProperties();
+        givenConfigurationProperty("net.interface.1-4.config.password", new Password(new char[] { 'f', 'o', 'o' }));
+        givenConfigurationProperty("net.interface.wlp1s0.config.wifi.master.passphrase",
+                new Password(new char[] { 'b', 'a', 'r' }));
+        givenConfigurationProperty("net.interface.wlp1s0.config.wifi.infra.passphrase",
+                new Password(new char[] { 'b', 'a', 'z' }));
+
+        whenConfigurationPropertiesAreRetrieved();
+
+        thenReturnedPropertyEqualsPassword("net.interface.1-4.config.password",
+                new Password(new char[] { 'f', 'o', 'o' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.master.passphrase",
+                new Password(new char[] { 'b', 'a', 'r' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.infra.passphrase",
+                new Password(new char[] { 'b', 'a', 'z' }));
+
+    }
+
+    @Test
+    public void shouldNotChangeOtherProperties() throws KuraException {
+        givenFullProperties();
+        whenConfigurationPropertiesAreRetrieved();
+
+        thenReturnedPropertyEquals("net.interface.lo.config.ip4.status", "netIPv4StatusEnabledLAN");
+        thenReturnedPropertyEquals("net.interface.1-4.config.resetTimeout", 5);
+        thenReturnedPropertyEquals("net.interface.1-4.config.ip4.prefix", -1);
     }
 
     private void givenPropertiesWithoutInterfaces() {
@@ -189,10 +240,19 @@ public class NetworkConfigurationServiceCommonTest {
         this.properties.put("net.interface.1-4.config.pdpType", "IP");
     }
 
+    private void givenConfigurationProperty(final String key, final Object value) {
+        this.properties.put(key, value);
+    }
+
     private void whenTocdIsRetrieved() throws KuraException {
         this.ads = null;
         this.tocd = NetworkConfigurationServiceCommon.getDefinition(this.properties, Optional.empty());
         this.ads = this.tocd.getAD();
+    }
+
+    private void whenConfigurationPropertiesAreRetrieved() throws KuraException {
+        this.returnedProperties = NetworkConfigurationServiceCommon
+                .getConfiguration("foo", this.properties, Optional.empty()).getConfigurationProperties();
     }
 
     private void thenComponentDefinitionHasBasicProperties() {
@@ -206,6 +266,16 @@ public class NetworkConfigurationServiceCommonTest {
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
         assertEquals(110, this.ads.size());
+    }
+
+    private void thenReturnedPropertyEquals(final String key, final Object value) {
+        assertEquals(value, this.returnedProperties.get(key));
+    }
+
+    private void thenReturnedPropertyEqualsPassword(final String key, final Password value) {
+        assertEquals(Password.class,
+                Optional.ofNullable(this.returnedProperties.get(key)).map(Object::getClass).orElse(null));
+        assertArrayEquals(value.getPassword(), ((Password) this.returnedProperties.get(key)).getPassword());
     }
 
     private void thenComponentDefinitionHasCorrectProperties() {

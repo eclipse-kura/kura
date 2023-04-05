@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.server.util;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.eclipse.kura.web.server.util.GwtServerUtil.PASSWORD_PLACEHOLDER;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -55,6 +56,10 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -745,5 +750,27 @@ public final class GwtServerUtil {
             logger.error("Error exporting snapshot");
             throw new ServletException(e);
         }
+    }
+    
+    public static List<GwtNetInterfaceConfig> replaceNetworkConfigListSensitivePasswordsWithPlaceholder(List<GwtNetInterfaceConfig> gwtNetworkConfigList) {
+        for (GwtNetInterfaceConfig netConfig : gwtNetworkConfigList) {
+            if (netConfig instanceof GwtWifiNetInterfaceConfig) {
+                GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
+                GwtWifiConfig gwtAPWifiConfig = wifiConfig.getAccessPointWifiConfig();
+                if (gwtAPWifiConfig != null) {
+                    gwtAPWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
+                }
+
+                GwtWifiConfig gwtStationWifiConfig = wifiConfig.getStationWifiConfig();
+                if (gwtStationWifiConfig != null) {
+                    gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
+                }
+            } else if (netConfig instanceof GwtModemInterfaceConfig) {
+                GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
+                modemConfig.setPassword(PASSWORD_PLACEHOLDER);
+            }
+        }
+        
+        return gwtNetworkConfigList;
     }
 }

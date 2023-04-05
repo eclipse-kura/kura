@@ -35,6 +35,9 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
 
+    private static final String DNSMASQ_GLOBAL_CONFIG_FILE = "/etc/dnsmasq.d/dnsmasq-globals.conf";
+    private static final String GLOBAL_CONFIGURATION = "port=0\nbind-interfaces\n";
+
     private CommandExecutorService executorService;
     private Map<String, Long> configsLastModifiedTimestamps = Collections.synchronizedMap(new HashMap<>());
 
@@ -96,8 +99,8 @@ public class DnsmasqTool implements DhcpLinuxTool {
             return true;
         }
 
-        if (configsLastModifiedTimestamps.containsKey(interfaceName)) {
-            return configFile.lastModified() > configsLastModifiedTimestamps.get(interfaceName);
+        if (this.configsLastModifiedTimestamps.containsKey(interfaceName)) {
+            return configFile.lastModified() > this.configsLastModifiedTimestamps.get(interfaceName);
         } else {
             return true;
         }
@@ -109,8 +112,8 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     private void writeGlobalConfig() {
         try {
-            Path dnsmasqGlobalsPath = Paths.get("/etc/dnsmasq.d/dnsmasq-globals.conf");
-            Files.write(dnsmasqGlobalsPath, "port=0\nbind-interfaces\n".getBytes(StandardCharsets.UTF_8));
+            Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
+            Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             logger.warn("DNSMASQ - Failed setting in DHCP-only mode.", e);
         }

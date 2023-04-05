@@ -237,7 +237,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldEncodeLoopbackInterfaceStatusWithDefaultsById() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId("lo0"));
 
         whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
                 "{\"interfaceIds\":[\"lo0\"]}");
@@ -261,7 +261,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldNotReturnMissingInterfaces() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId("lo0"));
 
         whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
                 "{\"interfaceIds\":[\"lo0\",\"foo\"]}");
@@ -287,7 +287,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldReturnEmptyListIfNoInterfacesMatch() {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId("lo0"));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId("lo0"));
 
         whenRequestIsPerformed(new MethodSpec("POST"), NETWORK_STATUS_BY_INTERFACE_ID_PATH,
                 "{\"interfaceIds\":[\"foo\"]}");
@@ -300,7 +300,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     @Test
     public void shouldEncodeLoopbackInterfaceStatusWithCustomParams() {
         givenNetworkStatus(LoopbackInterfaceStatus.builder() //
-                .withId("lo0") //
+                .withInterfaceId("lo0") //
                 .withInterfaceName("lo1") //
                 .withHardwareAddress(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, (byte) 0xff }) //
                 .withDriver("fooDriver") //
@@ -1068,7 +1068,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private void givenNetworkStatus(final NetworkInterfaceStatus.NetworkInterfaceStatusBuilder<?> builder) {
         final NetworkInterfaceStatus status = builder.build();
 
-        this.currentStatus.put(status.getId(), new Success(status));
+        this.currentStatus.put(status.getInterfaceId(), new Success(status));
     }
 
     private void givenExceptionRetrievingInterfaceStatus(final String interfaceId, final Exception exception) {
@@ -1078,7 +1078,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     private void givenLoopbackInterfaceWithFilledIP4Address(final String id) throws UnknownHostException {
         givenNetworkStatus(
-                LoopbackInterfaceStatus.builder().withId(id)
+                LoopbackInterfaceStatus.builder().withInterfaceId(id)
                         .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder()
                                 .withAddresses(Arrays.asList(
                                         new NetworkInterfaceIpAddress<>(ipV4Address(1, 2, 3, 4), (short) 16),
@@ -1089,7 +1089,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     private void givenLoopbackInterfaceWithFilledIP6Address(final String id) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
                 .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder()
                         .withAddresses(Arrays.asList(
                                 new NetworkInterfaceIpAddress<>(ipV6Address(1, 2, 3, 4, 5, 0), (short) 16),
@@ -1101,12 +1101,12 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     private void givenLoopbackInterfaceWithUnFilledIP4Address(final String id) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
                 .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder().build())));
     }
 
     private void givenLoopbackInterfaceWithUnFilledIP6Address(final String id) throws UnknownHostException {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withId(id)
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
                 .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder().build())));
     }
 

@@ -37,7 +37,7 @@ public class NetworkInterfaceStatusDTO {
     private final NetworkInterfaceIpAddressStatusDTO interfaceIp6Addresses;
 
     protected NetworkInterfaceStatusDTO(final NetworkInterfaceStatus status) {
-        this.id = status.getId();
+        this.id = status.getInterfaceId();
         this.interfaceName = status.getInterfaceName();
         this.hardwareAddress = AddressUtil.formatHardwareAddress(status.getHardwareAddress());
         this.type = status.getType();

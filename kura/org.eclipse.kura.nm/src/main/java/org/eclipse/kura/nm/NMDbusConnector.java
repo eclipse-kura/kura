@@ -387,14 +387,10 @@ public class NMDbusConnector {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
                 connection, deviceId, interfaceName, deviceType);
 
-        logger.info("New settings parsed");
-
         DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
                 NMDeviceState.NM_DEVICE_STATE_CONFIG);
 
         if (connection.isPresent()) {
-            logger.info("Current settings available");
-
             connection.get().Update(newConnectionSettings);
             this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                     new DBusPath(device.getObjectPath()), new DBusPath("/"));
@@ -643,7 +639,7 @@ public class NMDbusConnector {
         if (appliedConnection.isPresent()) {
             return appliedConnection;
         } else {
-            logger.info("Active connection not found, looking for avaliable connections.");
+            logger.debug("Active connection not found, looking for avaliable connections.");
 
             List<Connection> availableConnections = getAvaliableConnections(dev);
 

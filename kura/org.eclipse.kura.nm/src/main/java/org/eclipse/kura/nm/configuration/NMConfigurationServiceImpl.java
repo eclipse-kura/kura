@@ -326,9 +326,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             if (isWanInterface(interfaceName)) {
                 wanInterfaces.add(interfaceName);
             }
-        });
-
-        interfaceNames.forEach(interfaceName -> {
+            
             if (isNatValid(interfaceName)) {
                 natInterfaces.add(interfaceName);
             }

@@ -63,6 +63,8 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
 
+    private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
+
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
@@ -142,7 +144,8 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         HttpURLConnection connection = null;
 
         try {
-            mpUrl = new URL("http://marketplace.eclipse.org/node/" + nodeId + "/api/p");
+
+            mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
             connection = (HttpURLConnection) mpUrl.openConnection();
 
             connection.setRequestMethod("GET");

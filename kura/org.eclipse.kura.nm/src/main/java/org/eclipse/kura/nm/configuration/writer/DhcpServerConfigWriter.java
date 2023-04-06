@@ -127,6 +127,8 @@ public class DhcpServerConfigWriter {
                     // announce DNS servers on this device
                     pw.println("dhcp-option=" + this.interfaceName + ",6,0.0.0.0");
                 } else {
+                    // leaving the option without value disables it
+                    pw.println("dhcp-option=" + this.interfaceName + ",6");
                     pw.println("dhcp-ignore-names=" + this.interfaceName);
                 }
 

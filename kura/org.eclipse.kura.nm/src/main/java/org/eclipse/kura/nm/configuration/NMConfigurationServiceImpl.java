@@ -29,7 +29,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -272,12 +271,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(
-                NetworkConfigurationServiceCommon.PID, NetworkConfigurationServiceCommon
-                        .getDefinition(this.networkProperties.getProperties(), Optional.empty()),
-                this.networkProperties.getProperties());
+        return NetworkConfigurationServiceCommon.getConfiguration(NetworkConfigurationServiceCommon.PID,
+                this.networkProperties.getProperties(), Optional.empty());
+
     }
 
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {

@@ -16,8 +16,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
@@ -31,11 +34,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
+    
+    private final GwtNetInterfaceConfig oldGwtNetInterfaceConfig;
 
-    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig) {
+    public NetworkConfigurationServicePropertiesBuilder(GwtNetInterfaceConfig gwtConfig) throws GwtKuraException, KuraException {
         this.gwtConfig = gwtConfig;
         this.properties = new NetworkConfigurationServiceProperties();
         this.ifname = this.gwtConfig.getName();
+        this.oldGwtNetInterfaceConfig = getConfigsAndStatuses(this.gwtConfig.getName());
     }
 
     public Map<String, Object> build() {
@@ -152,7 +158,15 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
         this.properties.setWifiMasterSsid(this.ifname, gwtWifiConfig.getWirelessSsid());
         this.properties.setWifiMasterIgnoreSsid(this.ifname, gwtWifiConfig.ignoreSSID());
-        this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());
+        
+        if (gwtWifiConfig.getPassword().equals(GwtServerUtil.PASSWORD_PLACEHOLDER) && oldGwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig) {
+            GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
+            this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().getPassword());
+        }else {            
+            this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());
+        }
+        
+        
         this.properties.setWifiMasterChannel(this.ifname, gwtWifiConfig.getChannels());
 
         this.properties.setWifiMasterMode(this.ifname,
@@ -177,7 +191,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
         this.properties.setWifiInfraSsid(this.ifname, gwtWifiConfig.getWirelessSsid());
         this.properties.setWifiInfraIgnoreSsid(this.ifname, gwtWifiConfig.ignoreSSID());
-        this.properties.setWifiInfraPassphrase(this.ifname, gwtWifiConfig.getPassword());
+        
+        if (gwtWifiConfig.getPassword().equals(GwtServerUtil.PASSWORD_PLACEHOLDER) && oldGwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig) {
+            GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
+            this.properties.setWifiInfraPassphrase(this.ifname, gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().getPassword());
+        }else {            
+            this.properties.setWifiInfraPassphrase(this.ifname, gwtWifiConfig.getPassword());
+        }
+        
         this.properties.setWifiInfraChannel(this.ifname, gwtWifiConfig.getChannels());
 
         this.properties.setWifiInfraMode(this.ifname,
@@ -222,7 +243,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setModemConnectionStatus(this.ifname, Optional.ofNullable(gwtModemConfig.getHwState()));
             this.properties.setModemDialString(this.ifname, gwtModemConfig.getDialString());
             this.properties.setModemUsername(this.ifname, gwtModemConfig.getUsername());
-            this.properties.setModemPassword(this.ifname, gwtModemConfig.getPassword());
+            
+            if (gwtModemConfig.getPassword().equals(GwtServerUtil.PASSWORD_PLACEHOLDER) && oldGwtNetInterfaceConfig instanceof GwtModemInterfaceConfig) {
+                GwtModemInterfaceConfig gwtModemInterfaceConfig = (GwtModemInterfaceConfig) oldGwtNetInterfaceConfig;
+                this.properties.setModemPassword(this.ifname, gwtModemInterfaceConfig.getPassword());
+            }else {            
+                this.properties.setModemPassword(this.ifname, gwtModemConfig.getPassword());
+            }
+            
             this.properties.setModemResetTimeout(this.ifname, gwtModemConfig.getResetTimeout());
             this.properties.setModemPersistEnabled(this.ifname, gwtModemConfig.isPersist());
             this.properties.setModemHoldoff(this.ifname, gwtModemConfig.getHoldoff());
@@ -240,6 +268,11 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setUsbProductId(this.ifname, gwtModemConfig.getModel());
             this.properties.setUsbDevicePath(this.ifname, gwtModemConfig.getHwUsbDevice());
         }
+    }
+    
+    private static GwtNetInterfaceConfig getConfigsAndStatuses(String ifName) throws GwtKuraException, KuraException {
+        NetworkConfigurationServiceAdapter configuration = new NetworkConfigurationServiceAdapter();
+        return configuration.getGwtNetInterfaceConfig(ifName);
     }
 
 }

@@ -44,7 +44,6 @@ public class DnsmasqTool implements DhcpLinuxTool {
     public DnsmasqTool(CommandExecutorService service) {
         this.executorService = service;
     }
-
     @Override
     public boolean isRunning(String interfaceName) {
         CommandStatus status = this.executorService.execute(
@@ -88,7 +87,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     
             return isInterfaceDisabled;
         } catch (Exception e) {
-            throw new KuraProcessExecutionErrorException("Failed to disable DHCP server: " + e.getMessage());
+            throw new KuraProcessExecutionErrorException(e, "Failed to disable DHCP server: " + e.getMessage());
         }
     }
 

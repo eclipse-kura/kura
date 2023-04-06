@@ -108,7 +108,7 @@ public class NMStatusConverter {
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
 
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
-        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
+        builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState
                 .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -125,7 +125,7 @@ public class NMStatusConverter {
     public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
-        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
+        builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
 
         NMDeviceState deviceState = NMDeviceState
                 .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -141,7 +141,7 @@ public class NMStatusConverter {
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
             AccessPointsProperties accessPointsProperties, SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
-        builder.withId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
+        builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
 
         NMDeviceState deviceState = NMDeviceState
                 .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
@@ -176,7 +176,7 @@ public class NMStatusConverter {
         ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
         Properties deviceProperties = devicePropertiesWrapper.getDeviceProperties();
         Optional<Properties> modemProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
-        builder.withId(interfaceId).withVirtual(false);
+        builder.withInterfaceId(interfaceId).withVirtual(false);
         setModemInterfaceName(interfaceId, deviceProperties, builder);
 
         NMDeviceState deviceState = NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, STATE));

@@ -858,7 +858,9 @@ class UploadRequest extends ServletFileUpload {
     public UploadRequest(DiskFileItemFactory diskFileItemFactory) {
         super(diskFileItemFactory);
         setSizeMax(FileServlet.getFileUploadSizeMax());
-        setFileCountMax(2L);
+        // contrary to what the name says, this method does not set the number of allowed files but the number of parts
+        // (files and fields)
+        setFileCountMax(10L);
         this.formFields = new HashMap<>();
         this.fileItems = new ArrayList<>();
     }

@@ -119,11 +119,11 @@ public class DhcpServerConfigWriter {
                 
                 pw.println("dhcp-option=" + this.interfaceName + ",1,"
                         + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
+                // router property
+                pw.println(
+                        "dhcp-option=" + this.interfaceName + ",3," + dhcpServerConfig.getRouterAddress().toString());
 
                 if (dhcpServerConfig.isPassDns()) {
-                    // router property
-                    pw.println("dhcp-option=" + this.interfaceName + ",3,"
-                            + dhcpServerConfig.getRouterAddress().toString());
                     // announce DNS servers on this device
                     pw.println("dhcp-option=" + this.interfaceName + ",6,0.0.0.0");
                 } else {

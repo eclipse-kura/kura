@@ -1,17 +1,32 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.keystore.util.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.junit.Test;
 
@@ -157,5 +172,57 @@ public class KeystoreRemoteServiceTest {
         assertEquals(1024, ((RSAPublicKey) entry.getCertificate().getPublicKey()).getModulus().bitLength());
         assertEquals("X.509", entry.getCertificate().getType());
         assertEquals("RSA", entry.getPrivateKey().getAlgorithm());
+    }
+
+    @Test
+    public void shouldDecodeSingleCertificate() throws CertificateException, IOException {
+        givenCertificateToBeDecoded(publicKeyDSA);
+
+        whenCertificatesAreDecoded();
+
+        thenDecodedCertificateCountIs(1);
+        thenDecodedCertPEMEncodeingEquals(0, publicKeyDSA);
+    }
+
+    @Test
+    public void shouldDecodeMultipleCertificate() throws CertificateException, IOException {
+        givenCertificateToBeDecoded(publicKeyDSA);
+        givenCertificateToBeDecoded(publicKeyRSA);
+        givenCertificateToBeDecoded(publicKeyEC);
+
+        whenCertificatesAreDecoded();
+
+        thenDecodedCertificateCountIs(3);
+        thenDecodedCertPEMEncodeingEquals(0, publicKeyDSA);
+        thenDecodedCertPEMEncodeingEquals(1, publicKeyRSA);
+        thenDecodedCertPEMEncodeingEquals(2, publicKeyEC);
+    }
+
+    private String toBeDecoded = "";
+    private X509Certificate[] result;
+
+    private void givenCertificateToBeDecoded(final String cert) {
+        toBeDecoded += cert + '\n';
+    }
+
+    private void whenCertificatesAreDecoded() throws CertificateException {
+        this.result = KeystoreRemoteService.parsePublicCertificates(toBeDecoded);
+    }
+
+    private void thenDecodedCertificateCountIs(final int expectedCount) {
+        assertEquals(expectedCount, result.length);
+    }
+
+    private void thenDecodedCertPEMEncodeingEquals(final int index, final String encoded) throws IOException {
+        final String resultPEM;
+
+        try (final StringWriter stringWriter = new StringWriter();
+                final JcaPEMWriter writer = new JcaPEMWriter(stringWriter);) {
+            writer.writeObject(result[index]);
+            writer.flush();
+            resultPEM = stringWriter.toString();
+        }
+
+        assertEquals(encoded + '\n', resultPEM);
     }
 }

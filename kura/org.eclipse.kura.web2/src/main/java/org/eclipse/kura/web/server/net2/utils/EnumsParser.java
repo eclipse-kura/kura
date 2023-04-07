@@ -60,7 +60,7 @@ public class EnumsParser {
             }
         }
 
-        return GwtWifiWirelessMode.netWifiWirelessModeStation.name();
+        return GwtWifiWirelessMode.netWifiWirelessModeDisabled.name();
     }
 
     /**

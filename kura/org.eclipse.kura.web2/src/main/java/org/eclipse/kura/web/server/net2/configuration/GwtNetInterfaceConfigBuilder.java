@@ -181,8 +181,7 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiMasterDriver(this.ifName));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiMasterIgnoreSsid(this.ifName));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiMasterPassphrase(this.ifName).getPassword()));
-        gwtWifiConfig.setWirelessMode(
-                EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiMasterMode(this.ifName)));
+        gwtWifiConfig.setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
         gwtWifiConfig.setSecurity(
                 EnumsParser.getGwtWifiSecurity(this.properties.getWifiMasterSecurityType(this.ifName)));
         gwtWifiConfig.setPairwiseCiphers(
@@ -210,8 +209,7 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setDriver(this.properties.getWifiInfraDriver(this.ifName));
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiInfraIgnoreSsid(this.ifName));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiInfraPassphrase(this.ifName).getPassword()));
-        gwtWifiConfig
-                .setWirelessMode(EnumsParser.getGwtWifiWirelessMode(this.properties.getWifiInfraMode(this.ifName)));
+        gwtWifiConfig.setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
         gwtWifiConfig
                 .setSecurity(EnumsParser.getGwtWifiSecurity(this.properties.getWifiInfraSecurityType(this.ifName)));
         gwtWifiConfig.setPairwiseCiphers(

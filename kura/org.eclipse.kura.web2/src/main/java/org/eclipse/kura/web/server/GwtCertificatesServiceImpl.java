@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -98,9 +98,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 CertificatesService certificateService = ServiceLocator.getInstance()
                         .getService(CertificatesService.class);
 
-                for (X509Certificate cert : certs) {
-                    certificateService.addCertificate(new KuraCertificateEntry(keyStorePid, alias, cert));
-                }
+                certificateService.addCertificate(new KuraCertificateEntry(keyStorePid, alias, certs[0]));
             }
 
         } catch (CertificateException e) {

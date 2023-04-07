@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.core.keystore.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -36,6 +37,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +90,7 @@ public class KeystoreRemoteService {
 
     public static TrustedCertificateEntry createCertificateEntry(String certificate) throws CertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
         X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
         return new TrustedCertificateEntry(cert);
     }
@@ -116,12 +118,23 @@ public class KeystoreRemoteService {
         return new PrivateKeyEntry(privkey, certs);
     }
 
-    public static X509Certificate[] parsePublicCertificates(String publicKey) throws CertificateException {
-        List<X509Certificate> certificateChain = new ArrayList<>();
+    public static X509Certificate[] parsePublicCertificates(String certificates) throws CertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream is = new ByteArrayInputStream(publicKey.getBytes());
-        certificateChain.add((X509Certificate) certFactory.generateCertificate(is));
-        return certificateChain.toArray(new X509Certificate[0]);
+        ByteArrayInputStream is = new ByteArrayInputStream(certificates.getBytes(StandardCharsets.UTF_8));
+
+        final Collection<? extends Certificate> decodedCertificates = certFactory.generateCertificates(is);
+
+        final ArrayList<X509Certificate> result = new ArrayList<>();
+
+        for (final Certificate cert : decodedCertificates) {
+            if (!(cert instanceof X509Certificate)) {
+                throw new CertificateException("Provided certificate is not a X509Certificate");
+            }
+
+            result.add((X509Certificate) cert);
+        }
+
+        return result.toArray(new X509Certificate[result.size()]);
     }
 
     protected List<KeystoreInfo> listKeystoresInternal() {
@@ -304,7 +317,8 @@ public class KeystoreRemoteService {
                 logger.error("Cannot parse certificate subject alternative names", e);
             }
             if (withCertificate) {
-                final Base64.Encoder encoder = Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes());
+                final Base64.Encoder encoder = Base64.getMimeEncoder(64,
+                        LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
                 StringBuilder pemCertificate = new StringBuilder();
                 pemCertificate.append(BEGIN_CERT);
                 pemCertificate.append(LINE_SEPARATOR);
@@ -328,7 +342,8 @@ public class KeystoreRemoteService {
             privateKeyInfo.setAlgorithm(privateKey.getPrivateKey().getAlgorithm());
             privateKeyInfo.setSize(getSize(privateKey.getCertificate().getPublicKey()));
             if (withCertificate) {
-                final Base64.Encoder encoder = Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes());
+                final Base64.Encoder encoder = Base64.getMimeEncoder(64,
+                        LINE_SEPARATOR.getBytes(StandardCharsets.UTF_8));
                 String[] certificateChain = new String[privateKey.getCertificateChain().length];
                 for (int i = 0; i < certificateChain.length; i++) {
                     StringBuilder pemCertificate = new StringBuilder();

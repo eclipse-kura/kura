@@ -204,6 +204,8 @@ public class DhcpServerConfigWriterTest {
                 .append("interface=eth0\n")
                 .append("dhcp-range=eth0,192.168.0.111,192.168.0.120,900s\n")
                 .append("dhcp-option=eth0,1,255.255.255.0\n")
+                .append("dhcp-option=eth0,3,192.168.0.11\n")
+                .append("dhcp-option=eth0,6\n")
                 .append("dhcp-ignore-names=eth0\n")
                 .append("dhcp-option=eth0,27,1\n")
                 .toString());

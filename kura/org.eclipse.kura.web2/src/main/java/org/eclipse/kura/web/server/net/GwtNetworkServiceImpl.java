@@ -908,9 +908,7 @@ public class GwtNetworkServiceImpl {
             if (wifiHotspotInfoList != null) {
                 for (WifiHotspotInfo wifiHotspotInfo : wifiHotspotInfoList) {
                     String ssid = wifiHotspotInfo.getSsid();
-                    // if(!ssid.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
-                    // ssid= null;
-                    // }
+                    
                     if (wifiHotspotInfo.getChannel() <= systemService.getKuraWifiTopChannel() && ssid != null
                             && !ssid.equals(wirelessSsid)) {
                         GwtWifiHotspotEntry gwtWifiHotspotEntry = new GwtWifiHotspotEntry();

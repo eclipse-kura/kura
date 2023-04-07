@@ -278,8 +278,8 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig.setMaxFail(this.properties.getModemMaxFail(this.ifName));
             gwtModemConfig.setIdle(this.properties.getModemIdle(this.ifName));
             gwtModemConfig.setActiveFilter(this.properties.getModemActiveFilter(this.ifName));
-            gwtModemConfig.setLcpEchoInterval(this.properties.getModemIpcEchoInterval(this.ifName));
-            gwtModemConfig.setLcpEchoFailure(this.properties.getModemIpcEchoFailure(this.ifName));
+            gwtModemConfig.setLcpEchoInterval(this.properties.getModemLpcEchoInterval(this.ifName));
+            gwtModemConfig.setLcpEchoFailure(this.properties.getModemLpcEchoFailure(this.ifName));
             gwtModemConfig.setGpsEnabled(this.properties.getModemGpsEnabled(this.ifName));
             gwtModemConfig.setDiversityEnabled(this.properties.getModemDiversityEnabled(this.ifName));
             gwtModemConfig.setApn(this.properties.getModemApn(this.ifName));

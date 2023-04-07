@@ -212,7 +212,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             checkCompatibility(descriptor, kuraVersion);
 
         } catch (Exception e) {
-            logger.warn("failed to get deployment package descriptior from Eclipse Marketplace", e);
+            logger.warn("failed to get deployment package descriptor from Eclipse Marketplace", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         } finally {
             if (connection != null) {

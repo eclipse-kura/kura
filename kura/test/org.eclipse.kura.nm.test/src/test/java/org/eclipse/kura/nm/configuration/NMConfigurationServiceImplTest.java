@@ -32,7 +32,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -316,6 +320,12 @@ public class NMConfigurationServiceImplTest {
 
             return null;
         }).when(eventAdminMock).postEvent(any());
+
+        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        when(executorServiceMock.execute(any(Command.class))).thenReturn(status);
+
+        this.networkConfigurationService.setExecutorService(executorServiceMock);
 
     }
 

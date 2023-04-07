@@ -41,7 +41,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="serial"
+            default="gpsd"
             description="Source for setting the position provider. Verify the availabiliy of the selected provider before activate it.">
             
             <Option label="serial" value="serial" />

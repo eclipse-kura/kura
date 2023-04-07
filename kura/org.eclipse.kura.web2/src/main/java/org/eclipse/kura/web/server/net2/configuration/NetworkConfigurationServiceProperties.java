@@ -273,7 +273,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setWifiMasterPassphrase(String ifname, String passphrase) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname), passphrase);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname),
+                new Password(passphrase));
     }
 
     public String getWifiMasterSsid(String ifname) {
@@ -408,7 +409,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setWifiInfraPassphrase(String ifname, String passphrase) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname), passphrase);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname),
+                new Password(passphrase));
     }
 
     public boolean getWifiInfraIgnoreSsid(String ifname) {
@@ -549,7 +551,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setModemPassword(String ifname, String password) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_PASSWORD, ifname), password);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_PASSWORD, ifname), new Password(password));
     }
 
     public Optional<String> getModemPdpType(String ifname) {

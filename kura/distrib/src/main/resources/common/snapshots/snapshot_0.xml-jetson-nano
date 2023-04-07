@@ -287,7 +287,6 @@
             <esf:property name="bitsPerWord" array="false" encrypted="false" type="Integer">
                 <esf:value>8</esf:value>
             </esf:property>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="provider" type="String">
                 <esf:value>gpsd</esf:value>
             </esf:property>

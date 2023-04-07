@@ -1675,7 +1675,7 @@ public class GwtNetworkServiceImpl {
             oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
                     new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-            validateUserPassword(passKey);
+            GwtServerUtil.validateUserPassword(passKey);
             properties.put(wifiPassphrasePropName, new Password(passKey));
         } else if (passKey != null) {
             properties.put(wifiPassphrasePropName, new Password(passKey));
@@ -1839,22 +1839,6 @@ public class GwtNetworkServiceImpl {
             }
         }
         return false;
-    }
-
-    private static void validateUserPassword(final String password) throws GwtKuraException {
-        final List<Validator<String>> validators = PasswordStrengthValidators
-                .fromConfig(Console.getConsoleOptions().getUserOptions());
-
-        final List<String> errors = new ArrayList<>();
-
-        for (final Validator<String> validator : validators) {
-            validator.validate(password, errors::add);
-        }
-
-        if (!errors.isEmpty()) {
-            logger.warn("password strenght requirements not satisfied: {}", errors);
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-        }
     }
 
     private static void appendNetwork(String address, StringBuilder stringBuilder) throws UnknownHostException {

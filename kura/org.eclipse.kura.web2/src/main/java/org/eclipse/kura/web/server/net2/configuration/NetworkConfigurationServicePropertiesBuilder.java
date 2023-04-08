@@ -230,8 +230,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setModemMaxFail(this.ifname, gwtModemConfig.getMaxFail());
             this.properties.setModemIdle(this.ifname, gwtModemConfig.getIdle());
             this.properties.setModemActiveFilter(this.ifname, gwtModemConfig.getActiveFilter());
-            this.properties.setModemIpcEchoInterval(ifname, gwtModemConfig.getLcpEchoInterval());
-            this.properties.setModemIpcEchoFailure(this.ifname, gwtModemConfig.getLcpEchoFailure());
+            this.properties.setModemLpcEchoInterval(ifname, gwtModemConfig.getLcpEchoInterval());
+            this.properties.setModemLpcEchoFailure(this.ifname, gwtModemConfig.getLcpEchoFailure());
             this.properties.setModemGpsEnabled(this.ifname, gwtModemConfig.isGpsEnabled());
             this.properties.setModemDiversityEnabled(this.ifname, gwtModemConfig.isDiversityEnabled());
             this.properties.setModemApn(this.ifname, gwtModemConfig.getApn());

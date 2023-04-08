@@ -118,7 +118,7 @@ public class NetworkConfigurationServiceCommon {
         return tocd;
     }
 
-        public static ComponentConfiguration getConfiguration(final String pid, final Map<String, Object> properties,
+    public static ComponentConfiguration getConfiguration(final String pid, final Map<String, Object> properties,
             final Optional<List<UsbNetDevice>> usbNetDevices) throws KuraException {
         final Tocd definition = getDefinition(properties, usbNetDevices);
 

@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpServerConfigWriter {
 
+    private static final String DHCP_OPTION_KEY = "dhcp-option=";
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerConfigWriter.class);
     private static final String WRITE_ERROR_MESSAGE = "Failed to write DHCP config file for ";
     private final String interfaceName;
@@ -117,23 +118,23 @@ public class DhcpServerConfigWriter {
                         .append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
                 pw.println(dhcpRangeProp.toString());
                 
-                pw.println("dhcp-option=" + this.interfaceName + ",1,"
+                pw.println(DHCP_OPTION_KEY + this.interfaceName + ",1,"
                         + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
                 // router property
                 pw.println(
-                        "dhcp-option=" + this.interfaceName + ",3," + dhcpServerConfig.getRouterAddress().toString());
+                        DHCP_OPTION_KEY + this.interfaceName + ",3," + dhcpServerConfig.getRouterAddress().toString());
 
                 if (dhcpServerConfig.isPassDns()) {
                     // announce DNS servers on this device
-                    pw.println("dhcp-option=" + this.interfaceName + ",6,0.0.0.0");
+                    pw.println(DHCP_OPTION_KEY + this.interfaceName + ",6,0.0.0.0");
                 } else {
                     // leaving the option without value disables it
-                    pw.println("dhcp-option=" + this.interfaceName + ",6");
+                    pw.println(DHCP_OPTION_KEY + this.interfaceName + ",6");
                     pw.println("dhcp-ignore-names=" + this.interfaceName);
                 }
 
                 // all subnets are local
-                pw.println("dhcp-option=" + this.interfaceName + ",27,1");
+                pw.println(DHCP_OPTION_KEY + this.interfaceName + ",27,1");
             }
             pw.flush();
             fos.getFD().sync();

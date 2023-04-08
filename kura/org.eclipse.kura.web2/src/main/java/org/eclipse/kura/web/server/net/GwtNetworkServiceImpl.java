@@ -75,6 +75,7 @@ import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -119,24 +120,7 @@ public class GwtNetworkServiceImpl {
             throws GwtKuraException {
         List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(recompute);
 
-        for (GwtNetInterfaceConfig netConfig : result) {
-            if (netConfig instanceof GwtWifiNetInterfaceConfig) {
-                GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
-                GwtWifiConfig gwtAPWifiConfig = wifiConfig.getAccessPointWifiConfig();
-                if (gwtAPWifiConfig != null) {
-                    gwtAPWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
-                }
-
-                GwtWifiConfig gwtStationWifiConfig = wifiConfig.getStationWifiConfig();
-                if (gwtStationWifiConfig != null) {
-                    gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
-                }
-            } else if (netConfig instanceof GwtModemInterfaceConfig) {
-                GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
-                modemConfig.setPassword(PASSWORD_PLACEHOLDER);
-            }
-        }
-        return result;
+        return GwtServerUtil.replaceNetworkConfigListSensitivePasswordsWithPlaceholder(result);
     }
 
     private static List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations(boolean recompute)
@@ -1691,7 +1675,7 @@ public class GwtNetworkServiceImpl {
             oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
                     new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-            validateUserPassword(passKey);
+            GwtServerUtil.validateUserPassword(passKey);
             properties.put(wifiPassphrasePropName, new Password(passKey));
         } else if (passKey != null) {
             properties.put(wifiPassphrasePropName, new Password(passKey));
@@ -1855,22 +1839,6 @@ public class GwtNetworkServiceImpl {
             }
         }
         return false;
-    }
-
-    private static void validateUserPassword(final String password) throws GwtKuraException {
-        final List<Validator<String>> validators = PasswordStrengthValidators
-                .fromConfig(Console.getConsoleOptions().getUserOptions());
-
-        final List<String> errors = new ArrayList<>();
-
-        for (final Validator<String> validator : validators) {
-            validator.validate(password, errors::add);
-        }
-
-        if (!errors.isEmpty()) {
-            logger.warn("password strenght requirements not satisfied: {}", errors);
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-        }
     }
 
     private static void appendNetwork(String address, StringBuilder stringBuilder) throws UnknownHostException {

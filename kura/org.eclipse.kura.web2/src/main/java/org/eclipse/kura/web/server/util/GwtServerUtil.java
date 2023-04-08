@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,7 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -56,6 +57,12 @@ import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
+import org.eclipse.kura.web.shared.validator.Validator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -82,7 +89,9 @@ public final class GwtServerUtil {
     /** The Constant to check if configuration policy is set to require. */
     public static final String PATTERN_CONFIGURATION_REQUIRE = "configuration-policy=\"require\"";
 
-    /** The Constant to check if the provided interface is a configurable component. */
+    /**
+     * The Constant to check if the provided interface is a configurable component.
+     */
     public static final String PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP = "provide interface=\"org.eclipse.kura.configuration.ConfigurableComponent\"";
 
     /** The Constant to check if provided interface is Wire Emitter. */
@@ -91,7 +100,10 @@ public final class GwtServerUtil {
     /** The Constant to check if provided interface is Wire Receiver. */
     public static final String PATTERN_SERVICE_PROVIDE_RECEIVER = "provide interface=\"org.eclipse.kura.wire.WireReceiver\"";
 
-    /** The Constant to check if the provided interface is a self configuring component. */
+    /**
+     * The Constant to check if the provided interface is a self configuring
+     * component.
+     */
     public static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 
     private static final String DRIVER_PID = "driver.pid";
@@ -108,35 +120,35 @@ public final class GwtServerUtil {
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             final String trimmedValue = strValue.trim();
             switch (gwtType) {
-            case LONG:
-                objValue = Long.parseLong(trimmedValue);
-                break;
-            case DOUBLE:
-                objValue = Double.parseDouble(trimmedValue);
-                break;
-            case FLOAT:
-                objValue = Float.parseFloat(trimmedValue);
-                break;
-            case INTEGER:
-                objValue = Integer.parseInt(trimmedValue);
-                break;
-            case SHORT:
-                objValue = Short.parseShort(trimmedValue);
-                break;
-            case BYTE:
-                objValue = Byte.parseByte(trimmedValue);
-                break;
-            case BOOLEAN:
-                objValue = Boolean.parseBoolean(trimmedValue);
-                break;
-            case PASSWORD:
-                objValue = new Password(trimmedValue);
-                break;
-            case CHAR:
-                objValue = Character.valueOf(trimmedValue.charAt(0));
-                break;
-            default:
-                break;
+                case LONG:
+                    objValue = Long.parseLong(trimmedValue);
+                    break;
+                case DOUBLE:
+                    objValue = Double.parseDouble(trimmedValue);
+                    break;
+                case FLOAT:
+                    objValue = Float.parseFloat(trimmedValue);
+                    break;
+                case INTEGER:
+                    objValue = Integer.parseInt(trimmedValue);
+                    break;
+                case SHORT:
+                    objValue = Short.parseShort(trimmedValue);
+                    break;
+                case BYTE:
+                    objValue = Byte.parseByte(trimmedValue);
+                    break;
+                case BOOLEAN:
+                    objValue = Boolean.parseBoolean(trimmedValue);
+                    break;
+                case PASSWORD:
+                    objValue = new Password(trimmedValue);
+                    break;
+                case CHAR:
+                    objValue = Character.valueOf(trimmedValue.charAt(0));
+                    break;
+                default:
+                    break;
             }
         }
         return objValue;
@@ -149,87 +161,87 @@ public final class GwtServerUtil {
         List<String> trimmedValues = Stream.of(defaultValues).map(String::trim).collect(Collectors.toList());
 
         switch (type) {
-        case BOOLEAN:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Boolean.valueOf(value));
+            case BOOLEAN:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Boolean.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Boolean[] {});
+                return values.toArray(new Boolean[] {});
 
-        case BYTE:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Byte.valueOf(value));
+            case BYTE:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Byte.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Byte[] {});
+                return values.toArray(new Byte[] {});
 
-        case CHAR:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(new Character(value.charAt(0)));
+            case CHAR:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(new Character(value.charAt(0)));
+                    }
                 }
-            }
-            return values.toArray(new Character[] {});
+                return values.toArray(new Character[] {});
 
-        case DOUBLE:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Double.valueOf(value));
+            case DOUBLE:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Double.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Double[] {});
+                return values.toArray(new Double[] {});
 
-        case FLOAT:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Float.valueOf(value));
+            case FLOAT:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Float.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Float[] {});
+                return values.toArray(new Float[] {});
 
-        case INTEGER:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Integer.valueOf(value));
+            case INTEGER:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Integer.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Integer[] {});
+                return values.toArray(new Integer[] {});
 
-        case LONG:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Long.valueOf(value));
+            case LONG:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Long.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Long[] {});
+                return values.toArray(new Long[] {});
 
-        case SHORT:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(Short.valueOf(value));
+            case SHORT:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(Short.valueOf(value));
+                    }
                 }
-            }
-            return values.toArray(new Short[] {});
+                return values.toArray(new Short[] {});
 
-        case PASSWORD:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(new Password(value));
+            case PASSWORD:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(new Password(value));
+                    }
                 }
-            }
-            return values.toArray(new Password[] {});
+                return values.toArray(new Password[] {});
 
-        case STRING:
-            for (String value : trimmedValues) {
-                if (!value.isEmpty()) {
-                    values.add(value);
+            case STRING:
+                for (String value : trimmedValues) {
+                    if (!value.isEmpty()) {
+                        values.add(value);
+                    }
                 }
-            }
-            return values.toArray(new String[] {});
-        default:
-            return null;
+                return values.toArray(new String[] {});
+            default:
+                return null;
         }
     }
 
@@ -744,6 +756,45 @@ public final class GwtServerUtil {
         } catch (Exception e) {
             logger.error("Error exporting snapshot");
             throw new ServletException(e);
+        }
+    }
+
+    public static List<GwtNetInterfaceConfig> replaceNetworkConfigListSensitivePasswordsWithPlaceholder(
+            List<GwtNetInterfaceConfig> gwtNetworkConfigList) {
+        for (GwtNetInterfaceConfig netConfig : gwtNetworkConfigList) {
+            if (netConfig instanceof GwtWifiNetInterfaceConfig) {
+                GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
+                GwtWifiConfig gwtAPWifiConfig = wifiConfig.getAccessPointWifiConfig();
+                if (gwtAPWifiConfig != null) {
+                    gwtAPWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
+                }
+
+                GwtWifiConfig gwtStationWifiConfig = wifiConfig.getStationWifiConfig();
+                if (gwtStationWifiConfig != null) {
+                    gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
+                }
+            } else if (netConfig instanceof GwtModemInterfaceConfig) {
+                GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
+                modemConfig.setPassword(PASSWORD_PLACEHOLDER);
+            }
+        }
+
+        return gwtNetworkConfigList;
+    }
+
+    public static void validateUserPassword(final String password) throws GwtKuraException {
+        final List<Validator<String>> validators = PasswordStrengthValidators
+                .fromConfig(Console.getConsoleOptions().getUserOptions());
+
+        final List<String> errors = new ArrayList<>();
+
+        for (final Validator<String> validator : validators) {
+            validator.validate(password, errors::add);
+        }
+
+        if (!errors.isEmpty()) {
+            logger.warn("password strenght requirements not satisfied: {}", errors);
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
     }
 }

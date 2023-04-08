@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src/main/java/"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-analysis-9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-commons-9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-tree-9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-util-9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/dbus-java-3.3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jffi-1.3.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jffi-1.3.9-native.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-a64asm-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-constants-0.10.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-enxio-0.32.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-ffi-2.2.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-posix-3.1.15.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-unixsocket-0.38.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jnr-x86asm-1.0.2.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

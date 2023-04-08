@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
@@ -105,17 +104,26 @@ public class ConsoleOptions {
                     .build(), //
             Integer[].class);
 
+    private final SelfConfiguringComponentProperty<String> sslManagerServiceTarget = new SelfConfiguringComponentProperty<>(
+            new AdBuilder("SslManagerService.target", "SslManagerService Target Filter", Tscalar.STRING) //
+                    .setRequired(true) //
+                    .setDefault("(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)") //
+                    .setDescription(
+                            "Specifies, as an OSGi target filter, the pid of the SslManagerService used to create HTTPS connections. This is needed for example for fetching package descriptions from Eclipse Marketplace.") //
+                    .build(),
+            String.class);
+
     private final List<SelfConfiguringComponentProperty<?>> configurationProperties = new ArrayList<>();
     private final Map<String, SelfConfiguringComponentProperty<Boolean>> authenticationMethodProperties = new HashMap<>();
     private final ComponentConfiguration config;
 
-    private ConsoleOptions() throws KuraException {
+    private ConsoleOptions() {
         initProperties();
 
         this.config = toComponentConfiguration();
     }
 
-    private ConsoleOptions(final Map<String, Object> properties) throws KuraException {
+    private ConsoleOptions(final Map<String, Object> properties) {
         initProperties();
 
         for (final SelfConfiguringComponentProperty<?> property : this.configurationProperties) {
@@ -125,11 +133,11 @@ public class ConsoleOptions {
         this.config = toComponentConfiguration();
     }
 
-    public static ConsoleOptions defaultConfiguration() throws KuraException {
+    public static ConsoleOptions defaultConfiguration() {
         return new ConsoleOptions();
     }
 
-    public static ConsoleOptions fromProperties(final Map<String, Object> properties) throws KuraException {
+    public static ConsoleOptions fromProperties(final Map<String, Object> properties) {
         return new ConsoleOptions(properties);
     }
 
@@ -151,11 +159,15 @@ public class ConsoleOptions {
 
     public Set<String> getEnabledAuthMethods() {
         return this.authenticationMethodProperties.entrySet().stream().filter(e -> e.getValue().get())
-                .map(e -> e.getKey()).collect(Collectors.toSet());
+                .map(Map.Entry::getKey).collect(Collectors.toSet());
     }
 
     public Set<Integer> getAllowedPorts() {
         return GwtServerUtil.getArrayProperty(this.allowedPorts.get(), Integer.class);
+    }
+
+    public String getSslManagerServiceTarget() {
+        return sslManagerServiceTarget.get();
     }
 
     public boolean isPortAllowed(final int port) {
@@ -209,6 +221,7 @@ public class ConsoleOptions {
         this.configurationProperties.add(this.passwordRequireSpecialCharacters);
         this.configurationProperties.add(this.passwordRequireBothCases);
         this.configurationProperties.add(this.allowedPorts);
+        this.configurationProperties.add(this.sslManagerServiceTarget);
 
         addAuthenticationMethodProperties();
     }

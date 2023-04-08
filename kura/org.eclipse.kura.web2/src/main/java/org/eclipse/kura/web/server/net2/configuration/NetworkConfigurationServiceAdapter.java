@@ -80,8 +80,9 @@ public class NetworkConfigurationServiceAdapter {
      * 
      * @param gwtConfig the configuration containing the properties to update
      * @throws KuraException
+     * @throws GwtKuraException 
      */
-    public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException {
+    public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException, GwtKuraException {
         NetworkConfigurationServicePropertiesBuilder builder = new NetworkConfigurationServicePropertiesBuilder(
                 gwtConfig);
         Map<String, Object> newProperties = builder.build();

@@ -501,9 +501,9 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_PDP_TYPE = "net.interface.%s.config.pdpType";
     private static final String NET_INTERFACE_CONFIG_MAX_FAIL = "net.interface.%s.config.maxFail";
     private static final String NET_INTERFACE_CONFIG_AUTH_TYPE = "net.interface.%s.config.authType";
-    private static final String NET_INTERFACE_CONFIG_IPC_ECHO_INTERVAL = "net.interface.%s.config.lpcEchoInterval";
+    private static final String NET_INTERFACE_CONFIG_LPC_ECHO_INTERVAL = "net.interface.%s.config.lpcEchoInterval";
     private static final String NET_INTERFACE_CONFIG_ACTIVE_FILTER = "net.interface.%s.config.activeFilter";
-    private static final String NET_INTERFACE_CONFIG_ECHO_FAILURE = "net.interface.%s.config.lpcEchoFailure";
+    private static final String NET_INTERFACE_CONFIG_LPC_ECHO_FAILURE = "net.interface.%s.config.lpcEchoFailure";
     private static final String NET_INTERFACE_CONFIG_DIVERSITY_ENABLED = "net.interface.%s.config.diversityEnabled";
     private static final String NET_INTERFACE_CONFIG_RESET_TIMEOUT = "net.interface.%s.config.resetTimeout";
     private static final String NET_INTERFACE_CONFIG_GPS_ENABLED = "net.interface.%s.config.gpsEnabled";
@@ -563,7 +563,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public int getModemMaxFail(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_MAX_FAIL, ifname), 0);
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_MAX_FAIL, ifname), 1);
     }
 
     public void setModemMaxFail(String ifname, int maxFail) {
@@ -580,12 +580,12 @@ public class NetworkConfigurationServiceProperties {
         }
     }
 
-    public int getModemIpcEchoInterval(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IPC_ECHO_INTERVAL, ifname), 0);
+    public int getModemLpcEchoInterval(String ifname) {
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_LPC_ECHO_INTERVAL, ifname), 0);
     }
 
-    public void setModemIpcEchoInterval(String ifname, int echoInterval) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_IPC_ECHO_INTERVAL, ifname), echoInterval);
+    public void setModemLpcEchoInterval(String ifname, int echoInterval) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_LPC_ECHO_INTERVAL, ifname), echoInterval);
     }
 
     public String getModemActiveFilter(String ifname) {
@@ -596,12 +596,12 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_ACTIVE_FILTER, ifname), activeFilter);
     }
 
-    public int getModemIpcEchoFailure(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_ECHO_FAILURE, ifname), 0);
+    public int getModemLpcEchoFailure(String ifname) {
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_LPC_ECHO_FAILURE, ifname), 0);
     }
 
-    public void setModemIpcEchoFailure(String ifname, int echoFailure) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_ECHO_FAILURE, ifname), echoFailure);
+    public void setModemLpcEchoFailure(String ifname, int echoFailure) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_LPC_ECHO_FAILURE, ifname), echoFailure);
     }
 
     public boolean getModemDiversityEnabled(String ifname) {
@@ -614,7 +614,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public int getModemResetTimeout(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_RESET_TIMEOUT, ifname), 0);
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_RESET_TIMEOUT, ifname), 5);
     }
 
     public void setModemResetTimeout(String ifname, int modemResetTimeout) {

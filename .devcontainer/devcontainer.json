@@ -7,5 +7,25 @@
 		"installMaven": true,
 		"version": "none"
 	  }
-  }
+  },
+
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "workspaceFolder": "/workspace/kura",
+
+  "customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": [
+                "redhat.java",
+                "VisualStudioExptTeam.intellicode-api-usage-examples",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "vscjava.vscode-java-debug",
+                "vscjava.vscode-java-dependency",
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-java-test",
+                "vscjava.vscode-maven",
+                "yaozheng.vscode-pde"
+			]
+		}
+	}
 }

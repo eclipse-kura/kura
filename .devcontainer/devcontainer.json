@@ -27,7 +27,5 @@
                 "yaozheng.vscode-pde"
 			]
 		}
-	},
-
-    "postCreateCommand": "cd /workspace && mvn mvn -f target-platform/pom.xml clean install && mvn -f kura/pom.xml clean install -DskipTests"
+	}
 }

@@ -28,5 +28,5 @@
 			]
 		}
 	},
-  "postCreateCommand": "cd /workspace; mvn -f target-platform/pom.xml clean install; mvn -f kura/pom.xml clean install -Dmaven.test.skip=true"
+  // "postCreateCommand": "cd /workspace; mvn -f target-platform/pom.xml clean install; mvn -f kura/pom.xml clean install -Dmaven.test.skip=true"
 }

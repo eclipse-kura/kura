@@ -161,6 +161,10 @@ Since step and scenario methods are not allowed to return any value, it is somet
 
 The Gherkin reference: https://cucumber.io/docs/gherkin/reference/ 
 
+### Manual Tests
+
+Before submitting any changes, you are invited to check the correct functioning of the variations in a real environment. If you are not fully convinced of your attempts, in the pull request you can ask the reviewer to perform some tests, but we encourage you to always check the changes personally before publishing the contribution, and to limit these demands to what is strictly necessary.
+
 ## Submitting the Changes
 
 Submit a pull request via the normal GitHub UI.

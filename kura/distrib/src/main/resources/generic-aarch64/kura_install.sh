@@ -61,7 +61,6 @@ systemctl disable chrony
 systemctl enable NetworkManager
 systemctl start NetworkManager
 systemctl enable ModemManager
-systemctl start ModemManager
 
 # set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh

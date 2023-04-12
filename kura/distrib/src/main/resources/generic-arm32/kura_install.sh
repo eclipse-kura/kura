@@ -103,6 +103,12 @@ if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
     fi
 fi
 
+# install dnsmasq default configuration
+if [ -f /etc/default/dnsmasq ]; then
+    mv /etc/default/dnsmasq /etc/default/dnsmasq.old
+fi
+cp ${INSTALL_DIR}/kura/install/dnsmasq /etc/default/dnsmasq
+
 # disable NTP service
 if command -v timedatectl > /dev/null ;
   then

@@ -468,6 +468,63 @@ public class DatabaseLoaderTest {
         thenDatabaseFilesHaveBeenDeleted(false);
     }
 
+    @Test
+    public void shouldRunVacuumAfterRekeyInRollbackJournalMode() {
+        givenNewOptionsProperty(DB_MODE, PERSISTED);
+        givenNewOptionsProperty(DB_PATH, "foo");
+        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
+        givenNewOptionsProperty(DB_KEY, "otherkey");
+        givenNewOptionsProperty(DB_KEY_FORMAT, DB_KEY);
+        givenNewOptionsProperty(JOURNAL_MODE, "ROLLBACK_JOURNAL");
+
+        givenUnencryptedDatabase();
+
+        whenDataSourceIsCreated();
+
+        thenNoExceptionIsThrown();
+
+        thenOpenDataSourceInvocationCountIs(3);
+
+        thenOpenDataSourceInvocationKeyIs(0, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(1, Optional.empty());
+        thenOpenDataSourceInvocationKeyIs(2, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
+
+        thenExecutedQueryCountIs(2);
+        thenQueryIsExecuted(0, "PRAGMA rekey = 'otherkey';");
+        thenQueryIsExecuted(1, "VACUUM;");
+
+        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "ASCII:otherkey");
+    }
+
+    @Test
+    public void shouldRunVacuumAfterRekeyWalMode() {
+        givenNewOptionsProperty(DB_MODE, PERSISTED);
+        givenNewOptionsProperty(DB_PATH, "foo");
+        givenNewOptionsProperty(KURA_SERVICE_PID, "foo");
+        givenNewOptionsProperty(DB_KEY, "otherkey");
+        givenNewOptionsProperty(DB_KEY_FORMAT, DB_KEY);
+        givenNewOptionsProperty(JOURNAL_MODE, "WAL");
+
+        givenUnencryptedDatabase();
+
+        whenDataSourceIsCreated();
+
+        thenNoExceptionIsThrown();
+
+        thenOpenDataSourceInvocationCountIs(3);
+
+        thenOpenDataSourceInvocationKeyIs(0, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
+        thenOpenDataSourceInvocationKeyIs(1, Optional.empty());
+        thenOpenDataSourceInvocationKeyIs(2, Optional.of(new EncryptionKeySpec("otherkey", EncryptionKeyFormat.ASCII)));
+
+        thenExecutedQueryCountIs(3);
+        thenQueryIsExecuted(0, "PRAGMA rekey = 'otherkey';");
+        thenQueryIsExecuted(1, "VACUUM;");
+        thenQueryIsExecuted(2, "PRAGMA wal_checkpoint(TRUNCATE);");
+
+        thenCryptoServiceEntryIs(TEST_DB_CRYPTO_ENTRY_KEY, "ASCII:otherkey");
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(DatabaseLoaderTest.class);
 
     private static final String TEST_DB_CRYPTO_ENTRY_KEY = "sqlite:db:foo";
@@ -478,6 +535,7 @@ public class DatabaseLoaderTest {
     private static final String DB_PATH = "db.path";
     private static final String KURA_SERVICE_PID = "kura.service.pid";
     private static final String DB_MODE = "db.mode";
+    private static final String JOURNAL_MODE = "db.journal.mode";
     private static final String TEST_DB_URL = "jdbc:sqlite:file:foo";
 
     private final CryptoService cryptoService = mock(CryptoService.class);
@@ -553,9 +611,9 @@ public class DatabaseLoaderTest {
                 oldProperties.map(SqliteDbServiceOptions::new), cryptoService) {
 
             @Override
-            protected void changeEncryptionKey(SQLiteDataSource dataSource, Optional<EncryptionKeySpec> encryptionKey)
-                    throws SQLException {
-                super.changeEncryptionKey(dataSource, encryptionKey);
+            protected void changeEncryptionKey(SQLiteDataSource dataSource, Optional<EncryptionKeySpec> encryptionKey,
+                    final SqliteDbServiceOptions options) throws SQLException {
+                super.changeEncryptionKey(dataSource, encryptionKey, options);
                 databaseEncryptionKeys.put(dataSource.getUrl(), encryptionKey);
             }
 
@@ -570,6 +628,11 @@ public class DatabaseLoaderTest {
                     when(stmt.execute(any())).thenAnswer(i -> {
                         queries.add(i.getArgument(0));
                         return false;
+                    });
+
+                    when(stmt.executeUpdate(any())).then(i -> {
+                        queries.add(i.getArgument(0));
+                        return 0;
                     });
 
                     final Connection connection = mock(Connection.class);
@@ -659,6 +722,10 @@ public class DatabaseLoaderTest {
 
     private void thenQueryIsExecuted(final int index, final String query) {
         assertEquals(query, queries.get(index));
+    }
+
+    private void thenExecutedQueryCountIs(final int expectedCount) {
+        assertEquals(expectedCount, queries.size());
     }
 
     private void thenCryptoServiceUpdateCountIs(final int expectedCount) {

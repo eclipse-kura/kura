@@ -99,10 +99,15 @@ function preRemove {
     fi
 
     # restore /etc/network/interfaces.old
-    if test -f /etc/network/interfaces.old; then
+    if [ -f /etc/network/interfaces.old ]; then
         mv /etc/network/interfaces.old /etc/network/interfaces
     fi
 
+    # restore /etc/default/dnsmasq.old
+    if [ -f /etc/default/dnsmasq.old ]; then
+        mv /etc/default/dnsmasq.old /etc/default/dnsmasq
+    fi
+    
     echo ""
     echo "Uninstalling KURA... Done!"
 }

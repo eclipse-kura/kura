@@ -612,6 +612,9 @@ fi]]>
             <zipfileset file="src/main/resources/common/ifup-local.raspbian"
                 prefix="${build.output.name}/${install.folder}" />
 
+            <zipfileset file="src/main/resources/common/dnsmasq"
+                prefix="${build.output.name}/${install.folder}" />
+            	
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
                 prefix="${build.output.name}/${install.folder}" />

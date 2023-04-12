@@ -106,7 +106,7 @@ public class DatabaseLoader {
                 SQLiteDataSource result = openDataSource(dbUrl, encryptionKey, journalMode);
 
                 if (!encryptionKey.equals(keyFromNewOptions)) {
-                    changeEncryptionKey(result, keyFromNewOptions);
+                    changeEncryptionKey(result, keyFromNewOptions, newOptions);
                     result = openDataSource(dbUrl, keyFromNewOptions, journalMode);
                 }
 
@@ -193,24 +193,30 @@ public class DatabaseLoader {
     }
 
     protected void changeEncryptionKey(final SQLiteDataSource dataSource,
-            final Optional<EncryptionKeySpec> encryptionKey) throws SQLException {
+            final Optional<EncryptionKeySpec> encryptionKey, final SqliteDbServiceOptions options) throws SQLException {
         logger.info("Updating encryption key for {}", dataSource.getUrl());
 
-        if (encryptionKey.isPresent()) {
-            final EncryptionKeySpec encryptionKeySpec = encryptionKey.get();
+        try (final Connection connection = dataSource.getConnection()) {
 
-            final String key = encryptionKey.get().getKey().replace("'", "''");
+            if (encryptionKey.isPresent()) {
+                final EncryptionKeySpec encryptionKeySpec = encryptionKey.get();
 
-            if (encryptionKeySpec.getFormat() == EncryptionKeyFormat.HEX_SQLCIPHER) {
-                executeQuery(dataSource, "PRAGMA rekey = \"x'" + key + "'\";");
-            } else if (encryptionKeySpec.getFormat() == EncryptionKeyFormat.HEX_SSE) {
-                executeQuery(dataSource, "PRAGMA hexrekey = '" + key + "';");
+                final String key = encryptionKey.get().getKey().replace("'", "''");
+
+                if (encryptionKeySpec.getFormat() == EncryptionKeyFormat.HEX_SQLCIPHER) {
+                    executeQuery(connection, "PRAGMA rekey = \"x'" + key + "'\";");
+                } else if (encryptionKeySpec.getFormat() == EncryptionKeyFormat.HEX_SSE) {
+                    executeQuery(connection, "PRAGMA hexrekey = '" + key + "';");
+                } else {
+                    executeQuery(connection, "PRAGMA rekey = '" + key + "';");
+                }
             } else {
-                executeQuery(dataSource, "PRAGMA rekey = '" + key + "';");
+                executeQuery(connection, "PRAGMA rekey = '';");
             }
-        } else {
-            executeQuery(dataSource, "PRAGMA rekey = '';");
+
+            SqliteUtil.vacuum(connection, options);
         }
+
     }
 
     protected void deleteDbFiles(final String dbPath) {
@@ -225,8 +231,8 @@ public class DatabaseLoader {
         }
     }
 
-    protected void executeQuery(final SQLiteDataSource dataSource, final String query) throws SQLException {
-        try (final Connection conn = dataSource.getConnection(); final Statement stmt = conn.createStatement()) {
+    protected void executeQuery(final Connection connection, final String query) throws SQLException {
+        try (final Statement stmt = connection.createStatement()) {
             stmt.execute(query);
         }
     }

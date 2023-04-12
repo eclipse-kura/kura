@@ -31,7 +31,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.connection.listener.ConnectionListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.BaseDbService;
-import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
@@ -138,10 +137,6 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
 
     private class DbState {
 
-        private static final String DEFRAG_STATEMENT = "VACUUM;";
-
-        private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
-
         private final Optional<ScheduledExecutorService> executor;
         private final ConnectionPoolManager connectionPool;
         private final SqliteDbServiceOptions options;
@@ -195,42 +190,15 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         }
 
         private void walCheckpoint() {
-            logger.info("performing WAL checkpoint on database with url: {}...", getOptions().getDbUrl());
-
-            try (final Connection connection = getConnection();
-                    final Statement statement = connection.createStatement()) {
-                statement.execute(WAL_CHECKPOINT_STATEMENT);
-            } catch (final Exception e) {
-                logger.warn("WAL checkpoint failed", e);
+            try (final Connection connection = getConnection()) {
+                SqliteUtil.walCeckpoint(connection, options);
+            } catch (Exception e) {
+                logger.warn("failed to close connection", e);
             }
-
-            logger.info("performing WAL checkpoint on database with url: {}...done", getOptions().getDbUrl());
         }
 
         private void defrag() {
-            this.connectionPool.withExclusiveConnection(conn -> {
-                logger.info("defragmenting database with url: {}...", getOptions().getDbUrl());
-
-                try (final Statement statement = conn.createStatement()) {
-
-                    statement.executeUpdate(DEFRAG_STATEMENT);
-
-                } catch (final Exception e) {
-                    logger.warn("VACUUM command failed", e);
-                }
-
-                if (options.getJournalMode() == JournalMode.WAL) {
-                    try (final Statement statement = conn.createStatement()) {
-
-                        statement.executeUpdate(WAL_CHECKPOINT_STATEMENT);
-
-                    } catch (final Exception e) {
-                        logger.warn("WAL checkpoint after defrag failed", e);
-                    }
-                }
-
-                logger.info("defragmenting database with url: {}...done", getOptions().getDbUrl());
-            });
+            this.connectionPool.withExclusiveConnection(conn -> SqliteUtil.vacuum(conn, options));
         }
 
         private void tryClaimFile() {

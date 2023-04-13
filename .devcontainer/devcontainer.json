@@ -1,21 +1,7 @@
 {
-  "name": "kura-dev-container",
-  "image": "mcr.microsoft.com/devcontainers/java:17",
-  "features": {
-	"ghcr.io/devcontainers/features/java:1": {
-		"installGradle": true,
-		"installMaven": true,
-		"version": "none"
-	  }
-  },
-
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-  "workspaceFolder": "/workspace/kura",
-
-  "customizations": {
-		"vscode": {
-			"settings": {},
-			"extensions": [
+    "customizations": {
+        "vscode": {
+            "extensions": [
                 "redhat.java",
                 "VisualStudioExptTeam.intellicode-api-usage-examples",
                 "VisualStudioExptTeam.vscodeintellicode",
@@ -25,9 +11,23 @@
                 "vscjava.vscode-java-test",
                 "vscjava.vscode-maven",
                 "yaozheng.vscode-pde"
-			]
-		}
-	},
-  "hostRequirements": {"memory": "8gb"}
-  // "postCreateCommand": "cd /workspace; mvn -f target-platform/pom.xml clean install; mvn -f kura/pom.xml clean install -Dmaven.test.skip=true"
+            ],
+            "settings": {}
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/java:1": {
+            "installGradle": true,
+            "installMaven": true,
+            "version": "none"
+        }
+    },
+    "hostRequirements": {
+        "memory": "8gb"
+    },
+    "image": "mcr.microsoft.com/devcontainers/java:17",
+    "name": "kura-dev-container",
+    "workspaceFolder": "/workspace/kura",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
+    // "postCreateCommand": "cd /workspace; mvn -f target-platform/pom.xml clean install; mvn -f kura/pom.xml clean install -Dmaven.test.skip=true"
 }

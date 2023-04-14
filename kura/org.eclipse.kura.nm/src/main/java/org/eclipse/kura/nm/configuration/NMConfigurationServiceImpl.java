@@ -370,20 +370,26 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private boolean isDhcpServerValid(String interfaceName) {
-        boolean isValid = false;
-        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.getNetworkTypeFromProperties(interfaceName,
-                this.networkProperties.getProperties());
-        Optional<Boolean> isDhcpServerEnabled = this.networkProperties.getOpt(Boolean.class,
-                "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
-        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
 
-        if (Boolean.TRUE.equals(type.isPresent()
-                && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
-                && isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
-                && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
-            isValid = true;
+        final NetInterfaceType type = NetworkConfigurationServiceCommon
+                .getNetworkTypeFromProperties(interfaceName, this.networkProperties.getProperties())
+                .orElse(NetInterfaceType.UNKNOWN);
+        final boolean isDhcpServerEnabled = this.networkProperties
+                .getOpt(Boolean.class, "net.interface.%s.config.dhcpServer4.enabled", interfaceName).orElse(false);
+        final NetInterfaceStatus status = getNetInterfaceStatus(interfaceName)
+                .orElse(NetInterfaceStatus.netIPv4StatusUnknown);
+
+        if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI) {
+            return false;
         }
-        return isValid;
+
+        if (!isDhcpServerEnabled) {
+            return false;
+        }
+
+        return status != NetInterfaceStatus.netIPv4StatusDisabled && status != NetInterfaceStatus.netIPv4StatusUnmanaged
+                && status != NetInterfaceStatus.netIPv4StatusL2Only
+                && status != NetInterfaceStatus.netIPv4StatusUnknown;
     }
 
     private Optional<NetInterfaceStatus> getNetInterfaceStatus(String interfaceName) {

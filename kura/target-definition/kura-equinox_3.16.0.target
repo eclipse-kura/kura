@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="Kura Target Platform Equinox 3.16.0" sequenceNumber="47">
   <locations>
-    <location path="/workspace/kura/target-definition/common/repository/plugins" type="Profile"/>
-    <location path="/workspace/kura/target-definition/equinox_3.16.0/repository/plugins" type="Profile"/>
-    <location path="/workspace/kura/target-definition/test-deps/repository/plugins" type="Profile"/>
+    <location path="${project_loc:kura/target-definition}/target-definition/common/repository/plugins" type="Directory"/>
+    <location path="${project_loc:kura/target-definition}/target-definition/equinox_3.16.0/repository/plugins" type="Directory"/>
+    <location path="${project_loc:kura/target-definition}/target-definition/test-deps/repository/plugins" type="Directory"/>
   </locations>
 </target>

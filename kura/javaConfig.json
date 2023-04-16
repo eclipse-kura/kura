@@ -164,7 +164,8 @@
         "test/org.eclipse.kura.test",
         "test/org.eclipse.kura.watchdog.criticaltest",
         "test/org.eclipse.kura.internal.driver.s7plc.test",
-        "test/org.eclipse.kura.emulator.test"
+        "test/org.eclipse.kura.emulator.test",
+        "examples/org.eclipse.kura.raspberrypi.sensehat"
     ],
     "targetPlatform": "target-definition/kura-equinox_3.16.0.target"
 }

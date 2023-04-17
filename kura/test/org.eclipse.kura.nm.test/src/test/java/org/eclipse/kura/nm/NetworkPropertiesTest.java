@@ -312,6 +312,15 @@ public class NetworkPropertiesTest {
     }
 
     @Test
+    public void getOptStringListShouldWorkWithSimpleMap2() {
+        givenMapWith("testKey-comma-seperated", "commaSeperated1 ,commaSeperated2 ,commaSeperated3");
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptStringListIsCalledWith("testKey-comma-seperated");
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeperated1", "commaSeperated2", "commaSeperated3")));
+    }
+
+    @Test
     public void getOptStringListShouldWorkWithMalformed() {
         givenMapWith("testKey-comma-seperated",
                 ", , ,,,,commaSeperated1, , , ,,,,,commaSeperated2,,,, ,, ,,commaSeperated3,, , ,,,, ,");

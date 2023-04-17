@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.wire;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -21,7 +22,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -32,16 +36,20 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.graph.Constants;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.osgi.service.wireadmin.WireAdmin;
+import org.osgi.service.wireadmin.WireConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class WireGraphServiceImplTest {
@@ -89,14 +97,42 @@ public class WireGraphServiceImplTest {
         String receiverPid = "receiverPid";
 
         WireAdmin wireAdmin = mock(WireAdmin.class);
+        when(wireAdmin.createWire(eq(emitterPid), eq(receiverPid), any(Dictionary.class))).thenReturn(mock(Wire.class));
+        ComponentContext cc = mock(ComponentContext.class);
+        BundleContext bc = mock(BundleContext.class);
+        when(cc.getBundleContext()).thenReturn(bc);
+        
+        ServiceReference<WireComponent> emitter = mock(ServiceReference.class);
+        when(emitter.getProperty("kura.service.pid")).thenReturn(emitterPid);
+        when(emitter.getProperty("service.pid")).thenReturn(emitterPid);
+        ServiceReference<WireComponent> receiver = mock(ServiceReference.class);
+        when(receiver.getProperty("kura.service.pid")).thenReturn(receiverPid);
+        when(receiver.getProperty("service.pid")).thenReturn(receiverPid);
+        
+        Collection<ServiceReference<WireComponent>> wireComponentServiceReferences = new ArrayList();
+        wireComponentServiceReferences.add(emitter);
+        wireComponentServiceReferences.add(receiver);
+        
+        when(bc.getServiceReferences(WireComponent.class, null)).thenReturn(wireComponentServiceReferences);
 
         TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
 
-        wsi.activate(mock(ComponentContext.class), properties);
+        wsi.activate(cc, properties);
+        
+        Wire wire = mock(Wire.class);
+        Dictionary<String, Object> props = new Hashtable<>();
+        props.put(Constants.WIRE_EMITTER_PORT_PROP_NAME.value(), 0);
+        props.put(Constants.WIRE_RECEIVER_PORT_PROP_NAME.value(), 0);
+        props.put(WireConstants.WIREADMIN_PRODUCER_PID, emitterPid);
+        props.put(WireConstants.WIREADMIN_CONSUMER_PID, receiverPid);
+        when(wire.getProperties()).thenReturn(props);
+        Wire[] wires = new Wire[] {wire};
+        when(wireAdmin.getWires(null)).thenReturn(wires);
+        
         wsi.createWires();
 
-        verify(servicePidMappings, times(1)).get(emitterPid);
-        verify(servicePidMappings, times(1)).get(receiverPid);
+        verify(wireAdmin, times(2)).getWires(null);
+        verify(wireAdmin, times(1)).createWire(eq(emitterPid), eq(receiverPid), any(Dictionary.class));
     }
 
     @Test

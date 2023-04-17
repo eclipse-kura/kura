@@ -312,7 +312,7 @@ public class NetworkPropertiesTest {
     }
 
     @Test
-    public void getOptStringListShouldWorkWithSimpleMap2() {
+    public void getOptStringListWithSpacesShouldWorkWithSimpleMap() {
         givenMapWith("testKey-comma-seperated", "commaSeperated1 ,commaSeperated2 ,commaSeperated3");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptStringListIsCalledWith("testKey-comma-seperated");

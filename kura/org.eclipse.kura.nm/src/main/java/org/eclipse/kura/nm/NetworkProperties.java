@@ -101,7 +101,8 @@ public class NetworkProperties {
         List<String> stringList = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
         if (Objects.nonNull(commaSeparatedString) && !commaSeparatedString.isEmpty()) {
-            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).map(String::trim)
+                    .forEach(stringList::add);
         }
 
         return stringList;
@@ -115,7 +116,8 @@ public class NetworkProperties {
 
         List<String> stringList = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
-        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).map(String::trim)
+                .forEach(stringList::add);
 
         return Optional.of(stringList);
     }

@@ -259,22 +259,22 @@ public class NetworkPropertiesTest {
     public void getStringListShouldWorkWithSimpleMap() {
         givenMapWith("testKeyNull", null);
         givenMapWith("testKey1", "testString1");
-        givenMapWith("testKey-comma-seperated", "commaSeperated1,commaSeperated2,commaSeperated3");
+        givenMapWith("testKey-comma-seperated", "commaSeparated1,commaSeparated2,commaSeparated3");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetStringListIsCalledWith("testKey-comma-seperated");
         thenNoExceptionsOccured();
-        thenStringListResultEquals(Arrays.asList("commaSeperated1", "commaSeperated2", "commaSeperated3"));
+        thenStringListResultEquals(Arrays.asList("commaSeparated1", "commaSeparated2", "commaSeparated3"));
     }
 
     @Test
     public void getStringListShouldWorkWithMultipleCommas() {
         givenMapWith("testKeyNull", null);
         givenMapWith("testKey1", "testString1");
-        givenMapWith("testKey-comma-seperated", ",,   ,,,commaSeperated1, ,,,,commaSeperated2,   ,,commaSeperated3,");
+        givenMapWith("testKey-comma-seperated", ",,   ,,,commaSeparated1, ,,,,commaSeparated2,   ,,commaSeparated3,");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetStringListIsCalledWith("testKey-comma-seperated");
         thenNoExceptionsOccured();
-        thenStringListResultEquals(Arrays.asList("commaSeperated1", "commaSeperated2", "commaSeperated3"));
+        thenStringListResultEquals(Arrays.asList("commaSeparated1", "commaSeparated2", "commaSeparated3"));
     }
 
     @Test
@@ -304,21 +304,30 @@ public class NetworkPropertiesTest {
 
     @Test
     public void getOptStringListShouldWorkWithSimpleMap() {
-        givenMapWith("testKey-comma-seperated", "commaSeperated1,commaSeperated2,commaSeperated3");
+        givenMapWith("testKey-comma-seperated", "commaSeparated1,commaSeparated2,commaSeparated3");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptStringListIsCalledWith("testKey-comma-seperated");
         thenNoExceptionsOccured();
-        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeperated1", "commaSeperated2", "commaSeperated3")));
+        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeparated1", "commaSeparated2", "commaSeparated3")));
+    }
+
+    @Test
+    public void getOptStringListWithSpacesShouldWorkWithSimpleMap() {
+        givenMapWith("testKey-comma-seperated", "commaSeparated1 ,commaSeparated2 ,commaSeparated3");
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptStringListIsCalledWith("testKey-comma-seperated");
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeparated1", "commaSeparated2", "commaSeparated3")));
     }
 
     @Test
     public void getOptStringListShouldWorkWithMalformed() {
         givenMapWith("testKey-comma-seperated",
-                ", , ,,,,commaSeperated1, , , ,,,,,commaSeperated2,,,, ,, ,,commaSeperated3,, , ,,,, ,");
+                ", , ,,,,commaSeparated1, , , ,,,,,commaSeparated2,,,, ,, ,,commaSeparated3,, , ,,,, ,");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptStringListIsCalledWith("testKey-comma-seperated");
         thenNoExceptionsOccured();
-        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeperated1", "commaSeperated2", "commaSeperated3")));
+        thenOptionalResultEquals(Optional.of(Arrays.asList("commaSeparated1", "commaSeparated2", "commaSeparated3")));
     }
 
     @Test

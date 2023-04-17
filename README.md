@@ -165,7 +165,7 @@ Now you are ready to develop on Eclipse Kura.
 
 ### Eclipse IDE
 
-If you prefer a more advanced setup you can follow the setup instructions for [Eclipse IDE](https://eclipse.github.io/kuralatest/java-application-development/development-environment-setup/).
+If you prefer a more advanced setup you can follow the setup instructions for [Eclipse IDE](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/).
 
 ### Known Issues
 Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura emulator.

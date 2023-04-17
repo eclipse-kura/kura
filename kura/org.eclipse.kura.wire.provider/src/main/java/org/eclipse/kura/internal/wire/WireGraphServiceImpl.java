@@ -100,7 +100,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Binds the {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *            the new {@link WireAdmin} service dependency
+     *                  the new {@link WireAdmin} service dependency
      */
     public void bindWireAdmin(final WireAdmin wireAdmin) {
         if (isNull(this.wireAdmin)) {
@@ -112,7 +112,7 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
      * Unbinds {@link WireAdmin} dependency
      *
      * @param wireAdmin
-     *            the new {@link WireAdmin} instance
+     *                  the new {@link WireAdmin} instance
      */
     public void unbindWireAdmin(final WireAdmin wireAdmin) {
         if (this.wireAdmin == wireAdmin) {
@@ -232,30 +232,6 @@ public class WireGraphServiceImpl implements ConfigurableComponent, WireGraphSer
         } catch (final InvalidSyntaxException e) {
             logger.error("Error while creating wires configuration...", e);
         }
-    }
-
-    public MultiportWireConfiguration createWireConfigurationInternal(final String emitterPid, final String receiverPid,
-            final int emitterPort, final int receiverPort) throws KuraException {
-        if (!emitterPid.equals(receiverPid)) {
-            logger.info("Creating wire between {} and {}....", emitterPid, receiverPid);
-            final String emitterServicePid = getServicePidByKuraServicePid(emitterPid);
-            final String receiverServicePid = getServicePidByKuraServicePid(receiverPid);
-            if (isNull(emitterServicePid) || isNull(receiverServicePid)) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                        "Unable to retrieve Factory PIDs of one of the provided Wire Components");
-            }
-            MultiportWireConfiguration conf = new MultiportWireConfiguration(emitterPid, receiverPid, emitterPort,
-                    receiverPort);
-            WireGraphConfiguration wireGraphConfiguration = get();
-            final ArrayList<MultiportWireConfiguration> wireConfigurations = new ArrayList<>(
-                    wireGraphConfiguration.getWireConfigurations());
-            wireConfigurations.add(conf);
-            update(new WireGraphConfiguration(wireGraphConfiguration.getWireComponentConfigurations(),
-                    wireConfigurations));
-            logger.info("Creating wire between {} and {}....Done", emitterPid, receiverPid);
-            return conf;
-        }
-        return null;
     }
 
     /**

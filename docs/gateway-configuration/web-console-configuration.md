@@ -61,3 +61,9 @@ The default value is true
 
 Defines whether the "Certificate" authentication method is enabled or not
 The default value is true
+
+## SslManagerService Target Filter
+
+It is possible to specify the SslManagerService containing the certificates truststore required to establish a new **https** connection, this is needed, for example, for fetching package descriptions from Eclipse Marketplace.
+The default target is the **org.eclipse.kura.ssl.SslManagerService**
+

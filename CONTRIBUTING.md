@@ -163,7 +163,7 @@ The Gherkin reference: https://cucumber.io/docs/gherkin/reference/
 
 ### Manual Tests
 
-Before submitting a new Pull Request, please check the correct functioning of your changes in a real environment. If you are not fully convinced of your attempts, in the pull request you can ask the reviewer to perform some tests, but we encourage you to always check the changes personally before publishing the contribution, and to limit these demands to what is strictly necessary.
+Before you submit a Pull Request, ensure that your changes have been tested and are functional in a live environment. If you require additional validation, kindly request your reviewer to perform the necessary tests. It is strongly recommended that you personally verify your changes before submission and only seek further testing when absolutely necessary.
 
 ## Submitting the Changes
 

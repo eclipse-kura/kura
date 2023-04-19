@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin.monitor;
+package org.eclipse.kura.nm.configuration.monitor;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -22,7 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
@@ -32,38 +31,26 @@ import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
-import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
-import org.eclipse.kura.net.dhcp.DhcpServerConfig;
-import org.eclipse.kura.net.dns.DnsMonitorService;
 import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
-import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.eclipse.kura.nm.NetworkProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
+public class DnsServerMonitor {
 
-    private static final String NETWORK_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-
-    private static final Logger logger = LoggerFactory.getLogger(DnsMonitorServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DnsServerMonitor.class);
 
     private static final long THREAD_INTERVAL = 60000;
     private static final long THREAD_TERMINATION_TOUT = 60; // in seconds
     private Future<?> monitorTask;
-    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
-        final Thread t = Executors.defaultThreadFactory().newThread(r);
-        t.setName("DnsMonitorServiceImpl");
-        return t;
-    });
+    private ScheduledExecutorService executor;
 
     private boolean enabled;
     private NetworkConfiguration networkConfiguration;
@@ -71,55 +58,83 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private Set<IP4Address> forwarders;
 
     private final LinuxDns dnsUtil = LinuxDns.getInstance();
-    private DnsServerService dnsServer;
-    private CommandExecutorService executorService;
+
+    private final DnsServerService dnsServerService;
+    private final CommandExecutorService executorService;
+    private NetworkProperties networkProperties;
 
     private LinuxNetworkUtil linuxNetworkUtil;
 
-    private ConfigurationService configurationService;
+    public DnsServerMonitor(DnsServerService dnsServerService, CommandExecutorService executorService) {
 
-    public void setConfigurationService(final ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void setDnsServerService(DnsServerService dnsServer) {
-        this.dnsServer = dnsServer;
-    }
-
-    public void setExecutorService(CommandExecutorService executorService) {
+        this.dnsServerService = dnsServerService;
         this.executorService = executorService;
-    }
-
-    protected void activate() {
-        logger.debug("Activating DnsProxyMonitor Service...");
-
-        try {
-            this.networkConfiguration = new NetworkConfiguration(this.configurationService
-                    .getComponentConfiguration(NETWORK_CONFIGURATION_SERVICE_PID).getConfigurationProperties());
-        } catch (Exception e) {
-            logger.error("Could not get initial network configuration", e);
-        }
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
 
+    }
+
+    public void setNetworkProperties(NetworkProperties networkProperties) {
+        this.networkProperties = networkProperties;
+    }
+
+    public void start() {
+        this.executor = Executors.newSingleThreadScheduledExecutor(r -> {
+            final Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setName("DnsMonitorServiceImpl");
+            return t;
+        });
+
         this.monitorTask = this.executor.scheduleWithFixedDelay(this::monitorDnsServerStatus, 0, THREAD_INTERVAL,
                 TimeUnit.MILLISECONDS);
+    }
 
+    public void stop() {
+        if (this.monitorTask != null && !this.monitorTask.isDone()) {
+            logger.debug("Cancelling DnsServerMonitor task ...");
+            this.monitorTask.cancel(false);
+            logger.info("DnsServerMonitor task cancelled? = {}", this.monitorTask.isDone());
+            this.monitorTask = null;
+        }
+
+        if (this.executor != null) {
+            logger.debug("Terminating DnsServerMonitor Thread ...");
+            this.executor.shutdown();
+            try {
+                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted", e);
+                Thread.currentThread().interrupt();
+            }
+            logger.info("DnsServerMonitor Thread terminated? - {}", this.executor.isTerminated());
+            this.executor = null;
+        }
+    }
+
+    public void clear() {
+        this.networkProperties = null;
     }
 
     private void monitorDnsServerStatus() {
 
         logger.debug("DnsMonitor task start");
-        Set<IPAddress> dnsServers = DnsMonitorServiceImpl.this.dnsUtil.getDnServers();
+
+        try {
+            this.networkConfiguration = new NetworkConfiguration(this.networkProperties.getProperties());
+        } catch (Exception e) {
+            logger.error("Could not get initial network configuration", e);
+        }
+
+        Set<IPAddress> systemDnsServers = this.dnsUtil.getDnServers();
 
         // Check that resolv.conf matches what is configured
         Set<IPAddress> configuredServers = getConfiguredDnsServers();
-        if (!configuredServers.equals(dnsServers)) {
+        if (!configuredServers.equals(systemDnsServers)) {
             setDnsServers(configuredServers);
-            dnsServers = configuredServers;
+            systemDnsServers = configuredServers;
         }
 
-        manageDnsProxies(dnsServers);
+        manageDnsProxies(systemDnsServers);
         logger.debug("DnsMonitor task stop");
 
     }
@@ -133,14 +148,13 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             }
         }
 
-        if (!fwds.isEmpty() && !fwds.equals(DnsMonitorServiceImpl.this.forwarders)) {
+        if (!fwds.isEmpty() && !fwds.equals(this.forwarders)) {
             // there was a change - deal with it
             logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
-            DnsMonitorServiceImpl.this.forwarders = fwds;
+            this.forwarders = fwds;
 
-            DnsServerConfig currentDnsServerConfig = this.dnsServer.getConfig();
-            DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(DnsMonitorServiceImpl.this.forwarders,
-                    DnsMonitorServiceImpl.this.allowedNetworks);
+            DnsServerConfig currentDnsServerConfig = this.dnsServerService.getConfig();
+            DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(this.forwarders, this.allowedNetworks);
 
             if (currentDnsServerConfig != null && !currentDnsServerConfig.equals(newDnsServerConfig)) {
                 logger.debug("DNS server config has changed - updating from {} to {}", currentDnsServerConfig,
@@ -149,28 +163,6 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                 reconfigureDNSProxy(newDnsServerConfig);
             }
 
-        }
-    }
-
-    protected void deactivate() {
-        if (this.monitorTask != null && !this.monitorTask.isDone()) {
-            logger.debug("Cancelling DnsMonitorServiceImpl task ...");
-            this.monitorTask.cancel(false);
-            logger.info("DnsMonitorServiceImpl task cancelled? = {}", this.monitorTask.isDone());
-            this.monitorTask = null;
-        }
-
-        if (this.executor != null) {
-            logger.debug("Terminating DnsMonitorServiceImpl Thread ...");
-            this.executor.shutdown();
-            try {
-                this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                logger.warn("Interrupted", e);
-                Thread.currentThread().interrupt();
-            }
-            logger.info("DnsMonitorServiceImpl Thread terminated? - {}", this.executor.isTerminated());
-            this.executor = null;
         }
     }
 
@@ -186,96 +178,20 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         try {
 
             logger.debug("Disabling DNS proxy");
-            this.dnsServer.stop();
+            this.dnsServerService.stop();
 
             logger.debug("Writing config");
-            this.dnsServer.setConfig(dnsServerConfigIP4);
+            this.dnsServerService.setConfig(dnsServerConfigIP4);
 
             if (this.enabled) {
                 sleep(500);
                 logger.debug("Starting DNS proxy");
-                this.dnsServer.start();
+                this.dnsServerService.start();
             } else {
                 logger.debug("DNS proxy not enabled");
             }
         } catch (KuraException e) {
             logger.warn(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void handleEvent(Event event) {
-        logger.info("Dns handle event");
-        logger.debug("handleEvent - topic: {}", event.getTopic());
-        String topic = event.getTopic();
-
-        this.executor.execute(() -> {
-            if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-                try {
-                    this.networkConfiguration = new NetworkConfiguration(this.configurationService
-                            .getComponentConfiguration(NETWORK_CONFIGURATION_SERVICE_PID).getConfigurationProperties());
-                } catch (Exception e) {
-                    logger.error("Could not get network configuration", e);
-                }
-                updateDnsResolverConfig();
-                updateDnsProxyConfig();
-            } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
-                updateDnsResolverConfig();
-                updateDnsProxyConfig();
-            }
-        });
-    }
-
-    private void updateDnsResolverConfig() {
-        logger.debug("Updating resolver config");
-        setDnsServers(getConfiguredDnsServers());
-    }
-
-    private void updateDnsProxyConfig() {
-        this.enabled = false;
-
-        this.allowedNetworks = new HashSet<>();
-        this.forwarders = new HashSet<>();
-
-        if (this.networkConfiguration != null && this.networkConfiguration.getNetInterfaceConfigs() != null) {
-            List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
-                    .getNetInterfaceConfigs();
-            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
-                    getAllowedNetworks(netInterfaceConfig);
-                }
-            }
-        }
-
-        Set<IPAddress> dnsServers = this.dnsUtil.getDnServers();
-        if (dnsServers != null && !dnsServers.isEmpty()) {
-            for (IPAddress dnsServerTmp : dnsServers) {
-                logger.debug("Found DNS Server: {}", dnsServerTmp.getHostAddress());
-                this.forwarders.add((IP4Address) dnsServerTmp);
-            }
-        }
-
-        DnsServerConfigIP4 dnsServerConfigIP4 = new DnsServerConfigIP4(this.forwarders, this.allowedNetworks);
-        reconfigureDNSProxy(dnsServerConfigIP4);
-    }
-
-    private void getAllowedNetworks(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-
-        logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
-        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
-        for (NetConfig netConfig : netConfigs) {
-            if (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns()) {
-                logger.debug("Found an allowed network: {}/{}", ((DhcpServerConfig) netConfig).getRouterAddress(),
-                        ((DhcpServerConfig) netConfig).getPrefix());
-                this.enabled = true;
-
-                // this is an 'allowed network'
-                this.allowedNetworks
-                        .add(new NetworkPair<>((IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                ((DhcpServerConfig) netConfig).getPrefix()));
-            }
         }
     }
 

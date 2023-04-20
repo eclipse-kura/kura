@@ -57,7 +57,7 @@ def get_eth_wlan_interfaces_names():
 
     return (inteface_names)
 
-def commentParagraph(paragraph):
+def comment_paragraph(paragraph):
     """Comment a paragraph
 
     Returns:
@@ -72,30 +72,34 @@ def commentParagraph(paragraph):
     commented += "\n"
     return (commented)
 
-if (not exists(INTERFACES_PATH)):
-    print(LOG_MSG_PREFIX + "File " + INTERFACES_PATH + " does not exist.")
-    exit(1)
+def main():
+    if (not exists(INTERFACES_PATH)):
+        print(LOG_MSG_PREFIX + "File " + INTERFACES_PATH + " does not exist.")
+        exit(1)
+    
+    print(LOG_MSG_PREFIX + "Backup " + INTERFACES_PATH + " file.")
+    shutil.copyfile(INTERFACES_PATH, INTERFACES_OLD_PATH)
+    shutil.copyfile(INTERFACES_PATH, INTERFACES_TMP_PATH)
+    
+    print(LOG_MSG_PREFIX + "Search for interfaces...");
+    interface_names = get_eth_wlan_interfaces_names()
+    
+    for name in interface_names:
+        with open(INTERFACES_TMP_PATH, 'r+', encoding='utf-8') as file_to_edit:
+            content_paragraph = file_to_edit.read().split("\n\n")
+        output = ""
+        for paragraph in content_paragraph:
+            if name in paragraph:                
+                print(LOG_MSG_PREFIX + "Comment " + name + " configuration.");
+                output += comment_paragraph(paragraph)
+            else:
+                output += paragraph + "\n\n"
+        f = open(INTERFACES_TMP_PATH, "w")
+        f.write(output)
+        f.close()
 
-print(LOG_MSG_PREFIX + "Backup " + INTERFACES_PATH + " file.")
-shutil.copyfile(INTERFACES_PATH, INTERFACES_OLD_PATH)
-shutil.copyfile(INTERFACES_PATH, INTERFACES_TMP_PATH)
-
-print(LOG_MSG_PREFIX + "Search for interfaces...");
-interface_names = get_eth_wlan_interfaces_names()
-
-for name in interface_names:
-    with open(INTERFACES_TMP_PATH, 'r+', encoding='utf-8') as file_to_edit:
-        contentParagraph = file_to_edit.read().split("\n\n")
-    output = ""
-    for paragraph in contentParagraph:
-        if name in paragraph:                
-            print(LOG_MSG_PREFIX + "Comment " + name + " configuration.");
-            output += commentParagraph(paragraph)
-        else:
-            output += paragraph + "\n\n"
-    file = open(INTERFACES_TMP_PATH, "w")
-    file.write(output)
-    file.close()
-
-print(LOG_MSG_PREFIX + "Replace " + INTERFACES_PATH + " file.");
-shutil.move(INTERFACES_TMP_PATH, INTERFACES_PATH)
+    print(LOG_MSG_PREFIX + "Replace " + INTERFACES_PATH + " file.");
+    shutil.move(INTERFACES_TMP_PATH, INTERFACES_PATH)
+    
+if __name__ == "__main__":
+    main()

@@ -181,6 +181,11 @@ public class DataServiceOptions {
     }
 
     public Optional<CronExpression> getConnectionScheduleExpression() {
+        
+        if (!this.isConnectionScheduleEnabled()) {
+            return Optional.empty();
+        }
+        
         try {
             return Optional.of(new CronExpression((String) this.properties.get(CONNECTION_SCHECULE_EXPRESSION)));
         } catch (final Exception e) {

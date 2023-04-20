@@ -173,6 +173,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         logger.info("Deactivate NetworkConfigurationService...");
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+
+        this.dnsServerMonitor.stop();
+        this.dnsServerMonitor.clear();
+
         logger.info("Deactivate NetworkConfigurationService... Done.");
     }
 

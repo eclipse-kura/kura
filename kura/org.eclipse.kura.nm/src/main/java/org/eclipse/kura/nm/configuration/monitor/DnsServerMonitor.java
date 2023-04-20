@@ -140,25 +140,12 @@ public class DnsServerMonitor {
                     .getNetInterfaceConfigs();
 
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                if (isSupportedInterfaceType(netInterfaceConfig)) {
 
                     logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
                     List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
                     for (NetConfig netConfig : netConfigs) {
-
-                        if (isPassDnsEnable(netConfig)) {
-                            logger.debug("Found an allowed network: {}/{}",
-                                    ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                    ((DhcpServerConfig) netConfig).getPrefix());
-                            this.enabled = true;
-
-                            // this is an 'allowed network'
-                            allowedNetworks.add(
-                                    new NetworkPair<>((IP4Address) ((DhcpServerConfig) netConfig).getRouterAddress(),
-                                            ((DhcpServerConfig) netConfig).getPrefix()));
-                        }
+                        addToAllowedNetworksIfPassDnsEnabled(allowedNetworks, netConfig);
                     }
                 }
             }
@@ -168,7 +155,33 @@ public class DnsServerMonitor {
 
     }
 
-    public boolean isPassDnsEnable(NetConfig netConfig) {
+    private void addToAllowedNetworksIfPassDnsEnabled(Set<NetworkPair<IP4Address>> allowedNetworks, NetConfig netConfig) {
+        if (isPassDnsEnabled(netConfig)) {
+
+            DhcpServerConfig dhcpServerConfig = (DhcpServerConfig) netConfig;
+            IPAddress routerAddress = dhcpServerConfig.getRouterAddress();
+            short prefix = dhcpServerConfig.getPrefix();
+
+            logger.debug("Found an allowed network: {}/{}", routerAddress, prefix);
+            this.enabled = true;
+
+            // this is an 'allowed network'
+            allowedNetworks.add(toNetworkPair(routerAddress, prefix));
+        }
+    }
+
+    private NetworkPair<IP4Address> toNetworkPair(IPAddress routerAddress, short prefix) {
+        return new NetworkPair<>((IP4Address) routerAddress, prefix);
+    }
+
+    private boolean isSupportedInterfaceType(
+            NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        return netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                || netInterfaceConfig.getType() == NetInterfaceType.MODEM;
+    }
+
+    public boolean isPassDnsEnabled(NetConfig netConfig) {
         return (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns());
     }
 

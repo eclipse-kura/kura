@@ -159,10 +159,11 @@ After this command runs, images can be found in your preferred container engine 
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
 
 To correctly setup the environment, proceed as follows:
+- Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your OS and your platform.
 - Start the Eclipse Installer
 - Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
-- Set the Java 1.8+ VM: to the recently installed local jdk-8 VM, and press the Next button
+- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2022-06 or older**.
+- Set the Java 1.8+ VM to the installed local jdk-8 VM, and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.

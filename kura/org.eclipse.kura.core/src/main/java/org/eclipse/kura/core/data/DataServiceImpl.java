@@ -750,11 +750,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             return;
         }
 
-        Optional<CronExpression> schedule = Optional.empty();
-        
-        if (this.dataServiceOptions.isConnectionScheduleEnabled()) {
-            schedule = this.dataServiceOptions.getConnectionScheduleExpression();
-        }
+        final Optional<CronExpression> schedule = this.dataServiceOptions.getConnectionScheduleExpression();
 
         final AutoConnectStrategy strategy;
 

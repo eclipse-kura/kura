@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.nm.configuration.monitor;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,8 +23,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.net.IP4Address;
@@ -53,13 +57,14 @@ public class DnsServerMonitorTest {
     }
 
     @Test
-    public void shouldStopDnsServerMonitor() throws KuraException, InterruptedException, UnknownHostException {
+    public void shouldStopDnsServerMonitor()
+            throws KuraException, InterruptedException, UnknownHostException, NoSuchFieldException {
         givenNetworkProperties();
         givenDnsServerMonitor();
 
         whenDnsServerMonitorIsStopped();
 
-        thenDnsServerIsStopped();
+        thenDnsMonitorIsStopped();
     }
 
     private void givenDnsServerMonitor() throws KuraException, UnknownHostException {
@@ -142,13 +147,18 @@ public class DnsServerMonitorTest {
     }
 
     private void thenDnsServerIsStarted() throws KuraException, InterruptedException {
-        waitForSeconds(120);
+        waitForSeconds(1);
         verify(this.dnsServerServiceMock, atLeast(1)).start();
     }
 
-    private void thenDnsServerIsStopped() throws KuraException, InterruptedException {
-        waitForSeconds(120);
-        verify(this.dnsServerServiceMock, atLeast(1)).stop();
+    private void thenDnsMonitorIsStopped() throws KuraException, InterruptedException, NoSuchFieldException {
+        waitForSeconds(1);
+
+        Future<?> monitorTask = (Future<?>) TestUtil.getFieldValue(this.monitor, "monitorTask");
+        ScheduledExecutorService executor = (ScheduledExecutorService) TestUtil.getFieldValue(this.monitor, "executor");
+
+        assertNull(monitorTask);
+        assertNull(executor);
     }
 
     private void waitForSeconds(int timeout) throws InterruptedException {

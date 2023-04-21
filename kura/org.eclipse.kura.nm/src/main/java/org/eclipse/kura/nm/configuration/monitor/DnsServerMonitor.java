@@ -203,7 +203,7 @@ public class DnsServerMonitor {
         DnsServerConfig currentDnsServerConfig = this.dnsServerService.getConfig();
         DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(forwarders, allowedNetworks);
 
-        if (currentDnsServerConfig != null && !currentDnsServerConfig.equals(newDnsServerConfig)) {
+        if (currentDnsServerConfig == null || !currentDnsServerConfig.equals(newDnsServerConfig)) {
             logger.debug("DNS server config has changed - updating from {} to {}", currentDnsServerConfig,
                     newDnsServerConfig);
 

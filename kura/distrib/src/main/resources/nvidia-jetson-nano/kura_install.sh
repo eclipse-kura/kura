@@ -82,7 +82,7 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
 fi
 
 #disable FAN protocol handling script to avoid
-#prmissions issues
+#permissions issues
 if [ -f "/etc/network/if-up.d/ubuntu-fan" ] ; then
     chmod -x /etc/network/if-up.d/ubuntu-fan
 fi

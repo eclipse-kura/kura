@@ -31,6 +31,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -40,6 +41,7 @@ import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
+import org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -60,10 +62,13 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
 
     private NetworkService networkService;
+    private DnsServerService dnsServer;
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+
     private DhcpServerMonitor dhcpServerMonitor;
+    private DnsServerMonitor dnsServerMonitor;
 
     private LinuxNetworkUtil linuxNetworkUtil;
     private NetworkProperties networkProperties;
@@ -115,6 +120,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
+    public void setDnsServerService(DnsServerService dnsServer) {
+        this.dnsServer = dnsServer;
+    }
+
     public NMConfigurationServiceImpl() {
         try {
             this.nmDbusConnector = NMDbusConnector.getInstance();
@@ -137,6 +146,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
+        this.dnsServerMonitor = new DnsServerMonitor(this.dnsServer, this.commandExecutorService);
 
         if (Objects.nonNull(this.nmDbusConnector)) {
             try {
@@ -163,6 +173,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         logger.info("Deactivate NetworkConfigurationService...");
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+
+        this.dnsServerMonitor.stop();
+        this.dnsServerMonitor.clear();
+
         logger.info("Deactivate NetworkConfigurationService... Done.");
     }
 
@@ -175,6 +189,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+
+        this.dnsServerMonitor.stop();
+        this.dnsServerMonitor.clear();
 
         final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
         final Set<String> interfaces = NetworkConfigurationServiceCommon
@@ -201,7 +218,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             writeNetworkConfigurationSettings(modifiedProps);
             writeFirewallNatRules(interfaces);
             writeDhcpServerConfiguration(interfaces);
+            this.dnsServerMonitor.setNetworkProperties(this.networkProperties);
+
             this.dhcpServerMonitor.start();
+            this.dnsServerMonitor.start();
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
         } catch (KuraException e) {

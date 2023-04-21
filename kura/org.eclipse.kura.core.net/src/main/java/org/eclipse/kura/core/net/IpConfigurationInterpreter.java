@@ -202,9 +202,10 @@ public class IpConfigurationInterpreter {
             String dnsAll = (String) props.get(configDNSs);
             String[] dnss = dnsAll.split(",");
             for (String dns : dnss) {
-                if (dns != null && dns.length() > 0) {
-                    logger.trace("IPv4 DNS: {}", dns);
-                    IP4Address dnsIp4 = (IP4Address) IPAddress.parseHostAddress(dns);
+                String trimmedDns = dns.trim();
+                if (trimmedDns != null && trimmedDns.length() > 0) {
+                    logger.trace("IPv4 DNS: {}", trimmedDns);
+                    IP4Address dnsIp4 = (IP4Address) IPAddress.parseHostAddress(trimmedDns);
                     dnsIPs.add(dnsIp4);
                 }
             }

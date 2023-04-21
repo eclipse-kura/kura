@@ -166,6 +166,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
             if (GwtServerUtil.PASSWORD_PLACEHOLDER.equals(gwtWifiConfig.getPassword())
                     && oldGwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig) {
                 GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
+                gwtWifiNetInterfaceConfig.setUnescaped(true);
 
                 this.properties.setWifiMasterPassphrase(this.ifname,
                         gwtWifiNetInterfaceConfig.getAccessPointWifiConfig().getPassword());
@@ -205,6 +206,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
             if (GwtServerUtil.PASSWORD_PLACEHOLDER.equals(gwtWifiConfig.getPassword())
                     && oldGwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig) {
                 GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
+                gwtWifiNetInterfaceConfig.setUnescaped(true);
                 this.properties.setWifiInfraPassphrase(this.ifname,
                         gwtWifiNetInterfaceConfig.getStationWifiConfig().getPassword());
             } else {
@@ -261,6 +263,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 if (GwtServerUtil.PASSWORD_PLACEHOLDER.equals(gwtModemConfig.getPassword())
                         && oldGwtNetInterfaceConfig instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig gwtModemInterfaceConfig = (GwtModemInterfaceConfig) oldGwtNetInterfaceConfig;
+                    gwtModemInterfaceConfig.setUnescaped(true);
                     this.properties.setModemPassword(this.ifname, gwtModemInterfaceConfig.getPassword());
                 } else {
                     this.properties.setModemPassword(this.ifname, gwtModemConfig.getPassword());

@@ -14,6 +14,7 @@
 import subprocess
 import sys
 import shutil
+import logging
 from os.path import exists
 
 ETHERNET_TYPES = ['ethernet', 'eth', 'wired']
@@ -21,15 +22,6 @@ WIRELESS_TYPES = ['wifi', 'wireless']
 INTERFACES_PATH = "/etc/network/interfaces"
 INTERFACES_OLD_PATH = INTERFACES_PATH + ".old"
 INTERFACES_TMP_PATH = INTERFACES_PATH + ".tmp"
-
-logging.basicConfig(
-    format='[comment_interfaces_file.py] %(asctime)s %(levelname)s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.StreamHandler()
-    ]
-)
 
 def get_eth_wlan_interfaces_names():
     """Reads the network interface names using 'nmcli dev' command.
@@ -81,6 +73,15 @@ def comment_paragraph(paragraph):
     return (commented)
 
 def main():
+    logging.basicConfig(
+        format='[comment_interfaces_file.py] %(asctime)s %(levelname)s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
+
     if (not exists(INTERFACES_PATH)):
         logging.info("File %s does not exist.", INTERFACES_PATH)
         exit(0)

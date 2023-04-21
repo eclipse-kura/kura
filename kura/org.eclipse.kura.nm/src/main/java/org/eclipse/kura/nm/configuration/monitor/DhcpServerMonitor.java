@@ -69,10 +69,14 @@ public class DhcpServerMonitor {
         this.dhcpServerInterfaceConfiguration.entrySet().forEach(entry -> {
             String interfaceName = entry.getKey();
             boolean enable = entry.getValue();
-            if (enable && !this.dhcpServerManager.isRunning(interfaceName)) {
-                startDhcpServer(interfaceName);
-            } else if (!enable && this.dhcpServerManager.isRunning(interfaceName)) {
-                stopDhcpServer(interfaceName);
+            try {
+                if (enable && !this.dhcpServerManager.isRunning(interfaceName)) {
+                    startDhcpServer(interfaceName);
+                } else if (!enable && this.dhcpServerManager.isRunning(interfaceName)) {
+                    stopDhcpServer(interfaceName);
+                }
+            } catch (KuraException e) {
+                logger.warn("Failed to chech DHCP server status for the interface " + interfaceName, e);
             }
         });
     }

@@ -18,9 +18,9 @@ import org.eclipse.kura.executor.CommandStatus;
 
 public interface DhcpLinuxTool {
 
-    public boolean isRunning(String interfaceName);
+    public boolean isRunning(String interfaceName) throws KuraProcessExecutionErrorException;
 
-    public CommandStatus startInterface(String interfaceName);
+    public CommandStatus startInterface(String interfaceName) throws KuraProcessExecutionErrorException;
 
     public boolean disableInterface(String interfaceName) throws KuraProcessExecutionErrorException;
 

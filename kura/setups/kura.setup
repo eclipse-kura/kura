@@ -84,7 +84,7 @@
         name="org.sonarlint.eclipse.feature.feature.group"
         optional="true"/>
     <repository
-        url="https://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.9.0/N/LATEST/"/>
+        url="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/"/>
     <repository
         url="http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com"/>
     <repository

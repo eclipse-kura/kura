@@ -16,12 +16,20 @@ import sys
 import shutil
 from os.path import exists
 
-LOG_MSG_PREFIX = "[comment_interfaces_file.py] "
 ETHERNET_TYPES = ['ethernet', 'eth', 'wired']
 WIRELESS_TYPES = ['wifi', 'wireless']
 INTERFACES_PATH = "/etc/network/interfaces"
-INTERFACES_OLD_PATH =  INTERFACES_PATH + ".old"
+INTERFACES_OLD_PATH = INTERFACES_PATH + ".old"
 INTERFACES_TMP_PATH = INTERFACES_PATH + ".tmp"
+
+logging.basicConfig(
+    format='[comment_interfaces_file.py] %(asctime)s %(levelname)s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 def get_eth_wlan_interfaces_names():
     """Reads the network interface names using 'nmcli dev' command.
@@ -53,7 +61,7 @@ def get_eth_wlan_interfaces_names():
         
     inteface_names.sort()
 
-    print(LOG_MSG_PREFIX + 'Found interfaces: ', inteface_names)
+    logging.info("Found interfaces: %s", inteface_names)
 
     return (inteface_names)
 
@@ -74,14 +82,14 @@ def comment_paragraph(paragraph):
 
 def main():
     if (not exists(INTERFACES_PATH)):
-        print(LOG_MSG_PREFIX + "File " + INTERFACES_PATH + " does not exist.")
-        exit(1)
+        logging.info("File %s does not exist.", INTERFACES_PATH)
+        exit(0)
     
-    print(LOG_MSG_PREFIX + "Backup " + INTERFACES_PATH + " file.")
+    logging.info("Backup %s file.", INTERFACES_PATH)
     shutil.copyfile(INTERFACES_PATH, INTERFACES_OLD_PATH)
     shutil.copyfile(INTERFACES_PATH, INTERFACES_TMP_PATH)
     
-    print(LOG_MSG_PREFIX + "Search for interfaces...");
+    logging.info("Search for interfaces...")
     interface_names = get_eth_wlan_interfaces_names()
     
     for name in interface_names:
@@ -89,8 +97,8 @@ def main():
             content_paragraph = file_to_edit.read().split("\n\n")
         output = ""
         for paragraph in content_paragraph:
-            if name in paragraph:                
-                print(LOG_MSG_PREFIX + "Comment " + name + " configuration.");
+            if name in paragraph:
+                logging.info("Comment %s configuration.", name)
                 output += comment_paragraph(paragraph)
             else:
                 output += paragraph + "\n\n"
@@ -98,7 +106,7 @@ def main():
         f.write(output)
         f.close()
 
-    print(LOG_MSG_PREFIX + "Replace " + INTERFACES_PATH + " file.");
+    logging.info("Replace %s file.", INTERFACES_PATH)
     shutil.move(INTERFACES_TMP_PATH, INTERFACES_PATH)
     
 if __name__ == "__main__":

@@ -81,6 +81,12 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
     chmod -x /etc/network/if-up.d/ntpdate
 fi
 
+#disable FAN protocol handling script to avoid
+#prmissions issues
+if [ -f "/etc/network/if-up.d/ubuntu-fan" ] ; then
+    chmod -x /etc/network/if-up.d/ubuntu-fan
+fi
+
 #disable asking NTP servers to the DHCP server
 sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
 

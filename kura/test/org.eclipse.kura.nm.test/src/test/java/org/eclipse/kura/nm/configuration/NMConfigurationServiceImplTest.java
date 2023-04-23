@@ -297,7 +297,7 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.1-4.config.activeFilter", "inbound");
         this.properties.put("net.interface.enp5s0.config.ip6.dnsServers", "");
         this.properties.put("net.interface.1-4.config.dhcpClient6.enabled", false);
-        this.properties.put("net.interface.wlp1s0.config.wifi.infra.channel", 1);
+        this.properties.put("net.interface.wlp1s0.config.wifi.infra.channel", "1");
         this.properties.put("net.interface.wlp1s0.config.wifi.master.passphrase", "qwerty=");
         this.properties.put("net.interface.1-4.config.lcpEchoFailure", 0);
         this.properties.put("net.interface.eno1.config.dhcpServer4.rangeEnd", "172.16.0.110");
@@ -335,7 +335,7 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.enp5s0.config.ip4.dnsServers", "");
         this.properties.put("net.interface.wlp1s0.config.ip6.status", "netIPv6StatusDisabled");
         this.properties.put("net.interface.1-4.config.ip6.dnsServers", "");
-        this.properties.put("net.interface.wlp1s0.config.wifi.master.channel", 1);
+        this.properties.put("net.interface.wlp1s0.config.wifi.master.channel", "1");
         this.properties.put("net.interface.enp5s0.config.dhcpClient4.enabled", true);
         this.properties.put("net.interface.1-4.type", "MODEM");
         this.properties.put("net.interface.enp5s0.config.ip4.status", "netIPv4StatusEnabledWAN");

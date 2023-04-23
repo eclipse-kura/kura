@@ -61,7 +61,7 @@ public class DhcpServerManager {
         return dhcpServerTool;
     }
 
-    public boolean isRunning(String interfaceName) {
+    public boolean isRunning(String interfaceName) throws KuraException {
         return this.linuxTool.isRunning(interfaceName);
     }
 
@@ -89,7 +89,7 @@ public class DhcpServerManager {
 
     public boolean disable(String interfaceName) throws KuraException {
         logger.debug("Disable DHCP server for {}", interfaceName);
-        
+
         return this.linuxTool.disableInterface(interfaceName);
     }
 

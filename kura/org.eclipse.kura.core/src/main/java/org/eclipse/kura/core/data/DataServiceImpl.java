@@ -898,7 +898,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             try {
                 if (!DataServiceImpl.this.storeState.isPresent()) {
                     logger.warn(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
-                    return;
+                    DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
+                    throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
                 }
 
                 DataServiceImpl.this.storeState.get().getOrOpenMessageStore();

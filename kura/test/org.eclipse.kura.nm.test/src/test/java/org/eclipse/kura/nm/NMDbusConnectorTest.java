@@ -1056,8 +1056,8 @@ public class NMDbusConnectorTest {
 
             when(settings.GetConnectionByUuid(any())).thenReturn(mockUuidPath);
 
-            doThrow(DBusExecutionException.class).when(this.dbusConnection).getRemoteObject(
-                    "org.freedesktop.NetworkManager", "/unused/connection/path", Connection.class);
+            doThrow(DBusExecutionException.class).when(this.dbusConnection)
+                    .getRemoteObject("org.freedesktop.NetworkManager", "/unused/connection/path", Connection.class);
         }
 
         DBusPath mockPath = mock(DBusPath.class);
@@ -1121,8 +1121,8 @@ public class NMDbusConnectorTest {
         when(mockAssociatedConnection.GetSettings()).thenReturn(connectionSettings);
         when(mockAssociatedConnection.getObjectPath()).thenReturn(connectionPath);
 
-        doReturn(mockAssociatedConnection).when(this.dbusConnection)
-                .getRemoteObject("org.freedesktop.NetworkManager", connectionPath, Connection.class);
+        doReturn(mockAssociatedConnection).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
+                connectionPath, Connection.class);
 
         this.mockedConnections.put(connectionPath, mockAssociatedConnection);
 
@@ -1521,7 +1521,6 @@ public class NMDbusConnectorTest {
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_10));
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_39));
         assertTrue(modemStatus.isGpsSupported());
-        assertEquals(0, modemStatus.getActiveSimIndex());
         assertFalse(modemStatus.isSimLocked());
         assertEquals(ModemConnectionStatus.REGISTERED, modemStatus.getConnectionStatus());
         assertEquals(1, modemStatus.getAccessTechnologies().size());
@@ -1532,7 +1531,7 @@ public class NMDbusConnectorTest {
         assertEquals("VeryCoolMobile", modemStatus.getOperatorName());
         if (hasSims) {
             assertEquals(1, modemStatus.getAvailableSims().size());
-            Sim sim = modemStatus.getAvailableSims().get(modemStatus.getActiveSimIndex());
+            Sim sim = modemStatus.getAvailableSims().get(0);
             assertTrue(sim.isActive());
             assertEquals("VeryExpensiveSim", sim.getIccid());
             assertEquals("1234567890", sim.getImsi());

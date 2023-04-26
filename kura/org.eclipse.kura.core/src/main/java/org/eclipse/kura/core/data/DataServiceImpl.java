@@ -253,7 +253,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         } catch (KuraStoreException e) {
             logger.error("Failed to start store", e);
             DataServiceImpl.this.disconnectDataTransportAndLog(e);
-            DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
         }
     }
 
@@ -459,7 +458,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } catch (KuraStoreException e) {
                 logger.error("Failed to unpublish in-flight messages", e);
                 DataServiceImpl.this.disconnectDataTransportAndLog(e);
-                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
             }
         } else if (this.storeState.isPresent()) {
             logger.info("New session established. Dropping all in-flight messages.");
@@ -556,7 +554,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } catch (KuraStoreException e) {
                 logger.error("Cannot confirm message to store", e);
                 disconnectDataTransportAndLog(e);
-                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
             }
 
             // Notify the listeners
@@ -600,7 +597,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         try {
             this.storeState.get().getOrOpenMessageStore();
         } catch (KuraStoreException e) {
-            DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
             throw new KuraConnectException(e, MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
         }
 
@@ -687,7 +683,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 return messageId;
             } catch (KuraStoreException e) {
-                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                 disconnectDataTransportAndLog(e);
                 throw e;
             }
@@ -920,7 +915,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 connected = true;
             } catch (KuraConnectException | KuraStoreException e) {
                 logger.warn("DataService failure occured: ", e);
-
+                
                 if (e instanceof KuraStoreException) {
                     DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                 }
@@ -1108,7 +1103,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                 } catch (KuraStoreException e) {
                     DataServiceImpl.this.disconnectDataTransportAndLog(e);
-                    DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                 }
 
             } else {
@@ -1161,8 +1155,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } else {
                 throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
             }
-        } catch (KuraStoreException e) {
-            DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
+        } catch (Exception e) {
             DataServiceImpl.this.disconnectDataTransportAndLog(e);
             logger.error("Probably an unrecoverable exception", e);
         }

@@ -575,7 +575,9 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/patch_sysctl.sh"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/find-net-interfaces.py"
+            <zipfileset file="src/main/resources/common/find_net_interfaces.py"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/comment_interfaces_file.py"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/customize-installation.sh"
                 prefix="${build.output.name}/${install.folder}" />

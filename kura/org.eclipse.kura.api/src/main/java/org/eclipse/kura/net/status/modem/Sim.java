@@ -134,6 +134,10 @@ public class Sim {
             return this;
         }
 
+        public Sim build() {
+            return new Sim(this);
+        }
+
     }
 
     @Override

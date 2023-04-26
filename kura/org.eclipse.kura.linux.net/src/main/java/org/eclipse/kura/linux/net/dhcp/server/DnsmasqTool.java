@@ -142,7 +142,9 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private void writeGlobalConfig() {
         try {
             Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
-            Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
+            if (Files.notExists(dnsmasqGlobalsPath)) {
+                Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
+            }
         } catch (IOException e) {
             logger.warn("DNSMASQ - Failed setting in DHCP-only mode.", e);
         }

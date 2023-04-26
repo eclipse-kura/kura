@@ -659,7 +659,9 @@ public class NMStatusConverter {
         } catch (DBusExecutionException e) {
             logger.warn("SimType property not found. Only physical sims are supported.");
         }
-        return new Sim(isActive, isPrimary, iccid, imsi, eid, operatorName, simType, eSimStatus);
+
+        return Sim.builder().withActive(isActive).withPrimary(isPrimary).withIccid(iccid).withImsi(imsi).withEid(eid)
+                .withOperatorName(operatorName).withSimType(simType).withESimStatus(eSimStatus).build();
     }
 
     private static List<Bearer> getBearers(List<Properties> properties) {

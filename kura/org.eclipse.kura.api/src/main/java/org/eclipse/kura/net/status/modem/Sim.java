@@ -33,16 +33,15 @@ public class Sim {
     private final SimType simType;
     private final ESimStatus eSimStatus;
 
-    public Sim(boolean active, boolean primary, String iccid, String imsi, String eid, String operatorName,
-            SimType simType, ESimStatus eSimStatus) {
-        this.active = active;
-        this.primary = primary;
-        this.iccid = iccid;
-        this.imsi = imsi;
-        this.eid = eid;
-        this.operatorName = operatorName;
-        this.simType = simType;
-        this.eSimStatus = eSimStatus;
+    public Sim(SimBuilder builder) {
+        this.active = builder.active;
+        this.primary = builder.primary;
+        this.iccid = builder.iccid;
+        this.imsi = builder.imsi;
+        this.eid = builder.eid;
+        this.operatorName = builder.operatorName;
+        this.simType = builder.simType;
+        this.eSimStatus = builder.eSimStatus;
     }
 
     public boolean isActive() {
@@ -75,6 +74,66 @@ public class Sim {
 
     public ESimStatus geteSimStatus() {
         return this.eSimStatus;
+    }
+
+    public static SimBuilder builder() {
+        return new SimBuilder();
+    }
+
+    public static final class SimBuilder {
+
+        private boolean active;
+        private boolean primary;
+        private String iccid;
+        private String imsi;
+        private String eid;
+        private String operatorName;
+        private SimType simType;
+        private ESimStatus eSimStatus;
+
+        private SimBuilder() {
+        }
+
+        public SimBuilder withActive(boolean active) {
+            this.active = active;
+            return this;
+        }
+
+        public SimBuilder withPrimary(boolean primary) {
+            this.primary = primary;
+            return this;
+        }
+
+        public SimBuilder withIccid(String iccid) {
+            this.iccid = iccid;
+            return this;
+        }
+
+        public SimBuilder withImsi(String imsi) {
+            this.imsi = imsi;
+            return this;
+        }
+
+        public SimBuilder withEid(String eid) {
+            this.eid = eid;
+            return this;
+        }
+
+        public SimBuilder withOperatorName(String operatorName) {
+            this.operatorName = operatorName;
+            return this;
+        }
+
+        public SimBuilder withSimType(SimType simType) {
+            this.simType = simType;
+            return this;
+        }
+
+        public SimBuilder withESimStatus(ESimStatus eSimStatus) {
+            this.eSimStatus = eSimStatus;
+            return this;
+        }
+
     }
 
     @Override

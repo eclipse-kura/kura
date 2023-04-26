@@ -915,15 +915,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } catch (KuraConnectException | KuraStoreException e) {
                 logger.warn("DataService failure occured: ", e);
                 
-                if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled() && e instanceof KuraStoreException) {
-                    DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
-                }
-
                 if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
 
                     if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
                             .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
-                                    .getRecoveryMaximumAllowedFailures()) {
+                                    .getRecoveryMaximumAllowedFailures() || e instanceof KuraStoreException) {
                         logger.info("Checkin done.");
                         DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                     } else {

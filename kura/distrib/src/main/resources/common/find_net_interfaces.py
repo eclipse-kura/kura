@@ -65,7 +65,7 @@ def get_eth_wlan_interfaces_names():
 
 def main():
     logging.basicConfig(
-        format='[find-net-interfaces.py] %(asctime)s %(levelname)s %(message)s',
+        format='[find_net_interfaces.py] %(asctime)s %(levelname)s %(message)s',
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M:%S',
         handlers=[

@@ -632,31 +632,34 @@ public class NMStatusConverter {
     private static List<Sim> getAvailableSims(List<SimProperties> properties) {
         List<Sim> sims = new ArrayList<>();
         for (SimProperties property : properties) {
-            Properties simProperties = property.getProperties();
-
-            String iccid = simProperties.Get(MM_SIM_BUS_NAME, "SimIdentifier");
-            String imsi = simProperties.Get(MM_SIM_BUS_NAME, "Imsi");
-            String eid = "";
-            try {
-                eid = simProperties.Get(MM_SIM_BUS_NAME, "Eid");
-            } catch (DBusExecutionException e) {
-                logger.warn("Eid property not found.");
-            }
-            String operatorName = simProperties.Get(MM_SIM_BUS_NAME, "OperatorName");
-            SimType simType = SimType.PHYSICAL;
-            ESimStatus eSimStatus = ESimStatus.UNKNOWN;
-            try {
-                simType = MMSimType.toSimType(simProperties.Get(MM_SIM_BUS_NAME, "SimType"));
-                if (simType.equals(SimType.ESIM)) {
-                    eSimStatus = MMSimEsimStatus.toESimStatus(simProperties.Get(MM_SIM_BUS_NAME, "EsimStatus"));
-                }
-            } catch (DBusExecutionException e) {
-                logger.warn("SimType property not found. Only physical sims are supported.");
-            }
-            sims.add(new Sim(property.isActive(), property.isPrimary(), iccid, imsi, eid, operatorName, simType,
-                    eSimStatus));
+            Sim sim = getAvailableSim(property.getProperties(), property.isActive(), property.isPrimary());
+            sims.add(sim);
         }
+
         return sims;
+    }
+
+    private static Sim getAvailableSim(Properties simProperties, boolean isActive, boolean isPrimary) {
+        String iccid = simProperties.Get(MM_SIM_BUS_NAME, "SimIdentifier");
+        String imsi = simProperties.Get(MM_SIM_BUS_NAME, "Imsi");
+        String eid = "";
+        try {
+            eid = simProperties.Get(MM_SIM_BUS_NAME, "Eid");
+        } catch (DBusExecutionException e) {
+            logger.warn("Eid property not found.");
+        }
+        String operatorName = simProperties.Get(MM_SIM_BUS_NAME, "OperatorName");
+        SimType simType = SimType.PHYSICAL;
+        ESimStatus eSimStatus = ESimStatus.UNKNOWN;
+        try {
+            simType = MMSimType.toSimType(simProperties.Get(MM_SIM_BUS_NAME, "SimType"));
+            if (simType.equals(SimType.ESIM)) {
+                eSimStatus = MMSimEsimStatus.toESimStatus(simProperties.Get(MM_SIM_BUS_NAME, "EsimStatus"));
+            }
+        } catch (DBusExecutionException e) {
+            logger.warn("SimType property not found. Only physical sims are supported.");
+        }
+        return new Sim(isActive, isPrimary, iccid, imsi, eid, operatorName, simType, eSimStatus);
     }
 
     private static List<Bearer> getBearers(List<Properties> properties) {

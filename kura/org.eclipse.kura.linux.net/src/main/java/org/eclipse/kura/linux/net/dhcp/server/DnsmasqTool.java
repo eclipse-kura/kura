@@ -77,17 +77,22 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
         writeGlobalConfig();
 
-        return this.executorService.execute(systemctlRestartCommand());
+        CommandStatus restartStatus = this.executorService.execute(systemctlRestartCommand());
+
+        if (!restartStatus.getExitStatus().isSuccessful()) {
+            removeInterfaceConfig(interfaceName);
+            restartStatus = this.executorService.execute(systemctlRestartCommand());
+        }
+
+        return restartStatus;
     }
 
     @Override
     public boolean disableInterface(String interfaceName) throws KuraProcessExecutionErrorException {
         try {
-            File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
-
             boolean isInterfaceDisabled = true;
 
-            if (Files.deleteIfExists(configFile.toPath())) {
+            if (removeInterfaceConfig(interfaceName)) {
                 CommandStatus status = this.executorService.execute(systemctlRestartCommand());
                 isInterfaceDisabled = status.getExitStatus().isSuccessful();
             }
@@ -123,6 +128,15 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     private Command systemctlRestartCommand() {
         return new Command(new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
+    }
+
+    private boolean removeInterfaceConfig(String interfaceName) {
+        try {
+            File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
+            return Files.deleteIfExists(configFile.toPath());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void writeGlobalConfig() {

@@ -920,9 +920,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 connected = true;
             } catch (KuraConnectException | KuraStoreException e) {
                 logger.warn("DataService failure occured: ", e);
-                
+
                 if (e instanceof KuraStoreException) {
-                    DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);                    
+                    DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                 }
 
                 if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {

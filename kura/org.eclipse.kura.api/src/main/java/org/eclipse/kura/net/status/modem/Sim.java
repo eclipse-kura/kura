@@ -25,6 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class Sim {
 
     private final boolean active;
+    private final boolean primary;
     private final String iccid;
     private final String imsi;
     private final String eid;
@@ -32,9 +33,10 @@ public class Sim {
     private final SimType simType;
     private final ESimStatus eSimStatus;
 
-    public Sim(boolean active, String iccid, String imsi, String eid, String operatorName, SimType simType,
-            ESimStatus eSimStatus) {
+    public Sim(boolean active, boolean primary, String iccid, String imsi, String eid, String operatorName,
+            SimType simType, ESimStatus eSimStatus) {
         this.active = active;
+        this.primary = primary;
         this.iccid = iccid;
         this.imsi = imsi;
         this.eid = eid;
@@ -45,6 +47,10 @@ public class Sim {
 
     public boolean isActive() {
         return this.active;
+    }
+
+    public boolean isPrimary() {
+        return this.primary;
     }
 
     public String getIccid() {
@@ -73,8 +79,8 @@ public class Sim {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.active, this.eSimStatus, this.eid, this.iccid, this.imsi, this.operatorName,
-                this.simType);
+        return Objects.hash(this.active, this.primary, this.eSimStatus, this.eid, this.iccid, this.imsi,
+                this.operatorName, this.simType);
     }
 
     @Override
@@ -86,9 +92,10 @@ public class Sim {
             return false;
         }
         Sim other = (Sim) obj;
-        return this.active == other.active && this.eSimStatus == other.eSimStatus && Objects.equals(this.eid, other.eid)
-                && Objects.equals(this.iccid, other.iccid) && Objects.equals(this.imsi, other.imsi)
-                && Objects.equals(this.operatorName, other.operatorName) && this.simType == other.simType;
+        return this.active == other.active && this.primary == other.primary && this.eSimStatus == other.eSimStatus
+                && Objects.equals(this.eid, other.eid) && Objects.equals(this.iccid, other.iccid)
+                && Objects.equals(this.imsi, other.imsi) && Objects.equals(this.operatorName, other.operatorName)
+                && this.simType == other.simType;
     }
 
 }

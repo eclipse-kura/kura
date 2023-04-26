@@ -34,6 +34,7 @@ import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
+import org.eclipse.kura.nm.status.SimProperties;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
 import org.freedesktop.AddAndActivateConnectionTuple;
 import org.freedesktop.NetworkManager;
@@ -69,6 +70,7 @@ public class NMDbusConnector {
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
     private static final String MM_BUS_PATH = "/org/freedesktop/ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
+    private static final String MM_SIM_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
     private static final String NM_PROPERTY_VERSION = "Version";
@@ -194,15 +196,15 @@ public class NMDbusConnector {
                 DevicePropertiesWrapper ethernetPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.of(wiredDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-                networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId,
-                        ethernetPropertiesWrapper, ip4configProperties);
+                networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId, ethernetPropertiesWrapper,
+                        ip4configProperties);
                 break;
             case NM_DEVICE_TYPE_LOOPBACK:
                 DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
-                networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId,
-                        loopbackPropertiesWrapper, ip4configProperties);
+                networkInterfaceStatus = NMStatusConverter.buildLoopbackStatus(interfaceId, loopbackPropertiesWrapper,
+                        ip4configProperties);
                 break;
             case NM_DEVICE_TYPE_WIFI:
                 networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
@@ -224,7 +226,7 @@ public class NMDbusConnector {
         NetworkInterfaceStatus networkInterfaceStatus;
         Optional<String> modemPath = getModemPathFromMM(device.getObjectPath());
         Optional<Properties> modemDeviceProperties = Optional.empty();
-        List<Properties> simProperties = Collections.emptyList();
+        List<SimProperties> simProperties = Collections.emptyList();
         List<Properties> bearerProperties = Collections.emptyList();
         if (modemPath.isPresent()) {
             modemDeviceProperties = getModemProperties(modemPath.get());
@@ -500,19 +502,16 @@ public class NMDbusConnector {
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
             Optional<String> modemPath = getModemPathFromMM(dbusPath);
             if (!modemPath.isPresent()) {
-                throw new IllegalStateException(
-                        String.format("Cannot retrieve modem path for: %s.", dbusPath));
+                throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
             }
             Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
             if (!modemDeviceProperties.isPresent()) {
-                throw new IllegalStateException(
-                        String.format("Cannot retrieve modem properties for: %s.", dbusPath));
+                throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
 
             }
             return NMStatusConverter.getModemDeviceHwPath(modemDeviceProperties.get());
         } else {
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath,
-                    Properties.class);
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
             return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
         }
     }
@@ -589,8 +588,7 @@ public class NMDbusConnector {
 
         // Workaround to identify Loopback interface for NM versions prior to 1.42
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
-            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
-                    Generic.class);
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Generic.class);
             Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     genericDevice.getObjectPath(), Properties.class);
             String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
@@ -805,25 +803,35 @@ public class NMDbusConnector {
         return modemProperties;
     }
 
-    private List<Properties> getModemSimProperties(Properties modemProperties) throws DBusException {
-        List<Properties> simProperties = new ArrayList<>();
+    private List<SimProperties> getModemSimProperties(Properties modemProperties) throws DBusException {
+        List<SimProperties> simProperties = new ArrayList<>();
         try {
+            UInt32 primarySimSlot = modemProperties.Get(MM_MODEM_NAME, "PrimarySimSlot");
             List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
-            for (DBusPath path : simPaths) {
-                addSimPath(simProperties, path);
+            for (int index = 0; index < simPaths.size(); index++) {
+                String path = simPaths.get(index).getPath();
+
+                if (path.equals("/")) {
+                    continue;
+                }
+
+                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, path, Properties.class);
+                boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
+                boolean isPrimary = index == (primarySimSlot.intValue() - 1);
+
+                simProperties.add(new SimProperties(simProp, isActive, isPrimary));
             }
         } catch (DBusExecutionException e) {
-            // Get only the active sim if any
+            // Fallback to ModemManager version prior to 1.16
             DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
-            addSimPath(simProperties, simPath);
+            if (!simPath.getPath().equals("/")) {
+                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(),
+                        Properties.class);
+                simProperties.add(new SimProperties(simProp, true, true));
+            }
+
         }
         return simProperties;
-    }
-
-    private void addSimPath(List<Properties> simProperties, DBusPath path) throws DBusException {
-        if (!path.getPath().equals("/")) {
-            simProperties.add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, path.getPath(), Properties.class));
-        }
     }
 
     private List<Properties> getModemBearersProperties(String modemPath, Properties modemProperties)

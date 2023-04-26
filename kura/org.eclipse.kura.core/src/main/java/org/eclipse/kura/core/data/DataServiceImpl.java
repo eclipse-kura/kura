@@ -915,7 +915,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } catch (KuraConnectException | KuraStoreException e) {
                 logger.warn("DataService failure occured: ", e);
                 
-                if (e instanceof KuraStoreException) {
+                if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled() && e instanceof KuraStoreException) {
                     DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                 }
 

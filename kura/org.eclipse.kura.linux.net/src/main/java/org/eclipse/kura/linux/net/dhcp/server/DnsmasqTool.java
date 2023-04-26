@@ -41,6 +41,11 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private static final String DNSMASQ_GLOBAL_CONFIG_FILE = "/etc/dnsmasq.d/dnsmasq-globals.conf";
     private static final String GLOBAL_CONFIGURATION = "port=0\nbind-interfaces\n";
 
+    private static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
+            DhcpServerTool.DNSMASQ.getValue() });
+    private static final Command RESTART_COMMAND = new Command(new String[] { "systemctl", "restart",
+            DhcpServerTool.DNSMASQ.getValue() });
+
     private CommandExecutorService executorService;
     private Map<String, byte[]> configsLastHash = Collections.synchronizedMap(new HashMap<>());
 
@@ -50,8 +55,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     @Override
     public boolean isRunning(String interfaceName) throws KuraProcessExecutionErrorException {
-        CommandStatus status = this.executorService.execute(
-                new Command(new String[] { "systemctl", "is-active", "--quiet", DhcpServerTool.DNSMASQ.getValue() }));
+        CommandStatus status = this.executorService.execute(IS_ACTIVE_COMMAND);
 
         boolean isRunning;
         try {
@@ -77,11 +81,11 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
         writeGlobalConfig();
 
-        CommandStatus restartStatus = this.executorService.execute(systemctlRestartCommand());
+        CommandStatus restartStatus = this.executorService.execute(RESTART_COMMAND);
 
         if (!restartStatus.getExitStatus().isSuccessful()) {
             removeInterfaceConfig(interfaceName);
-            restartStatus = this.executorService.execute(systemctlRestartCommand());
+            restartStatus = this.executorService.execute(RESTART_COMMAND);
         }
 
         return restartStatus;
@@ -93,7 +97,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
             boolean isInterfaceDisabled = true;
 
             if (removeInterfaceConfig(interfaceName)) {
-                CommandStatus status = this.executorService.execute(systemctlRestartCommand());
+                CommandStatus status = this.executorService.execute(RESTART_COMMAND);
                 isInterfaceDisabled = status.getExitStatus().isSuccessful();
             }
 
@@ -124,10 +128,6 @@ public class DnsmasqTool implements DhcpLinuxTool {
         } else {
             return true;
         }
-    }
-
-    private Command systemctlRestartCommand() {
-        return new Command(new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
     }
 
     private boolean removeInterfaceConfig(String interfaceName) {

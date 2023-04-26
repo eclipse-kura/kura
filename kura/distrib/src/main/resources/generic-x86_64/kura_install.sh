@@ -102,6 +102,13 @@ if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
         rm "${TO_REMOVE}"
     fi
 fi
+# comment network interface configurations in interfaces file
+if python3 -V > /dev/null 2>&1
+then
+    python3 /opt/eclipse/kura/install/comment_interfaces_file.py
+else
+    echo "python3 not found. Please manually review the /etc/network/interfaces file and comment configured network interfaces."
+fi
 
 # install dnsmasq default configuration
 if [ -f /etc/default/dnsmasq ]; then

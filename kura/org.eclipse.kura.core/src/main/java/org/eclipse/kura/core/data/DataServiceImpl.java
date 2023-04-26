@@ -467,7 +467,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             } catch (KuraStoreException e) {
                 logger.error("Failed to drop in-flight messages", e);
                 DataServiceImpl.this.disconnectDataTransportAndLog(e);
-                DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
             }
         }
 

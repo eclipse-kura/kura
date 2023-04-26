@@ -809,13 +809,13 @@ public class NMDbusConnector {
             UInt32 primarySimSlot = modemProperties.Get(MM_MODEM_NAME, "PrimarySimSlot");
             List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
             for (int index = 0; index < simPaths.size(); index++) {
-                String path = simPaths.get(index).getPath();
+                String dbusPath = simPaths.get(index).getPath();
 
-                if (path.equals("/")) {
+                if (dbusPath.equals("/")) {
                     continue;
                 }
 
-                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, path, Properties.class);
+                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, dbusPath, Properties.class);
                 boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
                 boolean isPrimary = index == (primarySimSlot.intValue() - 1);
 

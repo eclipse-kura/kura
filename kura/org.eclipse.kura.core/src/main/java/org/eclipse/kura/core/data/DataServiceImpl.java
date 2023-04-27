@@ -898,7 +898,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             try {
                 if (!DataServiceImpl.this.storeState.isPresent()) {
                     logger.warn(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
-                    return;
+                    throw new KuraStoreException(MESSAGE_STORE_NOT_CONNECTED_MESSAGE);
                 }
 
                 DataServiceImpl.this.storeState.get().getOrOpenMessageStore();
@@ -913,13 +913,14 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }
                 connected = true;
             } catch (KuraConnectException | KuraStoreException e) {
-                logger.warn("Connect failed", e);
+                logger.warn("Connection attempt failed with exception {}", e.getClass().getSimpleName(), e);
 
                 if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
 
-                    if (isAuthenticationException(e) || DataServiceImpl.this.connectionAttempts
-                            .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
-                                    .getRecoveryMaximumAllowedFailures()) {
+                    if (isAuthenticationException(e) || e instanceof KuraStoreException
+                            || DataServiceImpl.this.connectionAttempts
+                                    .getAndIncrement() < DataServiceImpl.this.dataServiceOptions
+                                            .getRecoveryMaximumAllowedFailures()) {
                         logger.info("Checkin done.");
                         DataServiceImpl.this.watchdogService.checkin(DataServiceImpl.this);
                     } else {

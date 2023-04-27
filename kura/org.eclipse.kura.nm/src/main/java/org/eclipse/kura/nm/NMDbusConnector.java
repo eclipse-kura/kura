@@ -35,7 +35,6 @@ import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
-import org.freedesktop.AddAndActivateConnectionTuple;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -395,10 +394,12 @@ public class NMDbusConnector {
             this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                     new DBusPath(device.getObjectPath()), new DBusPath("/"));
         } else {
-            AddAndActivateConnectionTuple createdConnectionTuple = this.nm.AddAndActivateConnection(
-                    newConnectionSettings, new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+            DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
+            this.nm.ActivateConnection(createdConnectionPath, new DBusPath(device.getObjectPath()), new DBusPath("/"));
+
             Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                    createdConnectionTuple.getPath().getPath(), Connection.class);
+                    createdConnectionPath.getPath(), Connection.class);
             connection = Optional.of(createdConnection);
         }
 

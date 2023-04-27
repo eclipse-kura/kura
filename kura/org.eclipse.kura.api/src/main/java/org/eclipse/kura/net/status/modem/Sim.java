@@ -84,12 +84,12 @@ public class Sim {
 
         private boolean active;
         private boolean primary;
-        private String iccid;
-        private String imsi;
-        private String eid;
-        private String operatorName;
-        private SimType simType;
-        private ESimStatus eSimStatus;
+        private String iccid = "NA";
+        private String imsi = "NA";
+        private String eid = "NA";
+        private String operatorName = "NA";
+        private SimType simType = SimType.UNKNOWN;
+        private ESimStatus eSimStatus = ESimStatus.UNKNOWN;
 
         private SimBuilder() {
         }

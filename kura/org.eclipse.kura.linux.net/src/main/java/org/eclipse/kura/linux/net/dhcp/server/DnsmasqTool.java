@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -48,6 +49,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     private CommandExecutorService executorService;
     private Map<String, byte[]> configsLastHash = Collections.synchronizedMap(new HashMap<>());
+    private byte[] globalConfigHash;
 
     public DnsmasqTool(CommandExecutorService service) {
         this.executorService = service;
@@ -59,27 +61,29 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
         boolean isRunning;
         try {
-            isRunning = status.getExitStatus().isSuccessful() && !isConfigFileAlteredOrNonExistent(interfaceName);
-        } catch (Exception e) {
-            throw new KuraProcessExecutionErrorException(e, "Failed to start DHCP server: " + e.getMessage());
+            isRunning = status.getExitStatus().isSuccessful() && !isConfigFileAlteredOrNonExistent(interfaceName)
+                    && !shouldWriteGlobalConfig();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new KuraProcessExecutionErrorException(e,
+                    "Failed to check if DHCP server is running for interface: " + interfaceName);
         }
-        logger.debug("DNSMASQ - Is dnsmasq running updated for interface {}? {}", interfaceName, isRunning);
+        logger.debug("Is dnsmasq running updated for interface {}? {}", interfaceName, isRunning);
 
         return isRunning;
     }
 
     @Override
     public CommandStatus startInterface(String interfaceName) throws KuraProcessExecutionErrorException {
-        logger.debug("DNSMASQ - starting dnsmasq service for interface {}.", interfaceName);
+        logger.debug("Starting dnsmasq service for interface {}.", interfaceName);
 
         try {
             this.configsLastHash.put(interfaceName,
                     sha1(Paths.get(DhcpServerManager.getConfigFilename(interfaceName))));
-        } catch (Exception e) {
-            throw new KuraProcessExecutionErrorException(e, "Failed to start DHCP server: " + e.getMessage());
+            writeGlobalConfig();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new KuraProcessExecutionErrorException(e,
+                    "Failed to start DHCP server for interface: " + interfaceName);
         }
-
-        writeGlobalConfig();
 
         CommandStatus restartStatus = this.executorService.execute(RESTART_COMMAND);
 
@@ -93,23 +97,22 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     @Override
     public boolean disableInterface(String interfaceName) throws KuraProcessExecutionErrorException {
-        try {
-            boolean isInterfaceDisabled = true;
+        boolean isInterfaceDisabled = true;
 
-            if (removeInterfaceConfig(interfaceName)) {
-                CommandStatus status = this.executorService.execute(RESTART_COMMAND);
-                isInterfaceDisabled = status.getExitStatus().isSuccessful();
-            }
-
-            this.configsLastHash.remove(interfaceName);
-
-            logger.debug("DNSMASQ - Disabled dhcp server on interface {}. Success? {}", interfaceName,
-                    isInterfaceDisabled);
-
-            return isInterfaceDisabled;
-        } catch (Exception e) {
-            throw new KuraProcessExecutionErrorException(e, "Failed to disable DHCP server: " + e.getMessage());
+        if (removeInterfaceConfig(interfaceName)) {
+            CommandStatus status = this.executorService.execute(RESTART_COMMAND);
+            isInterfaceDisabled = status.getExitStatus().isSuccessful();
         }
+
+        this.configsLastHash.remove(interfaceName);
+
+        logger.debug("Disabled DHCP server on interface {}. Success? {}", interfaceName, isInterfaceDisabled);
+
+        if (!isInterfaceDisabled) {
+            throw new KuraProcessExecutionErrorException("Failed to stop DHCP server for interface " + interfaceName);
+        }
+
+        return isInterfaceDisabled;
     }
 
     private boolean isConfigFileAlteredOrNonExistent(String interfaceName)
@@ -139,14 +142,28 @@ public class DnsmasqTool implements DhcpLinuxTool {
         }
     }
 
-    private void writeGlobalConfig() {
-        try {
-            Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
-            if (Files.notExists(dnsmasqGlobalsPath)) {
-                Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
-            }
-        } catch (IOException e) {
-            logger.warn("DNSMASQ - Failed setting in DHCP-only mode.", e);
+    private void writeGlobalConfig() throws NoSuchAlgorithmException, IOException {
+        Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
+
+        if (shouldWriteGlobalConfig()) {
+            Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
+            this.globalConfigHash = sha1(dnsmasqGlobalsPath);
+            logger.debug("Global configuration '{}' written.", dnsmasqGlobalsPath);
+        }
+    }
+
+    private boolean shouldWriteGlobalConfig() throws NoSuchAlgorithmException, IOException {
+        Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
+
+        if (Objects.isNull(this.globalConfigHash)) {
+            return true;
+        }
+
+        if (Files.exists(dnsmasqGlobalsPath)) {
+            byte[] globalConfigCurrentHash = sha1(dnsmasqGlobalsPath);
+            return !Arrays.equals(globalConfigCurrentHash, this.globalConfigHash);
+        } else {
+            return true;
         }
     }
 

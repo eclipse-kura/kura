@@ -807,22 +807,34 @@ public class NMDbusConnector {
         List<SimProperties> simProperties = new ArrayList<>();
         try {
             UInt32 primarySimSlot = modemProperties.Get(MM_MODEM_NAME, "PrimarySimSlot");
-            List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
-            for (int index = 0; index < simPaths.size(); index++) {
-                String dbusPath = simPaths.get(index).getPath();
 
-                if (dbusPath.equals("/")) {
-                    continue;
+            if (primarySimSlot.intValue() == 0) {
+                // Multiple SIM slots aren't supported
+                DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
+                if (!simPath.getPath().equals("/")) {
+                    Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(),
+                            Properties.class);
+                    simProperties.add(new SimProperties(simProp, true, true));
                 }
+            } else {
+                List<DBusPath> simPaths = modemProperties.Get(MM_MODEM_NAME, "SimSlots");
+                for (int index = 0; index < simPaths.size(); index++) {
+                    String dbusPath = simPaths.get(index).getPath();
 
-                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, dbusPath, Properties.class);
-                boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
-                boolean isPrimary = index == (primarySimSlot.intValue() - 1);
+                    if (dbusPath.equals("/")) {
+                        // SIM slot doesn't contain a SIM
+                        continue;
+                    }
 
-                simProperties.add(new SimProperties(simProp, isActive, isPrimary));
+                    Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, dbusPath, Properties.class);
+                    boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
+                    boolean isPrimary = index == (primarySimSlot.intValue() - 1);
+
+                    simProperties.add(new SimProperties(simProp, isActive, isPrimary));
+                }
             }
         } catch (DBusExecutionException e) {
-            // Fallback to ModemManager version prior to 1.16
+            // Fallback for ModemManager version prior to 1.16
             DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
             if (!simPath.getPath().equals("/")) {
                 Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(),

@@ -89,8 +89,6 @@ public class GwtNetworkServiceImpl {
             }
         }
 
-        logInterfaces("getConfigsAndStatuses", result);
-
         return result;
     }
 
@@ -260,41 +258,6 @@ public class GwtNetworkServiceImpl {
             return aps;
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    private static void logInterfaces(String origin, List<GwtNetInterfaceConfig> configs) {
-        if (logger.isDebugEnabled()) {
-            for (GwtNetInterfaceConfig config : configs) {
-                Map<String, Object> ifProperties = config.getProperties();
-
-                if (config instanceof GwtWifiNetInterfaceConfig) {
-                    GwtWifiNetInterfaceConfig wifi = (GwtWifiNetInterfaceConfig) config;
-
-                    switch (wifi.getWirelessModeEnum()) {
-                    case netWifiWirelessModeAccessPoint:
-                        ifProperties.putAll(wifi.getAccessPointWifiConfigProps());
-                        break;
-                    case netWifiWirelessModeAdHoc:
-                        ifProperties.putAll(wifi.getAdhocWifiConfigProps());
-                        break;
-                    case netWifiWirelessModeStation:
-                        ifProperties.putAll(wifi.getStationWifiConfigProps());
-                        break;
-                    case netWifiWirelessModeDisabled:
-                    default:
-                        break;
-
-                    }
-                }
-
-                if (config instanceof GwtModemInterfaceConfig) {
-                    GwtModemInterfaceConfig modem = (GwtModemInterfaceConfig) config;
-                    ifProperties.putAll(modem.getProperties());
-                }
-
-                logger.debug("{} returned for interface {}:\n\n{}\n\n", origin, config.getName(), ifProperties);
-            }
         }
     }
 

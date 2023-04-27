@@ -259,9 +259,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) this.gwtConfig;
 
             this.properties.setModemAuthType(this.ifname,
-                    EnumsParser.getAuthType(Optional.ofNullable(gwtModemConfig.getAuthType().name())));
+                    EnumsParser.getAuthType(Optional.ofNullable(gwtModemConfig.getAuthType())));
             this.properties.setModemPdpType(this.ifname,
-                    EnumsParser.getPdpType(Optional.ofNullable(gwtModemConfig.getPdpType().name())));
+                    EnumsParser.getPdpType(Optional.ofNullable(gwtModemConfig.getPdpType())));
             this.properties.setModemConnectionStatus(this.ifname, Optional.ofNullable(gwtModemConfig.getHwState()));
             this.properties.setModemDialString(this.ifname, gwtModemConfig.getDialString());
             this.properties.setModemUsername(this.ifname, gwtModemConfig.getUsername());

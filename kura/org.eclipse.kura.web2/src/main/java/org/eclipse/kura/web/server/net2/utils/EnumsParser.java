@@ -328,18 +328,19 @@ public class EnumsParser {
      * Converts values of {@link GwtModemAuthType} to {@link AuthType.name()}
      * 
      */
-    public static String getAuthType(Optional<String> gwtModemAuthType) {
+    public static String getAuthType(Optional<GwtModemAuthType> gwtModemAuthType) {
         if (gwtModemAuthType.isPresent()) {
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthAUTO.name())) {
-                return AuthType.AUTO.name();
-            }
+            switch (gwtModemAuthType.get()) {
+                case netModemAuthAUTO:
+                    return AuthType.AUTO.name();
+                case netModemAuthCHAP:
+                    return AuthType.CHAP.name();
 
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthCHAP.name())) {
-                return AuthType.CHAP.name();
-            }
-
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthPAP.name())) {
-                return AuthType.PAP.name();
+                case netModemAuthPAP:
+                    return AuthType.PAP.name();
+                case netModemAuthNONE:
+                default:
+                    break;
             }
         }
 
@@ -372,18 +373,18 @@ public class EnumsParser {
      * Converts values of {@link GwtModemPdpType} to {@link PdpType.name()}
      * 
      */
-    public static String getPdpType(Optional<String> gwtModemPdpType) {
+    public static String getPdpType(Optional<GwtModemPdpType> gwtModemPdpType) {
         if (gwtModemPdpType.isPresent()) {
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIP.name())) {
-                return PdpType.IP.name();
-            }
-
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIPv6.name())) {
-                return PdpType.IPv6.name();
-            }
-
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpPPP.name())) {
-                return PdpType.PPP.name();
+            switch (gwtModemPdpType.get()) {
+                case netModemPdpIP:
+                    return PdpType.IP.name();
+                case netModemPdpIPv6:
+                    return PdpType.IPv6.name();
+                case netModemPdpPPP:
+                    return PdpType.PPP.name();
+                case netModemPdpUnknown:
+                default:
+                    break;
             }
         }
 

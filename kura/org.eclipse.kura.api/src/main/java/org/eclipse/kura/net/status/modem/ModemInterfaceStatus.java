@@ -362,12 +362,12 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(this.accessTechnologies, this.bearers, this.connectionStatus,
-                this.connectionType, this.currentBands, this.currentModemCapabilities, this.currentModes,
-                this.gpsSupported, this.hardwareRevision, this.manufacturer, this.model, this.operatorName, this.ports,
-                this.powerState, this.primaryPort, this.registrationStatus, this.signalStrength, this.serialNumber,
-                this.signalQuality, this.simLocked, this.softwareRevision, this.supportedBands,
-                this.supportedModemCapabilities, this.supportedModes);
+        result = prime * result + Objects.hash(this.accessTechnologies, this.availableSims, this.bearers,
+                this.connectionStatus, this.connectionType, this.currentBands, this.currentModemCapabilities,
+                this.currentModes, this.gpsSupported, this.hardwareRevision, this.manufacturer, this.model,
+                this.operatorName, this.ports, this.powerState, this.primaryPort, this.registrationStatus,
+                this.signalStrength, this.serialNumber, this.signalQuality, this.simLocked, this.softwareRevision,
+                this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
         return result;
     }
 

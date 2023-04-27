@@ -20,6 +20,7 @@ import org.eclipse.kura.net.status.modem.SimType;
 public class SimDTO {
 
     private final boolean active;
+    private final boolean primary;
     private final String iccid;
     private final String imsi;
     private final String eid;
@@ -29,6 +30,7 @@ public class SimDTO {
 
     public SimDTO(final Sim sim) {
         this.active = sim.isActive();
+        this.primary = sim.isPrimary();
         this.iccid = sim.getIccid();
         this.imsi = sim.getImsi();
         this.eid = sim.getEid();

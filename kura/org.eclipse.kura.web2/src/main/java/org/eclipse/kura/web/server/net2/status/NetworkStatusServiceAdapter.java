@@ -233,11 +233,13 @@ public class NetworkStatusServiceAdapter {
         if (gwtConfig instanceof GwtModemInterfaceConfig && networkInterfaceInfo instanceof ModemInterfaceStatus) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) gwtConfig;
             ModemInterfaceStatus modemInterfaceInfo = (ModemInterfaceStatus) networkInterfaceInfo;
-            int activeSimIndex = modemInterfaceInfo.getActiveSimIndex();
             Sim activeSim = null;
+
             List<Sim> availableSims = modemInterfaceInfo.getAvailableSims();
-            if (Objects.nonNull(availableSims) && !availableSims.isEmpty()) {
-                activeSim = modemInterfaceInfo.getAvailableSims().get(activeSimIndex);
+            for (Sim sim : availableSims) {
+                if (sim.isActive() && sim.isPrimary()) {
+                    activeSim = sim;
+                }
             }
 
             gwtModemConfig.setHwState(modemInterfaceInfo.getState().toString());
@@ -372,6 +374,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     private class ChannelsBuilder {
+
         List<WifiChannel> channels;
 
         public ChannelsBuilder() {

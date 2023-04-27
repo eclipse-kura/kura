@@ -264,8 +264,7 @@ public class NMStatusServiceImplTest {
     private void givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaces()
             throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getDeviceIds())
-                .thenThrow(new DBusException("Cannot retrieve interface list."));
+        when(this.nmDbusConnector.getDeviceIds()).thenThrow(new DBusException("Cannot retrieve interface list."));
     }
 
     private void whenInterfaceStatusIsRetrieved(String interfaceName) {
@@ -465,7 +464,6 @@ public class NMStatusServiceImplTest {
         builder.withCurrentBands(getCurrentModemBands());
         builder.withGpsSupported(false);
         builder.withAvailableSims(getAvailableSims());
-        builder.withActiveSimIndex(1);
         builder.withSimLocked(false);
         builder.withBearers(getBearers());
         builder.withConnectionType(ModemConnectionType.DirectIP);
@@ -513,8 +511,12 @@ public class NMStatusServiceImplTest {
 
     private List<Sim> getAvailableSims() {
         List<Sim> sims = new ArrayList<>();
-        sims.add(new Sim(false, "1234", "5678", "90", "VeryCoolMobile", SimType.PHYSICAL, ESimStatus.UNKNOWN));
-        sims.add(new Sim(true, "ABCD", "DEFG", "HI", "UglyMobile", SimType.PHYSICAL, ESimStatus.UNKNOWN));
+        sims.add(Sim.builder().withActive(false).withPrimary(false).withIccid("1234").withImsi("5678").withEid("90")
+                .withOperatorName("VeryCoolMobile").withSimType(SimType.PHYSICAL).withESimStatus(ESimStatus.UNKNOWN)
+                .build());
+        sims.add(Sim.builder().withActive(true).withPrimary(true).withIccid("ABCD").withImsi("DEFG").withEid("HI")
+                .withOperatorName("UglyMobile").withSimType(SimType.PHYSICAL).withESimStatus(ESimStatus.UNKNOWN)
+                .build());
         return sims;
     }
 

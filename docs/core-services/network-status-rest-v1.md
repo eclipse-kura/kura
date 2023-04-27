@@ -535,8 +535,6 @@ Object that contains specific properties to describe the status of a Modem inter
       * array element type: `object`
           * [Sim](#sim)
   
-  * **activeSimIndex**: `number` 
-  
   * **simLocked**: `bool` 
   
   * **bearers**: `array` 
@@ -568,11 +566,11 @@ Object that contains specific properties to describe the status of a Modem inter
   "accessTechnologies": [
     "LTE"
   ],
-  "activeSimIndex": 0,
   "autoConnect": true,
   "availableSims": [
     {
       "active": true,
+      "primary": true,
       "eSimStatus": "UNKNOWN",
       "eid": "",
       "iccid": "1111111111111111111",
@@ -888,6 +886,8 @@ This class contains all relevant properties to describe a SIM (Subscriber Identi
 <br>**Properties**:
 
   * **active**: `bool` 
+
+  * **primary**: `bool`
   
   * **iccid**: `string` 
   

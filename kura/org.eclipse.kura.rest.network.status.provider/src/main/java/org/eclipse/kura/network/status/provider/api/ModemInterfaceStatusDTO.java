@@ -46,7 +46,6 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
     private final Set<ModemBand> currentBands;
     private final boolean gpsSupported;
     private final List<SimDTO> availableSims;
-    private final int activeSimIndex;
     private final boolean simLocked;
     private final List<BearerDTO> bearers;
     private final ModemConnectionType connectionType;
@@ -77,7 +76,6 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
         this.currentBands = status.getCurrentBands();
         this.gpsSupported = status.isGpsSupported();
         this.availableSims = status.getAvailableSims().stream().map(SimDTO::new).collect(Collectors.toList());
-        this.activeSimIndex = status.getActiveSimIndex();
         this.simLocked = status.isSimLocked();
         this.bearers = status.getBearers().stream().map(BearerDTO::new).collect(Collectors.toList());
         this.connectionType = status.getConnectionType();

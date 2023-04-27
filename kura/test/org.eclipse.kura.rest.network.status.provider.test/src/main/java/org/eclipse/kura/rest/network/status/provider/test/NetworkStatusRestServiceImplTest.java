@@ -756,7 +756,6 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"currentBands\":[\"UNKNOWN\"]," //
                 + "\"gpsSupported\":false," //
                 + "\"availableSims\":[]," //
-                + "\"activeSimIndex\":0," //
                 + "\"simLocked\":false," //
                 + "\"bearers\":[]," //
                 + "\"connectionType\":\"DirectIP\"," //
@@ -801,7 +800,6 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withSupportedBands(EnumSet.of(ModemBand.CDMA_BC1)) //
                 .withCurrentBands(EnumSet.of(ModemBand.UTRAN_9, ModemBand.CDMA_BC0)) //
                 .withGpsSupported(true) //
-                .withActiveSimIndex(2) //
                 .withSimLocked(true) //
                 .withConnectionType(ModemConnectionType.DirectIP) //
                 .withConnectionStatus(ModemConnectionStatus.DISCONNECTING) //
@@ -833,7 +831,6 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"supportedBands\":[\"CDMA_BC1\"]," //
                 + "\"currentBands\":[\"UTRAN_9\",\"CDMA_BC0\"]," //
                 + "\"gpsSupported\":true,\"availableSims\":[]," //
-                + "\"activeSimIndex\":2," //
                 + "\"simLocked\":true," //
                 + "\"bearers\":[]," //
                 + "\"connectionType\":\"DirectIP\"," //
@@ -885,7 +882,6 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"currentBands\":[\"UNKNOWN\"]," //
                 + "\"gpsSupported\":false," //
                 + "\"availableSims\":[]," //
-                + "\"activeSimIndex\":0," //
                 + "\"simLocked\":false," //
                 + "\"bearers\":[{" //
                 + "\"name\":\"foo\"," //
@@ -925,9 +921,26 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     @Test
     public void shouldEncodeSim() {
-        givenNetworkStatus(ModemInterfaceStatus.builder().withAvailableSims(
-                Arrays.asList(new Sim(false, "abc", "imsi", "sed", "op", SimType.PHYSICAL, ESimStatus.UNKNOWN),
-                        new Sim(true, "ac", "isi", "se", "opp", SimType.ESIM, ESimStatus.WITH_PROFILES))));
+        givenNetworkStatus(ModemInterfaceStatus.builder().withAvailableSims(Arrays.asList( //
+                Sim.builder() //
+                        .withActive(true) //
+                        .withPrimary(true) //
+                        .withIccid("abc") //
+                        .withImsi("imsi") //
+                        .withEid("sed") //
+                        .withOperatorName("op") //
+                        .withSimType(SimType.PHYSICAL) //
+                        .withESimStatus(ESimStatus.UNKNOWN).build(), //
+                Sim.builder() //
+                        .withActive(false) //
+                        .withPrimary(false) //
+                        .withIccid("ac") //
+                        .withImsi("isi") //
+                        .withEid("se") //
+                        .withOperatorName("opp") //
+                        .withSimType(SimType.ESIM) //
+                        .withESimStatus(ESimStatus.WITH_PROFILES) //
+                        .build())));
 
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
 
@@ -949,21 +962,22 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"currentBands\":[\"UNKNOWN\"]," //
                 + "\"gpsSupported\":false," //
                 + "\"availableSims\":[{" //
-                + "\"active\":false," //
+                + "\"active\":true," //
+                + "\"primary\":true," //
                 + "\"iccid\":\"abc\"," //
                 + "\"imsi\":\"imsi\"," //
                 + "\"eid\":\"sed\"," //
                 + "\"operatorName\":\"op\"," //
                 + "\"simType\":\"PHYSICAL\"," //
                 + "\"eSimStatus\":\"UNKNOWN\"}," //
-                + "{\"active\":true," //
+                + "{\"active\":false," //
+                + "\"primary\":false," //
                 + "\"iccid\":\"ac\"," //
                 + "\"imsi\":\"isi\"," //
                 + "\"eid\":\"se\"," //
                 + "\"operatorName\":\"opp\"," //
                 + "\"simType\":\"ESIM\"," //
                 + "\"eSimStatus\":\"WITH_PROFILES\"}]," //
-                + "\"activeSimIndex\":0," //
                 + "\"simLocked\":false," //
                 + "\"bearers\":[]," //
                 + "\"connectionType\":\"DirectIP\"," //

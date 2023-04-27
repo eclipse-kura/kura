@@ -265,7 +265,6 @@ public class NMSettingsConverter {
         String connectionName = String.format("kura-%s-connection", iface);
         connectionMap.put("id", new Variant<>(connectionName));
         connectionMap.put("interface-name", new Variant<>(iface));
-        connectionMap.put("autoconnect", new Variant<>(true));
 
         return connectionMap;
     }

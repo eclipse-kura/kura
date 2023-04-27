@@ -374,7 +374,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private void writeDhcpServerConfiguration(Set<String> interfaceNames) {
         interfaceNames.forEach(interfaceName -> {
             if (isDhcpServerValid(interfaceName)) {
-                DhcpServerConfigWriter dhcpServerConfigWriter = new DhcpServerConfigWriter(interfaceName,
+                DhcpServerConfigWriter dhcpServerConfigWriter = buildDhcpServerConfigWriter(interfaceName,
                         this.networkProperties);
                 try {
                     dhcpServerConfigWriter.writeConfiguration();
@@ -387,6 +387,11 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 this.dhcpServerMonitor.putDhcpServerInterfaceConfiguration(interfaceName, false);
             }
         });
+    }
+
+    protected DhcpServerConfigWriter buildDhcpServerConfigWriter(final String interfaceName,
+            final NetworkProperties properties) {
+        return new DhcpServerConfigWriter(interfaceName, properties);
     }
 
     private boolean isDhcpServerValid(String interfaceName) {

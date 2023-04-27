@@ -913,7 +913,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                 }
                 connected = true;
             } catch (KuraConnectException | KuraStoreException e) {
-                logger.warn("Connection attempt failed with exception {}: {}", e.getClass().getSimpleName(), e);
+                logger.warn("Connection attempt failed with exception {}", e.getClass().getSimpleName(), e);
 
                 if (DataServiceImpl.this.dataServiceOptions.isConnectionRecoveryEnabled()) {
 

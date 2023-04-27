@@ -558,10 +558,8 @@ public class NetworkConfigurationServiceProperties {
         return Optional.ofNullable((String) this.properties.get(String.format(NET_INTERFACE_CONFIG_PDP_TYPE, ifname)));
     }
 
-    public void setModemPdpType(String ifname, Optional<String> modemPdpType) {
-        if (modemPdpType.isPresent()) {
-            this.properties.put(String.format(NET_INTERFACE_CONFIG_PDP_TYPE, ifname), modemPdpType.get());
-        }
+    public void setModemPdpType(String ifname, String modemPdpType) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_PDP_TYPE, ifname), modemPdpType);
     }
 
     public int getModemMaxFail(String ifname) {
@@ -576,10 +574,8 @@ public class NetworkConfigurationServiceProperties {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_AUTH_TYPE, ifname)));
     }
 
-    public void setModemAuthType(String ifname, Optional<String> authType) {
-        if (authType.isPresent()) {
-            this.properties.put(String.format(NET_INTERFACE_CONFIG_AUTH_TYPE, ifname), authType.get());
-        }
+    public void setModemAuthType(String ifname, String authType) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_AUTH_TYPE, ifname), authType);
     }
 
     public int getModemLpcEchoInterval(String ifname) {

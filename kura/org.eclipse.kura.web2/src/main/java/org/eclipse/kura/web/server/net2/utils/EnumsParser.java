@@ -325,25 +325,25 @@ public class EnumsParser {
     }
 
     /**
-     * Converts values of {@link GwtModemAuthType} to {@link AuthType}
+     * Converts values of {@link GwtModemAuthType} to {@link AuthType.name()}
      * 
      */
-    public static AuthType getAuthType(Optional<String> gwtModemAuthType) {
+    public static String getAuthType(Optional<String> gwtModemAuthType) {
         if (gwtModemAuthType.isPresent()) {
             if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthAUTO.name())) {
-                return AuthType.AUTO;
+                return AuthType.AUTO.name();
             }
 
             if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthCHAP.name())) {
-                return AuthType.CHAP;
+                return AuthType.CHAP.name();
             }
 
             if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthPAP.name())) {
-                return AuthType.PAP;
+                return AuthType.PAP.name();
             }
         }
 
-        return AuthType.NONE;
+        return AuthType.NONE.name();
     }
 
     /**
@@ -369,25 +369,25 @@ public class EnumsParser {
     }
 
     /**
-     * Converts values of {@link GwtModemPdpType} to {@link PdpType}
+     * Converts values of {@link GwtModemPdpType} to {@link PdpType.name()}
      * 
      */
-    public static PdpType getPdpType(Optional<String> gwtModemPdpType) {
+    public static String getPdpType(Optional<String> gwtModemPdpType) {
         if (gwtModemPdpType.isPresent()) {
             if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIP.name())) {
-                return PdpType.IP;
+                return PdpType.IP.name();
             }
 
             if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIPv6.name())) {
-                return PdpType.IPv6;
+                return PdpType.IPv6.name();
             }
 
             if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpPPP.name())) {
-                return PdpType.PPP;
+                return PdpType.PPP.name();
             }
         }
 
-        return PdpType.UNKNOWN;
+        return PdpType.UNKNOWN.name();
     }
 
     /**

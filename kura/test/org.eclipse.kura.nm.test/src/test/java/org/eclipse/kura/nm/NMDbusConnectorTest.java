@@ -1328,13 +1328,10 @@ public class NMDbusConnectorTest {
         try {
             this.instanceNMDbusConnector.apply(networkConfig);
         } catch (DBusException e) {
-            e.printStackTrace();
             this.hasDBusExceptionBeenThrown = true;
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionThrown = true;
         } catch (NullPointerException e) {
-            e.printStackTrace();
             this.hasNullPointerExceptionThrown = true;
         }
     }

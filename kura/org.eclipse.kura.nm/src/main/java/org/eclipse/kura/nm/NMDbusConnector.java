@@ -391,16 +391,20 @@ public class NMDbusConnector {
 
         if (connection.isPresent()) {
             connection.get().Update(newConnectionSettings);
-            this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
-                    new DBusPath(device.getObjectPath()), new DBusPath("/"));
         } else {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
             DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
-            this.nm.ActivateConnection(createdConnectionPath, new DBusPath(device.getObjectPath()), new DBusPath("/"));
-
             Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                     createdConnectionPath.getPath(), Connection.class);
             connection = Optional.of(createdConnection);
+        }
+
+        try {
+            this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
+                    new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            dsLock.waitForSignal();
+        } catch (DBusExecutionException e) {
+            logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
         }
 
         // Housekeeping
@@ -410,8 +414,6 @@ public class NMDbusConnector {
                 availableConnection.Delete();
             }
         }
-
-        dsLock.waitForSignal();
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);

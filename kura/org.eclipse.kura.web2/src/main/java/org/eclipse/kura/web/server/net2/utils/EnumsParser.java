@@ -14,11 +14,9 @@ package org.eclipse.kura.web.server.net2.utils;
 
 import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
-import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
@@ -325,25 +323,26 @@ public class EnumsParser {
     }
 
     /**
-     * Converts values of {@link GwtModemAuthType} to {@link AuthType}
+     * Converts values of {@link GwtModemAuthType} to {@link AuthType.name()}
      * 
      */
-    public static AuthType getAuthType(Optional<String> gwtModemAuthType) {
+    public static String getAuthType(Optional<GwtModemAuthType> gwtModemAuthType) {
         if (gwtModemAuthType.isPresent()) {
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthAUTO.name())) {
-                return AuthType.AUTO;
-            }
+            switch (gwtModemAuthType.get()) {
+                case netModemAuthAUTO:
+                    return AuthType.AUTO.name();
+                case netModemAuthCHAP:
+                    return AuthType.CHAP.name();
 
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthCHAP.name())) {
-                return AuthType.CHAP;
-            }
-
-            if (gwtModemAuthType.get().equals(GwtModemAuthType.netModemAuthPAP.name())) {
-                return AuthType.PAP;
+                case netModemAuthPAP:
+                    return AuthType.PAP.name();
+                case netModemAuthNONE:
+                default:
+                    break;
             }
         }
 
-        return AuthType.NONE;
+        return AuthType.NONE.name();
     }
 
     /**
@@ -369,71 +368,25 @@ public class EnumsParser {
     }
 
     /**
-     * Converts values of {@link GwtModemPdpType} to {@link PdpType}
+     * Converts values of {@link GwtModemPdpType} to {@link PdpType.name()}
      * 
      */
-    public static PdpType getPdpType(Optional<String> gwtModemPdpType) {
+    public static String getPdpType(Optional<GwtModemPdpType> gwtModemPdpType) {
         if (gwtModemPdpType.isPresent()) {
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIP.name())) {
-                return PdpType.IP;
-            }
-
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpIPv6.name())) {
-                return PdpType.IPv6;
-            }
-
-            if (gwtModemPdpType.get().equals(GwtModemPdpType.netModemPdpPPP.name())) {
-                return PdpType.PPP;
-            }
-        }
-
-        return PdpType.UNKNOWN;
-    }
-
-    /**
-     * Converts values of {@link ModemConnectionStatus} to {@link NetInterfaceState}
-     * values
-     * 
-     */
-    public static String getNetInterfaceState(Optional<String> modemConnectionStatus) {
-        if (modemConnectionStatus.isPresent()) {
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.CONNECTED.name())) {
-                return NetInterfaceState.ACTIVATED.name();
-            }
-
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.CONNECTING.name())) {
-                return NetInterfaceState.IP_CONFIG.name();
-            }
-
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.DISCONNECTED.name())) {
-                return NetInterfaceState.DISCONNECTED.name();
+            switch (gwtModemPdpType.get()) {
+                case netModemPdpIP:
+                    return PdpType.IP.name();
+                case netModemPdpIPv6:
+                    return PdpType.IPv6.name();
+                case netModemPdpPPP:
+                    return PdpType.PPP.name();
+                case netModemPdpUnknown:
+                default:
+                    break;
             }
         }
 
-        return NetInterfaceState.UNKNOWN.name();
-    }
-
-    /**
-     * Converts values of {@link NetInterfaceState} to {@link ModemConnectionStatus}
-     * values
-     * 
-     */
-    public static String getModemConnectionStatus(Optional<String> netInterfaceState) {
-        if (netInterfaceState.isPresent()) {
-            if (netInterfaceState.get().equals(NetInterfaceState.ACTIVATED.name())) {
-                return ModemConnectionStatus.CONNECTED.name();
-            }
-
-            if (netInterfaceState.get().equals(NetInterfaceState.IP_CONFIG.name())) {
-                return ModemConnectionStatus.CONNECTING.name();
-            }
-
-            if (netInterfaceState.get().equals(NetInterfaceState.DISCONNECTED.name())) {
-                return ModemConnectionStatus.DISCONNECTED.name();
-            }
-        }
-
-        return ModemConnectionStatus.UNKNOWN.name();
+        return PdpType.UNKNOWN.name();
     }
 
 }

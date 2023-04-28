@@ -263,8 +263,6 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig
                     .setAuthType(EnumsParser.getGwtModemAuthType(this.properties.getModemAuthType(this.ifName)));
             gwtModemConfig.setPdpType(EnumsParser.getGwtModemPdpType(this.properties.getModemPdpType(this.ifName)));
-            gwtModemConfig.setHwState(
-                    EnumsParser.getNetInterfaceState(this.properties.getModemConnectionStatus(this.ifName)));
 
             gwtModemConfig.setDialString(this.properties.getModemDialString(this.ifName));
             gwtModemConfig.setUsername(this.properties.getModemUsername(this.ifName));

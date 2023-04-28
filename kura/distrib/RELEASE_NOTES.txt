@@ -1,10 +1,15 @@
-Eclipse Kura - 5.3.0 - March 2023
+Eclipse Kura - [ERROR] [ERROR] Some problems were encountered while processing the POMs: - April 2023
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces a new framework compatibility with Java 17, a completely renewed networking that leverages Linux NetworkManager, a new set of APIs and abstractions for SQL and noSQL databases, the availability of SQLite as a database option (H2 still available for compatibility reasons), an improved Container Management feature with UDP ports support, a refreshed Asset implementation with the new data publishing on change and, finally, the new Kura Data Service Connection Policy.
+[TODO]
 
 
 Features:
+  * 85d1a18a7b - Improve the graph load time by reducing calls to bundleContext [backport release-5.3.0] (#4575) (github-actions[bot])
+  * 676648c2fd - [dnsmasq] support for multiple DHCP server interfaces [backport release-5.3.0] (#4561) (github-actions[bot])
+  * fd82998f20 - [position] changed metatype default provider to gpsd [backport release-5.3.0] (#4557) (github-actions[bot])
+  * 5d75fe951c - [nm] add firewall NAT rules update on configuration change [backport release-5.3.0] (#4538) (github-actions[bot])
+  * c28fa29a57 - [nm] add modem reset support [backport release-5.3.0] (#4523) (github-actions[bot])
   * bb2c0daae3 - Added db.defrag.enabled and db.wal.checkpoint.enabled fields. [Backport] (#4500) (Matteo Maiero)
   * 5743b23ee4 - [dhcp-server] added dnsmasq support [Backport] (#4498) (Matteo Maiero)
   * 7a54e07345 - First implementation of NetworkStatusService REST APIs (#4461) (nicolatimeus)
@@ -49,19 +54,40 @@ Features:
   * 79589e791b - add Temurin JDK as alternative JVM in .deb dependencies (#4190) (Mattia Dal Ben)
 
 Target Environments:
- Kura is released as pre-compiled binary installers for the following platforms:
-
-  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
-  * Raspberry Pi 3/4 based on 64 bits OS (Kura networking)
-  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
-  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
-  * Generic Debian Package for x86_64 (NetworkManager)
-  * Generic Debian Package for arm32 (NetworkManager)
-  * Generic Debian Package for arm64 (NetworkManager)
-
- Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
+[TODO]
 
 Bug Fixes:
+  * 343f11d7d2 - Fixed ScheduleStrategy shutdown [backport release-5.3.0] (#4611) (github-actions[bot])
+  * cd4bb55b4e - [api] Modem SIM representation [backport release-5.3.0] (#4608) (github-actions[bot])
+  * 0f1ea955cf - [core] Watchdog is not refreshed when connection to DB missing [backport release-5.3.0] (#4610) (github-actions[bot])
+  * 6ae07476c0 - password escaping issue with wifi passwords [backport release-5.3.0] (#4605) (github-actions[bot])
+  * 8b0fa0f486 - Ordering of channels when numbers are bigger than int [backport release-5.3.0] (#4603) (github-actions[bot])
+  * cb5a3f4784 - [installer] comment configured interfaces in interfaces file [backport release-5.3.0] (#4599) (github-actions[bot])
+  * 2c05cbab2d - [nm] Added legacy dns monitor to NetworkManager bundle [backport release-5.3.0] (#4590) (github-actions[bot])
+  * 9c8c12609b - [linux.net] Replaced timestamp check for dnsmasq configuration files with a hash check. [backport release-5.3.0] (#4592) (github-actions[bot])
+  * ad95dcf5f9 - [distrib] fix errors during network configuration on Jetson Nano [backport release-5.3.0] (#4593) (github-actions[bot])
+  * 3f0f38a0fc - check if schedule is enabled before parsing [backport release-5.3.0] (#4586) (github-actions[bot])
+  * 198d05af30 - [nm] Fix dns list wrongly split. [backport release-5.3.0] (#4578) (github-actions[bot])
+  * 94b6ee5f6a - Do not write dnsmasq config for disabled interfaces [backport release-5.3.0] (#4577) (github-actions[bot])
+  * 964e694d69 - [installer] Added dnsmasq default configuration file [backport release-5.3.0] (#4570) (github-actions[bot])
+  * 1851ebbd6a - Perform defrag after SQLite rekey [backport release-5.3.0] (#4569) (github-actions[bot])
+  * 0015e01305 - [installer] Added ModemManager enable command in install script [backport release-5.3.0] (#4566) (github-actions[bot])
+  * 1d6e36ee96 - [web2] Replaced marketplace url with the updated https url (avoiding redirect). Updated Eclipse Marketplace certificate in the keystore.. [backport release-5.3.0] (#4560) (github-actions[bot])
+  * 1dee359983 - [web2.server.net2] passwords for wifi infra, AP, and modem are saved as Password not as String [backport release-5.3.0] (#4559) (github-actions[bot])
+  * 68dfc1a5a2 - [web2] networking passwords replaced with placeholder, and html escaping and unescaping  [backport release-5.3.0] (#4556) (github-actions[bot])
+  * 2edd85767d - [web2] Fix cellular default values [backport release-5.3.0] (#4558) (github-actions[bot])
+  * cfbd286278 - [web2.server.net2] wrong enum default leaves wireless interface as station [backport release-5.3.0] (#4555) (github-actions[bot])
+  * 680a94ba2a - Allowed loading certificate chain in private key entry [backport release-5.3.0] (#4552) (github-actions[bot])
+  * 8d7d2662f1 - [distrib] do not rename /etc/network/interface file on installation [backport release-5.3.0] (#4550) (github-actions[bot])
+  * de404e93b5 - [nm.test] Fixed nm tests. [backport release-5.3.0] (#4546) (github-actions[bot])
+  * a4081f80ed - [web2] Fixed fileCountMax. [backport release-5.3.0] (#4541) (github-actions[bot])
+  * ef7e71517e - Fixed NetworkConfigurationService returning passwords as strings [backport release-5.3.0] (#4539) (github-actions[bot])
+  * d7b952da0e - [nm] avoid error when `Modem.Location` interface is missing [backport release-5.3.0] (#4522) (github-actions[bot])
+  * 78c40bfb70 - [nm] do not set `gsm.password` if property is empty [backport release-5.3.0] (#4521) (github-actions[bot])
+  * d2469a0a47 - [nm] support for pass dns feature in dnsmasq [backport release-5.3.0] (#4519) (github-actions[bot])
+  * 6888f56548 - [nm] added conversion from signal quality to signal strength [backport release-5.3.0] (#4510) (github-actions[bot])
+  * 7be9f374b9 - [linux.net] dhcp server tool ordering [backport release-5.3.0] (#4511) (github-actions[bot])
+  * 1d8cf87c8c - [distrib] let NetworkManager manage gsm type devices [backport release-5.3.0] (#4507) (github-actions[bot])
   * fa77118f1d - [nm] Settings leak on connection activation failure [Backport] (#4502) (Matteo Maiero)
   * 1293607a58 - Overriding NM unmanaged-devices policy  [Backport] (#4501) (Matteo Maiero)
   * ce63dc20d1 - Improved local image existence test with exact match [backport release-5.3.0] (#4499) (github-actions[bot])
@@ -169,7 +195,7 @@ Deprecated APIs/components:
   * be1ea00c87 - org.eclipse.kura.wire.script.filter.provider (#4295) (Marcello Rinaldo Martina)
   * c5d594cfd6 - deprecated set&getPortsExternal&Internal in ContainerConfiguration & ContainerInstanceDescriptor (#4196) (G_Ivo)
 
-Target Platform Updates (since Eclipse Kura 5.2.0):
+Target Platform Updates:
   * 3fe8916ea8 - bump tensorflow from 2.9.3 to 2.11.1 in /kura/examples/scenarios/org.eclipse.kura.example.ai/training (#4489) (dependabot[bot])
   * b6179945b7 - adding missing resources for other supported boards (#4483) (Marcello Rinaldo Martina)
   * 0ef6cb5022 - added complete list of dependencies (#4475) (Marcello Rinaldo Martina)
@@ -225,54 +251,54 @@ Target Platform Updates (since Eclipse Kura 5.2.0):
   * 23e2ff1214 - Added org.apache.servicemix.bundles.c3p0 0.9.5.5_1 (#4198) (nicolatimeus)
 
 Known Issues:
-* The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
-    The issue impact is limited, if the dataservice reconnect option is enabled.
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported with old networking. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #4212: Wrong order of BIRTH/APPLICATION certificates for custom APP IDs registration
-  * #3972: Topic name validation: issue with names containing "//" (Cloud Subscriber)
-  * #4141: Sometimes user is not logged in after changing password
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+[TODO]
 
 Changelog:
+  * 343f11d7d2 - fix: Fixed ScheduleStrategy shutdown [backport release-5.3.0] (#4611) (github-actions[bot])
+  * cd4bb55b4e - fix(api): Modem SIM representation [backport release-5.3.0] (#4608) (github-actions[bot])
+  * 0f1ea955cf - fix(core): Watchdog is not refreshed when connection to DB missing [backport release-5.3.0] (#4610) (github-actions[bot])
+  * 6ae07476c0 - fix: password escaping issue with wifi passwords [backport release-5.3.0] (#4605) (github-actions[bot])
+  * 8b0fa0f486 - fix: Ordering of channels when numbers are bigger than int [backport release-5.3.0] (#4603) (github-actions[bot])
+  * cb5a3f4784 - fix(installer): comment configured interfaces in interfaces file [backport release-5.3.0] (#4599) (github-actions[bot])
+  * 7594f57c02 - docs: Updated Oomph setup instructions [backport release-5.3.0] (#4594) (github-actions[bot])
+  * 2c05cbab2d - fix(nm): Added legacy dns monitor to NetworkManager bundle [backport release-5.3.0] (#4590) (github-actions[bot])
+  * 9c8c12609b - fix(linux.net): Replaced timestamp check for dnsmasq configuration files with a hash check. [backport release-5.3.0] (#4592) (github-actions[bot])
+  * ad95dcf5f9 - fix(distrib): fix errors during network configuration on Jetson Nano [backport release-5.3.0] (#4593) (github-actions[bot])
+  * 3f0f38a0fc - fix: check if schedule is enabled before parsing [backport release-5.3.0] (#4586) (github-actions[bot])
+  * 198d05af30 - fix(nm): Fix dns list wrongly split. [backport release-5.3.0] (#4578) (github-actions[bot])
+  * 94b6ee5f6a - fix: Do not write dnsmasq config for disabled interfaces [backport release-5.3.0] (#4577) (github-actions[bot])
+  * 85d1a18a7b - feat: Improve the graph load time by reducing calls to bundleContext [backport release-5.3.0] (#4575) (github-actions[bot])
+  * 964e694d69 - fix(installer): Added dnsmasq default configuration file [backport release-5.3.0] (#4570) (github-actions[bot])
+  * 1851ebbd6a - fix: Perform defrag after SQLite rekey [backport release-5.3.0] (#4569) (github-actions[bot])
+  * 0015e01305 - fix(installer): Added ModemManager enable command in install script [backport release-5.3.0] (#4566) (github-actions[bot])
+  * 048b998f09 - chore: Modified NM configuration to use dhclient [backport release-5.3.0] (#4565) (github-actions[bot])
+  * 676648c2fd - feat(dnsmasq): support for multiple DHCP server interfaces [backport release-5.3.0] (#4561) (github-actions[bot])
+  * 1d6e36ee96 - fix(web2): Replaced marketplace url with the updated https url (avoiding redirect). Updated Eclipse Marketplace certificate in the keystore.. [backport release-5.3.0] (#4560) (github-actions[bot])
+  * 1dee359983 - fix(web2.server.net2): passwords for wifi infra, AP, and modem are saved as Password not as String [backport release-5.3.0] (#4559) (github-actions[bot])
+  * 68dfc1a5a2 - fix(web2):  networking passwords replaced with placeholder, and html escaping and unescaping  [backport release-5.3.0] (#4556) (github-actions[bot])
+  * 2edd85767d - fix(web2): Fix cellular default values [backport release-5.3.0] (#4558) (github-actions[bot])
+  * fd82998f20 - feat(position): changed metatype default provider to gpsd [backport release-5.3.0] (#4557) (github-actions[bot])
+  * cfbd286278 - fix(web2.server.net2): wrong enum default leaves wireless interface as station [backport release-5.3.0] (#4555) (github-actions[bot])
+  * 702d25e090 - refactor(web2): clean up ghost code [backport release-5.3.0] (#4554) (github-actions[bot])
+  * 680a94ba2a - fix: Allowed loading certificate chain in private key entry [backport release-5.3.0] (#4552) (github-actions[bot])
+  * 726f103c3c - refactor(nm): `org.eclipse.kura.nm` log cleanup/update [backport release-5.3.0] (#4551) (github-actions[bot])
+  * 8d7d2662f1 - fix(distrib): do not rename /etc/network/interface file on installation [backport release-5.3.0] (#4550) (github-actions[bot])
+  * de404e93b5 - fix(nm.test): Fixed nm tests. [backport release-5.3.0] (#4546) (github-actions[bot])
+  * a4081f80ed - fix(web2): Fixed fileCountMax. [backport release-5.3.0] (#4541) (github-actions[bot])
+  * ef7e71517e - fix: Fixed NetworkConfigurationService returning passwords as strings [backport release-5.3.0] (#4539) (github-actions[bot])
+  * 95918ee50a - refactor(nm): NMDBusConnector class refactor [backport release-5.3.0] (#4542) (Pierantonio Merlino)
+  * 5d75fe951c - feat(nm): add firewall NAT rules update on configuration change [backport release-5.3.0] (#4538) (github-actions[bot])
+  * 6f7ec53aa4 - refactor(api): Changed id field to interfaceId in network APIs [backport release-5.3.0] (#4536) (github-actions[bot])
+  * 74adf91cd9 - test(nm.configuration.writer): refactor and added tests dnsmasq cases for DhcpServerConfigWriter [backport release-5.3.0] (#4528) (github-actions[bot])
+  * 2ef82bf536 - style(db.sqlite.provider): Fixed typos in metatype descriptions. [backport release-5.3.0] (#4526) (github-actions[bot])
+  * c28fa29a57 - feat(nm): add modem reset support [backport release-5.3.0] (#4523) (github-actions[bot])
+  * d7b952da0e - fix(nm): avoid error when `Modem.Location` interface is missing [backport release-5.3.0] (#4522) (github-actions[bot])
+  * 78c40bfb70 - fix(nm): do not set `gsm.password` if property is empty [backport release-5.3.0] (#4521) (github-actions[bot])
+  * d2469a0a47 - fix(nm): support for pass dns feature in dnsmasq [backport release-5.3.0] (#4519) (github-actions[bot])
+  * 6888f56548 - fix(nm): added conversion from signal quality to signal strength [backport release-5.3.0] (#4510) (github-actions[bot])
+  * 7be9f374b9 - fix(linux.net): dhcp server tool ordering [backport release-5.3.0] (#4511) (github-actions[bot])
+  * 1d8cf87c8c - fix(distrib): let NetworkManager manage gsm type devices [backport release-5.3.0] (#4507) (github-actions[bot])
+  * 9bda83c09b - chore: Add Kura 5.3.0 release notes (#4496) (nicolatimeus)
   * fa77118f1d - fix(nm): Settings leak on connection activation failure [Backport] (#4502) (Matteo Maiero)
   * 1293607a58 - fix: Overriding NM unmanaged-devices policy  [Backport] (#4501) (Matteo Maiero)
   * bb2c0daae3 - feat: Added db.defrag.enabled and db.wal.checkpoint.enabled fields. [Backport] (#4500) (Matteo Maiero)

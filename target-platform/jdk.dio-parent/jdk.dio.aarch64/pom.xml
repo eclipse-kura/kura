@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2016, 2022 Red Hat Inc and others
+    Copyright (c) 2016, 2023 Red Hat Inc and others
  
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>jdk.dio-parent</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 	

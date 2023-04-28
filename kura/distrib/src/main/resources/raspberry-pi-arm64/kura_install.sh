@@ -75,7 +75,15 @@ if command -v timedatectl > /dev/null ;
 fi
 
 #disable asking NTP servers to the DHCP server
-sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+if [ -f /etc/dhcp/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhcp/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+fi
+
+if [ -f /etc/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhclient.conf
+fi
 
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd

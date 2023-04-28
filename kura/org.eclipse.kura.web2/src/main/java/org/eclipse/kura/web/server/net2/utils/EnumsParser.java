@@ -14,11 +14,9 @@ package org.eclipse.kura.web.server.net2.utils;
 
 import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
-import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
@@ -389,52 +387,6 @@ public class EnumsParser {
         }
 
         return PdpType.UNKNOWN.name();
-    }
-
-    /**
-     * Converts values of {@link ModemConnectionStatus} to {@link NetInterfaceState}
-     * values
-     * 
-     */
-    public static String getNetInterfaceState(Optional<String> modemConnectionStatus) {
-        if (modemConnectionStatus.isPresent()) {
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.CONNECTED.name())) {
-                return NetInterfaceState.ACTIVATED.name();
-            }
-
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.CONNECTING.name())) {
-                return NetInterfaceState.IP_CONFIG.name();
-            }
-
-            if (modemConnectionStatus.get().equals(ModemConnectionStatus.DISCONNECTED.name())) {
-                return NetInterfaceState.DISCONNECTED.name();
-            }
-        }
-
-        return NetInterfaceState.UNKNOWN.name();
-    }
-
-    /**
-     * Converts values of {@link NetInterfaceState} to {@link ModemConnectionStatus}
-     * values
-     * 
-     */
-    public static String getModemConnectionStatus(Optional<String> netInterfaceState) {
-        if (netInterfaceState.isPresent()) {
-            if (netInterfaceState.get().equals(NetInterfaceState.ACTIVATED.name())) {
-                return ModemConnectionStatus.CONNECTED.name();
-            }
-
-            if (netInterfaceState.get().equals(NetInterfaceState.IP_CONFIG.name())) {
-                return ModemConnectionStatus.CONNECTING.name();
-            }
-
-            if (netInterfaceState.get().equals(NetInterfaceState.DISCONNECTED.name())) {
-                return ModemConnectionStatus.DISCONNECTED.name();
-            }
-        }
-
-        return ModemConnectionStatus.UNKNOWN.name();
     }
 
 }

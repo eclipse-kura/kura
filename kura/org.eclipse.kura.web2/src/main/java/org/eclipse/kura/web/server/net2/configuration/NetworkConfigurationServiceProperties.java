@@ -514,7 +514,6 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_DIAL_STRING = "net.interface.%s.config.dialString";
     private static final String NET_INTERFACE_CONFIG_HOLDOFF = "net.interface.%s.config.holdoff";
     private static final String NET_INTERFACE_CONFIG_PPP_NUM = "net.interface.%s.config.pppNum";
-    private static final String NET_INTERFACE_CONFIG_CONNECTION_STATUS = "net.interface.%s.config.connection.status";
     private static final String NET_INTERFACE_USB_PRODUCT_NAME = "net.interface.%s.usb.product.name";
     private static final String NET_INTERFACE_USB_VENDOR_ID = "net.interface.%s.usb.vendor.id";
     private static final String NET_INTERFACE_USB_VENDOR_NAME = "net.interface.%s.usb.vendor.name";
@@ -665,17 +664,6 @@ public class NetworkConfigurationServiceProperties {
 
     public void setModemPppNum(String ifname, int pppNum) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_PPP_NUM, ifname), pppNum);
-    }
-
-    public Optional<String> getModemConnectionStatus(String ifname) {
-        return getNonEmptyStringProperty(
-                this.properties.get(String.format(NET_INTERFACE_CONFIG_CONNECTION_STATUS, ifname)));
-    }
-
-    public void setModemConnectionStatus(String ifname, Optional<String> status) {
-        if (status.isPresent()) {
-            this.properties.put(String.format(NET_INTERFACE_CONFIG_CONNECTION_STATUS, ifname), status.get());
-        }
     }
 
     public String getUsbProductName(String ifname) {

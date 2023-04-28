@@ -587,7 +587,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWithAuthTypeAuto() {
-        givenMapWith("net.interface.ttyACM0.config.authType", "netModemAuthAUTO");
+        givenMapWith("net.interface.ttyACM0.config.authType", "AUTO");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
@@ -602,7 +602,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWithAuthTypeNone() {
-        givenMapWith("net.interface.ttyACM0.config.authType", "netModemAuthNONE");
+        givenMapWith("net.interface.ttyACM0.config.authType", "NONE");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
@@ -617,7 +617,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWithAuthTypeChap() {
-        givenMapWith("net.interface.ttyACM0.config.authType", "netModemAuthCHAP");
+        givenMapWith("net.interface.ttyACM0.config.authType", "CHAP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
@@ -632,7 +632,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWithAuthTypePap() {
-        givenMapWith("net.interface.ttyACM0.config.authType", "netModemAuthPAP");
+        givenMapWith("net.interface.ttyACM0.config.authType", "PAP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
@@ -647,7 +647,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldThrowWithUnsupportedAuthType() {
-        givenMapWith("net.interface.ttyACM0.config.authType", "netModemAuthROFL");
+        givenMapWith("net.interface.ttyACM0.config.authType", "ROFL");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");

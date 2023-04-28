@@ -578,7 +578,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
 
         if (this.disconnectionGuard.compareAndSet(false, true)) {
-            logger.error("Disconnecting the data trasporti service cause: {}", e.getMessage());
+            logger.error("Disconnecting the DataTransportService, cause: {}", e.getMessage());
             this.disconnect();
             this.disconnectionGuard.set(false);
         }

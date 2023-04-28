@@ -265,6 +265,7 @@ Target Platform Updates (since Eclipse Kura 5.2.0):
   * 23e2ff1214 - Added org.apache.servicemix.bundles.c3p0 0.9.5.5_1 (#4198) (nicolatimeus)
 
 Known Issues:
+  * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
   * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
     built and run immediately after installation.

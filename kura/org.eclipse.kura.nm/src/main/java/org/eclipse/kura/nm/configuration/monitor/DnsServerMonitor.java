@@ -32,6 +32,7 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
@@ -121,6 +122,8 @@ public class DnsServerMonitor {
             logger.error("Could not get initial network configuration", e);
         }
 
+        this.enabled = false;
+
         Set<IPAddress> systemDnsServers = this.dnsUtil.getDnServers();
 
         Set<IP4Address> forwarders = getForwarders(systemDnsServers);
@@ -140,7 +143,7 @@ public class DnsServerMonitor {
                     .getNetInterfaceConfigs();
 
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (isSupportedInterfaceType(netInterfaceConfig)) {
+                if (isSupportedInterfaceType(netInterfaceConfig) && isEnabledForLan(netInterfaceConfig)) {
 
                     logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
                     List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
@@ -179,6 +182,11 @@ public class DnsServerMonitor {
         return netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                 || netInterfaceConfig.getType() == NetInterfaceType.WIFI
                 || netInterfaceConfig.getType() == NetInterfaceType.MODEM;
+    }
+
+    private boolean isEnabledForLan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
+                .equals(NetInterfaceStatus.netIPv4StatusEnabledLAN);
     }
 
     public boolean isPassDnsEnabled(NetConfig netConfig) {

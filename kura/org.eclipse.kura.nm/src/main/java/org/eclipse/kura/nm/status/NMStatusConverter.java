@@ -172,7 +172,7 @@ public class NMStatusConverter {
 
     public static NetworkInterfaceStatus buildModemStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
-            List<Properties> simProperties, List<Properties> bearerProperties) {
+            List<SimProperties> simProperties, List<Properties> bearerProperties) {
         ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
         Properties deviceProperties = devicePropertiesWrapper.getDeviceProperties();
         Optional<Properties> modemProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
@@ -427,8 +427,7 @@ public class NMStatusConverter {
         case NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192:
             return WifiSecurity.KEY_MGMT_EAP_SUITE_B_192;
         default:
-            throw new IllegalArgumentException(
-                    String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
+            throw new IllegalArgumentException(String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
         }
     }
 
@@ -513,7 +512,7 @@ public class NMStatusConverter {
     }
 
     private static void setModemStatus(ModemInterfaceStatusBuilder builder, Optional<Properties> modemProperties,
-            List<Properties> simProperties, List<Properties> bearerProperties) {
+            List<SimProperties> simProperties, List<Properties> bearerProperties) {
         modemProperties.ifPresent(properties -> {
             builder.withModel(properties.Get(MM_MODEM_BUS_NAME, "Model"));
             builder.withManufacturer(properties.Get(MM_MODEM_BUS_NAME, "Manufacturer"));
@@ -531,7 +530,6 @@ public class NMStatusConverter {
             builder.withSupportedBands(getModemBands(properties, "SupportedBands"));
             builder.withCurrentBands(getModemBands(properties, "CurrentBands"));
             builder.withGpsSupported(isGpsSupported(properties));
-            builder.withActiveSimIndex(getActiveSimIndex(properties));
             builder.withSimLocked(isSimLocked(properties));
             builder.withConnectionStatus(MMModemState.toModemState(properties.Get(MM_MODEM_BUS_NAME, STATE)));
             builder.withAccessTechnologies(MMModemAccessTechnology
@@ -621,17 +619,6 @@ public class NMStatusConverter {
         return isSupported;
     }
 
-    private static int getActiveSimIndex(Properties properties) {
-        int simIndex = 0;
-        try {
-            UInt32 rawSimIndex = properties.Get(MM_MODEM_BUS_NAME, "PrimarySimSlot");
-            simIndex = rawSimIndex.intValue();
-        } catch (DBusExecutionException e) {
-            logger.warn("PrimarySimSlot property not found. Only a single SIM is supported");
-        }
-        return simIndex;
-    }
-
     private static boolean isSimLocked(Properties properties) {
         boolean simLocked = true;
         UInt32 simStatus = properties.Get(MM_MODEM_BUS_NAME, "UnlockRequired");
@@ -642,37 +629,39 @@ public class NMStatusConverter {
         return simLocked;
     }
 
-    private static List<Sim> getAvailableSims(List<Properties> properties) {
+    private static List<Sim> getAvailableSims(List<SimProperties> properties) {
         List<Sim> sims = new ArrayList<>();
-        for (Properties simProperties : properties) {
-            boolean active = true;
-            try {
-                active = simProperties.Get(MM_SIM_BUS_NAME, "Active");
-            } catch (DBusExecutionException e) {
-                logger.warn("Active property not found.");
-            }
-            String iccid = simProperties.Get(MM_SIM_BUS_NAME, "SimIdentifier");
-            String imsi = simProperties.Get(MM_SIM_BUS_NAME, "Imsi");
-            String eid = "";
-            try {
-                eid = simProperties.Get(MM_SIM_BUS_NAME, "Eid");
-            } catch (DBusExecutionException e) {
-                logger.warn("Eid property not found.");
-            }
-            String operatorName = simProperties.Get(MM_SIM_BUS_NAME, "OperatorName");
-            SimType simType = SimType.PHYSICAL;
-            ESimStatus eSimStatus = ESimStatus.UNKNOWN;
-            try {
-                simType = MMSimType.toSimType(simProperties.Get(MM_SIM_BUS_NAME, "SimType"));
-                if (simType.equals(SimType.ESIM)) {
-                    eSimStatus = MMSimEsimStatus.toESimStatus(simProperties.Get(MM_SIM_BUS_NAME, "EsimStatus"));
-                }
-            } catch (DBusExecutionException e) {
-                logger.warn("SimType property not found. Only physical sims are supported.");
-            }
-            sims.add(new Sim(active, iccid, imsi, eid, operatorName, simType, eSimStatus));
+        for (SimProperties property : properties) {
+            Sim sim = getAvailableSim(property.getProperties(), property.isActive(), property.isPrimary());
+            sims.add(sim);
         }
+
         return sims;
+    }
+
+    private static Sim getAvailableSim(Properties simProperties, boolean isActive, boolean isPrimary) {
+        String iccid = simProperties.Get(MM_SIM_BUS_NAME, "SimIdentifier");
+        String imsi = simProperties.Get(MM_SIM_BUS_NAME, "Imsi");
+        String eid = "";
+        try {
+            eid = simProperties.Get(MM_SIM_BUS_NAME, "Eid");
+        } catch (DBusExecutionException e) {
+            logger.warn("Eid property not found.");
+        }
+        String operatorName = simProperties.Get(MM_SIM_BUS_NAME, "OperatorName");
+        SimType simType = SimType.PHYSICAL;
+        ESimStatus eSimStatus = ESimStatus.UNKNOWN;
+        try {
+            simType = MMSimType.toSimType(simProperties.Get(MM_SIM_BUS_NAME, "SimType"));
+            if (simType.equals(SimType.ESIM)) {
+                eSimStatus = MMSimEsimStatus.toESimStatus(simProperties.Get(MM_SIM_BUS_NAME, "EsimStatus"));
+            }
+        } catch (DBusExecutionException e) {
+            logger.warn("SimType property not found. Only physical sims are supported.");
+        }
+
+        return Sim.builder().withActive(isActive).withPrimary(isPrimary).withIccid(iccid).withImsi(imsi).withEid(eid)
+                .withOperatorName(operatorName).withSimType(simType).withESimStatus(eSimStatus).build();
     }
 
     private static List<Bearer> getBearers(List<Properties> properties) {

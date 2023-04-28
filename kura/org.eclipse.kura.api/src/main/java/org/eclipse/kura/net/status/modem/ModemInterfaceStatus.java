@@ -48,7 +48,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final Set<ModemBand> currentBands;
     private final boolean gpsSupported;
     private final List<Sim> availableSims;
-    private final int activeSimIndex;
     private final boolean simLocked;
     private final List<Bearer> bearers;
     private final ModemConnectionType connectionType;
@@ -77,7 +76,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.currentBands = builder.currentBands;
         this.gpsSupported = builder.gpsSupported;
         this.availableSims = builder.availableSims;
-        this.activeSimIndex = builder.activeSimIndex;
         this.simLocked = builder.simLocked;
         this.bearers = builder.bearers;
         this.connectionType = builder.connectionType;
@@ -153,10 +151,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.availableSims;
     }
 
-    public int getActiveSimIndex() {
-        return this.activeSimIndex;
-    }
-
     public boolean isSimLocked() {
         return this.simLocked;
     }
@@ -216,7 +210,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private Set<ModemBand> currentBands = EnumSet.of(ModemBand.UNKNOWN);
         private boolean gpsSupported = false;
         private List<Sim> availableSims = Collections.emptyList();
-        private int activeSimIndex = 0;
         private boolean simLocked = false;
         private List<Bearer> bearers = Collections.emptyList();
         private ModemConnectionType connectionType = ModemConnectionType.DirectIP;
@@ -308,11 +301,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
-        public ModemInterfaceStatusBuilder withActiveSimIndex(int activeSimIndex) {
-            this.activeSimIndex = activeSimIndex;
-            return getThis();
-        }
-
         public ModemInterfaceStatusBuilder withSimLocked(boolean simLocked) {
             this.simLocked = simLocked;
             return getThis();
@@ -374,12 +362,12 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(this.accessTechnologies, this.activeSimIndex, this.availableSims,
-                this.bearers, this.connectionStatus, this.connectionType, this.currentBands,
-                this.currentModemCapabilities, this.currentModes, this.gpsSupported, this.hardwareRevision,
-                this.manufacturer, this.model, this.operatorName, this.ports, this.powerState, this.primaryPort,
-                this.registrationStatus, this.signalStrength, this.serialNumber, this.signalQuality, this.simLocked,
-                this.softwareRevision, this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
+        result = prime * result + Objects.hash(this.accessTechnologies, this.availableSims, this.bearers,
+                this.connectionStatus, this.connectionType, this.currentBands, this.currentModemCapabilities,
+                this.currentModes, this.gpsSupported, this.hardwareRevision, this.manufacturer, this.model,
+                this.operatorName, this.ports, this.powerState, this.primaryPort, this.registrationStatus,
+                this.signalStrength, this.serialNumber, this.signalQuality, this.simLocked, this.softwareRevision,
+                this.supportedBands, this.supportedModemCapabilities, this.supportedModes);
         return result;
     }
 
@@ -393,7 +381,6 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         }
         ModemInterfaceStatus other = (ModemInterfaceStatus) obj;
         return Objects.equals(this.accessTechnologies, other.accessTechnologies)
-                && this.activeSimIndex == other.activeSimIndex
                 && Objects.equals(this.availableSims, other.availableSims)
                 && Objects.equals(this.bearers, other.bearers) && this.connectionStatus == other.connectionStatus
                 && this.connectionType == other.connectionType && Objects.equals(this.currentBands, other.currentBands)

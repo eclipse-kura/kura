@@ -36,7 +36,6 @@ import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
-import org.freedesktop.AddAndActivateConnectionTuple;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -394,14 +393,20 @@ public class NMDbusConnector {
 
         if (connection.isPresent()) {
             connection.get().Update(newConnectionSettings);
+        } else {
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+            DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
+            Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    createdConnectionPath.getPath(), Connection.class);
+            connection = Optional.of(createdConnection);
+        }
+
+        try {
             this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
                     new DBusPath(device.getObjectPath()), new DBusPath("/"));
-        } else {
-            AddAndActivateConnectionTuple createdConnectionTuple = this.nm.AddAndActivateConnection(
-                    newConnectionSettings, new DBusPath(device.getObjectPath()), new DBusPath("/"));
-            Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                    createdConnectionTuple.getPath().getPath(), Connection.class);
-            connection = Optional.of(createdConnection);
+            dsLock.waitForSignal();
+        } catch (DBusExecutionException e) {
+            logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
         }
 
         // Housekeeping
@@ -411,8 +416,6 @@ public class NMDbusConnector {
                 availableConnection.Delete();
             }
         }
-
-        dsLock.waitForSignal();
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);

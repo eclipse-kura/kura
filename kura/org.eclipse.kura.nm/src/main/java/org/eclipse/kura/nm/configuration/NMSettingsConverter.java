@@ -270,23 +270,23 @@ public class NMSettingsConverter {
     }
 
     private static void setAuthenticationType(String authenticationType, Map<String, Variant<?>> settings) {
-        if (authenticationType.equals("netModemAuthAUTO")) {
+        if (authenticationType.equals("AUTO")) {
             return;
         }
 
-        if (authenticationType.equals("netModemAuthNONE")) {
+        if (authenticationType.equals("NONE")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("netModemAuthCHAP")) {
+        } else if (authenticationType.equals("CHAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(false));
             settings.put(PPP_REFUSE_PAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_MSCHAPV2, new Variant<>(true));
-        } else if (authenticationType.equals("netModemAuthPAP")) {
+        } else if (authenticationType.equals("PAP")) {
             settings.put(PPP_REFUSE_EAP, new Variant<>(true));
             settings.put(PPP_REFUSE_CHAP, new Variant<>(true));
             settings.put(PPP_REFUSE_PAP, new Variant<>(false));

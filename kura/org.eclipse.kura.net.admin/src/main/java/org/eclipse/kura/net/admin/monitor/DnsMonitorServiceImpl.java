@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -236,9 +236,10 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
                     .getNetInterfaceConfigs();
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                         || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                        && isEnabledForLan(netInterfaceConfig)) {
                     getAllowedNetworks(netInterfaceConfig);
                 }
             }
@@ -260,6 +261,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
         logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
         List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
+
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns()) {
                 logger.debug("Found an allowed network: {}/{}", ((DhcpServerConfig) netConfig).getRouterAddress(),
@@ -272,6 +274,11 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                                 ((DhcpServerConfig) netConfig).getPrefix()));
             }
         }
+    }
+
+    private boolean isEnabledForLan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
+                .equals(NetInterfaceStatus.netIPv4StatusEnabledLAN);
     }
 
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {

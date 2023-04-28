@@ -71,6 +71,12 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 95c03be77d - [web2] fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
+  * f221cb137e - [installer] Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
+  * 68d788fe31 - [monitor.dns-server] added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])
+  * 9ad3c92180 - [dnsmasq] added protections against wrong configurations [backport release-5.3.0] (#4619) (github-actions[bot])
+  * 4db5765c56 - [nm] cannot configure ethernet interfaces if the cable is disconnected [backport release-5.3.0] (#4617) (github-actions[bot])
+  * 29a5fbc8d4 - [distrib] disabled ntp-servers dhclient config for /etc/dhclient.conf and /etc/dhcp/dhclient.conf [backport release-5.3.0] (#4616) (github-actions[bot])
   * 343f11d7d2 - Fixed ScheduleStrategy shutdown [backport release-5.3.0] (#4611) (github-actions[bot])
   * cd4bb55b4e - [api] Modem SIM representation [backport release-5.3.0] (#4608) (github-actions[bot])
   * 0f1ea955cf - [core] Watchdog is not refreshed when connection to DB missing [backport release-5.3.0] (#4610) (github-actions[bot])
@@ -314,6 +320,12 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 95c03be77d - fix(web2): fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
+  * f221cb137e - fix(installer): Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
+  * 68d788fe31 - fix(monitor.dns-server): added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])
+  * 9ad3c92180 - fix(dnsmasq): added protections against wrong configurations [backport release-5.3.0] (#4619) (github-actions[bot])
+  * 4db5765c56 - fix(nm): cannot configure ethernet interfaces if the cable is disconnected [backport release-5.3.0] (#4617) (github-actions[bot])
+  * 29a5fbc8d4 - fix(distrib): disabled ntp-servers dhclient config for /etc/dhclient.conf and /etc/dhcp/dhclient.conf [backport release-5.3.0] (#4616) (github-actions[bot])
   * 343f11d7d2 - fix: Fixed ScheduleStrategy shutdown [backport release-5.3.0] (#4611) (github-actions[bot])
   * cd4bb55b4e - fix(api): Modem SIM representation [backport release-5.3.0] (#4608) (github-actions[bot])
   * 0f1ea955cf - fix(core): Watchdog is not refreshed when connection to DB missing [backport release-5.3.0] (#4610) (github-actions[bot])

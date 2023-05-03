@@ -58,6 +58,8 @@ systemctl start NetworkManager
 systemctl enable ModemManager
 systemctl stop dnsmasq
 systemctl disable dnsmasq
+systemctl stop dhcpcd
+systemctl disable dhcpcd
 
 # set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh

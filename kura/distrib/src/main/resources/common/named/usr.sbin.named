@@ -49,7 +49,7 @@
   /var/log/named/ rw,
   /var/log/** rw,
   /varlog/named.log rw,
-  
+
   /etc/named.rfc1912.zones r,
 
   # Site-specific additions and overrides. See local/README for details.

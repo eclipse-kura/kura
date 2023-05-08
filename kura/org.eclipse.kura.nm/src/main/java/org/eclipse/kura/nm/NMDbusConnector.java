@@ -468,6 +468,8 @@ public class NMDbusConnector {
                 .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
         Set<MMModemLocationSource> currentLocationSources = EnumSet
                 .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+        Set<MMModemLocationSource> desiredLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
 
         try {
             availableLocationSources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
@@ -480,22 +482,19 @@ public class NMDbusConnector {
             return;
         }
 
-        EnumSet<MMModemLocationSource> managedLocationSources = EnumSet.of(
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
-
-        for (MMModemLocationSource managedSource : managedLocationSources) {
-            if (isGPSSourceEnabled && availableLocationSources.contains(managedSource)) {
-                currentLocationSources.add(managedSource);
-            } else {
-                currentLocationSources.remove(managedSource);
+        if (isGPSSourceEnabled) {
+            if (!availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
+                logger.warn("Cannot setup Modem.Location, MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED not supported for {}",
+                        modemLocationProperties.getObjectPath());
+                return;
             }
+            desiredLocationSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
         }
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
-        if (!currentLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE)) {
-            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(currentLocationSources),
+        if (!currentLocationSources.equals(desiredLocationSources)) {
+            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
         }
     }

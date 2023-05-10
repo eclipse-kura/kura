@@ -28,7 +28,10 @@ import java.util.Set;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
+import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
+import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.modem.ModemPortType;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
@@ -500,6 +503,44 @@ public class NMDbusConnector {
             modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
         }
+
+        postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);
+    }
+
+    private void postModemEvent(String modemDevicePath, boolean enabled) throws DBusException {
+        if (!enabled) {
+            logger.debug("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}",
+                    ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
+            HashMap<String, Object> modemInfoMap = new HashMap<>();
+            // this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+            return;
+        }
+
+        Properties modemProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath,
+                Properties.class);
+
+        List<Object[]> rawPorts = modemProperties.Get(MM_MODEM_NAME, "Ports");
+        Optional<String> gpsPort = Optional.empty();
+        for (Object[] port : rawPorts) {
+            MMModemPortType detectedPortType = MMModemPortType.toMMModemPortType((UInt32) port[1]);
+
+            if (detectedPortType == MMModemPortType.MM_MODEM_PORT_TYPE_GPS) {
+                gpsPort = Optional.of(String.format("/dev/%s", port[0]));
+            }
+        }
+
+        HashMap<String, Object> modemInfoMap = new HashMap<>();
+        modemInfoMap.put(ModemGpsEnabledEvent.PORT, gpsPort);
+        modemInfoMap.put(ModemGpsEnabledEvent.BAUD_RATE, 9600);
+        modemInfoMap.put(ModemGpsEnabledEvent.DATA_BITS, 8);
+        modemInfoMap.put(ModemGpsEnabledEvent.STOP_BITS, 1);
+        modemInfoMap.put(ModemGpsEnabledEvent.PARITY, 1);
+        ModemGpsEnabledEvent event = new ModemGpsEnabledEvent(modemInfoMap);
+
+        logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}",
+                ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
+        logger.trace("postModemGpsEvent() :: ModemGpsEnabledEvent content {}", modemInfoMap);
+        // this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
     }
 
     private void enableModem(String modemDevicePath) throws DBusException {

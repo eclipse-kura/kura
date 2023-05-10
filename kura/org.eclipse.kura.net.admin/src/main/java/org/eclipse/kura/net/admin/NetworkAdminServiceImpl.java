@@ -1043,12 +1043,13 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                     renewDhcpLease(interfaceName);
                 } else {
                     this.linuxNetworkUtil.enableInterface(interfaceName);
+
+                    // if it isn't up - at least make sure the Ethernet controller is powered on
+                    if (!this.linuxNetworkUtil.hasAddress(interfaceName)) {
+                        this.linuxNetworkUtil.bringUpDeletingAddress(interfaceName);
+                    }
                 }
 
-                // if it isn't up - at least make sure the Ethernet controller is powered on
-                if (!this.linuxNetworkUtil.hasAddress(interfaceName)) {
-                    this.linuxNetworkUtil.bringUpDeletingAddress(interfaceName);
-                }
             } else {
                 logger.info("not bringing interface {} up because it is already up", interfaceName);
                 if (dhcp) {
@@ -1331,7 +1332,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 wifiModeWait(ifaceName, WifiMode.INFRA, 10);
                 ret = isWifiConnectionCompleted(ifaceName, tout);
 
-                // Disable wifi interface again, previous configuration will be restored by WifiMonitorService
+                // Disable wifi interface again, previous configuration will be restored by
+                // WifiMonitorService
                 disableWifiInterface(ifaceName);
             } catch (Exception e) {
                 logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
@@ -1396,7 +1398,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     //
     // ----------------------------------------------------------------
 
-    // FIXME: simplify method signature. Probably we could take the mode from the wifiConfig.
+    // FIXME: simplify method signature. Probably we could take the mode from the
+    // wifiConfig.
     private void enableWifiInterface(String ifaceName, NetInterfaceStatus status, WifiMode wifiMode,
             WifiConfig wifiConfig) throws KuraException {
         // ignore mon.* interface
@@ -1443,7 +1446,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         this.wpaSupplicantManager.stop(ifaceName);
     }
 
-    // Submit new configuration, waiting for network configuration change event before returning
+    // Submit new configuration, waiting for network configuration change event
+    // before returning
     private void submitNetworkConfiguration(List<String> modifiedInterfaceNames,
             NetworkConfiguration networkConfiguration) throws KuraException {
         short timeout = 30000; // in milliseconds

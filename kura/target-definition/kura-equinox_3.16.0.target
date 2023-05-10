@@ -1,7 +1,23 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="Kura Target Platform Equinox 3.16.0" sequenceNumber="47">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="Kura Target Platform Equinox 3.16.0" sequenceNumber="47">
   <locations>
     <location path="${git_work_tree}/kura/target-definition/common/repository/plugins" type="Profile"/>
     <location path="${git_work_tree}/kura/target-definition/equinox_3.16.0/repository/plugins" type="Profile"/>
     <location path="${git_work_tree}/kura/target-definition/test-deps/repository/plugins" type="Profile"/>
+    <location path="${git_work_tree}/kura/target-definition/ecf/repository/plugins" type="Profile"/>
+    
+    <!--
+    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <repository location="https://download.eclipse.org/rt/ecf/3.14.31/site.p2"/>
+        <unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.14.25.v20211005-1944"/>
+    </location>
+    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+        <repository location="https://download.eclipse.org/releases/2021-12"/>
+        <unit id="org.eclipse.equinox.compendium.sdk.feature.group" version="3.22.200.v20211021-1418"/>
+        <unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.23.200.v20211104-1730"/>
+        <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.1400.v20211117-0650"/>
+    </location>
+    -->
   </locations>
 </target>

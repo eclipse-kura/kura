@@ -119,6 +119,11 @@
         <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.rest.network.status.provider</module>
+
+        <module>org.eclipse.kura.remote.service.demo.api</module>
+        <module>org.eclipse.kura.remote.service.demo.provider</module>
+        <module>org.eclipse.kura.remote.service.demo.client</module>
+
         <module>emulator</module>
         <module>test-util</module>
     </modules>

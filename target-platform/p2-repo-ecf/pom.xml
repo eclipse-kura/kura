@@ -1,0 +1,252 @@
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>target-platform</artifactId>
+        <version>5.4.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>p2-repo-ecf</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <equinox.download.url>https://www.eclipse.org/downloads/download.php?file&#61;/equinox/drops/R-4.17-202009021800/equinox-SDK-4.17.zip&#38;r&#61;1</equinox.download.url>
+    </properties>
+
+    <repositories>
+        <!-- for org.eclipse.equinox.concurrent artifact -->
+        <repository>
+            <id>WSO2</id>
+            <url>https://dist.wso2.org/maven2/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${properties-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../config/kura.target-platform.build.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-bundles-for-publishing</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf</artifactId>
+                                    <version>${org.eclipse.ecf.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.discovery</artifactId>
+                                    <version>${org.eclipse.ecf.discovery.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.identity</artifactId>
+                                    <version>${org.eclipse.ecf.identity.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.osgi.services.distribution</artifactId>
+                                    <version>${org.eclipse.ecf.osgi.services.distribution.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.osgi.services.remoteserviceadmin</artifactId>
+                                    <version>${org.eclipse.ecf.osgi.services.remoteserviceadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy</artifactId>
+                                    <version>${org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.remoteservice</artifactId>
+                                    <version>${org.eclipse.ecf.remoteservice.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.remoteservice.asyncproxy</artifactId>
+                                    <version>${org.eclipse.ecf.remoteservice.asyncproxy.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.sharedobject</artifactId>
+                                    <version>${org.eclipse.ecf.sharedobject.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.osgi.services.remoteserviceadmin</artifactId>
+                                    <version>${org.eclipse.osgi.services.remoteserviceadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.equinox</groupId>
+                                    <artifactId>org.eclipse.equinox.concurrent</artifactId>
+                                    <version>${org.eclipse.equinox.concurrent.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.provider</artifactId>
+                                    <version>${org.eclipse.ecf.provider.version}</version>
+                                </artifactItem>
+
+                                <!-- TODO: find a way to download these, it does not work
+                                <artifactItem>
+                                    <groupId>>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.provider.jmdns</artifactId>
+                                    <version>${org.eclipse.ecf.provider.jmdns.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>>org.eclipse.ecf</groupId>
+                                    <artifactId>org.eclipse.ecf.provider.remoteservice</artifactId>
+                                    <version>${org.eclipse.ecf.provider.remoteservice.version}</version>
+                                </artifactItem>
+                                -->
+                            </artifactItems>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- we need to download these jars manually, the maven repo has an error -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${download-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <id>download-jmdns</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://download.eclipse.org/rt/ecf/3.14.31/site.p2/3.14.29.v20220105-2142/plugins/org.eclipse.ecf.provider.jmdns_4.3.301.v20201023-1142.jar</url>
+                            <outputFileName>org.eclipse.ecf.provider.jmdns.jar</outputFileName>
+                            <outputDirectory>${project.build.directory}/source/plugins/</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <id>download-provider-remoteservice</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://download.eclipse.org/rt/ecf/3.14.31/site.p2/3.14.29.v20220105-2142/plugins/org.eclipse.ecf.provider.remoteservice_4.6.1.v20210926-0332.jar</url>
+                            <outputFileName>org.eclipse.ecf.provider.remoteservice.jar</outputFileName>
+                            <outputDirectory>${project.build.directory}/source/plugins/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>rename-maven-deps</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf_${org.eclipse.ecf.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.discovery.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.discovery_${org.eclipse.ecf.discovery.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.identity.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.identity_${org.eclipse.ecf.identity.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.distribution.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.distribution_${org.eclipse.ecf.osgi.services.distribution.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin_${org.eclipse.ecf.osgi.services.remoteserviceadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy_${org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.remoteservice.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.remoteservice_${org.eclipse.ecf.remoteservice.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.remoteservice.asyncproxy.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.remoteservice.asyncproxy_${org.eclipse.ecf.remoteservice.asyncproxy.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.sharedobject.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.sharedobject_${org.eclipse.ecf.sharedobject.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.osgi.services.remoteserviceadmin.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.osgi.services.remoteserviceadmin_${org.eclipse.osgi.services.remoteserviceadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.concurrent.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.concurrent_${org.eclipse.equinox.concurrent.version}.jar" />
+
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.provider.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.provider_${org.eclipse.ecf.provider.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.provider.jmdns.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.provider.jmdns_${org.eclipse.ecf.provider.jmdns.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.ecf.provider.remoteservice.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.ecf.provider.remoteservice_${org.eclipse.ecf.provider.remoteservice.version}.jar" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install-ecf</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete dir="../../kura/target-definition/ecf/"/>
+                                <mkdir dir="../../kura/target-definition/ecf/repository"/>
+                                <copy todir="../../kura/target-definition/ecf/repository">
+                                    <fileset dir="${project.build.directory}/repository"/>
+                                </copy>
+                                <copy todir="../../kura/target-definition/ecf/source">
+                                    <fileset dir="${project.build.directory}/source"/>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-p2-extras-plugin</artifactId>
+                <version>${tycho-p2-extras-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>publish-features-and-bundles</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <compress>false</compress>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

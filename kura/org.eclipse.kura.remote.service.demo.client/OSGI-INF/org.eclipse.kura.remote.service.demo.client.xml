@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+    configuration-policy="require"
+    enabled="true"
+    immediate="true"
+    name="org.eclipse.kura.remote.service.demo.provider.client.ExampleClient"
+    activate="activate" modified="update" deactivate="deactivate">
+    
+    <implementation class="org.eclipse.kura.remote.service.demo.client.ExampleClient"/>
+    <property name="service.pid" value="org.eclipse.kura.remote.service.demo.client.ExampleClient"/>
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.remote.service.demo.client.ExampleClient"/>
+
+    <reference name="ExampleService"
+           policy="dynamic"
+           bind="bindExampleService"
+           unbind="unbindExampleService"
+           cardinality="0..1"
+           interface="org.eclipse.kura.remote.service.demo.api.ExampleService"/>
+  
+</scr:component>

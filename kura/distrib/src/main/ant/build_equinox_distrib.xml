@@ -256,6 +256,9 @@
             property="is.web2.jar.available" />
         <antcall target="web2-config" />
 
+        <!-- Remote services -->
+        <antcall target="ecf-config" />
+
         <available
             file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
             property="linux.gpio.jar.present" />
@@ -816,6 +819,9 @@ fi]]>
         <antcall target="nvidia-jetson-nano-jars" />
         <antcall target="linux-kura-network-jars" />
         <antcall target="linux-network-manager-jars" />
+        
+        <!-- Remote services -->
+        <antcall target="ecf-jar" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -2035,5 +2041,110 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
+    </target>
+
+    <target name="ecf-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf_${org.eclipse.ecf.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.discovery_${org.eclipse.ecf.discovery.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.identity_${org.eclipse.ecf.identity.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.osgi.services.distribution_${org.eclipse.ecf.osgi.services.distribution.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.osgi.services.remoteserviceadmin_${org.eclipse.ecf.osgi.services.remoteserviceadmin.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy_${org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.remoteservice_${org.eclipse.ecf.remoteservice.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.remoteservice.asyncproxy_${org.eclipse.ecf.remoteservice.asyncproxy.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.sharedobject_${org.eclipse.ecf.sharedobject.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.osgi.services.remoteserviceadmin_${org.eclipse.osgi.services.remoteserviceadmin.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.equinox.concurrent_${org.eclipse.equinox.concurrent.version}.jar@4:start" />
+            
+            <!-- this is missing in default equinox -->
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.core.jobs_3.10.800.v20200421-0950.jar@3:start" />
+            
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.provider_${org.eclipse.ecf.provider.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.provider.jmdns_${org.eclipse.ecf.provider.jmdns.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.ecf.provider.remoteservice_${org.eclipse.ecf.provider.remoteservice.version}.jar@4:start" />
+
+            <!-- This is just for the demo API-->
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.remote.service.demo.api-1.0.0-SNAPSHOT.jar@5:start" />
+        </propertyfile>
+    </target>
+
+    <target name="ecf-jar">
+        
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <!-- This is just for the demo API-->
+            <zipfileset
+                file="../org.eclipse.kura.remote.service.demo.api/target/org.eclipse.kura.remote.service.demo.api-1.0.0-SNAPSHOT.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            
+            <zipfileset
+                dir="../target-definition/ecf/source/plugins/"
+                prefix="${build.output.name}/${plugins.folder}" />
+
+            <!--
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf_${org.eclipse.ecf.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.discovery_${org.eclipse.ecf.discovery.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.identity_${org.eclipse.ecf.identity.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.osgi.services.distribution_${org.eclipse.ecf.osgi.services.distribution.version}.jar@4:start"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin_${org.eclipse.ecf.osgi.services.remoteserviceadmin.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy_${org.eclipse.ecf.osgi.services.remoteserviceadmin.proxy.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.remoteservice_${org.eclipse.ecf.remoteservice.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.remoteservice.asyncproxy_${org.eclipse.ecf.remoteservice.asyncproxy.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.sharedobject_${org.eclipse.ecf.sharedobject.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.osgi.services.remoteserviceadmin_${org.eclipse.osgi.services.remoteserviceadmin.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.equinox.concurrent_${org.eclipse.equinox.concurrent.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.provider_${org.eclipse.ecf.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.provider.jmdns_${org.eclipse.ecf.provider.jmdns.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="../target-definition/ecf/source/plugins/org.eclipse.ecf.provider.remoteservice_${org.eclipse.ecf.provider.remoteservice.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            -->
+        </zip>
+        
     </target>
 </project>

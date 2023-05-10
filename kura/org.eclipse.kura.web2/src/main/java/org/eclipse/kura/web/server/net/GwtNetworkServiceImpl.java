@@ -1668,10 +1668,12 @@ public class GwtNetworkServiceImpl {
 
     private static void fillWifiPassphrase(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties,
             String wifiModeBasePropName, String interfaceName, String mode) throws GwtKuraException, KuraException {
+
+        GwtWifiSecurity security = gwtWifiConfig.getSecurityEnum();
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
         String wifiPassphrasePropName = wifiModeBasePropName + "passphrase";
-        
-        if (isPlaceholder(passKey)) {
+
+        if (isPlaceholder(passKey, security)) {
             Optional<GwtWifiConfig> oldGwtWifiConfig = getOldGwtWifiConfig(interfaceName, mode);
             oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
                     new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
@@ -1683,8 +1685,9 @@ public class GwtNetworkServiceImpl {
         }
     }
 
-    private static boolean isPlaceholder(String passKey) {
-        return passKey != null && (passKey.equals(PASSWORD_PLACEHOLDER) || passKey.isEmpty());
+    private static boolean isPlaceholder(String passKey, GwtWifiSecurity security) {
+        return passKey != null && (passKey.equals(PASSWORD_PLACEHOLDER)
+                || (security != GwtWifiSecurity.netWifiSecurityNONE && passKey.isEmpty()));
     }
 
     private static Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode)

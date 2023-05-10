@@ -80,8 +80,9 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_PROPERTY_STATE = "State";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
     private static final String NM_SETTING_CONNECTION_KEY = "connection";
-
     private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
+
+    private static final String MM_MODEM_PROPERTY_STATE = "State";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
@@ -506,7 +507,8 @@ public class NMDbusConnector {
         Properties modemProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath,
                 Properties.class);
 
-        MMModemState currentModemState = MMModemState.toMMModemState(modemProperties.Get(MM_MODEM_NAME, "State"));
+        MMModemState currentModemState = MMModemState
+                .toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE));
 
         if (currentModemState.getValue() < MMModemState.MM_MODEM_STATE_ENABLED.getValue()) {
             logger.info("Modem {} not enabled. Enabling modem...", modemDevicePath);

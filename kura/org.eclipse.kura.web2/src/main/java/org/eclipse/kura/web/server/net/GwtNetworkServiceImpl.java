@@ -1670,7 +1670,8 @@ public class GwtNetworkServiceImpl {
             String wifiModeBasePropName, String interfaceName, String mode) throws GwtKuraException, KuraException {
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
         String wifiPassphrasePropName = wifiModeBasePropName + "passphrase";
-        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
+        
+        if (isPlaceholder(passKey)) {
             Optional<GwtWifiConfig> oldGwtWifiConfig = getOldGwtWifiConfig(interfaceName, mode);
             oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
                     new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
@@ -1680,6 +1681,10 @@ public class GwtNetworkServiceImpl {
         } else if (passKey != null) {
             properties.put(wifiPassphrasePropName, new Password(passKey));
         }
+    }
+
+    private static boolean isPlaceholder(String passKey) {
+        return passKey != null && (passKey.equals(PASSWORD_PLACEHOLDER) || passKey.isEmpty());
     }
 
     private static Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode)

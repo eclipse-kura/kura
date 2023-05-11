@@ -499,7 +499,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -518,9 +518,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
     }
 
     @Test
@@ -542,7 +540,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -564,9 +562,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI,
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
-                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
     }
 
     @Test
@@ -587,7 +583,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI), false);
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -1231,7 +1227,7 @@ public class NMDbusConnectorTest {
         doReturn("/org/freedesktop/ModemManager1/Modem/3").when(this.mockModemLocation).getObjectPath();
 
 
-        Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
+        Set<MMModemLocationSource> availableSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA, MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
         Set<MMModemLocationSource> enabledSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI);
         when(modemProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Capabilities"))
                 .thenReturn(MMModemLocationSource.toBitMaskFromMMModemLocationSource(availableSources));

@@ -92,12 +92,14 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
+        this.nmDbusConnector.setEventAdmin(eventAdmin);
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
         if (this.eventAdmin.equals(eventAdmin)) {
             this.eventAdmin = null;
         }
+        this.nmDbusConnector.unsetEventAdmin(eventAdmin);
     }
 
     public void setExecutorService(CommandExecutorService executorService) {

@@ -117,7 +117,7 @@ public class NMDbusConnector {
     }
 
     public void setEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = eventAdmin;
+        this.eventAdmin = Objects.requireNonNull(eventAdmin);
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
@@ -519,6 +519,11 @@ public class NMDbusConnector {
     }
 
     private void postModemEvent(String modemDevicePath, boolean enabled) throws DBusException {
+        if (Objects.isNull(this.eventAdmin)) {
+            logger.warn("EventAdmin not set, cannot port ModemGpsEnableEvent");
+            return;
+        }
+
         if (!enabled) {
             logger.debug("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}",
                     ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);

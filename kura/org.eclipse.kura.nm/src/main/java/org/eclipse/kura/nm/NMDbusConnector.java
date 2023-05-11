@@ -514,8 +514,9 @@ public class NMDbusConnector {
         if (!currentLocationSources.equals(desiredLocationSources)) {
             modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
-            postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);
         }
+
+        postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);
     }
 
     private void postModemEvent(String modemDevicePath, boolean enabled) throws DBusException {
@@ -546,11 +547,11 @@ public class NMDbusConnector {
         }
 
         HashMap<String, Object> modemInfoMap = new HashMap<>();
-        modemInfoMap.put(ModemGpsEnabledEvent.PORT, gpsPort);
+        modemInfoMap.put(ModemGpsEnabledEvent.PORT, gpsPort.get());
         modemInfoMap.put(ModemGpsEnabledEvent.BAUD_RATE, 9600);
         modemInfoMap.put(ModemGpsEnabledEvent.DATA_BITS, 8);
         modemInfoMap.put(ModemGpsEnabledEvent.STOP_BITS, 1);
-        modemInfoMap.put(ModemGpsEnabledEvent.PARITY, 1);
+        modemInfoMap.put(ModemGpsEnabledEvent.PARITY, 0);
 
         logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}",
                 ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);

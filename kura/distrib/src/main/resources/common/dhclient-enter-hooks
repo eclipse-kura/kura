@@ -1,0 +1,3 @@
+#!/bin/bash
+# Don't delete the following entry. Add custom actions after it.
+source /etc/kura-dhclient-enter-hooks

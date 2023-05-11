@@ -63,6 +63,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 break;
         }
 
+        // Manage GPS independently of device ip status
+        setModemGpsProperties();
+
         return this.properties.getProperties();
     }
 
@@ -287,13 +290,20 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setModemActiveFilter(this.ifname, gwtModemConfig.getActiveFilter());
             this.properties.setModemLpcEchoInterval(ifname, gwtModemConfig.getLcpEchoInterval());
             this.properties.setModemLpcEchoFailure(this.ifname, gwtModemConfig.getLcpEchoFailure());
-            this.properties.setModemGpsEnabled(this.ifname, gwtModemConfig.isGpsEnabled());
             this.properties.setModemDiversityEnabled(this.ifname, gwtModemConfig.isDiversityEnabled());
             this.properties.setModemApn(this.ifname, gwtModemConfig.getApn());
             this.properties.setUsbProductName(this.ifname, gwtModemConfig.getModemId());
             this.properties.setUsbVendorName(this.ifname, gwtModemConfig.getManufacturer());
             this.properties.setUsbProductId(this.ifname, gwtModemConfig.getModel());
             this.properties.setUsbDevicePath(this.ifname, gwtModemConfig.getHwUsbDevice());
+        }
+    }
+
+    private void setModemGpsProperties() {
+        if (this.gwtConfig instanceof GwtModemInterfaceConfig) {
+            GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) this.gwtConfig;
+
+            this.properties.setModemGpsEnabled(this.ifname, gwtModemConfig.isGpsEnabled());
         }
     }
 

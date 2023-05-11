@@ -31,7 +31,6 @@ import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
-import org.eclipse.kura.net.status.modem.ModemPortType;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.status.AccessPointsProperties;

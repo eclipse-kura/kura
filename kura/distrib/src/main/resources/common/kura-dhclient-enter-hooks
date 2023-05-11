@@ -1,0 +1,10 @@
+#!/bin/bash
+
+interfaces=()
+
+if [[ "${interfaces[*]}" =~ ${interface} ]]; then
+    make_resolv_conf(){
+        logger "Don't set DNS address for $interface"
+        :
+    }
+fi

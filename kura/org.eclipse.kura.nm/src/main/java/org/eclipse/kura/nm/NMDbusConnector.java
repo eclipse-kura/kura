@@ -546,6 +546,11 @@ public class NMDbusConnector {
             }
         }
 
+        if (!gpsPort.isPresent()) {
+            logger.warn("Could not find GPS port. Cannot post ModemGps event.");
+            return;
+        }
+
         HashMap<String, Object> modemInfoMap = new HashMap<>();
         modemInfoMap.put(ModemGpsEnabledEvent.PORT, gpsPort.get());
         modemInfoMap.put(ModemGpsEnabledEvent.BAUD_RATE, 9600);

@@ -514,9 +514,8 @@ public class NMDbusConnector {
         if (!currentLocationSources.equals(desiredLocationSources)) {
             modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
+            postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);
         }
-
-        postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);
     }
 
     private void postModemEvent(String modemDevicePath, boolean enabled) throws DBusException {
@@ -551,7 +550,7 @@ public class NMDbusConnector {
         logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}",
                 ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
         logger.trace("postModemGpsEvent() :: ModemGpsEnabledEvent content {}", modemInfoMap);
-        this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+        this.eventAdmin.postEvent(new ModemGpsEnabledEvent(modemInfoMap));
     }
 
     private void enableModem(String modemDevicePath) throws DBusException {

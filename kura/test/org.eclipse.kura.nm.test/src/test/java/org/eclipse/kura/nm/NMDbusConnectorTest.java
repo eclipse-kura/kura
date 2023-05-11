@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -48,6 +49,8 @@ import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.ExitStatus;
+import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
+import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.modem.AccessTechnology;
@@ -87,10 +90,12 @@ import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
 import org.junit.Test;
+import org.osgi.service.event.EventAdmin;
 
 public class NMDbusConnectorTest {
 
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
+    private final EventAdmin mockedEventAdmin = mock(EventAdmin.class);
     private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
     private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
     private final ModemManager1 mockedModemManager = mock(ModemManager1.class);
@@ -500,6 +505,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenEventAdminPostedEvent(false);
     }
 
     @Test
@@ -519,6 +525,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+        thenEventAdminPostedEvent(true);
     }
 
     @Test
@@ -541,6 +548,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenEventAdminPostedEvent(false);
     }
 
     @Test
@@ -563,6 +571,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+        thenEventAdminPostedEvent(true);
     }
 
     @Test
@@ -584,6 +593,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenEventAdminPostedEvent(false);
     }
 
     @Test
@@ -924,7 +934,8 @@ public class NMDbusConnectorTest {
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.ModemManager1"),
                 eq("/org/freedesktop/ModemManager1"), any()))
                 .thenReturn(this.mockedModemManager);
-
+        
+        this.instanceNMDbusConnector.setEventAdmin(this.mockedEventAdmin);
     }
 
     private void givenMockedPermissions() {
@@ -1473,6 +1484,14 @@ public class NMDbusConnectorTest {
             boolean expectedFlag) {
         verify(this.mockModemLocation, times(1))
                 .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);
+    }
+
+    private void thenEventAdminPostedEvent(boolean modemEnabled) {
+        if (modemEnabled) {
+            verify(this.mockedEventAdmin, times(1)).postEvent(isA(ModemGpsEnabledEvent.class));
+        } else {
+            verify(this.mockedEventAdmin, times(1)).postEvent(isA(ModemGpsDisabledEvent.class));
+        }
     }
 
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {

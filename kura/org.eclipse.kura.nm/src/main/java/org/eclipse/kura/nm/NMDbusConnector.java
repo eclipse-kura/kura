@@ -56,6 +56,7 @@ import org.freedesktop.networkmanager.device.Generic;
 import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,9 +110,21 @@ public class NMDbusConnector {
 
     private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
 
+    private EventAdmin eventAdmin;
+
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
+    }
+
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+
+    public void unsetEventAdmin(EventAdmin eventAdmin) {
+        if (eventAdmin.equals(this.eventAdmin)) {
+            this.eventAdmin = null;
+        }
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -512,7 +525,7 @@ public class NMDbusConnector {
             logger.debug("postModemGpsEvent() :: posting ModemGpsDisableEvent on topic {}",
                     ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC);
             HashMap<String, Object> modemInfoMap = new HashMap<>();
-            // this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+            this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
             return;
         }
 
@@ -535,12 +548,11 @@ public class NMDbusConnector {
         modemInfoMap.put(ModemGpsEnabledEvent.DATA_BITS, 8);
         modemInfoMap.put(ModemGpsEnabledEvent.STOP_BITS, 1);
         modemInfoMap.put(ModemGpsEnabledEvent.PARITY, 1);
-        ModemGpsEnabledEvent event = new ModemGpsEnabledEvent(modemInfoMap);
 
         logger.debug("postModemGpsEvent() :: posting ModemGpsEnabledEvent on topic {}",
                 ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC);
         logger.trace("postModemGpsEvent() :: ModemGpsEnabledEvent content {}", modemInfoMap);
-        // this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
+        this.eventAdmin.postEvent(new ModemGpsDisabledEvent(modemInfoMap));
     }
 
     private void enableModem(String modemDevicePath) throws DBusException {

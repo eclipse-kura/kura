@@ -1176,7 +1176,7 @@ public class NMDbusConnectorTest {
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimaryPort")).thenReturn(interfaceName);
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "Ports"))
                 .thenReturn(Arrays.asList(new Object[] { interfaceName, new UInt32(2) },
-                        new Object[] { "ttyACM3", new UInt32(4) }));
+                        new Object[] { "ttyACM3", new UInt32(5) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SupportedCapabilities"))
                 .thenReturn(Arrays.asList(new UInt32(4), new UInt32(8)));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "CurrentCapabilities"))
@@ -1507,7 +1507,7 @@ public class NMDbusConnectorTest {
         assertEquals("ttyACM17", modemStatus.getPrimaryPort());
         assertEquals(2, modemStatus.getPorts().size());
         assertEquals(ModemPortType.NET, modemStatus.getPorts().get("ttyACM17"));
-        assertEquals(ModemPortType.QCDM, modemStatus.getPorts().get("ttyACM3"));
+        assertEquals(ModemPortType.GPS, modemStatus.getPorts().get("ttyACM3"));
         assertEquals(2, modemStatus.getSupportedModemCapabilities().size());
         assertTrue(modemStatus.getSupportedModemCapabilities().contains(ModemCapability.GSM_UMTS));
         assertTrue(modemStatus.getSupportedModemCapabilities().contains(ModemCapability.LTE));

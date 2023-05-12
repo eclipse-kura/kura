@@ -30,8 +30,9 @@ public class DhcpClientManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpClientManager.class);
 
-    private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
+    private static final String DHCLIENT_HOOK_SCRIPT_FILE = "/etc/kura-dhclient-enter-hooks";
+    private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private final CommandExecutorService executorService;
 
     static {
@@ -86,6 +87,14 @@ public class DhcpClientManager {
         CommandStatus status = this.executorService.execute(command);
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to release current lease");
+        }
+    }
+
+    public static String getHookScriptFileName() {
+        if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+            return DHCLIENT_HOOK_SCRIPT_FILE;
+        } else {
+            return "";
         }
     }
 

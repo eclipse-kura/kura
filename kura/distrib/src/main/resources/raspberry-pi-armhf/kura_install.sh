@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+# Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,9 @@ fi
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
+
+systemctl stop apparmor
+systemctl disable apparmor
 
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
@@ -131,6 +134,38 @@ systemctl disable dhcpcd
 # disable isc-dhcp-server service - kura is the network manager
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
+
+#disable isc-dhcp-server6.service
+systemctl stop isc-dhcp-server6.service
+systemctl disable isc-dhcp-server6.service
+
+# disable NetworkManager.service - kura is the network manager
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
+
+#disable netplan
+systemctl disable systemd-networkd.socket
+systemctl disable systemd-networkd
+systemctl disable networkd-dispatcher
+systemctl disable systemd-networkd-wait-online
+systemctl mask systemd-networkd.socket
+systemctl mask systemd-networkd
+systemctl mask networkd-dispatcher
+systemctl mask systemd-networkd-wait-online
+
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
+
+#disable systemd-hostnamed
+systemctl stop systemd-hostnamed
+systemctl disable systemd-hostnamed
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant

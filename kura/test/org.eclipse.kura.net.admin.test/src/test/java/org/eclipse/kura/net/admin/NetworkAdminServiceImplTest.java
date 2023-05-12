@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -50,6 +51,12 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.ExitStatus;
+import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -59,6 +66,7 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
+import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
@@ -76,6 +84,7 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.service.event.Event;
 
 public class NetworkAdminServiceImplTest {
@@ -299,8 +308,10 @@ public class NetworkAdminServiceImplTest {
         props.put("net.interface.intf.up", true);
 
         props.put("net.interface.intf.config.ip4.address", "10.10.10.5");
-        // props.put("net.interface.intf.config.ip6.address", "1080:0:0:0:8:800:200C:417A");
-        // props.put("net.interface.intf.config.ip6.dnsServers", "1080:0:0:0:8:800:200C:417B");
+        // props.put("net.interface.intf.config.ip6.address",
+        // "1080:0:0:0:8:800:200C:417A");
+        // props.put("net.interface.intf.config.ip6.dnsServers",
+        // "1080:0:0:0:8:800:200C:417B");
 
         props.put("net.interface.intf.config.wifi.mode", WifiMode.INFRA.name());
         props.put("net.interface.intf.config.wifi.master.passphrase", passkey);
@@ -456,6 +467,154 @@ public class NetworkAdminServiceImplTest {
             assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
             assertTrue(e.getMessage().contains("invalid"));
         }
+
+    }
+
+    @Test
+    public void testEnableInterfaceDhcpClientDoesNotBringUpRemovingAddress()
+            throws KuraException, UnknownHostException, NoSuchFieldException {
+        // test error with invalid network configuration
+
+        final List<String> commands = new ArrayList<>();
+
+        NetworkAdminServiceImpl nasi = new NetworkAdminServiceImpl();
+
+        final CommandExecutorService ces = mock(CommandExecutorService.class);
+        when(ces.execute(Mockito.any())).thenAnswer(i -> {
+            final Command cmd = i.getArgument(0);
+            commands.add(Arrays.stream(cmd.getCommandLine()).collect(Collectors.joining(" ")));
+
+            final CommandStatus result = new CommandStatus(cmd, new ExitStatus() {
+
+                @Override
+                public int getExitCode() {
+                    return 0;
+                }
+
+                @Override
+                public boolean isSuccessful() {
+                    return true;
+                }
+
+            });
+
+            result.setErrorStream(cmd.getErrorStream());
+            result.setOutputStream(cmd.getOutputStream());
+            result.setInputStream(cmd.getInputStream());
+
+            return result;
+        });
+
+        nasi.setExecutorService(ces);
+        TestUtil.setFieldValue(nasi, "linuxNetworkUtil", new LinuxNetworkUtil(ces));
+        TestUtil.setFieldValue(nasi, "dhcpClientManager", new DhcpClientManager(ces));
+
+        NetworkConfigurationService networkConfigurationServiceMock = mock(NetworkConfigurationService.class);
+        nasi.setNetworkConfigurationService(networkConfigurationServiceMock);
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        String interfaceName = "intf";
+        EthernetInterfaceConfigImpl netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
+        List<NetInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
+        NetInterfaceAddressConfigImpl netInterfaceAddressConfig = new NetInterfaceAddressConfigImpl();
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        netConfig.setDhcp(true);
+
+        netConfigs.add(netConfig);
+
+        netInterfaceAddressConfig.setNetConfigs(netConfigs);
+        interfaceAddressConfigs.add(netInterfaceAddressConfig);
+
+        netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
+        nc.addNetInterfaceConfig(netInterfaceConfig);
+
+        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+
+        nasi.enableInterface("intf", true);
+
+        assertFalse(commands.contains("ifconfig intf 0.0.0.0"));
+
+    }
+
+    @Test
+    public void testEnableInterfaceStaticBringsUpRemovingAddress()
+            throws KuraException, UnknownHostException, NoSuchFieldException {
+        // test error with invalid network configuration
+
+        final List<String> commands = new ArrayList<>();
+
+        NetworkAdminServiceImpl nasi = new NetworkAdminServiceImpl();
+
+        final CommandExecutorService ces = mock(CommandExecutorService.class);
+        when(ces.execute(Mockito.any())).thenAnswer(i -> {
+            final Command cmd = i.getArgument(0);
+            commands.add(Arrays.stream(cmd.getCommandLine()).collect(Collectors.joining(" ")));
+
+            final CommandStatus result = new CommandStatus(cmd, new ExitStatus() {
+
+                @Override
+                public int getExitCode() {
+                    return 0;
+                }
+
+                @Override
+                public boolean isSuccessful() {
+                    return true;
+                }
+
+            });
+
+            result.setErrorStream(cmd.getErrorStream());
+            result.setOutputStream(cmd.getOutputStream());
+            result.setInputStream(cmd.getInputStream());
+
+            return result;
+        });
+
+        nasi.setExecutorService(ces);
+        TestUtil.setFieldValue(nasi, "linuxNetworkUtil", new LinuxNetworkUtil(ces) {
+            @Override
+            public boolean isLinkUp(NetInterfaceType ifaceType, String ifaceName) throws KuraException {
+                return false;
+            }
+
+            @Override
+            public boolean isLinkUp(String ifaceName) throws KuraException {
+                return false;
+            }
+        });
+        TestUtil.setFieldValue(nasi, "dhcpClientManager", new DhcpClientManager(ces));
+
+        NetworkConfigurationService networkConfigurationServiceMock = mock(NetworkConfigurationService.class);
+        nasi.setNetworkConfigurationService(networkConfigurationServiceMock);
+
+        NetworkConfiguration nc = new NetworkConfiguration();
+        String interfaceName = "intf";
+        EthernetInterfaceConfigImpl netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
+        List<NetInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
+        NetInterfaceAddressConfigImpl netInterfaceAddressConfig = new NetInterfaceAddressConfigImpl();
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        netConfig.setDhcp(false);
+        netConfig.setAddress((IP4Address) IP4Address.parseHostAddress("172.16.0.1"));
+        netConfig.setSubnetMask((IP4Address) IP4Address.parseHostAddress("255.255.255.0"));
+
+        netConfigs.add(netConfig);
+
+        netInterfaceAddressConfig.setNetConfigs(netConfigs);
+        interfaceAddressConfigs.add(netInterfaceAddressConfig);
+
+        netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
+        nc.addNetInterfaceConfig(netInterfaceConfig);
+
+        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+
+        nasi.enableInterface("intf", false);
+
+        assertTrue(commands.contains("ifconfig intf 0.0.0.0"));
 
     }
 
@@ -1293,7 +1452,8 @@ public class NetworkAdminServiceImplTest {
 
     @Test
     public void testSetCiphersWpa2Security() throws Throwable {
-        // WPA2 with both pair and group ciphers configured => only group ciphers are used
+        // WPA2 with both pair and group ciphers configured => only group ciphers are
+        // used
 
         NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
 
@@ -1318,7 +1478,8 @@ public class NetworkAdminServiceImplTest {
 
     @Test
     public void testSetCiphersWpaWpa2Security() throws Throwable {
-        // WPA_WPA2 with both pair and group ciphers configured => only pair ciphers are used
+        // WPA_WPA2 with both pair and group ciphers configured => only pair ciphers are
+        // used
 
         NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
 

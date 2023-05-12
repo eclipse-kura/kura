@@ -512,8 +512,12 @@ public class NMDbusConnector {
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
         if (!currentLocationSources.equals(desiredLocationSources)) {
-            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
-                    false);
+            try {
+                modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
+                        false);
+            } catch (DBusExecutionException e) {
+                logger.warn("Cannot setup Modem.Location, GPS data might not be available. Caused by:", e);
+            }
         }
 
         postModemEvent(modemDevicePath.get(), isGPSSourceEnabled);

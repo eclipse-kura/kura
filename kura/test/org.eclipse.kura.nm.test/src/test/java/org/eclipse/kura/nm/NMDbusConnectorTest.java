@@ -1406,10 +1406,6 @@ public class NMDbusConnectorTest {
         assertTrue(this.hasNullPointerExceptionThrown);
     }
 
-    private void thenNoSuchElementExceptionIsThrown() {
-        assertTrue(this.hasNoSuchElementExceptionThrown);
-    }
-
     private void thenIllegalArgumentExceptionIsThrown() {
         assertTrue(this.hasIllegalArgumentExceptionThrown);
     }

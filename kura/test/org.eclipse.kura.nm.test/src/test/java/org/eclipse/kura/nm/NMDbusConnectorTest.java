@@ -90,6 +90,7 @@ import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
 import org.junit.Test;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 public class NMDbusConnectorTest {
@@ -505,7 +506,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(false);
+        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -525,7 +526,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
-        thenEventAdminPostedEvent(true);
+        thenEventAdminPostedEvent(ModemGpsEnabledEvent.class);
     }
 
     @Test
@@ -548,7 +549,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(false);
+        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -571,7 +572,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
-        thenEventAdminPostedEvent(true);
+        thenEventAdminPostedEvent(ModemGpsEnabledEvent.class);
     }
 
     @Test
@@ -593,7 +594,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(false);
+        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -1486,12 +1487,8 @@ public class NMDbusConnectorTest {
                 .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);
     }
 
-    private void thenEventAdminPostedEvent(boolean modemEnabled) {
-        if (modemEnabled) {
-            verify(this.mockedEventAdmin, times(1)).postEvent(isA(ModemGpsEnabledEvent.class));
-        } else {
-            verify(this.mockedEventAdmin, times(1)).postEvent(isA(ModemGpsDisabledEvent.class));
-        }
+    private <T extends Event> void thenEventAdminPostedEvent(Class<T> clazz) {
+        verify(this.mockedEventAdmin, times(1)).postEvent(isA(clazz));
     }
 
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {

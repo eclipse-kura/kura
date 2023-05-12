@@ -12,15 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -40,16 +39,18 @@ import org.slf4j.LoggerFactory;
 public class DhcpClientConfigWriter implements NetworkConfigurationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpClientConfigWriter.class);
-    private static final String STANDARD_HOOK_SCRIPT = "#!/bin/bash\n"
+    private static final String DEFAULT_HOOK_SCRIPT = "#!/bin/sh\n"
             + "\n"
-            + "interfaces=()\n"
+            + "interfaces=\"\"\n"
             + "\n"
-            + "if [[ \"${interfaces[*]}\" =~ ${interface} ]]; then\n"
-            + "    make_resolv_conf(){\n"
-            + "        logger \"Don't set DNS address for $interface\"\n"
-            + "        :\n"
-            + "    }\n"
-            + "fi";
+            + "for item in $interfaces; do \n"
+            + "    if [ \"$item\" = \"$interface\" ]; then\n"
+            + "        make_resolv_conf(){\n"
+            + "            logger \"Don't set DNS address for $interface\"\n"
+            + "            :\n"
+            + "        }\n"
+            + "    fi\n"
+            + "done";
 
     public DhcpClientConfigWriter() {
         // Do nothing...
@@ -66,75 +67,62 @@ public class DhcpClientConfigWriter implements NetworkConfigurationVisitor {
             logger.debug("Hook scripts are supported only by dhclient. Do nothing.");
             return;
         }
+
+        List<String> lanInterfaceNames = new ArrayList<>();
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getModifiedNetInterfaceConfigs();
-
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
-                    || netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                writeConfig(netInterfaceConfig);
+            boolean isLan = ((AbstractNetInterface<?>) netInterfaceConfig)
+                    .getInterfaceStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
+            if (isLan && (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                    || netInterfaceConfig.getType() == NetInterfaceType.WIFI)) {
+                lanInterfaceNames.add(netInterfaceConfig.getName());
             }
         }
+
+        lanInterfaceNames.sort(null);
+        writeDhcpClientConfig(lanInterfaceNames);
     }
 
-    private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
-        String interfaceName = netInterfaceConfig.getName();
+    private void writeDhcpClientConfig(List<String> interfaceNames) {
         String hookScriptFileName = DhcpClientManager.getHookScriptFileName();
         if (hookScriptFileName == null || hookScriptFileName.isEmpty()) {
-            logger.debug("Hook scripts cannot be empty. Do nothing.");
+            logger.debug("Hook script file name not defined. Do nothing.");
             return;
         }
-        boolean isLan = ((AbstractNetInterface<?>) netInterfaceConfig)
-                .getInterfaceStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
 
         try {
-            writeHookScript(interfaceName, hookScriptFileName, isLan);
+            writeDhclientHookScript(interfaceNames, hookScriptFileName);
         } catch (KuraIOException e) {
-            logger.error("Failed to write dhcp client hook script for interface {}", interfaceName, e);
+            logger.error("Failed to write dhclient hook script", e);
         }
     }
 
-    private void writeHookScript(String interfaceName, String hookScriptFileName, boolean addToList)
+    private void writeDhclientHookScript(List<String> interfaceNames, String hookScriptFileName)
             throws KuraIOException {
-        Path hookScriptFilePath = Paths.get(hookScriptFileName);
-        createHookScriptFile(hookScriptFilePath);
+        StringBuilder interfacesLine = new StringBuilder("interfaces=\"");
+        interfacesLine.append(interfaceNames.stream().collect(Collectors.joining(" ")));
+        interfacesLine.append("\"\n");
+        String hookScriptContent = DEFAULT_HOOK_SCRIPT.replace("interfaces=\"\"\n", interfacesLine);
 
+        Path hookScriptFilePath = Paths.get(hookScriptFileName);
         try {
-            String fileContent = new String(Files.readAllBytes(hookScriptFilePath), StandardCharsets.UTF_8);
-            if (addToList) {
-                if (!fileContent.contains(interfaceName)) {
-                    Pattern pattern = Pattern.compile("interfaces=\\(.*\\)");
-                    Matcher matcher = pattern.matcher(fileContent);
-                    if (matcher.find()) {
-                        String line = matcher.group();
-                        String newLine = line.substring(0, line.length() - 1) + " " + interfaceName + ")";
-                        fileContent = fileContent.replace(line, newLine);
-                    }
+            if (Files.exists(hookScriptFilePath) && Files.isReadable(hookScriptFilePath)) {
+                String currentHookScriptContent = new String(Files.readAllBytes(hookScriptFilePath),
+                        StandardCharsets.UTF_8);
+                if (!hookScriptContent.equals(currentHookScriptContent)) {
+                    writeFile(hookScriptFilePath, hookScriptContent);
                 }
             } else {
-                fileContent = fileContent.replace(" " + interfaceName, "");
+                writeFile(hookScriptFilePath, hookScriptContent);
             }
-            Files.write(hookScriptFilePath, fileContent.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new KuraIOException(e, "Failed to update dhcp client hook script");
-        }
-
-    }
-
-    private void createHookScriptFile(Path hookScriptPath) throws KuraIOException {
-        if (!Files.exists(hookScriptPath)) {
-            try {
-                Files.write(hookScriptPath, STANDARD_HOOK_SCRIPT.getBytes());
-            } catch (IOException e) {
-                throw new KuraIOException(e, "Failed to write standard dhcp client hook script");
-            }
-        }
-        File file = hookScriptPath.toFile();
-        if (!file.setReadable(true, false)) {
-            logger.debug("Failed to set read permissions to {}", hookScriptPath);
-        }
-        if (!file.setWritable(true, false)) {
-            logger.debug("Failed to set write permissions to {}", hookScriptPath);
+            throw new KuraIOException(e, "Failed to update dhclient hook script");
         }
     }
+
+    private void writeFile(Path path, String content) throws IOException {
+        Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+    }
+
 }

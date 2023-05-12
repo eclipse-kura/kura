@@ -506,7 +506,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
+        thenEventAdminReceived(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -526,7 +526,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
-        thenEventAdminPostedEvent(ModemGpsEnabledEvent.class);
+        thenEventAdminReceived(ModemGpsEnabledEvent.class);
     }
 
     @Test
@@ -549,7 +549,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
+        thenEventAdminReceived(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -572,7 +572,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
-        thenEventAdminPostedEvent(ModemGpsEnabledEvent.class);
+        thenEventAdminReceived(ModemGpsEnabledEvent.class);
     }
 
     @Test
@@ -594,7 +594,7 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
-        thenEventAdminPostedEvent(ModemGpsDisabledEvent.class);
+        thenEventAdminReceived(ModemGpsDisabledEvent.class);
     }
 
     @Test
@@ -1483,7 +1483,7 @@ public class NMDbusConnectorTest {
                 .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);
     }
 
-    private <T extends Event> void thenEventAdminPostedEvent(Class<T> clazz) {
+    private <T extends Event> void thenEventAdminReceived(Class<T> clazz) {
         verify(this.mockedEventAdmin, times(1)).postEvent(isA(clazz));
     }
 

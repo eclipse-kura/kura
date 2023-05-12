@@ -6,6 +6,7 @@ This service release of Eclipse Kura includes the following changes:
 - Fixed DNS servers lifecycle when interface disabled
 - Fixed Asset channel ordering with channel names that contain indexes bigger than the int size
 - Fixed PPP PDP context number management
+- Fixed DNS monitor behavior and DNS interaction with dhclient
 
 
 Target Environments:
@@ -20,6 +21,8 @@ Breaking Changes:
   * Eclipse Kura 5.2.2 does not introduce API breakage with Eclipse Kura 5.2.x.
 
 Bug Fixes:
+  * 4f66bbcb19 - [net.admin] added dhclient hook files (#4645) (Pierantonio Merlino)
+  * 39d8fee514 - [net.admin] dns monitor fixes (#4636) (Pierantonio Merlino)
   * 0a4bcfe6e9 - Wires load time [Backport] (#4626) (Matteo Maiero)
   * 1abe40ddc6 - [monitor.dns-server] added check for interface as LAN before starting DNS server [Backport] (#4627) (Matteo Maiero)
   * b360f14801 - Ordering of channels when numbers are bigger than int [backport release-5.2.0] (#4625) (github-actions[bot])
@@ -76,6 +79,9 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 4f66bbcb19 - fix(net.admin): added dhclient hook files (#4645) (Pierantonio Merlino)
+  * 39d8fee514 - fix(net.admin): dns monitor fixes (#4636) (Pierantonio Merlino)
+  * d4151f6c67 - chore: add Kura 5.2.2 release notes (#4631) (github-actions[bot])
   * 04fd78c4ac - chore: automated uptick to 5.2.2 (#4628) (github-actions[bot])
   * 0a4bcfe6e9 - fix: Wires load time [Backport] (#4626) (Matteo Maiero)
   * 1abe40ddc6 - fix(monitor.dns-server): added check for interface as LAN before starting DNS server [Backport] (#4627) (Matteo Maiero)

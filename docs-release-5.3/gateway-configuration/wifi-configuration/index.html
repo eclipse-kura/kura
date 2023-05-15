@@ -3023,6 +3023,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Password Verification</strong>: clicking this button triggers password verification before a full connection is established.</p>
 </li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Generic Profiles Access Point Scan Issue</p>
+<p>Due to a limitation in our current implementation of Access Point scanning in the generic profiles, a scan triggered while the device Wireless Mode is set as <em>Access Point</em> will result in it reporting itself as the only reachable Access Point.</p>
+<p>To retrieve the actual list of nearby Access Points, set your device in <em>Station Mode</em> with a temporary configuration and trigger the scan again.</p>
+</div>
 <h2 id="wi-fi-linux-configuration">Wi-Fi Linux Configuration</h2>
 <p>This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
 <div class="admonition warning">

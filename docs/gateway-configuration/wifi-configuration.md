@@ -93,6 +93,11 @@ In addition to the options described above, the **Wireless** configuration displ
 
 - **Password Verification**: clicking this button triggers password verification before a full connection is established.
 
+!!! warning "Generic Profiles Access Point Scan Issue"
+    Due to a limitation in our current implementation of Access Point scanning in the generic profiles, a scan triggered while the device Wireless Mode is set as _Access Point_ will result in it reporting itself as the only reachable Access Point.
+
+    To retrieve the actual list of nearby Access Points, set your device in _Station Mode_ with a temporary configuration and trigger the scan again.
+
 ## Wi-Fi Linux Configuration
 
 This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.

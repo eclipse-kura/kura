@@ -2793,6 +2793,10 @@ following steps:</p>
 <p>and the default <strong>password</strong> is:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The Nvidia Jetson Nano with Ubuntu 18.04 LTS comes with the <code>ubuntu-fan</code> script that is launched by the <code>ifup</code> command. Since this relies on the <code>fanctl</code> script which requires root privileges, this causes issues on the Kura networking. For example, the network configuration cannot be applied due to some errors. <a href="https://github.com/eclipse/kura/pull/4587">Here</a> are some further details. To avoid errors in the application of the network configuration is preferable to disable the script execution with this command: <code>chmod -x /etc/network/if-up.d/ubuntu-fan</code></p>
+</div>
 </li>
 </ol>
 

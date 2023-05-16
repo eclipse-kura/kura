@@ -2902,7 +2902,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>clock.ntp.host</strong>: sets a valid NTP server host address.</p>
 </li>
 <li>
-<p><strong>clock.ntp.port</strong>: sets a valid NTP port number.</p>
+<p><strong>clock.ntp.port</strong>: sets a valid NTP port number (not supported by ntpd, use the port 123 in that case).</p>
 </li>
 <li>
 <p><strong>clock.ntp.timeout</strong>: specifies the NTP timeout in milliseconds.</p>
@@ -2917,7 +2917,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>clock.ntp.refresh-interval</strong>: defines the frequency (in seconds) at which the service tries to sync the clock. Note that at the start of Kura, when the ClockService is enabled, it tries to sync the clock every minute until it is successful. After a successful sync, this operation is performed at the frequency defined by this parameter. If the value is less than zero, there is no update. If the value is equal to zero, syncs only once at startup.</p>
 </li>
 <li>
-<p><strong>chrony.advanced.config</strong>: specifies the content of the chrony configuration file. If this field is left blank, the default system configuration will be used. 
+<p><strong>chrony.advanced.config</strong>: specifies the content of the chrony configuration file. If this field is left blank, the default system configuration will be used. All fields above will be ignored.
 To obtain the hardware clock synchronization  the directive rtcsync could be used. The rtcsync directive provides the hardware clock synchronization  made by the linux kernel every 11 minutes. For further information reference the <a href="https://chrony.tuxfamily.org/doc/4.1/chrony.conf.html">chrony website</a>.</p>
 </li>
 </ul>

@@ -74,3 +74,6 @@ following steps:
     ```
     admin
     ```
+
+    !!! warning
+        The Nvidia Jetson Nano with Ubuntu 18.04 LTS comes with the `ubuntu-fan` script that is launched by the `ifup` command. Since this relies on the `fanctl` script which requires root privileges, this causes issues on the Kura networking. For example, the network configuration cannot be applied due to some errors. [Here](https://github.com/eclipse/kura/pull/4587) are some further details. To avoid errors in the application of the network configuration is preferable to disable the script execution with this command: `chmod -x /etc/network/if-up.d/ubuntu-fan`

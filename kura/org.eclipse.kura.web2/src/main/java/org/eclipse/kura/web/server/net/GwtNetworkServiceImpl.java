@@ -426,25 +426,25 @@ public class GwtNetworkServiceImpl {
                                 GwtWifiRadioMode gwtWifiRadioMode = null;
                                 if (wifiConfig.getRadioMode() != null) {
                                     switch (wifiConfig.getRadioMode()) {
-                                        case RADIO_MODE_80211a:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
-                                            break;
-                                        case RADIO_MODE_80211b:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
-                                            break;
-                                        case RADIO_MODE_80211g:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
-                                            break;
-                                        case RADIO_MODE_80211nHT20:
-                                        case RADIO_MODE_80211nHT40above:
-                                        case RADIO_MODE_80211nHT40below:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
-                                            break;
-                                        case RADIO_MODE_80211_AC:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
-                                            break;
-                                        default:
-                                            break;
+                                    case RADIO_MODE_80211a:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
+                                        break;
+                                    case RADIO_MODE_80211b:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
+                                        break;
+                                    case RADIO_MODE_80211g:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
+                                        break;
+                                    case RADIO_MODE_80211nHT20:
+                                    case RADIO_MODE_80211nHT40above:
+                                    case RADIO_MODE_80211nHT40below:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
+                                        break;
+                                    case RADIO_MODE_80211_AC:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
+                                        break;
+                                    default:
+                                        break;
                                     }
                                 }
                                 if (gwtWifiRadioMode != null) {
@@ -892,7 +892,7 @@ public class GwtNetworkServiceImpl {
             if (wifiHotspotInfoList != null) {
                 for (WifiHotspotInfo wifiHotspotInfo : wifiHotspotInfoList) {
                     String ssid = wifiHotspotInfo.getSsid();
-                    
+
                     if (wifiHotspotInfo.getChannel() <= systemService.getKuraWifiTopChannel() && ssid != null
                             && !ssid.equals(wirelessSsid)) {
                         GwtWifiHotspotEntry gwtWifiHotspotEntry = new GwtWifiHotspotEntry();
@@ -1384,8 +1384,7 @@ public class GwtNetworkServiceImpl {
     }
 
     private static void fillDnsServers(GwtNetInterfaceConfig config, Map<String, Object> properties,
-            String basePropName)
-            throws UnknownHostException {
+            String basePropName) throws UnknownHostException {
         String regexp = "[\\s,;\\n\\t]+";
         String dnsServerPropName = basePropName + "ip4.dnsServers";
         List<String> dnsServers = Arrays.asList(config.getDnsServers().split(regexp));
@@ -1593,8 +1592,7 @@ public class GwtNetworkServiceImpl {
     }
 
     private static void fillWifiProperties(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties,
-            String basePropName,
-            String interfaceName) throws KuraException, GwtKuraException {
+            String basePropName, String interfaceName) throws KuraException, GwtKuraException {
         StringBuilder wifiBasePropName = new StringBuilder(basePropName).append("wifi.");
 
         String mode = gwtWifiConfig.getWirelessMode();
@@ -1667,19 +1665,60 @@ public class GwtNetworkServiceImpl {
     }
 
     private static void fillWifiPassphrase(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties,
-            String wifiModeBasePropName, String interfaceName, String mode) throws GwtKuraException, KuraException {
+            String wifiModeBasePropName, String interfaceName, String mode) throws GwtKuraException {
+
+        GwtWifiSecurity security = gwtWifiConfig.getSecurityEnum();
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
         String wifiPassphrasePropName = wifiModeBasePropName + "passphrase";
-        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
-            Optional<GwtWifiConfig> oldGwtWifiConfig = getOldGwtWifiConfig(interfaceName, mode);
-            oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
-                    new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
+
+        String wirelessSSID = gwtWifiConfig.getWirelessSsid();
+
+        if (isPlaceholder(passKey, security)) {
+            Optional<GwtWifiConfig> oldGwtWifiConfig = wirelessSSID == null ? getOldGwtWifiConfig(interfaceName, mode)
+                    : getOldGwtWifiConfigBySSID(wirelessSSID, interfaceName, mode);
+
+            if (oldGwtWifiConfig.isPresent()) {
+                properties.put(wifiPassphrasePropName,
+                        new Password(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.get().getPassword())));
+            } else {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
             GwtServerUtil.validateUserPassword(passKey);
             properties.put(wifiPassphrasePropName, new Password(passKey));
         } else if (passKey != null) {
             properties.put(wifiPassphrasePropName, new Password(passKey));
         }
+    }
+
+    private static boolean isPlaceholder(String passKey, GwtWifiSecurity security) {
+        return passKey != null && (passKey.equals(PASSWORD_PLACEHOLDER)
+                || (security != GwtWifiSecurity.netWifiSecurityNONE && passKey.isEmpty()));
+    }
+
+    private static Optional<GwtWifiConfig> getOldGwtWifiConfigBySSID(String wirelessSSID, String interfaceName,
+            String mode) throws GwtKuraException {
+        Optional<GwtWifiConfig> config = Optional.empty();
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(false);
+        for (GwtNetInterfaceConfig netConfig : result) {
+            if (netConfig instanceof GwtWifiNetInterfaceConfig
+                    && interfaceName.equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {
+                GwtWifiNetInterfaceConfig oldWifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
+                GwtWifiConfig oldGwtWifiConfig;
+                if (mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
+                    oldGwtWifiConfig = oldWifiConfig.getAccessPointWifiConfig();
+                } else {
+                    oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
+                }
+
+                if (oldGwtWifiConfig != null && oldGwtWifiConfig.getWirelessSsid().equals(wirelessSSID)) {
+                    config = Optional.of(oldGwtWifiConfig);
+                    break;
+                }
+            }
+        }
+        return config;
     }
 
     private static Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode)
@@ -1696,6 +1735,7 @@ public class GwtNetworkServiceImpl {
                 } else {
                     oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
                 }
+
                 if (oldGwtWifiConfig != null) {
                     config = Optional.of(oldGwtWifiConfig);
                     break;
@@ -1766,24 +1806,24 @@ public class GwtNetworkServiceImpl {
         WifiRadioMode wifiRadioMode;
 
         switch (radioMode) {
-            case netWifiRadioModeA:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
-                break;
-            case netWifiRadioModeB:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
-                break;
-            case netWifiRadioModeBG:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
-                break;
-            case netWifiRadioModeBGN:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
-                break;
-            case netWifiRadioModeANAC:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
-                break;
+        case netWifiRadioModeA:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+            break;
+        case netWifiRadioModeB:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
+            break;
+        case netWifiRadioModeBG:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
+            break;
+        case netWifiRadioModeBGN:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
+            break;
+        case netWifiRadioModeANAC:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
+            break;
 
-            default:
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        default:
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
 
         return wifiRadioMode;

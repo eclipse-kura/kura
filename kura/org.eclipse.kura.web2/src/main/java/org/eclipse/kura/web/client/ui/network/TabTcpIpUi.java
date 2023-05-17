@@ -700,8 +700,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
     private void showMultipleWanModal(List<GwtNetInterfaceConfig> configs) {
         for (GwtNetInterfaceConfig config : configs) {
-            if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN) && !config
-                    .getName().equals(TabTcpIpUi.this.selectedNetIfConfig.getName())) {
+            if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
+                    && !config.getName().equals(TabTcpIpUi.this.selectedNetIfConfig.getName())) {
                 logger.log(Level.SEVERE, "Error: Status Invalid");
                 TabTcpIpUi.this.wanModal.show();
                 break;
@@ -804,6 +804,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.subnet.setText("");
                 this.gateway.setText("");
                 this.dns.setText("");
+                this.renew.setEnabled(false);
             } else {
                 String configureValue = this.configure.getSelectedValue();
                 if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {

@@ -42,11 +42,11 @@
             cardinality="0" 
             required="true"
             default="java-ntp" 
-            description="Source for setting the system clock. Verify the availabiliy of the selected provider before activate it.">
-            
+            description="Source for setting the system clock. Verify the availabiliy of the selected provider before activate it. Using chrony-advanced causes all fields, except Chrony Configuration, to be ignored.">
+
                <Option label="java-ntp" value="java-ntp"/>
-               <Option label="ntpd"     value="ntpd"/>
-               <Option label="chrony-advanced"	value="chrony-advanced"/>
+               <Option label="ntpd" value="ntpd"/>
+               <Option label="chrony-advanced" value="chrony-advanced"/>
         </AD>
 
         <AD id="clock.ntp.host"  
@@ -65,7 +65,7 @@
             min="1"
             max="65535"
             default="123" 
-            description="The port number that provides the system time via NTP"/>
+            description="The port number that provides the system time via NTP (not supported by ntpd, use the port 123 in that case)"/>
 
         <AD id="clock.ntp.timeout"  
             name="clock.ntp.timeout"
@@ -115,7 +115,7 @@
             type="String"
             cardinality="0"
             required="false"
-            description="Chrony configuration file.|TextArea" />
+            description="Chrony configuration file. All fields above will be ignored.|TextArea" />
             
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

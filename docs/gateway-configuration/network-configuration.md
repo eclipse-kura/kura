@@ -44,6 +44,8 @@ Regarding DNS, both ESF and external tools store the DNS addresses in the `/etc/
 
 So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using ESF. If at least one WAN interface is configured by ESF, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, ESF will empty the file.
 
+To avoid device misconfigurations when **Not Managed** interfaces are used, **don't** use the _dns-nameservers_ directive in the `/etc/network/interfaces` file. Please add the DNS addresses directly to the `/etc/resolv.conf` file.
+
 ![Network Configuration TCP/IP](./images/network-configuration-tcpip.png)
 
 ## DHCP & NAT Configuration

@@ -7,11 +7,6 @@ Eclipse Kura™
 
 <div align="center">
 
-[![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
-[![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-</div>
-
 ![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)
 ![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)
 
@@ -20,10 +15,12 @@ Eclipse Kura™
 ![GitHub Contributors](https://img.shields.io/github/contributors/eclipse/kura?label=Contributors)
 ![GitHub Forks](https://img.shields.io/github/forks/eclipse/kura?label=Forks)
 
-![Gitter](https://img.shields.io/gitter/room/eclipse/kura?label=Chat&logo=gitter)
-
-![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins) <br/>
+![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)
 ![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins) <br/>
+  
+[![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+  
+</div>
 
 An OSGi-based Application Framework for M2M Service Gateways
 

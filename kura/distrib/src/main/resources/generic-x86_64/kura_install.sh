@@ -12,6 +12,36 @@
 #  Eurotech
 #
 
+backup_files() {
+    SUFFIX="${1}"
+
+    shift
+
+    for file in "${@}"
+    do
+        if [ -f "${file}" ]
+        then
+            mv "${file}" "${file}.${SUFFIX}"
+        fi
+    done
+}
+
+disable_netplan() {
+    # disable netplan configuration files
+    backup_files kurasave /lib/netplan/*.yaml /etc/netplan/*.yaml
+
+    if [ -d /etc/netplan  ]
+    then
+
+    # use NM renderer
+        cat > /etc/netplan/zz-kura-use-nm.yaml <<EOF
+network:
+  version: 2
+  renderer: NetworkManager
+EOF
+    fi
+}
+
 INSTALL_DIR=/opt/eclipse
 
 # create known kura install location
@@ -60,6 +90,7 @@ systemctl stop dnsmasq
 systemctl disable dnsmasq
 systemctl stop dhcpcd
 systemctl disable dhcpcd
+systemctl disable systemd-networkd
 
 # set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
@@ -89,16 +120,9 @@ systemctl enable firewall
 if [ -d /etc/cloud/cloud.cfg.d ]; then
     echo "network: {config: disabled}" | sudo tee -a /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null
 fi
-if [ -d /etc/netplan/ ]; then
-    cp /etc/netplan/00-installer-config.yaml /etc/netplan/00-installer-config.yaml.BAK
-    cat << EOF >> /etc/netplan/00-installer-config.yaml
-# This file describes the network interfaces available on your system
-# For more information, see netplan(5).
-network:
-  version: 2
-  renderer: NetworkManager
-EOF
-fi
+
+disable_netplan
+
 if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
     TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )
 

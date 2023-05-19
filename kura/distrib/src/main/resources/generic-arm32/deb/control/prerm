@@ -61,6 +61,27 @@ function stopWatchdog {
     fi
 }
 
+function restore_backup_files {
+    SUFFIX="${1}"
+
+    shift
+
+    for file in "${@}"
+    do
+        if [ -f "${file}" ] && expr "${file}" : ".*[.]${SUFFIX}$" > /dev/null; then
+            mv "${file}" "${file%."${SUFFIX}"}"
+        fi
+    done
+}
+
+function restore_netplan {
+  if [ -f /etc/netplan/zz-kura-use-nm.yaml ]; then
+    rm -f /etc/netplan/zz-kura-use-nm.yaml
+  fi
+
+  restore_backup_files kurasave /lib/netplan/* /etc/netplan/*
+}
+
 # Pre-remove script
 function preRemove {
     #Remove INIT scripts
@@ -107,6 +128,8 @@ function preRemove {
     if [ -f /etc/default/dnsmasq.old ]; then
         mv /etc/default/dnsmasq.old /etc/default/dnsmasq
     fi
+
+    restore_netplan
     
     echo ""
     echo "Uninstalling KURA... Done!"

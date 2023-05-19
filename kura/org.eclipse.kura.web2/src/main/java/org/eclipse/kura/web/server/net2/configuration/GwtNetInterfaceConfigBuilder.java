@@ -188,6 +188,7 @@ public class GwtNetInterfaceConfigBuilder {
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterPairwiseCiphers(this.ifName)));
         gwtWifiConfig.setGroupCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterGroupCiphers(this.ifName)));
+        gwtWifiConfig.setChannels(this.properties.getWifiMasterChannel(this.ifName));
 
         // wifi master specific properties
 
@@ -216,7 +217,8 @@ public class GwtNetInterfaceConfigBuilder {
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraPairwiseCiphers(this.ifName)));
         gwtWifiConfig.setGroupCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraGroupCiphers(this.ifName)));
-
+        gwtWifiConfig.setChannels(this.properties.getWifiInfraChannel(this.ifName));
+        
         // wifi infra specific properties
 
         Optional<String> radioMode = EnumsParser

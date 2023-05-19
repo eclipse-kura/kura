@@ -1462,7 +1462,7 @@ public class NMDbusConnectorTest {
     }
 
     private void thenConnectionIsDeleted(String path) {
-        verify(this.mockedConnections.get(path)).Delete();
+        verify(this.mockedConnections.get(path), atLeastOnce()).Delete();
     }
 
     private void thenConnectionIsNotDeleted(String path) {

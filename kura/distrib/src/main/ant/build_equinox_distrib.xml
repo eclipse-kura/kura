@@ -612,9 +612,7 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/ifup-local.raspbian"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/kura-dhclient-enter-hooks"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/dhclient-enter-hooks"
+            <zipfileset file="src/main/resources/common/kura-dhclient-enter-hook"
                 prefix="${build.output.name}/${install.folder}" />
         	
             <zipfileset file="src/main/resources/common/dnsmasq"

@@ -536,6 +536,8 @@ public class NMDbusConnector {
     }
 
     private void disable(Device device) throws DBusException {
+        Optional<Connection> appliedConnection = getAppliedConnection(device);
+
         NMDeviceState deviceState = getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
@@ -545,6 +547,10 @@ public class NMDbusConnector {
         }
 
         // Housekeeping
+        if (appliedConnection.isPresent()) {
+            appliedConnection.get().Delete();
+        }
+
         List<Connection> availableConnections = getAvaliableConnections(device);
         for (Connection connection : availableConnections) {
             connection.Delete();

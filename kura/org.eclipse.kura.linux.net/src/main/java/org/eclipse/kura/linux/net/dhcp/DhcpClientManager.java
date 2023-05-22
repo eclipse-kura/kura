@@ -93,9 +93,8 @@ public class DhcpClientManager {
     public static String getHookScriptFileName() {
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
             return DHCLIENT_HOOK_SCRIPT_FILE;
-        } else {
-            return "";
         }
+        return "";
     }
 
     private static boolean removePidFile(String interfaceName) {

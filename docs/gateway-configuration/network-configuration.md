@@ -31,18 +31,18 @@ If the network interface is *Enabled for LAN* and manually configured (i.e., not
 
 ### More details about the Not Managed interface Status
 
-When a network interface is configured as **Not Managed**, ESF will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
+When a network interface is configured as **Not Managed**, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
 
-Regarding DNS, both ESF and external tools store the DNS addresses in the `/etc/resolv.conf` file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.
+Regarding DNS, both Kura and the external tools store the DNS addresses in the `/etc/resolv.conf` file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.
 
-| ESF WAN interface | ESF NotManaged interface | Do ESF manage resolv.conf? |
-| ----------------- | ------------------------ | -------------------------- |
-| NO                | NO                       | YES                        |
-| NO                | YES                      | NO                         |
-| YES               | NO                       | YES                        |
-| YES               | YES                      | YES                        |
+| Kura WAN interface | Kura NotManaged interface | Does Kura manage resolv.conf? |
+| ------------------ | ------------------------- | ----------------------------- |
+| NO                 | NO                        | YES                           |
+| NO                 | YES                       | NO                            |
+| YES                | NO                        | YES                           |
+| YES                | YES                       | YES                           |
 
-So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using ESF. If at least one WAN interface is configured by ESF, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, ESF will empty the file.
+So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using Kura. If at least one WAN interface is configured by Eclipse Kura, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, Kura will empty the file.
 
 To avoid device misconfigurations when **Not Managed** interfaces are used, **don't** use the _dns-nameservers_ directive in the `/etc/network/interfaces` file. Please add the DNS addresses directly to the `/etc/resolv.conf` file.
 

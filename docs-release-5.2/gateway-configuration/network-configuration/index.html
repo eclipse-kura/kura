@@ -3079,6 +3079,7 @@ Since the network configuration shown on the screen may not be synchronized with
 </tbody>
 </table>
 <p>So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as <strong>Not Managed</strong> and not to set any interface as <strong>Enabled For Wan</strong> using ESF. If at least one WAN interface is configured by ESF, it will take the control of the <code>/etc/resolv.conf/</code> file. Finally, if any interface is configured in <strong>Enabled For Wan</strong> or <strong>Not Managed</strong> mode, ESF will empty the file.</p>
+<p>To avoid device misconfigurations when <strong>Not Managed</strong> interfaces are used, <strong>don't</strong> use the <em>dns-nameservers</em> directive in the <code>/etc/network/interfaces</code> file. Please add the DNS addresses directly to the <code>/etc/resolv.conf</code> file.</p>
 <p><img alt="Network Configuration TCP/IP" src="../images/network-configuration-tcpip.png" /></p>
 <h2 id="dhcp-nat-configuration">DHCP &amp; NAT Configuration</h2>
 <p>The <strong>DHCP &amp; NAT</strong> tab contains the following configuration parameters:</p>

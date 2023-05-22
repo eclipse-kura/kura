@@ -624,7 +624,7 @@ public class DnsMonitorServiceImplTest {
 
         setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledLAN, NetInterfaceStatus.netIPv4StatusEnabledLAN, svc);
 
-        verify(dns, times(1)).setDnServers(anyObject());
+        verify(dns, times(1)).setDnServers(any());
     }
 
     @Test
@@ -635,7 +635,7 @@ public class DnsMonitorServiceImplTest {
 
         setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledWAN, NetInterfaceStatus.netIPv4StatusEnabledLAN, svc);
 
-        verify(dns, times(1)).setDnServers(anyObject());
+        verify(dns, times(1)).setDnServers(any());
     }
 
     @Test
@@ -646,7 +646,7 @@ public class DnsMonitorServiceImplTest {
 
         setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledWAN, NetInterfaceStatus.netIPv4StatusUnmanaged, svc);
 
-        verify(dns, times(1)).setDnServers(anyObject());
+        verify(dns, times(1)).setDnServers(any());
     }
 
     @Test
@@ -657,7 +657,7 @@ public class DnsMonitorServiceImplTest {
 
         setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledLAN, NetInterfaceStatus.netIPv4StatusUnmanaged, svc);
 
-        verify(dns, times(0)).setDnServers(anyObject());
+        verify(dns, times(0)).setDnServers(any());
     }
 
     private void setDnsServers(NetInterfaceStatus eth0Status, NetInterfaceStatus eth1Status, DnsMonitorServiceImpl svc)

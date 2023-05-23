@@ -1,11 +1,7 @@
-Eclipse Kura - 5.3.0 - April 2023
+Eclipse Kura - [ERROR] [ERROR] Some problems were encountered while processing the POMs: - May 2023
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces a new framework compatibility with Java 17, 
-a completely renewed networking that leverages Linux NetworkManager, a new set of APIs and abstractions for SQL and noSQL databases, 
-the availability of SQLite as a database option (H2 still available for compatibility reasons), 
-an improved Container Management feature with UDP ports support, a refreshed Asset implementation with the new data publishing on change and, finally, 
-the new Kura Data Service Connection Policy.
+[TODO]
 
 
 Features:
@@ -58,19 +54,24 @@ Features:
   * 79589e791b - add Temurin JDK as alternative JVM in .deb dependencies (#4190) (Mattia Dal Ben)
 
 Target Environments:
- Kura is released as pre-compiled binary installers for the following platforms:
-
-  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
-  * Raspberry Pi 3/4 based on 64 bits OS (Kura networking)
-  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
-  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
-  * Generic Debian Package for x86_64 (NetworkManager)
-  * Generic Debian Package for arm32 (NetworkManager)
-  * Generic Debian Package for arm64 (NetworkManager)
-
- Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
+[TODO]
 
 Bug Fixes:
+  * 0187d76968 - Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
+  * 4177eb32c6 - Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])
+  * e4fd319e34 - porting of fixes for the dns management [backport release-5.3.0] (#4678) (github-actions[bot])
+  * b1dd6190c0 - Improved the way netplan is disabled on Kura install [backport release-5.3.0] (#4669) (github-actions[bot])
+  * 9cc78f6897 - [nm] actually delete connection upon device disconnection [backport release-5.3.0] (#4672) (github-actions[bot])
+  * eb0840823e - [web2] save configured wifi channel in GWT interface [backport release-5.3.0] (#4667) (github-actions[bot])
+  * dc4577e7c8 - wan priority description defaults. [backport release-5.3.0] (#4668) (github-actions[bot])
+  * 9323ea83f5 - [web2] Added missing wifi password content check. [backport release-5.3.0] (#4658) (github-actions[bot])
+  * 3995058aa5 - [web2] DHCP renew button is now disabled except in WAN/LAN mode using dhcp [backport release-5.3.0] (#4659) (github-actions[bot])
+  * 3ccb9fac87 - Do not remove interface address while dhclient is running [backport release-5.3.0] (#4647) (github-actions[bot])
+  * a23b6965d5 - [distrib] aligned disabled services on all kura-network installers [backport release-5.3.0] (#4646) (github-actions[bot])
+  * 98d4df3b58 - [nm] use UNMANAGED location source [backport release-5.3.0] (#4642) (github-actions[bot])
+  * 1db527c374 - [web2] GPS modem config is done independently of set IP status [backport release-5.3.0] (#4640) (github-actions[bot])
+  * d271bb9228 - [distrib] add named.rfc file to apparmor exceptions [backport release-5.3.0] (#4634) (github-actions[bot])
+  * 039b047031 - Disabled dhcpcd service for generic platform. [backport release-5.3.0] (#4632) (github-actions[bot])
   * 95c03be77d - [web2] fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
   * f221cb137e - [installer] Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
   * 68d788fe31 - [monitor.dns-server] added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])
@@ -215,7 +216,7 @@ Deprecated APIs/components:
   * be1ea00c87 - org.eclipse.kura.wire.script.filter.provider (#4295) (Marcello Rinaldo Martina)
   * c5d594cfd6 - deprecated set&getPortsExternal&Internal in ContainerConfiguration & ContainerInstanceDescriptor (#4196) (G_Ivo)
 
-Target Platform Updates (since Eclipse Kura 5.2.0):
+Target Platform Updates:
   * 3fe8916ea8 - bump tensorflow from 2.9.3 to 2.11.1 in /kura/examples/scenarios/org.eclipse.kura.example.ai/training (#4489) (dependabot[bot])
   * b6179945b7 - adding missing resources for other supported boards (#4483) (Marcello Rinaldo Martina)
   * 0ef6cb5022 - added complete list of dependencies (#4475) (Marcello Rinaldo Martina)
@@ -271,55 +272,27 @@ Target Platform Updates (since Eclipse Kura 5.2.0):
   * 23e2ff1214 - Added org.apache.servicemix.bundles.c3p0 0.9.5.5_1 (#4198) (nicolatimeus)
 
 Known Issues:
-  * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
-  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
-    The issue impact is limited, if the dataservice reconnect option is enabled.
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported with old networking. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #4212: Wrong order of BIRTH/APPLICATION certificates for custom APP IDs registration
-  * #3972: Topic name validation: issue with names containing "//" (Cloud Subscriber)
-  * #4141: Sometimes user is not logged in after changing password
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+[TODO]
 
 Changelog:
+  * 0187d76968 - fix: Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
+  * 0319e6db9e - test(linux.net.dhcp.server): added `DnsmasqToolTest` and `DhcpdToolTest` [backport release-5.3.0] (#4680) (github-actions[bot])
+  * 4177eb32c6 - fix: Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])
+  * e4fd319e34 - fix: porting of fixes for the dns management [backport release-5.3.0] (#4678) (github-actions[bot])
+  * b1dd6190c0 - fix: Improved the way netplan is disabled on Kura install [backport release-5.3.0] (#4669) (github-actions[bot])
+  * 9cc78f6897 - fix(nm): actually delete connection upon device disconnection [backport release-5.3.0] (#4672) (github-actions[bot])
+  * eb0840823e - fix(web2): save configured wifi channel in GWT interface [backport release-5.3.0] (#4667) (github-actions[bot])
+  * dc4577e7c8 - fix: wan priority description defaults. [backport release-5.3.0] (#4668) (github-actions[bot])
+  * 9323ea83f5 - fix(web2): Added missing wifi password content check. [backport release-5.3.0] (#4658) (github-actions[bot])
+  * 3995058aa5 - fix(web2): DHCP renew button is now disabled except in WAN/LAN mode using dhcp [backport release-5.3.0] (#4659) (github-actions[bot])
+  * d2e015526a - docs(linux.clock): Added some notes on ntpd and chrony [backport release-5.3.0] (#4657) (github-actions[bot])
+  * 3ccb9fac87 - fix: Do not remove interface address while dhclient is running [backport release-5.3.0] (#4647) (github-actions[bot])
+  * a23b6965d5 - fix(distrib): aligned disabled services on all kura-network installers [backport release-5.3.0] (#4646) (github-actions[bot])
+  * 98d4df3b58 - fix(nm): use UNMANAGED location source [backport release-5.3.0] (#4642) (github-actions[bot])
+  * 1db527c374 - fix(web2): GPS modem config is done independently of set IP status [backport release-5.3.0] (#4640) (github-actions[bot])
+  * d271bb9228 - fix(distrib): add named.rfc file to apparmor exceptions [backport release-5.3.0] (#4634) (github-actions[bot])
+  * 039b047031 - fix: Disabled dhcpcd service for generic platform. [backport release-5.3.0] (#4632) (github-actions[bot])
+  * ed071f058e - chore: add Kura 5.3.0 release notes (#4613) (github-actions[bot])
   * 95c03be77d - fix(web2): fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
   * f221cb137e - fix(installer): Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
   * 68d788fe31 - fix(monitor.dns-server): added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])

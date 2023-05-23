@@ -1,4 +1,4 @@
-Eclipse Kura - 5.3.0 - April 2023
+Eclipse Kura - 5.3.0 - May 2023
 -------------------------------------------------------------------------------------------------
 Description:
 This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces a new framework compatibility with Java 17, 
@@ -71,6 +71,21 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 0187d76968 - Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
+  * 4177eb32c6 - Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])
+  * e4fd319e34 - porting of fixes for the dns management [backport release-5.3.0] (#4678) (github-actions[bot])
+  * b1dd6190c0 - Improved the way netplan is disabled on Kura install [backport release-5.3.0] (#4669) (github-actions[bot])
+  * 9cc78f6897 - [nm] actually delete connection upon device disconnection [backport release-5.3.0] (#4672) (github-actions[bot])
+  * eb0840823e - [web2] save configured wifi channel in GWT interface [backport release-5.3.0] (#4667) (github-actions[bot])
+  * dc4577e7c8 - wan priority description defaults. [backport release-5.3.0] (#4668) (github-actions[bot])
+  * 9323ea83f5 - [web2] Added missing wifi password content check. [backport release-5.3.0] (#4658) (github-actions[bot])
+  * 3995058aa5 - [web2] DHCP renew button is now disabled except in WAN/LAN mode using dhcp [backport release-5.3.0] (#4659) (github-actions[bot])
+  * 3ccb9fac87 - Do not remove interface address while dhclient is running [backport release-5.3.0] (#4647) (github-actions[bot])
+  * a23b6965d5 - [distrib] aligned disabled services on all kura-network installers [backport release-5.3.0] (#4646) (github-actions[bot])
+  * 98d4df3b58 - [nm] use UNMANAGED location source [backport release-5.3.0] (#4642) (github-actions[bot])
+  * 1db527c374 - [web2] GPS modem config is done independently of set IP status [backport release-5.3.0] (#4640) (github-actions[bot])
+  * d271bb9228 - [distrib] add named.rfc file to apparmor exceptions [backport release-5.3.0] (#4634) (github-actions[bot])
+  * 039b047031 - Disabled dhcpcd service for generic platform. [backport release-5.3.0] (#4632) (github-actions[bot])
   * 95c03be77d - [web2] fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
   * f221cb137e - [installer] Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
   * 68d788fe31 - [monitor.dns-server] added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])
@@ -320,6 +335,24 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 0187d76968 - fix: Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
+  * 0319e6db9e - test(linux.net.dhcp.server): added `DnsmasqToolTest` and `DhcpdToolTest` [backport release-5.3.0] (#4680) (github-actions[bot])
+  * 4177eb32c6 - fix: Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])
+  * e4fd319e34 - fix: porting of fixes for the dns management [backport release-5.3.0] (#4678) (github-actions[bot])
+  * b1dd6190c0 - fix: Improved the way netplan is disabled on Kura install [backport release-5.3.0] (#4669) (github-actions[bot])
+  * 9cc78f6897 - fix(nm): actually delete connection upon device disconnection [backport release-5.3.0] (#4672) (github-actions[bot])
+  * eb0840823e - fix(web2): save configured wifi channel in GWT interface [backport release-5.3.0] (#4667) (github-actions[bot])
+  * dc4577e7c8 - fix: wan priority description defaults. [backport release-5.3.0] (#4668) (github-actions[bot])
+  * 9323ea83f5 - fix(web2): Added missing wifi password content check. [backport release-5.3.0] (#4658) (github-actions[bot])
+  * 3995058aa5 - fix(web2): DHCP renew button is now disabled except in WAN/LAN mode using dhcp [backport release-5.3.0] (#4659) (github-actions[bot])
+  * d2e015526a - docs(linux.clock): Added some notes on ntpd and chrony [backport release-5.3.0] (#4657) (github-actions[bot])
+  * 3ccb9fac87 - fix: Do not remove interface address while dhclient is running [backport release-5.3.0] (#4647) (github-actions[bot])
+  * a23b6965d5 - fix(distrib): aligned disabled services on all kura-network installers [backport release-5.3.0] (#4646) (github-actions[bot])
+  * 98d4df3b58 - fix(nm): use UNMANAGED location source [backport release-5.3.0] (#4642) (github-actions[bot])
+  * 1db527c374 - fix(web2): GPS modem config is done independently of set IP status [backport release-5.3.0] (#4640) (github-actions[bot])
+  * d271bb9228 - fix(distrib): add named.rfc file to apparmor exceptions [backport release-5.3.0] (#4634) (github-actions[bot])
+  * 039b047031 - fix: Disabled dhcpcd service for generic platform. [backport release-5.3.0] (#4632) (github-actions[bot])
+  * ed071f058e - chore: add Kura 5.3.0 release notes (#4613) (github-actions[bot])
   * 95c03be77d - fix(web2): fixed authType and pdpType enums conversion on net2 [backport release-5.3.0] (#4622) (github-actions[bot])
   * f221cb137e - fix(installer): Added missing named files in generic installers [backport release-5.3.0] (#4621) (github-actions[bot])
   * 68d788fe31 - fix(monitor.dns-server): added check for interface as LAN before starting DNS server [backport release-5.3.0] (#4620) (github-actions[bot])

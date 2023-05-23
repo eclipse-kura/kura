@@ -505,6 +505,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
     TCP/IP Configuration
   </a>
   
+    <nav class="md-nav" aria-label="TCP/IP Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+    More details about the Not Managed interface Status
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2971,6 +2984,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
     TCP/IP Configuration
   </a>
   
+    <nav class="md-nav" aria-label="TCP/IP Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+    More details about the Not Managed interface Status
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3149,6 +3175,42 @@ Since the network configuration shown on the screen may not be synchronized with
 <li><strong>Search Domains</strong> - Not implemented.</li>
 </ul>
 <p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
+<h3 id="more-details-about-the-not-managed-interface-status">More details about the Not Managed interface Status</h3>
+<p>When a network interface is configured as <strong>Not Managed</strong>, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.</p>
+<p>Regarding DNS, both Kura and the external tools store the DNS addresses in the <code>/etc/resolv.conf</code> file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.</p>
+<table>
+<thead>
+<tr>
+<th>Kura WAN interface</th>
+<th>Kura NotManaged interface</th>
+<th>Does Kura manage resolv.conf?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NO</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>NO</td>
+<td>YES</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>YES</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>YES</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+</tbody>
+</table>
+<p>So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as <strong>Not Managed</strong> and not to set any interface as <strong>Enabled For Wan</strong> using Kura. If at least one WAN interface is configured by Kura, it will take the control of the <code>/etc/resolv.conf/</code> file. Finally, if any interface is configured in <strong>Enabled For Wan</strong> or <strong>Not Managed</strong> mode, Kura will empty the file.</p>
+<p>To avoid device misconfigurations when <strong>Not Managed</strong> interfaces are used, <strong>don't</strong> use the <em>dns-nameservers</em> directive in the <code>/etc/network/interfaces</code> file. Please add the DNS addresses directly to the <code>/etc/resolv.conf</code> file.</p>
 <p><img alt="Network Configuration TCP/IP" src="../images/network-configuration-tcpip.png" /></p>
 <h2 id="dhcp-nat-configuration">DHCP &amp; NAT Configuration</h2>
 <p>The <strong>DHCP &amp; NAT</strong> tab contains the following configuration parameters:</p>

@@ -230,7 +230,7 @@ Deprecated APIs/components:
   * be1ea00c87 - org.eclipse.kura.wire.script.filter.provider (#4295) (Marcello Rinaldo Martina)
   * c5d594cfd6 - deprecated set&getPortsExternal&Internal in ContainerConfiguration & ContainerInstanceDescriptor (#4196) (G_Ivo)
 
-Target Platform Updates:
+Target Platform Updates (since Eclipse Kura 5.2.0):
   * 3fe8916ea8 - bump tensorflow from 2.9.3 to 2.11.1 in /kura/examples/scenarios/org.eclipse.kura.example.ai/training (#4489) (dependabot[bot])
   * b6179945b7 - adding missing resources for other supported boards (#4483) (Marcello Rinaldo Martina)
   * 0ef6cb5022 - added complete list of dependencies (#4475) (Marcello Rinaldo Martina)

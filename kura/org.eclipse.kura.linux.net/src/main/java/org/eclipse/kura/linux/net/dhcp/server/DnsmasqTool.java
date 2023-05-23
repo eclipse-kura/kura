@@ -39,12 +39,12 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
 
-    private static final String DNSMASQ_GLOBAL_CONFIG_FILE = "/etc/dnsmasq.d/dnsmasq-globals.conf";
+    private String globalConfigFilename = "/etc/dnsmasq.d/dnsmasq-globals.conf";
     private static final String GLOBAL_CONFIGURATION = "port=0\nbind-interfaces\n";
 
-    private static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
+    static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
             DhcpServerTool.DNSMASQ.getValue() });
-    private static final Command RESTART_COMMAND = new Command(new String[] { "systemctl", "restart",
+    static final Command RESTART_COMMAND = new Command(new String[] { "systemctl", "restart",
             DhcpServerTool.DNSMASQ.getValue() });
 
     private CommandExecutorService executorService;
@@ -115,6 +115,10 @@ public class DnsmasqTool implements DhcpLinuxTool {
         return isInterfaceDisabled;
     }
 
+    public void setDnsmasqGlobalConfigFile(String globalConfigFilename) {
+        this.globalConfigFilename = globalConfigFilename;
+    }
+
     private boolean isConfigFileAlteredOrNonExistent(String interfaceName)
             throws NoSuchAlgorithmException, IOException {
 
@@ -143,7 +147,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     }
 
     private void writeGlobalConfig() throws NoSuchAlgorithmException, IOException {
-        Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
+        Path dnsmasqGlobalsPath = Paths.get(this.globalConfigFilename);
 
         if (shouldWriteGlobalConfig()) {
             Files.write(dnsmasqGlobalsPath, GLOBAL_CONFIGURATION.getBytes(StandardCharsets.UTF_8));
@@ -153,7 +157,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     }
 
     private boolean shouldWriteGlobalConfig() throws NoSuchAlgorithmException, IOException {
-        Path dnsmasqGlobalsPath = Paths.get(DNSMASQ_GLOBAL_CONFIG_FILE);
+        Path dnsmasqGlobalsPath = Paths.get(this.globalConfigFilename);
 
         if (Objects.isNull(this.globalConfigHash)) {
             return true;

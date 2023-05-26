@@ -231,7 +231,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
-        // Do be done with NM...
+        // To be done with NM...
         if (isUsbPort(interfaceName)) {
             return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
         } else {
@@ -320,23 +320,30 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private void writeFirewallNatRules(Set<String> interfaceNames) {
-        List<String> wanInterfaces = new LinkedList<>();
-        List<String> natInterfaces = new LinkedList<>();
+    private void writeFirewallNatRules(Set<String> interfaceIds) {
+        List<String> wanInterfaceNames = new LinkedList<>();
+        List<String> natInterfaceNames = new LinkedList<>();
 
-        interfaceNames.forEach(interfaceName -> {
-            if (isWanInterface(interfaceName)) {
-                wanInterfaces.add(interfaceName);
-            }
+        interfaceIds.forEach(interfaceId -> {
+            try {
+                String interfaceName = this.nmDbusConnector.getInterfaceName(interfaceId);
+                if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
+                    if (isWanInterface(interfaceId)) {
+                        wanInterfaceNames.add(interfaceName);
+                    }
 
-            if (isNatValid(interfaceName)) {
-                natInterfaces.add(interfaceName);
+                    if (isNatValid(interfaceId)) {
+                        natInterfaceNames.add(interfaceName);
+                    }
+                }
+            } catch (DBusException e) {
+                logger.debug("Cannot retrieve information for {} interface", interfaceId, e);
             }
         });
 
         try {
             FirewallNatConfigWriter firewallNatConfigWriter = new FirewallNatConfigWriter(this.commandExecutorService,
-                    wanInterfaces, natInterfaces);
+                    wanInterfaceNames, natInterfaceNames);
             firewallNatConfigWriter.writeConfiguration();
         } catch (KuraException e) {
             logger.error("Failed to write NAT configuration.", e);

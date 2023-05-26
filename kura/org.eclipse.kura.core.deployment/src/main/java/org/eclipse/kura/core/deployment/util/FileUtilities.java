@@ -16,7 +16,7 @@ package org.eclipse.kura.core.deployment.util;
 public class FileUtilities {
 
     public static String getFileName(String dpName, String dpVersion, String extension) {
-        String packageFilename = new StringBuilder().append(dpName).append("-").append(dpVersion).append(extension)
+        String packageFilename = new StringBuilder().append(dpName).append("_").append(dpVersion).append(extension)
                 .toString();
         return packageFilename;
     }

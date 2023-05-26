@@ -389,7 +389,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.
             File packagesFolder = new File(this.packagesPath);
-            if (!dpFile.getCanonicalPath().startsWith(packagesFolder.getCanonicalPath())) {
+            if (!dpFile.getCanonicalPath().startsWith(packagesFolder.getCanonicalPath()) && dpFile.exists()) {
                 Files.delete(dpFile.toPath());
                 logger.debug("Deleted file: {}", dpFile.getName());
             }

@@ -271,36 +271,33 @@ public class InstallImpl {
             throws DeploymentException, IOException {
 
         DeploymentPackage dp = null;
-        File dpPersistentFile = null;
         File downloadedFile = fileReference;
 
+        StringBuilder dpPersistentFilePath = new StringBuilder();
+        dpPersistentFilePath.append(this.packagesPath);
+        dpPersistentFilePath.append(File.separator);
+        dpPersistentFilePath.append(fileReference.getName());
+        File dpPersistentFile = new File(dpPersistentFilePath.toString());
+        
+        boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath());
+
         try (InputStream dpInputStream = new FileInputStream(downloadedFile);) {
-            String dpBasename = fileReference.getName();
-            StringBuilder pathSB = new StringBuilder();
-            pathSB.append(this.packagesPath);
-            pathSB.append(File.separator);
-            pathSB.append(dpBasename);
-            String dpPersistentFilePath = pathSB.toString();
-            dpPersistentFile = new File(dpPersistentFilePath);
 
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
-            // Now we need to copy the deployment package file to the Kura
-            // packages directory unless it's already there.
-
-            if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
-                logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
-                logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
-                FileUtils.copyFile(downloadedFile, dpPersistentFile);
-                addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
+            if (!isDownloadedInPersistentPath) {
+                logger.info("Moving downloaded DP from '{}' to '{}'.", downloadedFile.getCanonicalPath(),
+                        dpPersistentFile.getCanonicalPath());
+                Files.deleteIfExists(dpPersistentFile.toPath());
+                FileUtils.moveFile(downloadedFile, dpPersistentFile);
             }
-        } catch (IOException ex) {
 
+            addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath.toString());
+        } catch (IOException ex) {
+            logger.error("Unable to move downloaded DP from '" + downloadedFile.getCanonicalPath() + "' to '"
+                    + dpPersistentFile.getCanonicalPath() + "'.", ex);
         } finally {
-            // The file from which we have installed the deployment package will be deleted
-            // unless it's a persistent deployment package file.
-            if (dpPersistentFile != null
-                    && !downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (!isDownloadedInPersistentPath) {
                 downloadedFile.delete();
             }
         }

@@ -216,7 +216,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
-            writeFirewallNatRules(interfaces);
+            writeFirewallNatRules(interfaces, modifiedProps);
             writeDhcpServerConfiguration(interfaces);
             this.dnsServerMonitor.setNetworkProperties(this.networkProperties);
 
@@ -320,24 +320,19 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private void writeFirewallNatRules(Set<String> interfaceIds) {
+    private void writeFirewallNatRules(Set<String> interfaceIds, Map<String, Object> properties) {
         List<String> wanInterfaceNames = new LinkedList<>();
         List<String> natInterfaceNames = new LinkedList<>();
 
         interfaceIds.forEach(interfaceId -> {
-            try {
-                String interfaceName = this.nmDbusConnector.getInterfaceName(interfaceId);
-                if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
-                    if (isWanInterface(interfaceId)) {
-                        wanInterfaceNames.add(interfaceName);
-                    }
+            String interfaceName = getInterfaceName(properties, interfaceId);
 
-                    if (isNatValid(interfaceId)) {
-                        natInterfaceNames.add(interfaceName);
-                    }
-                }
-            } catch (DBusException e) {
-                logger.debug("Cannot retrieve information for {} interface", interfaceId, e);
+            if (isWanInterface(interfaceId)) {
+                wanInterfaceNames.add(interfaceName);
+            }
+
+            if (isNatValid(interfaceId)) {
+                natInterfaceNames.add(interfaceName);
             }
         });
 
@@ -348,6 +343,30 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         } catch (KuraException e) {
             logger.error("Failed to write NAT configuration.", e);
         }
+    }
+
+    private String getInterfaceName(Map<String, Object> properties, String interfaceId) {
+        // I don't like it, really. If the interface is not up, NM will return an empty
+        // string.
+        // We should wait until the connection is up, before applying the nat rule.
+        String interfaceName = "";
+        try {
+            interfaceName = this.nmDbusConnector.getInterfaceName(interfaceId);
+        } catch (DBusException e) {
+            logger.debug("Cannot retrieve information for {} interface", interfaceId, e);
+        }
+        if (Objects.isNull(interfaceName) || interfaceName.isEmpty()) {
+            NetInterfaceType type = NetInterfaceType
+                    .valueOf((String) properties.get(String.format(PREFIX + "%s.type", interfaceId)));
+            if (NetInterfaceType.MODEM.equals(type)) {
+                Integer pppNum = (Integer) properties
+                        .get(String.format(PREFIX + "%s.config.pppNum", interfaceId));
+                interfaceName = "ppp" + pppNum;
+            } else {
+                interfaceName = interfaceId;
+            }
+        }
+        return interfaceName;
     }
 
     private boolean isWanInterface(String interfaceName) {

@@ -334,11 +334,11 @@ public class DeploymentAgentTest {
         String str = new String(buf);
 
         assertTrue("DP file location should have been added to config file",
-                str.contains("file\\:target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp")
-                        || str.contains("file\\:target\\\\" + DP_NAME + "_" + VERSION_1_0_0 + ".dp"));
+                str.contains("file\\:target/" + DP_NAME + "-" + VERSION_1_0_0 + ".dp")
+                        || str.contains("file\\:target\\\\" + DP_NAME + "-" + VERSION_1_0_0 + ".dp"));
 
         assertTrue("DP file should have been copied",
-                new File("target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp").exists());
+                new File("target/" + DP_NAME + "-" + VERSION_1_0_0 + ".dp").exists());
     }
 
     @Test

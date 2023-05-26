@@ -371,7 +371,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         try (InputStream dpInputStream = new FileInputStream(dpFile);) {
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
-            String dpFsName = dp.getName() + "_" + dp.getVersion() + ".dp";
+            String dpFsName = dp.getName() + "-" + dp.getVersion() + ".dp";
             String dpPersistentFilePath = this.packagesPath + File.separator + dpFsName;
             dpPersistentFile = new File(dpPersistentFilePath);
 
@@ -380,9 +380,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             if (!dpFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
                 logger.debug("dpFile.getCanonicalPath(): {}", dpFile.getCanonicalPath());
                 logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
-                FileUtils.copyFile(dpFile, dpPersistentFile);
-                addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
+                Files.deleteIfExists(dpPersistentFile.toPath());
+                FileUtils.moveFile(dpFile, dpPersistentFile);
             }
+
+            addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath);
         } finally {
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.

@@ -371,7 +371,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         try (InputStream dpInputStream = new FileInputStream(dpFile);) {
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
-            String dpFsName = dp.getName() + "-" + dp.getVersion() + ".dp";
+            String dpFsName = dp.getName() + "_" + dp.getVersion() + ".dp";
             String dpPersistentFilePath = this.packagesPath + File.separator + dpFsName;
             dpPersistentFile = new File(dpPersistentFilePath);
 

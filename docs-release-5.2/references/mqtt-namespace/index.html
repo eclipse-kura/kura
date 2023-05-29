@@ -4114,10 +4114,9 @@ The installation procedure will be performed after the download completes if the
     update.</li>
 <li><strong>dp.reboot</strong> (Bool). Optional (default: false).
     Whether the system should be rebooted as part of the package
-    installation process.</li>
+    installation process. This property is ignored if <strong>dp.install.system.update</strong> is true. In such case the reboot must be implemented as part of the script.</li>
 <li><strong>dp.reboot.delay</strong> (Integer). Optional (default: 0 - immediately).
-    Delay after which the device will be rebooted. Only meaningful if
-    dp.reboot==true.</li>
+    Delay after which the device will be rebooted. Only meaningful if <strong>dp.reboot</strong> is true and <strong>dp.install.system.update</strong> is false.</li>
 </ul>
 </li>
 </ul>
@@ -4240,10 +4239,9 @@ request received.</p>
     post-installation (from the standpoint of the OSGi Deployment Admin)
     step requiring a system reboot. Note that the post-install phase is
     not handled by the Deployment Admin. The installation in this case
-    is complete (and can fail) after the reboot.</li>
+    is complete (and can fail) after the reboot. This property is ignored if <strong>dp.install.system.update</strong> is true. In such case the reboot must be implemented as part of the script.</li>
 <li><strong>dp.reboot.delay</strong> (Integer). Optional (default: 0 - immediately).
-    Delay after which the device will be rebooted. Only meaningful if
-    dp.reboot==true.</li>
+    Delay after which the device will be rebooted. Only meaningful if <strong>dp.reboot</strong> is true and <strong>dp.install.system.update</strong> is false.</li>
 </ul>
 </li>
 </ul>

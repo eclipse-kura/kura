@@ -26,11 +26,11 @@ public class DownloadFileUtilities extends FileUtilities {
         String downloadDirectory = options.getDownloadDirectory();
         String packageFilename;
         if (!options.getSystemUpdate()) {
-            String dpName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".dp");
+            String dpName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".dp", "_");
             packageFilename = new StringBuilder().append(downloadDirectory).append(File.separator).append(dpName)
                     .toString();
         } else {
-            String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".sh");
+            String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".sh", "-");
             packageFilename = new StringBuilder().append(downloadDirectory).append(File.separator).append(shName)
                     .toString();
         }

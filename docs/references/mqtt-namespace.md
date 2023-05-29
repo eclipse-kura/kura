@@ -434,10 +434,9 @@ Request:
             update.
         *  **dp.reboot** (Bool). Optional (default: false).
             Whether the system should be rebooted as part of the package
-            installation process.
+            installation process. This property is ignored if **dp.install.system.update** is true. In such case the reboot must be implemented as part of the script.
         *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
-            Delay after which the device will be rebooted. Only meaningful if
-            dp.reboot==true.
+            Delay after which the device will be rebooted. Only meaningful if **dp.reboot** is true and **dp.install.system.update** is false.
 
 Response:
 
@@ -546,10 +545,9 @@ Request:
             post-installation (from the standpoint of the OSGi Deployment Admin)
             step requiring a system reboot. Note that the post-install phase is
             not handled by the Deployment Admin. The installation in this case
-            is complete (and can fail) after the reboot.
+            is complete (and can fail) after the reboot. This property is ignored if **dp.install.system.update** is true. In such case the reboot must be implemented as part of the script.
         *  **dp.reboot.delay** (Integer). Optional (default: 0 - immediately).
-            Delay after which the device will be rebooted. Only meaningful if
-            dp.reboot==true.
+            Delay after which the device will be rebooted. Only meaningful if **dp.reboot** is true and **dp.install.system.update** is false.
 
 !!! note
     This operation can be retried. Anyway, if it fails once it's likely to fail again.

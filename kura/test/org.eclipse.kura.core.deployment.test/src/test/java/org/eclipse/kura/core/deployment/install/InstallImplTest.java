@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -213,6 +214,7 @@ public class InstallImplTest {
 
         DeploymentPackage dpMock = mock(DeploymentPackage.class);
         when(dpMock.getName()).thenReturn("dp");
+        when(dpMock.getVersion()).thenReturn(new Version("1.0.0"));
         when(deploymentAdminMock.installDeploymentPackage(anyObject())).thenReturn(dpMock);
 
         Object dp = TestUtil.invokePrivate(ii, "installDeploymentPackageInternal", dpFile);

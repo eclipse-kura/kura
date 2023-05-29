@@ -46,8 +46,7 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.log.LoggerFactory;
 
 public class InstallImpl {
 
@@ -272,18 +271,20 @@ public class InstallImpl {
 
         DeploymentPackage dp = null;
         File downloadedFile = fileReference;
-
         StringBuilder dpPersistentFilePath = new StringBuilder();
-        dpPersistentFilePath.append(this.packagesPath);
-        dpPersistentFilePath.append(File.separator);
-        dpPersistentFilePath.append(fileReference.getName());
-        File dpPersistentFile = new File(dpPersistentFilePath.toString());
-        
-        boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath());
 
         try (InputStream dpInputStream = new FileInputStream(downloadedFile);) {
 
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
+
+            dpPersistentFilePath.append(this.packagesPath);
+            dpPersistentFilePath.append(File.separator);
+            dpPersistentFilePath.append(this.packagesPath);
+            dpPersistentFilePath.append(File.separator);
+            File dpPersistentFile = new File(dpPersistentFilePath.toString());
+
+            boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath()
+                    .equals(dpPersistentFile.getCanonicalPath());
 
             if (!isDownloadedInPersistentPath) {
                 logger.info("Moving downloaded DP from '{}' to '{}'.", downloadedFile.getCanonicalPath(),
@@ -295,9 +296,9 @@ public class InstallImpl {
             addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath.toString());
         } catch (IOException ex) {
             logger.error("Unable to move downloaded DP from '" + downloadedFile.getCanonicalPath() + "' to '"
-                    + dpPersistentFile.getCanonicalPath() + "'.", ex);
+                    + dpPersistentFilePath.toString() + "'.", ex);
         } finally {
-            if (!isDownloadedInPersistentPath) {
+            if (!downloadedFile.getCanonicalPath().equals(dpPersistentFilePath.toString())) {
                 downloadedFile.delete();
             }
         }

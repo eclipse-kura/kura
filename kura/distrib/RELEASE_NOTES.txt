@@ -71,6 +71,10 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 4d9f51002c - [core.deployment] dpa.properties is written even if package is already in persistence [backport release-5.3.0] (#4692) (github-actions[bot])
+  * 648c46ad01 - [nm] Added convertion between interfaceId and interfaceName in firewall co… [backport release-5.3.0] (#4691) (github-actions[bot])
+  * 0364abd2d0 - Removed deprecated named options [backport release-5.3.0] (#4687) (github-actions[bot])
+  * 868ebaf455 - Updated named apparmor profile to include /usr/share/dns [backport release-5.3.0] (#4686) (github-actions[bot])
   * 0187d76968 - Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
   * 4177eb32c6 - Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])
   * e4fd319e34 - porting of fixes for the dns management [backport release-5.3.0] (#4678) (github-actions[bot])
@@ -230,7 +234,7 @@ Deprecated APIs/components:
   * be1ea00c87 - org.eclipse.kura.wire.script.filter.provider (#4295) (Marcello Rinaldo Martina)
   * c5d594cfd6 - deprecated set&getPortsExternal&Internal in ContainerConfiguration & ContainerInstanceDescriptor (#4196) (G_Ivo)
 
-Target Platform Updates (since Eclipse Kura 5.2.0):
+Target Platform Updates:
   * 3fe8916ea8 - bump tensorflow from 2.9.3 to 2.11.1 in /kura/examples/scenarios/org.eclipse.kura.example.ai/training (#4489) (dependabot[bot])
   * b6179945b7 - adding missing resources for other supported boards (#4483) (Marcello Rinaldo Martina)
   * 0ef6cb5022 - added complete list of dependencies (#4475) (Marcello Rinaldo Martina)
@@ -335,6 +339,11 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 4d9f51002c - fix(core.deployment): dpa.properties is written even if package is already in persistence [backport release-5.3.0] (#4692) (github-actions[bot])
+  * 648c46ad01 - fix(nm): Added convertion between interfaceId and interfaceName in firewall co… [backport release-5.3.0] (#4691) (github-actions[bot])
+  * 0364abd2d0 - fix: Removed deprecated named options [backport release-5.3.0] (#4687) (github-actions[bot])
+  * 868ebaf455 - fix: Updated named apparmor profile to include /usr/share/dns [backport release-5.3.0] (#4686) (github-actions[bot])
+  * 3508e8af27 - chore: updated Kura 5.3.0 release notes (#4683) (nicolatimeus)
   * 0187d76968 - fix: Wrong PKCS11KeystoreServiceImpl bind methods [backport release-5.3.0] (#4681) (Matteo Maiero)
   * 0319e6db9e - test(linux.net.dhcp.server): added `DnsmasqToolTest` and `DhcpdToolTest` [backport release-5.3.0] (#4680) (github-actions[bot])
   * 4177eb32c6 - fix: Prevented ifup-local from writing duplicate DNS entries [backport release-5.3.0] (#4679) (github-actions[bot])

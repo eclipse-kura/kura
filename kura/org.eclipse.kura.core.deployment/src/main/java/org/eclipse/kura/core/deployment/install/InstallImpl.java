@@ -39,6 +39,7 @@ import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.deployment.util.FileUtilities;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -273,19 +274,20 @@ public class InstallImpl {
 
         DeploymentPackage dp = null;
         File downloadedFile = fileReference;
-
         StringBuilder dpPersistentFilePath = new StringBuilder();
-        dpPersistentFilePath.append(this.packagesPath);
-        dpPersistentFilePath.append(File.separator);
-        dpPersistentFilePath.append(fileReference.getName());
-        File dpPersistentFile = new File(dpPersistentFilePath.toString());
-
-        boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath()
-                .equals(dpPersistentFile.getCanonicalPath());
 
         try (InputStream dpInputStream = new FileInputStream(downloadedFile);) {
 
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
+
+            dpPersistentFilePath.append(this.packagesPath);
+            dpPersistentFilePath.append(File.separator);
+            dpPersistentFilePath
+                    .append(FileUtilities.getFileName(dp.getName(), dp.getVersion().toString(), ".dp", "_"));
+            File dpPersistentFile = new File(dpPersistentFilePath.toString());
+            
+            boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath()
+                    .equals(dpPersistentFile.getCanonicalPath());
 
             if (!isDownloadedInPersistentPath) {
                 logger.info("Moving downloaded DP from '{}' to '{}'.", downloadedFile.getCanonicalPath(),
@@ -297,9 +299,9 @@ public class InstallImpl {
             addPackageToConfFile(dp.getName(), "file:" + dpPersistentFilePath.toString());
         } catch (IOException ex) {
             logger.error("Unable to move downloaded DP from '" + downloadedFile.getCanonicalPath() + "' to '"
-                    + dpPersistentFile.getCanonicalPath() + "'.", ex);
+                    + dpPersistentFilePath.toString() + "'.", ex);
         } finally {
-            if (!isDownloadedInPersistentPath) {
+            if (!downloadedFile.getCanonicalPath().equals(dpPersistentFilePath.toString())) {
                 downloadedFile.delete();
             }
         }

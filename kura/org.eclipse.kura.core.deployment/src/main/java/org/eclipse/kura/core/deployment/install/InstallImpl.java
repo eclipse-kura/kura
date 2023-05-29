@@ -38,6 +38,7 @@ import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.InstallStatus;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
+import org.eclipse.kura.core.deployment.util.FileUtilities;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -46,7 +47,8 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
-import org.osgi.service.log.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstallImpl {
 
@@ -279,8 +281,8 @@ public class InstallImpl {
 
             dpPersistentFilePath.append(this.packagesPath);
             dpPersistentFilePath.append(File.separator);
-            dpPersistentFilePath.append(this.packagesPath);
-            dpPersistentFilePath.append(File.separator);
+            dpPersistentFilePath
+                    .append(FileUtilities.getFileName(dp.getName(), dp.getVersion().toString(), ".dp", "_"));
             File dpPersistentFile = new File(dpPersistentFilePath.toString());
 
             boolean isDownloadedInPersistentPath = downloadedFile.getCanonicalPath()

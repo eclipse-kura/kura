@@ -1,0 +1,5 @@
+{
+    "java.format.settings.url": "setups/formatting/KuraFormatter.xml",
+    "editor.defaultFormatter": "redhat.java",
+    "editor.formatOnSave": true
+}

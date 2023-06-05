@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="lib/graal-sdk.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/js.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/js-launcher.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/js-scriptengine.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/launcher-common.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/truffle-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/regex.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/icu4j.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

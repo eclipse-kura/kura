@@ -4,8 +4,6 @@
 *~
 classes
 target
-.classpath
-.project
 .wtpmodules
 .settings
 .sonar
@@ -38,3 +36,4 @@ bin/
 maven.deps
 DEPENDENCIES
 .java-version
+.tycho-consumer-pom.xml

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src/main/java/"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sdk-client.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sdk-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/stack-client.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/stack-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-channel-fsm.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/strict-machine.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/failureaccess.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-codec.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-common.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-buffer.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-handler.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-resolver.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport-native-unix-common.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport-native-epoll.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport-classes-epoll.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport-native-kqueue.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netty-transport-classes-kqueue.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk18on.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcpkix-jdk18on.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcutil-jdk18on.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

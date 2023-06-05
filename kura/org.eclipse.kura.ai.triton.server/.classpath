@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src/main/java/"/>
+	<classpathentry kind="src" path="target/generated-sources/protobuf/java/"/>
+	<classpathentry kind="src" path="target/generated-sources/protobuf/grpc-java/"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-context.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-netty-shaded.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-protobuf.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-protobuf-lite.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grpc-stub.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/perfmark-api.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

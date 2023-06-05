@@ -52,12 +52,7 @@ Development on Kura follows a [variant of the gitflow model](https://github.com/
 Getting Started
 -----------------
 
-Development for Kura can be done in Eclipse IDE using the Kura Development Environment, in a gateway or in a Docker container.
-
 ## Development Environment
-
-### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac OS and Windows.
 
 ### Prerequisites
 Before installing Kura, you need to have the following programs installed in your system
@@ -164,28 +159,22 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 
 After this command runs, images can be found in your preferred container engine image list.
 
-### Eclipse IDE
-The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
+### Visual Studio Code
+
+The simplest way to start developing on Eclipse Kura is to use a [Visual Studio Code](https://code.visualstudio.com/docs/languages/java) based setup.
 
 To correctly setup the environment, proceed as follows:
-- Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your specific CPU architecture and OS.
-- Start the Eclipse Installer
-- Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2022-06 or older**.
-- Set the Java 1.8+ VM to the installed local jdk-8 VM, and press the Next button
-- Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
-- Select the "Developer Type":
-  - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
-  - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework.
-- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
-- Leave all Bootstrap Tasks selected and press the Finish button
-- Accept all the licenses and wait for the installation to finish
-At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. 
-- When the tasks are completed. In the IDE open (double click) Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window
+- Open Visual Studio Code in the `kura` directory.
+- Install the recommended extensions.
+- Load the project in [Standard Mode](https://code.visualstudio.com/docs/java/java-project#_lightweight-mode).
+- After the build completes you'll see a lot of errors. This is normal. To fix this run the _"Developer: Reload Window"_ command in the [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette)(this is needed only once, the first time you import the project).
+- ... and you're done!
 
 Now you are ready to develop on Eclipse Kura.
 
-To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
+### Eclipse IDE
+
+If you prefer a more advanced setup you can follow the setup instructions for [Eclipse IDE](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/).
 
 ### Known Issues
 Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura emulator.

@@ -67,8 +67,6 @@
     <requirement
         name="org.eclipse.m2e.feature.feature.group"/>
     <requirement
-        name="org.sonatype.tycho.m2e.feature.feature.group"/>
-    <requirement
         name="org.eclipse.m2e.wtp.feature.feature.group"/>
     <requirement
         name="org.eclipse.oomph.setup.projects.feature.group"/>
@@ -80,8 +78,6 @@
     <requirement
         name="org.sonarlint.eclipse.feature.feature.group"
         optional="true"/>
-    <repository
-        url="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/"/>
     <repository
         url="https://download.eclipse.org/eclemma/releases/3.1.6/"/>
     <repository

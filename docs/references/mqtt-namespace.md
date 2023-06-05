@@ -1088,10 +1088,10 @@ Examples:
 
 #### List All images
 
-Using the API exposed by Inventory-V1, the user can manage containers images via external applications such as Everywhere Cloud. This operation lists all the images installed in the gateway.
+Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Everywhere Cloud. This operation lists all the images in the gateway.
 
 * Request Topic:
-    * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
+    * **$EDC/account_name/client_id/INVENTORY-V1/GET/images**
 * Request Payload:
     * Nothing application-specific beyond the request ID and requester client ID
 * Response Payload:
@@ -1116,7 +1116,7 @@ The container JSON message is comprised of the following elements:
 
 * Name: The name of the image.
 
-* Version: describes the container images version.
+* Version: describes the container image's version.
 
 * Type: denotes the type of inventory payload
 
@@ -1126,13 +1126,13 @@ This operation allows deleting a container image not in use on the gateway.
 * Request Topic
     * $EDC/account_name/client_id/INVENTORY-V1/EXEC/images/_delete
 * Request Payload
-    * A JSON object that identifies the target container must be specified in the payload body. This payload will be described in the following section
+    * A JSON object that identifies the target image must be specified in the payload body. This payload will be described in the following section
 * Response Payload
     * Nothing application-specific
 
 #### JSON identifier/payload for container image delete requests
 
-The requests for starting and deleting a container image require the application to include a JSON object in the request payload for selecting the target container requires both name and version fields to be populated.
+The requests for deleting a container image require the application to include a JSON object in the request payload for selecting the target. The JSON requires both name and version fields to be populated.
 
 Examples:
 

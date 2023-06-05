@@ -1086,7 +1086,7 @@ Examples:
 
 ### Inventory Container Images
 
-#### List All images
+#### List All Images
 
 Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Everywhere Cloud. This operation lists all the images in the gateway.
 
@@ -1114,7 +1114,7 @@ The following JSON message is an example of what this request outputs:
 
 The container JSON message is comprised of the following elements:
 
-* Name: The name of the image.
+* Name: The name of the container image.
 
 * Version: describes the container image's version.
 

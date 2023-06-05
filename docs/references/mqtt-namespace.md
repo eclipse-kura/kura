@@ -752,6 +752,7 @@ The **app_id** for the remote inventory service of an MQTT application is “**I
 - [RPM](#inventory-system-packages-debrpmapk) : represents a Linux RPM package
 - [APK](#inventory-system-packages-debrpmapk) : represents a Linux Alpine APK package
 - [DOCKER](#inventory-containers) : represents a container
+- [CONTAINER IMAGE](#inventory-container-images) : represents a container image
 
 The resources are represented in JSON format. The following message is an example of a service deployment:
 
@@ -1080,6 +1081,73 @@ Examples:
 ```json
 {
     "name":"container_1",
+}
+```
+
+### Inventory Container Images
+
+#### List All images
+
+Using the API exposed by Inventory-V1, the user can manage containers images via external applications such as Everywhere Cloud. This operation lists all the images installed in the gateway.
+
+* Request Topic:
+    * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
+* Request Payload:
+    * Nothing application-specific beyond the request ID and requester client ID
+* Response Payload:
+    * Installed containers serialized in JSON format
+
+The following JSON message is an example of what this request outputs:
+
+```json
+{
+  "images":
+  [
+    {
+        "name":"nginx",
+        "version":"latest",
+        "type":"CONTAINER_IMAGE"
+    }
+  ]
+}
+```
+
+The container JSON message is comprised of the following elements:
+
+* Name: The name of the image.
+
+* Version: describes the container images version.
+
+* Type: denotes the type of inventory payload
+
+#### Delete a Container Image
+
+This operation allows deleting a container image not in use on the gateway.
+* Request Topic
+    * $EDC/account_name/client_id/INVENTORY-V1/EXEC/images/_delete
+* Request Payload
+    * A JSON object that identifies the target container must be specified in the payload body. This payload will be described in the following section
+* Response Payload
+    * Nothing application-specific
+
+#### JSON identifier/payload for container image delete requests
+
+The requests for starting and deleting a container image require the application to include a JSON object in the request payload for selecting the target container requires both name and version fields to be populated.
+
+Examples:
+
+```json
+{
+    "name":"nginx",
+    "version":"latest",
+    "type":"CONTAINER_IMAGE"
+}
+```
+
+```json
+{
+    "name":"nginx",
+    "version":"latest",
 }
 ```
 

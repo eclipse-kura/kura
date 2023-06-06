@@ -1005,7 +1005,7 @@ The bundle JSON message is comprised of the following bundle elements:
 
 #### List All Containers
 
-Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Everywhere Cloud. This operation lists all the containers installed in the gateway.
+Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Kapua. This operation lists all the containers installed in the gateway.
 
 * Request Topic:
     * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
@@ -1088,7 +1088,7 @@ Examples:
 
 #### List All Images
 
-Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Everywhere Cloud. This operation lists all the images in the gateway.
+Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Kapua. This operation lists all the images in the gateway.
 
 * Request Topic:
     * **$EDC/account_name/client_id/INVENTORY-V1/GET/images**

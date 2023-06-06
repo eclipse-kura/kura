@@ -320,7 +320,7 @@ The previously described read and update resource operations can be leveraged to
 
 The screen capture that follows shows an example administration application where, for a given IoT gateway, a list of all configurable services is presented to the administrator.
 
-![Kapua Device Configuration](./images/kapua_config.png)
+![Eclipse Kapua Device Configuration](./images/kapua_config.png)
 
 When one such service is selected, a form is dynamically generated based on the metadata provided in the service OCD. This form includes logic to handle different attribute types, validate acceptable value ranges, and render optional values as drop-downs. When the form is submitted, the new values are communicated to the device through an MQTT resource update message.
 
@@ -726,7 +726,7 @@ This operation stops a bundle identified by its ID.
 #### Example Management Web Application
 
 The previously described read, start/stop, and install/uninstall resources can be used to implement a remote management application. An example of such application is Eclipse Kapua.
-In particular it is possible to use the download and install resources from the following sections in Kapua console:
+In particular it is possible to use the download and install resources from the following sections in Eclipse Kapua console:
 
 * **Devices section**:
 
@@ -1005,7 +1005,7 @@ The bundle JSON message is comprised of the following bundle elements:
 
 #### List All Containers
 
-Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Kapua. This operation lists all the containers installed in the gateway.
+Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Eclipse Kapua. This operation lists all the containers installed in the gateway.
 
 * Request Topic:
     * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
@@ -1088,7 +1088,7 @@ Examples:
 
 #### List All Images
 
-Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Kapua. This operation lists all the images in the gateway.
+Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Eclipse Kapua. This operation lists all the images in the gateway.
 
 * Request Topic:
     * **$EDC/account_name/client_id/INVENTORY-V1/GET/images**

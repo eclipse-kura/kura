@@ -23,13 +23,8 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-<<<<<<< HEAD:kura/features/org.eclipse.kura.db.sqlite.provider/pom.xml
-	<artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
-=======
 	<artifactId>org.eclipse.kura.db.sqlite</artifactId>
-	<version>1.0.0</version>
->>>>>>> 853b6230a (fix: Added missing dp copy to distrib):kura/features/org.eclipse.kura.db.sqlite/pom.xml
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
 	<build>

@@ -2765,6 +2765,7 @@
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
                                 </configuration>
                             </execution>
                             <execution>
@@ -2833,6 +2834,18 @@
                                             <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
                                             <version>${org.eclipse.kura.ai.triton.server.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
+                                            <version>${org.eclipse.kura.wire.script.tools.feature.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
+                                            <version>${org.eclipse.kura.db.sqlite.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>

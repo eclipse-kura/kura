@@ -2844,7 +2844,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.db.sqlite</artifactId>
+                                            <artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
                                             <version>${org.eclipse.kura.db.sqlite.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>

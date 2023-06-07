@@ -171,16 +171,16 @@ To correctly setup the environment, proceed as follows:
 - Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your specific CPU architecture and OS.
 - Start the Eclipse Installer
 - Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2022-06 or older**.
-- Set the Java 1.8+ VM to the installed local jdk-8 VM, and press the Next button
+- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2023-03 or newer**.
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
   - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework.
 - Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
+- Set the `JRE 1.8 location` value to the installed local jdk-8 VM
 - Leave all Bootstrap Tasks selected and press the Finish button
 - Accept all the licenses and wait for the installation to finish
-At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. 
+At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets
 - When the tasks are completed. In the IDE open (double click) Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window
 
 Now you are ready to develop on Eclipse Kura.

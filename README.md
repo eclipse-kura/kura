@@ -165,7 +165,7 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 After this command runs, images can be found in your preferred container engine image list.
 
 ### Eclipse IDE
-The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
+The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](https://eclipse.github.io/kura/docs-develop/java-application-development/development-environment-setup). Here you'll find a brief explaination of the required steps.
 
 To correctly setup the environment, proceed as follows:
 - Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your specific CPU architecture and OS.

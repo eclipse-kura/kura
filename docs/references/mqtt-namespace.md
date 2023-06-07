@@ -320,7 +320,7 @@ The previously described read and update resource operations can be leveraged to
 
 The screen capture that follows shows an example administration application where, for a given IoT gateway, a list of all configurable services is presented to the administrator.
 
-![Kapua Device Configuration](./images/kapua_config.png)
+![Eclipse Kapua Device Configuration](./images/kapua_config.png)
 
 When one such service is selected, a form is dynamically generated based on the metadata provided in the service OCD. This form includes logic to handle different attribute types, validate acceptable value ranges, and render optional values as drop-downs. When the form is submitted, the new values are communicated to the device through an MQTT resource update message.
 
@@ -726,7 +726,7 @@ This operation stops a bundle identified by its ID.
 #### Example Management Web Application
 
 The previously described read, start/stop, and install/uninstall resources can be used to implement a remote management application. An example of such application is Eclipse Kapua.
-In particular it is possible to use the download and install resources from the following sections in Kapua console:
+In particular it is possible to use the download and install resources from the following sections in Eclipse Kapua console:
 
 * **Devices section**:
 
@@ -752,6 +752,7 @@ The **app_id** for the remote inventory service of an MQTT application is “**I
 - [RPM](#inventory-system-packages-debrpmapk) : represents a Linux RPM package
 - [APK](#inventory-system-packages-debrpmapk) : represents a Linux Alpine APK package
 - [DOCKER](#inventory-containers) : represents a container
+- [CONTAINER IMAGE](#inventory-container-images) : represents a container image
 
 The resources are represented in JSON format. The following message is an example of a service deployment:
 
@@ -1004,7 +1005,7 @@ The bundle JSON message is comprised of the following bundle elements:
 
 #### List All Containers
 
-Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Everywhere Cloud. This operation lists all the containers installed in the gateway.
+Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Eclipse Kapua. This operation lists all the containers installed in the gateway.
 
 * Request Topic:
     * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
@@ -1072,6 +1073,73 @@ Examples:
 ```json
 {
     "name":"container_1",
+}
+```
+
+### Inventory Container Images
+
+#### List All Images
+
+Using the API exposed by Inventory-V1, the user can manage container images via external applications such as Eclipse Kapua. This operation lists all the images in the gateway.
+
+* Request Topic:
+    * **$EDC/account_name/client_id/INVENTORY-V1/GET/images**
+* Request Payload:
+    * Nothing application-specific beyond the request ID and requester client ID
+* Response Payload:
+    * Installed containers serialized in JSON format
+
+The following JSON message is an example of what this request outputs:
+
+```json
+{
+  "images":
+  [
+    {
+        "name":"nginx",
+        "version":"latest",
+        "type":"CONTAINER_IMAGE"
+    }
+  ]
+}
+```
+
+The container JSON message is comprised of the following elements:
+
+* Name: The name of the container image.
+
+* Version: describes the container image's version.
+
+* Type: denotes the type of inventory payload
+
+#### Delete a Container Image
+
+This operation allows deleting a container image not in use on the gateway.
+* Request Topic
+    * $EDC/account_name/client_id/INVENTORY-V1/EXEC/images/_delete
+* Request Payload
+    * A JSON object that identifies the target image must be specified in the payload body. This payload will be described in the following section
+* Response Payload
+    * Nothing application-specific
+
+#### JSON identifier/payload for container image delete requests
+
+The requests for deleting a container image require the application to include a JSON object in the request payload for selecting the target. The JSON requires both name and version fields to be populated.
+
+Examples:
+
+```json
+{
+    "name":"nginx",
+    "version":"latest",
+    "type":"CONTAINER_IMAGE"
+}
+```
+
+```json
+{
+    "name":"nginx",
+    "version":"latest",
 }
 ```
 

@@ -67,14 +67,9 @@
     <requirement
         name="org.eclipse.m2e.feature.feature.group"/>
     <requirement
-        name="org.sonatype.tycho.m2e.feature.feature.group"/>
-    <requirement
         name="org.eclipse.m2e.wtp.feature.feature.group"/>
     <requirement
         name="org.eclipse.oomph.setup.projects.feature.group"/>
-    <requirement
-        name="org.tigris.mtoolkit.feature.group"
-        optional="true"/>
     <requirement
         name="org.eclipse.egit.gitflow.feature.feature.group"/>
     <requirement
@@ -84,11 +79,7 @@
         name="org.sonarlint.eclipse.feature.feature.group"
         optional="true"/>
     <repository
-        url="https://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.9.0/N/LATEST/"/>
-    <repository
-        url="http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com"/>
-    <repository
-        url="http://update.eclemma.org/"/>
+        url="https://download.eclipse.org/eclemma/releases/3.1.6/"/>
     <repository
         url="https://eclipse-uc.sonarlint.org/"/>
     <description>Install the tools needed in the IDE to work with the source code for ${scope.project.label}</description>

@@ -40,27 +40,16 @@ Before installing Eclipse, you should choose directory locations for the Eclipse
 
 Download the current distribution of Eclipse for your OS from [Eclipse official website](https://www.eclipse.org/downloads/packages/). Choose the **Eclipse IDE for Eclipse Committers**.
 
-The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an **eclipse\installs\** directory. The Eclipse executable will then be found in the **eclipse\installs\eclipse\** directory.  
+The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an **eclipse\installs** directory. The Eclipse executable will then be found in the **eclipse\installs\eclipse** directory.  
 This installation will be different depending on the operating system.
 
 ![Eclipse Install Folder](./images/development-environment-setup/image1.png)
 
-Because there may potentially be future Eclipse installs extracted into this location, before doing anything else, rename the directory, such as **eclipse\installs\\*juno1*\\**.
+Because there may potentially be future Eclipse installs extracted into this location, before doing anything else, rename the directory, such as **eclipse\installs\juno1\\**.
 !!! warning
     Once you begin using this Eclipse install, it should NOT be moved or renamed.
 
 ![Eclipse Install Folder 2](./images/development-environment-setup/image2.png)
-
-### Installing mToolkit
-
-An additional plugin, mToolkit, is needed to allow remote connectivity to an OSGi framework on a Kura-enabled target device.  To install mToolkit into Eclipse, use the following steps:
-
-- Open the **Help \| Install New Software...** menu.
-- Add the following URL as an update site based on your version of Eclipse
-    - Eclipse **Mars** and older: [http://mtoolkit-mars.s3-website-us-east-1.amazonaws.com](http://mtoolkit-mars.s3-website-us-east-1.amazonaws.com)
-    - Eclipse **Neon** and newer: [http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com](http://mtoolkit-neon.s3-website-us-east-1.amazonaws.com)
-- Install the "mToolkit" feature (you need to uncheck the **Group items by category** checkbox in order to see the feature)
-- Restart Eclipse. In the menu **Window \| Show View \| Other**, there should be an **mToolkit \| Frameworks** option. If so, the plugin has been installed correctly.
 
 ## Workspaces
 
@@ -145,7 +134,8 @@ Download the latest Eclipse Installer appropriate for your platform from [Eclips
 
     ![Kura Oomph](./images/development-environment-setup/image11.png)
 
-* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). Then click the Next button.
+* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). 
+* Set the `JRE 1.8 location` value to the installed local jdk-8 VM. Then click the Next button.
 * Leave all Bootstrap Tasks selected and press the Finish button.
 * Accept the licenses and unsigned content.
 * Wait for the installation to finish, a few additional plugins will be installed.

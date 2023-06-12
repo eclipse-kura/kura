@@ -21,10 +21,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -44,25 +41,9 @@ public class InventoryRestService {
 
     private InventoryHandlerV1 inventoryHandlerV1;
 
-    private ConfigurationService configurationService;
-    private OCDService ocdService;
-    private CryptoService cryptoService;
-
     public void setUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
         logger.error("roles activated - GREG");
-    }
-
-    public void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void setOCDService(OCDService ocdService) {
-        this.ocdService = ocdService;
-    }
-
-    public void setCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
     }
 
     public void setInventoryHandlerV1(InventoryHandlerV1 inventoryHandlerV1) {
@@ -103,7 +84,7 @@ public class InventoryRestService {
 
         return "{\"test\":\"string\"}";
     }
-    
+
     /**
      * GET method.
      *
@@ -116,7 +97,7 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/inventory")
     @Produces(MediaType.APPLICATION_JSON)
-    public String listInventory() {
+    public String listInventory2() {
         logger.error("IT WORKED");
 
         return "{\"test\":\"string\"}";

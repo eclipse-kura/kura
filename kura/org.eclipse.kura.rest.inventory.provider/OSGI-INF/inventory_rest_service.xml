@@ -13,19 +13,16 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.internal.rest.inventory.InventoryRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.internal.rest.inventory.InventoryRestService" enabled="true" immediate="true">
    <implementation class="org.eclipse.kura.internal.rest.inventory.InventoryRestService"/>
    
    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.inventory.InventoryRestService"/>
    
    <reference bind="setInventoryHandlerV1" cardinality="1..1" interface="org.eclipse.kura.core.inventory.InventoryHandlerV1" name="InventoryHandlerV1" policy="static"/>
-   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
-   <reference bind="setOCDService" cardinality="1..1" interface="org.eclipse.kura.configuration.metatype.OCDService" name="OCDService" policy="static"/>
-   <reference bind="setUserAdmin" cardinality="0..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
    <reference bind="setRequestHandlerRegistry" cardinality="0..n" interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry" name="RequestHandlerRegistry" policy="dynamic" unbind="unsetRequestHandlerRegistry"/>
    <service>
       <provide interface="org.eclipse.kura.internal.rest.inventory.InventoryRestService"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.inventory.InventoryRestService"/>
-   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
 </scr:component>

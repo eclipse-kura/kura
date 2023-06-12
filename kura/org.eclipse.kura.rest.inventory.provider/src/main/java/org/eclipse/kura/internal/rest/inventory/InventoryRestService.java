@@ -214,7 +214,7 @@ public class InventoryRestService {
     /**
      * POST method.
      *
-     * Start selected containers.
+     * Start selected container.
      *
      */
     @POST
@@ -233,7 +233,7 @@ public class InventoryRestService {
     /**
      * POST method.
      *
-     * Stop selected containers.
+     * Stop selected container.
      *
      */
     @POST

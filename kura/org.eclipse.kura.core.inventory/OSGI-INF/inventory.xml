@@ -25,5 +25,8 @@
    <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.core.inventory.InventoryHandlerV1"/>
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
+   <service>
+      <provide interface="org.eclipse.kura.core.inventory.InventoryHandlerV1"/>
+   </service>
    <reference cardinality="0..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="dynamic" bind="setContainerOrchestrationService" unbind="unsetContainerOrchestrationService"/>
 </scr:component>

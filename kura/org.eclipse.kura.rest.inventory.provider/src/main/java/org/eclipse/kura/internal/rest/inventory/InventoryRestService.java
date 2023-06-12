@@ -70,7 +70,7 @@ public class InventoryRestService {
     /**
      * GET method.
      *
-     * Lists all the available snapshots in the framework
+     * Lists all the available inventory items
      *
      * @return a list of long that represents the list of snapshots managed by the
      *         framework.
@@ -82,24 +82,10 @@ public class InventoryRestService {
     public String listInventory() {
         logger.error("IT WORKED");
 
-        return "{\"test\":\"string\"}";
-    }
-
-    /**
-     * GET method.
-     *
-     * Lists all the available snapshots in the framework
-     *
-     * @return a list of long that represents the list of snapshots managed by the
-     *         framework.
-     */
-    @GET
-    @RolesAllowed("inventory")
-    @Path("/inventory")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String listInventory2() {
-        logger.error("IT WORKED");
+        KuraMessage km = new KuraMessage(); 
+        inventoryHandlerV1.doGet(null, null)
 
         return "{\"test\":\"string\"}";
     }
+    
 }

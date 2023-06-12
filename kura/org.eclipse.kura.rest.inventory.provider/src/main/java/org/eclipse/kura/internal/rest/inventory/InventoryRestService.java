@@ -124,12 +124,12 @@ public class InventoryRestService {
      */
     @POST
     @RolesAllowed("inventory")
-    @Path("/bundles/bundles/_start")
+    @Path("/bundles/_start")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response startBundle(final String bundleJson) {
         try {
-            return makeInventoryDoGetRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
+            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -138,17 +138,150 @@ public class InventoryRestService {
     /**
      * POST method.
      *
-     * Start selected bundle.
+     * Stop selected bundle.
      *
      */
     @POST
     @RolesAllowed("inventory")
-    @Path("/bundles/bundles/_stop")
+    @Path("/bundles/_stop")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response stopBundle(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_BUNDLE, bundleJson));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * GET method.
+     *
+     * Lists all the available Deployment Packages.
+     *
+     */
+    @GET
+    @RolesAllowed("inventory")
+    @Path("/deploymentPackages")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDeploymentPackages() {
+        try {
+            return makeInventoryDoGetRequest(
+                    buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_DEPLOYMENT_PACKAGES), ""));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * GET method.
+     *
+     * Lists all the available System Packages.
+     *
+     */
+    @GET
+    @RolesAllowed("inventory")
+    @Path("/systemPackages")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSystemPackages() {
+        try {
+            return makeInventoryDoGetRequest(
+                    buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_SYSTEM_PACKAGES), ""));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * GET method.
+     *
+     * Lists all the available containers.
+     *
+     */
+    @GET
+    @RolesAllowed("inventory")
+    @Path("/containers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getContainers() {
+        try {
+            return makeInventoryDoGetRequest(
+                    buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_DOCKER_CONTAINERS), ""));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * POST method.
+     *
+     * Start selected containers.
+     *
+     */
+    @POST
+    @RolesAllowed("inventory")
+    @Path("/containers/_start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response startContainer(final String bundleJson) {
+        try {
+            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_CONTAINER, bundleJson));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * POST method.
+     *
+     * Stop selected containers.
+     *
+     */
+    @POST
+    @RolesAllowed("inventory")
+    @Path("/containers/_stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response stopContainer(final String bundleJson) {
+        try {
+            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_CONTAINER, bundleJson));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * GET method.
+     *
+     * Lists all the available container images.
+     *
+     */
+    @GET
+    @RolesAllowed("inventory")
+    @Path("/images")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getImages() {
+        try {
+            return makeInventoryDoGetRequest(
+                    buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_CONTAINER_IMAGES), ""));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /**
+     * POST method.
+     *
+     * Delete selected container image.
+     *
+     */
+    @POST
+    @RolesAllowed("inventory")
+    @Path("/images/_delete")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteImage(final String bundleJson) {
+        try {
+            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.DELETE_IMAGE, bundleJson));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

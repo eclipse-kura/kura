@@ -92,7 +92,7 @@ public class InventoryRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInventorySummary() {
         try {
-            return makeInventoryRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.INVENTORY), ""));
+            return makeInventoryDoGetRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.INVENTORY), ""));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -110,7 +110,7 @@ public class InventoryRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getBundles() {
         try {
-            return makeInventoryRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_BUNDLES), ""));
+            return makeInventoryDoGetRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_BUNDLES), ""));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -129,7 +129,7 @@ public class InventoryRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response startBundle(final String bundleJson) {
         try {
-            return makeInventoryRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
+            return makeInventoryDoGetRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -148,7 +148,7 @@ public class InventoryRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response stopBundle(final String bundleJson) {
         try {
-            return makeInventoryRequest(buildKuraMessage(InventoryHandlerV1.STOP_BUNDLE, bundleJson));
+            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_BUNDLE, bundleJson));
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -165,8 +165,13 @@ public class InventoryRestService {
         return new KuraMessage(kuraPayload, payloadProperties);
     }
 
-    private Response makeInventoryRequest(KuraMessage kuraMessage) throws KuraException {
+    private Response makeInventoryDoGetRequest(KuraMessage kuraMessage) throws KuraException {
         KuraMessage inventoryResponse = inventoryHandlerV1.doGet(null, kuraMessage);
+        return Response.ok(inventoryResponse.getPayload().getBody()).build();
+    }
+
+    private Response makeInventoryDoExecRequest(KuraMessage kuraMessage) throws KuraException {
+        KuraMessage inventoryResponse = inventoryHandlerV1.doExec(null, kuraMessage);
         return Response.ok(inventoryResponse.getPayload().getBody()).build();
     }
 

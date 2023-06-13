@@ -17,7 +17,7 @@
     <OCD id="org.eclipse.kura.wire.Conditional"
          name="Conditional (deprecated)"
          description="A wire component that allows to forward the received envelopes to different ports depending on a boolean condition.
-         Deprecated component, available only if running on JRE with Nashorn (Java < 15).">
+         Deprecated component, available only if running on JRE with Nashorn (Java version lesser than 15).">
 
          <AD id="condition"
             name="condition"

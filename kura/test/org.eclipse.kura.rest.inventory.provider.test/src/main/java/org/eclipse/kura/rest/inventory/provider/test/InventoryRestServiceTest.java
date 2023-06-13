@@ -29,28 +29,8 @@ import org.eclipse.kura.internal.rest.inventory.InventoryRestService;
 import org.eclipse.kura.message.KuraPayload;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 public class InventoryRestServiceTest {
-
-    public static final String RESOURCE_DEPLOYMENT_PACKAGES = "deploymentPackages";
-    public static final String RESOURCE_BUNDLES = "bundles";
-    public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
-    public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
-    public static final String RESOURCE_CONTAINER_IMAGES = "images";
-    public static final String INVENTORY = "inventory";
-
-    private static final String START = "_start";
-    private static final String STOP = "_stop";
-    private static final String DELETE = "_delete";
-
-    public static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
-    public static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
-
-    public static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
-    public static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
-
-    public static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
 
     private static final String ARGS_KEY = "args";
 
@@ -68,8 +48,130 @@ public class InventoryRestServiceTest {
         whenGetInventorySummary();
 
         thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList(INVENTORY), "");
-        thenVerifyNoExceptionOccured();
+        thenInventoryDoGetRequestIs(Arrays.asList("inventory"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void listBundlesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenGetBundles();
+
+        thenVerifyDoGetIsRun();
+        thenInventoryDoGetRequestIs(Arrays.asList("bundles"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void startBundlesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenStartBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+
+        thenVerifyDoExecIsRun();
+        thenInventoryDoExecRequestIs(Arrays.asList("bundles", "_start"),
+                "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void stopBundlesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenStopBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+
+        thenVerifyDoExecIsRun();
+        thenInventoryDoExecRequestIs(Arrays.asList("bundles", "_stop"),
+                "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void listDeploymentPackagesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenGetDeploymentPackages();
+
+        thenVerifyDoGetIsRun();
+        thenInventoryDoGetRequestIs(Arrays.asList("deploymentPackages"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void listSystemPackagesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenGetSystemPackages();
+
+        thenVerifyDoGetIsRun();
+        thenInventoryDoGetRequestIs(Arrays.asList("systemPackages"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void listContainersTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenGetContainers();
+
+        thenVerifyDoGetIsRun();
+        thenInventoryDoGetRequestIs(Arrays.asList("containers"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void startContainerTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenStartContainer("{ \"name\":\"kura-test-container\"}");
+
+        thenVerifyDoExecIsRun();
+        thenInventoryDoExecRequestIs(Arrays.asList("containers", "_start"), "{ \"name\":\"kura-test-container\"}");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void stopContainerTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenStopContainer("{ \"name\":\"kura-test-container\"}");
+
+        thenVerifyDoExecIsRun();
+        thenInventoryDoExecRequestIs(Arrays.asList("containers", "_stop"), "{ \"name\":\"kura-test-container\"}");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void listImagesTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenGetImages();
+
+        thenVerifyDoGetIsRun();
+        thenInventoryDoGetRequestIs(Arrays.asList("images"), "");
+        thenVerifyNoExceptionOccurred();
+    }
+
+    @Test
+    public void deleteImageTest() throws KuraException {
+        givenInventoryHandler();
+        givenInventoryRestService();
+
+        whenDeleteImage("{ \"name\":\"nginx\"}");
+
+        thenVerifyDoExecIsRun();
+        thenInventoryDoExecRequestIs(Arrays.asList("images", "_delete"), "{ \"name\":\"nginx\"}");
+        thenVerifyNoExceptionOccurred();
     }
 
     private void givenInventoryHandler() throws KuraException {
@@ -96,18 +198,119 @@ public class InventoryRestServiceTest {
         }
     }
 
+    private void whenGetBundles() {
+        try {
+            inventoryRestService.getBundles();
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenStartBundles(String jsonArgument) {
+        try {
+            inventoryRestService.startBundle(jsonArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenStopBundles(String jsonArgument) {
+        try {
+            inventoryRestService.stopBundle(jsonArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenGetDeploymentPackages() {
+        try {
+            inventoryRestService.getDeploymentPackages();
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenGetSystemPackages() {
+        try {
+            inventoryRestService.getSystemPackages();
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenGetContainers() {
+        try {
+            inventoryRestService.getContainers();
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenStartContainer(String jsonArgument) {
+        try {
+            inventoryRestService.startContainer(jsonArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenStopContainer(String jsonArgument) {
+        try {
+            inventoryRestService.stopContainer(jsonArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenGetImages() {
+        try {
+            inventoryRestService.getImages();
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
+    private void whenDeleteImage(String jsonArgument) {
+        try {
+            inventoryRestService.deleteImage(jsonArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasExceptionOccured = true;
+        }
+    }
+
     private void thenVerifyDoGetIsRun() throws KuraException {
         verify(inventoryHandlerV1).doGet(any(), kuraPayloadArgumentCaptor.capture());
     }
 
-    private void thenInventoryRequestIs(List<String> expectedArgs, String expectedBody) {
+    private void thenVerifyDoExecIsRun() throws KuraException {
+        verify(inventoryHandlerV1).doExec(any(), kuraPayloadArgumentCaptor.capture());
+    }
+
+    private void thenInventoryDoGetRequestIs(List<String> expectedArgs, String expectedBody) {
         KuraMessage receivedKuraPayload = kuraPayloadArgumentCaptor.getValue();
 
         assertEquals(expectedArgs, receivedKuraPayload.getProperties().get(ARGS_KEY));
         assertEquals(expectedBody, new String(receivedKuraPayload.getPayload().getBody()));
     }
 
-    private void thenVerifyNoExceptionOccured() {
+    private void thenInventoryDoExecRequestIs(List<String> expectedArgs, String expectedBody) {
+        KuraMessage receivedKuraPayload = kuraPayloadArgumentCaptor.getValue();
+
+        assertEquals(expectedArgs, receivedKuraPayload.getProperties().get(ARGS_KEY));
+        assertEquals(expectedBody, new String(receivedKuraPayload.getPayload().getBody()));
+    }
+
+    private void thenVerifyNoExceptionOccurred() {
         assertFalse(hasExceptionOccured);
     }
 

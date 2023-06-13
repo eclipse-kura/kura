@@ -30,12 +30,9 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.cloudconnection.request.RequestHandler;
-import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -46,38 +43,17 @@ public class InventoryRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryRestService.class);
 
-    private static final String APP_ID = "INVEN-V1";
-
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.inventory";
-
-    private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
     private InventoryHandlerV1 inventoryHandlerV1;
 
     public void setUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
-        logger.error("roles activated - GREG");
     }
 
     public void setInventoryHandlerV1(InventoryHandlerV1 inventoryHandlerV1) {
         this.inventoryHandlerV1 = inventoryHandlerV1;
 
-    }
-
-    public void setRequestHandlerRegistry(final RequestHandlerRegistry registry) {
-        try {
-            registry.registerRequestHandler(APP_ID, this.requestHandler);
-        } catch (final Exception e) {
-            logger.warn("failed to register request handler", e);
-        }
-    }
-
-    public void unsetRequestHandlerRegistry(final RequestHandlerRegistry registry) {
-        try {
-            registry.unregister(APP_ID);
-        } catch (KuraException e) {
-            logger.warn("failed to unregister request handler", e);
-        }
     }
 
     /**

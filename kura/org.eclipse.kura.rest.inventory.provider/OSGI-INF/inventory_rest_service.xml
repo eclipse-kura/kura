@@ -20,7 +20,6 @@
    
    <reference bind="setInventoryHandlerV1" cardinality="1..1" interface="org.eclipse.kura.core.inventory.InventoryHandlerV1" name="InventoryHandlerV1" policy="static"/>
    <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
-   <reference bind="setRequestHandlerRegistry" cardinality="0..n" interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry" name="RequestHandlerRegistry" policy="dynamic" unbind="unsetRequestHandlerRegistry"/>
    <service>
       <provide interface="org.eclipse.kura.internal.rest.inventory.InventoryRestService"/>
    </service>

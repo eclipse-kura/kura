@@ -48,7 +48,7 @@ public class InventoryRestServiceTest {
         whenGetInventorySummary();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("inventory"), "");
+        thenInventoryRequestIs(Arrays.asList("inventory"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -60,7 +60,7 @@ public class InventoryRestServiceTest {
         whenGetBundles();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("bundles"), "");
+        thenInventoryRequestIs(Arrays.asList("bundles"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -72,7 +72,7 @@ public class InventoryRestServiceTest {
         whenStartBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryDoExecRequestIs(Arrays.asList("bundles", "_start"),
+        thenInventoryRequestIs(Arrays.asList("bundles", "_start"),
                 "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
         thenVerifyNoExceptionOccurred();
     }
@@ -85,8 +85,7 @@ public class InventoryRestServiceTest {
         whenStopBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryDoExecRequestIs(Arrays.asList("bundles", "_stop"),
-                "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        thenInventoryRequestIs(Arrays.asList("bundles", "_stop"), "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -98,7 +97,7 @@ public class InventoryRestServiceTest {
         whenGetDeploymentPackages();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("deploymentPackages"), "");
+        thenInventoryRequestIs(Arrays.asList("deploymentPackages"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -110,7 +109,7 @@ public class InventoryRestServiceTest {
         whenGetSystemPackages();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("systemPackages"), "");
+        thenInventoryRequestIs(Arrays.asList("systemPackages"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -122,7 +121,7 @@ public class InventoryRestServiceTest {
         whenGetContainers();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("containers"), "");
+        thenInventoryRequestIs(Arrays.asList("containers"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -134,7 +133,7 @@ public class InventoryRestServiceTest {
         whenStartContainer("{ \"name\":\"kura-test-container\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryDoExecRequestIs(Arrays.asList("containers", "_start"), "{ \"name\":\"kura-test-container\"}");
+        thenInventoryRequestIs(Arrays.asList("containers", "_start"), "{ \"name\":\"kura-test-container\"}");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -146,7 +145,7 @@ public class InventoryRestServiceTest {
         whenStopContainer("{ \"name\":\"kura-test-container\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryDoExecRequestIs(Arrays.asList("containers", "_stop"), "{ \"name\":\"kura-test-container\"}");
+        thenInventoryRequestIs(Arrays.asList("containers", "_stop"), "{ \"name\":\"kura-test-container\"}");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -158,7 +157,7 @@ public class InventoryRestServiceTest {
         whenGetImages();
 
         thenVerifyDoGetIsRun();
-        thenInventoryDoGetRequestIs(Arrays.asList("images"), "");
+        thenInventoryRequestIs(Arrays.asList("images"), "");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -170,7 +169,7 @@ public class InventoryRestServiceTest {
         whenDeleteImage("{ \"name\":\"nginx\"}");
 
         thenVerifyDoExecIsRun();
-        thenInventoryDoExecRequestIs(Arrays.asList("images", "_delete"), "{ \"name\":\"nginx\"}");
+        thenInventoryRequestIs(Arrays.asList("images", "_delete"), "{ \"name\":\"nginx\"}");
         thenVerifyNoExceptionOccurred();
     }
 
@@ -296,14 +295,7 @@ public class InventoryRestServiceTest {
         verify(inventoryHandlerV1).doExec(any(), kuraPayloadArgumentCaptor.capture());
     }
 
-    private void thenInventoryDoGetRequestIs(List<String> expectedArgs, String expectedBody) {
-        KuraMessage receivedKuraPayload = kuraPayloadArgumentCaptor.getValue();
-
-        assertEquals(expectedArgs, receivedKuraPayload.getProperties().get(ARGS_KEY));
-        assertEquals(expectedBody, new String(receivedKuraPayload.getPayload().getBody()));
-    }
-
-    private void thenInventoryDoExecRequestIs(List<String> expectedArgs, String expectedBody) {
+    private void thenInventoryRequestIs(List<String> expectedArgs, String expectedBody) {
         KuraMessage receivedKuraPayload = kuraPayloadArgumentCaptor.getValue();
 
         assertEquals(expectedArgs, receivedKuraPayload.getProperties().get(ARGS_KEY));

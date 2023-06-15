@@ -204,7 +204,8 @@
 ##### Request Body
 ``` JSON
 {
-    "name":"container_1"
+    "name":"container_1",
+    "version": "nginx:latest",
 }
 ```
 ##### Responses
@@ -219,7 +220,8 @@
 ##### Request Body
 ``` JSON
 {
-    "name":"container_1"
+    "name":"container_1",
+    "version": "nginx:latest",
 }
 ```
 ##### Responses

@@ -39,18 +39,15 @@ import org.slf4j.LoggerFactory;
 public class DhcpClientConfigWriter implements NetworkConfigurationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpClientConfigWriter.class);
-    private static final String DEFAULT_HOOK_SCRIPT = "#!/bin/sh\n"
-            + "\n"
-            + "interfaces=\"\"\n"
-            + "\n"
-            + "for item in $interfaces; do \n"
-            + "    if [ \"$item\" = \"$interface\" ]; then\n"
-            + "        make_resolv_conf(){\n"
-            + "            logger \"Don't set DNS address for $interface\"\n"
-            + "            :\n"
-            + "        }\n"
-            + "    fi\n"
-            + "done";
+    private static final String DEFAULT_RESOLV_CONF_HOOK_SCRIPT = "#!/bin/sh\n" + "\n" + "interfaces=\"\"\n" + "\n"
+            + "for item in $interfaces; do \n" + "    if [ \"$item\" = \"$interface\" ]; then\n"
+            + "        make_resolv_conf(){\n" + "            logger \"Don't set DNS address for $interface\"\n"
+            + "            :\n" + "        }\n" + "    fi\n" + "done\n";
+
+    private static final String DEFAULT_ROUTE_HOOK_SCRIPT = "#!/bin/sh\n" + "\ninterfaces=\"\"\n" + "\n"
+            + "for iface in $interfaces; do\n" + "    if [ \"$iface\" = \"$interface\" ]; then\n"
+            + "        case $reason in\n" + "        BOUND|RENEW|REBIND|REBOOT)\n" + "            unset new_routers\n"
+            + "            ;;\n" + "        esac\n" + "    fi\n" + "done\n";
 
     public DhcpClientConfigWriter() {
         // Do nothing...
@@ -81,29 +78,32 @@ public class DhcpClientConfigWriter implements NetworkConfigurationVisitor {
         }
 
         lanInterfaceNames.sort(null);
-        writeDhcpClientConfig(lanInterfaceNames);
+        writeDhcpConfClientConfig(lanInterfaceNames, DhcpClientManager.getResolvConfHookScriptFileName(),
+                DEFAULT_RESOLV_CONF_HOOK_SCRIPT);
+        writeDhcpConfClientConfig(lanInterfaceNames, DhcpClientManager.getRouteHookScriptFileName(),
+                DEFAULT_ROUTE_HOOK_SCRIPT);
     }
 
-    private void writeDhcpClientConfig(List<String> interfaceNames) {
-        String hookScriptFileName = DhcpClientManager.getHookScriptFileName();
+    private void writeDhcpConfClientConfig(List<String> interfaceNames, String hookScriptFileName,
+            String scriptContent) {
         if (hookScriptFileName == null || hookScriptFileName.isEmpty()) {
             logger.debug("Hook script file name not defined. Do nothing.");
             return;
         }
 
         try {
-            writeDhclientHookScript(interfaceNames, hookScriptFileName);
+            writeDhcpClientHookScript(interfaceNames, hookScriptFileName, scriptContent);
         } catch (KuraIOException e) {
             logger.error("Failed to write dhclient hook script", e);
         }
     }
 
-    private void writeDhclientHookScript(List<String> interfaceNames, String hookScriptFileName)
+    private void writeDhcpClientHookScript(List<String> interfaceNames, String hookScriptFileName, String scriptContent)
             throws KuraIOException {
         StringBuilder interfacesLine = new StringBuilder("interfaces=\"");
         interfacesLine.append(interfaceNames.stream().collect(Collectors.joining(" ")));
         interfacesLine.append("\"\n");
-        String hookScriptContent = DEFAULT_HOOK_SCRIPT.replace("interfaces=\"\"\n", interfacesLine);
+        String hookScriptContent = scriptContent.replace("interfaces=\"\"\n", interfacesLine);
 
         Path hookScriptFilePath = Paths.get(hookScriptFileName);
         try {

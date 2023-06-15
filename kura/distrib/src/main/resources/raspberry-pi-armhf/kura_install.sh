@@ -117,6 +117,7 @@ chmod 600 /etc/bind/rndc.key
 
 #set up dhclient hooks
 cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-hook /etc/dhcp/dhclient-enter-hooks.d/zz-kura-dhclient-enter-hook
+cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-route-hook /etc/dhcp/dhclient-enter-hooks.d/yy-kura-dhclient-enter-hook
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf

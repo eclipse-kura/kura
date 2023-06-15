@@ -614,13 +614,15 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/kura-dhclient-enter-hook"
                 prefix="${build.output.name}/${install.folder}" />
-        	
+            <zipfileset file="src/main/resources/common/kura-dhclient-enter-route-hook"
+                prefix="${build.output.name}/${install.folder}" />
+
             <zipfileset file="src/main/resources/common/dnsmasq"
                 prefix="${build.output.name}/${install.folder}" />
-        	
+
             <zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
             	prefix="${build.output.name}/${install.folder}" />
-        	
+
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/start_kura.sh"
                 fullpath="${build.output.name}/${binary.folder}/start_kura.sh"

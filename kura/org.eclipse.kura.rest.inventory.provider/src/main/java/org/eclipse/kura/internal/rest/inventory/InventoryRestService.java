@@ -28,10 +28,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -275,13 +277,21 @@ public class InventoryRestService {
     }
 
     private Response makeInventoryDoGetRequest(KuraMessage kuraMessage) throws KuraException {
-        KuraMessage inventoryResponse = inventoryHandlerV1.doGet(null, kuraMessage);
-        return Response.ok(inventoryResponse.getPayload().getBody()).build();
+        return buildResponse(inventoryHandlerV1.doGet(null, kuraMessage).getPayload());
     }
 
     private Response makeInventoryDoExecRequest(KuraMessage kuraMessage) throws KuraException {
-        KuraMessage inventoryResponse = inventoryHandlerV1.doExec(null, kuraMessage);
-        return Response.ok(inventoryResponse.getPayload().getBody()).build();
+        return buildResponse(inventoryHandlerV1.doExec(null, kuraMessage).getPayload());
+    }
+
+    private Response buildResponse(KuraPayload kuraPayload) throws KuraException {
+        if (kuraPayload instanceof KuraResponsePayload) {
+            KuraResponsePayload kuraResponsePayload = (KuraResponsePayload) kuraPayload;
+            return Response.status(kuraResponsePayload.getResponseCode()).entity(kuraPayload.getBody()).build();
+        } else {
+            throw new KuraException(KuraErrorCode.INVALID_MESSAGE_EXCEPTION);
+        }
+
     }
 
 }

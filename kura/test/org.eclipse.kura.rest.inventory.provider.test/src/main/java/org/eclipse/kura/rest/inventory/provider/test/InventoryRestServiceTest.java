@@ -27,6 +27,7 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.internal.rest.inventory.InventoryRestService;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -176,7 +177,7 @@ public class InventoryRestServiceTest {
     private void givenInventoryHandler() throws KuraException {
         inventoryHandlerV1 = mock(InventoryHandlerV1.class);
 
-        KuraPayload fakeKuraPayload = new KuraPayload();
+        KuraResponsePayload fakeKuraPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         KuraMessage fakeKuraMessage = new KuraMessage(fakeKuraPayload);
 
         when(inventoryHandlerV1.doGet(any(), any())).thenReturn(fakeKuraMessage);

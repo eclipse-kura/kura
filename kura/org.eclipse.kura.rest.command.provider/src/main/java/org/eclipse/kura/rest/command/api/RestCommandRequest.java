@@ -14,13 +14,16 @@ package org.eclipse.kura.rest.command.api;
 
 public class RestCommandRequest {
 
+    // Mandatory //
     private String command;
+    private String password;
+
+    // Optional //
+    private byte[] zipBytes;
     private String[] arguments;
     private String[] enviromentPairs;
     private String workingDirectory;
-    private String password;
     private boolean isRunAsync;
-    private byte[] zipBytes;
 
     public void setCommand(String command) {
         this.command = command;

@@ -12,29 +12,25 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.command;
 
-import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.app.command.CommandCloudApp;
+import org.eclipse.kura.cloud.app.command.KuraCommandRequestPayload;
+import org.eclipse.kura.cloud.app.command.KuraCommandResponsePayload;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.osgi.service.useradmin.Role;
+import org.eclipse.kura.rest.command.api.RestCommandRequest;
+import org.eclipse.kura.rest.command.api.RestCommandResponse;
 import org.osgi.service.useradmin.UserAdmin;
+import org.osgi.service.useradmin.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,23 +39,26 @@ public class CommandRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommandRestService.class);
 
-    private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.inventory";
+    private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.command";
 
-    private InventoryHandlerV1 inventoryHandlerV1;
+    private static final String PASSWORD_METRIC_NAME = "command.password";
+    private static final String COMMAND_METRIC_NAME = "command.command";
+
+    private CommandCloudApp commandCloudApp;
 
     public void setUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
     }
 
-    public void setInventoryHandlerV1(InventoryHandlerV1 inventoryHandlerV1) {
-        this.inventoryHandlerV1 = inventoryHandlerV1;
+    public void setCommandCloudApp(CommandCloudApp commandCloudApp) {
+        this.commandCloudApp = commandCloudApp;
 
     }
 
     /**
      * POST method.
      *
-     * Start selected bundle.
+     * Run command with Executor service.
      *
      */
     @POST
@@ -67,31 +66,52 @@ public class CommandRestService {
     @Path("/command")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response startBundle(final RestCommandRequest restCommandPayload) {
+    public RestCommandResponse execCommand(final RestCommandRequest restCommandPayload) {
         try {
-            return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
+            return doExecCommand(restCommandPayload);
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
+    private RestCommandResponse doExecCommand(RestCommandRequest restCommandPayload) throws KuraException {
+        return buildRestCommandResponse(this.commandCloudApp.doExec(null, buildKuraMessage(restCommandPayload)));
+    }
+
     private KuraMessage buildKuraMessage(RestCommandRequest restCommandPayload) {
 
-        String METRIC_CMD = "command.command";
-        String METRIC_ARG = "command.argument";
-        String METRIC_ENVP = "command.environment.pair";
-        String METRIC_DIR = "command.working.directory";
-        String METRIC_STDIN = "command.stdin";
-        String METRIC_TOUT = "command.timeout";
-        String METRIC_ASYNC = "command.run.async";
+        KuraCommandRequestPayload kuraCommandRequestPayload = new KuraCommandRequestPayload(
+                restCommandPayload.getCommand());
 
-        Map<String, Object> payloadProperties = new HashMap<>();
-        payloadProperties.put(ARGS_KEY.value(), requestObject);
+        // TODO: MUST CONVERT THIS TO PASSWORD OBJECT
+        kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, restCommandPayload.getPassword());
+        kuraCommandRequestPayload.setZipBytes(restCommandPayload.getZipBytes());
 
-        KuraPayload kuraPayload = new KuraPayload();
-        kuraPayload.setZipBytes(body.getBytes());
+        // These Fields are optional
+        kuraCommandRequestPayload.setWorkingDir(restCommandPayload.getWorkingDirectory());
+        kuraCommandRequestPayload.setArguments(restCommandPayload.getArguments());
+        kuraCommandRequestPayload.setEnvironmentPairs(restCommandPayload.getEnviromentPairs());
+        kuraCommandRequestPayload.setRunAsync(restCommandPayload.getIsRunAsync());
 
-        return new KuraMessage(kuraPayload, payloadProperties);
+        return new KuraMessage(kuraCommandRequestPayload);
+    }
+
+    private RestCommandResponse buildRestCommandResponse(KuraMessage kuraMessage) throws KuraException {
+
+        if (kuraMessage.getPayload() instanceof KuraCommandResponsePayload) {
+            RestCommandResponse restCommandResponse = new RestCommandResponse();
+            KuraCommandResponsePayload kuraCommandResponsePayload = (KuraCommandResponsePayload) kuraMessage
+                    .getPayload();
+
+            restCommandResponse.setStdout(kuraCommandResponsePayload.getStdout());
+            restCommandResponse.setStderr(kuraCommandResponsePayload.getStderr());
+            restCommandResponse.setExitCode(kuraCommandResponsePayload.getExitCode());
+            restCommandResponse.setIsTimeOut(kuraCommandResponsePayload.isTimedout());
+
+            return restCommandResponse;
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
     }
 
 }

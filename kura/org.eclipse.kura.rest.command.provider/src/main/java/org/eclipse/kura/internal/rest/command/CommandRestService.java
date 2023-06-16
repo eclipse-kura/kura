@@ -25,12 +25,12 @@ import org.eclipse.kura.cloud.app.command.CommandCloudApp;
 import org.eclipse.kura.cloud.app.command.KuraCommandRequestPayload;
 import org.eclipse.kura.cloud.app.command.KuraCommandResponsePayload;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.rest.command.api.RestCommandRequest;
 import org.eclipse.kura.rest.command.api.RestCommandResponse;
-import org.osgi.service.useradmin.UserAdmin;
 import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,11 +83,9 @@ public class CommandRestService {
         KuraCommandRequestPayload kuraCommandRequestPayload = new KuraCommandRequestPayload(
                 restCommandPayload.getCommand());
 
-        // TODO: MUST CONVERT THIS TO PASSWORD OBJECT
-        kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, restCommandPayload.getPassword());
+        kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, new Password(restCommandPayload.getPassword()));
         kuraCommandRequestPayload.setZipBytes(restCommandPayload.getZipBytes());
 
-        // These Fields are optional
         kuraCommandRequestPayload.setWorkingDir(restCommandPayload.getWorkingDirectory());
         kuraCommandRequestPayload.setArguments(restCommandPayload.getArguments());
         kuraCommandRequestPayload.setEnvironmentPairs(restCommandPayload.getEnviromentPairs());

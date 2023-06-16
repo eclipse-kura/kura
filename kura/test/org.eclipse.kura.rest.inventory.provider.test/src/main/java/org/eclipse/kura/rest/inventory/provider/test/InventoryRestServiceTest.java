@@ -193,7 +193,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getInventorySummary();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -202,7 +201,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getBundles();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -211,7 +209,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.startBundle(jsonArgument);
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -220,7 +217,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.stopBundle(jsonArgument);
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -229,7 +225,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getDeploymentPackages();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -238,7 +233,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getSystemPackages();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -247,7 +241,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getContainers();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -256,7 +249,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.startContainer(jsonArgument);
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -265,7 +257,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.stopContainer(jsonArgument);
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -274,7 +265,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.getImages();
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }
@@ -283,7 +273,6 @@ public class InventoryRestServiceTest {
         try {
             inventoryRestService.deleteImage(jsonArgument);
         } catch (Exception e) {
-            e.printStackTrace();
             hasExceptionOccured = true;
         }
     }

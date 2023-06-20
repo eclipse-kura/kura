@@ -270,8 +270,6 @@
 --- 
 ## States
 
-%%We should probably unify these states to the same case.%%
-
 ### Bundle States
 ```
 -   `ACTIVE`: Container is running

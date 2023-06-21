@@ -13,8 +13,10 @@
 package org.eclipse.kura.internal.db.sqlite.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -44,18 +46,30 @@ public class SqliteProviderActivatorTest {
     }
 
     @Test
-    public void shouldNotChangeSqliteTempDirIfAlreadySet() {
+    public void shouldChangeSqliteTempDirIfSetButNonExisting() {
         givenSystemProperty("org.sqlite.tmpdir", "bar");
         givenBundleStorageAreaPath("/tmp/foo");
 
         whenActivatorIsStarted();
 
         thenNoExceptionIsThrown();
-        thenSystemPropertyValueIs("org.sqlite.tmpdir", "bar");
+        thenSystemPropertyValueIs("org.sqlite.tmpdir", "/tmp/foo");
+    }
+
+    @Test
+    public void shouldNotChangeSqliteTempDirIfSetAndExisting() {
+        givenSystemProperty("org.sqlite.tmpdir", temporaryDirectoryPath());
+        givenBundleStorageAreaPath("/tmp/foo");
+
+        whenActivatorIsStarted();
+
+        thenNoExceptionIsThrown();
+        thenSystemPropertyValueIs("org.sqlite.tmpdir", temporaryDirectoryPath());
     }
 
     private final BundleContext bundleContext = Mockito.mock(BundleContext.class);
     private Optional<Exception> exception = Optional.empty();
+    private Optional<String> temporaryDirectoryPath = Optional.empty();
 
     private void givenBundleStorageAreaPath(String path) {
         Mockito.when(bundleContext.getDataFile("")).thenReturn(new File(path));
@@ -75,7 +89,6 @@ public class SqliteProviderActivatorTest {
         } catch (Exception e) {
             this.exception = Optional.of(e);
         }
-
     }
 
     private void thenSystemPropertyValueIs(final String key, final String value) {
@@ -84,6 +97,20 @@ public class SqliteProviderActivatorTest {
 
     private void thenNoExceptionIsThrown() {
         assertEquals(Optional.empty(), this.exception);
+    }
 
+    private String temporaryDirectoryPath() {
+        if (temporaryDirectoryPath.isPresent()) {
+            return temporaryDirectoryPath.get();
+        }
+
+        try {
+            final String newPath = Files.createTempDirectory(null).toFile().getAbsolutePath();
+            this.temporaryDirectoryPath = Optional.of(newPath);
+            return newPath;
+        } catch (final Exception e) {
+            fail("Cannot create temporary directory");
+            throw new IllegalStateException("unreachable");
+        }
     }
 }

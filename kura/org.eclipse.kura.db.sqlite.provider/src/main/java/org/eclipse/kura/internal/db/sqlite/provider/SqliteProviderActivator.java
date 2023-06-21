@@ -22,21 +22,28 @@ public class SqliteProviderActivator implements BundleActivator {
 
     private static final String SQLITE_TMPDIR_PROPERTY_KEY = "org.sqlite.tmpdir";
 
+    private boolean locationChanged = false;
+
     @Override
     public void start(final BundleContext context) throws Exception {
-        if (System.getProperty(SQLITE_TMPDIR_PROPERTY_KEY) == null) {
+        final Optional<String> sqliteTmpDir = Optional.ofNullable(System.getProperty(SQLITE_TMPDIR_PROPERTY_KEY));
+
+        if (!sqliteTmpDir.isPresent() || !new File(sqliteTmpDir.get()).isDirectory()) {
 
             final Optional<File> bundleStorageAreaLocation = Optional.ofNullable(context.getDataFile(""));
 
             if (bundleStorageAreaLocation.isPresent()) {
                 System.setProperty(SQLITE_TMPDIR_PROPERTY_KEY, bundleStorageAreaLocation.get().getAbsolutePath());
+                locationChanged = true;
             }
         }
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        // nothing to do
+        if (locationChanged) {
+            System.setProperty(SQLITE_TMPDIR_PROPERTY_KEY, null);
+        }
     }
 
 }

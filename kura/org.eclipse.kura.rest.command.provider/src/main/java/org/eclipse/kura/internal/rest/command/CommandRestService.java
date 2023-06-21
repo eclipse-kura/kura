@@ -12,6 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.command;
 
+import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -25,7 +31,6 @@ import org.eclipse.kura.cloud.app.command.CommandCloudApp;
 import org.eclipse.kura.cloud.app.command.KuraCommandRequestPayload;
 import org.eclipse.kura.cloud.app.command.KuraCommandResponsePayload;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.rest.command.api.RestCommandRequest;
 import org.eclipse.kura.rest.command.api.RestCommandResponse;
@@ -42,7 +47,7 @@ public class CommandRestService {
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.command";
 
     private static final String PASSWORD_METRIC_NAME = "command.password";
-    private static final String COMMAND_METRIC_NAME = "command.command";
+    public static final String RESOURCE_COMMAND = "command";
 
     private CommandCloudApp commandCloudApp;
 
@@ -83,15 +88,19 @@ public class CommandRestService {
         KuraCommandRequestPayload kuraCommandRequestPayload = new KuraCommandRequestPayload(
                 restCommandPayload.getCommand());
 
-        kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, new Password(restCommandPayload.getPassword()));
+        kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, restCommandPayload.getPassword());
         kuraCommandRequestPayload.setZipBytes(restCommandPayload.getZipBytes());
 
         kuraCommandRequestPayload.setWorkingDir(restCommandPayload.getWorkingDirectory());
         kuraCommandRequestPayload.setArguments(restCommandPayload.getArguments());
-        kuraCommandRequestPayload.setEnvironmentPairs(restCommandPayload.getEnviromentPairs());
+        kuraCommandRequestPayload.setEnvironmentPairs(restCommandPayload.getEnvironmentPairsAsStringArray());
+
         kuraCommandRequestPayload.setRunAsync(restCommandPayload.getIsRunAsync());
 
-        return new KuraMessage(kuraCommandRequestPayload);
+        Map<String, Object> payloadProperties = new HashMap<>();
+        payloadProperties.put(ARGS_KEY.value(), Arrays.asList(RESOURCE_COMMAND));
+
+        return new KuraMessage(kuraCommandRequestPayload, payloadProperties);
     }
 
     private RestCommandResponse buildRestCommandResponse(KuraMessage kuraMessage) throws KuraException {

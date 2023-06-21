@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.command.api;
 
+import java.util.Base64;
+import java.util.Map;
+
 public class RestCommandRequest {
 
     // Mandatory //
@@ -19,9 +22,9 @@ public class RestCommandRequest {
     private String password;
 
     // Optional //
-    private byte[] zipBytes;
+    private String zipBytes;
     private String[] arguments;
-    private String[] enviromentPairs;
+    private Map<String, String> environmentPairs;
     private String workingDirectory;
     private boolean isRunAsync;
 
@@ -33,8 +36,8 @@ public class RestCommandRequest {
         this.arguments = arguments;
     }
 
-    public void setEnviromentPairs(String[] enviromentPairs) {
-        this.arguments = enviromentPairs;
+    public void setEnvironmentPairs(Map<String, String> environmentPairs) {
+        this.environmentPairs = environmentPairs;
     }
 
     public void setWorkingDirectory(String workingDirectory) {
@@ -49,8 +52,8 @@ public class RestCommandRequest {
         this.isRunAsync = isRunAsync;
     }
 
-    public void setZipBytes(byte[] body) {
-        this.zipBytes = body;
+    public void setZipBytes(String zipBytes) {
+        this.zipBytes = zipBytes;
     }
 
     public String getCommand() {
@@ -61,8 +64,13 @@ public class RestCommandRequest {
         return this.arguments;
     }
 
-    public String[] getEnviromentPairs() {
-        return this.enviromentPairs;
+    public Map<String, String> getEnvironmentPairs() {
+        return this.environmentPairs;
+    }
+
+    public String[] getEnvironmentPairsAsStringArray() {
+        return this.environmentPairs.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toArray(String[]::new);
     }
 
     public String getWorkingDirectory() {
@@ -78,7 +86,7 @@ public class RestCommandRequest {
     }
 
     public byte[] getZipBytes() {
-        return this.zipBytes;
+        return Base64.getDecoder().decode(this.zipBytes);
     }
 
 }

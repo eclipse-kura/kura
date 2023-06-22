@@ -12,21 +12,29 @@
  ******************************************************************************/
 package org.eclipse.kura.rest.command.provider.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.app.command.CommandCloudApp;
+import org.eclipse.kura.cloud.app.command.KuraCommandRequestPayload;
+import org.eclipse.kura.cloud.app.command.KuraCommandResponsePayload;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.core.inventory.InventoryHandlerV1;
-import org.eclipse.kura.internal.rest.inventory.CommandRestService;
-import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.internal.rest.command.CommandRestService;
+import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.rest.command.api.RestCommandRequest;
+import org.eclipse.kura.rest.command.api.RestCommandResponse;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -34,276 +42,208 @@ public class CommandRestServiceTest {
 
     private static final String ARGS_KEY = "args";
 
-    InventoryHandlerV1 inventoryHandlerV1;
-    CommandRestService inventoryRestService;
-    Boolean hasExceptionOccured = false;
+    CommandCloudApp commandCloudApp;
+    CommandRestService commandRestService;
+    Boolean hasExceptionOccurred = false;
+
+    RestCommandRequest restCommandRequest = new RestCommandRequest();
+    RestCommandResponse restCommandResponse = new RestCommandResponse();
+
+    KuraCommandResponsePayload mockedKuraCommandResponsePayload;
 
     private ArgumentCaptor<KuraMessage> kuraPayloadArgumentCaptor = ArgumentCaptor.forClass(KuraMessage.class);
+    KuraMessage capturedKuraMessage;
+    KuraCommandRequestPayload captureKuraCommandRequestPayload;
 
     @Test
-    public void listInventoryTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
+    public void commandExecNull() throws KuraException {
+        givenCommandCloudApp();
+        givenCommandRestService();
 
-        whenGetInventorySummary();
+        givenMockedResponseStdout("example stdout 1");
+        givenMockedResponseStderr("example stderr 1");
+        givenMockedResponseExitCode(0);
+        givenMockedResponseTimedout(false);
 
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("inventory"), "");
-        thenVerifyNoExceptionOccurred();
-    }
-
-    @Test
-    public void listBundlesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenGetBundles();
-
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("bundles"), "");
-        thenVerifyNoExceptionOccurred();
-    }
-
-    @Test
-    public void startBundlesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenStartBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        whenExecCommand();
 
         thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("bundles", "_start"),
-                "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
-        thenVerifyNoExceptionOccurred();
+        thenCommandRequestIs(Arrays.asList("command"));
     }
 
     @Test
-    public void stopBundlesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
+    public void commandExecWithCommandTest() throws KuraException {
+        givenCommandCloudApp();
+        givenCommandRestService();
+        givenCommand("ls");
 
-        whenStopBundles("{ \"name\":\"org.eclipse.kura.example.publisher\"}");
+        givenMockedResponseStdout("example stdout 2");
+        givenMockedResponseStderr("example stderr 2");
+        givenMockedResponseExitCode(0);
+        givenMockedResponseTimedout(false);
+
+        whenExecCommand();
 
         thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("bundles", "_stop"), "{ \"name\":\"org.eclipse.kura.example.publisher\"}");
-        thenVerifyNoExceptionOccurred();
+        thenCommandRequestIs(Arrays.asList("command"));
+        thenCommandIs("ls");
+
+        thenVerifyKuraResponseStdoutIs("example stdout 2");
+        thenVerifyKuraResponseStderrIs("example stderr 2");
+        thenVerifyKuraResponseExitCodeIs(0);
+        thenVerifyKuraResponseTimedoutIs(false);
     }
 
     @Test
-    public void listDeploymentPackagesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
+    public void commandExecWithFullParamsTest() throws KuraException {
+        givenCommandCloudApp();
+        givenCommandRestService();
 
-        whenGetDeploymentPackages();
+        givenCommand("ls");
+        givenArguments(new String[] { "arg1", "arg2" });
+        givenEnvironmentPairs(Collections.singletonMap("testvar", "testValue"));
+        givenWorkingDirectory("/tmp");
+        givenPassword("password");
+        givenIsRunAsync(true);
+        givenZipBytes("emlwQnl0ZXM=");
 
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("deploymentPackages"), "");
-        thenVerifyNoExceptionOccurred();
-    }
+        givenMockedResponseStdout("example stdout 3");
+        givenMockedResponseStderr("example stderr 3");
+        givenMockedResponseExitCode(0);
+        givenMockedResponseTimedout(false);
 
-    @Test
-    public void listSystemPackagesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenGetSystemPackages();
-
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("systemPackages"), "");
-        thenVerifyNoExceptionOccurred();
-    }
-
-    @Test
-    public void listContainersTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenGetContainers();
-
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("containers"), "");
-        thenVerifyNoExceptionOccurred();
-    }
-
-    @Test
-    public void startContainerTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenStartContainer("{ \"name\":\"kura-test-container\"}");
+        whenExecCommand();
 
         thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("containers", "_start"), "{ \"name\":\"kura-test-container\"}");
-        thenVerifyNoExceptionOccurred();
+        thenCommandRequestIs(Arrays.asList("command"));
+        thenCommandIs("ls");
+        thenArgumentsIs(new String[] { "arg1", "arg2" });
+        thenEnvironmentPairsIs(Collections.singletonMap("testvar", "testValue"));
+        thenWorkingDirectoryIs("/tmp");
+        thenPasswordIs("password");
+        thenIsRunAsyncIs(true);
+        thenZipBytesIs(new byte[] { 'z', 'i', 'p', 'B', 'y', 't', 'e', 's' });
+
+        thenVerifyKuraResponseStdoutIs("example stdout 3");
+        thenVerifyKuraResponseStderrIs("example stderr 3");
+        thenVerifyKuraResponseExitCodeIs(0);
+        thenVerifyKuraResponseTimedoutIs(false);
     }
 
-    @Test
-    public void stopContainerTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
+    private void givenCommandCloudApp() throws KuraException {
+        commandCloudApp = mock(CommandCloudApp.class);
 
-        whenStopContainer("{ \"name\":\"kura-test-container\"}");
+        mockedKuraCommandResponsePayload = new KuraCommandResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        KuraMessage fakeKuraMessage = new KuraMessage(mockedKuraCommandResponsePayload);
 
-        thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("containers", "_stop"), "{ \"name\":\"kura-test-container\"}");
-        thenVerifyNoExceptionOccurred();
+        when(commandCloudApp.doExec(any(), any())).thenReturn(fakeKuraMessage);
     }
 
-    @Test
-    public void listImagesTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenGetImages();
-
-        thenVerifyDoGetIsRun();
-        thenInventoryRequestIs(Arrays.asList("images"), "");
-        thenVerifyNoExceptionOccurred();
+    private void givenCommandRestService() {
+        commandRestService = new CommandRestService();
+        commandRestService.setCommandCloudApp(commandCloudApp);
     }
 
-    @Test
-    public void deleteImageTest() throws KuraException {
-        givenInventoryHandler();
-        givenInventoryRestService();
-
-        whenDeleteImage("{ \"name\":\"nginx\"}");
-
-        thenVerifyDoExecIsRun();
-        thenInventoryRequestIs(Arrays.asList("images", "_delete"), "{ \"name\":\"nginx\"}");
-        thenVerifyNoExceptionOccurred();
+    private void givenMockedResponseStdout(String stdout) {
+        mockedKuraCommandResponsePayload.setStdout(stdout);
     }
 
-    private void givenInventoryHandler() throws KuraException {
-        inventoryHandlerV1 = mock(InventoryHandlerV1.class);
-
-        KuraPayload fakeKuraPayload = new KuraPayload();
-        KuraMessage fakeKuraMessage = new KuraMessage(fakeKuraPayload);
-
-        when(inventoryHandlerV1.doGet(any(), any())).thenReturn(fakeKuraMessage);
-        when(inventoryHandlerV1.doExec(any(), any())).thenReturn(fakeKuraMessage);
+    private void givenMockedResponseStderr(String stderr) {
+        mockedKuraCommandResponsePayload.setStderr(stderr);
     }
 
-    private void givenInventoryRestService() {
-        inventoryRestService = new CommandRestService();
-        inventoryRestService.setInventoryHandlerV1(inventoryHandlerV1);
+    private void givenMockedResponseExitCode(int exitCode) {
+        mockedKuraCommandResponsePayload.setExitCode(exitCode);
     }
 
-    private void whenGetInventorySummary() {
-        try {
-            inventoryRestService.getInventorySummary();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenMockedResponseTimedout(boolean isTimedout) {
+        mockedKuraCommandResponsePayload.setTimedout(isTimedout);
     }
 
-    private void whenGetBundles() {
-        try {
-            inventoryRestService.getBundles();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenCommand(String command) {
+        this.restCommandRequest.setCommand(command);
     }
 
-    private void whenStartBundles(String jsonArgument) {
-        try {
-            inventoryRestService.startBundle(jsonArgument);
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenArguments(String[] arguments) {
+        this.restCommandRequest.setArguments(arguments);
     }
 
-    private void whenStopBundles(String jsonArgument) {
-        try {
-            inventoryRestService.stopBundle(jsonArgument);
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenEnvironmentPairs(Map<String, String> environmentPairs) {
+        this.restCommandRequest.setEnvironmentPairs(environmentPairs);
     }
 
-    private void whenGetDeploymentPackages() {
-        try {
-            inventoryRestService.getDeploymentPackages();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenWorkingDirectory(String workingDirectory) {
+        this.restCommandRequest.setWorkingDirectory(workingDirectory);
     }
 
-    private void whenGetSystemPackages() {
-        try {
-            inventoryRestService.getSystemPackages();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenPassword(String password) {
+        this.restCommandRequest.setPassword(password);
     }
 
-    private void whenGetContainers() {
-        try {
-            inventoryRestService.getContainers();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    public void givenIsRunAsync(boolean isRunAsync) {
+        this.restCommandRequest.setIsRunAsync(isRunAsync);
     }
 
-    private void whenStartContainer(String jsonArgument) {
-        try {
-            inventoryRestService.startContainer(jsonArgument);
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
+    private void givenZipBytes(String zipBytes) {
+        this.restCommandRequest.setZipBytes(zipBytes);
     }
 
-    private void whenStopContainer(String jsonArgument) {
-        try {
-            inventoryRestService.stopContainer(jsonArgument);
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
-    }
-
-    private void whenGetImages() {
-        try {
-            inventoryRestService.getImages();
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
-    }
-
-    private void whenDeleteImage(String jsonArgument) {
-        try {
-            inventoryRestService.deleteImage(jsonArgument);
-        } catch (Exception e) {
-            e.printStackTrace();
-            hasExceptionOccured = true;
-        }
-    }
-
-    private void thenVerifyDoGetIsRun() throws KuraException {
-        verify(inventoryHandlerV1).doGet(any(), kuraPayloadArgumentCaptor.capture());
+    private void whenExecCommand() {
+        restCommandResponse = commandRestService.execCommand(this.restCommandRequest);
     }
 
     private void thenVerifyDoExecIsRun() throws KuraException {
-        verify(inventoryHandlerV1).doExec(any(), kuraPayloadArgumentCaptor.capture());
+        verify(commandCloudApp).doExec(any(), kuraPayloadArgumentCaptor.capture());
     }
 
-    private void thenInventoryRequestIs(List<String> expectedArgs, String expectedBody) {
-        KuraMessage receivedKuraPayload = kuraPayloadArgumentCaptor.getValue();
+    private void thenCommandRequestIs(List<String> expectedArgs) {
+        capturedKuraMessage = kuraPayloadArgumentCaptor.getValue();
+        captureKuraCommandRequestPayload = (KuraCommandRequestPayload) capturedKuraMessage.getPayload();
 
-        assertEquals(expectedArgs, receivedKuraPayload.getProperties().get(ARGS_KEY));
-        assertEquals(expectedBody, new String(receivedKuraPayload.getPayload().getBody()));
+        assertEquals(expectedArgs, capturedKuraMessage.getProperties().get(ARGS_KEY));
     }
 
-    private void thenVerifyNoExceptionOccurred() {
-        assertFalse(hasExceptionOccured);
+    private void thenCommandIs(String command) {
+        assertEquals(command, captureKuraCommandRequestPayload.getCommand());
     }
 
+    private void thenArgumentsIs(String[] arguments) {
+        assertArrayEquals(arguments, captureKuraCommandRequestPayload.getArguments());
+    }
+
+    private void thenEnvironmentPairsIs(Map<String, String> environmentPairs) {
+        this.restCommandRequest.setEnvironmentPairs(environmentPairs);
+    }
+
+    private void thenWorkingDirectoryIs(String workingDirectory) {
+        assertEquals(workingDirectory, captureKuraCommandRequestPayload.getWorkingDir());
+    }
+
+    private void thenPasswordIs(String password) {
+        assertEquals(password, captureKuraCommandRequestPayload.getMetric("command.password"));
+    }
+
+    private void thenIsRunAsyncIs(boolean isRunAsync) {
+        assertEquals(isRunAsync, captureKuraCommandRequestPayload.isRunAsync());
+    }
+
+    private void thenZipBytesIs(byte[] zipBytes) {
+        assertEquals(new String(zipBytes), new String(captureKuraCommandRequestPayload.getZipBytes()));
+    }
+
+    private void thenVerifyKuraResponseStdoutIs(String stdout) {
+        assertEquals(stdout, restCommandResponse.getStdout());
+    }
+
+    private void thenVerifyKuraResponseStderrIs(String stderr) {
+        assertEquals(stderr, restCommandResponse.getStderr());
+    }
+
+    private void thenVerifyKuraResponseExitCodeIs(int exitCode) {
+        assertEquals(exitCode, restCommandResponse.getExitCode());
+    }
+
+    private void thenVerifyKuraResponseTimedoutIs(boolean isTimedout) {
+        assertEquals(isTimedout, restCommandResponse.getIsTimeOut());
+    }
 }

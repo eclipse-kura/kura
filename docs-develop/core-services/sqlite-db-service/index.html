@@ -3000,6 +3000,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h1 id="sqlite-db-service">SQLite Db Service</h1>
 <p>Starting from version 5.3, Kura provides provides an integration of the SQLite database, based on the org.xerial:sqlite-jdbc wrapper .</p>
 <p>The database integration is not included in the official distribution, but it can be downloaded from Eclipse Marketplace as a deployment package.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Note about Raspberry PI: Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of <code>uname -m</code> to decide which native libraries to load (see https://github.com/raspberrypi/firmware/issues/1795). This currently affects the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting <code>arm_64bit=0</code> in <code>/boot/config.txt</code> and restarting the device.</p>
+</div>
 <h2 id="supported-features">Supported Features</h2>
 <p>Kura supports the following SQLite database features:</p>
 <ul>

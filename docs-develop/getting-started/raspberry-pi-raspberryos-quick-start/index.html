@@ -2937,6 +2937,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura download page</a></p>
 </div>
 <p>This quickstart has been tested using the latest Raspberry Pi OS 32 and 64 bits images which are available for download through <a href="https://www.raspberrypi.com/software/operating-systems/">the official Raspberry Pi foundation site</a> and the Raspberry Pi Imager.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Recent versions of Raspberry Pi OS 32 bit on Raspberry PI 4 will use by default a 64 bit kernel with a 32 bit userspace. This can cause issues to applications that use the result of <code>uname -m</code> to decide which native libraries to load (see https://github.com/raspberrypi/firmware/issues/1795). This currently affects for example the Kura SQLite database connector. It should be possible to solve by switching to the 32 bit kernel setting <code>arm_64bit=0</code> in <code>/boot/config.txt</code> and restarting the device.</p>
+</div>
 <p>For additional details on OS compatibility refer to the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Kura&trade; release notes</a>.</p>
 <h2 id="enable-ssh-access">Enable SSH Access</h2>
 <p>The ssh server is disabled by default on Raspbian images released after November 2016,

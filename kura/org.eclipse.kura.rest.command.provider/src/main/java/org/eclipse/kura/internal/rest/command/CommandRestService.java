@@ -89,7 +89,7 @@ public class CommandRestService {
                 restCommandPayload.getCommand());
 
         kuraCommandRequestPayload.addMetric(PASSWORD_METRIC_NAME, restCommandPayload.getPassword());
-        kuraCommandRequestPayload.setZipBytes(restCommandPayload.getZipBytes());
+        kuraCommandRequestPayload.setZipBytes(restCommandPayload.getZipBytesAsByteArray());
 
         kuraCommandRequestPayload.setWorkingDir(restCommandPayload.getWorkingDirectory());
         kuraCommandRequestPayload.setArguments(restCommandPayload.getArguments());

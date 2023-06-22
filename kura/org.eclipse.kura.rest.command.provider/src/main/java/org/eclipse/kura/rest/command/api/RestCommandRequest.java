@@ -88,7 +88,11 @@ public class RestCommandRequest {
         return this.isRunAsync;
     }
 
-    public byte[] getZipBytes() {
+    public String getZipBytes() {
+        return this.zipBytes;
+    }
+
+    public byte[] getZipBytesAsByteArray() {
         if (this.zipBytes == null) {
             return new byte[0];
         }

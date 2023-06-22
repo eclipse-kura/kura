@@ -32,6 +32,7 @@ public class DhcpClientManager {
 
     private static final String PID_FILE_DIR = "/var/run";
     private static final String DHCLIENT_HOOK_SCRIPT_FILE = "/etc/kura-dhclient-resolv-hook";
+    private static final String DHCLIENT_ROUTE_SCRIPT_FILE = "/etc/kura-dhclient-route-hook";
     private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private final CommandExecutorService executorService;
 
@@ -90,9 +91,16 @@ public class DhcpClientManager {
         }
     }
 
-    public static String getHookScriptFileName() {
+    public static String getResolvConfHookScriptFileName() {
         if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
             return DHCLIENT_HOOK_SCRIPT_FILE;
+        }
+        return "";
+    }
+
+    public static String getRouteHookScriptFileName() {
+        if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+            return DHCLIENT_ROUTE_SCRIPT_FILE;
         }
         return "";
     }

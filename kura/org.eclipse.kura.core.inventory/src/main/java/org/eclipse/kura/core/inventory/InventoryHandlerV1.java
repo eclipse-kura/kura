@@ -75,17 +75,18 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
     public static final String RESOURCE_CONTAINER_IMAGES = "images";
     public static final String INVENTORY = "inventory";
+
     private static final String START = "_start";
     private static final String STOP = "_stop";
     private static final String DELETE = "_delete";
 
-    private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
-    private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
+    public static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
+    public static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
 
-    private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
-    private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
-    
-    private static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
+    public static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
+    public static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+
+    public static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
@@ -352,7 +353,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             int state = bundle.getState();
             systemBundle.setState(bundleStateToString(state));
-            
+
             systemBundle.setSigned(isSigned(bundle));
 
             axb[i] = systemBundle;
@@ -394,7 +395,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService.listContainerDescriptors();
+                List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService
+                        .listContainerDescriptors();
                 containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
                                 container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
@@ -404,16 +406,15 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             }
 
         }
-        
+
         // get Container Images
         if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating container images invenetory");
-                List<ImageInstanceDescriptor> images = this.containerOrchestrationService.listImageInstanceDescriptors();
-                images.stream().forEach(
-                        image -> inventory.add(new SystemResourceInfo(image.getImageName(),
-                                image.getImageTag(),
-                                SystemResourceType.CONTAINER_IMAGE)));
+                List<ImageInstanceDescriptor> images = this.containerOrchestrationService
+                        .listImageInstanceDescriptors();
+                images.stream().forEach(image -> inventory.add(new SystemResourceInfo(image.getImageName(),
+                        image.getImageTag(), SystemResourceType.CONTAINER_IMAGE)));
             } catch (Exception e) {
                 logger.error("Could not connect to container-engine");
             }
@@ -466,7 +467,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService
+                    .listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -482,7 +484,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         return respPayload;
     }
-    
+
     private KuraPayload doGetContainerImages() {
 
         if (this.containerOrchestrationService == null) {
@@ -491,7 +493,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService.listImageInstanceDescriptors();
+            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService
+                    .listImageInstanceDescriptors();
 
             List<ContainerImage> imageList = new ArrayList<>();
             containers.stream().forEach(p -> imageList.add(new ContainerImage(p)));
@@ -591,7 +594,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         return stateString;
     }
-    
+
     private boolean isSigned(Bundle bundle) {
         return !bundle.getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty();
     }
@@ -623,7 +626,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 DockerContainer.class);
 
         try {
-            List<ContainerInstanceDescriptor> containerList = this.containerOrchestrationService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containerList = this.containerOrchestrationService
+                    .listContainerDescriptors();
 
             for (ContainerInstanceDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
@@ -638,7 +642,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
 
     }
-    
+
     private ImageInstanceDescriptor extractContainerImageRef(final KuraMessage message) throws KuraException {
         final KuraPayload payload = message.getPayload();
 
@@ -650,7 +654,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
 
         ContainerImage dc = unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8),
-        		ContainerImage.class);
+                ContainerImage.class);
 
         try {
             List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptors();
@@ -687,7 +691,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private ContainerInstanceDescriptor findFirstMatchingContainer(final ContainerInstanceDescriptor ref)
             throws KuraException {
-        for (final ContainerInstanceDescriptor container : this.containerOrchestrationService.listContainerDescriptors()) {
+        for (final ContainerInstanceDescriptor container : this.containerOrchestrationService
+                .listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }
@@ -695,9 +700,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
-    
-    private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref)
-            throws KuraException {
+
+    private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref) throws KuraException {
         for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptors()) {
             if (image.getImageName().equals(ref.getImageName()) && image.getImageTag().equals(ref.getImageTag())) {
                 return image;
@@ -706,7 +710,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
-
 
     private static KuraMessage success() {
         final KuraPayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);

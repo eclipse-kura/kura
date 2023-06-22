@@ -69,6 +69,9 @@ public class RestCommandRequest {
     }
 
     public String[] getEnvironmentPairsAsStringArray() {
+        if (this.environmentPairs == null) {
+            return new String[0];
+        }
         return this.environmentPairs.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
                 .toArray(String[]::new);
     }
@@ -86,6 +89,10 @@ public class RestCommandRequest {
     }
 
     public byte[] getZipBytes() {
+        if (this.zipBytes == null) {
+            return new byte[0];
+        }
+
         return Base64.getDecoder().decode(this.zipBytes);
     }
 

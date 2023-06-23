@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.eclipse.kura.nm.enums.NMDeviceWifiCapabilities;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.kura.nm.enums.NMDeviceStateReason;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

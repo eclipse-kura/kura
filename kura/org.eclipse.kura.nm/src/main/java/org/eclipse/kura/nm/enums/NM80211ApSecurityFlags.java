@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import java.util.ArrayList;
 import java.util.Arrays;

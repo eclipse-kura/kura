@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.freedesktop.dbus.types.UInt32;

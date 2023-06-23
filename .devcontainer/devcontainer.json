@@ -1,0 +1,12 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+        "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
+			    "command1": "python3 -m venv .venv",
+			    "command2": "source .venv/bin/activate",
+          "command3": "pip3 install --upgrade pip",
+          "command4": "pip3 install -r requirements.txt",
+          "command5": "mkdocs serve"
+        }
+    }
+}

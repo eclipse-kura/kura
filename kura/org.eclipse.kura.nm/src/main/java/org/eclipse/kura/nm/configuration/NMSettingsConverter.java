@@ -24,8 +24,8 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.KuraIpStatus;
-import org.eclipse.kura.nm.NMDeviceType;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;

@@ -15,6 +15,7 @@ package org.eclipse.kura.nm;
 import java.util.Objects;
 import java.util.Timer;
 
+import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.networkmanager.Device;

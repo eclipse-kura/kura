@@ -14,6 +14,7 @@ package org.eclipse.kura.nm;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;

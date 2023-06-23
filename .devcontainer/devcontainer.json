@@ -9,6 +9,13 @@
 		"gradleVersion": "5.6.4",
 		"mavenVersion": "3.5.4",
 		"antVersion": "1.9.15"
-	  }
-  }
+	  },
+    	"docker-in-docker": {
+        	"version": "latest",
+        	"moby": true,
+        	"dockerDashComposeVersion": "v1"
+    	  }
+  },
+  "postCreateCommand": "mvn clean install -f target-platform/pom.xml && mvn -f kura/pom.xml clean install -Dmaven.test.skip=true && mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers",
+  "postStartCommand": "docker images"
 }

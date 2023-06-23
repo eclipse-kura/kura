@@ -14,7 +14,6 @@ package org.eclipse.kura.nm.enums;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 

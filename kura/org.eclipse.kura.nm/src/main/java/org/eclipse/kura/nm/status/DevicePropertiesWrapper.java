@@ -14,7 +14,7 @@ package org.eclipse.kura.nm.status;
 
 import java.util.Optional;
 
-import org.eclipse.kura.nm.NMDeviceType;
+import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.interfaces.Properties;
 
 public class DevicePropertiesWrapper {

@@ -17,6 +17,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.eclipse.kura.nm.enums.NMDeviceState;
+import org.eclipse.kura.nm.enums.NMDeviceStateReason;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.networkmanager.Device;

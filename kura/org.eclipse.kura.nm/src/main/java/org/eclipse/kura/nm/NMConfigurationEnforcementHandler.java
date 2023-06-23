@@ -14,6 +14,8 @@ package org.eclipse.kura.nm;
 
 import java.util.Objects;
 
+import org.eclipse.kura.nm.enums.NMDeviceState;
+import org.eclipse.kura.nm.enums.NMDeviceStateReason;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
 import org.freedesktop.networkmanager.Device;

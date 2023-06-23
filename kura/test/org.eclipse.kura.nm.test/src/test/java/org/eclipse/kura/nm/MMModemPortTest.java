@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.kura.net.status.modem.ModemPortType;
+import org.eclipse.kura.nm.enums.MMModemPortType;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

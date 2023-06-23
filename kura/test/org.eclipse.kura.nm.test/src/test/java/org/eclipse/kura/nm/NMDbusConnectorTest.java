@@ -65,6 +65,8 @@ import org.eclipse.kura.net.status.modem.ModemPowerState;
 import org.eclipse.kura.net.status.modem.RegistrationStatus;
 import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.modem.SimType;
+import org.eclipse.kura.nm.enums.MMModemLocationSource;
+import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.ModemManager1;
 import org.freedesktop.NetworkManager;

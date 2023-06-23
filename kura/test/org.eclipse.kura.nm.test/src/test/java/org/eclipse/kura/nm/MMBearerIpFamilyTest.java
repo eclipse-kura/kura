@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.net.status.modem.BearerIpType;
+import org.eclipse.kura.nm.enums.MMBearerIpFamily;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

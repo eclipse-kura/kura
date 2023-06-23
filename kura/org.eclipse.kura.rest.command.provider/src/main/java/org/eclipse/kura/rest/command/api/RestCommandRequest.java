@@ -17,11 +17,8 @@ import java.util.Map;
 
 public class RestCommandRequest {
 
-    // Mandatory //
     private String command;
     private String password;
-
-    // Optional //
     private String zipBytes;
     private String[] arguments;
     private Map<String, String> environmentPairs;

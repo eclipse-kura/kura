@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

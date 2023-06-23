@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,7 +20,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

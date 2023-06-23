@@ -10,14 +10,13 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.eclipse.kura.nm.enums.NM80211ApSecurityFlags;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 

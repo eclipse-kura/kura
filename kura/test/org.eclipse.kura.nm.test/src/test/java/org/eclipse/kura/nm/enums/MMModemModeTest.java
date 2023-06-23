@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.enums;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.net.status.modem.ModemMode;
-import org.eclipse.kura.nm.enums.MMModemMode;
 import org.freedesktop.dbus.types.UInt32;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

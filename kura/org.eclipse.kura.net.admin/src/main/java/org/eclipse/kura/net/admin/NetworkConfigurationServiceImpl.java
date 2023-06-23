@@ -33,7 +33,6 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.IpConfigurationInterpreter;
 import org.eclipse.kura.core.net.LoopbackInterfaceConfigImpl;
@@ -385,11 +384,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(PID,
-                NetworkConfigurationServiceCommon.getDefinition(this.properties, Optional.of(this.usbNetDevices)),
-                this.properties);
+        return NetworkConfigurationServiceCommon.getConfiguration(PID, properties, Optional.of(this.usbNetDevices));
     }
 
     @Override

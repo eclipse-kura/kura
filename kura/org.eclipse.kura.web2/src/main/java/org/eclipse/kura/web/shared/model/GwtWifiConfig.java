@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,7 @@ package org.eclipse.kura.web.shared.model;
 import java.io.Serializable;
 import java.util.List;
 
-import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
-
-public class GwtWifiConfig extends GwtBaseModel implements Serializable {
+public class GwtWifiConfig extends KuraBaseModel implements Serializable {
 
     private static final long serialVersionUID = -7610506986073264800L;
 
@@ -43,15 +41,6 @@ public class GwtWifiConfig extends GwtBaseModel implements Serializable {
         setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
         setRadioMode(GwtWifiRadioMode.netWifiRadioModeBGN.name());
         setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
-    }
-
-    @Override
-    public void set(String name, Object value) {
-        Object escapedValue = value;
-        if (value instanceof String) {
-            escapedValue = GwtSafeHtmlUtils.htmlEscape((String) value);
-        }
-        super.set(name, escapedValue);
     }
 
     public String getWirelessMode() {

@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import org.eclipse.kura.configuration.Password;
+
 public class NetworkProperties {
 
     private final Map<String, Object> properties;
@@ -44,8 +46,16 @@ public class NetworkProperties {
             throw new NoSuchElementException(String.format("The \"%s\" key contains a null value.", formattedKey));
         }
 
-        if (clazz == String.class) {
-            String value = String.class.cast(rawValue);
+        if (clazz == String.class || clazz == Password.class) {
+            String value = "";
+
+            if (clazz == String.class) {
+                value = String.class.cast(rawValue);
+            } else {
+                Password pwValue = Password.class.cast(rawValue);
+                value = pwValue.toString();
+            }
+
             if (value.isEmpty()) {
                 throw new NoSuchElementException(
                         String.format("The \"%s\" key contains an empty string value.", formattedKey));
@@ -67,8 +77,16 @@ public class NetworkProperties {
             return Optional.empty();
         }
 
-        if (clazz == String.class) {
-            String value = String.class.cast(rawValue);
+        if (clazz == String.class || clazz == Password.class) {
+            String value = "";
+
+            if (clazz == String.class) {
+                value = String.class.cast(rawValue);
+            } else {
+                Password pwValue = Password.class.cast(rawValue);
+                value = pwValue.toString();
+            }
+
             if (value.isEmpty()) {
                 return Optional.empty();
             }
@@ -83,7 +101,8 @@ public class NetworkProperties {
         List<String> stringList = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
         if (Objects.nonNull(commaSeparatedString) && !commaSeparatedString.isEmpty()) {
-            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+            comma.splitAsStream(commaSeparatedString).filter(s -> !s.trim().isEmpty()).map(String::trim)
+                    .forEach(stringList::add);
         }
 
         return stringList;
@@ -97,7 +116,8 @@ public class NetworkProperties {
 
         List<String> stringList = new ArrayList<>();
         Pattern comma = Pattern.compile(",");
-        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).forEach(stringList::add);
+        comma.splitAsStream(commaSeparatedString.get()).filter(s -> !s.trim().isEmpty()).map(String::trim)
+                .forEach(stringList::add);
 
         return Optional.of(stringList);
     }

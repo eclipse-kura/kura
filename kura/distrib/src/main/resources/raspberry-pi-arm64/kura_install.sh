@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2022 Eurotech and/or its affiliates and others
+# Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -75,11 +75,17 @@ if command -v timedatectl > /dev/null ;
 fi
 
 #disable asking NTP servers to the DHCP server
-sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+if [ -f /etc/dhcp/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhcp/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+fi
+
+if [ -f /etc/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhclient.conf
+fi
 
 # Prevent time sync services from starting
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 # Prevent time sync with chrony from starting.
@@ -108,6 +114,10 @@ if [ ! -f "/etc/bind/rndc.key" ] ; then
 fi
 chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
+
+#set up dhclient hooks
+cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-hook /etc/dhcp/dhclient-enter-hooks.d/zz-kura-dhclient-enter-hook
+cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-route-hook /etc/dhcp/dhclient-enter-hooks.d/yy-kura-dhclient-enter-hook
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
@@ -156,6 +166,10 @@ systemctl disable resolvconf.service
 #disable ModemManager
 systemctl stop ModemManager
 systemctl disable ModemManager
+
+#disable systemd-hostnamed
+systemctl stop systemd-hostnamed
+systemctl disable systemd-hostnamed
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant

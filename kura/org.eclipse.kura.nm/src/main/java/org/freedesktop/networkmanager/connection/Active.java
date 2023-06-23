@@ -14,6 +14,7 @@ package org.freedesktop.networkmanager.connection;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -63,11 +64,11 @@ public interface Active extends DBusInterface {
         }
 
         public UInt32 getState() {
-            return state;
+            return this.state;
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }
@@ -82,7 +83,7 @@ public interface Active extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

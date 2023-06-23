@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.db.sqlite.provider;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,45 +25,55 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.connection.listener.ConnectionListener;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.BaseDbService;
-import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.JournalMode;
 import org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceOptions.Mode;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
+import org.eclipse.kura.util.store.listener.ConnectionListenerManager;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider;
 import org.eclipse.kura.wire.store.provider.WireRecordStore;
 import org.eclipse.kura.wire.store.provider.WireRecordStoreProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteJDBCLoader;
 
 public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
         WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
+    private static final Set<String> OPEN_URLS = new HashSet<>();
+
     private static final Logger logger = LoggerFactory.getLogger(SqliteDbServiceImpl.class);
 
-    static {
-        try {
-            DriverManager.registerDriver(new org.sqlite.JDBC());
-        } catch (SQLException e) {
-            throw new IllegalStateException("Failed to register driver");
-        }
-    }
-
+    private CryptoService cryptoService;
     private SqliteDebugShell debugShell;
+
+    private Optional<DbState> state = Optional.empty();
+    private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
     public void setDebugShell(final SqliteDebugShell debugShell) {
         this.debugShell = debugShell;
     }
 
-    private Optional<DbState> state = Optional.empty();
+    public void setCryptoService(final CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
 
     public void activate(final Map<String, Object> properties) {
+
         logger.info("activating...");
+        try {
+            logger.info("SQLite driver is in native mode: {}", SQLiteJDBCLoader.isNativeMode());
+        } catch (Exception e) {
+            logger.info("Failed to determine if SQLite driver is in native mode", e);
+        }
 
         updated(properties);
 
@@ -77,10 +86,12 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         final SqliteDbServiceOptions newOptions = new SqliteDbServiceOptions(properties);
         this.debugShell.setPidAllowed(newOptions.getKuraServicePid(), newOptions.isDebugShellAccessEnabled());
 
-        if (!this.state.map(DbState::getOptions).equals(Optional.of(newOptions))) {
+        final Optional<SqliteDbServiceOptions> oldOptions = this.state.map(DbState::getOptions);
+
+        if (!oldOptions.equals(Optional.of(newOptions))) {
             shutdown();
             try {
-                this.state = Optional.of(new DbState(newOptions));
+                this.state = Optional.of(new DbState(newOptions, oldOptions, cryptoService));
             } catch (final Exception e) {
                 logger.warn("Failed to initialize the database instance", e);
             }
@@ -101,47 +112,49 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         if (this.state.isPresent()) {
             this.state.get().shutdown();
             this.state = Optional.empty();
+            this.listenerManager.dispatchDisconnected();
         }
     }
 
     @Override
     public synchronized Connection getConnection() throws SQLException {
 
-        return this.state.orElseThrow(() -> new SQLException("Database is not initialized")).getConnection();
+        if (this.state.isPresent()) {
+            Connection connection;
+            try {
+                connection = this.state.get().getConnection();
+            } catch (SQLException e) {
+                this.listenerManager.dispatchDisconnected();
+                throw e;
+            }
+            return connection;
+        } else {
+            this.listenerManager.dispatchDisconnected();
+            throw new SQLException("Database is not initialized");
+        }
+
     }
 
-    private static class DbState {
-
-        private static final String DEFRAG_STATEMENT = "VACUUM;";
-
-        private static final String WAL_CHECKPOINT_STATEMENT = "PRAGMA wal_checkpoint(TRUNCATE);";
-
-        private static final Set<String> OPEN_URLS = new HashSet<>();
+    private class DbState {
 
         private final Optional<ScheduledExecutorService> executor;
         private final ConnectionPoolManager connectionPool;
         private final SqliteDbServiceOptions options;
 
-        public DbState(SqliteDbServiceOptions options) throws SQLException {
+        public DbState(SqliteDbServiceOptions options, final Optional<SqliteDbServiceOptions> oldOptions,
+                final CryptoService cryptoService) throws SQLException, KuraException {
             this.options = options;
             tryClaimFile();
 
             try {
                 logger.info("opening database with url: {}...", options.getDbUrl());
 
-                final SQLiteConnectionPoolDataSource dataSource = new SQLiteConnectionPoolDataSource();
-                dataSource.setUrl(options.getDbUrl());
-
-                if (options.getMode() == Mode.PERSISTED) {
-                    dataSource.setJournalMode(
-                            options.getJournalMode() == JournalMode.ROLLBACK_JOURNAL ? "DELETE" : "WAL");
-                }
+                final SQLiteDataSource dataSource = new DatabaseLoader(options, oldOptions, cryptoService)
+                        .openDataSource();
 
                 int maxConnectionCount = options.getMode() == Mode.PERSISTED ? options.getConnectionPoolMaxSize() : 1;
 
                 this.connectionPool = new ConnectionPoolManager(dataSource, maxConnectionCount);
-
-                this.connectionPool.getConnection().close();
 
                 if (options.isPeriodicDefragEnabled() || options.isPeriodicWalCheckpointEnabled()) {
                     this.executor = Optional.of(Executors.newSingleThreadScheduledExecutor());
@@ -161,6 +174,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
                 }
 
                 logger.info("opening database with url: {}...done", options.getDbUrl());
+                SqliteDbServiceImpl.this.listenerManager.dispatchConnected();
             } catch (final Exception e) {
                 releaseFile();
                 throw e;
@@ -176,42 +190,15 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         }
 
         private void walCheckpoint() {
-            logger.info("performing WAL checkpoint on database with url: {}...", getOptions().getDbUrl());
-
-            try (final Connection connection = getConnection();
-                    final Statement statement = connection.createStatement()) {
-                statement.execute(WAL_CHECKPOINT_STATEMENT);
-            } catch (final Exception e) {
-                logger.warn("WAL checkpoint failed", e);
+            try (final Connection connection = getConnection()) {
+                SqliteUtil.walCeckpoint(connection, options);
+            } catch (Exception e) {
+                logger.warn("failed to close connection", e);
             }
-
-            logger.info("performing WAL checkpoint on database with url: {}...done", getOptions().getDbUrl());
         }
 
         private void defrag() {
-            this.connectionPool.withExclusiveConnection(conn -> {
-                logger.info("defragmenting database with url: {}...", getOptions().getDbUrl());
-
-                try (final Statement statement = conn.createStatement()) {
-
-                    statement.executeUpdate(DEFRAG_STATEMENT);
-
-                } catch (final Exception e) {
-                    logger.warn("VACUUM command failed", e);
-                }
-
-                if (options.getJournalMode() == JournalMode.WAL) {
-                    try (final Statement statement = conn.createStatement()) {
-
-                        statement.executeUpdate(WAL_CHECKPOINT_STATEMENT);
-
-                    } catch (final Exception e) {
-                        logger.warn("WAL checkpoint after defrag failed", e);
-                    }
-                }
-
-                logger.info("defragmenting database with url: {}...done", getOptions().getDbUrl());
-            });
+            this.connectionPool.withExclusiveConnection(conn -> SqliteUtil.vacuum(conn, options));
         }
 
         private void tryClaimFile() {
@@ -328,9 +315,10 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public List<WireRecord> performQuery(String query) throws KuraStoreException {
 
-        return SqliteQueryableWireRecordStoreImpl.performQuery(this::withConnection, query);
+        return new SqliteQueryableWireRecordStoreImpl(this::withConnection).performQuery(query);
     }
 
     @SuppressWarnings("restriction")
@@ -339,6 +327,18 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         try (final Connection conn = this.getConnection()) {
             return callable.call(conn);
         }
+    }
+
+    @Override
+    public void addListener(ConnectionListener listener) {
+        this.listenerManager.add(listener);
+
+    }
+
+    @Override
+    public void removeListener(ConnectionListener listener) {
+        this.listenerManager.remove(listener);
+
     }
 
 }

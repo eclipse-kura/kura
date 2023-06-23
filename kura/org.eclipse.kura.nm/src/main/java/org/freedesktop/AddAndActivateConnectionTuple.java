@@ -32,19 +32,19 @@ public class AddAndActivateConnectionTuple extends Tuple {
     }
 
     public void setPath(DBusPath arg) {
-        path = arg;
+        this.path = arg;
     }
 
     public DBusPath getPath() {
-        return path;
+        return this.path;
     }
 
     public void setActiveConnection(DBusPath arg) {
-        activeConnection = arg;
+        this.activeConnection = arg;
     }
 
     public DBusPath getActiveConnection() {
-        return activeConnection;
+        return this.activeConnection;
     }
 
 }

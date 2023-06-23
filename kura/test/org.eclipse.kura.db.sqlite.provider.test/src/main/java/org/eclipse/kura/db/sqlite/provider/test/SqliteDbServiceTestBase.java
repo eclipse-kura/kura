@@ -14,6 +14,7 @@ package org.eclipse.kura.db.sqlite.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -43,7 +44,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public class SqliteDbServiceTestBase {
 
-    private static final String SQLITE_DB_SERVICE_FACTORY_PID = "org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl";
+    private static final String SQLITE_DB_SERVICE_FACTORY_PID = "org.eclipse.kura.db.SQLiteDbService";
     private static final AtomicInteger currentId = new AtomicInteger(0);
 
     private final ConfigurationService configurationService;
@@ -123,6 +124,10 @@ public class SqliteDbServiceTestBase {
         assertEquals(size, Files.size(new File(path).toPath()));
     }
 
+    protected void thenFileSizeIsNotZero(final String path) throws IOException {
+        assertNotEquals(0, Files.size(new File(path).toPath()));
+    }
+
     protected void thenFileSizeDecreased(final String pathStr) throws IOException {
         final Path path = new File(pathStr).toPath();
 
@@ -130,6 +135,16 @@ public class SqliteDbServiceTestBase {
         final long after = Files.size(path);
 
         assertTrue("file size did not decrease, before " + before + " after " + after, after < before);
+    }
+
+    protected void thenFileSizeDidNotChange(String pathStr) throws IOException {
+        final Path path = new File(pathStr).toPath();
+
+        final long before = this.fileSize.get(path);
+        final long after = Files.size(path);
+
+        assertEquals("file size decreased, before " + before + " after " + after, before, after);
+
     }
 
     protected void thenFileDoesNotExist(final String path) {

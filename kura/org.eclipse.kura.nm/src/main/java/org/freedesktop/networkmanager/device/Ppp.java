@@ -13,6 +13,7 @@
 package org.freedesktop.networkmanager.device;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
@@ -35,7 +36,7 @@ public interface Ppp extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

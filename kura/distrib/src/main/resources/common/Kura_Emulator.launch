@@ -71,7 +71,7 @@
         <setEntry value="org.apache.commons.commons-net@default:default"/>
         <setEntry value="org.apache.commons.csv@default:default"/>
         <setEntry value="org.apache.commons.exec@default:default"/>
-        <setEntry value="org.apache.commons.fileupload@default:default"/>
+        <setEntry value="org.apache.commons.commons-fileupload@default:default"/>
         <setEntry value="org.apache.commons.lang3@default:default"/>
         <setEntry value="org.apache.felix.dependencymanager@default:default"/>
         <setEntry value="org.apache.felix.deploymentadmin@default:default"/>
@@ -150,6 +150,7 @@
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.inventory.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>
         <setEntry value="org.eclipse.kura.sun.misc@default:false"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>

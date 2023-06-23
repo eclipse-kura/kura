@@ -15,12 +15,17 @@ package org.eclipse.kura.nm.status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.nm.NMDbusConnector;
+import org.freedesktop.dbus.errors.UnknownMethod;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,55 +33,66 @@ public class NMStatusServiceImpl implements NetworkStatusService {
 
     private static final Logger logger = LoggerFactory.getLogger(NMStatusServiceImpl.class);
 
+    private CommandExecutorService commandExecutorService;
+
     private NMDbusConnector nmDbusConnector;
 
-    public void activate() throws DBusException {
-        logger.debug("Activate NMStatusService...");
-        this.nmDbusConnector = NMDbusConnector.getInstance();
+    public void setCommandExecutorService(CommandExecutorService executorService) {
+        this.commandExecutorService = executorService;
+    }
+
+    public NMStatusServiceImpl() {
+        try {
+            this.nmDbusConnector = NMDbusConnector.getInstance();
+        } catch (DBusExecutionException | DBusException e) {
+            logger.error("Cannot initialize NMDbusConnector due to: ", e);
+        }
+    }
+
+    public NMStatusServiceImpl(NMDbusConnector nmDbusConnector) {
+        this.nmDbusConnector = Objects.requireNonNull(nmDbusConnector);
+    }
+
+    public void activate() {
+        logger.info("Activate NMStatusService...");
+        logger.info("Activate NMStatusService... Done.");
     }
 
     public void update() {
-        logger.info("Update TritonServerService...");
+        logger.info("Update NMStatusService...");
+        logger.info("Update NMStatusService... Done.");
     }
 
     public void deactivate() {
-        logger.debug("Deactivate NMStatusService...");
-        this.nmDbusConnector.closeConnection();
+        logger.info("Deactivate NMStatusService...");
+        logger.info("Deactivate NMStatusService... Done.");
     }
 
     @Override
-    public List<NetInterface<NetInterfaceAddress>> getNetworkStatus() {
-        List<String> availableInterfaces = getInterfaceNames();
-
-        List<NetInterface<NetInterfaceAddress>> interfaceStatuses = new ArrayList<>();
-        for (String iface : availableInterfaces) {
-            NetInterface<NetInterfaceAddress> status = getNetworkStatus(iface);
-            if (Objects.nonNull(status)) {
-                interfaceStatuses.add(status);
-            }
-        }
-
-        return interfaceStatuses;
-    }
-
-    @Override
-    public NetInterface<NetInterfaceAddress> getNetworkStatus(String interfaceName) {
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) throws KuraException {
+        Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
         try {
-            return this.nmDbusConnector.getInterfaceStatus(interfaceName);
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id, this.commandExecutorService);
+            if (Objects.nonNull(status)) {
+                networkInterfaceStatus = Optional.of(status);
+            }
+        } catch (UnknownMethod e) {
+            throw new KuraIOException(e, "Could not retrieve status for " + id
+                    + " interface from NM because the DBus object path references got invalidated.");
         } catch (DBusException e) {
-            logger.warn("Could not retrieve status for \"{}\" interface from NM because: ", interfaceName, e);
+            throw new KuraIOException(e, "Could not retrieve status for " + id + " interface from NM.");
         }
 
-        return null;
+        return networkInterfaceStatus;
     }
 
     @Override
-    public List<String> getInterfaceNames() {
+    public List<String> getInterfaceIds() throws KuraException {
         List<String> interfaces = new ArrayList<>();
         try {
-            interfaces = this.nmDbusConnector.getInterfaces();
+            interfaces = this.nmDbusConnector.getDeviceIds();
         } catch (DBusException e) {
-            logger.warn("Could not retrieve interfaces from NM because: ", e);
+            throw new KuraIOException(e, "Could not retrieve interfaces from NM.");
         }
 
         return interfaces;

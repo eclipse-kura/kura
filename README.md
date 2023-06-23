@@ -7,13 +7,22 @@ Eclipse Kura™
 
 <div align="center">
 
-[![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
-[![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)
+![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)
 
+![GitHub Issues](https://img.shields.io/github/issues-raw/eclipse/kura?label=Open%20Issues)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/eclipse/kura?label=Pull%20Requests&color=blue)
+![GitHub Contributors](https://img.shields.io/github/contributors/eclipse/kura?label=Contributors)
+![GitHub Forks](https://img.shields.io/github/forks/eclipse/kura?label=Forks)
+
+![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)
+![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins) <br/>
+  
+[![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+  
 </div>
 
 An OSGi-based Application Framework for M2M Service Gateways
-
 
 Background
 ----------
@@ -142,22 +151,36 @@ or
 
 and select the profiles you want to build.
 
+### Building Eclipse Kura Containers
+
+The kura container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux ```kura-alpine-x86_64```, and another on Ubi8 ```kura-ubi8-x86_64```.
+
+Build Kura as per [our instructions](https://github.com/eclipse/kura#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
+```
+> *Note*: this build step requires 'docker' to be a executable command on your system. For Instance, if you are using podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
+
+After this command runs, images can be found in your preferred container engine image list.
+
 ### Eclipse IDE
-The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
+The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](https://eclipse.github.io/kura/docs-develop/java-application-development/development-environment-setup). Here you'll find a brief explaination of the required steps.
 
 To correctly setup the environment, proceed as follows:
+- Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your specific CPU architecture and OS.
 - Start the Eclipse Installer
 - Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
-- Set the Java 1.8+ VM: to the recently installed local jdk-8 VM, and press the Next button
+- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2023-03 or newer**.
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
   - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework.
 - Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
+- Set the `JRE 1.8 location` value to the installed local jdk-8 VM
 - Leave all Bootstrap Tasks selected and press the Finish button
 - Accept all the licenses and wait for the installation to finish
-At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. 
+At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets
 - When the tasks are completed. In the IDE open (double click) Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window
 
 Now you are ready to develop on Eclipse Kura.

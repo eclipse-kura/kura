@@ -26,3 +26,15 @@ fi
 
 eval sed -i `grep -v "^#" $1 | sed "s|\(.*\)=.*|-e '\/\1\/d'|"` $2
 grep -v "^#" $1 >> $2
+
+# This is a bash script that performs the following actions:
+#
+# 1) Checks if the first and second command line arguments are provided and if they exist in the file system. If any of these conditions are not met, the script prints a usage message and exits with an error code.
+#
+# 2) If the script is running on a system with the file "/etc/fedora-release", the script creates a file called "ipv6.conf" in the directory "/etc/modules-load.d/", removes any existing lines containing "ipv6" from the "ipv6.conf" file, and appends a new line with "ipv6".
+#
+# 3) The script removes any commented lines and extracts the non-commented lines containing kernel parameters from the first file, and uses them as patterns to delete matching lines in the second file.
+#
+# Finally, the script appends the non-commented lines from the first file to the second file.
+#
+# In summary, the script updates the second file with the kernel parameters specified in the first file and ensures that the "ipv6" kernel module is loaded if the script is running on a Fedora-based system.

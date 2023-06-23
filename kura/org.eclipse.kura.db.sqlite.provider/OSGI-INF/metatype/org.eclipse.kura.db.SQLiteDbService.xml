@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.db.SQLiteDbService" 
+         name="SqliteDbService" 
+         description="SQLite based database service.">
+
+        <AD id="db.mode"
+            name="Database Mode"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="IN_MEMORY"
+            description="Defines the database mode. If set to In Memory, the database data will be stored in RAM only, and it will be lost if the service instance is removed or if the framework is restarted. If set to Persisted, the database data will be stored on the file system, in the location defined by the Persisted Database Path parameter.">
+            <Option label="In Memory" value="IN_MEMORY"/>
+            <Option label="Persisted" value="PERSISTED"/>
+         </AD>
+
+         <AD id="db.path"
+            name="Persisted Database Path"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="/opt/mydb.sqlite"
+            description="Defines the database path. The parameter value should be set to the absolute path to the database file (it should end with the database file name, it is not enough to specify only the parent directory). This parameter is only relevant for persisted databases.">
+         </AD>
+         
+         <AD id="db.key"
+            name="Encryption Key"
+            type="Password"
+            cardinality="0" 
+            required="false"
+            description="Allows to specify a key/passphrase for encrypting the database file. This feature requires a SQLite binary with an encryption extension, and is only relevant for persisted databases. The key format can be specified using the Encryption Key Format parameter. If the value of this parameter is changed, the encryption key of the database will be updated accordingly. This parameter can be left empty to create an unencrypted database or to decrypt an encrypted one."/>
+            
+         <AD id="db.key.format"
+            name="Encryption Key Format"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="ASCII"
+            description="Allows to specify the format of the Encryption Key parameter value. The possible values are ASCII (an ASCII string), Hex SSE (the key is an hexadecimal string to be used with the SSE extension) or Hex SQLCipher (the key is an hexadecimal string to be used with the SQLCipher extension)">
+            <Option label="ASCII" value="ASCII"/>
+            <Option label="Hex SSE" value="HEX_SSE"/>
+            <Option label="Hex SQLCipher" value="HEX_SQLCIPHER"/>
+         </AD>
+
+         <AD id="db.journal.mode"
+            name="Journal Mode"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="WAL"
+            description="The database journal mode (see https://www.sqlite.org/pragma.html#pragma_journal_mode for more details). If set to Rollback Journal the DELETE journal mode will be used. This parameter is only relevant for persisted databases.">
+            <Option label="Rollback Journal" value="ROLLBACK_JOURNAL"/>
+            <Option label="WAL" value="WAL"/>
+         </AD>
+
+         <AD id="db.defrag.enabled"
+            name="Defrag enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enables or disables the database defragmentation. Use the Defrag Interval parameter to specify the interval." />
+
+         <AD id="db.defrag.interval.seconds"
+            name="Defrag Interval (seconds)"
+            type="Long"
+            cardinality="0" 
+            required="false"
+            default="900"
+            min="60"
+            description="SqliteDbService instances support running periodic defragmentation using the VACUUM command (https://www.sqlite.org/lang_vacuum.html). This parameter specifies the interval in seconds beetween two consecutive defragmentations. This parameter is only relevant for persisted databases."/>
+
+         <AD id="db.wal.checkpoint.enabled"
+            name="Checkpoint enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enables or disables checkpoints in WAL journal mode. Use the WAL Checkpoint Interval parameter to specify the interval."/>
+
+         <AD id="db.wal.checkpoint.interval.seconds"
+            name="WAL Checkpoint Interval (Seconds)"
+            type="Long"
+            cardinality="0" 
+            required="false"
+            default="600"
+            min="60"
+            description="SqliteDbService instances support running periodic periodic WAL checkpoints (https://www.sqlite.org/pragma.html#pragma_wal_checkpoint). Checkpoints will be performed in TRUNCATE mode. This parameter specifies the interval in seconds beetween two consecutive checkpoints. This parameter is only relevant for persisted databases in WAL Journal Mode."/>
+
+         <AD id="db.connection.pool.max.size"
+            name="Connection Pool Max Size"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="10"
+            min="1"
+            description="The SqliteDbService manages connections using a connection pool. This parameter defines the maximum number of connections for the pool. Only 1 connection is available in In Memory mode."/>
+
+        <AD id="delete.db.files.on.failure"
+            name="Delete Database Files On Failure"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="true"
+            description="If set to true, the database files will be deleted in case of failure in opening a persisted database. This is intended as a last resort measure for keeping the database service operational, especially in the case when it is used as a cloud connection message store."/>
+
+        <AD id="debug.shell.access.enabled"
+            name="Debug Shell Access Enabled"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false"
+            description="Enables or disables the interaction with this database instance using the sqlitedbg OSGi console command"/>
+
+        </OCD>
+    <Designate factoryPid="org.eclipse.kura.db.SQLiteDbService">
+        <Object ocdref="org.eclipse.kura.db.SQLiteDbService"/>
+    </Designate>
+</MetaData>

@@ -18,14 +18,19 @@ import java.util.Optional;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * The NetworkService allows to browse and configure the network interfaces of the system.
+ * The NetworkService allows to browse and configure the network interfaces of
+ * the system.
  * <br>
- * NetworkService extends what is offered by the standard Java APIs by offering information
- * like the NetworkInterface type - e.g. wired vs wireless vs modem - and additional information
- * regarding the address of a NetworkInterface - e.g. its getway address, DNS, and so on.
+ * NetworkService extends what is offered by the standard Java APIs by offering
+ * information
+ * like the NetworkInterface type - e.g. wired vs wireless vs modem - and
+ * additional information
+ * regarding the address of a NetworkInterface - e.g. its getway address, DNS,
+ * and so on.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -72,18 +77,23 @@ public interface NetworkService {
     public List<WifiAccessPoint> getAllWifiAccessPoints() throws KuraException;
 
     /**
-     * Returns the list of the WifiAccessPoints visible from the specified wifi network interface.
-     * If this wifiInterfaceName is in Master mode it will return a List with one WifiAccessPoint
+     * Returns the list of the WifiAccessPoints visible from the specified wifi
+     * network interface.
+     * If this wifiInterfaceName is in Master mode it will return a List with one
+     * WifiAccessPoint
      * which is itself.
      *
      * @param wifiInterfaceName
-     *            name of the interface used to scan for the available access points
-     * @return the list of the WifiAccessPoints visible from the specified wifi network interface.
+     *                          name of the interface used to scan for the available
+     *                          access points
+     * @return the list of the WifiAccessPoints visible from the specified wifi
+     *         network interface.
      */
     public List<WifiAccessPoint> getWifiAccessPoints(String wifiInterfaceName) throws KuraException;
 
     /**
-     * Return the active NetworkIntefaces which have active connections for the system.
+     * Return the active NetworkIntefaces which have active connections for the
+     * system.
      *
      * @return
      */
@@ -111,7 +121,7 @@ public interface NetworkService {
      * Given a usb path, look up the associated ppp interface name
      * 
      * @param usbPath
-     *            a string representing the usb port (i.e. 1-2.3)
+     *                a string representing the usb port (i.e. 1-2.3)
      * @return the name of the ppp interface
      * @throws KuraException
      * 
@@ -123,11 +133,22 @@ public interface NetworkService {
      * Given a usb path, look up the associated modem device
      * 
      * @param usbPath
-     *            a string representing the usb port (i.e. 1-2.3)
+     *                a string representing the usb port (i.e. 1-2.3)
      * @return the {@link ModemDevice} attached to the specified usb port
      * @throws KuraException
      * 
      * @since 2.3
      */
     public Optional<ModemDevice> getModemDevice(String usbPath);
+
+    /**
+     * Return the {@link UsbNetDevice} associated to the given network interface
+     * name, if any.
+     * 
+     * @param interfaceName the name of the network interface
+     * @return an optional {@link UsbNetDevice}
+     * 
+     * @since 2.4
+     */
+    public Optional<UsbNetDevice> getUsbNetDevice(String interfaceName);
 }

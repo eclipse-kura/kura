@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,10 +24,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -62,6 +64,14 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final Logger logger = LoggerFactory.getLogger(GwtPackageServiceImpl.class);
 
     private static final int MARKETPLACE_FEEDBACK_REQUEST_TIMEOUT = 20 * 1000;
+
+    private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
+
+    private final SslManagerService sslManagerService;
+
+    public GwtPackageServiceImpl(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
+    }
 
     @Override
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -139,11 +149,13 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         GwtMarketplacePackageDescriptor descriptor = null;
         URL mpUrl = null;
-        HttpURLConnection connection = null;
+        HttpsURLConnection connection = null;
 
         try {
-            mpUrl = new URL("http://marketplace.eclipse.org/node/" + nodeId + "/api/p");
-            connection = (HttpURLConnection) mpUrl.openConnection();
+
+            mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
+            connection = (HttpsURLConnection) mpUrl.openConnection();
+            connection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
 
             connection.setRequestMethod("GET");
             connection.connect();
@@ -200,7 +212,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             checkCompatibility(descriptor, kuraVersion);
 
         } catch (Exception e) {
-            logger.warn("failed to get deployment package descriptior from Eclipse Marketplace", e);
+            logger.warn("failed to get deployment package descriptor from Eclipse Marketplace", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         } finally {
             if (connection != null) {

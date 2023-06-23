@@ -178,6 +178,26 @@ public class DbWireComponentsTest extends DbComponentsTestBase {
     }
 
     @Test
+    public void shouldSupportMaximumTableSize1()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 5);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(1));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(2));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(3));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(4));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(5));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(6));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(7));
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 1);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(8));
+
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\" ORDER BY ID DESC;");
+
+        thenEnvelopeRecordCountIs(0, 1);
+        thenFilterEmitsEnvelopeWithProperty(0, 0, "foo", TypedValues.newIntegerValue(8));
+    }
+
+    @Test
     public void shouldSupportCleanupRecordKeep()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 5,
@@ -206,6 +226,19 @@ public class DbWireComponentsTest extends DbComponentsTestBase {
         whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\";");
 
         thenFilterEmitsEnvelopeWithProperty("foo", TypedValues.newIntegerValue(24));
+    }
+
+    @Test
+    public void shouldNotResetIdIfTableIsEmpty()
+            throws KuraException, InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
+        givenStoreWithConfig(this.wireComponentTestTarget.storeMaximumSizeKey(), 1);
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(23));
+        givenAnEnvelopeReceivedByStore("foo", TypedValues.newIntegerValue(24));
+
+        whenQueryIsPerformed("SELECT * FROM \"" + tableName + "\";");
+
+        thenEnvelopeRecordCountIs(0, 1);
+        thenFilterEmitsEnvelopeWithProperty("ID", TypedValues.newLongValue(2));
     }
 
     @Parameters(name = "{0} with {1}")

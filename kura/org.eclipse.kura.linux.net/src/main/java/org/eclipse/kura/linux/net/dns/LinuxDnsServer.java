@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -287,7 +287,7 @@ public abstract class LinuxDnsServer {
         sb.append("};\n");
         sb.append("\tmax-cache-ttl 30;\n");
         sb.append("\tmax-ncache-ttl 30;\n");
-        sb.append("\tdnssec-enable yes;\n").append("\tdnssec-validation yes;\n").append("\tdnssec-lookaside auto;\n");
+        sb.append("\tdnssec-validation no;\n");
         sb.append("};\n") //
                 .append("zone \".\" IN {\n") //
                 .append("\ttype hint;\n") //
@@ -322,9 +322,7 @@ public abstract class LinuxDnsServer {
                 .append("\n") //
                 .append("\tmax-cache-ttl 30;\n") //
                 .append("\tmax-ncache-ttl 30;\n") //
-                .append("\tdnssec-enable yes;\n") //
-                .append("\tdnssec-validation yes;\n") //
-                .append("\tdnssec-lookaside auto;\n") //
+                .append("\tdnssec-validation no;\n") //
                 .append("\n") //
                 .append("\t/* Path to ISC DLV key */\n") //
                 .append("\nbindkeys-file \"/etc/named.iscdlv.key\";\n") //

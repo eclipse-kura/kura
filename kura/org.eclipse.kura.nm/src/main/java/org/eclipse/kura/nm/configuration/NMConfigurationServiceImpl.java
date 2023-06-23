@@ -15,6 +15,8 @@ package org.eclipse.kura.nm.configuration;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -27,12 +29,10 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
@@ -41,8 +41,9 @@ import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
+import org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
-import org.eclipse.kura.usb.UsbDevice;
+import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
@@ -61,10 +62,13 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
 
     private NetworkService networkService;
+    private DnsServerService dnsServer;
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+
     private DhcpServerMonitor dhcpServerMonitor;
+    private DnsServerMonitor dnsServerMonitor;
 
     private LinuxNetworkUtil linuxNetworkUtil;
     private NetworkProperties networkProperties;
@@ -116,6 +120,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
+    public void setDnsServerService(DnsServerService dnsServer) {
+        this.dnsServer = dnsServer;
+    }
+
     public NMConfigurationServiceImpl() {
         try {
             this.nmDbusConnector = NMDbusConnector.getInstance();
@@ -134,10 +142,11 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     //
     // ----------------------------------------------------------------
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.debug("Activate NetworkConfigurationService...");
+        logger.info("Activate NetworkConfigurationService...");
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         this.dhcpServerMonitor = new DhcpServerMonitor(this.commandExecutorService);
+        this.dnsServerMonitor = new DnsServerMonitor(this.dnsServer, this.commandExecutorService);
 
         if (Objects.nonNull(this.nmDbusConnector)) {
             try {
@@ -156,19 +165,23 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(properties)));
             update(this.networkProperties.getProperties());
         }
+
+        logger.info("Activate NetworkConfigurationService... Done.");
     }
 
     public void deactivate(ComponentContext componentContext) {
-        logger.debug("Deactivate NetworkConfigurationService...");
-        if (Objects.nonNull(this.nmDbusConnector)) {
-            this.nmDbusConnector.closeConnection();
-        }
+        logger.info("Deactivate NetworkConfigurationService...");
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+
+        this.dnsServerMonitor.stop();
+        this.dnsServerMonitor.clear();
+
+        logger.info("Deactivate NetworkConfigurationService... Done.");
     }
 
     public synchronized void update(Map<String, Object> receivedProperties) {
-        logger.debug("Update NetworkConfigurationService...");
+        logger.info("Update NetworkConfigurationService...");
         if (receivedProperties == null) {
             logger.debug("Received null properties...");
             return;
@@ -176,6 +189,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         this.dhcpServerMonitor.stop();
         this.dhcpServerMonitor.clear();
+
+        this.dnsServerMonitor.stop();
+        this.dnsServerMonitor.clear();
 
         final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
         final Set<String> interfaces = NetworkConfigurationServiceCommon
@@ -200,17 +216,22 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
+            writeFirewallNatRules(interfaces, modifiedProps);
             writeDhcpServerConfiguration(interfaces);
+            this.dnsServerMonitor.setNetworkProperties(this.networkProperties);
+
             this.dhcpServerMonitor.start();
+            this.dnsServerMonitor.start();
 
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
         } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);
         }
+        logger.info("Update NetworkConfigurationService... Done.");
     }
 
     protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
-        // Do be done with NM...
+        // To be done with NM...
         if (isUsbPort(interfaceName)) {
             return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
         } else {
@@ -270,12 +291,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     @Override
+    @SuppressWarnings("restriction")
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
 
-        return new ComponentConfigurationImpl(
-                NetworkConfigurationServiceCommon.PID, NetworkConfigurationServiceCommon
-                        .getDefinition(this.networkProperties.getProperties(), Optional.empty()),
-                this.networkProperties.getProperties());
+        return NetworkConfigurationServiceCommon.getConfiguration(NetworkConfigurationServiceCommon.PID,
+                this.networkProperties.getProperties(), Optional.empty());
+
     }
 
     private void mergeNetworkConfigurationProperties(final Map<String, Object> source, final Map<String, Object> dest) {
@@ -284,20 +305,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         dest.putAll(source);
         dest.put(NET_INTERFACES, interfaces.stream().collect(Collectors.joining(",")));
-    }
-
-    private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
-        final Set<String> interfaceNamesInConfig = NetworkConfigurationServiceCommon
-                .getNetworkInterfaceNamesInConfig(this.networkProperties.getProperties());
-
-        final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
-
-        if (usbPort.isPresent() && interfaceNamesInConfig.contains(usbPort.get())) {
-            return usbPort.get();
-        } else if (interfaceNamesInConfig.contains(netInterface.getName())) {
-            return netInterface.getName();
-        }
-        return usbPort.orElse(netInterface.getName());
     }
 
     private void writeNetworkConfigurationSettings(Map<String, Object> networkProperties) {
@@ -313,10 +320,87 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
+    private void writeFirewallNatRules(Set<String> interfaceIds, Map<String, Object> properties) {
+        List<String> wanInterfaceNames = new LinkedList<>();
+        List<String> natInterfaceNames = new LinkedList<>();
+
+        interfaceIds.forEach(interfaceId -> {
+            String interfaceName = getInterfaceName(properties, interfaceId);
+
+            if (isWanInterface(interfaceId)) {
+                wanInterfaceNames.add(interfaceName);
+            }
+
+            if (isNatValid(interfaceId)) {
+                natInterfaceNames.add(interfaceName);
+            }
+        });
+
+        try {
+            FirewallNatConfigWriter firewallNatConfigWriter = new FirewallNatConfigWriter(this.commandExecutorService,
+                    wanInterfaceNames, natInterfaceNames);
+            firewallNatConfigWriter.writeConfiguration();
+        } catch (KuraException e) {
+            logger.error("Failed to write NAT configuration.", e);
+        }
+    }
+
+    private String getInterfaceName(Map<String, Object> properties, String interfaceId) {
+        // I don't like it, really. If the interface is not up, NM will return an empty
+        // string.
+        // We should wait until the connection is up, before applying the nat rule.
+        String interfaceName = "";
+        try {
+            interfaceName = this.nmDbusConnector.getInterfaceName(interfaceId);
+        } catch (DBusException e) {
+            logger.debug("Cannot retrieve information for {} interface", interfaceId, e);
+        }
+        if (Objects.isNull(interfaceName) || interfaceName.isEmpty()) {
+            NetInterfaceType type = NetInterfaceType
+                    .valueOf((String) properties.get(String.format(PREFIX + "%s.type", interfaceId)));
+            if (NetInterfaceType.MODEM.equals(type)) {
+                Integer pppNum = (Integer) properties
+                        .get(String.format(PREFIX + "%s.config.pppNum", interfaceId));
+                interfaceName = "ppp" + pppNum;
+            } else {
+                interfaceName = interfaceId;
+            }
+        }
+        return interfaceName;
+    }
+
+    private boolean isWanInterface(String interfaceName) {
+        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+
+        if (status.isPresent()) {
+            return status.get() == NetInterfaceStatus.netIPv4StatusEnabledWAN;
+        }
+        return false;
+    }
+
+    private boolean isNatValid(String interfaceName) {
+        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.getNetworkTypeFromProperties(interfaceName,
+                this.networkProperties.getProperties());
+        Optional<Boolean> isNatEnabled = this.networkProperties.getOpt(Boolean.class,
+                "net.interface.%s.config.nat.enabled", interfaceName);
+        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+
+        if (type.isPresent() && isNatEnabled.isPresent() && status.isPresent()) {
+            boolean isSupportedType = type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI
+                    || type.get() == NetInterfaceType.MODEM;
+            boolean isNat = isNatEnabled.get();
+            boolean isLan = status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
+
+            return isSupportedType && isNat && isLan;
+        }
+
+        return false;
+    }
+
     private void writeDhcpServerConfiguration(Set<String> interfaceNames) {
         interfaceNames.forEach(interfaceName -> {
             if (isDhcpServerValid(interfaceName)) {
-                DhcpServerConfigWriter dhcpServerConfigWriter = new DhcpServerConfigWriter(interfaceName,
+                DhcpServerConfigWriter dhcpServerConfigWriter = buildDhcpServerConfigWriter(interfaceName,
                         this.networkProperties);
                 try {
                     dhcpServerConfigWriter.writeConfiguration();
@@ -331,21 +415,32 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         });
     }
 
-    private boolean isDhcpServerValid(String interfaceName) {
-        boolean isValid = false;
-        Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.getNetworkTypeFromProperties(interfaceName,
-                this.networkProperties.getProperties());
-        Optional<Boolean> isDhcpServerEnabled = this.networkProperties.getOpt(Boolean.class,
-                "net.interface.%s.config.dhcpServer4.enabled", interfaceName);
-        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+    protected DhcpServerConfigWriter buildDhcpServerConfigWriter(final String interfaceName,
+            final NetworkProperties properties) {
+        return new DhcpServerConfigWriter(interfaceName, properties);
+    }
 
-        if (type.isPresent()
-                && (NetInterfaceType.ETHERNET.equals(type.get()) || NetInterfaceType.WIFI.equals(type.get()))
-                && (isDhcpServerEnabled.isPresent() && isDhcpServerEnabled.get() && status.isPresent())
-                && !status.get().equals(NetInterfaceStatus.netIPv4StatusL2Only)) {
-            isValid = true;
+    private boolean isDhcpServerValid(String interfaceName) {
+
+        final NetInterfaceType type = NetworkConfigurationServiceCommon
+                .getNetworkTypeFromProperties(interfaceName, this.networkProperties.getProperties())
+                .orElse(NetInterfaceType.UNKNOWN);
+        final boolean isDhcpServerEnabled = this.networkProperties
+                .getOpt(Boolean.class, "net.interface.%s.config.dhcpServer4.enabled", interfaceName).orElse(false);
+        final NetInterfaceStatus status = getNetInterfaceStatus(interfaceName)
+                .orElse(NetInterfaceStatus.netIPv4StatusUnknown);
+
+        if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI) {
+            return false;
         }
-        return isValid;
+
+        if (!isDhcpServerEnabled) {
+            return false;
+        }
+
+        return status != NetInterfaceStatus.netIPv4StatusDisabled && status != NetInterfaceStatus.netIPv4StatusUnmanaged
+                && status != NetInterfaceStatus.netIPv4StatusL2Only
+                && status != NetInterfaceStatus.netIPv4StatusUnknown;
     }
 
     private Optional<NetInterfaceStatus> getNetInterfaceStatus(String interfaceName) {
@@ -374,7 +469,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             logger.info("migrating configuration for interface: {}...", existingInterfaceName);
             final String migratedInterfaceName = this.networkService.getModemUsbPort(existingInterfaceName);
 
-            logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
+            logger.debug("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
             result = replaceModemPropertyKeys(migratedInterfaceName, existingInterfaceName, result);
             resultInterfaceNames.add(migratedInterfaceName);
 

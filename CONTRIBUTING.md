@@ -161,6 +161,10 @@ Since step and scenario methods are not allowed to return any value, it is somet
 
 The Gherkin reference: https://cucumber.io/docs/gherkin/reference/ 
 
+### Manual Tests
+
+Before you submit a Pull Request, ensure that your changes have been tested and are functional in a live environment. If you require additional validation, kindly request your reviewer to perform the necessary tests. It is strongly recommended that you personally verify your changes before submission and only seek further testing when absolutely necessary.
+
 ## Submitting the Changes
 
 Submit a pull request via the normal GitHub UI.

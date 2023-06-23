@@ -215,14 +215,18 @@ public class ScheduleStrategy implements AutoConnectStrategy {
     }
 
     private void rescheduleTimeout(final long timeoutMs) {
+        cancelTimeout();
+
+        this.timeout = Optional.of(executor.schedule(() -> updateState(State::onTimeout), timeoutMs,
+                TimeUnit.MILLISECONDS));
+    }
+
+    private void cancelTimeout() {
         final Optional<ScheduledFuture<?>> currentFuture = this.timeout;
 
         if (currentFuture.isPresent()) {
             currentFuture.get().cancel(false);
         }
-
-        this.timeout = Optional.of(executor.schedule(() -> updateState(State::onTimeout), timeoutMs,
-                TimeUnit.MILLISECONDS));
     }
 
     private void updateState(final UnaryOperator<State> transition) {
@@ -275,7 +279,11 @@ public class ScheduleStrategy implements AutoConnectStrategy {
 
     @Override
     public void shutdown() {
-        executor.shutdown();
+        executor.execute(() -> {
+            cancelTimeout();
+            executor.shutdown();
+        });
+
         try {
             executor.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {

@@ -22,5 +22,6 @@
    </service>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
+   <reference bind="setDnsServerService" cardinality="1..1" interface="org.eclipse.kura.internal.linux.net.dns.DnsServerService" name="DNSService" policy="static" />
    <reference name="CryptoService" interface="org.eclipse.kura.crypto.CryptoService" bind="setCryptoService" unbind="unsetCryptoService" cardinality="1..1" policy="static"/>
 </scr:component>

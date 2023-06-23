@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.nm;
 
+import java.util.Objects;
+
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusSigHandler;
@@ -21,13 +23,18 @@ import org.slf4j.LoggerFactory;
 public class NMDeviceAddedHandler implements DBusSigHandler<NetworkManager.DeviceAdded> {
 
     private static final Logger logger = LoggerFactory.getLogger(NMDeviceAddedHandler.class);
+    private final NMDbusConnector nm;
+
+    public NMDeviceAddedHandler(NMDbusConnector connector) {
+        this.nm = Objects.requireNonNull(connector);
+    }
 
     @Override
     public void handle(NetworkManager.DeviceAdded s) {
         try {
-            NMDbusConnector nm = NMDbusConnector.getInstance();
             logger.info("New network device connected at {}", s.getDevicePath());
-            nm.apply();
+            String deviceId = this.nm.getDeviceIdByDBusPath(s.getDevicePath().getPath());
+            this.nm.apply(deviceId);
         } catch (DBusException e) {
             logger.error("Failed to handle DeviceAdded event for device: {}. Caused by:", s.getDevicePath(), e);
         }

@@ -52,7 +52,7 @@ public interface StoreTestTarget {
 
         @Override
         public String factoryPid() {
-            return "org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl";
+            return "org.eclipse.kura.db.SQLiteDbService";
         }
 
         @Override

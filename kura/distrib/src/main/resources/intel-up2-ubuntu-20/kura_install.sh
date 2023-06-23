@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2022 Eurotech and/or its affiliates and others
+# Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -75,11 +75,17 @@ if command -v timedatectl > /dev/null ;
 fi
 
 #disable asking NTP servers to the DHCP server
-sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+if [ -f /etc/dhcp/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhcp/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
+fi
+
+if [ -f /etc/dhclient.conf ]; then
+    echo "Disabling ntp-servers in /etc/dhclient.conf"
+    sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhclient.conf
+fi
 
 # Prevent time sync services from starting
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 # Prevent time sync with chrony from starting.
@@ -114,6 +120,10 @@ fi
 chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
 
+#set up dhclient hooks
+cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-hook /etc/dhcp/dhclient-enter-hooks.d/zz-kura-dhclient-enter-hook
+cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-route-hook /etc/dhcp/dhclient-enter-hooks.d/yy-kura-dhclient-enter-hook
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
 
@@ -125,6 +135,10 @@ fi
 
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
+
+# disable dhcpcd service - kura is the network manager
+systemctl stop dhcpcd
+systemctl disable dhcpcd
 
 # disable isc-dhcp-server service - kura is the network manager
 systemctl stop isc-dhcp-server
@@ -151,6 +165,8 @@ systemctl mask systemd-networkd-wait-online
 #disable DNS-related services - kura is the network manager
 systemctl stop systemd-resolved.service
 systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
 
 #disable ModemManager
 systemctl stop ModemManager
@@ -192,14 +208,14 @@ ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.k
 
 if ! [ -d /sys/class/net ]
 then
- sysctl -p || true
+    sysctl -p || true
 else
- sysctl -w net.ipv6.conf.all.disable_ipv6=1
- sysctl -w net.ipv6.conf.default.disable_ipv6=1
- for INTERFACE in $(ls /sys/class/net)
- do
- 	sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
- done
+    sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sysctl -w net.ipv6.conf.default.disable_ipv6=1
+    for INTERFACE in $(ls /sys/class/net)
+    do
+        sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
+    done
 fi
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

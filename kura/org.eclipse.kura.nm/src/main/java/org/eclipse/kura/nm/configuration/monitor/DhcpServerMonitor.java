@@ -29,7 +29,7 @@ public class DhcpServerMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerMonitor.class);
 
-    private Map<String, Boolean> dhcpServerInterfaceConfiguration;
+    private final Map<String, Boolean> dhcpServerInterfaceConfiguration;
     protected DhcpServerManager dhcpServerManager;
     private ScheduledExecutorService worker;
     private ScheduledFuture<?> handle;
@@ -69,10 +69,14 @@ public class DhcpServerMonitor {
         this.dhcpServerInterfaceConfiguration.entrySet().forEach(entry -> {
             String interfaceName = entry.getKey();
             boolean enable = entry.getValue();
-            if (enable && !this.dhcpServerManager.isRunning(interfaceName)) {
-                startDhcpServer(interfaceName);
-            } else if (!enable && this.dhcpServerManager.isRunning(interfaceName)) {
-                stopDhcpServer(interfaceName);
+            try {
+                if (enable && !this.dhcpServerManager.isRunning(interfaceName)) {
+                    startDhcpServer(interfaceName);
+                } else if (!enable && this.dhcpServerManager.isRunning(interfaceName)) {
+                    stopDhcpServer(interfaceName);
+                }
+            } catch (KuraException e) {
+                logger.warn("Failed to chech DHCP server status for the interface " + interfaceName, e);
             }
         });
     }
@@ -84,6 +88,7 @@ public class DhcpServerMonitor {
         } catch (KuraException e) {
             logger.warn("Failed to start DHCP server for the interface " + interfaceName, e);
         }
+        logger.debug("Starting DHCP server for {}. Done.", interfaceName);
     }
 
     private void stopDhcpServer(String interfaceName) {
@@ -93,6 +98,7 @@ public class DhcpServerMonitor {
         } catch (KuraException e) {
             logger.warn("Failed to stop DHCP server for the interface " + interfaceName, e);
         }
+        logger.debug("Stopping DHCP server for {}. Done.", interfaceName);
     }
 
 }

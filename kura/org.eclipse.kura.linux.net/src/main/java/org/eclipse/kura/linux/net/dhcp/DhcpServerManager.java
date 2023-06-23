@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,17 +13,13 @@
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraProcessExecutionErrorException;
-import org.eclipse.kura.core.linux.executor.LinuxSignal;
-import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.executor.Pid;
+import org.eclipse.kura.linux.net.dhcp.server.DhcpLinuxTool;
+import org.eclipse.kura.linux.net.dhcp.server.DhcpdTool;
+import org.eclipse.kura.linux.net.dhcp.server.DnsmasqTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +31,18 @@ public class DhcpServerManager {
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
     private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
-    private final CommandExecutorService executorService;
+    private final DhcpLinuxTool linuxTool;
 
     static {
         dhcpServerTool = getTool();
     }
 
     public DhcpServerManager(CommandExecutorService service) {
-        this.executorService = service;
+        if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            this.linuxTool = new DnsmasqTool(service);
+        } else {
+            this.linuxTool = new DhcpdTool(service, dhcpServerTool);
+        }
     }
 
     public static DhcpServerTool getTool() {
@@ -51,28 +51,31 @@ public class DhcpServerManager {
                 dhcpServerTool = DhcpServerTool.DHCPD;
             } else if (LinuxNetworkUtil.toolExists(DhcpServerTool.UDHCPD.getValue())) {
                 dhcpServerTool = DhcpServerTool.UDHCPD;
+            } else if (LinuxNetworkUtil.toolExists(DhcpServerTool.DNSMASQ.getValue())) {
+                dhcpServerTool = DhcpServerTool.DNSMASQ;
             }
         }
+
+        logger.info("Using {} as DHCP server.", dhcpServerTool.getValue());
+
         return dhcpServerTool;
     }
 
-    public boolean isRunning(String interfaceName) {
-        // Check if DHCP server is running
-        return this.executorService.isRunning(DhcpServerManager.formDhcpdCommand(interfaceName));
+    public boolean isRunning(String interfaceName) throws KuraException {
+        return this.linuxTool.isRunning(interfaceName);
     }
 
     public boolean enable(String interfaceName) throws KuraException {
-        // Check if DHCP server is running
         if (isRunning(interfaceName)) {
-            // If so, disable it
             logger.error("DHCP server is already running for {}, bringing it down...", interfaceName);
             disable(interfaceName);
         }
-        // Start DHCP server
+
         File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
         if (configFile.exists()) {
-            CommandStatus status = this.executorService
-                    .execute(new Command(DhcpServerManager.formDhcpdCommand(interfaceName)));
+
+            CommandStatus status = this.linuxTool.startInterface(interfaceName);
+
             if (status.getExitStatus().isSuccessful()) {
                 logger.debug("DHCP server started.");
                 return true;
@@ -87,25 +90,7 @@ public class DhcpServerManager {
     public boolean disable(String interfaceName) throws KuraException {
         logger.debug("Disable DHCP server for {}", interfaceName);
 
-        Map<String, Pid> pids = this.executorService.getPids(DhcpServerManager.formDhcpdCommand(interfaceName));
-        for (Pid pid : pids.values()) {
-            if (this.executorService.stop(pid, LinuxSignal.SIGTERM)) {
-                DhcpServerManager.removePidFile(interfaceName);
-            } else {
-                logger.debug("Failed to stop process...try to kill");
-                if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
-                    DhcpServerManager.removePidFile(interfaceName);
-                } else {
-                    throw new KuraProcessExecutionErrorException("Failed to disable DHCP server");
-                }
-            }
-        }
-        if (pids.isEmpty()) {
-            logger.debug("tried to kill DHCP server for interface but it is not running");
-            return false;
-        }
-
-        return true;
+        return this.linuxTool.disableInterface(interfaceName);
     }
 
     public static String getConfigFilename(String interfaceName) {
@@ -116,16 +101,12 @@ public class DhcpServerManager {
             sb.append(interfaceName);
             sb.append(".conf");
         }
-        return sb.toString();
-    }
 
-    private static boolean removePidFile(String interfaceName) {
-        boolean ret = true;
-        File pidFile = new File(DhcpServerManager.getPidFilename(interfaceName));
-        if (pidFile.exists()) {
-            ret = pidFile.delete();
+        if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            sb.append("dnsmasq.d/dnsmasq-" + interfaceName + ".conf");
         }
-        return ret;
+
+        return sb.toString();
     }
 
     public static String getPidFilename(String interfaceName) {
@@ -137,22 +118,5 @@ public class DhcpServerManager {
             sb.append(".pid");
         }
         return sb.toString();
-    }
-
-    private static String[] formDhcpdCommand(String interfaceName) {
-        List<String> command = new ArrayList<>();
-        if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            command.add(DhcpServerTool.DHCPD.getValue());
-            command.add("-cf");
-            command.add(DhcpServerManager.getConfigFilename(interfaceName));
-            command.add("-pf");
-            command.add(DhcpServerManager.getPidFilename(interfaceName));
-        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-            command.add(DhcpServerTool.UDHCPD.getValue());
-            command.add("-f");
-            command.add("-S");
-            command.add(DhcpServerManager.getConfigFilename(interfaceName));
-        }
-        return command.toArray(new String[0]);
     }
 }

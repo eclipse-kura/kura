@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.db.SQLiteDbService">
+   <implementation class="org.eclipse.kura.internal.db.sqlite.provider.SqliteDbServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.db.BaseDbService"/>
+      <provide interface="org.eclipse.kura.message.store.provider.MessageStoreProvider"/>
+      <provide interface="org.eclipse.kura.wire.store.provider.WireRecordStoreProvider"/>
+      <provide interface="org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider"/>
+   </service>
+   <reference bind="setDebugShell" cardinality="1..1" interface="org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell" name="SqliteDebugShell" policy="static"/>
+   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+</scr:component>

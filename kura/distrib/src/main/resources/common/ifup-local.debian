@@ -4,6 +4,33 @@ if [ $IFACE == "lo" ] ; then
 	exit
 fi
 
+write_dns() {
+   if [ -z "$1" ]; then
+      return
+   fi
+
+   ARG=$(echo "${1}" | xargs)
+
+   WRITE_DNS=1
+
+   if [ -e /etc/resolv.conf ]; then
+      while read -r line
+      do
+         if [[ "$line" == nameserver* ]]; then
+            DNS=$(echo "${line#*\ }" | xargs)
+            if [ "${DNS}" == "${ARG}" ]; then
+               WRITE_DNS=0
+               break
+            fi
+         fi
+      done < /etc/resolv.conf
+   fi
+
+   if [ "${WRITE_DNS}" == 1 ]; then
+      echo "nameserver ${ARG}" >> /etc/resolv.conf
+   fi
+}
+
 DEVICE=$IFACE
 FILENAME="/tmp/.kura/coninfo-"$DEVICE
 FLAG=0
@@ -40,7 +67,7 @@ do
         DnsInd=`expr $DnsInd + 1`               
         IFS=' ' read -ra  Dns <<< "${line:$ind}"   
         for i in "${Dns[@]}"; do                   
-           echo "nameserver $i" >> /etc/resolv.conf
+           write_dns "$i"
         done 
         break                   
    fi                           

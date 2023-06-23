@@ -25,7 +25,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>5.3.0-SNAPSHOT</version>
+    <version>5.4.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -600,6 +600,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.inventory.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.inventory.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
                                     <version>${org.eclipse.kura.request.handler.jaxrs.version}</version>
                                 </artifactItem>
@@ -637,6 +642,11 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.event.publisher</artifactId>
                                     <version>${org.eclipse.kura.event.publisher.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.network.status.provider.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -783,14 +793,16 @@
                                 <move file="target/plugins/org.eclipse.kura.core.keystore.jar" tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.log.filesystem.provider.jar" tofile="target/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.inventory.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.wire.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.provider.jar" tofile="target/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ai.triton.server.jar" tofile="target/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.configuration.change.manager.jar" tofile="target/plugins/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.event.publisher.jar" tofile="target/plugins/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.network.status.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar" />
                             </target>
                         </configuration>
                     </execution>
@@ -1260,7 +1272,7 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-arm64_installer-nn.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-arm64-nn_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/resources/raspberry-pi-arm64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
@@ -1465,6 +1477,304 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>generic-arm32</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-arm32-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-arm32" />
+                                        <property name="target.device" value="generic-arm32" />
+                                        <property name="native.tag" value="armv6hf" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="network.provider" value="network-manager" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-arm32-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-arm32/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-arm32.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
+                                            <type>file</type>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>generic-x86_64</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-x86_64-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-x86_64" />
+                                        <property name="target.device" value="generic-x86_64" />
+                                        <property name="native.tag" value="x86_64" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="network.provider" value="network-manager" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-x86_64-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-x86_64/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
+                                            <type>file</type>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>generic-aarch64</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-aarch64-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-aarch64" />
+                                        <property name="target.device" value="generic-aarch64" />
+                                        <property name="native.tag" value="aarch64" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <property name="network.provider" value="network-manager" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-aarch64-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-aarch64/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
+                                            <type>file</type>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>intel-up2-ubuntu-20</id>
             <activation>
@@ -1717,7 +2027,7 @@
                         <version>1.7</version>
                         <executions>
                           <execution>
-                            <id>docker-x86_64-nn-base-container</id>
+                            <id>docker-x86_64-nn-build-container</id>
                             <phase>package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1773,14 +2083,10 @@
         <profile>
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
                 <property>
                     <name>buildAllContainers</name>
                 </property>
             </activation>
-            <properties>
-                
-            </properties>
             <build>
                 <resources>
                     <resource>
@@ -1794,7 +2100,8 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
+                            <execution>
+                            <id>docker-ubi8-x86_64-nn-build-container</id>
                             <phase>package</phase>
                             <configuration>
                                 <executable>docker</executable>
@@ -1802,7 +2109,7 @@
                                 <arguments>
                                     <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-ubi8:${project.version}</argument>
                                     <argument>-t</argument>
@@ -1834,20 +2141,21 @@
                     </resource>
                 </resources>
                 <plugins>
-                      <plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.6.0</version>
                         <executions>
-                          <execution>
-                            <phase>package</phase>
-                            <configuration>
-                                <executable>docker</executable>
-                                <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
-                                <arguments>
-                                    <argument>build</argument>
+                            <execution>
+                                <id>docker-alpine-x86_64-nn-build-container</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                                    <arguments>
+                                        <argument>build</argument>
                                     <argument>--build-arg</argument>
-                                    <argument>BASE_IMAGE_KURA=base-kura-docker-x86_64:${project.version}</argument>
+                                    <argument>base_image_version=${project.version}</argument>
                                     <argument>-t</argument>
                                     <argument>kura-alpine:${project.version}</argument>
                                     <argument>-t</argument>
@@ -2195,6 +2503,7 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <!-- Add Artemis bundles-->
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
@@ -2463,6 +2772,7 @@
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
                                 </configuration>
                             </execution>
                             <execution>
@@ -2531,6 +2841,18 @@
                                             <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
                                             <version>${org.eclipse.kura.ai.triton.server.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
+                                            <version>${org.eclipse.kura.wire.script.tools.feature.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
+                                            <version>${org.eclipse.kura.db.sqlite.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>

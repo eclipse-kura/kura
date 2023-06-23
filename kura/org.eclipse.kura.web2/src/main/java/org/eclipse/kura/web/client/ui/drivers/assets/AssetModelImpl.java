@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -96,7 +96,7 @@ public class AssetModelImpl implements AssetModel {
             if (name != null) {
                 result.add(name);
             } else {
-                extraParameters.add(param);
+                this.extraParameters.add(param);
             }
         }
         this.channelNames = result;
@@ -124,6 +124,7 @@ public class AssetModelImpl implements AssetModel {
             LegacyChannelModel model = models.computeIfAbsent(channelName, name -> new LegacyChannelModel(name, index));
             model.parameters[channelIndexes.get(propertyName)] = param;
         }
+
         ArrayList<Entry<String, LegacyChannelModel>> sortedModels = new ArrayList<>(models.entrySet());
         Collections.sort(sortedModels, CHANNEL_LABEL_COMPARATOR);
         List<LegacyChannelModel> sortedLegacyChannelModels = new ArrayList<>();
@@ -261,14 +262,14 @@ public class AssetModelImpl implements AssetModel {
     @Override
     public boolean isValid() {
         for (final ChannelModel model : this.channelModels) {
-            for (final String param : paramIndexes.keySet()) {
+            for (final String param : this.paramIndexes.keySet()) {
                 if (!model.isValid(param)) {
                     return false;
                 }
             }
         }
 
-        for (final GwtConfigParameter extraParam : extraParameters) {
+        for (final GwtConfigParameter extraParam : this.extraParameters) {
 
             if (!ValidationUtil.validateParameter(extraParam, extraParam.getValue())) {
                 return false;
@@ -281,10 +282,10 @@ public class AssetModelImpl implements AssetModel {
     @Override
     public void addAllChannels(final AssetModel other) {
         for (final ChannelModel model : other.getChannels()) {
-            final ChannelModel channel = channelModels.stream()
+            final ChannelModel channel = this.channelModels.stream()
                     .filter(c -> c.getChannelName().contentEquals(model.getChannelName())).findAny()
                     .orElseGet(() -> createNewChannel(model.getChannelName()));
-            for (final String param : paramIndexes.keySet()) {
+            for (final String param : this.paramIndexes.keySet()) {
                 channel.setValue(param, model.getValue(param));
             }
         }
@@ -292,8 +293,8 @@ public class AssetModelImpl implements AssetModel {
 
     @Override
     public void replaceChannels(final AssetModel other) {
-        while (!channelNames.isEmpty()) {
-            deleteChannel(channelNames.iterator().next());
+        while (!this.channelNames.isEmpty()) {
+            deleteChannel(this.channelNames.iterator().next());
         }
         addAllChannels(other);
     }

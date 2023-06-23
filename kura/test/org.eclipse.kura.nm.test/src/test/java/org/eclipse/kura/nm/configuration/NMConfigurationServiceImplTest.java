@@ -20,27 +20,36 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.eclipse.kura.nm.NMDbusConnector;
+import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -57,6 +66,7 @@ public class NMConfigurationServiceImplTest {
     private final Object lock = new Object();
     private AtomicBoolean posted;
     private Event event;
+    private final Set<String> dhcpConfigWriterInterfaces = new HashSet<>();
 
     @Test
     public void shouldPostEventAfterActivationTest() throws InterruptedException, KuraException {
@@ -129,6 +139,110 @@ public class NMConfigurationServiceImplTest {
         thenNetInterfacesPropertyIsCorrect();
     }
 
+    @Test
+    public void shouldStartConfigWriterIfEthernetInterfaceIsEnabledAndInDhcpServerMode() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces("eno1");
+    }
+
+    @Test
+    public void shouldStartConfigWriterIfWifiInterfaceIsEnabledAndInDhcpServerMode() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "WIFI");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces("eno1");
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfInterfaceTypeIsNotCorrect() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "LOOPBACK");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfDisabled() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", false);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfInterfaceIsDisabled() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusDisabled");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfInterfaceIsUnmanaged() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusUnmanaged");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfInterfaceIsL2Only() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusL2Only");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
+    @Test
+    public void shouldNotStartConfigWriterIfInterfaceIsUnknown() throws KuraException {
+        givenNetworkConfigurationService();
+        givenFullProperties();
+        givenProperty("net.interface.eno1.config.ip4.status", "netIPv4StatusUnknown");
+        givenProperty("net.interface.eno1.config.dhcpServer4.enabled", true);
+        givenProperty("net.interface.eno1.type", "ETHERNET");
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces();
+    }
+
     private void givenPropertiesWithModifiedInterfaces() {
         this.properties.clear();
         this.properties.put("modified.interface.names", "eth0");
@@ -137,6 +251,14 @@ public class NMConfigurationServiceImplTest {
     private void givenPropertiesWithoutInterfaces() {
         this.properties.clear();
         this.properties.put("net.interfaces", "");
+    }
+
+    private void givenProperty(final String key, final Object value) {
+        this.properties.put(key, value);
+    }
+
+    private void thenDhcpConfigWriterIsCreatedForInterfaces(final String... interfaces) {
+        assertEquals(new HashSet<>(Arrays.asList(interfaces)), this.dhcpConfigWriterInterfaces);
     }
 
     private void givenFullProperties() {
@@ -175,7 +297,7 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.1-4.config.activeFilter", "inbound");
         this.properties.put("net.interface.enp5s0.config.ip6.dnsServers", "");
         this.properties.put("net.interface.1-4.config.dhcpClient6.enabled", false);
-        this.properties.put("net.interface.wlp1s0.config.wifi.infra.channel", 1);
+        this.properties.put("net.interface.wlp1s0.config.wifi.infra.channel", "1");
         this.properties.put("net.interface.wlp1s0.config.wifi.master.passphrase", "qwerty=");
         this.properties.put("net.interface.1-4.config.lcpEchoFailure", 0);
         this.properties.put("net.interface.eno1.config.dhcpServer4.rangeEnd", "172.16.0.110");
@@ -213,7 +335,7 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.enp5s0.config.ip4.dnsServers", "");
         this.properties.put("net.interface.wlp1s0.config.ip6.status", "netIPv6StatusDisabled");
         this.properties.put("net.interface.1-4.config.ip6.dnsServers", "");
-        this.properties.put("net.interface.wlp1s0.config.wifi.master.channel", 1);
+        this.properties.put("net.interface.wlp1s0.config.wifi.master.channel", "1");
         this.properties.put("net.interface.enp5s0.config.dhcpClient4.enabled", true);
         this.properties.put("net.interface.1-4.type", "MODEM");
         this.properties.put("net.interface.enp5s0.config.ip4.status", "netIPv4StatusEnabledWAN");
@@ -289,6 +411,13 @@ public class NMConfigurationServiceImplTest {
             protected NetInterfaceType getNetworkTypeFromSystem(String interfaceName) throws KuraException {
                 return guessNetworkType(interfaceName);
             }
+
+            @Override
+            protected DhcpServerConfigWriter buildDhcpServerConfigWriter(String interfaceName,
+                    NetworkProperties properties) {
+                dhcpConfigWriterInterfaces.add(interfaceName);
+                return Mockito.mock(DhcpServerConfigWriter.class);
+            }
         };
 
         EventAdmin eventAdminMock = mock(EventAdmin.class);
@@ -317,6 +446,12 @@ public class NMConfigurationServiceImplTest {
 
             return null;
         }).when(eventAdminMock).postEvent(any());
+
+        CommandExecutorService executorServiceMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        when(executorServiceMock.execute(any(Command.class))).thenReturn(status);
+
+        this.networkConfigurationService.setExecutorService(executorServiceMock);
 
     }
 

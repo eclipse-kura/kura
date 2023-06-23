@@ -44,6 +44,8 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
+import org.eclipse.kura.net.configuration.NetworkConfigurationMessages;
+import org.eclipse.kura.net.configuration.NetworkConfigurationPropertyNames;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
@@ -367,7 +369,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_OPEN_PORTS_VALUE);
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -377,7 +380,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_PORT_FORWARDING_VALUE);
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -387,7 +391,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_NAT_VALUE);
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
+        tad.setDescription(
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
         tocd.addAD(tad);
 
         return tocd;

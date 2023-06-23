@@ -50,6 +50,7 @@ public class DataServiceOptions {
     private static final String CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS = "connection.schedule.inactivity.interval.seconds";
     private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE = "connection.schedule.priority.override.enable";
     private static final String CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD = "connection.schedule.priority.override.threshold";
+    private static final String MAXIMUM_PAYLOAD_SIZE = "maximum.payload.size";
 
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
@@ -71,6 +72,7 @@ public class DataServiceOptions {
     private static final long CONNECTION_SCHEDULE_INACTIVITY_INTERVAL_SECONDS_DEFAULT = 60;
     private static final boolean CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_ENABLE_DEFAULT = false;
     private static final int CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT = 1;
+    private static final long MAXIMUM_PAYLOAD_SIZE_DEFAULT = 16777216;
 
     private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
 
@@ -179,6 +181,11 @@ public class DataServiceOptions {
     }
 
     public Optional<CronExpression> getConnectionScheduleExpression() {
+        
+        if (!this.isConnectionScheduleEnabled()) {
+            return Optional.empty();
+        }
+        
         try {
             return Optional.of(new CronExpression((String) this.properties.get(CONNECTION_SCHECULE_EXPRESSION)));
         } catch (final Exception e) {
@@ -203,5 +210,13 @@ public class DataServiceOptions {
         return (Integer) this.properties.getOrDefault(CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD,
                 CONNECTION_SCHEDULE_PRIORITY_OVERRIDE_THRESHOLD_DEFAULT);
 
+    }
+
+    public long getMaximumPayloadSizeBytes() {
+        try {
+            return (long) this.properties.getOrDefault(MAXIMUM_PAYLOAD_SIZE, MAXIMUM_PAYLOAD_SIZE_DEFAULT);
+        } catch (final Exception e) {
+            return MAXIMUM_PAYLOAD_SIZE_DEFAULT;
+        }
     }
 }

@@ -19,6 +19,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -89,19 +95,64 @@ public class CryptoServiceImpl implements CryptoService {
             byte[] iv = new byte[IV_SIZE];
             this.random.nextBytes(iv);
             c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
-            byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
-
+            byte[] encryptedBytes = c.doFinal(charArrayToByteArray(value));
             String ivString = base64Encode(iv);
             String encryptedMessage = base64Encode(encryptedBytes);
+
             return (ivString + ENCRYPTED_STRING_SEPARATOR + encryptedMessage).toCharArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "encrypt");
-        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | CharacterCodingException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_EXCEPTION_CAUSE);
         } catch (InvalidAlgorithmParameterException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, PARAMETER_EXCEPTION_CAUSE);
         }
 
+    }
+
+    private byte[] charArrayToByteArray(char[] value) throws CharacterCodingException {
+
+        ByteBuffer byteBuffer;
+        try {
+            byteBuffer = getUtf8Encoder().encode(CharBuffer.wrap(value));
+        } catch (CharacterCodingException e) {
+            // fallback for backward compatibility
+            byteBuffer = ByteBuffer.wrap(new String(value).getBytes());
+        }
+        byte[] encodedBytes = new byte[byteBuffer.limit()];
+        byteBuffer.get(encodedBytes);
+
+        return encodedBytes;
+    }
+
+    private char[] byteArrayToCharArray(byte[] value) throws CharacterCodingException {
+        CharBuffer charBuffer;
+        try {
+            charBuffer = getUtf8Decoder().decode(ByteBuffer.wrap(value));
+        } catch (CharacterCodingException e) {
+            // fallback for backward compatibility
+            charBuffer = CharBuffer.wrap(new String(value).toCharArray());
+        }
+        char[] decodedChar = new char[charBuffer.limit()];
+        charBuffer.get(decodedChar);
+
+        return decodedChar;
+    }
+
+    private CharsetEncoder getUtf8Encoder() {
+        CharsetEncoder encoder = StandardCharsets.UTF_8.newEncoder();
+        encoder.onMalformedInput(CodingErrorAction.REPORT);
+        encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        return encoder;
+    }
+
+    private CharsetDecoder getUtf8Decoder() {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        return decoder;
     }
 
     private byte[] base64Decode(String internalStringValue) {
@@ -137,11 +188,11 @@ public class CryptoServiceImpl implements CryptoService {
             Cipher c = Cipher.getInstance(CIPHER);
             c.init(Cipher.DECRYPT_MODE, generateKey(), new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
             byte[] decryptedBytes = c.doFinal(decodedValue);
-            String decryptedValue = new String(decryptedBytes);
-            return decryptedValue.toCharArray();
+
+            return byteArrayToCharArray(decryptedBytes);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, DECRYPT_EXCEPTION_CAUSE);
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | CharacterCodingException e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_EXCEPTION_CAUSE);
         } catch (InvalidAlgorithmParameterException e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, PARAMETER_EXCEPTION_CAUSE);

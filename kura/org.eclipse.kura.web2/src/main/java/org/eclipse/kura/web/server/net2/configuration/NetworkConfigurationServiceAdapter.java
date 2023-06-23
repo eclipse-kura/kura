@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
@@ -49,16 +50,28 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     /**
+     * Return a {@link GwtNetInterfaceConfig} of the given network interface with
+     * properties read from the NetworkConfigurationService
      * 
-     * @param ifname
-     * @return a new {@link GwtNetInterfaceConfig} with properties read from the
-     *         NetworkConfigurationService
+     * @param ifName the network interface name
+     * @return a new {@link GwtNetInterfaceConfig}
      */
-    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifname) {
-        GwtNetInterfaceConfig gwtConfig = new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
-                .forInterface(ifname).build();
-        logger.debug("GWT Network Configuration for interface {}:\n{}\n", ifname, gwtConfig.getProperties());
-        return gwtConfig;
+    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifName) {
+        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
+                .forInterface(ifName).build();
+    }
+
+    /**
+     * Return a {@link GwtNetInterfaceConfig} for the given network interface
+     * name and type with default values
+     * 
+     * @param ifName the network interface name
+     * @param ifType the network interface type
+     * @return a new {@link GwtNetInterfaceConfig}
+     */
+    public GwtNetInterfaceConfig getDefaultGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
+        return new GwtNetInterfaceConfigBuilder()
+                .forInterface(ifName).forType(ifType).build();
     }
 
     /**
@@ -67,8 +80,9 @@ public class NetworkConfigurationServiceAdapter {
      * 
      * @param gwtConfig the configuration containing the properties to update
      * @throws KuraException
+     * @throws GwtKuraException 
      */
-    public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException {
+    public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException, GwtKuraException {
         NetworkConfigurationServicePropertiesBuilder builder = new NetworkConfigurationServicePropertiesBuilder(
                 gwtConfig);
         Map<String, Object> newProperties = builder.build();
@@ -80,14 +94,7 @@ public class NetworkConfigurationServiceAdapter {
     }
 
     private String addNetworkInterfaceIfNotPresent(String ifname) {
-        List<String> ifnames = new LinkedList<>();
-
-        String netInterfaces = (String) this.netConfServProperties.get(NET_INTERFACES);
-        String[] interfaces = netInterfaces.split(",");
-
-        for (String name : interfaces) {
-            ifnames.add(name.trim());
-        }
+        List<String> ifnames = getConfiguredNetworkInterfaceNames();
 
         if (!ifnames.contains(ifname)) {
             ifnames.add(ifname);
@@ -103,4 +110,21 @@ public class NetworkConfigurationServiceAdapter {
         return String.join(",", ifnames.stream().collect(Collectors.toList()));
     }
 
+    /**
+     * Return the names of the configured network interfaces
+     * 
+     * @return a List of network interfaces
+     */
+    public List<String> getConfiguredNetworkInterfaceNames() {
+        List<String> ifnames = new LinkedList<>();
+
+        String netInterfaces = (String) this.netConfServProperties.get(NET_INTERFACES);
+        String[] interfaces = netInterfaces.split(",");
+
+        for (String name : interfaces) {
+            ifnames.add(name.trim());
+        }
+
+        return ifnames;
+    }
 }

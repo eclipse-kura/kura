@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,10 @@ public class DhcpClientManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpClientManager.class);
 
-    private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private static final String PID_FILE_DIR = "/var/run";
+    private static final String DHCLIENT_HOOK_SCRIPT_FILE = "/etc/kura-dhclient-resolv-hook";
+    private static final String DHCLIENT_ROUTE_SCRIPT_FILE = "/etc/kura-dhclient-route-hook";
+    private static DhcpClientTool dhcpClientTool = DhcpClientTool.NONE;
     private final CommandExecutorService executorService;
 
     static {
@@ -87,6 +89,20 @@ public class DhcpClientManager {
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to release current lease");
         }
+    }
+
+    public static String getResolvConfHookScriptFileName() {
+        if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+            return DHCLIENT_HOOK_SCRIPT_FILE;
+        }
+        return "";
+    }
+
+    public static String getRouteHookScriptFileName() {
+        if (dhcpClientTool == DhcpClientTool.DHCLIENT) {
+            return DHCLIENT_ROUTE_SCRIPT_FILE;
+        }
+        return "";
     }
 
     private static boolean removePidFile(String interfaceName) {

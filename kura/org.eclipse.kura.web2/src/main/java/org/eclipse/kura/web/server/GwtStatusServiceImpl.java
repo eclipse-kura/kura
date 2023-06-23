@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
@@ -342,9 +343,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 }
             } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                 String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
-                String currentModemPppNum = Integer
-                        .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
-                String name = "ppp" + currentModemPppNum + " (" + gwtNetInterfaceConfig.getName() + ")";
+                String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
+                String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
+                if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
+                    name = name + " (" + interfaceName + ")";
+                }
                 if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
@@ -354,8 +357,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
                             currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
                                     + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                    + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab + "PPP: "
-                                    + currentModemPppNum));
+                                    + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab
+                                    + "Interface: " + interfaceName));
                 }
             }
         }

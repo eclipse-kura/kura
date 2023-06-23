@@ -14,6 +14,7 @@ package org.freedesktop.modemmanager1;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -24,11 +25,6 @@ import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.modemmanager1.PropertyCurrentModesStruct;
-import org.freedesktop.modemmanager1.PropertyPortsStruct;
-import org.freedesktop.modemmanager1.PropertySignalQualityStruct;
-import org.freedesktop.modemmanager1.PropertySupportedModesStruct;
-import org.freedesktop.modemmanager1.SetCurrentModesStruct;
 
 /**
  * Auto-generated class.
@@ -104,15 +100,15 @@ public interface Modem extends DBusInterface {
         }
 
         public int getOld() {
-            return old;
+            return this.old;
         }
 
         public int getNewparam() {
-            return newparam;
+            return this.newparam;
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }

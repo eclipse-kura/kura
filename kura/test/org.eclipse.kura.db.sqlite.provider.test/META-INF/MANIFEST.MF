@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.util.test
 Bundle-SymbolicName: org.eclipse.kura.db.sqlite.provider.test;singleton:=true
-Bundle-Version: 5.3.0.qualifier
+Bundle-Version: 5.4.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ClassPath: .
@@ -13,5 +13,8 @@ Import-Package: org.apache.felix.service.command;version="1.0.0",
  org.eclipse.kura.core.testutil.service;version="[1.0,2.0)",
  org.eclipse.kura.db;version="2.0.0",
  org.junit;version="4.12.0",
+ org.mockito;version="4.8.1",
+ org.mockito.invocation;version="4.8.1",
+ org.mockito.stubbing;version="4.8.1",
  org.osgi.framework;version="1.10.0"
-Require-Bundle: org.eclipse.kura.db.sqlite.provider
+Fragment-Host: org.eclipse.kura.db.sqlite.provider

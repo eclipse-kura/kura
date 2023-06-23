@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -236,9 +236,10 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
                     .getNetInterfaceConfigs();
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-                if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                         || netInterfaceConfig.getType() == NetInterfaceType.WIFI
-                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM) {
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                        && isEnabledForLan(netInterfaceConfig)) {
                     getAllowedNetworks(netInterfaceConfig);
                 }
             }
@@ -260,6 +261,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
         logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
         List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
+
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns()) {
                 logger.debug("Found an allowed network: {}/{}", ((DhcpServerConfig) netConfig).getRouterAddress(),
@@ -274,12 +276,27 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         }
     }
 
+    private boolean isEnabledForLan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
+                .equals(NetInterfaceStatus.netIPv4StatusEnabledLAN);
+    }
+
     private boolean isEnabledForWan(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
         return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
                 .equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 
+    private boolean isNotManaged(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        return ((AbstractNetInterface<?>) netInterfaceConfig).getInterfaceStatus()
+                .equals(NetInterfaceStatus.netIPv4StatusUnmanaged);
+    }
+
     private void setDnsServers(Set<IPAddress> newServers) {
+        if (isNotAllowedToManageDnsServers()) {
+            logger.debug("Don't manage dns servers");
+            return;
+        }
+
         LinuxDns linuxDns = this.dnsUtil;
         Set<IPAddress> currentServers = linuxDns.getDnServers();
 
@@ -301,14 +318,40 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         }
     }
 
+    // Kura will not manage the dns servers if no WAN interfaces are configured, but
+    // there are Unmanaged ones.
+    private boolean isNotAllowedToManageDnsServers() {
+        boolean wanInterfaceExist = false;
+        boolean unmanagedInterfaceExist = false;
+        if (this.networkConfiguration != null && this.networkConfiguration.getNetInterfaceConfigs() != null) {
+            List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
+                    .getNetInterfaceConfigs();
+            for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+                if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                        && isEnabledForWan(netInterfaceConfig)) {
+                    wanInterfaceExist = true;
+                }
+                if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
+                        || netInterfaceConfig.getType() == NetInterfaceType.WIFI
+                        || netInterfaceConfig.getType() == NetInterfaceType.MODEM)
+                        && isNotManaged(netInterfaceConfig)) {
+                    unmanagedInterfaceExist = true;
+                }
+            }
+        }
+        return !wanInterfaceExist && unmanagedInterfaceExist;
+    }
+
     // Get a list of dns servers for all WAN interfaces
     private Set<IPAddress> getConfiguredDnsServers() {
         LinkedHashSet<IPAddress> serverList = new LinkedHashSet<>();
         if (this.networkConfiguration != null && this.networkConfiguration.getNetInterfaceConfigs() != null) {
             List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = this.networkConfiguration
                     .getNetInterfaceConfigs();
-            // If there are multiple WAN interfaces, their configured DNS servers are all included in no particular
-            // order
+            // If there are multiple WAN interfaces, their configured DNS servers are all
+            // included in no particular order
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
                 if ((netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                         || netInterfaceConfig.getType() == NetInterfaceType.WIFI

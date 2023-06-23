@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -368,7 +368,8 @@ public class DnsMonitorServiceImplTest {
 
     @Test
     public void testUpdateDnsProxyConfig() throws Throwable {
-        // test the method descending into getAllowedNetworks, adding forwarders and updating DNS
+        // test the method descending into getAllowedNetworks, adding forwarders and
+        // updating DNS
 
         String dnsServer = "10.10.0.100";
         IPAddress allowedHost = IPAddress.parseHostAddress("10.10.0.200");
@@ -613,6 +614,85 @@ public class DnsMonitorServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(dnsServer, result.iterator().next());
+    }
+
+    @Test
+    public void shouldManageDnsFileWithBothLanInterfacesTest() throws Throwable {
+        DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl();
+        LinuxDns dns = mock(LinuxDns.class);
+        TestUtil.setFieldValue(svc, "dnsUtil", dns);
+
+        setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledLAN, NetInterfaceStatus.netIPv4StatusEnabledLAN, svc);
+
+        verify(dns, times(1)).setDnServers(any());
+    }
+
+    @Test
+    public void shouldManageDnsFileWithWanAndLanInterfacesTest() throws Throwable {
+        DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl();
+        LinuxDns dns = mock(LinuxDns.class);
+        TestUtil.setFieldValue(svc, "dnsUtil", dns);
+
+        setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledWAN, NetInterfaceStatus.netIPv4StatusEnabledLAN, svc);
+
+        verify(dns, times(1)).setDnServers(any());
+    }
+
+    @Test
+    public void shouldManageDnsFileWithWanAndUnmanagedInterfacesTest() throws Throwable {
+        DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl();
+        LinuxDns dns = mock(LinuxDns.class);
+        TestUtil.setFieldValue(svc, "dnsUtil", dns);
+
+        setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledWAN, NetInterfaceStatus.netIPv4StatusUnmanaged, svc);
+
+        verify(dns, times(1)).setDnServers(any());
+    }
+
+    @Test
+    public void shouldNotManageDnsFileWithLanAndUnmanagedInterfacesTest() throws Throwable {
+        DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl();
+        LinuxDns dns = mock(LinuxDns.class);
+        TestUtil.setFieldValue(svc, "dnsUtil", dns);
+
+        setDnsServers(NetInterfaceStatus.netIPv4StatusEnabledLAN, NetInterfaceStatus.netIPv4StatusUnmanaged, svc);
+
+        verify(dns, times(0)).setDnServers(any());
+    }
+
+    private void setDnsServers(NetInterfaceStatus eth0Status, NetInterfaceStatus eth1Status, DnsMonitorServiceImpl svc)
+            throws Throwable {
+        NetworkConfiguration netc = new NetworkConfiguration();
+
+        EthernetInterfaceConfigImpl ethNic0 = new EthernetInterfaceConfigImpl("eth0");
+        List<NetInterfaceAddressConfig> ethInterfaceAddresses0 = new ArrayList<>();
+        NetInterfaceAddressConfigImpl ethNiac0 = new NetInterfaceAddressConfigImpl();
+        List<NetConfig> ethCurrentNets0 = new ArrayList<>();
+        NetConfigIP4 ethNc0 = new NetConfigIP4(eth0Status, true);
+        ethCurrentNets0.add(ethNc0);
+        ethNiac0.setNetConfigs(ethCurrentNets0);
+        ethInterfaceAddresses0.add(ethNiac0);
+        ethNic0.setNetInterfaceAddresses(ethInterfaceAddresses0);
+        netc.addNetInterfaceConfig(ethNic0);
+
+        EthernetInterfaceConfigImpl ethNic1 = new EthernetInterfaceConfigImpl("eth1");
+        List<NetInterfaceAddressConfig> ethInterfaceAddresses1 = new ArrayList<>();
+        NetInterfaceAddressConfigImpl ethNiac1 = new NetInterfaceAddressConfigImpl();
+        List<NetConfig> ethCurrentNets1 = new ArrayList<>();
+        NetConfigIP4 ethNc1 = new NetConfigIP4(eth1Status, true);
+        ethCurrentNets1.add(ethNc1);
+        ethNiac1.setNetConfigs(ethCurrentNets1);
+        ethInterfaceAddresses1.add(ethNiac1);
+        ethNic1.setNetInterfaceAddresses(ethInterfaceAddresses1);
+        netc.addNetInterfaceConfig(ethNic1);
+
+        TestUtil.setFieldValue(svc, "networkConfiguration", netc);
+
+        Set<IPAddress> servers = new HashSet<>();
+        IPAddress address = IPAddress.parseHostAddress("10.10.0.10");
+        servers.add(address);
+
+        TestUtil.invokePrivate(svc, "setDnsServers", servers);
     }
 
 }

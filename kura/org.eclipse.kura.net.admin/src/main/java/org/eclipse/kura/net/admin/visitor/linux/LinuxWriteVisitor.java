@@ -33,6 +33,7 @@ public class LinuxWriteVisitor implements NetworkConfigurationVisitor {
         this.visitors.add(new WifiConfigWriter());
         this.visitors.add(new PppConfigWriter());
         this.visitors.add(new DhcpConfigWriter());
+        this.visitors.add(new DhcpClientConfigWriter());
         this.visitors.add(new FirewallAutoNatConfigWriter());
     }
 
@@ -51,7 +52,8 @@ public class LinuxWriteVisitor implements NetworkConfigurationVisitor {
             visitor.visit(config);
         }
 
-        // After every visit, unset the executorService. This must be set before every call.
+        // After every visit, unset the executorService. This must be set before every
+        // call.
         this.executorService = null;
     }
 

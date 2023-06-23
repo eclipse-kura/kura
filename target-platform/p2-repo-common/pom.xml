@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>5.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>p2-repo-common</artifactId>
     <packaging>pom</packaging>
@@ -36,7 +36,7 @@
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>libsocket-can-osgi</artifactId>
-                    <version>1.1.0-SNAPSHOT</version>
+                    <version>1.2.0-SNAPSHOT</version>
                 </dependency>
             </dependencies>
             <build>
@@ -264,7 +264,7 @@
                                 <artifactItem>
                                     <groupId>commons-fileupload</groupId>
                                     <artifactId>commons-fileupload</artifactId>
-                                    <version>${org.apache.commons.fileupload.version}</version>
+                                    <version>${commons-fileupload.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.commons</groupId>
@@ -746,7 +746,7 @@
                                 <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
                                 <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/HikariCP_${hikaricp.version}.jar"/>
                                 <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
-                                <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version.version}.jar"/>
+                                <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

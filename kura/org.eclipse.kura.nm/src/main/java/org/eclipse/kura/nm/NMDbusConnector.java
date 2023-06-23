@@ -35,6 +35,9 @@ import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
+import org.eclipse.kura.nm.signal.handlers.NMDeviceAddedHandler;
+import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
@@ -547,7 +550,7 @@ public class NMDbusConnector {
         }
     }
 
-    protected String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
+    public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
         NMDeviceType deviceType = getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
             Optional<String> modemPath = getModemPathFromMM(dbusPath);

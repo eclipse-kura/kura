@@ -35,6 +35,7 @@ import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
 import org.eclipse.kura.nm.signal.handlers.NMDeviceAddedHandler;
 import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;

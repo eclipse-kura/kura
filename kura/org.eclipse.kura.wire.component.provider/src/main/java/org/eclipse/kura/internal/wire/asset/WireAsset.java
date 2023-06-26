@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -364,7 +364,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     @Override
-    protected boolean isChannelListenerValid(final ChannelListenerRegistration reg, final Channel channel) {
+    protected boolean isChannelListenerValid(final ChannelListenerHolder reg, final Channel channel) {
 
         if (!super.isChannelListenerValid(reg, channel)) {
             return false;
@@ -380,13 +380,13 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
     }
 
     @Override
-    protected void updateChannelListenerRegistrations(final Set<ChannelListenerRegistration> listeners,
+    protected void updateChannelListenerRegistrations(final Set<ChannelListenerHolder> listeners,
             final AssetConfiguration config) {
 
         super.updateChannelListenerRegistrations(listeners, config);
 
         config.getAssetChannels().entrySet().stream().filter(e -> isListeningChannel(e.getValue().getConfiguration()))
-                .map(e -> new ChannelListenerRegistration(e.getKey(), new EmitterChannelListener()))
+                .map(e -> new ChannelListenerHolder(e.getValue(), new EmitterChannelListener()))
                 .forEach(listeners::add);
     }
 

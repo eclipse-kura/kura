@@ -21,6 +21,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -335,15 +337,25 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         Set<Object> packageNames = deployedPackages.keySet();
         for (Object packageName : packageNames) {
-            String packageUrl = (String) deployedPackages.get(packageName);
-
-            logger.info("Deploying package name {} at URL {}", packageName, packageUrl);
             try {
-                installDeploymentPackageAsync(packageUrl);
+                String packageUri = (String) deployedPackages.get(packageName);
+
+                if (isHttp(packageUri)) {
+                    throw new KuraRuntimeException(KuraErrorCode.SECURITY_EXCEPTION,
+                            "For security reason is not allowed install package from remote repository in config file.");
+                }
+
+                logger.info("Deploying package name {} at URI {}", packageName, packageUri);
+                installDeploymentPackageAsync(packageUri);
             } catch (Exception e) {
                 logger.error("Error installing package {}", packageName, e);
             }
         }
+    }
+
+    private boolean isHttp(String packageUri) throws URISyntaxException {
+        String uriScheme = new URI(packageUri).getScheme();
+        return uriScheme.equalsIgnoreCase("https") || uriScheme.equalsIgnoreCase("http");
     }
 
     protected Properties readDeployedPackages() {

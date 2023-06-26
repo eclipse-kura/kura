@@ -406,20 +406,26 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     protected List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
         channelRecords.stream()
-                .filter(channelRecord -> !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue()))
                 .forEach(channelRecord -> {
                     Channel channel = channels.get(channelRecord.getChannelName());
-                    double channelScale = channel.getValueScale();
-                    double channelOffset = channel.getValueOffset();
 
-                    applyScaleAndOffset(channelRecord, channelScale, channelOffset);
+                    if (shouldApplyScaleAndOffset(channelRecord, channel)) {
+                        applyScaleAndOffset(channelRecord, channel);
+                    }
                 });
 
         return channelRecords;
     }
 
-    private void applyScaleAndOffset(final ChannelRecord channelRecord, final double channelScale,
-            final double channelOffset) {
+    private boolean shouldApplyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
+        return !isNull(channelRecord) && !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue())
+                && (channel.getValueScale() != 1.0d || channel.getValueOffset() != 0.0d);
+    }
+
+    private void applyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
+        final double channelScale = channel.getValueScale();
+        final double channelOffset = channel.getValueOffset();
+
         if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
             channelRecord.setValue(new DoubleValue(
                     (double) channelRecord.getValue().getValue() * channelScale + channelOffset));
@@ -631,10 +637,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public void onChannelEvent(ChannelEvent event) {
             final ChannelRecord originaRecord = event.getChannelRecord();
 
-            if (!isNull(originaRecord) && !isNull(originaRecord.getValueType()) && !isNull(originaRecord.getValue())) {
+            if (shouldApplyScaleAndOffset(originaRecord, channel)) {
                 final ChannelRecord cloned = cloneRecord(originaRecord);
 
-                applyScaleAndOffset(cloned, channel.getValueScale(), channel.getValueOffset());
+                applyScaleAndOffset(cloned, channel);
 
                 this.listener.onChannelEvent(new ChannelEvent(cloned));
             } else {

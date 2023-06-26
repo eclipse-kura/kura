@@ -25,7 +25,8 @@ RUN chmod a+x -R /usr/local/bin && \
     apk --no-cache add dos2unix openssl net-tools which busybox-extras && \
     apk --no-cache add bluez bluez-deprecated chrony eudev glib psmisc socat && \
     /kura-install/kura_*_docker-x86_64-nn_installer.sh && \
-    chmod a+rw -R /opt/eclipse && \
+    chmod -R go-rwx /opt/eclipse  && \
+    chmod a+rx /opt/eclipse  && \
     find /opt/eclipse -type d | xargs chmod a+x && \
     chmod a+rwx /var/log && \
     `# Test for the existence of the entry point` \

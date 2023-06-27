@@ -340,9 +340,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             try {
                 String packageUri = (String) deployedPackages.get(packageName);
 
-                if (isHttp(packageUri)) {
-                    throw new KuraRuntimeException(KuraErrorCode.SECURITY_EXCEPTION,
-                            "For security reason is not allowed install package from remote repository in config file.");
+                if (!isFile(packageUri)) {
+                    throw new KuraRuntimeException(KuraErrorCode.SECURITY_EXCEPTION, "Only local file are allowed.");
                 }
 
                 logger.info("Deploying package name {} at URI {}", packageName, packageUri);
@@ -353,9 +352,9 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
     }
 
-    private boolean isHttp(String packageUri) throws URISyntaxException {
-        String uriScheme = new URI(packageUri).getScheme();
-        return uriScheme.equalsIgnoreCase("https") || uriScheme.equalsIgnoreCase("http");
+    private boolean isFile(String packageUri) throws URISyntaxException {
+        return new File(new URI(packageUri)).isFile();
+
     }
 
     protected Properties readDeployedPackages() {

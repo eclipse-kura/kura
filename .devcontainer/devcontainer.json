@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/devcontainers/python:3",
   "features": {
     },
   "postCreateCommand": "python3 -m venv .venv & source .venv/bin/activate & pip3 install --upgrade pip & pip3 install -r requirements.txt",

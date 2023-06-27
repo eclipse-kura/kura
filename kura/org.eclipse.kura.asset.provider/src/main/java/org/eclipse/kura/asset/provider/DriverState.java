@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.kura.asset.provider.BaseAsset.ChannelListenerRegistration;
+import org.eclipse.kura.asset.provider.BaseAsset.ChannelListenerHolder;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.driver.Driver;
@@ -32,7 +32,7 @@ public class DriverState {
     private static final Logger logger = LoggerFactory.getLogger(DriverState.class);
 
     private final Driver driver;
-    private final Set<ChannelListenerRegistration> attachedListeners;
+    private final Set<ChannelListenerHolder> attachedListeners;
 
     private PreparedRead preparedRead;
 
@@ -76,53 +76,53 @@ public class DriverState {
         }
     }
 
-    public void syncChannelListeners(final Set<ChannelListenerRegistration> targetState,
+    public void syncChannelListeners(final Set<ChannelListenerHolder> targetState,
             final Map<String, Channel> channels) {
         setChannelListenersInternal(new HashSet<>(targetState), channels);
     }
 
-    private void setChannelListenersInternal(final Set<ChannelListenerRegistration> targetState,
+    private void setChannelListenersInternal(final Set<ChannelListenerHolder> targetState,
             final Map<String, Channel> channels) {
 
-        final Iterator<ChannelListenerRegistration> iter = this.attachedListeners.iterator();
+        final Iterator<ChannelListenerHolder> iter = this.attachedListeners.iterator();
 
         while (iter.hasNext()) {
-            final ChannelListenerRegistration reg = iter.next();
+            final ChannelListenerHolder reg = iter.next();
 
             if (!targetState.contains(reg)) {
                 detach(iter, reg);
             }
         }
 
-        for (final ChannelListenerRegistration reg : targetState) {
+        for (final ChannelListenerHolder holder : targetState) {
 
-            if (this.attachedListeners.contains(reg)) {
+            if (this.attachedListeners.contains(holder)) {
                 continue;
             }
 
-            final Channel channel = channels.get(reg.getChannelName());
+            final Channel channel = channels.get(holder.getChannelName());
 
             if (channel != null && channel.isEnabled()) {
-                attach(reg, channel);
+                attach(holder, channel);
             }
         }
     }
 
-    private void attach(final ChannelListenerRegistration reg, final Channel channel) {
+    private void attach(final ChannelListenerHolder holder, final Channel channel) {
         try {
             logger.debug("Registering Channel Listener for monitoring...");
-            this.driver.registerChannelListener(channel.getConfiguration(), reg.getChannelListener());
-            this.attachedListeners.add(reg);
+            this.driver.registerChannelListener(channel.getConfiguration(), holder);
+            this.attachedListeners.add(holder);
             logger.debug("Registering Channel Listener for monitoring...done");
         } catch (Exception e) {
             logger.warn("Failed to register channel listener", e);
         }
     }
 
-    private void detach(final Iterator<ChannelListenerRegistration> iter, final ChannelListenerRegistration reg) {
+    private void detach(final Iterator<ChannelListenerHolder> iter, final ChannelListenerHolder holder) {
         try {
             logger.debug("Unregistering Asset Listener...");
-            this.driver.unregisterChannelListener(reg.getChannelListener());
+            this.driver.unregisterChannelListener(holder);
             iter.remove();
             logger.debug("Unregistering Asset Listener...done");
         } catch (Exception e) {

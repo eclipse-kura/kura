@@ -353,7 +353,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private boolean isFile(String packageUri) throws URISyntaxException {
-        return new File(new URI(packageUri)).isFile();
+        return "file".equals(new URI(packageUri).getScheme());
 
     }
 

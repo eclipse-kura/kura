@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -47,6 +48,7 @@ import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -71,7 +73,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The Class BaseAsset is basic implementation of {@code Asset}.
  *
- * BaseAsset persists the AssetConfguration using the {@code ConfigurationService}.
+ * BaseAsset persists the AssetConfguration using the
+ * {@code ConfigurationService}.
  *
  * The configuration properites must conform to the following
  * specifications.<br>
@@ -84,32 +87,46 @@ import org.slf4j.LoggerFactory;
  * description</li>
  * <li>[name#property]</li> where name is a string denoting the channel's unique
  * name and the {@code [property]} denotes the protocol specific properties.
- * The name of a channel must be unique in the channels configurations of an Asset, and is not
- * allowed to contain spaces or any of the following characters: <b>#</b>, <b>_</b>.
+ * The name of a channel must be unique in the channels configurations of an
+ * Asset, and is not
+ * allowed to contain spaces or any of the following characters: <b>#</b>,
+ * <b>_</b>.
  * </ul>
  *
- * The configuration properties of a channel belong to one of this two groups: generic channel properties and
+ * The configuration properties of a channel belong to one of this two groups:
+ * generic channel properties and
  * driver specific properties.
  * <br>
- * Generic channel properties begin with the '+' character, and are driver independent.
- * The following generic channel properties must always be present in the channel configuration:
+ * Generic channel properties begin with the '+' character, and are driver
+ * independent.
+ * The following generic channel properties must always be present in the
+ * channel configuration:
  * <ul>
- * <li>{@code +type} identifies the channel type (READ, WRITE or READ_WRITE) as specified by {@code ChannelType}</li>
- * <li>{@code +value.type} identifies the {@link org.eclipse.kura.type.DataType} of the channel.</li>
+ * <li>{@code +type} identifies the channel type (READ, WRITE or READ_WRITE) as
+ * specified by {@code ChannelType}</li>
+ * <li>{@code +value.type} identifies the {@link org.eclipse.kura.type.DataType}
+ * of the channel.</li>
  * </ul>
- * For example, the property keys above for a channel named channel1 would be encoded as channel1#+type and
+ * For example, the property keys above for a channel named channel1 would be
+ * encoded as channel1#+type and
  * channel1#+value.type<br>
  *
- * The values of the <b>+value.type</b> and <b>+type</b> properties must me mappable
- * respectively to a {@link org.eclipse.kura.type.DataType} and {@code ChannelType} instance.
+ * The values of the <b>+value.type</b> and <b>+type</b> properties must me
+ * mappable
+ * respectively to a {@link org.eclipse.kura.type.DataType} and
+ * {@code ChannelType} instance.
  * <br>
- * The value of these property can be either an instance of the corresponding type,
- * or a string representation that equals the value returned by calling the {@code toString()} method
+ * The value of these property can be either an instance of the corresponding
+ * type,
+ * or a string representation that equals the value returned by calling the
+ * {@code toString()} method
  * on one of the enum variants of that type.
  *
  * <br>
- * Driver specific properties are defined by the driver, their keys cannot begin with a '+' character.
- * For example, valid driver specific properties can be channel1#modbus.register,
+ * Driver specific properties are defined by the driver, their keys cannot begin
+ * with a '+' character.
+ * For example, valid driver specific properties can be
+ * channel1#modbus.register,
  * channel1#modbus.unit.id etc.<br>
  * <br>
  *
@@ -125,7 +142,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     private static final Logger logger = LoggerFactory.getLogger(BaseAsset.class);
 
     /** Container of channel listeners registered by this Asset. */
-    protected final Set<ChannelListenerRegistration> channelListeners = new HashSet<>();
+    protected final Set<ChannelListenerHolder> channelListeners = new HashSet<>();
 
     private BaseAssetConfiguration config;
 
@@ -141,9 +158,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component callback while activation.
      *
      * @param componentContext
-     *            the component context
+     *                         the component context
      * @param properties
-     *            the service properties
+     *                         the service properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.info("activating...");
@@ -157,7 +174,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component update callback.
      *
      * @param properties
-     *            the service properties
+     *                   the service properties
      */
     public void updated(final Map<String, Object> properties) {
 
@@ -177,7 +194,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component callback while deactivation.
      *
      * @param context
-     *            the component context
+     *                the component context
      */
     protected void deactivate(final ComponentContext context) {
         logger.debug("deactivating...");
@@ -196,9 +213,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * PID.
      *
      * @param driverId
-     *            the identifier of the driver
+     *                 the identifier of the driver
      * @throws NullPointerException
-     *             if driver id provided is null
+     *                              if driver id provided is null
      */
     private void reopenDriverTracker(final String driverId) {
         requireNonNull(driverId, "Driver PID cannot be null");
@@ -389,30 +406,41 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     protected List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
         channelRecords.stream()
-                .filter(channelRecord -> !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue()))
                 .forEach(channelRecord -> {
                     Channel channel = channels.get(channelRecord.getChannelName());
-                    double channelScale = channel.getValueScale();
-                    double channelOffset = channel.getValueOffset();
 
-                    if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
-                        channelRecord.setValue(new DoubleValue(
-                                (double) channelRecord.getValue().getValue() * channelScale + channelOffset));
-                    } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
-                        channelRecord.setValue(
-                                new FloatValue((float) channelRecord.getValue().getValue() * (float) channelScale
-                                        + (float) channelOffset));
-                    } else if (channelRecord.getValueType().equals(DataType.INTEGER)) {
-                        channelRecord.setValue(new IntegerValue(
-                                (int) channelRecord.getValue().getValue() * (int) channelScale + (int) channelOffset));
-                    } else if (channelRecord.getValueType().equals(DataType.LONG)) {
-                        channelRecord
-                                .setValue(new LongValue((long) channelRecord.getValue().getValue() * (long) channelScale
-                                        + (long) channelOffset));
+                    if (shouldApplyScaleAndOffset(channelRecord, channel)) {
+                        applyScaleAndOffset(channelRecord, channel);
                     }
                 });
 
         return channelRecords;
+    }
+
+    private boolean shouldApplyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
+        return !isNull(channelRecord) && !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue())
+                && (channel.getValueScale() != 1.0d || channel.getValueOffset() != 0.0d);
+    }
+
+    private void applyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
+        final double channelScale = channel.getValueScale();
+        final double channelOffset = channel.getValueOffset();
+
+        if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
+            channelRecord.setValue(new DoubleValue(
+                    (double) channelRecord.getValue().getValue() * channelScale + channelOffset));
+        } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
+            channelRecord.setValue(
+                    new FloatValue((float) channelRecord.getValue().getValue() * (float) channelScale
+                            + (float) channelOffset));
+        } else if (channelRecord.getValueType().equals(DataType.INTEGER)) {
+            channelRecord.setValue(new IntegerValue(
+                    (int) channelRecord.getValue().getValue() * (int) channelScale + (int) channelOffset));
+        } else if (channelRecord.getValueType().equals(DataType.LONG)) {
+            channelRecord
+                    .setValue(new LongValue((long) channelRecord.getValue().getValue() * (long) channelScale
+                            + (long) channelOffset));
+        }
     }
 
     public boolean hasReadChannels() {
@@ -435,7 +463,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             throw new IllegalArgumentException("Channel not found");
         }
 
-        final ChannelListenerRegistration reg = new ChannelListenerRegistration(channelName, channelListener);
+        final ChannelListenerHolder reg = new ChannelListenerHolder(channel, channelListener);
 
         if (this.channelListeners.contains(reg)) {
             return;
@@ -457,10 +485,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     public synchronized void unregisterChannelListener(final ChannelListener channelListener) throws KuraException {
         requireNonNull(channelListener, "Asset Listener cannot be null");
 
-        final Iterator<ChannelListenerRegistration> i = this.channelListeners.iterator();
+        final Iterator<ChannelListenerHolder> i = this.channelListeners.iterator();
 
         while (i.hasNext()) {
-            final ChannelListenerRegistration reg = i.next();
+            final ChannelListenerHolder reg = i.next();
             if (reg.listener == channelListener) {
                 i.remove();
             }
@@ -553,18 +581,18 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
     }
 
-    protected boolean isChannelListenerValid(final ChannelListenerRegistration reg, final Channel channel) {
+    protected boolean isChannelListenerValid(final ChannelListenerHolder reg, final Channel channel) {
         return channel != null;
     }
 
-    protected void updateChannelListenerRegistrations(final Set<ChannelListenerRegistration> listeners,
+    protected void updateChannelListenerRegistrations(final Set<ChannelListenerHolder> listeners,
             final AssetConfiguration config) {
         final Map<String, Channel> channels = config.getAssetChannels();
 
-        final Iterator<ChannelListenerRegistration> i = listeners.iterator();
+        final Iterator<ChannelListenerHolder> i = listeners.iterator();
 
         while (i.hasNext()) {
-            final ChannelListenerRegistration reg = i.next();
+            final ChannelListenerHolder reg = i.next();
 
             if (!isChannelListenerValid(reg, channels.get(reg.getChannelName()))) {
                 i.remove();
@@ -586,18 +614,19 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return "BaseAsset [Asset Configuration=" + this.config + "]";
     }
 
-    protected static class ChannelListenerRegistration {
+    protected class ChannelListenerHolder implements ChannelListener {
 
-        private final String channelName;
         private final ChannelListener listener;
+        private final Channel channel;
 
-        public ChannelListenerRegistration(String channelName, ChannelListener listener) {
-            this.channelName = channelName;
+        public ChannelListenerHolder(Channel channel,
+                ChannelListener listener) {
+            this.channel = channel;
             this.listener = listener;
         }
 
         public String getChannelName() {
-            return this.channelName;
+            return this.channel.getName();
         }
 
         public ChannelListener getChannelListener() {
@@ -605,10 +634,46 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }
 
         @Override
+        public void onChannelEvent(ChannelEvent event) {
+            final ChannelRecord originaRecord = event.getChannelRecord();
+
+            if (shouldApplyScaleAndOffset(originaRecord, channel)) {
+                final ChannelRecord cloned = cloneRecord(originaRecord);
+
+                applyScaleAndOffset(cloned, channel);
+
+                this.listener.onChannelEvent(new ChannelEvent(cloned));
+            } else {
+                this.listener.onChannelEvent(event);
+            }
+        }
+
+        private ChannelRecord cloneRecord(final ChannelRecord originalRecord) {
+            final ChannelRecord clonedRecord = ChannelRecord.createReadRecord(originalRecord.getChannelName(),
+                    originalRecord.getValueType());
+
+            if (originalRecord.getValue() != null) {
+                clonedRecord.setValue(originalRecord.getValue());
+            }
+
+            if (originalRecord.getChannelConfig() != null) {
+                clonedRecord.setChannelConfig(originalRecord.getChannelConfig());
+            }
+
+            if (originalRecord.getChannelStatus() != null) {
+                clonedRecord.setChannelStatus(originalRecord.getChannelStatus());
+            }
+
+            clonedRecord.setTimestamp(originalRecord.getTimestamp());
+
+            return clonedRecord;
+        }
+
+        @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (this.channelName == null ? 0 : this.channelName.hashCode());
+            result = prime * result + (this.channel.getName() == null ? 0 : this.channel.getName().hashCode());
             result = prime * result + (this.listener == null ? 0 : this.listener.hashCode());
             return result;
         }
@@ -621,20 +686,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            ChannelListenerRegistration other = (ChannelListenerRegistration) obj;
-            if (this.channelName == null) {
-                if (other.channelName != null) {
-                    return false;
-                }
-            } else if (!this.channelName.equals(other.channelName)) {
-                return false;
-            }
-            if (this.listener == null) {
-                if (other.listener != null) {
-                    return false;
-                }
-            }
-            return this.listener == other.listener;
+            ChannelListenerHolder other = (ChannelListenerHolder) obj;
+
+            return Objects.equals(this.channel.getName(), other.channel.getName()) && this.listener == other.listener;
         }
     }
 }

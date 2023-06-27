@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
@@ -39,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -50,6 +52,11 @@ public class DeploymentAgentTest {
 
     private static final String VERSION_1_0_0 = "1.0.0";
     private static final String DP_NAME = "dpName";
+    private DeploymentAgent deploymentAgent;
+    private String dpaConfigurationFilepath;
+    private DeploymentAgent spiedDeploymentAgent;
+
+    private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
 
     @Test
     public void testInstallDeploymentPackageAsyncAlreadyDeploying() throws Exception {
@@ -477,6 +484,55 @@ public class DeploymentAgentTest {
 
         verify(deployedPackages, times(1)).remove(dpName);
         verify(deployedPackages, times(1)).store((FileOutputStream) any(), any());
+    }
+
+    @Test
+    public void shouldNotInstallPackageWithURLInConfFile() throws Exception {
+        givenDeploymentAgent();
+        givenConfigurationFile("target/dpa.properties");
+        givenDpWithUrlScheme("dp-with-url", "http://fake-url/dp-with-url.dp\n");
+
+        whenActivate();
+
+        thenNoPackageInstalled();
+
+    }
+
+    private void givenDpWithUrlScheme(String dpName, String dpUrl) throws IOException {
+        FileWriter writer = new FileWriter(dpaConfigurationFilepath);
+        writer.write(String.join("=", dpName, dpUrl) + "\n");
+        writer.close();
+    }
+
+    private void givenDeploymentAgent() {
+        this.deploymentAgent = new DeploymentAgent();
+
+        SystemService systemServiceMock = mock(SystemService.class);
+        Properties properties = new Properties();
+
+        properties.put("kura.packages", "fake-packages-path");
+
+        when(systemServiceMock.getProperties()).thenReturn(properties);
+
+        this.deploymentAgent.setSystemService(systemServiceMock);
+
+        this.spiedDeploymentAgent = spy(this.deploymentAgent);
+
+    }
+
+    private void givenConfigurationFile(String dpaConfigurationFilepath) throws NoSuchFieldException {
+        this.dpaConfigurationFilepath = dpaConfigurationFilepath;
+        System.setProperty(DPA_CONF_PATH_PROPNAME, dpaConfigurationFilepath);
+    }
+
+    private void whenActivate() {
+
+        this.deploymentAgent.activate();
+
+    }
+
+    private void thenNoPackageInstalled() throws Exception {
+        verify(this.spiedDeploymentAgent, times(0)).installDeploymentPackageAsync(anyString());
     }
 
 }

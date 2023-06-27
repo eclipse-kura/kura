@@ -1,5 +1,5 @@
 {
   "image": "mcr.microsoft.com/devcontainers/python:3",
   "postCreateCommand": "pip3 install --upgrade pip && pip3 install -r requirements.txt",
-  "postStartCommand": "mkdocs serve"
+  "postStartCommand": "nohup bash -c 'mkdocs serve &'"
 }

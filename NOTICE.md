@@ -180,6 +180,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
+* maven/mavencentral/org.osgi/org.osgi.service.metatype.annotations/1.4.1, Apache-2.0, approved, #6910
 * maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979
 * maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.36, Apache-2.0, approved, CQ12843
 * maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368

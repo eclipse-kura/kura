@@ -3,7 +3,7 @@ Eclipse Kura - 5.3.1 - June 2023
 Description:
 This service release of Eclipse Kura includes the following changes:
 - Fixed metatype issue in Wires Conditional component preventing correct displaying in the Web UI
-- Fixed distribution issue with SQLite dp
+- Fixed distribution issue with SQLite and wires script tools deployment packages 
 - Fixed scale and offset not applied in assets with channels in listen mode
 - Updated org.xerial:sqlite-jdbc to 3.42.0.0
 

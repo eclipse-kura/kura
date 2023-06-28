@@ -92,6 +92,6 @@ To access the compiled documentation press the `Open in Browser` button in the p
 
 ![Open in browser button](https://github.com/GregoryIvo/kura/assets/22748355/227b5089-717f-42ac-b67f-00f54c6ab50d)
 
-Or go to `Ports` and press the `Open in Browser` icon corresponding to the `mkdocs` process
+Or go to the `Ports` tab and press the `Open in Browser` icon corresponding to the `mkdocs` process
 
 ![Open in browser from ports](https://github.com/GregoryIvo/kura/assets/22748355/bf14f656-5fa4-4eaf-90d6-341e7374dfae)

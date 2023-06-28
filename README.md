@@ -75,22 +75,41 @@ mike serve
 
 #### 1. Create a new branch from `docs-develop` and press the `<> Code` button.
 
-![Create branch](https://github.com/GregoryIvo/kura/assets/22748355/5f5afe11-56a4-41ba-904d-02b0d31ba96f)
+<div align="center">
 
+![Create branch](https://github.com/GregoryIvo/kura/assets/22748355/5f5afe11-56a4-41ba-904d-02b0d31ba96f)
 ![Code button](https://github.com/GregoryIvo/kura/assets/22748355/1216e082-6c75-428f-b5ff-27d91eb3aefc)
+
+</div>
 
 #### 2. Under the `Codespaces` title, press the  `+`  button to create a new codespace.
 
+<div align="center">
+
 ![Create new workspace](https://github.com/GregoryIvo/kura/assets/22748355/083032af-9a84-4f03-a4f5-12bd9f4d68d9)
+
+</div>
 
 #### 3. A VSCode web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally, the docs will be accessible via port 8000.
 
+<div align="center">
+
 ![Docs running in web browser](https://github.com/GregoryIvo/kura/assets/29900100/4c4276db-0466-4703-b485-6d653020c09d)
+
+</div>
 
 To access the compiled documentation press the `Open in Browser` button in the popup.
 
+<div align="center">
+
 ![Open in browser button](https://github.com/GregoryIvo/kura/assets/22748355/227b5089-717f-42ac-b67f-00f54c6ab50d)
+
+</div>
 
 Or go to the `Ports` tab and press the `Open in Browser` icon corresponding to the `mkdocs` process
 
+<div align="center">
+
 ![Open in browser from ports](https://github.com/GregoryIvo/kura/assets/22748355/bf14f656-5fa4-4eaf-90d6-341e7374dfae)
+
+</div>

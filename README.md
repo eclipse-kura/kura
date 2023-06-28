@@ -71,9 +71,16 @@ mike serve
 > ```
 > where `[version]` is the one you used in the `deploy` command before.
 
-# Use GitHub Codespaces to edit docs in a web browser
-1) Open a PR and press the `<> Code` button. ![Code Button](https://github.com/GregoryIvo/kura/assets/29900100/300efa50-00e7-44ec-bb49-c37f68002d91)
- 
-2) Under the `Codespaces` title, press the  `+`  button to create a new codespace. ![Create new workspace](https://github.com/GregoryIvo/kura/assets/29900100/836978a0-1b3a-4bc2-9b83-dab01b524b87)
+### Use GitHub Codespaces to edit docs in a web browser
 
-3) A vs-code web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally, the docs will be accessible via port 8000. ![Docs running in web browser](https://github.com/GregoryIvo/kura/assets/29900100/4c4276db-0466-4703-b485-6d653020c09d)
+#### 1. Open a PR and press the `<> Code` button.
+
+ ![Code Button](https://github.com/GregoryIvo/kura/assets/29900100/300efa50-00e7-44ec-bb49-c37f68002d91)
+ 
+#### 2. Under the `Codespaces` title, press the  `+`  button to create a new codespace.
+
+![Create new workspace](https://github.com/GregoryIvo/kura/assets/29900100/836978a0-1b3a-4bc2-9b83-dab01b524b87)
+
+#### 3. A vs-code web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally, the docs will be accessible via port 8000.
+
+![Docs running in web browser](https://github.com/GregoryIvo/kura/assets/29900100/4c4276db-0466-4703-b485-6d653020c09d)

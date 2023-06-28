@@ -84,3 +84,11 @@ mike serve
 #### 3. A vs-code web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally, the docs will be accessible via port 8000.
 
 ![Docs running in web browser](https://github.com/GregoryIvo/kura/assets/29900100/4c4276db-0466-4703-b485-6d653020c09d)
+
+To access the compiled documentation press the "_Open in Browser_" button in the popup.
+
+![Open in browser button](https://github.com/GregoryIvo/kura/assets/22748355/227b5089-717f-42ac-b67f-00f54c6ab50d)
+
+Or go to "_Ports_" and press the "_Open in Browser_" icon corresponding to the `mkdocs` process
+
+![Open in browser from ports](https://github.com/GregoryIvo/kura/assets/22748355/bf14f656-5fa4-4eaf-90d6-341e7374dfae)

@@ -70,3 +70,8 @@ mike serve
 > mike set-default [version]
 > ```
 > where `[version]` is the one you used in the `deploy` command before.
+
+# Use Github Code spaces to edit docs in a web browser
+1) Open a PR and press the `<> Code` button.
+2) Under the `Codespaces` title, press the  `+`  button to create a new code space.
+3) A vs-code web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally the docs will be accessible via pot 8000

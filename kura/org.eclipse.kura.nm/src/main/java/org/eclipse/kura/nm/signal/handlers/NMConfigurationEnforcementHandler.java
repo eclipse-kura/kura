@@ -10,10 +10,11 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.nm;
+package org.eclipse.kura.nm.signal.handlers;
 
 import java.util.Objects;
 
+import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceStateReason;
 import org.freedesktop.dbus.exceptions.DBusException;

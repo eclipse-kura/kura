@@ -21,6 +21,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -335,15 +337,24 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         Set<Object> packageNames = deployedPackages.keySet();
         for (Object packageName : packageNames) {
-            String packageUrl = (String) deployedPackages.get(packageName);
-
-            logger.info("Deploying package name {} at URL {}", packageName, packageUrl);
             try {
-                installDeploymentPackageAsync(packageUrl);
+                String packageUri = (String) deployedPackages.get(packageName);
+
+                if (!isFile(packageUri)) {
+                    throw new KuraRuntimeException(KuraErrorCode.SECURITY_EXCEPTION, "Only local file are allowed.");
+                }
+
+                logger.info("Deploying package name {} at URI {}", packageName, packageUri);
+                installDeploymentPackageAsync(packageUri);
             } catch (Exception e) {
                 logger.error("Error installing package {}", packageName, e);
             }
         }
+    }
+
+    private boolean isFile(String packageUri) throws URISyntaxException {
+        return "file".equals(new URI(packageUri).getScheme());
+
     }
 
     protected Properties readDeployedPackages() {

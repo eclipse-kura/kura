@@ -83,7 +83,6 @@ mike serve
 
 ![Create new workspace](https://github.com/GregoryIvo/kura/assets/22748355/083032af-9a84-4f03-a4f5-12bd9f4d68d9)
 
-
 #### 3. A VSCode web instance will be opened in a new tab. Once launched the necessary dependencies will be downloaded, the docs will be compiled, and finally, the docs will be accessible via port 8000.
 
 ![Docs running in web browser](https://github.com/GregoryIvo/kura/assets/29900100/4c4276db-0466-4703-b485-6d653020c09d)

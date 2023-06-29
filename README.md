@@ -22,7 +22,7 @@ Eclipse Kura™
   
 </div>
 
-An OSGi-based Application Framework for M2M Service Gateways
+**Eclipse Kura**, from [the maori word for tank/container](https://maoridictionary.co.nz/search/?keywords=kura), is an OSGi-based Application Framework for M2M Service Gateways
 
 Background
 ----------

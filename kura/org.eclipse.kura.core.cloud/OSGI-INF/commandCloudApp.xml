@@ -31,6 +31,7 @@
    	<service>
    		<provide interface="org.eclipse.kura.command.PasswordCommandService"/>
      	<provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+     	<provide interface="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
    	</service>
    	<property name="service.pid" type="String" value="org.eclipse.kura.cloud.app.command.CommandCloudApp"/>
     <reference bind="setUnprivilegedExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.UnprivilegedExecutorService" name="UnprivilegedExecutorService" policy="static" unbind="unsetUnprivilegedExecutorService"/>

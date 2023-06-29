@@ -211,7 +211,8 @@ public class DownloadImpl implements ProgressListener {
             }
             s_logger.info("--> Going to verify hash signature!");
             try {
-                // these things should be checked beforehand, so that hash() has a chance to succeed
+                // these things should be checked beforehand, so that hash() has a chance to
+                // succeed
                 if (hashAlgorithm == null || "".equals(hashAlgorithm) || hashValue == null || "".equals(hashValue)) {
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, null,
                             "Failed to verify checksum with empty algorithm: " + hashAlgorithm);
@@ -278,7 +279,7 @@ public class DownloadImpl implements ProgressListener {
 
     private File getDpVerifierFile(DeploymentPackageInstallOptions options) {
 
-        String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".sh_verifier.sh");
+        String shName = FileUtilities.getFileName(options.getDpName(), options.getDpVersion(), ".sh_verifier.sh", "-");
         String packageFilename = new StringBuilder().append(this.verificationDirectory).append(File.separator)
                 .append(shName).toString();
 

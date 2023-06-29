@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -88,10 +89,17 @@ public class InstallImplTest {
     }
 
     @Test
-    public void testInstallDpSuccessMessage() throws KuraException {
+    public void testInstallDpSuccessMessage() throws KuraException, DeploymentException {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
         InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
+
+        DeploymentAdmin mockDeploymentAdmin = mock(DeploymentAdmin.class);
+        DeploymentPackage dpMock = mock(DeploymentPackage.class);
+        when(dpMock.getName()).thenReturn("dpname");
+        when(mockDeploymentAdmin.installDeploymentPackage(Mockito.any())).thenReturn(dpMock);
+        ii.setDeploymentAdmin(mockDeploymentAdmin);
+        ii.setDpaConfPath("/tmp/dpa.properties");
 
         final String clientId = "clientid";
         final long jobid = 1234;
@@ -111,8 +119,8 @@ public class InstallImplTest {
                 KuraInstallPayload kp = (KuraInstallPayload) arguments[1];
 
                 assertEquals("", clientId, kp.getClientId());
-                assertEquals("", 100, kp.getInstallProgress());
                 assertEquals("", InstallStatus.COMPLETED.getStatusString(), kp.getInstallStatus());
+                assertEquals("", 100, kp.getInstallProgress());
                 assertEquals("", jobid, kp.getJobId().longValue());
 
                 return null;
@@ -193,6 +201,8 @@ public class InstallImplTest {
 
         ii.setPackagesPath(kuraDataDir);
 
+        ii.setDpaConfPath("/tmp/dpa.properties");
+
         File persDir = new File(kuraDataDir, "persistance");
         persDir.mkdirs();
         File veriDir = new File(persDir, "verification");
@@ -203,6 +213,8 @@ public class InstallImplTest {
         dpFile.createNewFile();
 
         DeploymentPackage dpMock = mock(DeploymentPackage.class);
+        when(dpMock.getName()).thenReturn("dp");
+        when(dpMock.getVersion()).thenReturn(new Version("1.0.0"));
         when(deploymentAdminMock.installDeploymentPackage(anyObject())).thenReturn(dpMock);
 
         Object dp = TestUtil.invokePrivate(ii, "installDeploymentPackageInternal", dpFile);
@@ -244,6 +256,7 @@ public class InstallImplTest {
         when(deploymentAdminMock.installDeploymentPackage(anyObject())).thenReturn(dpMock);
 
         when(dpMock.getName()).thenReturn("dpname");
+        when(dpMock.getVersion()).thenReturn(new Version("1.0.0"));
 
         ii.setDpaConfPath(null); // make sure this is null, so that we don't test too much
         ii.setPackagesPath(pkgDir.getCanonicalPath());

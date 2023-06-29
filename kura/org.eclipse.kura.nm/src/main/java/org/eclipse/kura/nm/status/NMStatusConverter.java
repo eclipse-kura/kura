@@ -605,12 +605,9 @@ public class NMStatusConverter {
         boolean isSupported = false;
         try {
             UInt32 locationSources = properties.Get(MM_MODEM_LOCATION_BUS_NAME, "Capabilities");
-            // Check if the location capability is MM_MODEM_LOCATION_SOURCE_GPS_RAW or
-            // MM_MODEM_LOCATION_SOURCE_GPS_NMEA
             Set<MMModemLocationSource> modemLocationSources = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(locationSources);
-            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
-                    || modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)) {
+            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
                 isSupported = true;
             }
         } catch (DBusExecutionException e) {

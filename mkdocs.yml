@@ -149,6 +149,7 @@ nav:
       - Javadoc: references/javadoc.md
       - REST-APIs:
         - REST Inventory API: references/rest-apis/rest-inventory-api.md
+        - REST Command API: references/rest-apis/rest-command-api.md
     - Tutorials:
       - Anomaly Detection: tutorials/AD-EdgeAI.ipynb
 

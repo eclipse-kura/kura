@@ -75,7 +75,6 @@ Kura generic has been tested on the following devices and provides full configur
 Check out the quick start guides for the detailed installation steps and set-up procedures:
 
 - [Raspberry Pi - Raspberry Pi OS Quick Start](./raspberry-pi-raspberryos-quick-start.md)
-- [Raspberry Pi - Ubuntu 20 Quick Start](./raspberry-pi-ubuntu-20-quick-start.md)
 - [Docker Quick Start](./docker-quick-start.md)
 - [Intel Up² Quick Start](./intel-up-2-quick-start.md)
 - [NVIDIA Jetson Nano&trade;](./nvidia-jetson-nano-quick-start.md)

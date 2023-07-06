@@ -1671,6 +1671,11 @@ public class GwtNetworkServiceImpl {
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
         String wifiPassphrasePropName = wifiModeBasePropName + "passphrase";
 
+        if (security == GwtWifiSecurity.netWifiSecurityNONE) {
+            properties.put(wifiPassphrasePropName, null);
+            return;
+        }
+
         String wirelessSSID = gwtWifiConfig.getWirelessSsid();
 
         if (isPlaceholder(passKey, security)) {

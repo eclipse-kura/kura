@@ -1143,19 +1143,7 @@ public class NMDbusConnectorTest {
             boolean hasSims) throws DBusException {
         when(mockedProperties.Get("org.freedesktop.NetworkManager.Device.Modem", "DeviceId")).thenReturn("abcd1234");
         when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "IpInterface")).thenReturn("wwan0");
-
-        Map<String, Variant<?>> managedObjectProperties = new HashMap<>();
-        managedObjectProperties.put("DeviceIdentifier", new Variant<>("abcd1234"));
-        Map<String, Map<String, Variant<?>>> managedObject = new HashMap<>();
-        managedObject.put(MM_MODEM_BUS_NAME, managedObjectProperties);
-        Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = new HashMap<>();
-        managedObjects.put(new DBusPath("/org/freedesktop/ModemManager1/Modem/3"), managedObject);
-
-        ObjectManager objectManager = mock(ObjectManager.class);
-        when(objectManager.getObjectPath()).thenReturn("org/freedesktop/ModemManager1");
-        when(objectManager.GetManagedObjects()).thenReturn(managedObjects);
-        doReturn(objectManager).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",
-                "/org/freedesktop/ModemManager1", ObjectManager.class);
+        when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "Udi")).thenReturn("/org/freedesktop/ModemManager1/Modem/3");
 
         Properties modemProperties = mock(Properties.class);
         doReturn(modemProperties).when(this.dbusConnection).getRemoteObject("org.freedesktop.ModemManager1",

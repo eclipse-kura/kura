@@ -15,7 +15,6 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -31,8 +29,6 @@ import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
-import org.eclipse.kura.nm.enums.MMModemLocationSource;
-import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
@@ -52,7 +48,6 @@ import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.Modem;
-import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Wired;
@@ -70,14 +65,10 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
-    private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
-    private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
     private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
-
-    private static final String MM_MODEM_PROPERTY_STATE = "State";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
@@ -393,7 +384,8 @@ public class NMDbusConnector {
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
-            handleModemManagerGPSSetup(device, enableGPS);
+            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+            this.modemManager.handleModemManagerGPSSetup(mmDbusPath, enableGPS);
         }
 
     }
@@ -464,60 +456,8 @@ public class NMDbusConnector {
         disable(device);
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            handleModemManagerGPSSetup(device, Optional.of(false));
-        }
-    }
-
-    private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
-        Optional<String> modemDevicePath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-
-        if (!modemDevicePath.isPresent()) {
-            logger.warn("Cannot retrieve MM.Modem from NM.Modem at path: {}. Skipping GPS configuration.",
-                    device.getObjectPath());
-            return;
-        }
-
-        this.modemManager.enableModem(modemDevicePath.get());
-
-        boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
-
-        Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
-                Location.class);
-        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
-                modemLocation.getObjectPath(), Properties.class);
-
-        Set<MMModemLocationSource> availableLocationSources = EnumSet
-                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
-        Set<MMModemLocationSource> currentLocationSources = EnumSet
-                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
-        Set<MMModemLocationSource> desiredLocationSources = EnumSet
-                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
-
-        try {
-            availableLocationSources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
-                    modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
-            currentLocationSources = MMModemLocationSource
-                    .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
-        } catch (DBusExecutionException e) {
-            logger.warn("Cannot retrive Modem.Location capabilities for {}. Caused by: ",
-                    modemLocationProperties.getObjectPath(), e);
-            return;
-        }
-
-        if (isGPSSourceEnabled) {
-            if (!availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
-                logger.warn("Cannot setup Modem.Location, MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED not supported for {}",
-                        modemLocationProperties.getObjectPath());
-                return;
-            }
-            desiredLocationSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
-        }
-
-        logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
-
-        if (!currentLocationSources.equals(desiredLocationSources)) {
-            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
-                    false);
+            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+            this.modemManager.handleModemManagerGPSSetup(mmDbusPath, Optional.of(false));
         }
     }
 

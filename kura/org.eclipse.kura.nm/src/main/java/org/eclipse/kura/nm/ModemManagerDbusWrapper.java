@@ -1,10 +1,13 @@
 package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
+import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
@@ -14,6 +17,7 @@ import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.modemmanager1.Modem;
+import org.freedesktop.modemmanager1.modem.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +36,58 @@ public class ModemManagerDbusWrapper {
 
     protected ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
+    }
+
+    protected void handleModemManagerGPSSetup(Optional<String> modemDevicePath, Optional<Boolean> enableGPS)
+            throws DBusException {
+
+        if (!modemDevicePath.isPresent()) {
+            logger.warn("Cannot retrieve MM.Modem from NM.Modem. Skipping GPS configuration.");
+            return;
+        }
+
+        enableModem(modemDevicePath.get());
+
+        boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
+
+        Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
+                Location.class);
+        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
+                modemLocation.getObjectPath(), Properties.class);
+
+        Set<MMModemLocationSource> availableLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+        Set<MMModemLocationSource> currentLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+        Set<MMModemLocationSource> desiredLocationSources = EnumSet
+                .of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE);
+
+        try {
+            availableLocationSources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
+                    modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Capabilities"));
+            currentLocationSources = MMModemLocationSource
+                    .toMMModemLocationSourceFromBitMask(modemLocationProperties.Get(MM_LOCATION_BUS_NAME, "Enabled"));
+        } catch (DBusExecutionException e) {
+            logger.warn("Cannot retrive Modem.Location capabilities for {}. Caused by: ",
+                    modemLocationProperties.getObjectPath(), e);
+            return;
+        }
+
+        if (isGPSSourceEnabled) {
+            if (!availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
+                logger.warn("Cannot setup Modem.Location, MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED not supported for {}",
+                        modemLocationProperties.getObjectPath());
+                return;
+            }
+            desiredLocationSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
+        }
+
+        logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
+
+        if (!currentLocationSources.equals(desiredLocationSources)) {
+            modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
+                    false);
+        }
     }
 
     protected void enableModem(String modemDevicePath) throws DBusException {

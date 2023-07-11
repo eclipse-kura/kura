@@ -86,6 +86,7 @@ Known Issues:
 
 Changelog: 
   * 3ff9742547 - fix(web2): Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (#4756) (github-actions[bot])
+  * efd2c774d9 - chore: add Kura 5.3.1 release notes (#4741) (github-actions[bot])
   * b735ac1692 - chore: automated uptick to Eclipse Kura 5.3.1 (#4740) (github-actions[bot])
   * 65d08f1b58 - fix: Fixed asset scale and offset not being applied in listen mode [backport release-5.3.0] (#4738) (github-actions[bot])
   * 39a2d18906 - fix: added correct permissions to docker file [backport release-5.3.0] (#4735) (github-actions[bot])

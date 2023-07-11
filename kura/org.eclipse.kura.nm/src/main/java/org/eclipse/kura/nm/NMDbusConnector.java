@@ -79,12 +79,9 @@ public class NMDbusConnector {
     private static final String MM_SIM_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
-    private static final String NM_PROPERTY_VERSION = "Version";
-
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
     private static final String NM_DEVICE_PROPERTY_MANAGED = "Managed";
     private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";
-    private static final String NM_DEVICE_PROPERTY_STATE = "State";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
     private static final String NM_SETTING_CONNECTION_KEY = "connection";
     private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
@@ -416,7 +413,7 @@ public class NMDbusConnector {
         if (Boolean.FALSE.equals(isDeviceManaged(device))) {
             setDeviceManaged(device, true);
         }
-        String interfaceName = getDeviceInterface(device);
+        String interfaceName = this.networkManager.getDeviceInterface(device);
 
         Optional<Connection> connection = getAssociatedConnection(device);
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
@@ -571,7 +568,7 @@ public class NMDbusConnector {
     private void disable(Device device) throws DBusException {
         Optional<Connection> appliedConnection = getAppliedConnection(device);
 
-        NMDeviceState deviceState = getDeviceState(device);
+        NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
                     NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
@@ -616,13 +613,6 @@ public class NMDbusConnector {
         return accessPointProperties;
     }
 
-    private NMDeviceState getDeviceState(Device device) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                Properties.class);
-
-        return NMDeviceState.fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_STATE));
-    }
-
     private void setDeviceManaged(Device device, Boolean manage) throws DBusException {
         Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
                 Properties.class);
@@ -657,13 +647,6 @@ public class NMDbusConnector {
         }
 
         return deviceType;
-    }
-
-    private String getDeviceInterface(Device device) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                Properties.class);
-
-        return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
     }
 
     private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {

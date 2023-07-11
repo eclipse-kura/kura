@@ -274,7 +274,7 @@ public class NMDbusConnector {
         Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 wirelessDevice.getObjectPath(), Properties.class);
 
-        List<Properties> accessPoints = getAllAccessPoints(wirelessDevice);
+        List<Properties> accessPoints = this.networkManager.getAllAccessPoints(wirelessDevice);
 
         DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "ActiveAccessPoint");
         Optional<Properties> activeAccessPoint = Optional.empty();
@@ -577,21 +577,6 @@ public class NMDbusConnector {
         for (Connection connection : availableConnections) {
             connection.Delete();
         }
-    }
-
-    private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
-        List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
-
-        List<Properties> accessPointProperties = new ArrayList<>();
-
-        for (DBusPath path : accessPointPaths) {
-            Properties apProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
-                    Properties.class);
-            accessPointProperties.add(apProperties);
-
-        }
-
-        return accessPointProperties;
     }
 
     private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {

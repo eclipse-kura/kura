@@ -18,6 +18,7 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +190,21 @@ public class NetworkManagerDbusWrapper {
     protected void activateConnection(Connection connection, Device device) throws DBusException {
         this.networkManager.ActivateConnection(new DBusPath(connection.getObjectPath()),
                 new DBusPath(device.getObjectPath()), new DBusPath("/"));
+    }
+
+    protected List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
+        List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
+
+        List<Properties> accessPointProperties = new ArrayList<>();
+
+        for (DBusPath path : accessPointPaths) {
+            Properties apProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                    Properties.class);
+            accessPointProperties.add(apProperties);
+
+        }
+
+        return accessPointProperties;
     }
 
 }

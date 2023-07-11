@@ -3,6 +3,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -10,9 +11,14 @@ import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
+import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
+import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,4 +114,76 @@ public class NetworkManagerDbusWrapper {
 
         return deviceType;
     }
+
+    protected Optional<Connection> getAssociatedConnection(Device dev) throws DBusException {
+        Optional<Connection> appliedConnection = getAppliedConnection(dev);
+        if (appliedConnection.isPresent()) {
+            return appliedConnection;
+        } else {
+            logger.debug("Active connection not found, looking for avaliable connections.");
+
+            List<Connection> availableConnections = getAvaliableConnections(dev);
+
+            if (!availableConnections.isEmpty()) {
+                return Optional.of(availableConnections.get(0));
+
+            } else {
+                return Optional.empty();
+            }
+        }
+    }
+
+    protected Optional<Connection> getAppliedConnection(Device dev) throws DBusException {
+        try {
+            Map<String, Map<String, Variant<?>>> connectionSettings = dev.GetAppliedConnection(new UInt32(0))
+                    .getConnection();
+            String uuid = String.valueOf(connectionSettings.get(NM_SETTING_CONNECTION_KEY).get("uuid").getValue());
+
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+
+            DBusPath connectionPath = settings.GetConnectionByUuid(uuid);
+            return Optional
+                    .of(this.dbusConnection.getRemoteObject(NM_BUS_NAME, connectionPath.getPath(), Connection.class));
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+        }
+
+        return Optional.empty();
+    }
+
+    protected List<Connection> getAvaliableConnections(Device dev) throws DBusException {
+        List<Connection> connections = new ArrayList<>();
+
+        try {
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+
+            List<DBusPath> connectionPath = settings.ListConnections();
+
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(),
+                    Properties.class);
+            String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+            String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
+
+            for (DBusPath path : connectionPath) {
+
+                Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                        Connection.class);
+
+                Map<String, Map<String, Variant<?>>> availableConnectionSettings = availableConnection.GetSettings();
+                String availableConnectionId = (String) availableConnectionSettings.get(NM_SETTING_CONNECTION_KEY)
+                        .get("id").getValue();
+
+                if (availableConnectionId.equals(expectedConnectionName)) {
+                    connections.add(availableConnection);
+                }
+
+            }
+
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+        }
+
+        return connections;
+    }
+
 }

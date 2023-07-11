@@ -26,7 +26,6 @@ public class ModemManagerDbusWrapper {
     private static final Logger logger = LoggerFactory.getLogger(ModemManagerDbusWrapper.class);
 
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
-    private static final String MM_BUS_PATH = "/org/freedesktop/ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_MODEM_PROPERTY_STATE = "State";

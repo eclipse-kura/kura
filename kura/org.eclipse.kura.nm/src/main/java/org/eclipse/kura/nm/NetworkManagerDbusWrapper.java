@@ -63,4 +63,11 @@ public class NetworkManagerDbusWrapper {
                 Properties.class);
         return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED);
     }
+
+    protected void setDeviceManaged(Device device, Boolean manage) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
+                Properties.class);
+
+        deviceProperties.Set(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED, manage);
+    }
 }

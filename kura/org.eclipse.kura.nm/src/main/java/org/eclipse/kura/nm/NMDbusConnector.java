@@ -409,7 +409,7 @@ public class NMDbusConnector {
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
             throws DBusException {
         if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(device))) {
-            setDeviceManaged(device, true);
+            this.networkManager.setDeviceManaged(device, true);
         }
         String interfaceName = this.networkManager.getDeviceInterface(device);
 
@@ -465,7 +465,7 @@ public class NMDbusConnector {
         }
 
         if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(device))) {
-            setDeviceManaged(device, true);
+            this.networkManager.setDeviceManaged(device, true);
         }
 
         logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", deviceId, deviceType);
@@ -609,13 +609,6 @@ public class NMDbusConnector {
         }
 
         return accessPointProperties;
-    }
-
-    private void setDeviceManaged(Device device, Boolean manage) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.getObjectPath(),
-                Properties.class);
-
-        deviceProperties.Set(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED, manage);
     }
 
     private NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {

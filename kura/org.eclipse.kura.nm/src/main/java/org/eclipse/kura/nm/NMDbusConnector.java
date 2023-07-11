@@ -828,11 +828,11 @@ public class NMDbusConnector {
 
         String modemDbusPath = (String) deviceProperties.Get(NM_DEVICE_BUS_NAME, "Udi");
         if (Objects.isNull(modemDbusPath) || !modemDbusPath.startsWith(MM_BUS_PATH)) {
-            logger.debug("Could not find ModemDbusPath for device {}", devicePath);
+            logger.debug("Could not find DBus path for modem device {}", devicePath);
             return Optional.empty();
         }
 
-        logger.debug("Found ModemDbusPath {} for device {}", modemDbusPath, devicePath);
+        logger.debug("Found DBus path {} for modem device {}", modemDbusPath, devicePath);
         return Optional.of(modemDbusPath);
     }
 

@@ -149,7 +149,7 @@ public class NMDbusConnector {
     }
 
     public synchronized List<String> getDeviceIds() throws DBusException {
-        List<Device> availableDevices = getAllDevices();
+        List<Device> availableDevices = this.networkManager.getAllDevices();
 
         List<String> supportedDeviceNames = new ArrayList<>();
         for (Device device : availableDevices) {
@@ -339,7 +339,7 @@ public class NMDbusConnector {
 
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
-        List<Device> availableDevices = getAllDevices();
+        List<Device> availableDevices = this.networkManager.getAllDevices();
         availableDevices.forEach(device -> {
             try {
                 String deviceId = getDeviceIdByDBusPath(device.getObjectPath());
@@ -581,17 +581,6 @@ public class NMDbusConnector {
         }
     }
 
-    private List<Device> getAllDevices() throws DBusException {
-        List<DBusPath> devicePaths = this.nm.GetAllDevices();
-
-        List<Device> devices = new ArrayList<>();
-        for (DBusPath path : devicePaths) {
-            devices.add(this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class));
-        }
-
-        return devices;
-    }
-
     private List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
         List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
 
@@ -608,7 +597,7 @@ public class NMDbusConnector {
     }
 
     private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
-        for (Device d : getAllDevices()) {
+        for (Device d : this.networkManager.getAllDevices()) {
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, d.getObjectPath(),
                     Properties.class);
             NMDeviceType deviceType = NMDeviceType

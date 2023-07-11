@@ -1,10 +1,13 @@
 package org.eclipse.kura.nm;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.NetworkManager;
+import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -71,6 +74,17 @@ public class NetworkManagerDbusWrapper {
                 Properties.class);
 
         deviceProperties.Set(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED, manage);
+    }
+
+    protected List<Device> getAllDevices() throws DBusException {
+        List<DBusPath> devicePaths = this.networkManager.GetAllDevices();
+
+        List<Device> devices = new ArrayList<>();
+        for (DBusPath path : devicePaths) {
+            devices.add(this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(), Device.class));
+        }
+
+        return devices;
     }
 
     protected NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {

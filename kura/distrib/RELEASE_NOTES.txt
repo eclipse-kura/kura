@@ -6,6 +6,7 @@ This service release of Eclipse Kura includes the following changes:
 - Fixed distribution issue with SQLite and wires script tools deployment packages 
 - Fixed scale and offset not applied in assets with channels in listen mode
 - Updated org.xerial:sqlite-jdbc to 3.42.0.0
+- Fixed an issue when trying to connect for the first time with a Wifi Network without using any security mode
 
 
 
@@ -23,6 +24,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 3ff9742547 - Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (github-actions[bot])
   * 65d08f1b58 - Fixed asset scale and offset not being applied in listen mode [backport release-5.3.0] (#4738) (github-actions[bot])
   * 39a2d18906 - added correct permissions to docker file [backport release-5.3.0] (#4735) (github-actions[bot])
   * 731fa02c4d - Fixed error on SQLite dp reinstallation [backport release-5.3.0] (#4727) (github-actions[bot])
@@ -82,7 +84,8 @@ Known Issues:
   * #253:  Check if bundle contexes correctly unget services after invoking getService
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
-Changelog:
+Changelog: 
+  * 3ff9742547 - fix(web2): Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (#4756) (github-actions[bot])
   * b735ac1692 - chore: automated uptick to Eclipse Kura 5.3.1 (#4740) (github-actions[bot])
   * 65d08f1b58 - fix: Fixed asset scale and offset not being applied in listen mode [backport release-5.3.0] (#4738) (github-actions[bot])
   * 39a2d18906 - fix: added correct permissions to docker file [backport release-5.3.0] (#4735) (github-actions[bot])

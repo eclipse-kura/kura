@@ -3,6 +3,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.nm.enums.NMDeviceState;
@@ -207,4 +208,23 @@ public class NetworkManagerDbusWrapper {
         return accessPointProperties;
     }
 
+    protected Optional<String> getModemManagerDbusPath(String devicePath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath, Properties.class);
+        NMDeviceType deviceType = NMDeviceType
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
+
+        if (deviceType != NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            logger.warn("Device {} is not a modem", devicePath);
+            return Optional.empty();
+        }
+
+        String modemDbusPath = (String) deviceProperties.Get(NM_DEVICE_BUS_NAME, "Udi");
+        if (Objects.isNull(modemDbusPath) || !modemDbusPath.startsWith("/org/freedesktop/ModemManager1")) {
+            logger.debug("Could not find DBus path for modem device {}", devicePath);
+            return Optional.empty();
+        }
+
+        logger.debug("Found DBus path {} for modem device {}", modemDbusPath, devicePath);
+        return Optional.of(modemDbusPath);
+    }
 }

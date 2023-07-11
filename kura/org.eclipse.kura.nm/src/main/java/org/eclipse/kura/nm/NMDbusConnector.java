@@ -247,7 +247,7 @@ public class NMDbusConnector {
     private NetworkInterfaceStatus createModemStatus(String interfaceId, Device device, Properties deviceProperties,
             Optional<Properties> ip4configProperties) throws DBusException {
         NetworkInterfaceStatus networkInterfaceStatus;
-        Optional<String> modemPath = getModemPathFromMM(device.getObjectPath());
+        Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
         Optional<Properties> modemDeviceProperties = Optional.empty();
         List<SimProperties> simProperties = Collections.emptyList();
         List<Properties> bearerProperties = Collections.emptyList();
@@ -472,7 +472,7 @@ public class NMDbusConnector {
     }
 
     private void handleModemManagerGPSSetup(Device device, Optional<Boolean> enableGPS) throws DBusException {
-        Optional<String> modemDevicePath = getModemPathFromMM(device.getObjectPath());
+        Optional<String> modemDevicePath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
 
         if (!modemDevicePath.isPresent()) {
             logger.warn("Cannot retrieve MM.Modem from NM.Modem at path: {}. Skipping GPS configuration.",
@@ -541,7 +541,7 @@ public class NMDbusConnector {
     public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
         NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-            Optional<String> modemPath = getModemPathFromMM(dbusPath);
+            Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
             if (!modemPath.isPresent()) {
                 throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
             }
@@ -586,7 +586,7 @@ public class NMDbusConnector {
             NMDeviceType deviceType = NMDeviceType
                     .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
             if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-                Optional<String> modemPath = getModemPathFromMM(d.getObjectPath());
+                Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(d.getObjectPath());
                 if (modemPath.isPresent()) {
                     Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
                     if (modemDeviceProperties.isPresent() && NMStatusConverter
@@ -623,7 +623,7 @@ public class NMDbusConnector {
     }
 
     private void modemResetHandlerEnable(String deviceId, int delayMinutes, Device device) throws DBusException {
-        Optional<String> mmDBusPath = getModemPathFromMM(device.getObjectPath());
+        Optional<String> mmDBusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
         if (!mmDBusPath.isPresent()) {
             logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
             return;
@@ -655,26 +655,6 @@ public class NMDbusConnector {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
         }
-    }
-
-    private Optional<String> getModemPathFromMM(String devicePath) throws DBusException {
-        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath, Properties.class);
-        NMDeviceType deviceType = NMDeviceType
-                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
-
-        if (deviceType != NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            logger.warn("Device {} is not a modem", devicePath);
-            return Optional.empty();
-        }
-
-        String modemDbusPath = (String) deviceProperties.Get(NM_DEVICE_BUS_NAME, "Udi");
-        if (Objects.isNull(modemDbusPath) || !modemDbusPath.startsWith(MM_BUS_PATH)) {
-            logger.debug("Could not find DBus path for modem device {}", devicePath);
-            return Optional.empty();
-        }
-
-        logger.debug("Found DBus path {} for modem device {}", modemDbusPath, devicePath);
-        return Optional.of(modemDbusPath);
     }
 
     private Optional<Properties> getModemProperties(String modemPath) throws DBusException {

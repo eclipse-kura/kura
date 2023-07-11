@@ -67,12 +67,10 @@ public class NMDbusConnector {
     private static final Logger logger = LoggerFactory.getLogger(NMDbusConnector.class);
 
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
-    private static final String NM_BUS_PATH = "/org/freedesktop/NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
     private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
-    private static final String MM_BUS_PATH = "/org/freedesktop/ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
@@ -95,7 +93,6 @@ public class NMDbusConnector {
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
-    private final NetworkManager nm;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -109,7 +106,6 @@ public class NMDbusConnector {
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
-        this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {

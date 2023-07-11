@@ -102,6 +102,7 @@ public class NMDbusConnector {
 
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
+    private final NetworkManagerDbusWrapper networkManager;
     private final NetworkManager nm;
 
     private Map<String, Object> cachedConfiguration = null;
@@ -115,6 +116,7 @@ public class NMDbusConnector {
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
+        this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.nm = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
     }
 
@@ -140,7 +142,7 @@ public class NMDbusConnector {
     }
 
     public void checkPermissions() {
-        Map<String, String> getPermissions = this.nm.GetPermissions();
+        Map<String, String> getPermissions = this.networkManager.getPermissions();
         if (logger.isDebugEnabled()) {
             for (Entry<String, String> entry : getPermissions.entrySet()) {
                 logger.debug("Permission for {}: {}", entry.getKey(), entry.getValue());
@@ -149,10 +151,7 @@ public class NMDbusConnector {
     }
 
     public void checkVersion() throws DBusException {
-        Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
-
-        String nmVersion = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
-
+        String nmVersion = this.networkManager.getVersion();
         logger.debug("NM Version: {}", nmVersion);
     }
 

@@ -426,8 +426,7 @@ public class NMDbusConnector {
         }
 
         try {
-            this.nm.ActivateConnection(new DBusPath(connection.get().getObjectPath()),
-                    new DBusPath(device.getObjectPath()), new DBusPath("/"));
+            this.networkManager.activateConnection(connection.get(), device);
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);

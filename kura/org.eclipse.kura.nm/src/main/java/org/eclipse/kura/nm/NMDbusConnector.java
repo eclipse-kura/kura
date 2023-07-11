@@ -49,7 +49,6 @@ import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
-import org.freedesktop.dbus.interfaces.ObjectManager;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -817,41 +816,24 @@ public class NMDbusConnector {
         }
     }
 
-    private String getDeviceIdFromNM(String deviceDbusPath) throws DBusException {
-        Properties nmModemProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
-                Properties.class);
-        String deviceId = (String) nmModemProperties.Get(NM_DEVICE_BUS_NAME + ".Modem", "DeviceId");
-        logger.debug("Found DeviceId {} for device {}", deviceId, deviceDbusPath);
-        return deviceId;
-    }
-
-    private Map<DBusPath, Map<String, Map<String, Variant<?>>>> getManagedObjectsFromMM() throws DBusException {
-        ObjectManager objectManager = this.dbusConnection.getRemoteObject(MM_BUS_NAME, MM_BUS_PATH,
-                ObjectManager.class);
-        Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = objectManager.GetManagedObjects();
-        logger.debug("Found Managed Objects {}", managedObjects.keySet());
-        return managedObjects;
-    }
-
-    private Optional<String> getModemPathFromManagedObjects(
-            Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects, String deviceId) {
-        Optional<String> modemPath = Optional.empty();
-        Optional<Entry<DBusPath, Map<String, Map<String, Variant<?>>>>> modemEntry = managedObjects.entrySet().stream()
-                .filter(entry -> {
-                    String modemDeviceId = (String) entry.getValue().get(MM_MODEM_NAME).get("DeviceIdentifier")
-                            .getValue();
-                    return modemDeviceId.equals(deviceId);
-                }).findFirst();
-        if (modemEntry.isPresent()) {
-            modemPath = Optional.of(modemEntry.get().getKey().getPath());
-        }
-        return modemPath;
-    }
-
     private Optional<String> getModemPathFromMM(String devicePath) throws DBusException {
-        String deviceId = getDeviceIdFromNM(devicePath);
-        Map<DBusPath, Map<String, Map<String, Variant<?>>>> managedObjects = getManagedObjectsFromMM();
-        return getModemPathFromManagedObjects(managedObjects, deviceId);
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, devicePath, Properties.class);
+        NMDeviceType deviceType = NMDeviceType
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
+
+        if (deviceType != NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            logger.warn("Device {} is not a modem", devicePath);
+            return Optional.empty();
+        }
+
+        String modemDbusPath = (String) deviceProperties.Get(NM_DEVICE_BUS_NAME, "Udi");
+        if (Objects.isNull(modemDbusPath) || !modemDbusPath.startsWith(MM_BUS_PATH)) {
+            logger.debug("Could not find DBus path for modem device {}", devicePath);
+            return Optional.empty();
+        }
+
+        logger.debug("Found DBus path {} for modem device {}", modemDbusPath, devicePath);
+        return Optional.of(modemDbusPath);
     }
 
     private Optional<Properties> getModemProperties(String modemPath) throws DBusException {

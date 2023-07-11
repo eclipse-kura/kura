@@ -250,7 +250,7 @@ public class NMDbusConnector {
         List<SimProperties> simProperties = Collections.emptyList();
         List<Properties> bearerProperties = Collections.emptyList();
         if (modemPath.isPresent()) {
-            modemDeviceProperties = getModemProperties(modemPath.get());
+            modemDeviceProperties = this.modemManager.getModemProperties(modemPath.get());
             if (modemDeviceProperties.isPresent()) {
                 simProperties = getModemSimProperties(modemDeviceProperties.get());
                 bearerProperties = getModemBearersProperties(modemPath.get(), modemDeviceProperties.get());
@@ -543,7 +543,7 @@ public class NMDbusConnector {
             if (!modemPath.isPresent()) {
                 throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
             }
-            Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
+            Optional<Properties> modemDeviceProperties = this.modemManager.getModemProperties(modemPath.get());
             if (!modemDeviceProperties.isPresent()) {
                 throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
 
@@ -586,7 +586,7 @@ public class NMDbusConnector {
             if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
                 Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(d.getObjectPath());
                 if (modemPath.isPresent()) {
-                    Optional<Properties> modemDeviceProperties = getModemProperties(modemPath.get());
+                    Optional<Properties> modemDeviceProperties = this.modemManager.getModemProperties(modemPath.get());
                     if (modemDeviceProperties.isPresent() && NMStatusConverter
                             .getModemDeviceHwPath(modemDeviceProperties.get()).equals(interfaceId)) {
                         return Optional.of(d);
@@ -653,15 +653,6 @@ public class NMDbusConnector {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
         }
-    }
-
-    private Optional<Properties> getModemProperties(String modemPath) throws DBusException {
-        Optional<Properties> modemProperties = Optional.empty();
-        Properties properties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemPath, Properties.class);
-        if (Objects.nonNull(properties)) {
-            modemProperties = Optional.of(properties);
-        }
-        return modemProperties;
     }
 
     private List<SimProperties> getModemSimProperties(Properties modemProperties) throws DBusException {

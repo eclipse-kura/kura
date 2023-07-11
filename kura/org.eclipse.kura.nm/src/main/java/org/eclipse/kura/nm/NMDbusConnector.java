@@ -477,7 +477,7 @@ public class NMDbusConnector {
             return;
         }
 
-        enableModem(modemDevicePath.get());
+        this.modemManager.enableModem(modemDevicePath.get());
 
         boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
 
@@ -518,20 +518,6 @@ public class NMDbusConnector {
         if (!currentLocationSources.equals(desiredLocationSources)) {
             modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
-        }
-    }
-
-    private void enableModem(String modemDevicePath) throws DBusException {
-        Modem modem = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath, Modem.class);
-        Properties modemProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath,
-                Properties.class);
-
-        MMModemState currentModemState = MMModemState
-                .toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE));
-
-        if (currentModemState.getValue() < MMModemState.MM_MODEM_STATE_ENABLED.getValue()) {
-            logger.info("Modem {} not enabled. Enabling modem...", modemDevicePath);
-            modem.Enable(true);
         }
     }
 

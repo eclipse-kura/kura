@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -31,6 +32,20 @@ public class ModemManagerDbusWrapper {
 
     protected ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
+    }
+
+    protected void enableModem(String modemDevicePath) throws DBusException {
+        Modem modem = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath, Modem.class);
+        Properties modemProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath,
+                Properties.class);
+
+        MMModemState currentModemState = MMModemState
+                .toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE));
+
+        if (currentModemState.getValue() < MMModemState.MM_MODEM_STATE_ENABLED.getValue()) {
+            logger.info("Modem {} not enabled. Enabling modem...", modemDevicePath);
+            modem.Enable(true);
+        }
     }
 
     protected Optional<Properties> getModemProperties(String modemPath) throws DBusException {

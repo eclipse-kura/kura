@@ -38,9 +38,7 @@ public class ModemManagerDbusWrapper {
         this.dbusConnection = dbusConnection;
     }
 
-    protected void handleModemManagerGPSSetup(Optional<String> modemDevicePath, Optional<Boolean> enableGPS)
-            throws DBusException {
-
+    protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS) throws DBusException {
         if (!modemDevicePath.isPresent()) {
             logger.warn("Cannot retrieve MM.Modem from NM.Modem. Skipping GPS configuration.");
             return;

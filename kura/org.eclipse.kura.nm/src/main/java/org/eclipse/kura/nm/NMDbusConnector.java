@@ -385,7 +385,7 @@ public class NMDbusConnector {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
             Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-            this.modemManager.handleModemManagerGPSSetup(mmDbusPath, enableGPS);
+            this.modemManager.setGPS(mmDbusPath, enableGPS);
         }
 
     }
@@ -457,7 +457,7 @@ public class NMDbusConnector {
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-            this.modemManager.handleModemManagerGPSSetup(mmDbusPath, Optional.of(false));
+            this.modemManager.setGPS(mmDbusPath, Optional.of(false));
         }
     }
 

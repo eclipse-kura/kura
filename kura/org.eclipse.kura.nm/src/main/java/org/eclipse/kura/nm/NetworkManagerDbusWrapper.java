@@ -3,11 +3,13 @@ package org.eclipse.kura.nm;
 import java.util.Map;
 
 import org.eclipse.kura.nm.enums.NMDeviceState;
+import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.networkmanager.Device;
+import org.freedesktop.networkmanager.device.Generic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,5 +71,27 @@ public class NetworkManagerDbusWrapper {
                 Properties.class);
 
         deviceProperties.Set(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_MANAGED, manage);
+    }
+
+    protected NMDeviceType getDeviceType(String deviceDbusPath) throws DBusException {
+        Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath,
+                Properties.class);
+
+        NMDeviceType deviceType = NMDeviceType
+                .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
+
+        // Workaround to identify Loopback interface for NM versions prior to 1.42
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_GENERIC) {
+            Generic genericDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, deviceDbusPath, Generic.class);
+            Properties genericDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                    genericDevice.getObjectPath(), Properties.class);
+            String genericDeviceType = genericDeviceProperties.Get(NM_GENERIC_DEVICE_BUS_NAME,
+                    NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION);
+            if (genericDeviceType.equals("loopback")) {
+                return NMDeviceType.NM_DEVICE_TYPE_LOOPBACK;
+            }
+        }
+
+        return deviceType;
     }
 }

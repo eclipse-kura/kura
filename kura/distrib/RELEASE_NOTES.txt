@@ -7,7 +7,7 @@ This service release of Eclipse Kura includes the following changes:
 - Fixed scale and offset not applied in assets with channels in listen mode
 - Updated org.xerial:sqlite-jdbc to 3.42.0.0
 - Fixed an issue when trying to connect for the first time with a Wifi Network without using any security mode
-
+- Fixed support for Wifi using Security Type "None"
 
 
 Target Environments:
@@ -24,6 +24,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 06ac0c0923 - support for no Wireless Security [backport release-5.3.0] (#4760) (github-actions[bot])
   * 3ff9742547 - Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (github-actions[bot])
   * 65d08f1b58 - Fixed asset scale and offset not being applied in listen mode [backport release-5.3.0] (#4738) (github-actions[bot])
   * 39a2d18906 - added correct permissions to docker file [backport release-5.3.0] (#4735) (github-actions[bot])
@@ -36,6 +37,7 @@ Target Platform Updates:
   * 6c0d6ed74d - Updated org.xerial:sqlite-jdbc to 3.42.0.0 [backport release-5.3.0] (#4726) (github-actions[bot])
 
 Known Issues:
+  * WEP Security Type is currently not supported on Generic Profiles for Wifi connection
   * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
   * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
@@ -85,6 +87,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog: 
+  * 06ac0c0923 - fix: support for no Wireless Security [backport release-5.3.0] (#4760) (github-actions[bot])
+  * ffe123077c - chore: update Kura 5.3.1 release notes (#4758)
   * 3ff9742547 - fix(web2): Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (#4756) (github-actions[bot])
   * efd2c774d9 - chore: add Kura 5.3.1 release notes (#4741) (github-actions[bot])
   * b735ac1692 - chore: automated uptick to Eclipse Kura 5.3.1 (#4740) (github-actions[bot])

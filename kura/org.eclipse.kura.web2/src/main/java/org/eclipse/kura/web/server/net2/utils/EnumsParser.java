@@ -147,6 +147,10 @@ public class EnumsParser {
      */
     public static String getGwtWifiSecurity(Optional<String> wifiSecurity) {
         if (wifiSecurity.isPresent()) {
+            if (wifiSecurity.get().equals(WifiSecurity.NONE.name())) {
+                return GwtWifiSecurity.netWifiSecurityNONE.name();
+            }
+
             if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WEP.name())) {
                 return GwtWifiSecurity.netWifiSecurityWEP.name();
             }

@@ -65,10 +65,16 @@ public class NMSettingsConverter {
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter.build80211WirelessSettings(properties,
                     deviceId);
-            Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
-                    .build80211WirelessSecuritySettings(properties, deviceId);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
-            newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+
+            String propMode = properties.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+            String securityType = properties.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+                    propMode.toLowerCase());
+            if (!"NONE".equals(securityType)) {
+                Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
+                        .build80211WirelessSecuritySettings(properties, deviceId);
+                newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+            }
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, deviceId);
             Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, deviceId);
@@ -172,18 +178,18 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+                propMode.toLowerCase());
 
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
                 .toString();
-        String keyMgmt = wifiKeyMgmtConvert(props.get(String.class, "net.interface.%s.config.wifi.%s.securityType",
-                deviceId, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));
+        String keyMgmt = wifiKeyMgmtConvert(securityType);
         settings.put("key-mgmt", new Variant<>(keyMgmt));
 
         if ("wpa-psk".equals(keyMgmt)) {
-            List<String> proto = wifiProtoConvert(props.get(String.class,
-                    "net.interface.%s.config.wifi.%s.securityType", deviceId, propMode.toLowerCase()));
+            List<String> proto = wifiProtoConvert(securityType);
             settings.put("proto", new Variant<>(proto, "as"));
         }
 

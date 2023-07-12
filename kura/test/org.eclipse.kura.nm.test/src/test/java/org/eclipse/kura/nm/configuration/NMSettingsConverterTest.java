@@ -861,6 +861,38 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildSettingsShouldNotSet80211WirelessSecuritySettingsIfSecurityTypeIsSetToNone() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
+        givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
+        givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
+        givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "NONE");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+        thenResultingBuildAllMapContains("ipv4", "method", "manual");
+        thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapContains("connection", "id", "kura-wlan0-connection");
+        thenResultingBuildAllMapContains("connection", "interface-name", "wlan0");
+        thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+        thenResultingBuildAllMapContains("802-11-wireless", "mode", "infrastructure");
+        thenResultingBuildAllMapContainsBytes("802-11-wireless", "ssid", "ssidtest");
+        thenResultingBuildAllMapContains("802-11-wireless", "band", "a");
+        thenResultingBuildAllMapContains("802-11-wireless", "channel", new UInt32(Short.parseShort("10")));
+        thenResultingBuildAllMapNotContains("802-11-wireless-security");
+    }
+
+    @Test
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
@@ -1300,6 +1332,10 @@ public class NMSettingsConverterTest {
 
     public void thenResultingBuildAllMapContains(String key, String subKey, Object value) {
         assertEquals(value, this.resultAllSettingsMap.get(key).get(subKey).getValue());
+    }
+
+    public void thenResultingBuildAllMapNotContains(String key) {
+        assertFalse(this.resultAllSettingsMap.containsKey(key));
     }
 
     public void thenResultingBuildAllMapContainsBytes(String key, String subKey, Object value) {

@@ -873,6 +873,10 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
         givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
         givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "NONE");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ignoreSSID", true);
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",

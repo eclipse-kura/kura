@@ -178,18 +178,18 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+                propMode.toLowerCase());
 
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
                 .toString();
-        String keyMgmt = wifiKeyMgmtConvert(props.get(String.class, "net.interface.%s.config.wifi.%s.securityType",
-                deviceId, propMode.toLowerCase()));
         settings.put("psk", new Variant<>(psk));
+        String keyMgmt = wifiKeyMgmtConvert(securityType);
         settings.put("key-mgmt", new Variant<>(keyMgmt));
 
         if ("wpa-psk".equals(keyMgmt)) {
-            List<String> proto = wifiProtoConvert(props.get(String.class,
-                    "net.interface.%s.config.wifi.%s.securityType", deviceId, propMode.toLowerCase()));
+            List<String> proto = wifiProtoConvert(securityType);
             settings.put("proto", new Variant<>(proto, "as"));
         }
 

@@ -65,10 +65,16 @@ public class NMSettingsConverter {
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             Map<String, Variant<?>> wifiSettingsMap = NMSettingsConverter.build80211WirelessSettings(properties,
                     deviceId);
-            Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
-                    .build80211WirelessSecuritySettings(properties, deviceId);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
-            newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+
+            String propMode = properties.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+            String securityType = properties.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+                    propMode.toLowerCase());
+            if (!"NONE".equals(securityType)) {
+                Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
+                        .build80211WirelessSecuritySettings(properties, deviceId);
+                newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
+            }
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Map<String, Variant<?>> gsmSettingsMap = NMSettingsConverter.buildGsmSettings(properties, deviceId);
             Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, deviceId);

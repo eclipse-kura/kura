@@ -87,6 +87,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog: 
+  * 19a702c271 - chore(distrib): bump bundle versions (#4762) (Mattia Dal Ben)
+  * d1c010f8c3 - chore: update Kura 5.3.1 release notes (#4761) (Mattia Dal Ben)
   * 06ac0c0923 - fix: support for no Wireless Security [backport release-5.3.0] (#4760) (github-actions[bot])
   * ffe123077c - chore: update Kura 5.3.1 release notes (#4758)
   * 3ff9742547 - fix(web2): Impossible to apply WiFi configuration in station mode with Security Mode Off [backport release-5.3.0] (#4756) (github-actions[bot])

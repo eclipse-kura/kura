@@ -152,6 +152,7 @@
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.inventory.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.command.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.linux.position.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>
         <setEntry value="org.eclipse.kura.sun.misc@default:false"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>

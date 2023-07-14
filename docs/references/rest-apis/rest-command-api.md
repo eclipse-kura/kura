@@ -48,7 +48,7 @@
 
  --- 
 
- #### Execute Asynchronous Command
+#### Execute Asynchronous Command
 - Method: POST
 - API PATH: `/services/command/v1/command/async`
 ##### Request Body

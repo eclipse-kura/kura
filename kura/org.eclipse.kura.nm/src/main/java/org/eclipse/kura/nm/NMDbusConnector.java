@@ -168,6 +168,27 @@ public class NMDbusConnector {
         return "";
     }
 
+    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
+        for (Device nmDevice : this.networkManager.getAllDevices()) {
+            String deviceInterfaceId = getDeviceIdByDBusPath(nmDevice.getObjectPath());
+            if (deviceInterfaceId.equals(interfaceId)) {
+                return Optional.of(nmDevice);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
+        NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
+        if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
+            Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
+            return this.modemManager.getHardwareSysfsPath(modemPath);
+        } else {
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
+            return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+        }
+    }
+
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
@@ -453,27 +474,6 @@ public class NMDbusConnector {
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
             this.modemManager.setGPS(mmDbusPath, Optional.of(false));
-        }
-    }
-
-    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
-        for (Device nmDevice : this.networkManager.getAllDevices()) {
-            String deviceInterfaceId = getDeviceIdByDBusPath(nmDevice.getObjectPath());
-            if (deviceInterfaceId.equals(interfaceId)) {
-                return Optional.of(nmDevice);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
-        NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
-        if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-            Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
-            return this.modemManager.getHardwareSysfsPath(modemPath);
-        } else {
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
-            return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
         }
     }
 

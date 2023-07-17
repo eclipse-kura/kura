@@ -456,6 +456,16 @@ public class NMDbusConnector {
         }
     }
 
+    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
+        for (Device nmDevice : this.networkManager.getAllDevices()) {
+            String deviceInterfaceId = getDeviceIdByDBusPath(nmDevice.getObjectPath());
+            if (deviceInterfaceId.equals(interfaceId)) {
+                return Optional.of(nmDevice);
+            }
+        }
+        return Optional.empty();
+    }
+
     public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
         NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
@@ -487,26 +497,6 @@ public class NMDbusConnector {
         for (Connection connection : availableConnections) {
             connection.Delete();
         }
-    }
-
-    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
-        for (Device d : this.networkManager.getAllDevices()) {
-            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, d.getObjectPath(),
-                    Properties.class);
-            NMDeviceType deviceType = NMDeviceType
-                    .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
-            if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-                Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(d.getObjectPath());
-                if (this.modemManager.getHardwareSysfsPath(modemPath).equals(interfaceId)) {
-                    return Optional.of(d);
-                }
-            } else {
-                if (deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE).equals(interfaceId)) {
-                    return Optional.of(d);
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private void configurationEnforcementEnable() throws DBusException {

@@ -24,6 +24,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -79,11 +80,39 @@ public class CommandRestService {
         }
     }
 
-    private RestCommandResponse doExecCommand(RestCommandRequest restCommandPayload) throws KuraException {
-        return buildRestCommandResponse(this.commandCloudApp.doExec(null, buildKuraMessage(restCommandPayload)));
+    /**
+     * POST method.
+     *
+     * Run command with Async Executor service.
+     *
+     */
+    @POST
+    @RolesAllowed("command")
+    @Path("/command/async")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response execAsyncCommand(final RestCommandRequest restCommandPayload) {
+        try {
+            return doExecAsyncCommand(restCommandPayload);
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
     }
 
-    private KuraMessage buildKuraMessage(RestCommandRequest restCommandPayload) {
+    private RestCommandResponse doExecCommand(RestCommandRequest restCommandPayload) throws KuraException {
+        return buildRestCommandResponse(this.commandCloudApp.doExec(null, buildKuraMessage(restCommandPayload, false)));
+    }
+
+    private Response doExecAsyncCommand(RestCommandRequest restCommandPayload) throws KuraException {
+        try {
+            this.commandCloudApp.doExec(null, buildKuraMessage(restCommandPayload, true));
+            return Response.accepted().build();
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    private KuraMessage buildKuraMessage(RestCommandRequest restCommandPayload, boolean isAsync) {
 
         KuraCommandRequestPayload kuraCommandRequestPayload = new KuraCommandRequestPayload(
                 restCommandPayload.getCommand());
@@ -95,7 +124,7 @@ public class CommandRestService {
         kuraCommandRequestPayload.setArguments(restCommandPayload.getArguments());
         kuraCommandRequestPayload.setEnvironmentPairs(restCommandPayload.getEnvironmentPairsAsStringArray());
 
-        kuraCommandRequestPayload.setRunAsync(restCommandPayload.getIsRunAsync());
+        kuraCommandRequestPayload.setRunAsync(isAsync);
 
         Map<String, Object> payloadProperties = new HashMap<>();
         payloadProperties.put(ARGS_KEY.value(), Arrays.asList(RESOURCE_COMMAND));

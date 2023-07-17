@@ -23,7 +23,6 @@ public class RestCommandRequest {
     private String[] arguments;
     private Map<String, String> environmentPairs;
     private String workingDirectory;
-    private boolean isRunAsync;
 
     public void setCommand(String command) {
         this.command = command;
@@ -43,10 +42,6 @@ public class RestCommandRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setIsRunAsync(boolean isRunAsync) {
-        this.isRunAsync = isRunAsync;
     }
 
     public void setZipBytes(String zipBytes) {
@@ -79,10 +74,6 @@ public class RestCommandRequest {
 
     public String getPassword() {
         return this.password;
-    }
-
-    public boolean getIsRunAsync() {
-        return this.isRunAsync;
     }
 
     public String getZipBytes() {

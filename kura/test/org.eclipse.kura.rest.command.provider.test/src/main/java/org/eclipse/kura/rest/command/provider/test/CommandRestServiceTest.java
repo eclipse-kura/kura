@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.app.command.CommandCloudApp;
 import org.eclipse.kura.cloud.app.command.KuraCommandRequestPayload;
@@ -54,6 +56,8 @@ public class CommandRestServiceTest {
     private ArgumentCaptor<KuraMessage> kuraPayloadArgumentCaptor = ArgumentCaptor.forClass(KuraMessage.class);
     KuraMessage capturedKuraMessage;
     KuraCommandRequestPayload captureKuraCommandRequestPayload;
+
+    Response asyncResponse;
 
     @Test
     public void commandExecNull() throws KuraException {
@@ -104,7 +108,6 @@ public class CommandRestServiceTest {
         givenEnvironmentPairs(Collections.singletonMap("testvar", "testValue"));
         givenWorkingDirectory("/tmp");
         givenPassword("password");
-        givenIsRunAsync(true);
         givenZipBytes("emlwQnl0ZXM=");
 
         givenMockedResponseStdout("example stdout 3");
@@ -121,13 +124,43 @@ public class CommandRestServiceTest {
         thenEnvironmentPairsIs(Collections.singletonMap("testvar", "testValue"));
         thenWorkingDirectoryIs("/tmp");
         thenPasswordIs("password");
-        thenIsRunAsyncIs(true);
+        thenIsRunAsyncIs(false);
         thenZipBytesIs(new byte[] { 'z', 'i', 'p', 'B', 'y', 't', 'e', 's' });
 
         thenVerifyKuraResponseStdoutIs("example stdout 3");
         thenVerifyKuraResponseStderrIs("example stderr 3");
         thenVerifyKuraResponseExitCodeIs(0);
         thenVerifyKuraResponseTimedoutIs(false);
+    }
+
+    @Test
+    public void commandExecAsycWithFullParamsTest() throws KuraException {
+        givenCommandCloudApp();
+        givenCommandRestService();
+
+        givenCommand("ls");
+        givenArguments(new String[] { "arg1", "arg2" });
+        givenEnvironmentPairs(Collections.singletonMap("testvar", "testValue"));
+        givenWorkingDirectory("/tmp");
+        givenPassword("password");
+        givenZipBytes("emlwQnl0ZXM=");
+
+        givenMockedResponseStdout("example stdout 3");
+        givenMockedResponseStderr("example stderr 3");
+        givenMockedResponseExitCode(0);
+        givenMockedResponseTimedout(false);
+
+        whenExecAsyncCommand();
+
+        thenVerifyDoExecIsRun();
+        thenCommandRequestIs(Arrays.asList("command"));
+        thenCommandIs("ls");
+        thenArgumentsIs(new String[] { "arg1", "arg2" });
+        thenEnvironmentPairsIs(Collections.singletonMap("testvar", "testValue"));
+        thenWorkingDirectoryIs("/tmp");
+        thenPasswordIs("password");
+        thenIsRunAsyncIs(true);
+        thenZipBytesIs(new byte[] { 'z', 'i', 'p', 'B', 'y', 't', 'e', 's' });
     }
 
     private void givenCommandCloudApp() throws KuraException {
@@ -180,16 +213,16 @@ public class CommandRestServiceTest {
         this.restCommandRequest.setPassword(password);
     }
 
-    public void givenIsRunAsync(boolean isRunAsync) {
-        this.restCommandRequest.setIsRunAsync(isRunAsync);
-    }
-
     private void givenZipBytes(String zipBytes) {
         this.restCommandRequest.setZipBytes(zipBytes);
     }
 
     private void whenExecCommand() {
         restCommandResponse = commandRestService.execCommand(this.restCommandRequest);
+    }
+
+    private void whenExecAsyncCommand() {
+        asyncResponse = commandRestService.execAsyncCommand(this.restCommandRequest);
     }
 
     private void thenVerifyDoExecIsRun() throws KuraException {

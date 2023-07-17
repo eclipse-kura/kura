@@ -158,6 +158,18 @@ public class ModemManagerDbusWrapper {
         return simProperties;
     }
 
+    protected String getHardwareSysfsPath(Optional<String> dbusPath) throws DBusException {
+        if (!dbusPath.isPresent()) {
+            throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
+        }
+        Optional<Properties> modemDeviceProperties = getModemProperties(dbusPath.get());
+        if (!modemDeviceProperties.isPresent()) {
+            throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
+        }
+        String modemDeviceProperty = (String) modemDeviceProperties.get().Get(MM_MODEM_NAME, "Device");
+        return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
+    }
+
     protected List<Properties> getModemBearersProperties(String modemPath, Properties modemProperties)
             throws DBusException {
         List<Properties> bearerProperties = new ArrayList<>();
@@ -223,17 +235,5 @@ public class ModemManagerDbusWrapper {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
         }
-    }
-
-    protected String getHardwareSysfsPath(Optional<String> dbusPath) throws DBusException {
-        if (!dbusPath.isPresent()) {
-            throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
-        }
-        Optional<Properties> modemDeviceProperties = getModemProperties(dbusPath.get());
-        if (!modemDeviceProperties.isPresent()) {
-            throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
-        }
-        String modemDeviceProperty = (String) modemDeviceProperties.get().Get(MM_MODEM_NAME, "Device");
-        return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
     }
 }

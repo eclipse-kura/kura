@@ -225,4 +225,15 @@ public class ModemManagerDbusWrapper {
         }
     }
 
+    protected String getHardwarePath(Optional<String> dbusPath) throws DBusException {
+        if (!dbusPath.isPresent()) {
+            throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
+        }
+        Optional<Properties> modemDeviceProperties = getModemProperties(dbusPath.get());
+        if (!modemDeviceProperties.isPresent()) {
+            throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
+        }
+        String modemDeviceProperty = (String) modemDeviceProperties.get().Get(MM_MODEM_NAME, "Device");
+        return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
+    }
 }

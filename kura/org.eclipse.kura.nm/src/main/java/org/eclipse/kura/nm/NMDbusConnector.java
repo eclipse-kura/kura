@@ -460,15 +460,7 @@ public class NMDbusConnector {
         NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
             Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
-            if (!modemPath.isPresent()) {
-                throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
-            }
-            Optional<Properties> modemDeviceProperties = this.modemManager.getModemProperties(modemPath.get());
-            if (!modemDeviceProperties.isPresent()) {
-                throw new IllegalStateException(String.format("Cannot retrieve modem properties for: %s.", dbusPath));
-
-            }
-            return NMStatusConverter.getModemDeviceHwPath(modemDeviceProperties.get());
+            return this.modemManager.getHardwarePath(modemPath);
         } else {
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
             return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
@@ -505,12 +497,8 @@ public class NMDbusConnector {
                     .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
             if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
                 Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(d.getObjectPath());
-                if (modemPath.isPresent()) {
-                    Optional<Properties> modemDeviceProperties = this.modemManager.getModemProperties(modemPath.get());
-                    if (modemDeviceProperties.isPresent() && NMStatusConverter
-                            .getModemDeviceHwPath(modemDeviceProperties.get()).equals(interfaceId)) {
-                        return Optional.of(d);
-                    }
+                if (this.modemManager.getHardwarePath(modemPath).equals(interfaceId)) {
+                    return Optional.of(d);
                 }
             } else {
                 if (deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE).equals(interfaceId)) {

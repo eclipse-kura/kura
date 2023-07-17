@@ -2,13 +2,16 @@ package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
+import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -32,6 +35,8 @@ public class ModemManagerDbusWrapper {
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
     private DBusConnection dbusConnection;
+
+    private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
 
     protected ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -183,6 +188,41 @@ public class ModemManagerDbusWrapper {
         }
         return bearerProperties;
 
+    }
+
+    protected void resetHandlerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes,
+            String networkManagerDbusPath) throws DBusException {
+        if (!modemManagerDbusPath.isPresent()) {
+            logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
+            return;
+        }
+
+        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
+
+        NMModemResetHandler resetHandler = new NMModemResetHandler(networkManagerDbusPath, mmModemDevice,
+                delayMinutes * 60L * 1000L);
+
+        this.modemHandlers.put(deviceId, resetHandler);
+        this.dbusConnection.addSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, resetHandler);
+    }
+
+    protected void resetHandlersDisable() {
+        for (String deviceId : this.modemHandlers.keySet()) {
+            resetHandlersDisable(deviceId);
+        }
+        this.modemHandlers.clear();
+    }
+
+    protected void resetHandlersDisable(String deviceId) {
+        if (this.modemHandlers.containsKey(deviceId)) {
+            NMModemResetHandler handler = this.modemHandlers.get(deviceId);
+            handler.clearTimer();
+            try {
+                this.dbusConnection.removeSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, handler);
+            } catch (DBusException e) {
+                logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
+            }
+        }
     }
 
 }

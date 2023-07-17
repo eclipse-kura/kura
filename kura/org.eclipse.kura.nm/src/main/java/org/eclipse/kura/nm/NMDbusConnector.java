@@ -15,7 +15,6 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +33,6 @@ import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
 import org.eclipse.kura.nm.signal.handlers.NMDeviceAddedHandler;
-import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
@@ -88,8 +86,6 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
-
-    private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);

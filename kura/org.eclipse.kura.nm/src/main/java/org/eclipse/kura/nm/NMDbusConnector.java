@@ -47,7 +47,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Wired;
@@ -64,7 +63,6 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
-    private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
     private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";

@@ -27,8 +27,6 @@
     //Working directory of command to be executed
     "workingDirectory":"/tmp",
     
-    //Run command synchronously/asynchronously
-    "isRunAsync":false
 }
 ```
 
@@ -48,7 +46,43 @@
 - 404 Resource Not Found
 - 500 Internal Server Error
 
+ --- 
 
+#### Execute Asynchronous Command
+- Method: POST
+- API PATH: `/services/command/v1/command/async`
+##### Request Body
+``` JSON
+{
+	//Command to be excuted on gateway
+    "command":"printenv TextEnvVarName1",
+
+    //Service Password for command Service
+    "password":"s3curePassw0rd",
+
+    //String base64 encoding of a zip file to transfer to gateway
+    "zipBytes": "UEsDBAoACAAAAIyD1lYAA AAAAAAAAAAAAAAJACAAdGVzdGZpbGUxVVQNAAfprpRk6a6UZOmulGR1eAsAAQT1AQAABBQAAABQSwcIAAAAAAAAAAAAAAAAUEsBAgoDCgAIAAAAjIPWVgAAAAAAAAAAAAAAAAkAIAAAAAAAAAAAAKSBAAAAAHRlc3RmaWxlMVVUDQAH6a6UZOmulGTprpRkdXgLAAEE9QEAAAQUAAAAUEsFBgAAAAABAAEAVwAAAFcAAAAAAA==",
+
+    //Command argument String array
+    "arguments":["arg 1"],
+
+    //Shell environment Pairs Map
+    "environmentPairs": 
+    {
+        "TextEnvVarName1":"TextEnvVarValue1",
+        "TextEnvVarName2":"TextEnvVarValue2"
+    },
+    //Working directory of command to be executed
+    "workingDirectory":"/tmp",
+    
+}
+```
+
+##### Responses
+- 202 Accepted
+- 400 Bad Request (Malformed Client JSON)
+- 404 Resource Not Found
+- 500 Internal Server Error
 
 !!! note
 

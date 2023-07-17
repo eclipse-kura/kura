@@ -35,12 +35,12 @@ When a network interface is configured as **Not Managed**, Kura will ignore it a
 
 Regarding DNS, both Kura and the external tools store the DNS addresses in the `/etc/resolv.conf` file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.
 
-| Kura WAN interface | Kura NotManaged interface | Does Kura manage resolv.conf? |
+| Is there at least an interface set as `WAN`? | Is there at least one interface set as `Not Managed`? | Does Kura manage resolv.conf? |
 | ------------------ | ------------------------- | ----------------------------- |
-| NO                 | NO                        | YES                           |
-| NO                 | YES                       | NO                            |
-| YES                | NO                        | YES                           |
-| YES                | YES                       | YES                           |
+| NO                 | NO                        | **YES**                           |
+| NO                 | YES                       | **NO**                            |
+| YES                | NO                        | **YES**                           |
+| YES                | YES                       | **YES**                           |
 
 So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using Kura. If at least one WAN interface is configured by Kura, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, Kura will empty the file.
 

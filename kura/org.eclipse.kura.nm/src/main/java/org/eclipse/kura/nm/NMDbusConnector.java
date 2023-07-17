@@ -63,7 +63,6 @@ public class NMDbusConnector {
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
-    private static final String NM_DEVICE_PROPERTY_DEVICETYPE = "DeviceType";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(

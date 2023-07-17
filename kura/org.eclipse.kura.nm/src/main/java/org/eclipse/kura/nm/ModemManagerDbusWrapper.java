@@ -225,7 +225,7 @@ public class ModemManagerDbusWrapper {
         }
     }
 
-    protected String getHardwarePath(Optional<String> dbusPath) throws DBusException {
+    protected String getHardwareSysfsPath(Optional<String> dbusPath) throws DBusException {
         if (!dbusPath.isPresent()) {
             throw new IllegalStateException(String.format("Cannot retrieve modem path for: %s.", dbusPath));
         }

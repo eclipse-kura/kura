@@ -460,7 +460,7 @@ public class NMDbusConnector {
         NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
             Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
-            return this.modemManager.getHardwarePath(modemPath);
+            return this.modemManager.getHardwareSysfsPath(modemPath);
         } else {
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dbusPath, Properties.class);
             return deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
@@ -497,7 +497,7 @@ public class NMDbusConnector {
                     .fromUInt32(deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_DEVICETYPE));
             if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
                 Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(d.getObjectPath());
-                if (this.modemManager.getHardwarePath(modemPath).equals(interfaceId)) {
+                if (this.modemManager.getHardwareSysfsPath(modemPath).equals(interfaceId)) {
                     return Optional.of(d);
                 }
             } else {

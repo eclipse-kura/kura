@@ -6,7 +6,7 @@
 ##### Request Body
 ``` JSON
 {
-	//Command to be excuted on gateway
+    //Command to be executed on gateway
     "command":"printenv TextEnvVarName1",
 
     //Service Password for command Service
@@ -54,7 +54,7 @@
 ##### Request Body
 ``` JSON
 {
-	//Command to be excuted on gateway
+    //Command to be executed on gateway
     "command":"printenv TextEnvVarName1",
 
     //Service Password for command Service

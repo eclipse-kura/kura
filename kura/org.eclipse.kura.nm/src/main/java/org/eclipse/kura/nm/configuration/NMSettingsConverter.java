@@ -182,8 +182,7 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
 
         if ("SECURITY_WEP".equals(securityType)) {
-            String keyMgmt = wifiKeyMgmtConvert(securityType);
-            settings.put("key-mgmt", new Variant<>(keyMgmt));
+            settings.put("key-mgmt", new Variant<>("none"));
             settings.put("wep-key-type", new Variant<>(1));
 
             String wepKey = props
@@ -193,8 +192,7 @@ public class NMSettingsConverter {
         } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
                 || "SECURITY_WPA_WPA2".equals(securityType)) {
 
-            String keyMgmt = wifiKeyMgmtConvert(securityType);
-            settings.put("key-mgmt", new Variant<>(keyMgmt));
+            settings.put("key-mgmt", new Variant<>("wpa-psk"));
 
             String psk = props
                     .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
@@ -393,21 +391,6 @@ public class NMSettingsConverter {
             return Arrays.asList("tkip", "ccmp");
         default:
             throw new IllegalArgumentException(String.format("Unsupported WiFi cipher \"%s\"", kuraCipher));
-        }
-    }
-
-    private static String wifiKeyMgmtConvert(String kuraSecurityType) {
-        switch (kuraSecurityType) {
-        case "NONE":
-        case "SECURITY_WEP":
-            return "none";
-        case "SECURITY_WPA":
-        case "SECURITY_WPA2":
-        case "SECURITY_WPA_WPA2":
-            return "wpa-psk";
-        default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported WiFi key management \"%s\"", kuraSecurityType));
         }
     }
 

@@ -73,6 +73,7 @@ public class NMSettingsConverter {
             String securityType = properties.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
                     propMode.toLowerCase());
             if (!"NONE".equals(securityType)) {
+                // Only populate "802-11-wireless-security" field if security is enabled
                 Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
                         .build80211WirelessSecuritySettings(properties, deviceId);
                 newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);

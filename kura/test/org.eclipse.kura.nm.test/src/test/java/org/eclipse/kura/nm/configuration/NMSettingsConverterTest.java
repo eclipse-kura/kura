@@ -440,6 +440,9 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
+        // TODO: This test is wrong! It should not work with security type NONE
+        // If security type is set to NONE the 802-11-wireless-security setting should not be set
+        // Throw an exception maybe?
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "none");
         thenResultingMapNotContains("proto");
@@ -459,7 +462,10 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "none");
+        thenResultingMapContains("wep-key-type", 1);
+        thenResultingMapContains("wep-key0", "test");
         thenResultingMapNotContains("proto");
+        thenResultingMapNotContains("wpa-psk");
     }
 
     @Test
@@ -477,6 +483,8 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("proto", new Variant<>(Arrays.asList("wpa"), "as").getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
     }
 
     @Test
@@ -494,6 +502,8 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("proto", new Variant<>(Arrays.asList("rsn"), "as").getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
     }
 
     @Test

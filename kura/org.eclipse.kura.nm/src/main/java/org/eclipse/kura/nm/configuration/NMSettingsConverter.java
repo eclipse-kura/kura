@@ -175,48 +175,62 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String deviceId) {
-        Map<String, Variant<?>> settings = new HashMap<>();
-
         String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
         String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
                 propMode.toLowerCase());
 
         if ("SECURITY_WEP".equals(securityType)) {
-            settings.put("key-mgmt", new Variant<>("none"));
-            settings.put("wep-key-type", new Variant<>(1));
-
-            String wepKey = props
-                    .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
-                    .toString();
-            settings.put("wep-key0", new Variant<>(wepKey));
+            return buildWEPSettings(props, deviceId, propMode);
         } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
                 || "SECURITY_WPA_WPA2".equals(securityType)) {
-
-            settings.put("key-mgmt", new Variant<>("wpa-psk"));
-
-            String psk = props
-                    .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
-                    .toString();
-            settings.put("psk", new Variant<>(psk));
-
-            List<String> proto = wifiProtoConvert(securityType);
-            settings.put("proto", new Variant<>(proto, "as"));
-
-            Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers",
-                    deviceId, propMode.toLowerCase());
-            if (group.isPresent()) {
-                List<String> nmGroup = wifiCipherConvert(group.get());
-                settings.put("group", new Variant<>(nmGroup, "as"));
-            }
-
-            Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers",
-                    deviceId, propMode.toLowerCase());
-            if (pairwise.isPresent()) {
-                List<String> nmPairwise = wifiCipherConvert(pairwise.get());
-                settings.put("pairwise", new Variant<>(nmPairwise, "as"));
-            }
+            return buildWPAWPA2Settings(props, deviceId, propMode);
         } else {
             throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
+        }
+    }
+
+    private static Map<String, Variant<?>> buildWEPSettings(NetworkProperties props, String deviceId, String propMode) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        settings.put("key-mgmt", new Variant<>("none"));
+        settings.put("wep-key-type", new Variant<>(1));
+
+        String wepKey = props
+                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
+                .toString();
+        settings.put("wep-key0", new Variant<>(wepKey));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> buildWPAWPA2Settings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        settings.put("key-mgmt", new Variant<>("wpa-psk"));
+
+        String psk = props
+                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
+                .toString();
+        settings.put("psk", new Variant<>(psk));
+
+        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+                propMode.toLowerCase());
+        List<String> proto = wifiProtoConvert(securityType);
+        settings.put("proto", new Variant<>(proto, "as"));
+
+        Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", deviceId,
+                propMode.toLowerCase());
+        if (group.isPresent()) {
+            List<String> nmGroup = wifiCipherConvert(group.get());
+            settings.put("group", new Variant<>(nmGroup, "as"));
+        }
+
+        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers",
+                deviceId, propMode.toLowerCase());
+        if (pairwise.isPresent()) {
+            List<String> nmPairwise = wifiCipherConvert(pairwise.get());
+            settings.put("pairwise", new Variant<>(nmPairwise, "as"));
         }
 
         return settings;

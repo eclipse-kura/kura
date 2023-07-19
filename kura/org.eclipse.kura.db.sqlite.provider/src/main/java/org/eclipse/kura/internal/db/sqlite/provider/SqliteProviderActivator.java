@@ -42,7 +42,7 @@ public class SqliteProviderActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         if (locationChanged) {
-            System.setProperty(SQLITE_TMPDIR_PROPERTY_KEY, null);
+            System.clearProperty(SQLITE_TMPDIR_PROPERTY_KEY);
         }
     }
 

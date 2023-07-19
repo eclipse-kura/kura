@@ -282,30 +282,30 @@ public interface Interface extends DBusInterface {
 
     public static class BlobAdded extends DBusSignal {
 
-        private final String name;
+        private final String blobName;
 
-        public BlobAdded(String _path, String _name) throws DBusException {
-            super(_path, _name);
-            this.name = _name;
+        public BlobAdded(String _path, String _blobName) throws DBusException {
+            super(_path, _blobName);
+            this.blobName = _blobName;
         }
 
-        public String getName() {
-            return name;
+        public String getBlobName() {
+            return blobName;
         }
 
     }
 
     public static class BlobRemoved extends DBusSignal {
 
-        private final String name;
+        private final String blobName;
 
-        public BlobRemoved(String _path, String _name) throws DBusException {
-            super(_path, _name);
-            this.name = _name;
+        public BlobRemoved(String _path, String _blobName) throws DBusException {
+            super(_path, _blobName);
+            this.blobName = _blobName;
         }
 
-        public String getName() {
-            return name;
+        public String getBlobName() {
+            return blobName;
         }
 
     }
@@ -430,30 +430,30 @@ public interface Interface extends DBusInterface {
 
     public static class StaAuthorized extends DBusSignal {
 
-        private final String name;
+        private final String mac;
 
-        public StaAuthorized(String _path, String _name) throws DBusException {
-            super(_path, _name);
-            this.name = _name;
+        public StaAuthorized(String _path, String _mac) throws DBusException {
+            super(_path, _mac);
+            this.mac = _mac;
         }
 
-        public String getName() {
-            return name;
+        public String getMac() {
+            return mac;
         }
 
     }
 
     public static class StaDeauthorized extends DBusSignal {
 
-        private final String name;
+        private final String mac;
 
-        public StaDeauthorized(String _path, String _name) throws DBusException {
-            super(_path, _name);
-            this.name = _name;
+        public StaDeauthorized(String _path, String _mac) throws DBusException {
+            super(_path, _mac);
+            this.mac = _mac;
         }
 
-        public String getName() {
-            return name;
+        public String getMac() {
+            return mac;
         }
 
     }

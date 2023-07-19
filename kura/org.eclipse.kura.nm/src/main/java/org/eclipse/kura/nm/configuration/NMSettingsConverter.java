@@ -180,16 +180,17 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
 
         if ("SECURITY_WEP".equals(securityType)) {
-            return buildWEPSettings(props, deviceId, propMode);
+            return createWEPSettings(props, deviceId, propMode);
         } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
                 || "SECURITY_WPA_WPA2".equals(securityType)) {
-            return buildWPAWPA2Settings(props, deviceId, propMode);
+            return createWPAWPA2Settings(props, deviceId, propMode);
         } else {
             throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
         }
     }
 
-    private static Map<String, Variant<?>> buildWEPSettings(NetworkProperties props, String deviceId, String propMode) {
+    private static Map<String, Variant<?>> createWEPSettings(NetworkProperties props, String deviceId,
+            String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         settings.put("key-mgmt", new Variant<>("none"));
@@ -203,7 +204,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> buildWPAWPA2Settings(NetworkProperties props, String deviceId,
+    private static Map<String, Variant<?>> createWPAWPA2Settings(NetworkProperties props, String deviceId,
             String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 

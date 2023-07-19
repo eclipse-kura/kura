@@ -233,12 +233,12 @@ public class NMStatusServiceImplTest {
 
     private void givenNMStatusServiceImplWithoutInterfaces() throws DBusException, UnknownHostException {
         createTestObjects();
-        when(this.nmDbusConnector.getDeviceIds()).thenReturn(Collections.emptyList());
+        when(this.nmDbusConnector.getInterfaceIds()).thenReturn(Collections.emptyList());
     }
 
     private void givenNMStatusServiceImplWithInterfaces() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getDeviceIds()).thenReturn(Arrays.asList("abcd0", "wlan0"));
+        when(this.nmDbusConnector.getInterfaceIds()).thenReturn(Arrays.asList("abcd0", "wlan0"));
         when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
         when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
@@ -264,7 +264,7 @@ public class NMStatusServiceImplTest {
     private void givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaces()
             throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getDeviceIds()).thenThrow(new DBusException("Cannot retrieve interface list."));
+        when(this.nmDbusConnector.getInterfaceIds()).thenThrow(new DBusException("Cannot retrieve interface list."));
     }
 
     private void whenInterfaceStatusIsRetrieved(String interfaceName) {

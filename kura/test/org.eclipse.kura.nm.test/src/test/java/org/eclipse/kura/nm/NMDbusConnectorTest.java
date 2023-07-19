@@ -284,7 +284,7 @@ public class NMDbusConnectorTest {
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
         givenMockedDeviceList();
 
-        whenGetInterfacesIsCalled();
+        whenGetInterfaceIdsIsCalled();
 
         thenNoExceptionIsThrown();
         thenGetInterfacesReturn(Arrays.asList("wlan0", "eth0"));
@@ -1296,9 +1296,9 @@ public class NMDbusConnectorTest {
         }
     }
 
-    private void whenGetInterfacesIsCalled() {
+    private void whenGetInterfaceIdsIsCalled() {
         try {
-            this.internalStringList = this.instanceNMDbusConnector.getDeviceIds();
+            this.internalStringList = this.instanceNMDbusConnector.getInterfaceIds();
         } catch (DBusException e) {
             this.hasDBusExceptionBeenThrown = true;
         }

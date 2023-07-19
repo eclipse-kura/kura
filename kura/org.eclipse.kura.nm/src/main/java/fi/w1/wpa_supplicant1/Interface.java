@@ -14,6 +14,7 @@ package fi.w1.wpa_supplicant1;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -250,7 +251,7 @@ public interface Interface extends DBusInterface {
         }
 
         public boolean getSuccess() {
-            return success;
+            return this.success;
         }
 
     }
@@ -272,7 +273,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }
@@ -302,7 +303,7 @@ public interface Interface extends DBusInterface {
         }
 
         public String getBlobName() {
-            return blobName;
+            return this.blobName;
         }
 
     }
@@ -317,7 +318,7 @@ public interface Interface extends DBusInterface {
         }
 
         public String getBlobName() {
-            return blobName;
+            return this.blobName;
         }
 
     }
@@ -339,7 +340,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }
@@ -384,7 +385,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }
@@ -399,7 +400,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getArgs() {
-            return args;
+            return this.args;
         }
 
     }
@@ -414,7 +415,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getCertification() {
-            return certification;
+            return this.certification;
         }
 
     }
@@ -431,11 +432,11 @@ public interface Interface extends DBusInterface {
         }
 
         public String getStatus() {
-            return status;
+            return this.status;
         }
 
         public String getParameter() {
-            return parameter;
+            return this.parameter;
         }
 
     }
@@ -450,7 +451,7 @@ public interface Interface extends DBusInterface {
         }
 
         public String getMac() {
-            return mac;
+            return this.mac;
         }
 
     }
@@ -465,7 +466,7 @@ public interface Interface extends DBusInterface {
         }
 
         public String getMac() {
-            return mac;
+            return this.mac;
         }
 
     }
@@ -487,7 +488,7 @@ public interface Interface extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

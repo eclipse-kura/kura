@@ -14,6 +14,7 @@ package fi.w1;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -60,7 +61,7 @@ public interface Wpa_supplicant1 extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
     }
 
@@ -89,7 +90,7 @@ public interface Wpa_supplicant1 extends DBusInterface {
         }
 
         public Map<String, Variant<?>> getProperties() {
-            return properties;
+            return this.properties;
         }
 
     }

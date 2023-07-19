@@ -1,0 +1,117 @@
+package fi.w1;
+
+import java.util.List;
+import java.util.Map;
+import org.freedesktop.dbus.DBusPath;
+import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.messages.DBusSignal;
+import org.freedesktop.dbus.types.Variant;
+
+/**
+ * Auto-generated class.
+ */
+@DBusProperty(name = "DebugLevel", type = String.class, access = Access.READ_WRITE)
+@DBusProperty(name = "DebugTimestamp", type = Boolean.class, access = Access.READ_WRITE)
+@DBusProperty(name = "DebugShowKeys", type = Boolean.class, access = Access.READ_WRITE)
+@DBusProperty(name = "Interfaces", type = Wpa_supplicant1.PropertyInterfacesType.class, access = Access.READ)
+@DBusProperty(name = "EapMethods", type = Wpa_supplicant1.PropertyEapMethodsType.class, access = Access.READ)
+@DBusProperty(name = "Capabilities", type = Wpa_supplicant1.PropertyCapabilitiesType.class, access = Access.READ)
+@DBusProperty(name = "WFDIEs", type = Wpa_supplicant1.PropertyWFDIEsType.class, access = Access.READ_WRITE)
+public interface Wpa_supplicant1 extends DBusInterface {
+
+
+    public DBusPath CreateInterface(Map<String, Variant<?>> args);
+    public void RemoveInterface(DBusPath path);
+    public DBusPath GetInterface(String ifname);
+    public void ExpectDisconnect();
+
+
+    public static class InterfaceAdded extends DBusSignal {
+
+        private final DBusPath path;
+        private final Map<String, Variant<?>> properties;
+
+        public InterfaceAdded(String _path, DBusPath _path, Map<String, Variant<?>> _properties) throws DBusException {
+            super(_path, _path, _properties);
+            this.path = _path;
+            this.properties = _properties;
+        }
+
+
+        public DBusPath getPath() {
+            return path;
+        }
+
+        public Map<String, Variant<?>> getProperties() {
+            return properties;
+        }
+
+
+    }
+
+    public static class InterfaceRemoved extends DBusSignal {
+
+        private final DBusPath path;
+
+        public InterfaceRemoved(String _path, DBusPath _path) throws DBusException {
+            super(_path, _path);
+            this.path = _path;
+        }
+
+
+        public DBusPath getPath() {
+            return path;
+        }
+
+
+    }
+
+    public static class PropertiesChanged extends DBusSignal {
+
+        private final Map<String, Variant<?>> properties;
+
+        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
+            super(_path, _properties);
+            this.properties = _properties;
+        }
+
+
+        public Map<String, Variant<?>> getProperties() {
+            return properties;
+        }
+
+
+    }
+
+    public static interface PropertyInterfacesType extends TypeRef<List<DBusPath>> {
+
+
+
+
+    }
+
+    public static interface PropertyEapMethodsType extends TypeRef<List<String>> {
+
+
+
+
+    }
+
+    public static interface PropertyCapabilitiesType extends TypeRef<List<String>> {
+
+
+
+
+    }
+
+    public static interface PropertyWFDIEsType extends TypeRef<List<Byte>> {
+
+
+
+
+    }
+}

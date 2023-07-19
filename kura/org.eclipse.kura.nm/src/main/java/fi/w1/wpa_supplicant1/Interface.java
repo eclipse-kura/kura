@@ -164,40 +164,69 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "ColocIntfReporting", type = String.class, access = Access.READ_WRITE)
 public interface Interface extends DBusInterface {
 
-
     public void Scan(Map<String, Variant<?>> args);
-    public Map<String, Variant<?>> SignalPoll();
-    public void Disconnect();
-    public DBusPath AddNetwork(Map<String, Variant<?>> args);
-    public void Reassociate();
-    public void Reattach();
-    public void Reconnect();
-    public void RemoveNetwork(DBusPath path);
-    public void RemoveAllNetworks();
-    public void SelectNetwork(DBusPath path);
-    public void NetworkReply(DBusPath path, String field, String value);
-    public void AddBlob(String name, List<Byte> data);
-    public List<Byte> GetBlob(String name);
-    public void RemoveBlob(String name);
-    public void SetPKCS11EngineAndModulePath(String pkcs11EnginePath, String pkcs11ModulePath);
-    public void FlushBSS(UInt32 age);
-    public void SubscribeProbeReq();
-    public void UnsubscribeProbeReq();
-    public void EAPLogoff();
-    public void EAPLogon();
-    public void AutoScan(String arg);
-    public void TDLSDiscover(String peerAddress);
-    public void TDLSSetup(String peerAddress);
-    public String TDLSStatus(String peerAddress);
-    public void TDLSTeardown(String peerAddress);
-    public void TDLSChannelSwitch(Map<String, Variant<?>> args);
-    public void TDLSCancelChannelSwitch(String peerAddress);
-    public void VendorElemAdd(int frameId, List<Byte> ielems);
-    public List<Byte> VendorElemGet(int frameId);
-    public void VendorElemRem(int frameId, List<Byte> ielems);
-    public void SaveConfig();
-    public void AbortScan();
 
+    public Map<String, Variant<?>> SignalPoll();
+
+    public void Disconnect();
+
+    public DBusPath AddNetwork(Map<String, Variant<?>> args);
+
+    public void Reassociate();
+
+    public void Reattach();
+
+    public void Reconnect();
+
+    public void RemoveNetwork(DBusPath path);
+
+    public void RemoveAllNetworks();
+
+    public void SelectNetwork(DBusPath path);
+
+    public void NetworkReply(DBusPath path, String field, String value);
+
+    public void AddBlob(String name, List<Byte> data);
+
+    public List<Byte> GetBlob(String name);
+
+    public void RemoveBlob(String name);
+
+    public void SetPKCS11EngineAndModulePath(String pkcs11EnginePath, String pkcs11ModulePath);
+
+    public void FlushBSS(UInt32 age);
+
+    public void SubscribeProbeReq();
+
+    public void UnsubscribeProbeReq();
+
+    public void EAPLogoff();
+
+    public void EAPLogon();
+
+    public void AutoScan(String arg);
+
+    public void TDLSDiscover(String peerAddress);
+
+    public void TDLSSetup(String peerAddress);
+
+    public String TDLSStatus(String peerAddress);
+
+    public void TDLSTeardown(String peerAddress);
+
+    public void TDLSChannelSwitch(Map<String, Variant<?>> args);
+
+    public void TDLSCancelChannelSwitch(String peerAddress);
+
+    public void VendorElemAdd(int frameId, List<Byte> ielems);
+
+    public List<Byte> VendorElemGet(int frameId);
+
+    public void VendorElemRem(int frameId, List<Byte> ielems);
+
+    public void SaveConfig();
+
+    public void AbortScan();
 
     public static class ScanDone extends DBusSignal {
 
@@ -208,51 +237,46 @@ public interface Interface extends DBusInterface {
             this.success = _success;
         }
 
-
         public boolean getSuccess() {
             return success;
         }
-
 
     }
 
     public static class BSSAdded extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath addedBSSPath;
         private final Map<String, Variant<?>> properties;
 
-        public BSSAdded(String _path, DBusPath _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _path, _properties);
-            this.path = _path;
+        public BSSAdded(String _path, DBusPath _addedBSSpath, Map<String, Variant<?>> _properties)
+                throws DBusException {
+            super(_path, _addedBSSpath, _properties);
+            this.addedBSSPath = _addedBSSpath;
             this.properties = _properties;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getAddedBSSPath() {
+            return this.addedBSSPath;
         }
 
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
 
-
     }
 
     public static class BSSRemoved extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath removedBSSPath;
 
-        public BSSRemoved(String _path, DBusPath _path) throws DBusException {
-            super(_path, _path);
-            this.path = _path;
+        public BSSRemoved(String _path, DBusPath _removedBSSPath) throws DBusException {
+            super(_path, _removedBSSPath);
+            this.removedBSSPath = _removedBSSPath;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getRemovedBSSPath() {
+            return this.removedBSSPath;
         }
-
 
     }
 
@@ -265,11 +289,9 @@ public interface Interface extends DBusInterface {
             this.name = _name;
         }
 
-
         public String getName() {
             return name;
         }
-
 
     }
 
@@ -282,68 +304,61 @@ public interface Interface extends DBusInterface {
             this.name = _name;
         }
 
-
         public String getName() {
             return name;
         }
-
 
     }
 
     public static class NetworkAdded extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath addedNetworkPath;
         private final Map<String, Variant<?>> properties;
 
-        public NetworkAdded(String _path, DBusPath _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _path, _properties);
-            this.path = _path;
+        public NetworkAdded(String _path, DBusPath _addedNetworkPath, Map<String, Variant<?>> _properties)
+                throws DBusException {
+            super(_path, _addedNetworkPath, _properties);
+            this.addedNetworkPath = _addedNetworkPath;
             this.properties = _properties;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getAddedNetworkPath() {
+            return this.addedNetworkPath;
         }
 
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
 
-
     }
 
     public static class NetworkRemoved extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath removedNetworkPath;
 
-        public NetworkRemoved(String _path, DBusPath _path) throws DBusException {
-            super(_path, _path);
-            this.path = _path;
+        public NetworkRemoved(String _path, DBusPath _removedNetworkPath) throws DBusException {
+            super(_path, _removedNetworkPath);
+            this.removedNetworkPath = _removedNetworkPath;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getRemovedNetworkPath() {
+            return this.removedNetworkPath;
         }
-
 
     }
 
     public static class NetworkSelected extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath selectedNetworkPath;
 
-        public NetworkSelected(String _path, DBusPath _path) throws DBusException {
-            super(_path, _path);
-            this.path = _path;
+        public NetworkSelected(String _path, DBusPath _selectedNetworkPath) throws DBusException {
+            super(_path, _selectedNetworkPath);
+            this.selectedNetworkPath = _selectedNetworkPath;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getSelectedNetworkPath() {
+            return this.selectedNetworkPath;
         }
-
 
     }
 
@@ -356,11 +371,9 @@ public interface Interface extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
@@ -373,11 +386,9 @@ public interface Interface extends DBusInterface {
             this.args = _args;
         }
 
-
         public Map<String, Variant<?>> getArgs() {
             return args;
         }
-
 
     }
 
@@ -390,11 +401,9 @@ public interface Interface extends DBusInterface {
             this.certification = _certification;
         }
 
-
         public Map<String, Variant<?>> getCertification() {
             return certification;
         }
-
 
     }
 
@@ -409,7 +418,6 @@ public interface Interface extends DBusInterface {
             this.parameter = _parameter;
         }
 
-
         public String getStatus() {
             return status;
         }
@@ -417,7 +425,6 @@ public interface Interface extends DBusInterface {
         public String getParameter() {
             return parameter;
         }
-
 
     }
 
@@ -430,11 +437,9 @@ public interface Interface extends DBusInterface {
             this.name = _name;
         }
 
-
         public String getName() {
             return name;
         }
-
 
     }
 
@@ -447,115 +452,66 @@ public interface Interface extends DBusInterface {
             this.name = _name;
         }
 
-
         public String getName() {
             return name;
         }
-
 
     }
 
     public static class StationAdded extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath addedStationPath;
         private final Map<String, Variant<?>> properties;
 
-        public StationAdded(String _path, DBusPath _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _path, _properties);
-            this.path = _path;
+        public StationAdded(String _path, DBusPath _addedStationPath, Map<String, Variant<?>> _properties)
+                throws DBusException {
+            super(_path, _addedStationPath, _properties);
+            this.addedStationPath = _addedStationPath;
             this.properties = _properties;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getAddedStationPath() {
+            return this.addedStationPath;
         }
 
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
 
-
     }
 
     public static class StationRemoved extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath removedStationPath;
 
-        public StationRemoved(String _path, DBusPath _path) throws DBusException {
-            super(_path, _path);
-            this.path = _path;
+        public StationRemoved(String _path, DBusPath _removedStationPath) throws DBusException {
+            super(_path, _removedStationPath);
+            this.removedStationPath = _removedStationPath;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getRemovedStationPath() {
+            return this.removedStationPath;
         }
-
-
-    }
-
-    public static class NetworkRequest extends DBusSignal {
-
-        private final DBusPath path;
-        private final String field;
-        private final String text;
-
-        public NetworkRequest(String _path, DBusPath _path, String _field, String _text) throws DBusException {
-            super(_path, _path, _field, _text);
-            this.path = _path;
-            this.field = _field;
-            this.text = _text;
-        }
-
-
-        public DBusPath getPath() {
-            return path;
-        }
-
-        public String getField() {
-            return field;
-        }
-
-        public String getText() {
-            return text;
-        }
-
 
     }
 
     public static interface PropertyCapabilitiesType extends TypeRef<Map<String, Variant>> {
 
-
-
-
     }
 
     public static interface PropertyBlobsType extends TypeRef<Map<String, List<Byte>>> {
-
-
-
 
     }
 
     public static interface PropertyBSSsType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertyNetworksType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertyStationsType extends TypeRef<List<DBusPath>> {
-
-
-
 
     }
 }

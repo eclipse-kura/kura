@@ -18,10 +18,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.position.api.IsLockedDTO;
 import org.eclipse.kura.rest.position.api.LocalDateTimeDTO;
@@ -81,9 +83,13 @@ public class PositionRestService {
     @Path("/position")
     @Produces(MediaType.APPLICATION_JSON)
     public PositionDTO getPosition() {
-        return new PositionDTO(positionServiceImpl.getPosition());
-    }
+        if (positionServiceImpl.isLocked()) {
+            return new PositionDTO(positionServiceImpl.getPosition());
+        }
 
+        throw DefaultExceptionHandler.toWebApplicationException(
+                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Position is not locked"));
+    }
 
     /**
      * GET method.
@@ -98,13 +104,20 @@ public class PositionRestService {
     @Path("/localdatetime")
     @Produces(MediaType.APPLICATION_JSON)
     public LocalDateTimeDTO getLocalDateTime() {
-        return new LocalDateTimeDTO(positionServiceImpl.getDateTime());
+        if (positionServiceImpl.isLocked()) {
+            return new LocalDateTimeDTO(positionServiceImpl.getDateTime());
+        }
+
+        throw DefaultExceptionHandler.toWebApplicationException(
+                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Position is not locked"));
+
     }
 
     /**
      * GET method.
      *
-     * Get returns true if a valid geographic position has been received by position service.
+     * Get returns true if a valid geographic position has been received by position
+     * service.
      *
      * @return a list of long that represents the list of snapshots managed by the
      *         framework.
@@ -114,6 +127,10 @@ public class PositionRestService {
     @Path("/islocked")
     @Produces(MediaType.APPLICATION_JSON)
     public IsLockedDTO getIsLocked() {
-        return new IsLockedDTO(positionServiceImpl.isLocked());
+        try {
+            return new IsLockedDTO(positionServiceImpl.isLocked());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
     }
 }

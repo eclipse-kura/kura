@@ -429,7 +429,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeNone() {
+    public void build80211WirelessSecuritySettingsShouldThrowWhenGivenSecurityTypeNone() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
@@ -440,12 +440,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
-        // TODO: This test is wrong! It should not work with security type NONE
-        // If security type is set to NONE the 802-11-wireless-security setting should not be set
-        // Throw an exception maybe?
-        thenNoExceptionsHaveBeenThrown();
-        thenResultingMapContains("key-mgmt", "none");
-        thenResultingMapNotContains("proto");
+        thenIllegalArgumentExceptionThrown();
     }
 
     @Test

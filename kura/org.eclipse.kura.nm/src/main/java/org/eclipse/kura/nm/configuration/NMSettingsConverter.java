@@ -181,30 +181,44 @@ public class NMSettingsConverter {
         String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
                 propMode.toLowerCase());
 
-        String psk = props
-                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
-                .toString();
-        settings.put("psk", new Variant<>(psk));
-        String keyMgmt = wifiKeyMgmtConvert(securityType);
-        settings.put("key-mgmt", new Variant<>(keyMgmt));
+        if ("SECURITY_WEP".equals(securityType)) {
+            String keyMgmt = wifiKeyMgmtConvert(securityType);
+            settings.put("key-mgmt", new Variant<>(keyMgmt));
+            settings.put("wep-key-type", new Variant<>(1));
 
-        if ("wpa-psk".equals(keyMgmt)) {
+            String wepKey = props
+                    .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
+                    .toString();
+            settings.put("wep-key0", new Variant<>(wepKey));
+        } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
+                || "SECURITY_WPA_WPA2".equals(securityType)) {
+
+            String keyMgmt = wifiKeyMgmtConvert(securityType);
+            settings.put("key-mgmt", new Variant<>(keyMgmt));
+
+            String psk = props
+                    .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
+                    .toString();
+            settings.put("psk", new Variant<>(psk));
+
             List<String> proto = wifiProtoConvert(securityType);
             settings.put("proto", new Variant<>(proto, "as"));
-        }
 
-        Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", deviceId,
-                propMode.toLowerCase());
-        if (group.isPresent()) {
-            List<String> nmGroup = wifiCipherConvert(group.get());
-            settings.put("group", new Variant<>(nmGroup, "as"));
-        }
+            Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers",
+                    deviceId, propMode.toLowerCase());
+            if (group.isPresent()) {
+                List<String> nmGroup = wifiCipherConvert(group.get());
+                settings.put("group", new Variant<>(nmGroup, "as"));
+            }
 
-        Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers",
-                deviceId, propMode.toLowerCase());
-        if (pairwise.isPresent()) {
-            List<String> nmPairwise = wifiCipherConvert(pairwise.get());
-            settings.put("pairwise", new Variant<>(nmPairwise, "as"));
+            Optional<String> pairwise = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.pairwiseCiphers",
+                    deviceId, propMode.toLowerCase());
+            if (pairwise.isPresent()) {
+                List<String> nmPairwise = wifiCipherConvert(pairwise.get());
+                settings.put("pairwise", new Variant<>(nmPairwise, "as"));
+            }
+        } else {
+            throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
         }
 
         return settings;

@@ -46,6 +46,8 @@ public class NMSettingsConverter {
     private static final String PPP_REFUSE_MSCHAP = "refuse-mschap";
     private static final String PPP_REFUSE_MSCHAPV2 = "refuse-mschapv2";
 
+    private static final int NM_WEP_KEY_TYPE_KEY = 1;
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -194,7 +196,7 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         settings.put("key-mgmt", new Variant<>("none"));
-        settings.put("wep-key-type", new Variant<>(1));
+        settings.put("wep-key-type", new Variant<>(NM_WEP_KEY_TYPE_KEY));
 
         String wepKey = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())

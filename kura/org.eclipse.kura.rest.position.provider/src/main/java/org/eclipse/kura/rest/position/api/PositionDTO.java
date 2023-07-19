@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.rest.linux.position.api;
+package org.eclipse.kura.rest.position.api;
 
 import org.osgi.util.position.Position;
 
@@ -18,12 +18,12 @@ public class PositionDTO {
 
     private final double longitude;
     private final double latitude;
-    private final double speed;
+    private final double altitude;
 
     public PositionDTO(Position position) {
-        this.longitude = position.getLongitude().getValue();
-        this.latitude = position.getLatitude().getValue();
-        this.speed = position.getSpeed().getValue();
+        this.longitude = Math.toDegrees(position.getLongitude().getValue());
+        this.latitude = Math.toDegrees(position.getLatitude().getValue());
+        this.altitude = position.getAltitude().getValue();
     }
 
     public double getLongitude() {
@@ -34,8 +34,7 @@ public class PositionDTO {
         return latitude;
     }
 
-    public double getSpeed() {
-        return speed;
-    }
-    
+    public double getAltitude() {
+        return altitude;
+    }    
 }

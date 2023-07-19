@@ -23,50 +23,47 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "WFDIEs", type = Wpa_supplicant1.PropertyWFDIEsType.class, access = Access.READ_WRITE)
 public interface Wpa_supplicant1 extends DBusInterface {
 
-
     public DBusPath CreateInterface(Map<String, Variant<?>> args);
-    public void RemoveInterface(DBusPath path);
-    public DBusPath GetInterface(String ifname);
-    public void ExpectDisconnect();
 
+    public void RemoveInterface(DBusPath path);
+
+    public DBusPath GetInterface(String ifname);
+
+    public void ExpectDisconnect();
 
     public static class InterfaceAdded extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath addedInterfacePath;
         private final Map<String, Variant<?>> properties;
 
-        public InterfaceAdded(String _path, DBusPath _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _path, _properties);
-            this.path = _path;
+        public InterfaceAdded(String _path, DBusPath _addedInterfacePath, Map<String, Variant<?>> _properties)
+                throws DBusException {
+            super(_path, _addedInterfacePath, _properties);
+            this.addedInterfacePath = _addedInterfacePath;
             this.properties = _properties;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getAddedInterfacePath() {
+            return this.addedInterfacePath;
         }
 
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
-
     }
 
     public static class InterfaceRemoved extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath removedInterfacePath;
 
-        public InterfaceRemoved(String _path, DBusPath _path) throws DBusException {
-            super(_path, _path);
-            this.path = _path;
+        public InterfaceRemoved(String _path, DBusPath _removedInterfacePath) throws DBusException {
+            super(_path, _removedInterfacePath);
+            this.removedInterfacePath = _removedInterfacePath;
         }
 
-
-        public DBusPath getPath() {
-            return path;
+        public DBusPath getRemovedInterfacePath() {
+            return this.removedInterfacePath;
         }
-
 
     }
 
@@ -79,39 +76,25 @@ public interface Wpa_supplicant1 extends DBusInterface {
             this.properties = _properties;
         }
 
-
         public Map<String, Variant<?>> getProperties() {
             return properties;
         }
-
 
     }
 
     public static interface PropertyInterfacesType extends TypeRef<List<DBusPath>> {
 
-
-
-
     }
 
     public static interface PropertyEapMethodsType extends TypeRef<List<String>> {
-
-
-
 
     }
 
     public static interface PropertyCapabilitiesType extends TypeRef<List<String>> {
 
-
-
-
     }
 
     public static interface PropertyWFDIEsType extends TypeRef<List<Byte>> {
-
-
-
 
     }
 }

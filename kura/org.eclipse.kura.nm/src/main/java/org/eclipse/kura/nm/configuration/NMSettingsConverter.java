@@ -48,6 +48,9 @@ public class NMSettingsConverter {
 
     private static final int NM_WEP_KEY_TYPE_KEY = 1;
 
+    private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
+    private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -69,8 +72,8 @@ public class NMSettingsConverter {
                     deviceId);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
 
-            String propMode = properties.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
-            String securityType = properties.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+            String propMode = properties.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
+            String securityType = properties.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
                     propMode.toLowerCase());
             if (!"NONE".equals(securityType)) {
                 // Only populate "802-11-wireless-security" field if security is enabled
@@ -153,7 +156,7 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+        String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
 
         String mode = wifiModeConvert(propMode);
         settings.put("mode", new Variant<>(mode));
@@ -178,8 +181,8 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String deviceId) {
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
-        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+        String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
+        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
                 propMode.toLowerCase());
 
         if ("SECURITY_WEP".equals(securityType)) {
@@ -218,7 +221,7 @@ public class NMSettingsConverter {
                 .toString();
         settings.put("psk", new Variant<>(psk));
 
-        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
                 propMode.toLowerCase());
         List<String> proto = wifiProtoConvert(securityType);
         settings.put("proto", new Variant<>(proto, "as"));

@@ -212,11 +212,6 @@ public class NMStatusConverter {
         }
     }
 
-    public static String getModemDeviceHwPath(Properties modemProperties) {
-        String modemDeviceProperty = (String) modemProperties.Get(MM_MODEM_BUS_NAME, "Device");
-        return modemDeviceProperty.substring(modemDeviceProperty.lastIndexOf("/") + 1);
-    }
-
     private static String getHwAddressFrom(DevicePropertiesWrapper devicePropertiesWrapper) {
         try {
             return devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);

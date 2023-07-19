@@ -28,7 +28,7 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-	<artifactId>org.eclipse.kura.rest.linux.position.provider</artifactId>
+	<artifactId>org.eclipse.kura.rest.position.provider</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 </project>

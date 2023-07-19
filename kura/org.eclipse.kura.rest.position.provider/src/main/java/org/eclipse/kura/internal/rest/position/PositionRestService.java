@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.linux.position;
+package org.eclipse.kura.internal.rest.position;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -21,28 +21,30 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.linux.position.PositionServiceImpl;
+import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
-import org.eclipse.kura.rest.linux.position.api.PositionDTO;
+import org.eclipse.kura.rest.position.api.IsLockedDTO;
+import org.eclipse.kura.rest.position.api.LocalDateTimeDTO;
+import org.eclipse.kura.rest.position.api.PositionDTO;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/linux/position/v1")
-public class LinuxPositionRestService {
+@Path("/position/v1")
+public class PositionRestService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxPositionRestService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PositionRestService.class);
 
     private static final String APP_ID = "POS-V1";
 
-    private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.linux.position";
+    private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.position";
 
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    private PositionServiceImpl positionServiceImpl;
+    private PositionService positionServiceImpl;
 
-    public void setPositionServiceImpl(PositionServiceImpl positionServiceImpl) {
+    public void setPositionServiceImpl(PositionService positionServiceImpl) {
         this.positionServiceImpl = positionServiceImpl;
     }
 
@@ -75,10 +77,43 @@ public class LinuxPositionRestService {
      *         framework.
      */
     @GET
-    @RolesAllowed("configuration")
-    @Path("/snapshots")
+    @RolesAllowed("position")
+    @Path("/position")
     @Produces(MediaType.APPLICATION_JSON)
-    public PositionDTO listSnapshots() {
+    public PositionDTO getPosition() {
         return new PositionDTO(positionServiceImpl.getPosition());
+    }
+
+
+    /**
+     * GET method.
+     *
+     * Get localDateTime.
+     *
+     * @return a list of long that represents the list of snapshots managed by the
+     *         framework.
+     */
+    @GET
+    @RolesAllowed("position")
+    @Path("/localdatetime")
+    @Produces(MediaType.APPLICATION_JSON)
+    public LocalDateTimeDTO getLocalDateTime() {
+        return new LocalDateTimeDTO(positionServiceImpl.getDateTime());
+    }
+
+    /**
+     * GET method.
+     *
+     * Get returns true if a valid geographic position has been received by position service.
+     *
+     * @return a list of long that represents the list of snapshots managed by the
+     *         framework.
+     */
+    @GET
+    @RolesAllowed("position")
+    @Path("/islocked")
+    @Produces(MediaType.APPLICATION_JSON)
+    public IsLockedDTO getIsLocked() {
+        return new IsLockedDTO(positionServiceImpl.isLocked());
     }
 }

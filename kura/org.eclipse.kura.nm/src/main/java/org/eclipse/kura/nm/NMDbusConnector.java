@@ -143,7 +143,7 @@ public class NMDbusConnector {
     }
 
     public synchronized String getInterfaceName(String interfaceId) throws DBusException {
-        Optional<Device> device = getDeviceByInterfaceId(interfaceId);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
             if (!NMDeviceType.NM_DEVICE_TYPE_MODEM.equals(deviceType)) {
@@ -167,7 +167,7 @@ public class NMDbusConnector {
         return "";
     }
 
-    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
+    private Optional<Device> getNetworkManagerDeviceByInterfaceId(String interfaceId) throws DBusException {
         for (Device nmDevice : this.networkManager.getAllDevices()) {
             String deviceInterfaceId = getInterfaceIdByDBusPath(nmDevice.getObjectPath());
             if (deviceInterfaceId.equals(interfaceId)) {
@@ -191,7 +191,7 @@ public class NMDbusConnector {
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
-        Optional<Device> device = getDeviceByInterfaceId(interfaceId);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
@@ -356,7 +356,7 @@ public class NMDbusConnector {
         NetworkProperties properties = new NetworkProperties(networkConfiguration);
         List<String> configuredInterfaceIds = properties.getStringList("net.interfaces");
 
-        Optional<Device> device = getDeviceByInterfaceId(deviceIdToBeConfigured);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(deviceIdToBeConfigured);
         if (device.isPresent()) {
             if (configuredInterfaceIds.contains(deviceIdToBeConfigured)) {
                 manageConfiguredInterface(device.get(), deviceIdToBeConfigured, properties);

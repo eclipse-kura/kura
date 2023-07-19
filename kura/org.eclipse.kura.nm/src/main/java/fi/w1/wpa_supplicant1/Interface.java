@@ -508,6 +508,33 @@ public interface Interface extends DBusInterface {
 
     }
 
+    public static class NetworkRequest extends DBusSignal {
+
+        private final DBusPath networkPath;
+        private final String field;
+        private final String text;
+
+        public NetworkRequest(String _path, DBusPath _networkPath, String _field, String _text) throws DBusException {
+            super(_path, _networkPath, _field, _text);
+            this.networkPath = _networkPath;
+            this.field = _field;
+            this.text = _text;
+        }
+
+        public DBusPath getNetworkPath() {
+            return this.networkPath;
+        }
+
+        public String getField() {
+            return this.field;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+    }
+
     public static interface PropertyCapabilitiesType extends TypeRef<Map<String, Variant>> {
 
     }

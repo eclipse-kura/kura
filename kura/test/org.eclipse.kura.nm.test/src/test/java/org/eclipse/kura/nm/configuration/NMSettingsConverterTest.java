@@ -429,7 +429,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeNone() {
+    public void build80211WirelessSecuritySettingsShouldThrowWhenGivenSecurityTypeNone() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
@@ -440,9 +440,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenNoExceptionsHaveBeenThrown();
-        thenResultingMapContains("key-mgmt", "none");
-        thenResultingMapNotContains("proto");
+        thenIllegalArgumentExceptionThrown();
     }
 
     @Test
@@ -459,7 +457,10 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "none");
+        thenResultingMapContains("wep-key-type", 1);
+        thenResultingMapContains("wep-key0", "test");
         thenResultingMapNotContains("proto");
+        thenResultingMapNotContains("wpa-psk");
     }
 
     @Test
@@ -477,6 +478,8 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("proto", new Variant<>(Arrays.asList("wpa"), "as").getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
     }
 
     @Test
@@ -494,6 +497,8 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("key-mgmt", "wpa-psk");
         thenResultingMapContains("proto", new Variant<>(Arrays.asList("rsn"), "as").getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
     }
 
     @Test

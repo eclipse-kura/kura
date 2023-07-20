@@ -46,6 +46,11 @@ public class NMSettingsConverter {
     private static final String PPP_REFUSE_MSCHAP = "refuse-mschap";
     private static final String PPP_REFUSE_MSCHAPV2 = "refuse-mschapv2";
 
+    private static final int NM_WEP_KEY_TYPE_KEY = 1;
+
+    private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
+    private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -67,10 +72,11 @@ public class NMSettingsConverter {
                     deviceId);
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
 
-            String propMode = properties.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
-            String securityType = properties.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
+            String propMode = properties.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
+            String securityType = properties.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
                     propMode.toLowerCase());
             if (!"NONE".equals(securityType)) {
+                // Only populate "802-11-wireless-security" field if security is enabled
                 Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
                         .build80211WirelessSecuritySettings(properties, deviceId);
                 newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
@@ -150,7 +156,7 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
+        String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
 
         String mode = wifiModeConvert(propMode);
         settings.put("mode", new Variant<>(mode));
@@ -175,23 +181,50 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String deviceId) {
+        String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
+        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
+                propMode.toLowerCase());
+
+        if ("SECURITY_WEP".equals(securityType)) {
+            return createWEPSettings(props, deviceId, propMode);
+        } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
+                || "SECURITY_WPA_WPA2".equals(securityType)) {
+            return createWPAWPA2Settings(props, deviceId, propMode);
+        } else {
+            throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
+        }
+    }
+
+    private static Map<String, Variant<?>> createWEPSettings(NetworkProperties props, String deviceId,
+            String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String propMode = props.get(String.class, "net.interface.%s.config.wifi.mode", deviceId);
-        String securityType = props.get(String.class, "net.interface.%s.config.wifi.%s.securityType", deviceId,
-                propMode.toLowerCase());
+        settings.put("key-mgmt", new Variant<>("none"));
+        settings.put("wep-key-type", new Variant<>(NM_WEP_KEY_TYPE_KEY));
+
+        String wepKey = props
+                .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
+                .toString();
+        settings.put("wep-key0", new Variant<>(wepKey));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWPAWPA2Settings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        settings.put("key-mgmt", new Variant<>("wpa-psk"));
 
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
                 .toString();
         settings.put("psk", new Variant<>(psk));
-        String keyMgmt = wifiKeyMgmtConvert(securityType);
-        settings.put("key-mgmt", new Variant<>(keyMgmt));
 
-        if ("wpa-psk".equals(keyMgmt)) {
-            List<String> proto = wifiProtoConvert(securityType);
-            settings.put("proto", new Variant<>(proto, "as"));
-        }
+        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
+                propMode.toLowerCase());
+        List<String> proto = wifiProtoConvert(securityType);
+        settings.put("proto", new Variant<>(proto, "as"));
 
         Optional<String> group = props.getOpt(String.class, "net.interface.%s.config.wifi.%s.groupCiphers", deviceId,
                 propMode.toLowerCase());
@@ -379,21 +412,6 @@ public class NMSettingsConverter {
             return Arrays.asList("tkip", "ccmp");
         default:
             throw new IllegalArgumentException(String.format("Unsupported WiFi cipher \"%s\"", kuraCipher));
-        }
-    }
-
-    private static String wifiKeyMgmtConvert(String kuraSecurityType) {
-        switch (kuraSecurityType) {
-        case "NONE":
-        case "SECURITY_WEP":
-            return "none";
-        case "SECURITY_WPA":
-        case "SECURITY_WPA2":
-        case "SECURITY_WPA_WPA2":
-            return "wpa-psk";
-        default:
-            throw new IllegalArgumentException(
-                    String.format("Unsupported WiFi key management \"%s\"", kuraSecurityType));
         }
     }
 

@@ -127,14 +127,14 @@ public class NMDbusConnector {
         logger.debug("NM Version: {}", nmVersion);
     }
 
-    public synchronized List<String> getDeviceIds() throws DBusException {
+    public synchronized List<String> getInterfaceIds() throws DBusException {
         List<Device> availableDevices = this.networkManager.getAllDevices();
 
         List<String> supportedDeviceNames = new ArrayList<>();
         for (Device device : availableDevices) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.getObjectPath());
             if (STATUS_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
-                supportedDeviceNames.add(getDeviceIdByDBusPath(device.getObjectPath()));
+                supportedDeviceNames.add(getInterfaceIdByDBusPath(device.getObjectPath()));
             }
 
         }
@@ -143,7 +143,7 @@ public class NMDbusConnector {
     }
 
     public synchronized String getInterfaceName(String interfaceId) throws DBusException {
-        Optional<Device> device = getDeviceByInterfaceId(interfaceId);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
             if (!NMDeviceType.NM_DEVICE_TYPE_MODEM.equals(deviceType)) {
@@ -167,9 +167,9 @@ public class NMDbusConnector {
         return "";
     }
 
-    private Optional<Device> getDeviceByInterfaceId(String interfaceId) throws DBusException {
+    private Optional<Device> getNetworkManagerDeviceByInterfaceId(String interfaceId) throws DBusException {
         for (Device nmDevice : this.networkManager.getAllDevices()) {
-            String deviceInterfaceId = getDeviceIdByDBusPath(nmDevice.getObjectPath());
+            String deviceInterfaceId = getInterfaceIdByDBusPath(nmDevice.getObjectPath());
             if (deviceInterfaceId.equals(interfaceId)) {
                 return Optional.of(nmDevice);
             }
@@ -177,7 +177,7 @@ public class NMDbusConnector {
         return Optional.empty();
     }
 
-    public String getDeviceIdByDBusPath(String dbusPath) throws DBusException {
+    public String getInterfaceIdByDBusPath(String dbusPath) throws DBusException {
         NMDeviceType deviceType = this.networkManager.getDeviceType(dbusPath);
         if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
             Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(dbusPath);
@@ -191,7 +191,7 @@ public class NMDbusConnector {
     public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
-        Optional<Device> device = getDeviceByInterfaceId(interfaceId);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
             Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
@@ -343,7 +343,7 @@ public class NMDbusConnector {
         List<Device> availableDevices = this.networkManager.getAllDevices();
         availableDevices.forEach(device -> {
             try {
-                String deviceId = getDeviceIdByDBusPath(device.getObjectPath());
+                String deviceId = getInterfaceIdByDBusPath(device.getObjectPath());
                 doApply(deviceId, networkConfiguration);
             } catch (DBusException | DBusExecutionException | IllegalArgumentException | NoSuchElementException e) {
                 logger.error("Unable to apply configuration to the device path {}", device.getObjectPath(), e);
@@ -356,7 +356,7 @@ public class NMDbusConnector {
         NetworkProperties properties = new NetworkProperties(networkConfiguration);
         List<String> configuredInterfaceIds = properties.getStringList("net.interfaces");
 
-        Optional<Device> device = getDeviceByInterfaceId(deviceIdToBeConfigured);
+        Optional<Device> device = getNetworkManagerDeviceByInterfaceId(deviceIdToBeConfigured);
         if (device.isPresent()) {
             if (configuredInterfaceIds.contains(deviceIdToBeConfigured)) {
                 manageConfiguredInterface(device.get(), deviceIdToBeConfigured, properties);

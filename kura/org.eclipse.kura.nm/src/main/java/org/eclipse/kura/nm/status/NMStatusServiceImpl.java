@@ -90,7 +90,7 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     public List<String> getInterfaceIds() throws KuraException {
         List<String> interfaces = new ArrayList<>();
         try {
-            interfaces = this.nmDbusConnector.getDeviceIds();
+            interfaces = this.nmDbusConnector.getInterfaceIds();
         } catch (DBusException e) {
             throw new KuraIOException(e, "Could not retrieve interfaces from NM.");
         }

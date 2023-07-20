@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.nm.KuraIpStatus;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;

@@ -52,7 +52,7 @@ node {
                                 -Dsonar.java.binaries='target/' \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
-                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*'''
+                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*'''
                         }
                     }
                 }

@@ -26,7 +26,7 @@ import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.position.api.IsLockedDTO;
-import org.eclipse.kura.rest.position.api.LocalDateTimeDTO;
+import org.eclipse.kura.rest.position.api.DateTimeDTO;
 import org.eclipse.kura.rest.position.api.PositionDTO;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -103,9 +103,9 @@ public class PositionRestService {
     @RolesAllowed("position")
     @Path("/localdatetime")
     @Produces(MediaType.APPLICATION_JSON)
-    public LocalDateTimeDTO getLocalDateTime() {
+    public DateTimeDTO getLocalDateTime() {
         if (positionServiceImpl.isLocked()) {
-            return new LocalDateTimeDTO(positionServiceImpl.getDateTime());
+            return new DateTimeDTO(positionServiceImpl.getDateTime());
         }
 
         throw DefaultExceptionHandler.toWebApplicationException(

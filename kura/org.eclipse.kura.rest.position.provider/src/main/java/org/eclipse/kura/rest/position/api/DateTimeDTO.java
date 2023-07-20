@@ -13,7 +13,7 @@
 package org.eclipse.kura.rest.position.api;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeDTO {
@@ -21,7 +21,7 @@ public class DateTimeDTO {
     String dateTime;
 
     public DateTimeDTO(LocalDateTime localDateTime) {
-        this.dateTime = localDateTime.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_INSTANT);
+        this.dateTime = localDateTime.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
     }
 
     public String getDateTime() {

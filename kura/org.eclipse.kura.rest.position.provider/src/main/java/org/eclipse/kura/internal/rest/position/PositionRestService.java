@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 @Path("/position/v1")
 public class PositionRestService {
 
+    private static final String POSITION_IS_NOT_LOCKED = "Position is not locked";
+
     private static final Logger logger = LoggerFactory.getLogger(PositionRestService.class);
 
     private static final String APP_ID = "POS-V1";
@@ -88,7 +90,7 @@ public class PositionRestService {
         }
 
         throw DefaultExceptionHandler.toWebApplicationException(
-                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Position is not locked"));
+                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, POSITION_IS_NOT_LOCKED));
     }
 
     /**
@@ -109,7 +111,7 @@ public class PositionRestService {
         }
 
         throw DefaultExceptionHandler.toWebApplicationException(
-                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Position is not locked"));
+                new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, POSITION_IS_NOT_LOCKED));
 
     }
 

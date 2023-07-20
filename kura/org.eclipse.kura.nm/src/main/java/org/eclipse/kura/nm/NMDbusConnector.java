@@ -78,6 +78,7 @@ public class NMDbusConnector {
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
     private final ModemManagerDbusWrapper modemManager;
+    private final WpaSupplicantDbusWrapper wpaSupplicant;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -90,6 +91,7 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
+        this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -276,6 +278,7 @@ public class NMDbusConnector {
         Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 wirelessDevice.getObjectPath(), Properties.class);
 
+        this.wpaSupplicant.triggerScan(interfaceId); // Trigger rescan of APs
         List<Properties> accessPoints = this.networkManager.getAllAccessPoints(wirelessDevice);
 
         DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "ActiveAccessPoint");

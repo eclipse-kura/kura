@@ -1,6 +1,7 @@
 package org.eclipse.kura.nm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -9,24 +10,24 @@ public class KuraWifiSecurityTypeTest {
 
     KuraWifiSecurityType securityType;
     String stringSecurityType;
-    private boolean exceptionWasThrown;
+    private Exception occurredException;
 
     @Test
     public void conversionThrowsForTypeUnknown() {
         whenFromStringIsCalledWith("UNKNOWN");
-        thenExceptionWasThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
     public void conversionThrowsForTypeNull() {
         whenFromStringIsCalledWith(null);
-        thenExceptionWasThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
     public void conversionThrowsForTypeEmpty() {
         whenFromStringIsCalledWith("");
-        thenExceptionWasThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -62,8 +63,8 @@ public class KuraWifiSecurityTypeTest {
     public void whenFromStringIsCalledWith(String securityType) {
         try {
             this.securityType = KuraWifiSecurityType.fromString(securityType);
-        } catch (IllegalArgumentException e) {
-            this.exceptionWasThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
@@ -71,7 +72,8 @@ public class KuraWifiSecurityTypeTest {
         assertEquals(securityType, this.securityType);
     }
 
-    private void thenExceptionWasThrown() {
-        assertTrue(this.exceptionWasThrown);
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedExceptionClass) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedExceptionClass, this.occurredException.getClass());
     }
 }

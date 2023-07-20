@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -34,6 +35,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "EapMethods", type = Wpa_supplicant1.PropertyEapMethodsType.class, access = Access.READ)
 @DBusProperty(name = "Capabilities", type = Wpa_supplicant1.PropertyCapabilitiesType.class, access = Access.READ)
 @DBusProperty(name = "WFDIEs", type = Wpa_supplicant1.PropertyWFDIEsType.class, access = Access.READ_WRITE)
+@DBusInterfaceName("fi.w1.wpa_supplicant1")
 public interface Wpa_supplicant1 extends DBusInterface {
 
     public DBusPath CreateInterface(Map<String, Variant<?>> args);

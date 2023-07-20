@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -175,6 +176,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "GasRandMacAddr", type = String.class, access = Access.READ_WRITE)
 @DBusProperty(name = "DppConfigProcessing", type = String.class, access = Access.READ_WRITE)
 @DBusProperty(name = "ColocIntfReporting", type = String.class, access = Access.READ_WRITE)
+@DBusInterfaceName("fi.w1.wpa_supplicant1.Interface")
 public interface Interface extends DBusInterface {
 
     public void Scan(Map<String, Variant<?>> args);

@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.time.LocalDateTime;
 import org.osgi.util.position.Position;
 import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.message.KuraPayload;
@@ -49,18 +50,20 @@ public class PositionRestServiceTest {
 
     @Test
     public void getPositionTest() throws KuraException {
+        givenMockedPositionService();
         givenIsLocked(true);
-        givenPosition(1.0, 1.0, 4.5);
+        givenPosition(0.1, 0.2, 4.5);
 
         whenGetPosition();
 
-        thenPositionIs(1.0, 2.3, 4.5);
+        thenPositionIs(0.1, 0.2, 4.5);
     }
 
     @Test
     public void getLocalDateTimeTest() throws KuraException {
+        givenMockedPositionService();
         givenIsLocked(true);
-        givenLocalDateTime("2023-07-19T18:26:38Z");
+        givenLocalDateTime("2023-07-19T18:26:38");
 
         whenGetLocalDateTime();
 
@@ -69,6 +72,7 @@ public class PositionRestServiceTest {
 
     @Test
     public void getIsLockedTest() throws KuraException {
+        givenMockedPositionService();
         givenIsLocked(true);
 
         whenGetIsLocked();
@@ -76,12 +80,17 @@ public class PositionRestServiceTest {
         thenIsLockedIs(true);
     }
 
-    private void givenPosition(double longitude, double latitude, double altitude){
-        Position testPosition = new Position(new Measurement(Math.toRadians(latitude)), new Measurement(Math.toRadians(longitude)), new Measurement(altitude), new Measurement(0.0), new Measurement(0.0));
+    private void givenMockedPositionService(){
+        positionRestService.setPositionServiceImpl(positionService);
+    }
+
+    private void givenPosition(double longitude, double latitude, double altitude) {
+        Position testPosition = new Position(new Measurement(Math.toRadians(latitude), Unit.rad),
+                new Measurement(Math.toRadians(longitude), Unit.rad), new Measurement(altitude, Unit.m), null, null);
         when(positionService.getPosition()).thenReturn(testPosition);
     }
 
-    private void givenLocalDateTime(String zonedDateTime){
+    private void givenLocalDateTime(String zonedDateTime) {
         LocalDateTime testLocalDateTime = LocalDateTime.parse(zonedDateTime);
         when(positionService.getDateTime()).thenReturn(testLocalDateTime);
     }
@@ -102,17 +111,17 @@ public class PositionRestServiceTest {
         isLockedDTO = positionRestService.getIsLocked();
     }
 
-    private void thenPositionIs(double longitude, double latitude, double altitude){
+    private void thenPositionIs(double longitude, double latitude, double altitude) {
         assertEquals(longitude, positionDTO.getLongitude(), 0.0);
         assertEquals(latitude, positionDTO.getLatitude(), 0.0);
         assertEquals(altitude, positionDTO.getAltitude(), 0.0);
     }
 
-    private void thenLocalDateTimeIs(String zonedDateTime){
+    private void thenLocalDateTimeIs(String zonedDateTime) {
         assertEquals(zonedDateTime, localDateTimeDTO.getDateTime());
     }
 
-    private void thenIsLockedIs(boolean isLocked){
+    private void thenIsLockedIs(boolean isLocked) {
         assertEquals(isLocked, isLockedDTO.getIsLocked());
     }
 

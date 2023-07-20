@@ -94,7 +94,7 @@ public interface PositionService {
     public String getNmeaDate();
 
     /**
-     * Returns the current date from {@link PositionServiceProvider}
+     * Returns the current date from {@link PositionServiceProvider}. Returned DateTime is in UTC TimeZone.
      *
      * @since 2.3
      */

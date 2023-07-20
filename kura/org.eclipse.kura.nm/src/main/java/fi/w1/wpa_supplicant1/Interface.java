@@ -29,6 +29,7 @@ import org.freedesktop.dbus.types.Variant;
 /**
  * Auto-generated class.
  */
+@DBusInterfaceName("fi.w1.wpa_supplicant1.Interface")
 @DBusProperty(name = "Capabilities", type = Interface.PropertyCapabilitiesType.class, access = Access.READ)
 @DBusProperty(name = "State", type = String.class, access = Access.READ)
 @DBusProperty(name = "Scanning", type = Boolean.class, access = Access.READ)
@@ -176,7 +177,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "GasRandMacAddr", type = String.class, access = Access.READ_WRITE)
 @DBusProperty(name = "DppConfigProcessing", type = String.class, access = Access.READ_WRITE)
 @DBusProperty(name = "ColocIntfReporting", type = String.class, access = Access.READ_WRITE)
-@DBusInterfaceName("fi.w1.wpa_supplicant1.Interface")
 public interface Interface extends DBusInterface {
 
     public void Scan(Map<String, Variant<?>> args);

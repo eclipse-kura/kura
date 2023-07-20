@@ -28,6 +28,7 @@ import org.freedesktop.dbus.types.Variant;
 /**
  * Auto-generated class.
  */
+@DBusInterfaceName("fi.w1.wpa_supplicant1")
 @DBusProperty(name = "DebugLevel", type = String.class, access = Access.READ_WRITE)
 @DBusProperty(name = "DebugTimestamp", type = Boolean.class, access = Access.READ_WRITE)
 @DBusProperty(name = "DebugShowKeys", type = Boolean.class, access = Access.READ_WRITE)
@@ -35,7 +36,6 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "EapMethods", type = Wpa_supplicant1.PropertyEapMethodsType.class, access = Access.READ)
 @DBusProperty(name = "Capabilities", type = Wpa_supplicant1.PropertyCapabilitiesType.class, access = Access.READ)
 @DBusProperty(name = "WFDIEs", type = Wpa_supplicant1.PropertyWFDIEsType.class, access = Access.READ_WRITE)
-@DBusInterfaceName("fi.w1.wpa_supplicant1")
 public interface Wpa_supplicant1 extends DBusInterface {
 
     public DBusPath CreateInterface(Map<String, Variant<?>> args);

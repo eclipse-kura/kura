@@ -27,6 +27,7 @@ public class SqliteProviderActivatorTest {
 
     @Test
     public void shouldSetSqliteTempDirIfUnset() {
+        givenNoSystemPropertyValue("org.sqlite.tmpdir");
         givenBundleStorageAreaPath("/tmp/foo");
 
         whenActivatorIsStarted();
@@ -37,6 +38,7 @@ public class SqliteProviderActivatorTest {
 
     @Test
     public void shouldNotSetSqliteTempDirIfBundleStorageAreaIsNotAvailable() {
+        givenNoSystemPropertyValue("org.sqlite.tmpdir");
         givenNoBundleStorageArea();
 
         whenActivatorIsStarted();
@@ -67,9 +69,34 @@ public class SqliteProviderActivatorTest {
         thenSystemPropertyValueIs("org.sqlite.tmpdir", temporaryDirectoryPath());
     }
 
+    @Test
+    public void shouldClearSqliteTempDirOnStopIfChanged() {
+        givenNoSystemPropertyValue("org.sqlite.tmpdir");
+        givenBundleStorageAreaPath("/tmp/foo");
+        givenStartedActivator();
+
+        whenActivatorIsStopped();
+
+        thenNoExceptionIsThrown();
+        thenSystemPropertyValueIs("org.sqlite.tmpdir", null);
+    }
+
+    @Test
+    public void shouldNotClearSqliteTempDirOnStopIfNotChanged() {
+        givenSystemProperty("org.sqlite.tmpdir", temporaryDirectoryPath());
+        givenBundleStorageAreaPath("/tmp/foo");
+        givenStartedActivator();
+
+        whenActivatorIsStopped();
+
+        thenNoExceptionIsThrown();
+        thenSystemPropertyValueIs("org.sqlite.tmpdir", temporaryDirectoryPath());
+    }
+
     private final BundleContext bundleContext = Mockito.mock(BundleContext.class);
     private Optional<Exception> exception = Optional.empty();
     private Optional<String> temporaryDirectoryPath = Optional.empty();
+    private SqliteProviderActivator activator = new SqliteProviderActivator();
 
     private void givenBundleStorageAreaPath(String path) {
         Mockito.when(bundleContext.getDataFile("")).thenReturn(new File(path));
@@ -83,9 +110,28 @@ public class SqliteProviderActivatorTest {
         System.setProperty(key, value);
     }
 
+    private void givenNoSystemPropertyValue(final String key) {
+        System.clearProperty(key);
+    }
+
+    private void givenStartedActivator() {
+        whenActivatorIsStarted();
+        thenNoExceptionIsThrown();
+    }
+
     private void whenActivatorIsStarted() {
         try {
-            new SqliteProviderActivator().start(bundleContext);
+            this.exception = Optional.empty();
+            activator.start(bundleContext);
+        } catch (Exception e) {
+            this.exception = Optional.of(e);
+        }
+    }
+
+    private void whenActivatorIsStopped() {
+        try {
+            this.exception = Optional.empty();
+            activator.stop(bundleContext);
         } catch (Exception e) {
             this.exception = Optional.of(e);
         }

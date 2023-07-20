@@ -14,6 +14,7 @@ package org.eclipse.kura.rest.position.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.WebApplicationException;
 import java.time.ZonedDateTime;
 import java.time.LocalDateTime;
 import org.osgi.util.position.Position;
@@ -48,8 +50,10 @@ public class PositionRestServiceTest {
     private PositionDTO positionDTO;
     private DateTimeDTO localDateTimeDTO;
 
+    private Exception testException;
+
     @Test
-    public void getPositionTest() throws KuraException {
+    public void getPositionTest() {
         givenMockedPositionService();
         givenIsLocked(true);
         givenPosition(0.1, 0.2, 4.5);
@@ -57,10 +61,11 @@ public class PositionRestServiceTest {
         whenGetPosition();
 
         thenPositionIs(0.1, 0.2, 4.5);
+        thenNoExceptionIsThrown();
     }
 
     @Test
-    public void getLocalDateTimeTest() throws KuraException {
+    public void getLocalDateTimeTest() {
         givenMockedPositionService();
         givenIsLocked(true);
         givenLocalDateTime("2023-07-19T18:26:38");
@@ -68,17 +73,51 @@ public class PositionRestServiceTest {
         whenGetLocalDateTime();
 
         thenLocalDateTimeIs("2023-07-19T18:26:38Z");
+        thenNoExceptionIsThrown();
     }
 
     @Test
-    public void getIsLockedTest() throws KuraException {
+    public void getIsLockedTest() {
         givenMockedPositionService();
         givenIsLocked(true);
 
         whenGetIsLocked();
 
         thenIsLockedIs(true);
+        thenNoExceptionIsThrown();
     }
+
+    @Test
+    public void getIsLockedTestFalse() {
+        givenMockedPositionService();
+        givenIsLocked(false);
+
+        whenGetIsLocked();
+
+        thenIsLockedIs(false);
+        thenNoExceptionIsThrown();
+    }
+
+    @Test
+    public void getPositionNoLockTest(){
+        givenMockedPositionService();
+        givenIsLocked(false);
+
+        whenGetPosition();
+
+        thenExceptionIsThrown();
+    }
+
+    @Test
+    public void getLocalDateTimeNoLockTest(){
+        givenMockedPositionService();
+        givenIsLocked(false);
+
+        whenGetLocalDateTime();
+
+        thenExceptionIsThrown();
+    }
+
 
     private void givenMockedPositionService(){
         positionRestService.setPositionServiceImpl(positionService);
@@ -99,16 +138,28 @@ public class PositionRestServiceTest {
         when(positionService.isLocked()).thenReturn(isLocked);
     }
 
-    private void whenGetPosition() throws KuraException {
-        positionDTO = positionRestService.getPosition();
+    private void whenGetPosition() {
+        try {
+            positionDTO = positionRestService.getPosition();
+        } catch (Exception e) {
+            testException = e;
+        }
     }
 
-    private void whenGetLocalDateTime() throws KuraException {
-        localDateTimeDTO = positionRestService.getLocalDateTime();
+    private void whenGetLocalDateTime() {
+        try{
+            localDateTimeDTO = positionRestService.getLocalDateTime();
+        } catch (Exception e) {
+            testException = e;
+        }
     }
 
-    private void whenGetIsLocked() throws KuraException {
-        isLockedDTO = positionRestService.getIsLocked();
+    private void whenGetIsLocked() {
+        try{
+            isLockedDTO = positionRestService.getIsLocked();
+        } catch (Exception e) {
+            testException = e;
+        }
     }
 
     private void thenPositionIs(double longitude, double latitude, double altitude) {
@@ -125,4 +176,11 @@ public class PositionRestServiceTest {
         assertEquals(isLocked, isLockedDTO.getIsLocked());
     }
 
+    private void thenNoExceptionIsThrown() {
+        assertEquals(null, testException);
+    }
+
+    private void thenExceptionIsThrown() {
+        assertEquals(WebApplicationException.class, testException.getClass());
+    }
 }

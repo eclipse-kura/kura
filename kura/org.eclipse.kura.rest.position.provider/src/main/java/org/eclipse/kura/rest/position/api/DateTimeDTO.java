@@ -16,16 +16,16 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateTimeDTO {
+public class DateTimeDTO {
 
-    String localDateTime;
+    String dateTime;
 
-    public LocalDateTimeDTO(LocalDateTime localDateTime) {
-        this.localDateTime = localDateTime.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_INSTANT);
+    public DateTimeDTO(LocalDateTime localDateTime) {
+        this.dateTime = localDateTime.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_INSTANT);
     }
 
-    public String getLocalDateTime() {
-        return this.localDateTime;
+    public String getDateTime() {
+        return this.dateTime;
     }
 
 }

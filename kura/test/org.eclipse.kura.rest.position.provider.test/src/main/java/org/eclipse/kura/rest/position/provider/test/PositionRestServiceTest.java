@@ -33,7 +33,7 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.internal.rest.position.PositionRestService;
 import org.eclipse.kura.rest.position.api.IsLockedDTO;
-import org.eclipse.kura.rest.position.api.LocalDateTimeDTO;
+import org.eclipse.kura.rest.position.api.DateTimeDTO;
 import org.eclipse.kura.rest.position.api.PositionDTO;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,7 +45,7 @@ public class PositionRestServiceTest {
 
     private IsLockedDTO isLockedDTO;
     private PositionDTO positionDTO;
-    private LocalDateTimeDTO localDateTimeDTO;
+    private DateTimeDTO localDateTimeDTO;
 
     @Test
     public void getPositionTest() throws KuraException {
@@ -109,7 +109,7 @@ public class PositionRestServiceTest {
     }
 
     private void thenLocalDateTimeIs(String zonedDateTime){
-        assertEquals(zonedDateTime, localDateTimeDTO.getLocalDateTime());
+        assertEquals(zonedDateTime, localDateTimeDTO.getDateTime());
     }
 
     private void thenIsLockedIs(boolean isLocked){

@@ -21,6 +21,10 @@ public enum KuraWifiSecurityType {
     SECURITY_WPA_WPA2;
 
     public static KuraWifiSecurityType fromString(String securityType) {
+        if (securityType == null || securityType.isEmpty()) {
+            throw new IllegalArgumentException("Invalid security type: null or empty string are not supported");
+        }
+
         switch (securityType) {
         case "NONE":
             return KuraWifiSecurityType.SECURITY_NONE;

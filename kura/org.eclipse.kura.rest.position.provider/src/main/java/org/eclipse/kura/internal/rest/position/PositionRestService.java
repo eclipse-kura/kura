@@ -75,10 +75,8 @@ public class PositionRestService {
     /**
      * GET method.
      *
-     * Get position.
      *
-     * @return a list of long that represents the list of snapshots managed by the
-     *         framework.
+     * @return a PositionDTO that represents the current position. Values returned can be null.
      */
     @GET
     @RolesAllowed("position")
@@ -96,10 +94,8 @@ public class PositionRestService {
     /**
      * GET method.
      *
-     * Get localDateTime.
      *
-     * @return a list of long that represents the list of snapshots managed by the
-     *         framework.
+     * @return a DateTimeDTO that represents the current date and time. Date and time are represented in UTC.
      */
     @GET
     @RolesAllowed("position")

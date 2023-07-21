@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.KuraIpStatus;
+import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
@@ -73,9 +74,10 @@ public class NMSettingsConverter {
             newConnectionSettings.put("802-11-wireless", wifiSettingsMap);
 
             String propMode = properties.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
-            String securityType = properties.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
-                    propMode.toLowerCase());
-            if (!"NONE".equals(securityType)) {
+            KuraWifiSecurityType securityType = KuraWifiSecurityType.fromString(
+                    properties.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId, propMode.toLowerCase()));
+
+            if (securityType != KuraWifiSecurityType.SECURITY_NONE) {
                 // Only populate "802-11-wireless-security" field if security is enabled
                 Map<String, Variant<?>> wifiSecuritySettingsMap = NMSettingsConverter
                         .build80211WirelessSecuritySettings(properties, deviceId);
@@ -182,13 +184,14 @@ public class NMSettingsConverter {
 
     public static Map<String, Variant<?>> build80211WirelessSecuritySettings(NetworkProperties props, String deviceId) {
         String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
-        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
-                propMode.toLowerCase());
+        KuraWifiSecurityType securityType = KuraWifiSecurityType.fromString(
+                props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId, propMode.toLowerCase()));
 
-        if ("SECURITY_WEP".equals(securityType)) {
+        if (securityType == KuraWifiSecurityType.SECURITY_WEP) {
             return createWEPSettings(props, deviceId, propMode);
-        } else if ("SECURITY_WPA".equals(securityType) || "SECURITY_WPA2".equals(securityType)
-                || "SECURITY_WPA_WPA2".equals(securityType)) {
+        } else if (securityType == KuraWifiSecurityType.SECURITY_WPA
+                || securityType == KuraWifiSecurityType.SECURITY_WPA2
+                || securityType == KuraWifiSecurityType.SECURITY_WPA_WPA2) {
             return createWPAWPA2Settings(props, deviceId, propMode);
         } else {
             throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
@@ -221,8 +224,8 @@ public class NMSettingsConverter {
                 .toString();
         settings.put("psk", new Variant<>(psk));
 
-        String securityType = props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId,
-                propMode.toLowerCase());
+        KuraWifiSecurityType securityType = KuraWifiSecurityType.fromString(
+                props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId, propMode.toLowerCase()));
         List<String> proto = wifiProtoConvert(securityType);
         settings.put("proto", new Variant<>(proto, "as"));
 
@@ -415,16 +418,16 @@ public class NMSettingsConverter {
         }
     }
 
-    private static List<String> wifiProtoConvert(String kuraSecurityProto) {
-        switch (kuraSecurityProto) {
-        case "SECURITY_WPA":
+    private static List<String> wifiProtoConvert(KuraWifiSecurityType securityType) {
+        switch (securityType) {
+        case SECURITY_WPA:
             return Arrays.asList("wpa");
-        case "SECURITY_WPA2":
+        case SECURITY_WPA2:
             return Arrays.asList("rsn");
-        case "SECURITY_WPA_WPA2":
+        case SECURITY_WPA_WPA2:
             return Arrays.asList();
         default:
-            throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", kuraSecurityProto));
+            throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", securityType));
         }
     }
 

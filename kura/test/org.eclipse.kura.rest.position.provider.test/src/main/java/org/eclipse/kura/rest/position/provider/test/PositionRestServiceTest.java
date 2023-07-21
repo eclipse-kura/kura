@@ -14,6 +14,7 @@ package org.eclipse.kura.rest.position.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -56,11 +57,11 @@ public class PositionRestServiceTest {
     public void getPositionTest() {
         givenMockedPositionService();
         givenIsLocked(true);
-        givenPosition(0.1, 0.2, 4.5);
+        givenPosition(0.1, 0.2, 4.5, null, null);
 
         whenGetPosition();
 
-        thenPositionIs(0.1, 0.2, 4.5);
+        thenPositionIs(0.1, 0.2, 4.5, null, null);
         thenNoExceptionIsThrown();
     }
 
@@ -123,9 +124,16 @@ public class PositionRestServiceTest {
         positionRestService.setPositionServiceImpl(positionService);
     }
 
-    private void givenPosition(double longitude, double latitude, double altitude) {
-        Position testPosition = new Position(new Measurement(Math.toRadians(latitude), Unit.rad),
-                new Measurement(Math.toRadians(longitude), Unit.rad), new Measurement(altitude, Unit.m), null, null);
+    private void givenPosition(Double longitude, Double latitude, Double altitude, Double speed, Double track) {
+
+        Measurement longitudeMesurment = longitude != null ? new Measurement(Math.toRadians(longitude), Unit.rad) : null;
+        Measurement latitudeMesurment = latitude != null ? new Measurement(Math.toRadians(latitude), Unit.rad) : null;
+        Measurement altitudeMesurment = altitude != null ? new Measurement(altitude, Unit.m) : null;
+        Measurement speedMesurment = speed != null ? new Measurement(speed, Unit.m_s) : null;
+        Measurement trackMesurment = track != null ? new Measurement(Math.toRadians(track), Unit.rad) : null;
+
+        Position testPosition = new Position(latitudeMesurment, longitudeMesurment, altitudeMesurment, speedMesurment, trackMesurment);
+
         when(positionService.getPosition()).thenReturn(testPosition);
     }
 
@@ -162,10 +170,36 @@ public class PositionRestServiceTest {
         }
     }
 
-    private void thenPositionIs(double longitude, double latitude, double altitude) {
-        assertEquals(longitude, positionDTO.getLongitude(), 0.0);
-        assertEquals(latitude, positionDTO.getLatitude(), 0.0);
-        assertEquals(altitude, positionDTO.getAltitude(), 0.0);
+    private void thenPositionIs(Double longitude, Double latitude, Double altitude, Double speed, Double track) {
+        if (longitude != null){
+            assertEquals(longitude, positionDTO.getLongitude(), 0.0);
+        } else {
+            assertNull(positionDTO.getLongitude());
+        }
+
+        if (latitude != null){
+            assertEquals(latitude, positionDTO.getLatitude(), 0.0);
+        } else {
+            assertNull(positionDTO.getLatitude());
+        }
+
+        if (altitude != null){
+            assertEquals(altitude, positionDTO.getAltitude(), 0.0);
+        } else {
+            assertNull(positionDTO.getAltitude());
+        }
+
+        if (speed != null){
+            assertEquals(speed, positionDTO.getSpeed(), 0.0);
+        } else {
+            assertNull(positionDTO.getSpeed());
+        }
+
+        if (track != null){
+            assertEquals(track, positionDTO.getTrack(), 0.0);
+        } else {
+            assertNull(positionDTO.getTrack());
+        }
     }
 
     private void thenLocalDateTimeIs(String zonedDateTime) {

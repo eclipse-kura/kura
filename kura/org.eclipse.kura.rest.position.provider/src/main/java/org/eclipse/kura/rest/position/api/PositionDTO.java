@@ -16,25 +16,43 @@ import org.osgi.util.position.Position;
 
 public class PositionDTO {
 
-    private final double longitude;
-    private final double latitude;
-    private final double altitude;
+    private Double longitude;
+    private Double latitude;
+    private Double altitude;
+    private Double speed;
+    private Double track;
 
     public PositionDTO(Position position) {
-        this.longitude = Math.toDegrees(position.getLongitude().getValue());
-        this.latitude = Math.toDegrees(position.getLatitude().getValue());
-        this.altitude = position.getAltitude().getValue();
+        if (position.getLongitude() != null) {
+            this.longitude = Math.toDegrees(position.getLongitude().getValue());
+        }
+
+        if (position.getLatitude() != null) {
+            this.latitude = Math.toDegrees(position.getLatitude().getValue());
+        }
+
+        if (position.getAltitude() != null) {
+            this.altitude = position.getAltitude().getValue();
+        }
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public double getAltitude() {
+    public Double getAltitude() {
         return altitude;
-    }    
+    }
+
+    public Double getSpeed() {
+        return speed;
+    }
+
+    public Double getTrack() {
+        return track;
+    }
 }

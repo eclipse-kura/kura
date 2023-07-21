@@ -41,10 +41,6 @@ public class WpaSupplicantDbusWrapper {
     public void triggerScan(String interfaceName) throws DBusException {
         DBusPath interfacePath = this.wpaSupplicant.GetInterface(interfaceName);
 
-        if (interfacePath.getPath().equals("/")) {
-            throw new IllegalArgumentException(String.format("Interface \"%s\" not found", interfaceName));
-        }
-
         Interface interfaceObject = this.dbusConnection.getRemoteObject(WPA_SUPPLICANT_BUS_NAME,
                 interfacePath.getPath(), Interface.class);
 

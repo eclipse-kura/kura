@@ -34,24 +34,47 @@ public class PositionDTO {
         if (position.getAltitude() != null) {
             this.altitude = position.getAltitude().getValue();
         }
+
+        if (position.getSpeed() != null) {
+            this.speed = position.getSpeed().getValue();
+        }
+
+        if (position.getTrack() != null) {
+            this.track = Math.toDegrees(position.getTrack().getValue());
+        }
     }
 
+    /**
+     * Returns the longitude of this position in degrees.
+     */
     public Double getLongitude() {
         return longitude;
     }
 
+    /**
+     * Returns the latitude of this position in degrees.
+     */
     public Double getLatitude() {
         return latitude;
     }
 
+    /**
+     * Returns the altitude of this position in meters.
+     */
     public Double getAltitude() {
         return altitude;
     }
 
+    /**
+     * Returns the ground speed of this position in meters per second.
+     */
     public Double getSpeed() {
         return speed;
     }
 
+    /**
+     * Returns the track of this position in degrees as a compass heading.
+     */
     public Double getTrack() {
         return track;
     }

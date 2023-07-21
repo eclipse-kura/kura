@@ -66,6 +66,18 @@ public class PositionRestServiceTest {
     }
 
     @Test
+    public void getPositionTestWithFullParameters() {
+        givenMockedPositionService();
+        givenIsLocked(true);
+        givenPosition(0.1, 0.2, 4.5, 50.6, 9.8);
+
+        whenGetPosition();
+
+        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8);
+        thenNoExceptionIsThrown();
+    }
+
+    @Test
     public void getLocalDateTimeTest() {
         givenMockedPositionService();
         givenIsLocked(true);
@@ -126,8 +138,8 @@ public class PositionRestServiceTest {
 
     private void givenPosition(Double longitude, Double latitude, Double altitude, Double speed, Double track) {
 
-        Measurement longitudeMesurment = longitude != null ? new Measurement(Math.toRadians(longitude), Unit.rad) : null;
         Measurement latitudeMesurment = latitude != null ? new Measurement(Math.toRadians(latitude), Unit.rad) : null;
+        Measurement longitudeMesurment = longitude != null ? new Measurement(Math.toRadians(longitude), Unit.rad) : null;
         Measurement altitudeMesurment = altitude != null ? new Measurement(altitude, Unit.m) : null;
         Measurement speedMesurment = speed != null ? new Measurement(speed, Unit.m_s) : null;
         Measurement trackMesurment = track != null ? new Measurement(Math.toRadians(track), Unit.rad) : null;

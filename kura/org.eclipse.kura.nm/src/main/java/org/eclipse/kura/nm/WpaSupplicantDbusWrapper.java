@@ -3,6 +3,7 @@ package org.eclipse.kura.nm;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.kura.nm.signal.handlers.WPAScanLock;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -35,7 +36,10 @@ public class WpaSupplicantDbusWrapper {
         options.put("Type", new Variant<>("active"));
         options.put("AllowRoam", new Variant<>(false));
 
+        WPAScanLock scanLock = new WPAScanLock(this.dbusConnection, interfacePath.getPath());
+
         interfaceObject.Scan(options);
+        scanLock.waitForSignal();
     }
 
 }

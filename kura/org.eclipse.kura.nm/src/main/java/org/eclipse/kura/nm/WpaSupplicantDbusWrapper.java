@@ -33,6 +33,7 @@ public class WpaSupplicantDbusWrapper {
 
         Map<String, Variant<?>> options = new HashMap<>();
         options.put("Type", new Variant<>("active"));
+        options.put("AllowRoam", new Variant<>(false));
 
         interfaceObject.Scan(options);
     }

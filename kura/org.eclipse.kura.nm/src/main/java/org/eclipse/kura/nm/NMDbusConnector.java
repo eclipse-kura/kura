@@ -28,6 +28,7 @@ import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
+import org.eclipse.kura.nm.enums.NM80211Mode;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
@@ -64,6 +65,8 @@ public class NMDbusConnector {
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
+
+    private static final Long NM_WIRELESS_LAST_SCAN_NEVER = -1L;
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
@@ -278,7 +281,16 @@ public class NMDbusConnector {
         Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 wirelessDevice.getObjectPath(), Properties.class);
 
-        this.wpaSupplicant.triggerScan(interfaceId); // Trigger rescan of APs
+        // Decide whether to trigger a scan or not
+        Long lastScan = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "LastScan");
+        NM80211Mode operatingMode = NM80211Mode
+                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
+        logger.info("Last scan for device {} was {}", interfaceId, lastScan);
+        logger.info("Device {} is in mode {}", interfaceId, operatingMode);
+
+        if (operatingMode == NM80211Mode.NM_802_11_MODE_AP) {
+            this.wpaSupplicant.triggerScan(interfaceId); // Trigger rescan of APs
+        }
         List<Properties> accessPoints = this.networkManager.getAllAccessPoints(wirelessDevice);
 
         DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "ActiveAccessPoint");

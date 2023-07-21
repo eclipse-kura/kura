@@ -15,6 +15,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,7 +29,6 @@ import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
-import org.eclipse.kura.nm.enums.NM80211Mode;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
@@ -66,8 +66,6 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
 
-    private static final Long NM_WIRELESS_LAST_SCAN_NEVER = -1L;
-
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
@@ -76,6 +74,8 @@ public class NMDbusConnector {
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
             NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+
+    private static final long LAST_SCAN_TIMEOUT_5_MINUTES = 5 * 60 * 1000;
 
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
@@ -89,6 +89,8 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
+
+    private Map<String, Long> lastScan = new HashMap<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -282,15 +284,13 @@ public class NMDbusConnector {
                 wirelessDevice.getObjectPath(), Properties.class);
 
         // Decide whether to trigger a scan or not
-        Long lastScan = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "LastScan");
-        NM80211Mode operatingMode = NM80211Mode
-                .fromUInt32(wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "Mode"));
-        logger.info("Last scan for device {} was {}", interfaceId, lastScan);
-        logger.info("Device {} is in mode {}", interfaceId, operatingMode);
-
-        if (operatingMode == NM80211Mode.NM_802_11_MODE_AP) {
+        long timestamp = System.currentTimeMillis();
+        if (!this.lastScan.containsKey(interfaceId) || this.lastScan.get(interfaceId) == null
+                || this.lastScan.get(interfaceId) - timestamp > LAST_SCAN_TIMEOUT_5_MINUTES) {
             this.wpaSupplicant.triggerScan(interfaceId); // Trigger rescan of APs
+            this.lastScan.put(interfaceId, timestamp);
         }
+
         List<Properties> accessPoints = this.networkManager.getAllAccessPoints(wirelessDevice);
 
         DBusPath activeAccessPointPath = wirelessDeviceProperties.Get(NM_DEVICE_WIRELESS_BUS_NAME, "ActiveAccessPoint");

@@ -60,7 +60,7 @@ public class PositionRestService {
         try {
             registry.registerRequestHandler(APP_ID, this.requestHandler);
         } catch (final Exception e) {
-            logger.warn("failed to register request handler", e);
+            logger.warn("failed to register {} request handler", APP_ID, e);
         }
     }
 
@@ -68,7 +68,7 @@ public class PositionRestService {
         try {
             registry.unregister(APP_ID);
         } catch (KuraException e) {
-            logger.warn("failed to unregister request handler", e);
+            logger.warn("failed to unregister {} request handler", APP_ID, e);
         }
     }
 
@@ -114,11 +114,8 @@ public class PositionRestService {
     /**
      * GET method.
      *
-     * Get returns true if a valid geographic position has been received by position
-     * service.
      *
-     * @return a list of long that represents the list of snapshots managed by the
-     *         framework.
+     * @return IsLockedDTO which contains a boolean that represents the current lock status of the position service.
      */
     @GET
     @RolesAllowed("position")

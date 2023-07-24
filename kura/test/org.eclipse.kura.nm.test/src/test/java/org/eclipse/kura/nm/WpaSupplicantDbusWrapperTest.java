@@ -9,10 +9,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
+import org.freedesktop.dbus.types.Variant;
 import org.junit.Test;
 
 import fi.w1.Wpa_supplicant1;
@@ -125,6 +129,10 @@ public class WpaSupplicantDbusWrapperTest {
     }
 
     private void thenInterfaceScanWasTriggered() {
-        verify(this.mockedInterface, times(1)).Scan(any());
+        Map<String, Variant<?>> expectedOptions = new HashMap<>();
+        expectedOptions.put("AllowRoam", new Variant<>(false));
+        expectedOptions.put("Type", new Variant<>("active"));
+
+        verify(this.mockedInterface, times(1)).Scan(expectedOptions);
     }
 }

@@ -26,7 +26,7 @@ public class WpaSupplicantDbusWrapperTest {
     @Test
     public void syncScanShouldThrowWithNonExistentInterface() throws DBusException {
         givenMockWpaSupplicant();
-        givenWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith("wlan0");
+        givenMockWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith("wlan0");
 
         givenWpaSupplicantDbusWrapper();
 
@@ -38,7 +38,7 @@ public class WpaSupplicantDbusWrapperTest {
     @Test
     public void asyncScanShouldThrowWithNonExistentInterface() throws DBusException {
         givenMockWpaSupplicant();
-        givenWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith("wlan0");
+        givenMockWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith("wlan0");
 
         givenWpaSupplicantDbusWrapper();
 
@@ -56,7 +56,7 @@ public class WpaSupplicantDbusWrapperTest {
                 .thenReturn(this.mockedWpaSupplicant);
     }
 
-    private void givenWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith(String interfaceName) {
+    private void givenMockWpaSupplicantWillThrowWhenGetInterfaceIsCalledWith(String interfaceName) {
         when(this.mockedWpaSupplicant.GetInterface(interfaceName))
                 .thenThrow(new DBusExecutionException("Interface not found"));
     }

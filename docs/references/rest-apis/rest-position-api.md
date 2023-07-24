@@ -28,9 +28,8 @@
 }
 ```
 
-- 400 Bad Request (Malformed Client JSON)
-- 404 Resource Not Found
 - 500 Internal Server Error
+	- can also occur when GPS Position is not locked
 ```JSON
 {
 	"message": "Service unavailable. Position is not locked."
@@ -47,13 +46,13 @@
 
 ```JSON
 {
+    //Date and time string in UTC timezone. 
 	"dateTime": "2023-07-19T18:26:38Z"
 }
 ```
 
-- 400 Bad Request (Malformed Client JSON)
-- 404 Resource Not Found
 - 500 Internal Server Error
+	- can also occur when GPS Position is not locked 
 ```JSON
 {
 	"message": "Service unavailable. Position is not locked."
@@ -70,15 +69,7 @@
 
 ```JSON
 {
-	"localDateTime": "2023-07-19T18:26:38Z"
-}
-```
-
-- 400 Bad Request (Malformed Client JSON)
-- 404 Resource Not Found
-- 500 Internal Server Error
-```JSON
-{
 	"islocked": false
 }
 ```
+- 500 Internal Server Error

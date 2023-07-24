@@ -44,6 +44,7 @@ public class WpaSupplicantDbusWrapperTest {
 
     private WpaSupplicantDbusWrapper wpaSupplicantDbusWrapper;
     private Exception occurredException;
+    private DBusPath returnedDbusPath;
 
     @Test
     public void syncScanShouldThrowWithNonExistentInterface() throws DBusException {
@@ -79,6 +80,7 @@ public class WpaSupplicantDbusWrapperTest {
 
         thenExceptionDidNotOccur();
         thenInterfaceScanWasTriggered();
+        thenReturnedDbusPathIs("/fi/w1/wpa_supplicant1/Interfaces/0");
     }
 
     /*
@@ -120,7 +122,7 @@ public class WpaSupplicantDbusWrapperTest {
 
     private void whenAsyncScanIsCalledWith(String interfaceName) {
         try {
-            this.wpaSupplicantDbusWrapper.asyncScan(interfaceName);
+            this.returnedDbusPath = this.wpaSupplicantDbusWrapper.asyncScan(interfaceName);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -145,5 +147,9 @@ public class WpaSupplicantDbusWrapperTest {
         expectedOptions.put("Type", new Variant<>("active"));
 
         verify(this.mockedInterface, times(1)).Scan(expectedOptions);
+    }
+
+    private void thenReturnedDbusPathIs(String expectedDbusPath) {
+        assertEquals(expectedDbusPath, this.returnedDbusPath.getPath());
     }
 }

@@ -15,7 +15,6 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,13 +74,10 @@ public class NMDbusConnector {
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
             NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
-    private static final long LAST_SCAN_TIMEOUT_5_MINUTES = 5 * 60 * 1000;
-
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
     private final ModemManagerDbusWrapper modemManager;
-    private final WpaSupplicantDbusWrapper wpaSupplicant;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -90,13 +86,10 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
 
-    private Map<String, Long> lastScan = new HashMap<>();
-
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
-        this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -282,17 +275,6 @@ public class NMDbusConnector {
                 Wireless.class);
         Properties wirelessDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 wirelessDevice.getObjectPath(), Properties.class);
-
-        // Decide whether to trigger a scan or not
-        long timestamp = System.currentTimeMillis();
-        if (!this.lastScan.containsKey(interfaceId) || this.lastScan.get(interfaceId) == null
-                || this.lastScan.get(interfaceId) - timestamp > LAST_SCAN_TIMEOUT_5_MINUTES) {
-            logger.info("Triggering scan for interface {}", interfaceId); // Debug
-            this.wpaSupplicant.syncScan(interfaceId); // Trigger rescan of APs
-            this.lastScan.put(interfaceId, timestamp);
-        } else {
-            logger.info("Skipping scan for interface {} as it was already performed recently", interfaceId); // Debug
-        }
 
         List<Properties> accessPoints = this.networkManager.getAllAccessPoints(wirelessDevice);
 

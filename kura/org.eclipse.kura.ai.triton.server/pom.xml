@@ -85,7 +85,7 @@
 								<artifactItem>
 									<groupId>io.perfmark</groupId>
 									<artifactId>perfmark-api</artifactId>
-									<version>0.19.0</version>
+									<version>0.26.0</version>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

@@ -35,7 +35,7 @@ public class WPAScanLock {
 
     public WPAScanLock(DBusConnection dbusConnection, String dbusPath) throws DBusException {
         if (Objects.isNull(dbusPath) || dbusPath.isEmpty() || dbusPath.equals("/")) {
-            throw new IllegalArgumentException(String.format("Illegat DBus path for WPAScanLock \"%s\"", dbusPath));
+            throw new IllegalArgumentException(String.format("Illegal DBus path for WPAScanLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.scanHandler = new WPAScanDoneHandler(this.latch, dbusPath);

@@ -120,6 +120,7 @@ public class WpaSupplicantDbusWrapperTest {
     /*
      * Then
      */
+
     private void thenExceptionDidNotOccur() {
         assertNull(this.occurredException);
     }

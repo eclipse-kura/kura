@@ -288,7 +288,7 @@ public class NMDbusConnector {
         if (!this.lastScan.containsKey(interfaceId) || this.lastScan.get(interfaceId) == null
                 || this.lastScan.get(interfaceId) - timestamp > LAST_SCAN_TIMEOUT_5_MINUTES) {
             logger.info("Triggering scan for interface {}", interfaceId); // Debug
-            this.wpaSupplicant.triggerScan(interfaceId); // Trigger rescan of APs
+            this.wpaSupplicant.syncScan(interfaceId); // Trigger rescan of APs
             this.lastScan.put(interfaceId, timestamp);
         } else {
             logger.info("Skipping scan for interface {} as it was already performed recently", interfaceId); // Debug

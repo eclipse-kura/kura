@@ -38,20 +38,33 @@ public class WpaSupplicantDbusWrapper {
                 Wpa_supplicant1.class);
     }
 
-    public void triggerScan(String interfaceName) throws DBusException {
+    public void syncScan(String interfaceName) throws DBusException {
         DBusPath interfacePath = this.wpaSupplicant.GetInterface(interfaceName);
 
+        WPAScanLock scanLock = new WPAScanLock(this.dbusConnection, interfacePath.getPath());
+
+        triggerScan(interfacePath);
+
+        scanLock.waitForSignal();
+    }
+
+    public DBusPath asyncScan(String interfaceName) throws DBusException {
+        DBusPath interfacePath = this.wpaSupplicant.GetInterface(interfaceName);
+
+        triggerScan(interfacePath);
+
+        return interfacePath;
+    }
+
+    private void triggerScan(DBusPath interfaceObjectPath) throws DBusException {
         Interface interfaceObject = this.dbusConnection.getRemoteObject(WPA_SUPPLICANT_BUS_NAME,
-                interfacePath.getPath(), Interface.class);
+                interfaceObjectPath.getPath(), Interface.class);
 
         Map<String, Variant<?>> options = new HashMap<>();
         options.put("Type", new Variant<>("active"));
         options.put("AllowRoam", new Variant<>(false));
 
-        WPAScanLock scanLock = new WPAScanLock(this.dbusConnection, interfacePath.getPath());
-
         interfaceObject.Scan(options);
-        scanLock.waitForSignal();
     }
 
 }

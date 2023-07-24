@@ -57,10 +57,7 @@ public class WpaSupplicantDbusWrapperTest {
     @Test
     public void asyncScanShouldWorkWithExistentInterface() throws DBusException {
         givenMockWpaSupplicant();
-        givenMockWpaSupplicantWillReturnDbusPathWhenGetInterfaceIsCalledWith("wlan0",
-                "/fi/w1/wpa_supplicant1/Interfaces/0");
-        givenMockDbusConnectionWillReturnInterfaceWhenGetRemoteObjectIsCalledWith(
-                "/fi/w1/wpa_supplicant1/Interfaces/0");
+        givenMockInterface("wlan0", "/fi/w1/wpa_supplicant1/Interfaces/0");
         givenWpaSupplicantDbusWrapper();
 
         whenAsyncScanIsCalledWith("wlan0");
@@ -73,11 +70,6 @@ public class WpaSupplicantDbusWrapperTest {
      * Given
      */
 
-    private void givenMockDbusConnectionWillReturnInterfaceWhenGetRemoteObjectIsCalledWith(String dbusPath) throws DBusException {
-        when(this.mockedDbusConnection.getRemoteObject(WPA_SUPPLICANT_BUS_NAME, dbusPath, Interface.class))
-                .thenReturn(this.mockedInterface);
-    }
-
     private void givenMockWpaSupplicant() throws DBusException {
         when(this.mockedDbusConnection.getRemoteObject(WPA_SUPPLICANT_BUS_NAME, WPA_SUPPLICANT_BUS_PATH, Wpa_supplicant1.class))
                 .thenReturn(this.mockedWpaSupplicant);
@@ -88,9 +80,11 @@ public class WpaSupplicantDbusWrapperTest {
                 .thenThrow(new DBusExecutionException("Interface not found"));
     }
 
-    private void givenMockWpaSupplicantWillReturnDbusPathWhenGetInterfaceIsCalledWith(String interfaceName, String dbusPath) {
+    private void givenMockInterface(String interfaceName, String dbusPath) throws DBusException {
         when(this.mockedWpaSupplicant.GetInterface(interfaceName))
                 .thenReturn(new DBusPath(dbusPath));
+        when(this.mockedDbusConnection.getRemoteObject(WPA_SUPPLICANT_BUS_NAME, dbusPath, Interface.class))
+                .thenReturn(this.mockedInterface);
     }
 
     private void givenWpaSupplicantDbusWrapper() throws DBusException {

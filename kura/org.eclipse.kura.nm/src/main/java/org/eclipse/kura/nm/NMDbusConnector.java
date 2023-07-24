@@ -372,8 +372,8 @@ public class NMDbusConnector {
 
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
-        // Temporary solution while we wait to add complete IPv6 support
-        KuraIpStatus ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        KuraIpStatus ip6Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip6.status", deviceId));
         KuraInterfaceStatus interfaceStatus = KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
 
         if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)

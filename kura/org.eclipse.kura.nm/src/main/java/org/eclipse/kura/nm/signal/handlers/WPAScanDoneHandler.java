@@ -35,9 +35,9 @@ public class WPAScanDoneHandler implements DBusSigHandler<Interface.ScanDone> {
     @Override
     public void handle(Interface.ScanDone s) {
 
-        logger.info("AP scan done signal received for {}", s.getPath());
+        logger.trace("AP scan done signal received for {}", s.getPath());
         if (s.getPath().equals(this.path)) {
-            logger.info("Notify waiting thread");
+            logger.debug("Notify waiting thread");
             this.latch.countDown();
         }
     }

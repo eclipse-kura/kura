@@ -34,7 +34,7 @@ public class DeviceStateLock {
     public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState)
             throws DBusException {
         if (Objects.isNull(dbusPath) || dbusPath.isEmpty() || dbusPath.equals("/")) {
-            throw new IllegalArgumentException(String.format("Illegal DBus path for DeviceSateLock \"%s\"", dbusPath));
+            throw new IllegalArgumentException(String.format("Illegat DBus path for DeviceSateLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.stateHandler = new NMDeviceStateChangeHandler(this.latch, dbusPath, expectedNmDeviceState);

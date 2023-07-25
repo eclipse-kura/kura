@@ -162,7 +162,8 @@ public class NMSettingsConverter {
 
         KuraIP6ConfigPrivacy ip6Privacy = KuraIP6ConfigPrivacy
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.privacy", deviceId));
-        settings.put("ip6-privacy", new Variant<>(KuraIP6ConfigPrivacy.ip6PrivacyCode(ip6Privacy)));
+        settings.put("ip6-privacy",
+                new Variant<>(KuraIP6ConfigPrivacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
 
         KuraIpv6AddressGenerationMethod ip6GenMethod = KuraIpv6AddressGenerationMethod
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.address.generation", deviceId));
@@ -207,7 +208,7 @@ public class NMSettingsConverter {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
                     deviceId);
             if (dnsServers.isPresent()) {
-                settings.put("dns", new Variant<>(convertIp6(dnsServers.get()), "au"));
+                settings.put("dns", new Variant<>(convertIp6(dnsServers.get()), "aay"));
                 settings.put("ignore-auto-dns", new Variant<>(true));
             }
 
@@ -435,11 +436,11 @@ public class NMSettingsConverter {
         return new UInt32(result);
     }
 
-    private static List<byte[]> convertIp6(List<String> ipAddrList) {
-        List<byte[]> uint32Addresses = new ArrayList<>();
+    private static List<List<Byte>> convertIp6(List<String> ipAddrList) {
+        List<List<Byte>> uint32Addresses = new ArrayList<>();
         for (String address : ipAddrList) {
             try {
-                uint32Addresses = convertIp6(address);
+                uint32Addresses.add(convertIp6(address));
             } catch (UnknownHostException e) {
                 logger.warn("Cannot convert ip address \"{}\" because: ", address, e);
             }
@@ -447,13 +448,17 @@ public class NMSettingsConverter {
         return uint32Addresses;
     }
 
-    private static List<byte[]> convertIp6(String ipAddrString) throws UnknownHostException {
+    private static List<Byte> convertIp6(String ipAddrString) throws UnknownHostException {
         InetAddress address = InetAddress.getByName(ipAddrString);
 
-        List<byte[]> returnList = new ArrayList<>();
-        returnList.add(address.getAddress()); // sistemar ordine
+        byte[] dnsByteArray = address.getAddress();
 
-        return returnList;
+        List<Byte> dnsAddress = new ArrayList<>();
+        for (int i = 0; i < dnsByteArray.length; i++) {
+            dnsAddress.add(dnsByteArray[i]);
+        }
+
+        return dnsAddress;
     }
 
     private static String wifiModeConvert(String kuraMode) {

@@ -3,6 +3,8 @@ package org.eclipse.kura.nm;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.kura.nm.enums.NMSettingIP6ConfigPrivacy;
+
 public enum KuraIP6ConfigPrivacy {
 
     UNKNOWN,
@@ -33,18 +35,18 @@ public enum KuraIP6ConfigPrivacy {
         }
     }
 
-    public static Integer ip6PrivacyCode(KuraIP6ConfigPrivacy privacyValue) {
+    public static NMSettingIP6ConfigPrivacy toNMSettingIP6ConfigPrivacy(KuraIP6ConfigPrivacy privacyValue) {
         switch (privacyValue) {
         case UNKNOWN:
-            return -1;
+            return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_UNKNOWN;
         case DISABLED:
-            return 0;
+            return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_DISABLED;
         case ENABLED_PUBLIC_ADD:
-            return 1;
+            return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_PREFER_PUBLIC_ADDR;
         case ENABLED_TEMP_ADD:
-            return 2;
+            return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_PREFER_TEMP_ADDR;
         default:
-            return -1;
+            return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_UNKNOWN;
         }
     }
 }

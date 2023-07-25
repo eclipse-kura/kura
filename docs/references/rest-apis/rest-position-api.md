@@ -29,7 +29,7 @@
 ```
 
 - 500 Internal Server Error
-	- can also occur when GPS Position is not locked
+	- will also occur when GPS Position is not locked
 ```JSON
 {
 	"message": "Service unavailable. Position is not locked."
@@ -46,13 +46,13 @@
 
 ```JSON
 {
-    //Date and time string in UTC timezone. 
+    //The dateTime string is formatted according to the ISO 8601 standard, and will always be in the UTC timezone. 
 	"dateTime": "2023-07-19T18:26:38Z"
 }
 ```
 
 - 500 Internal Server Error
-	- can also occur when GPS Position is not locked 
+	- will also occur when GPS Position is not locked 
 ```JSON
 {
 	"message": "Service unavailable. Position is not locked."

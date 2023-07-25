@@ -16,35 +16,34 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceStateLock {
+import fi.w1.wpa_supplicant1.Interface;
 
-    private static final Logger logger = LoggerFactory.getLogger(DeviceStateLock.class);
+public class WPAScanLock {
+
+    private static final Logger logger = LoggerFactory.getLogger(WPAScanLock.class);
 
     private final CountDownLatch latch = new CountDownLatch(1);
-    private final NMDeviceStateChangeHandler stateHandler;
+    private final WPAScanDoneHandler scanHandler;
     private final DBusConnection dbusConnection;
 
-    public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState)
-            throws DBusException {
+    public WPAScanLock(DBusConnection dbusConnection, String dbusPath) throws DBusException {
         if (Objects.isNull(dbusPath) || dbusPath.isEmpty() || dbusPath.equals("/")) {
-            throw new IllegalArgumentException(String.format("Illegal DBus path for DeviceSateLock \"%s\"", dbusPath));
+            throw new IllegalArgumentException(String.format("Illegal DBus path for WPAScanLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
-        this.stateHandler = new NMDeviceStateChangeHandler(this.latch, dbusPath, expectedNmDeviceState);
+        this.scanHandler = new WPAScanDoneHandler(this.latch, dbusPath);
 
-        this.dbusConnection.addSigHandler(Device.StateChanged.class, this.stateHandler);
+        this.dbusConnection.addSigHandler(Interface.ScanDone.class, this.scanHandler);
     }
 
-    public void waitForSignal() throws DBusException {
+    public void waitForSignal(long scanTimeoutSeconds) throws DBusException {
         try {
-            boolean countdownCompleted = this.latch.await(5, TimeUnit.SECONDS);
+            boolean countdownCompleted = this.latch.await(scanTimeoutSeconds, TimeUnit.SECONDS);
             if (!countdownCompleted) {
                 logger.warn("Timeout elapsed. Exiting anyway");
             }
@@ -52,7 +51,7 @@ public class DeviceStateLock {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();
         } finally {
-            this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.stateHandler);
+            this.dbusConnection.removeSigHandler(Interface.ScanDone.class, this.scanHandler);
         }
     }
 

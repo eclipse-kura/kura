@@ -83,6 +83,18 @@ public class WpaSupplicantDbusWrapperTest {
         thenReturnedDbusPathIs("/fi/w1/wpa_supplicant1/Interfaces/0");
     }
 
+    @Test
+    public void syncScanShouldWorkWithExistentInterface() throws DBusException {
+        givenMockWpaSupplicant();
+        givenMockInterface("wlan1", "/fi/w1/wpa_supplicant1/Interfaces/1");
+        givenWpaSupplicantDbusWrapper();
+
+        whenSyncScanIsCalledWith("wlan1");
+
+        thenExceptionDidNotOccur();
+        thenInterfaceScanWasTriggered();
+    }
+
     /*
      * Given
      */

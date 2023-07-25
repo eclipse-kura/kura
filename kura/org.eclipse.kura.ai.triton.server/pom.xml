@@ -29,7 +29,7 @@
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.ai.triton.server.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<grpc.version>1.51.1</grpc.version>
+		<grpc.version>1.56.1</grpc.version>
 		<protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
 		<protoc.version>3.12.0</protoc.version>
 	</properties>
@@ -50,42 +50,42 @@
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-api</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-context</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-core</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-netty-shaded</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-protobuf</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-protobuf-lite</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-stub</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 								<artifactItem>
 									<groupId>io.perfmark</groupId>
 									<artifactId>perfmark-api</artifactId>
-									<version>0.19.0</version>
+									<version>0.26.0</version>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

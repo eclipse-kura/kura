@@ -34,48 +34,48 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-testing</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-api</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-context</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-core</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-protobuf</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-protobuf-lite</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-stub</artifactId>
-			<version>1.51.1</version>
+			<version>1.56.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.perfmark</groupId>
 			<artifactId>perfmark-api</artifactId>
-			<version>0.19.0</version>
+			<version>0.26.0</version>
 		</dependency>
 	</dependencies>
 
@@ -99,7 +99,7 @@
 								<artifactItem>
 									<groupId>io.grpc</groupId>
 									<artifactId>grpc-testing</artifactId>
-									<version>1.51.1</version>
+									<version>1.56.1</version>
 								</artifactItem>
 							</artifactItems>
 						</configuration>

@@ -29,6 +29,8 @@ public class WpaSupplicantDbusWrapper {
     private static final String WPA_SUPPLICANT_BUS_NAME = "fi.w1.wpa_supplicant1";
     private static final String WPA_SUPPLICANT_BUS_PATH = "/fi/w1/wpa_supplicant1";
 
+    private static final long DEFAULT_SCAN_TIMEOUT_SECONDS = 30;
+
     private final DBusConnection dbusConnection;
     private Wpa_supplicant1 wpaSupplicant;
 
@@ -39,13 +41,17 @@ public class WpaSupplicantDbusWrapper {
     }
 
     public void syncScan(String interfaceName) throws DBusException {
+        syncScan(interfaceName, DEFAULT_SCAN_TIMEOUT_SECONDS);
+    }
+
+    public void syncScan(String interfaceName, long scanTimeoutSeconds) throws DBusException {
         DBusPath interfacePath = this.wpaSupplicant.GetInterface(interfaceName);
 
         WPAScanLock scanLock = new WPAScanLock(this.dbusConnection, interfacePath.getPath());
 
         triggerScan(interfacePath);
 
-        scanLock.waitForSignal();
+        scanLock.waitForSignal(scanTimeoutSeconds);
     }
 
     public DBusPath asyncScan(String interfaceName) throws DBusException {

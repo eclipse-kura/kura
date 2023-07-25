@@ -27,8 +27,6 @@ public class WPAScanLock {
 
     private static final Logger logger = LoggerFactory.getLogger(WPAScanLock.class);
 
-    private static final long SCAN_TIMEOUT_S = 30;
-
     private final CountDownLatch latch = new CountDownLatch(1);
     private final WPAScanDoneHandler scanHandler;
     private final DBusConnection dbusConnection;
@@ -43,9 +41,9 @@ public class WPAScanLock {
         this.dbusConnection.addSigHandler(Interface.ScanDone.class, this.scanHandler);
     }
 
-    public void waitForSignal() throws DBusException {
+    public void waitForSignal(long scanTimeoutSeconds) throws DBusException {
         try {
-            boolean countdownCompleted = this.latch.await(SCAN_TIMEOUT_S, TimeUnit.SECONDS);
+            boolean countdownCompleted = this.latch.await(scanTimeoutSeconds, TimeUnit.SECONDS);
             if (!countdownCompleted) {
                 logger.warn("Timeout elapsed. Exiting anyway");
             }

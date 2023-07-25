@@ -53,7 +53,7 @@ public class WpaSupplicantDbusWrapperTest {
 
         givenWpaSupplicantDbusWrapper();
 
-        whenSyncScanIsCalledWith("wlan0");
+        whenSyncScanIsCalledWith("wlan0", 1);
 
         thenExceptionOccurred(DBusExecutionException.class);
     }
@@ -89,7 +89,7 @@ public class WpaSupplicantDbusWrapperTest {
         givenMockInterface("wlan1", "/fi/w1/wpa_supplicant1/Interfaces/1");
         givenWpaSupplicantDbusWrapper();
 
-        whenSyncScanIsCalledWith("wlan1");
+        whenSyncScanIsCalledWith("wlan1", 1);
 
         thenExceptionDidNotOccur();
         thenInterfaceScanWasTriggered();
@@ -124,9 +124,9 @@ public class WpaSupplicantDbusWrapperTest {
      * When
      */
 
-    private void whenSyncScanIsCalledWith(String interfaceName) {
+    private void whenSyncScanIsCalledWith(String interfaceName, long scanTimeoutSeconds) {
         try {
-            this.wpaSupplicantDbusWrapper.syncScan(interfaceName);
+            this.wpaSupplicantDbusWrapper.syncScan(interfaceName, scanTimeoutSeconds);
         } catch (Exception e) {
             this.occurredException = e;
         }

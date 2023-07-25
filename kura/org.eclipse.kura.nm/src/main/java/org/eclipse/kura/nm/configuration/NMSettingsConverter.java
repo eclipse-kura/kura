@@ -23,10 +23,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.KuraIP6ConfigAddGenMode;
 import org.eclipse.kura.nm.KuraIP6ConfigPrivacy;
 import org.eclipse.kura.nm.KuraIpStatus;
+import org.eclipse.kura.nm.KuraIpv6Method;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
-import org.eclipse.kura.nm.KuraIpv6AddressGenerationMethod;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
@@ -154,29 +155,28 @@ public class NMSettingsConverter {
         KuraIpStatus ip6Status = KuraIpStatus
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.status", deviceId));
 
-        Boolean ipv6AddressGenerationMode = props.get(Boolean.class, "net.interface.%s.config.ip6.addr.gen.mode",
-                deviceId);
-        // 1 = STABLE_PRIVACY 0 = EUI64
-        settings.put("addr-gen-mode",
-                new Variant<>(Boolean.TRUE.equals((ipv6AddressGenerationMode)) ? (int) 1 : (int) 0));
+        KuraIP6ConfigAddGenMode ipv6AddressGenerationMode = KuraIP6ConfigAddGenMode
+                .fromString(props.get(String.class, "net.interface.%s.config.ip6.addr.gen.mode", deviceId));
+        settings.put("addr-gen-mode", new Variant<>(
+                KuraIP6ConfigAddGenMode.toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
 
         KuraIP6ConfigPrivacy ip6Privacy = KuraIP6ConfigPrivacy
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.privacy", deviceId));
         settings.put("ip6-privacy",
                 new Variant<>(KuraIP6ConfigPrivacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
 
-        KuraIpv6AddressGenerationMethod ip6GenMethod = KuraIpv6AddressGenerationMethod
+        KuraIpv6Method ip6GenMethod = KuraIpv6Method
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.address.generation", deviceId));
 
-        if (ip6GenMethod.equals(KuraIpv6AddressGenerationMethod.AUTO)) {
+        if (ip6GenMethod.equals(KuraIpv6Method.AUTO)) {
 
             settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
 
-        } else if (ip6GenMethod.equals(KuraIpv6AddressGenerationMethod.DHCP)) {
+        } else if (ip6GenMethod.equals(KuraIpv6Method.DHCP)) {
 
             settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("dhcp"));
 
-        } else if (ip6GenMethod.equals(KuraIpv6AddressGenerationMethod.MANUAL)) {
+        } else if (ip6GenMethod.equals(KuraIpv6Method.MANUAL)) {
 
             settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("manual"));
 

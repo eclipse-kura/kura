@@ -16,31 +16,30 @@ package org.eclipse.kura.nm;
 import java.util.Arrays;
 import java.util.List;
 
-public enum KuraIpv6AddressGenerationMethod {
+public enum KuraIpv6Method {
 
     AUTO,
     DHCP,
     MANUAL,
     UNKNOWN;
 
-    private static final List<KuraIpv6AddressGenerationMethod> ENABLED_STATUS = Arrays.asList(
-            KuraIpv6AddressGenerationMethod.AUTO, KuraIpv6AddressGenerationMethod.DHCP,
-            KuraIpv6AddressGenerationMethod.MANUAL);
+    private static final List<KuraIpv6Method> ENABLED_STATUS = Arrays.asList(KuraIpv6Method.AUTO, KuraIpv6Method.DHCP,
+            KuraIpv6Method.MANUAL);
 
-    public static Boolean isEnabled(KuraIpv6AddressGenerationMethod status) {
+    public static Boolean isEnabled(KuraIpv6Method status) {
         return ENABLED_STATUS.contains(status);
     }
 
-    public static KuraIpv6AddressGenerationMethod fromString(String status) {
+    public static KuraIpv6Method fromString(String status) {
         switch (status) {
         case "netIPv6MethodAuto":
-            return KuraIpv6AddressGenerationMethod.AUTO;
+            return KuraIpv6Method.AUTO;
         case "netIPv6MethodDhcp":
-            return KuraIpv6AddressGenerationMethod.DHCP;
+            return KuraIpv6Method.DHCP;
         case "netIPv6MethodManual":
-            return KuraIpv6AddressGenerationMethod.MANUAL;
+            return KuraIpv6Method.MANUAL;
         default:
-            return KuraIpv6AddressGenerationMethod.UNKNOWN;
+            return KuraIpv6Method.UNKNOWN;
 
         }
 

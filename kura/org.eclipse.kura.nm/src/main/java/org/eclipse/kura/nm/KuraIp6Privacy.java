@@ -5,37 +5,36 @@ import java.util.List;
 
 import org.eclipse.kura.nm.enums.NMSettingIP6ConfigPrivacy;
 
-public enum KuraIP6ConfigPrivacy {
+public enum KuraIp6Privacy {
 
     UNKNOWN,
     DISABLED,
     ENABLED_PUBLIC_ADD,
     ENABLED_TEMP_ADD;
 
-    private static final List<KuraIP6ConfigPrivacy> ENABLED_STATUS = Arrays.asList(KuraIP6ConfigPrivacy.UNKNOWN,
-            KuraIP6ConfigPrivacy.DISABLED, KuraIP6ConfigPrivacy.ENABLED_PUBLIC_ADD,
-            KuraIP6ConfigPrivacy.ENABLED_TEMP_ADD);
+    private static final List<KuraIp6Privacy> ENABLED_STATUS = Arrays.asList(KuraIp6Privacy.UNKNOWN,
+            KuraIp6Privacy.DISABLED, KuraIp6Privacy.ENABLED_PUBLIC_ADD, KuraIp6Privacy.ENABLED_TEMP_ADD);
 
-    public static Boolean isEnabled(KuraIP6ConfigPrivacy status) {
+    public static Boolean isEnabled(KuraIp6Privacy status) {
         return ENABLED_STATUS.contains(status);
     }
 
-    public static KuraIP6ConfigPrivacy fromString(String status) {
+    public static KuraIp6Privacy fromString(String status) {
         switch (status) {
         case "netIPv6PrivacyUnknown":
-            return KuraIP6ConfigPrivacy.UNKNOWN;
+            return KuraIp6Privacy.UNKNOWN;
         case "netIPv6PrivacyDisabled":
-            return KuraIP6ConfigPrivacy.DISABLED;
+            return KuraIp6Privacy.DISABLED;
         case "netIPv6PrivacyEnabledPubAdd":
-            return KuraIP6ConfigPrivacy.ENABLED_PUBLIC_ADD;
+            return KuraIp6Privacy.ENABLED_PUBLIC_ADD;
         case "netIPv6PrivacyEnabledTempAdd":
-            return KuraIP6ConfigPrivacy.ENABLED_TEMP_ADD;
+            return KuraIp6Privacy.ENABLED_TEMP_ADD;
         default:
-            return KuraIP6ConfigPrivacy.UNKNOWN;
+            return KuraIp6Privacy.UNKNOWN;
         }
     }
 
-    public static NMSettingIP6ConfigPrivacy toNMSettingIP6ConfigPrivacy(KuraIP6ConfigPrivacy privacyValue) {
+    public static NMSettingIP6ConfigPrivacy toNMSettingIP6ConfigPrivacy(KuraIp6Privacy privacyValue) {
         switch (privacyValue) {
         case UNKNOWN:
             return NMSettingIP6ConfigPrivacy.NM_SETTING_IP6_CONFIG_PRIVACY_UNKNOWN;

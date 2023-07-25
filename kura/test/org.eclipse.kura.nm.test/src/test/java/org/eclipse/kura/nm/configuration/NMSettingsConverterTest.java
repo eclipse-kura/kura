@@ -16,7 +16,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -161,6 +164,100 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "manual");
         thenResultingMapContains("address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithAutoMethodAndWAN() {
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContains("method", "auto");
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithDhcpMethodAndWAN() {
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodDhcp");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContains("method", "dhcp");
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithManualMethodAndEnabledForWan() {
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodManual");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.address", "fe80::eed:f0a1:d03a:1028");
+        givenMapWith("net.interface.wlan0.config.ip6.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip6.dnsServers", "2001:4860:4860:0:0:0:0:8844");
+        givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "manual");
+        thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
+        thenResultingMapContains("dns", buildDnsAddressesList("2001:4860:4860:0:0:0:0:8844"));
+        thenResultingMapContains("ignore-auto-dns", true);
+        thenResultingMapContains("gateway", "fe80::eed:f0a1:d03a:1");
+
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithAutoMethodAndEnabledForLan() {
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledLAN");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "auto");
+        thenResultingMapContains("ignore-auto-dns", true);
+        thenResultingMapContains("ignore-auto-routes", true);
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithManualMethodAndEnabledForLan() {
+
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodManual");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledLAN");
+        givenMapWith("net.interface.wlan0.config.ip6.address", "fe80::eed:f0a1:d03a:1028");
+        givenMapWith("net.interface.wlan0.config.ip6.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip6.dnsServers", "2001:4860:4860:0:0:0:0:8844");
+        givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "manual");
+        thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
+        thenResultingMapContains("ignore-auto-dns", true);
+        thenResultingMapContains("ignore-auto-routes", true);
+    }
+
+    @Test
+    public void buildIpv6SettingsShouldWorkWhenGivenExpectedMapWithManualMethodAndUnmanaged() {
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodManual");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusUnmanaged");
+        givenMapWith("net.interface.wlan0.config.ip6.address", "fe80::eed:f0a1:d03a:1028");
+        givenMapWith("net.interface.wlan0.config.ip6.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip6.dnsServers", "2001:4860:4860:0:0:0:0:8844");
+        givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
     }
 
     @Test
@@ -706,6 +803,12 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
         givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusUnmanaged");
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodManual");
+        givenMapWith("net.interface.wlan0.config.ip6.address", "fe80::eed:f0a1:d03a:1028");
+        givenMapWith("net.interface.wlan0.config.ip6.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip6.dnsServers", "2001:4860:4860:0:0:0:0:8844");
+        givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
         givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
@@ -721,9 +824,10 @@ public class NMSettingsConverterTest {
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
-        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
         thenResultingBuildAllMapContains("ipv4", "method", "manual");
         thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapContains("ipv6", "method", "manual");
+        thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
         thenResultingBuildAllMapContains("connection", "id", "kura-wlan0-connection");
         thenResultingBuildAllMapContains("connection", "interface-name", "wlan0");
         thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
@@ -747,6 +851,12 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
         givenMapWith("net.interface.wlan0.config.ip4.gateway", "192.168.0.1");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusManagedLAN");
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodManual");
+        givenMapWith("net.interface.wlan0.config.ip6.address", "fe80::eed:f0a1:d03a:1028");
+        givenMapWith("net.interface.wlan0.config.ip6.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.ip6.dnsServers", "2001:4860:4860:0:0:0:0:8844");
+        givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
         givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
         givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
@@ -763,9 +873,10 @@ public class NMSettingsConverterTest {
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
         thenNoExceptionsHaveBeenThrown();
-        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
         thenResultingBuildAllMapContains("ipv4", "method", "manual");
         thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapContains("ipv6", "method", "manual");
+        thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
         thenResultingBuildAllMapContains("connection", "id", "kura-wlan0-connection");
         thenResultingBuildAllMapContains("connection", "interface-name", "wlan0");
         thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
@@ -783,6 +894,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedConfiguredForInputsWiFiWan() {
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
@@ -824,6 +936,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLanAndHiddenSsid() {
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
@@ -867,6 +980,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldNotSet80211WirelessSecuritySettingsIfSecurityTypeIsSetToNone() {
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
@@ -903,6 +1017,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
@@ -946,6 +1061,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndUnmanaged() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusUnmanaged");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -968,6 +1084,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndLan() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedLan");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -990,6 +1107,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsEthernetAndWan() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -1012,6 +1130,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldWorkWithModemSettings() {
+        givenMapWith("net.interface.1-1.1.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.1-1.1.config.dhcpClient4.enabled", true);
         givenMapWith("net.interface.1-1.1.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.1-1.1.config.apn", "mobile.test.com");
@@ -1381,5 +1500,28 @@ public class NMSettingsConverterTest {
         Variant<?> dataVariant = new Variant<>(addressData, "aa{sv}");
 
         return dataVariant.getValue();
+    }
+
+    public List<List<Byte>> buildDnsAddressesList(String inputDns) {
+        List<List<Byte>> dnsAddresses = new ArrayList<>();
+
+        InetAddress address;
+
+        try {
+            address = InetAddress.getByName(inputDns);
+        } catch (UnknownHostException ex) {
+            address = null;
+        }
+
+        byte[] dnsByteArray = address.getAddress();
+
+        List<Byte> dnsAddress = new ArrayList<>();
+        for (int i = 0; i < dnsByteArray.length; i++) {
+            dnsAddress.add(dnsByteArray[i]);
+        }
+
+        dnsAddresses.add(dnsAddress);
+
+        return dnsAddresses;
     }
 }

@@ -404,6 +404,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -426,6 +427,7 @@ public class NMDbusConnectorTest {
         givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -532,6 +534,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
@@ -554,6 +557,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
@@ -576,6 +580,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
@@ -730,6 +735,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -756,6 +762,7 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");

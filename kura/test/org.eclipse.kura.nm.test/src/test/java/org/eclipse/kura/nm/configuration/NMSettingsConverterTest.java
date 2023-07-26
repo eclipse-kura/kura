@@ -157,6 +157,44 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildIpv4SettingsShouldSupportEmptyWanPriorityProperty() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("route-metric");
+    }
+
+    @Test
+    public void buildIpv4SettingsShouldPopulateWanPriorityProperty() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("route-metric", new Variant<>(new Long(30)).getValue());
+    }
+
+    @Test
+    public void buildIpv4SettingsShouldNotPopulateWanPriorityPropertyIfNotWAN() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("route-metric");
+    }
+
+    @Test
     public void build80211WirelessSettingsShouldWorkWhenGivenExpectedMapAndSetToInfraAndWithChannelField() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
@@ -1121,45 +1159,6 @@ public class NMSettingsConverterTest {
 
         thenNoSuchElementExceptionThrown();
     }
-
-    @Test
-    public void shouldSupportEmptyWanPriorityProperty() {
-        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-
-        thenNoExceptionsHaveBeenThrown();
-        thenResultingMapNotContains("route-metric");
-    }
-
-    @Test
-    public void shouldPopulateWanPriorityProperty() {
-        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
-        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-
-        thenNoExceptionsHaveBeenThrown();
-        thenResultingMapContains("route-metric", new Variant<>(new Long(30)).getValue());
-    }
-
-    @Test
-    public void shouldNotPopulateWanPriorityPropertyIfNotWAN() {
-        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
-        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", new Integer(30));
-        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-
-        thenNoExceptionsHaveBeenThrown();
-        thenResultingMapNotContains("route-metric");
-    }
-
     /*
      * Given
      */

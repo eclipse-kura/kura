@@ -156,19 +156,10 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
-        KuraIpStatus ip6Status = KuraIpStatus
-                .fromString(props.get(String.class, "net.interface.%s.config.ip6.status", deviceId));
-
-        if (ip6Status == KuraIpStatus.UNMANAGED || ip6Status == KuraIpStatus.UNKNOWN) {
-            throw new IllegalArgumentException("IPv6 status is not supported: " + ip6Status
-                    + ". Build settings should be called only for managed interfaces.");
-        }
-
         Map<String, Variant<?>> settings = new HashMap<>();
-        if (ip6Status == KuraIpStatus.DISABLED) {
-            settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("disabled"));
-            return settings;
-        }
+
+        // Disabled for now
+        settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("disabled"));
 
         return settings;
     }

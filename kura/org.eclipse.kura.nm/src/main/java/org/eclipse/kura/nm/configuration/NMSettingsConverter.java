@@ -159,7 +159,7 @@ public class NMSettingsConverter {
         KuraIpStatus ip6Status = KuraIpStatus
                 .fromString(props.get(String.class, "net.interface.%s.config.ip6.status", deviceId));
 
-        if (ip6Status == KuraIpStatus.UNMANAGED) {
+        if (ip6Status == KuraIpStatus.UNMANAGED || ip6Status == KuraIpStatus.UNKNOWN) {
             throw new IllegalArgumentException("IPv6 status is not supported: " + ip6Status
                     + ". Build settings should be called only for managed interfaces.");
         }

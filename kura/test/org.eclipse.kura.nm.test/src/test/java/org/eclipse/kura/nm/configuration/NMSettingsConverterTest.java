@@ -101,6 +101,24 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildIpv4SettingsShouldWorkWhenDisabled() {
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusDisabled");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "disabled");
+        thenResultingMapNotContains("ignore-auto-dns");
+        thenResultingMapNotContains("ignore-auto-routes");
+        thenResultingMapNotContains("route-metric");
+        thenResultingMapNotContains("address-data");
+        thenResultingMapNotContains("dns");
+        thenResultingMapNotContains("ignore-auto-dns");
+        thenResultingMapNotContains("gateway");
+    }
+
+    @Test
     public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForWan() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");

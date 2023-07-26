@@ -25,8 +25,8 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
-import org.eclipse.kura.rest.position.api.IsLockedDTO;
 import org.eclipse.kura.rest.position.api.DateTimeDTO;
+import org.eclipse.kura.rest.position.api.IsLockedDTO;
 import org.eclipse.kura.rest.position.api.PositionDTO;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -99,7 +99,7 @@ public class PositionRestService {
      */
     @GET
     @RolesAllowed("position")
-    @Path("/localdatetime")
+    @Path("/dateTime")
     @Produces(MediaType.APPLICATION_JSON)
     public DateTimeDTO getLocalDateTime() {
         if (positionServiceImpl.isLocked()) {
@@ -119,7 +119,7 @@ public class PositionRestService {
      */
     @GET
     @RolesAllowed("position")
-    @Path("/islocked")
+    @Path("/isLocked")
     @Produces(MediaType.APPLICATION_JSON)
     public IsLockedDTO getIsLocked() {
         try {

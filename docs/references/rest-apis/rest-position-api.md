@@ -4,7 +4,7 @@
 
 #### Get Position
 - Method: GET
-- API PATH: `/services/position/v1/position/`
+- API PATH: `/services/position/v1/position`
 
 ##### Responses
 - 200 OK status
@@ -39,7 +39,7 @@
 ---
 #### Get Date Time
 - Method: GET
-- API PATH: `/services/position/v1/datetime/`
+- API PATH: `/services/position/v1/dateTime`
 
 ##### Responses
 - 200 OK status
@@ -62,7 +62,7 @@
 ---
 #### Get Is Position Locked
 - Method: GET
-- API PATH: `/services/position/v1/islocked/`
+- API PATH: `/services/position/v1/isLocked`
 
 ##### Responses
 - 200 OK status

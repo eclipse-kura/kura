@@ -81,6 +81,26 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildIpv4SettingsShouldThrowWithUnmanagedStatus() {
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusUnmanaged");
+
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void buildIpv4SettingsShouldThrowWithUnknownStatus() {
+        givenMapWith("net.interface.wlan0.config.ip4.status", "myNewAnDifferentUnknownStatus");
+
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
     public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsTrueAndEnabledForWan() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
@@ -730,8 +750,19 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiUnmanged() {
+    public void buildSettingsShouldThrowWithStatusUnmanaged() {
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusUnmanaged");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void buildSettingsShouldThrowWithStatusUnknown() {
+        givenMapWith("net.interface.wlan0.config.ip4.status", "myAwesomeUnknownString");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",

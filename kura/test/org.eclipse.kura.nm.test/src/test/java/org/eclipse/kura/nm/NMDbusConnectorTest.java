@@ -75,6 +75,7 @@ import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
+import org.freedesktop.dbus.interfaces.ObjectManager;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.UInt64;
@@ -404,7 +405,6 @@ public class NMDbusConnectorTest {
         givenMockedDeviceList();
 
         givenNetworkConfigMapWith("net.interfaces", "eth0");
-        givenNetworkConfigMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");

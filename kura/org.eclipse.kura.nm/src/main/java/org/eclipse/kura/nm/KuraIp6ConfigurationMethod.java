@@ -13,22 +13,12 @@
 
 package org.eclipse.kura.nm;
 
-import java.util.Arrays;
-import java.util.List;
-
 public enum KuraIp6ConfigurationMethod {
 
     AUTO,
     DHCP,
     MANUAL,
     UNKNOWN;
-
-    private static final List<KuraIp6ConfigurationMethod> ENABLED_STATUS = Arrays.asList(
-            KuraIp6ConfigurationMethod.AUTO, KuraIp6ConfigurationMethod.DHCP, KuraIp6ConfigurationMethod.MANUAL);
-
-    public static Boolean isEnabled(KuraIp6ConfigurationMethod status) {
-        return ENABLED_STATUS.contains(status);
-    }
 
     public static KuraIp6ConfigurationMethod fromString(String status) {
         switch (status) {

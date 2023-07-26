@@ -1,8 +1,5 @@
 package org.eclipse.kura.nm;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.kura.nm.enums.NMSettingIP6ConfigPrivacy;
 
 public enum KuraIp6Privacy {
@@ -11,13 +8,6 @@ public enum KuraIp6Privacy {
     DISABLED,
     ENABLED_PUBLIC_ADD,
     ENABLED_TEMP_ADD;
-
-    private static final List<KuraIp6Privacy> ENABLED_STATUS = Arrays.asList(KuraIp6Privacy.UNKNOWN,
-            KuraIp6Privacy.DISABLED, KuraIp6Privacy.ENABLED_PUBLIC_ADD, KuraIp6Privacy.ENABLED_TEMP_ADD);
-
-    public static Boolean isEnabled(KuraIp6Privacy status) {
-        return ENABLED_STATUS.contains(status);
-    }
 
     public static KuraIp6Privacy fromString(String status) {
         switch (status) {
@@ -30,7 +20,7 @@ public enum KuraIp6Privacy {
         case "netIPv6PrivacyEnabledTempAdd":
             return KuraIp6Privacy.ENABLED_TEMP_ADD;
         default:
-            return KuraIp6Privacy.UNKNOWN;
+            throw new IllegalArgumentException(String.format("Unsupported IPv6 privacy value: \"%s\"", status));
         }
     }
 

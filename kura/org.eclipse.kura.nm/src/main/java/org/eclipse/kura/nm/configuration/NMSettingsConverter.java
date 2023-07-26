@@ -151,17 +151,23 @@ public class NMSettingsConverter {
 
     public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
 
-        KuraIpStatus ip6Status = KuraIpStatus
-                .fromString(props.get(String.class, "net.interface.%s.config.ip6.status", deviceId));
+        // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status property is not set, it assumes
+        // it is disabled.
 
-        if (ip6Status == KuraIpStatus.UNMANAGED) {
+        Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
+                .fromString(props.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));
+
+        KuraIpStatus ip6Status = ip6OptStatus.isPresent() ? ip6OptStatus.get() : KuraIpStatus.DISABLED;
+
+        if (ip6Status == KuraIpStatus.UNMANAGED || ip6Status == KuraIpStatus.UNKNOWN) {
             throw new IllegalArgumentException("IPv6 status is not supported: " + ip6Status
                     + ". Build settings should be called only for managed interfaces.");
         }
 
         Map<String, Variant<?>> settings = new HashMap<>();
+
         if (ip6Status == KuraIpStatus.DISABLED) {
-            settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("disabled"));
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("disabled"));
             return settings;
         }
 
@@ -171,6 +177,22 @@ public class NMSettingsConverter {
         if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.AUTO)) {
 
             settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
+
+            Optional<String> addressGenerationMode = props.getOpt(String.class,
+                    "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
+            if (addressGenerationMode.isPresent()) {
+                KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
+                        .fromString(addressGenerationMode.get());
+                settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
+                        .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
+            }
+
+            Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
+            if (privacy.isPresent()) {
+                KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
+                settings.put("ip6-privacy",
+                        new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
+            }
 
         } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.DHCP)) {
 
@@ -220,22 +242,6 @@ public class NMSettingsConverter {
             }
         } else {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
-        }
-
-        Optional<String> addressGenerationMode = props.getOpt(String.class, "net.interface.%s.config.ip6.addr.gen.mode",
-                deviceId);
-        if (addressGenerationMode.isPresent()) {
-            KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
-                    .fromString(addressGenerationMode.get());
-            settings.put("addr-gen-mode", new Variant<>(
-                    KuraIp6AddressGenerationMode.toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
-        }
-
-        Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
-        if (privacy.isPresent()) {
-            KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
-            settings.put("ip6-privacy",
-                    new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
         }
 
         return settings;

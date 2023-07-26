@@ -1,21 +1,11 @@
 package org.eclipse.kura.nm;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.kura.nm.enums.NMSettingIP6ConfigAddrGenMode;
 
 public enum KuraIp6AddressGenerationMode {
 
     EUI64,
     STABLE_PRIVACY;
-
-    private static final List<KuraIp6AddressGenerationMode> ADDRESS_GEN_MODE = Arrays
-            .asList(KuraIp6AddressGenerationMode.EUI64, KuraIp6AddressGenerationMode.STABLE_PRIVACY);
-
-    public static Boolean isEnabled(KuraIp6AddressGenerationMode status) {
-        return ADDRESS_GEN_MODE.contains(status);
-    }
 
     public static KuraIp6AddressGenerationMode fromString(String status) {
         switch (status) {

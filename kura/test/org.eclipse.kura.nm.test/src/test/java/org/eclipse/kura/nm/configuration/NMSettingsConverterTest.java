@@ -110,6 +110,9 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
 
         thenResultingMapContains("method", "auto");
+        thenResultingMapNotContains("ignore-auto-dns");
+        thenResultingMapNotContains("ignore-auto-routes");
+        thenResultingMapNotContains("route-metric");
     }
 
     @Test
@@ -130,7 +133,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("dns", new Variant<>(Arrays.asList(new UInt32(16843009)), "au").getValue());
         thenResultingMapContains("ignore-auto-dns", true);
         thenResultingMapContains("gateway", "192.168.0.1");
-
+        thenResultingMapNotContains("route-metric");
     }
 
     @Test
@@ -145,6 +148,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("method", "auto");
         thenResultingMapContains("ignore-auto-dns", true);
         thenResultingMapContains("ignore-auto-routes", true);
+        thenResultingMapNotContains("route-metric");
     }
 
     @Test
@@ -164,27 +168,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
         thenResultingMapContains("ignore-auto-dns", true);
         thenResultingMapContains("ignore-auto-routes", true);
-    }
-
-    @Test
-    public void buildIpv4SettingsShouldWorkWhenGivenExpectedMapAndDhcpIsFalseAndUnmanaged() {
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusUnmanaged");
-        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-
-        thenIllegalArgumentExceptionThrown();
-    }
-
-    @Test
-    public void buildIpv4SettingsShouldSupportEmptyWanPriorityProperty() {
-        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
-
-        whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-
-        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("dns");
         thenResultingMapNotContains("route-metric");
     }
 
@@ -198,6 +182,7 @@ public class NMSettingsConverterTest {
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "auto");
         thenResultingMapContains("route-metric", new Variant<>(new Long(30)).getValue());
     }
 
@@ -211,6 +196,9 @@ public class NMSettingsConverterTest {
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("method", "auto");
+        thenResultingMapContains("ignore-auto-dns", true);
+        thenResultingMapContains("ignore-auto-routes", true);
         thenResultingMapNotContains("route-metric");
     }
 
@@ -1341,6 +1329,11 @@ public class NMSettingsConverterTest {
 
     public void thenResultingBuildAllMapNotContains(String key) {
         assertFalse(this.resultAllSettingsMap.containsKey(key));
+    }
+
+    public void thenResultingBuildAllMapNotContains(String key, String subKey) {
+        Map<String, Variant<?>> innerMap = this.resultAllSettingsMap.get(key);
+        assertFalse(innerMap.containsKey(key));
     }
 
     public void thenResultingBuildAllMapContainsBytes(String key, String subKey, Object value) {

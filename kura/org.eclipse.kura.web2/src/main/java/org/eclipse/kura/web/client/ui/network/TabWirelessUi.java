@@ -1487,6 +1487,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     TabWirelessUi.this.gwtNetworkService.findWifiHotspots(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(),
                             TabWirelessUi.this.selectedNetIfConfig.getAccessPointWifiConfig().getWirelessSsid(),
+                            false,
                             new AsyncCallback<List<GwtWifiHotspotEntry>>() {
 
                                 @Override

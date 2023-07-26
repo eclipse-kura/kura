@@ -15,7 +15,6 @@ package org.eclipse.kura.web.server.net2;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
@@ -34,11 +33,9 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
-import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
-import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -251,9 +248,11 @@ public class GwtNetworkServiceImpl {
         }
     }
 
-    public static List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws GwtKuraException {
+    public static List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName, boolean recompute)
+            throws GwtKuraException {
         try {
-            List<GwtWifiHotspotEntry> aps = new NetworkStatusServiceAdapter().findWifiHotspots(interfaceName);
+            List<GwtWifiHotspotEntry> aps = new NetworkStatusServiceAdapter().findWifiHotspots(interfaceName,
+                    recompute);
             logger.debug("Found APs: {}", aps);
             return aps;
         } catch (KuraException e) {

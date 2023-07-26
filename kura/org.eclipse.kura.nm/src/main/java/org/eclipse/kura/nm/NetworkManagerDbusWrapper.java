@@ -42,8 +42,8 @@ public class NetworkManagerDbusWrapper {
     private static final String NM_SETTING_CONNECTION_KEY = "connection";
     private static final String NM_DEVICE_GENERIC_PROPERTY_TYPEDESCRIPTION = "TypeDescription";
 
-    private DBusConnection dbusConnection;
-    private NetworkManager networkManager;
+    private final DBusConnection dbusConnection;
+    private final NetworkManager networkManager;
 
     protected NetworkManagerDbusWrapper(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = dbusConnection;

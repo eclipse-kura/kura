@@ -60,7 +60,7 @@ public class DnsServerMonitor {
     private final CommandExecutorService executorService;
     private NetworkProperties networkProperties;
 
-    private LinuxNetworkUtil linuxNetworkUtil;
+    private final LinuxNetworkUtil linuxNetworkUtil;
 
     public DnsServerMonitor(DnsServerService dnsServerService, CommandExecutorService executorService) {
 
@@ -158,7 +158,8 @@ public class DnsServerMonitor {
 
     }
 
-    private void addToAllowedNetworksIfPassDnsEnabled(Set<NetworkPair<IP4Address>> allowedNetworks, NetConfig netConfig) {
+    private void addToAllowedNetworksIfPassDnsEnabled(Set<NetworkPair<IP4Address>> allowedNetworks,
+            NetConfig netConfig) {
         if (isPassDnsEnabled(netConfig)) {
 
             DhcpServerConfig dhcpServerConfig = (DhcpServerConfig) netConfig;
@@ -190,7 +191,7 @@ public class DnsServerMonitor {
     }
 
     public boolean isPassDnsEnabled(NetConfig netConfig) {
-        return (netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns());
+        return netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isPassDns();
     }
 
     private Set<IP4Address> getForwarders(Set<IPAddress> dnsServers) {

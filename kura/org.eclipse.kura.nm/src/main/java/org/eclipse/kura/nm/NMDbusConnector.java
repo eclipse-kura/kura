@@ -74,6 +74,8 @@ public class NMDbusConnector {
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
             NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
+    private static final long MAX_SCAN_TIME_SECONDS = 30L;
+
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
@@ -188,9 +190,15 @@ public class NMDbusConnector {
         }
     }
 
-    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId,
+    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId, boolean recompute,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
+
+        if (recompute) {
+            WpaSupplicantDbusWrapper wpaSupplicantDbusWrapper = new WpaSupplicantDbusWrapper(this.dbusConnection);
+            wpaSupplicantDbusWrapper.syncScan(interfaceId, MAX_SCAN_TIME_SECONDS);
+        }
+
         Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());

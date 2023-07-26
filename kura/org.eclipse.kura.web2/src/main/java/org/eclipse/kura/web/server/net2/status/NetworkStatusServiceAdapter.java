@@ -144,10 +144,11 @@ public class NetworkStatusServiceAdapter {
         return "";
     }
 
-    public List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName) throws KuraException {
+    public List<GwtWifiHotspotEntry> findWifiHotspots(String interfaceName, boolean recompute) throws KuraException {
         List<GwtWifiHotspotEntry> result = new ArrayList<>();
 
-        Optional<NetworkInterfaceStatus> ifStatus = this.networkStatusService.getNetworkStatus(interfaceName);
+        Optional<NetworkInterfaceStatus> ifStatus = this.networkStatusService.getNetworkStatus(interfaceName,
+                recompute);
 
         if (ifStatus.isPresent() && ifStatus.get() instanceof WifiInterfaceStatus) {
             WifiInterfaceStatus wifiStatus = (WifiInterfaceStatus) ifStatus.get();
@@ -296,8 +297,6 @@ public class NetworkStatusServiceAdapter {
             WifiInterfaceStatus wifiInterfaceInfo = (WifiInterfaceStatus) networkInterfaceInfo;
             gwtWifiNetInterfaceConfig.setHwState(wifiInterfaceInfo.getState().toString());
 
-            
-
             if (wifiInterfaceInfo.getMode() == WifiMode.MASTER) {
                 setWifiMasterStateProperties(gwtWifiNetInterfaceConfig, wifiInterfaceInfo);
             } else if (wifiInterfaceInfo.getMode() == WifiMode.INFRA) {
@@ -306,7 +305,8 @@ public class NetworkStatusServiceAdapter {
         }
     }
 
-    private void setWifiMasterStateProperties(GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig, WifiInterfaceStatus wifiInterfaceInfo) {
+    private void setWifiMasterStateProperties(GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig,
+            WifiInterfaceStatus wifiInterfaceInfo) {
         GwtWifiConfig gwtConfig;
         if (Objects.nonNull(gwtWifiNetInterfaceConfig.getAccessPointWifiConfig())) {
             gwtConfig = gwtWifiNetInterfaceConfig.getAccessPointWifiConfig();
@@ -329,7 +329,8 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setChannels(channelsBuilder.getChannelsIntegers());
     }
 
-    private void setWifiInfraStateProperties(GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig, WifiInterfaceStatus wifiInterfaceInfo) {
+    private void setWifiInfraStateProperties(GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig,
+            WifiInterfaceStatus wifiInterfaceInfo) {
         AtomicReference<String> rssi = new AtomicReference<>("N/A");
         wifiInterfaceInfo.getActiveWifiAccessPoint()
                 .ifPresent(accessPoint -> rssi.set(String.valueOf(accessPoint.getSignalStrength())));

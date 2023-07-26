@@ -776,7 +776,7 @@ public class NMStatusConverter {
      * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L4305
      * and
      * https://github.com/torvalds/linux/blob/c9c3395d5e3dcc6daee66c6908354d47bf98cb0c/drivers/net/wireless/intel/ipw2x00/ipw2200.c#L11664
-     * 
+     *
      * signalQuality = (100 * DeltaRSSI^2 - (RSSIMax - RSSI)*(15*DeltaRSSI + 62*DeltaRSSI))/DeltaRSSI^2
      */
     protected static int convertToWifiSignalStrength(int signalQuality) {
@@ -791,7 +791,7 @@ public class NMStatusConverter {
      * the command at+csq (https://m2msupport.net/m2msupport/atcsq-signal-quality/),
      * the following method converts the signalQuality to the csq value and finally
      * convert this to the signal strength [dBm]:
-     * 
+     *
      * signalQuality = 100/30 * csq
      * signalStrength = -113 + 2 * csq
      */

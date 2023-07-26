@@ -97,7 +97,7 @@ public class NMSettingsConverter {
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
 
-        if (ip4Status == KuraIpStatus.UNMANAGED) {
+        if (ip4Status == KuraIpStatus.UNMANAGED || ip4Status == KuraIpStatus.UNKNOWN) {
             throw new IllegalArgumentException("IPv4 status is not supported: " + ip4Status
                     + ". Build settings should be called only for managed interfaces.");
         }

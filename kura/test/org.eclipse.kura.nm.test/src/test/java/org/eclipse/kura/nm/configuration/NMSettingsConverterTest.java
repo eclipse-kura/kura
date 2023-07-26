@@ -706,7 +706,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLan() {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -749,7 +749,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedConfiguredForInputsWiFiWan() {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -791,7 +791,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiLanAndHiddenSsid() {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -835,7 +835,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldNotSet80211WirelessSecuritySettingsIfSecurityTypeIsSetToNone() {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedLan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -872,7 +872,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForWiFiWanAndHiddenSsid() {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -927,7 +927,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedInputsConfiguredForEthernetAndLan() {
         givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedLan");
+        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledLAN");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
@@ -950,7 +950,7 @@ public class NMSettingsConverterTest {
     public void buildSettingsShouldWorkWithExpectedInputsEthernetAndWan() {
         givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
@@ -992,8 +992,9 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullIp() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.eth0.config.ip4.address", null);
         givenMapWith("net.interface.eth0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
@@ -1008,8 +1009,9 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullPrefix() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.eth0.config.ip4.prefix", null);
         givenMapWith("net.interface.eth0.config.ip4.dnsServers", "1.1.1.1");
@@ -1024,6 +1026,7 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullStatus() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.eth0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.eth0.config.ip4.status", null);
         givenMapWith("net.interface.eth0.config.ip4.address", "192.168.0.12");
@@ -1040,8 +1043,9 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullWifiSsid() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -1066,8 +1070,9 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullWifiPassword() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
@@ -1092,8 +1097,9 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildSettingsShouldThrowDhcpDisabledAndNullWifiSecurityType() {
+        givenMapWith("net.interface.eth0.config.ip6.status", "netIPv6StatusDisabled");
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusManagedWan");
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
         givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
         givenMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");

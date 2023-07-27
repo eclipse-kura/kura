@@ -67,13 +67,13 @@ This project leverages the following third party content.
 * maven/mavencentral/commons-io/commons-io/2.6, Apache-2.0, approved, CQ19090
 * maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-api/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-context/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-core/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-netty-shaded/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-protobuf-lite/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-protobuf/1.33.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-stub/1.33.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-api/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-context/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-core/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-netty-shaded/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-protobuf-lite/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-protobuf/1.56.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-stub/1.56.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.netty /netty-all/4.1.82.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
 * maven/mavencentral/io.netty /netty-buffer/4.1.82.Final, Apache-2.0, approved, CQ21842
 * maven/mavencentral/io.netty /netty-codec-http/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
@@ -88,7 +88,7 @@ This project leverages the following third party content.
 * maven/mavencentral/io.netty /netty-transport-native-kqueue/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty /netty-transport-native-unix-common/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty /netty-transport/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.perfmark/perfmark-api/0.19.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.perfmark/perfmark-api/0.26.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/1.2.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb
 * maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse

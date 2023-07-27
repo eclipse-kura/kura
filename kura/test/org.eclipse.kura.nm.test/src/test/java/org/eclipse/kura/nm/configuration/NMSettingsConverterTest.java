@@ -16,10 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +50,9 @@ public class NMSettingsConverterTest {
     Boolean hasNoSuchElementExceptionBeenThrown = false;
     Boolean hasAnIllegalArgumentExceptionThrown = false;
     Boolean hasAGenericExecptionBeenThrown = false;
+
+    private static List<List<Byte>> expectedDnsList = Arrays
+            .asList(Arrays.asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 }));
 
     @Test
     public void buildSettingsShouldThrowWhenGivenEmptyMap() {
@@ -205,7 +205,7 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "manual");
         thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
-        thenResultingMapContains("dns", buildDnsAddressesList("2001:4860:4860:0:0:0:0:8844"));
+        thenResultingMapContains("dns", expectedDnsList);
         thenResultingMapContains("ignore-auto-dns", true);
         thenResultingMapContains("gateway", "fe80::eed:f0a1:d03a:1");
 
@@ -1708,28 +1708,5 @@ public class NMSettingsConverterTest {
         Variant<?> dataVariant = new Variant<>(addressData, "aa{sv}");
 
         return dataVariant.getValue();
-    }
-
-    public List<List<Byte>> buildDnsAddressesList(String inputDns) {
-        List<List<Byte>> dnsAddresses = new ArrayList<>();
-
-        InetAddress address;
-
-        try {
-            address = InetAddress.getByName(inputDns);
-        } catch (UnknownHostException ex) {
-            address = null;
-        }
-
-        byte[] dnsByteArray = address.getAddress();
-
-        List<Byte> dnsAddress = new ArrayList<>();
-        for (int i = 0; i < dnsByteArray.length; i++) {
-            dnsAddress.add(dnsByteArray[i]);
-        }
-
-        dnsAddresses.add(dnsAddress);
-
-        return dnsAddresses;
     }
 }

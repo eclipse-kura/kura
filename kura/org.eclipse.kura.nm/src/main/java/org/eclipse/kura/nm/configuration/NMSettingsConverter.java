@@ -43,6 +43,7 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_CONNECTION = "connection";
     private static final String NM_SETTINGS_IPV4_METHOD = "method";
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
+    private static final String NM_SETTINGS_IPV6_IGNORE_AUTO_DNS = "ignore-auto-dns";
 
     private static final String PPP_REFUSE_EAP = "refuse-eap";
     private static final String PPP_REFUSE_CHAP = "refuse-chap";
@@ -126,14 +127,14 @@ public class NMSettingsConverter {
         }
 
         if (ip4Status.equals(KuraIpStatus.ENABLEDLAN)) {
-            settings.put("ignore-auto-dns", new Variant<>(true));
+            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
         } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers",
                     deviceId);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
-                settings.put("ignore-auto-dns", new Variant<>(true));
+                settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
             }
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",
@@ -180,19 +181,20 @@ public class NMSettingsConverter {
 
             Optional<String> addressGenerationMode = props.getOpt(String.class,
                     "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
-            if (addressGenerationMode.isPresent()) {
+
+            addressGenerationMode.ifPresent(value -> {
                 KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
                         .fromString(addressGenerationMode.get());
                 settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
                         .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
-            }
+            });
 
             Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
-            if (privacy.isPresent()) {
+            privacy.ifPresent(value -> {
                 KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
                 settings.put("ip6-privacy",
                         new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
-            }
+            });
 
         } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.DHCP)) {
 
@@ -223,23 +225,23 @@ public class NMSettingsConverter {
         }
 
         if (ip6Status.equals(KuraIpStatus.ENABLEDLAN)) {
-            settings.put("ignore-auto-dns", new Variant<>(true));
+            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
 
         } else if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
                     deviceId);
-            if (dnsServers.isPresent()) {
-                settings.put("dns", new Variant<>(convertIp6(dnsServers.get()), "aay"));
-                settings.put("ignore-auto-dns", new Variant<>(true));
-            }
+
+            dnsServers.ifPresent(value -> {
+                settings.put("dns", new Variant<>(convertIp6(value), "aay"));
+                settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+            });
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip6.wan.priority",
                     deviceId);
-            if (wanPriority.isPresent()) {
-                Long supportedByNM = wanPriority.get().longValue();
-                settings.put("route-metric", new Variant<>(supportedByNM));
-            }
+
+            wanPriority.ifPresent(value -> settings.put("route-metric", new Variant<>(value.longValue())));
+
         } else {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
         }

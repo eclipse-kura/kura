@@ -74,9 +74,9 @@ jobs:
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == false
       # Only runs if all of the files exist
       run: |
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[WIP\]/ && !done { sub(/\[WIP\]/, desc); done=1 } 1' description.txt done=0 RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[WIP\]/ && !done { sub(/\[WIP\]/, desc); done=1 } 1' target-env.txt done=0 RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[WIP\]/ && !done { sub(/\[WIP\]/, desc); done=1 } 1' known-issues.txt done=0 RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 RELEASE_NOTES.txt
       shell: bash
         
     - name: Files exist clean up

@@ -99,12 +99,21 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> buildIpv4Settings(NetworkProperties props, String deviceId) {
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", deviceId);
-
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(props.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
+
+        if (ip4Status == KuraIpStatus.UNMANAGED || ip4Status == KuraIpStatus.UNKNOWN) {
+            throw new IllegalArgumentException("IPv4 status is not supported: " + ip4Status
+                    + ". Build settings should be called only for managed interfaces.");
+        }
+
+        Map<String, Variant<?>> settings = new HashMap<>();
+        if (ip4Status == KuraIpStatus.DISABLED) {
+            settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("disabled"));
+            return settings;
+        }
+
+        Boolean dhcpClient4Enabled = props.get(Boolean.class, "net.interface.%s.config.dhcpClient4.enabled", deviceId);
 
         if (Boolean.FALSE.equals(dhcpClient4Enabled)) {
             settings.put(NM_SETTINGS_IPV4_METHOD, new Variant<>("manual"));

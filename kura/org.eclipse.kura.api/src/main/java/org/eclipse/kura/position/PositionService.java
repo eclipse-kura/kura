@@ -39,12 +39,12 @@ public interface PositionService {
      * Returns the current geographic position.<br>
      * The org.osgi.util.measurement.Measurement class is used to represent the values that make up a position:
      * <ul>
-     * <li>getLongitude() : returns the longitude of this position in radians.
-     * <li>getLatitude() : returns the latitude of this position in radians.
-     * <li>getSpeed() : returns the ground speed of this position in meters per second.
+     * <li>getLongitude() : returns the longitude of this position in radians. Can be null.
+     * <li>getLatitude() : returns the latitude of this position in radians. Can be null.
+     * <li>getSpeed() : returns the ground speed of this position in meters per second. Can be null.
      * <li>getTrack() : Returns the track of this position in radians as a compass heading. The track is the
      * extrapolation of
-     * previous previously measured positions to a future position.
+     * previous previously measured positions to a future position. Can be null.
      * </ul>
      *
      * @see org.osgi.util.position.Position Position
@@ -94,7 +94,7 @@ public interface PositionService {
     public String getNmeaDate();
 
     /**
-     * Returns the current date from {@link PositionServiceProvider}
+     * Returns the current date from {@link PositionServiceProvider}. Returned DateTime is in UTC TimeZone.
      *
      * @since 2.3
      */

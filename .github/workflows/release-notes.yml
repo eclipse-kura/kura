@@ -91,7 +91,7 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
-        title: "chore: add Project ${{ steps.get-version.outputs.resolved-version }} release notes"
-        commit-message: "chore: add Project ${{ steps.get-version.outputs.resolved-version }} release notes"
-        body: "Automated changes by _Release Notes automation_ action: add Project ${{ steps.get-version.outputs.resolved-version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
-        branch-suffix: timestamp
+        title: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
+        commit-message: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
+        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.resolved-version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
+        branch-suffix: short-commit-hash

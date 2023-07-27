@@ -43,6 +43,7 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_CONNECTION = "connection";
     private static final String NM_SETTINGS_IPV4_METHOD = "method";
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
+    private static final String NM_SETTINGS_IPV4_IGNORE_AUTO_DNS = "ignore-auto-dns";
     private static final String NM_SETTINGS_IPV6_IGNORE_AUTO_DNS = "ignore-auto-dns";
 
     private static final String PPP_REFUSE_EAP = "refuse-eap";
@@ -127,14 +128,14 @@ public class NMSettingsConverter {
         }
 
         if (ip4Status.equals(KuraIpStatus.ENABLEDLAN)) {
-            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+            settings.put(NM_SETTINGS_IPV4_IGNORE_AUTO_DNS, new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
         } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers",
                     deviceId);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
-                settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+                settings.put(NM_SETTINGS_IPV4_IGNORE_AUTO_DNS, new Variant<>(true));
             }
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",

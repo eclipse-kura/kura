@@ -51,8 +51,8 @@ public class NMSettingsConverterTest {
     Boolean hasAnIllegalArgumentExceptionThrown = false;
     Boolean hasAGenericExecptionBeenThrown = false;
 
-    private static List<List<Byte>> expectedDnsList = Arrays
-            .asList(Arrays.asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 }));
+    private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays
+            .asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 });
 
     @Test
     public void buildSettingsShouldThrowWhenGivenEmptyMap() {
@@ -205,7 +205,7 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "manual");
         thenResultingMapContains("address-data", buildAddressDataWith("fe80::eed:f0a1:d03a:1028", new UInt32(25)));
-        thenResultingMapContains("dns", expectedDnsList);
+        thenResultingMapContains("dns", Arrays.asList(IP6_BYTE_ARRAY_ADDRESS));
         thenResultingMapContains("ignore-auto-dns", true);
         thenResultingMapContains("gateway", "fe80::eed:f0a1:d03a:1");
 
@@ -1694,7 +1694,7 @@ public class NMSettingsConverterTest {
     }
 
     /*
-     * Helper Enables
+     * Helper Methods
      */
 
     public Object buildAddressDataWith(String ipAddr, UInt32 prefix) {

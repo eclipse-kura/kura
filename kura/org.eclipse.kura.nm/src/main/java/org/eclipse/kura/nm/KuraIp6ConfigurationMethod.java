@@ -17,8 +17,7 @@ public enum KuraIp6ConfigurationMethod {
 
     AUTO,
     DHCP,
-    MANUAL,
-    UNKNOWN;
+    MANUAL;
 
     public static KuraIp6ConfigurationMethod fromString(String status) {
         switch (status) {
@@ -29,7 +28,7 @@ public enum KuraIp6ConfigurationMethod {
         case "netIPv6MethodManual":
             return KuraIp6ConfigurationMethod.MANUAL;
         default:
-            return KuraIp6ConfigurationMethod.UNKNOWN;
+            throw new IllegalArgumentException(String.format("Unsupported IPv6 configuration method: \"%s\"", status));
 
         }
 

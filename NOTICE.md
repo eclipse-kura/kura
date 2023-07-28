@@ -74,20 +74,20 @@ This project leverages the following third party content.
 * maven/mavencentral/io.grpc/grpc-protobuf-lite/1.56.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.grpc/grpc-protobuf/1.56.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.grpc/grpc-stub/1.56.1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.netty /netty-all/4.1.82.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
-* maven/mavencentral/io.netty /netty-buffer/4.1.82.Final, Apache-2.0, approved, CQ21842
-* maven/mavencentral/io.netty /netty-codec-http/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-codec-mqtt/4.1.82.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
-* maven/mavencentral/io.netty /netty-codec/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-common/4.1.82.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
-* maven/mavencentral/io.netty /netty-handler/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-resolver/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-transport-classes-epoll/4.1.82.Final, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.netty /netty-transport-classes-kqueue/4.1.82.Final, Apache-2.0, approved, #4107
-* maven/mavencentral/io.netty /netty-transport-native-epoll/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-transport-native-kqueue/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-transport-native-unix-common/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.netty /netty-transport/4.1.82.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-all/4.1.95.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
+* maven/mavencentral/io.netty /netty-buffer/4.1.95.Final, Apache-2.0, approved, CQ21842
+* maven/mavencentral/io.netty /netty-codec-http/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-codec-mqtt/4.1.95.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
+* maven/mavencentral/io.netty /netty-codec/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-common/4.1.95.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
+* maven/mavencentral/io.netty /netty-handler/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-resolver/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-transport-classes-epoll/4.1.95.Final, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.netty /netty-transport-classes-kqueue/4.1.95.Final, Apache-2.0, approved, #4107
+* maven/mavencentral/io.netty /netty-transport-native-epoll/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-transport-native-kqueue/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-transport-native-unix-common/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty /netty-transport/4.1.95.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.perfmark/perfmark-api/0.26.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/1.2.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb

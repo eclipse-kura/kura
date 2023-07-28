@@ -38,15 +38,15 @@ jobs:
       id: check_files
       uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
-        files: 'RELEASE_NOTES.txt'
+        files: './kura/distrib/RELEASE_NOTES.txt'
 
     - name: Files exist
       id: get-old-text
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == false
       run: |
-        awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' RELEASE_NOTES.txt > description.txt
-        awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' RELEASE_NOTES.txt > target-env.txt
-        awk '/Known Issues:/ {found=1; next} /^$/ {found=0} found {print}' RELEASE_NOTES.txt > known-issues.txt
+        awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > description.txt
+        awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > target-env.txt
+        awk '/Known Issues:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > known-issues.txt
       shell: bash
 
     - name: Download git-changelog-command-line tool
@@ -67,7 +67,7 @@ jobs:
         -ex "{\"version\":\"${{ steps.get-version.outputs.resolved-version }}\"}" \
         -t .github/release_notes_template/template.hbs \
         -hhf .github/release_notes_template/helper.hbs \
-        -of RELEASE_NOTES.txt
+        -of ./kura/distrib/RELEASE_NOTES.txt
     
     - name: Files exist write description
       id: get-description

@@ -14,6 +14,7 @@ package org.eclipse.kura.nm;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public enum KuraIpStatus {
 
@@ -51,6 +52,36 @@ public enum KuraIpStatus {
         default:
             return KuraIpStatus.UNKNOWN;
 
+        }
+
+    }
+
+    public static Optional<KuraIpStatus> fromString(Optional<String> status) {
+
+        if (status.isPresent()) {
+            switch (status.get()) {
+            case "netIPv4StatusDisabled":
+            case "netIPv6StatusDisabled":
+                return Optional.of(KuraIpStatus.DISABLED);
+            case "netIPv4StatusUnmanaged":
+            case "netIPv6StatusUnmanaged":
+                return Optional.of(KuraIpStatus.UNMANAGED);
+            case "netIPv4StatusL2Only":
+            case "netIPv6StatusL2Only":
+                return Optional.of(KuraIpStatus.L2ONLY);
+            case "netIPv4StatusEnabledLAN":
+            case "netIPv6StatusEnabledLAN":
+                return Optional.of(KuraIpStatus.ENABLEDLAN);
+            case "netIPv4StatusEnabledWAN":
+            case "netIPv6StatusEnabledWAN":
+                return Optional.of(KuraIpStatus.ENABLEDWAN);
+            default:
+                return Optional.of(KuraIpStatus.UNKNOWN);
+
+            }
+
+        } else {
+            return Optional.empty();
         }
 
     }

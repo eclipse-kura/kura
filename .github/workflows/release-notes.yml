@@ -36,6 +36,7 @@ jobs:
     
     - name: Check file existence
       id: check_files
+      continue-on-error: true
       uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
         files: './kura/distrib/RELEASE_NOTES.txt'

@@ -36,7 +36,10 @@
                 <esf:value>enp3s0,lo,enp2s0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.status" type="String">
-                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+                <esf:value>netIPv4StatusUnmanaged</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip6.status" type="String">
+                <esf:value>netIPv6StatusUnmanaged</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip4.address" type="String">
                 <esf:value>172.16.0.1</esf:value>
@@ -49,6 +52,9 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip4.status" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip6.status" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.address" type="String">
                 <esf:value>172.16.0.1</esf:value>
@@ -118,6 +124,9 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.ip4.status" type="String">
                 <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.ip6.status" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

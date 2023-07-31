@@ -56,6 +56,9 @@
             <esf:property name="net.interface.eth0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledWAN</esf:value>
             </esf:property>
+            <esf:property name="net.interface.eth0.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
+            </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.broadcast" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
@@ -131,6 +134,9 @@
             <esf:property name="net.interface.lo.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusUnmanaged</esf:value>
             </esf:property>
+            <esf:property name="net.interface.lo.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusUnmanaged</esf:value>
+            </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
             </esf:property>
@@ -163,6 +169,9 @@
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.wlan0.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

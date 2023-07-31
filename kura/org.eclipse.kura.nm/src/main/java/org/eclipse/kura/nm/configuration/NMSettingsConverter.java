@@ -23,7 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.KuraIp6AddressGenerationMode;
+import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
+import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -40,6 +43,8 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_CONNECTION = "connection";
     private static final String NM_SETTINGS_IPV4_METHOD = "method";
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
+    private static final String NM_SETTINGS_IPV4_IGNORE_AUTO_DNS = "ignore-auto-dns";
+    private static final String NM_SETTINGS_IPV6_IGNORE_AUTO_DNS = "ignore-auto-dns";
 
     private static final String PPP_REFUSE_EAP = "refuse-eap";
     private static final String PPP_REFUSE_CHAP = "refuse-chap";
@@ -132,14 +137,14 @@ public class NMSettingsConverter {
         }
 
         if (ip4Status.equals(KuraIpStatus.ENABLEDLAN)) {
-            settings.put("ignore-auto-dns", new Variant<>(true));
+            settings.put(NM_SETTINGS_IPV4_IGNORE_AUTO_DNS, new Variant<>(true));
             settings.put("ignore-auto-routes", new Variant<>(true));
         } else if (ip4Status.equals(KuraIpStatus.ENABLEDWAN)) {
             Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip4.dnsServers",
                     deviceId);
             if (dnsServers.isPresent()) {
                 settings.put("dns", new Variant<>(convertIp4(dnsServers.get()), "au"));
-                settings.put("ignore-auto-dns", new Variant<>(true));
+                settings.put(NM_SETTINGS_IPV4_IGNORE_AUTO_DNS, new Variant<>(true));
             }
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",
@@ -156,10 +161,100 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
+
+        // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status property is not set, it assumes
+        // it is disabled.
+
+        Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
+                .fromString(props.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));
+
+        KuraIpStatus ip6Status = ip6OptStatus.isPresent() ? ip6OptStatus.get() : KuraIpStatus.DISABLED;
+
+        if (ip6Status == KuraIpStatus.UNMANAGED || ip6Status == KuraIpStatus.UNKNOWN) {
+            throw new IllegalArgumentException("IPv6 status is not supported: " + ip6Status
+                    + ". Build settings should be called only for managed interfaces.");
+        }
+
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        // Disabled for now
-        settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("disabled"));
+        if (ip6Status == KuraIpStatus.DISABLED) {
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("disabled"));
+            return settings;
+        }
+
+        KuraIp6ConfigurationMethod ip6ConfigMethod = KuraIp6ConfigurationMethod
+                .fromString(props.get(String.class, "net.interface.%s.config.ip6.address.method", deviceId));
+
+        if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.AUTO)) {
+
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
+
+            Optional<String> addressGenerationMode = props.getOpt(String.class,
+                    "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
+
+            addressGenerationMode.ifPresent(value -> {
+                KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
+                        .fromString(addressGenerationMode.get());
+                settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
+                        .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
+            });
+
+            Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
+            privacy.ifPresent(value -> {
+                KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
+                settings.put("ip6-privacy",
+                        new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
+            });
+
+        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.DHCP)) {
+
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("dhcp"));
+
+        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.MANUAL)) {
+
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("manual"));
+
+            String address = props.get(String.class, "net.interface.%s.config.ip6.address", deviceId);
+            Short prefix = props.get(Short.class, "net.interface.%s.config.ip6.prefix", deviceId);
+
+            Map<String, Variant<?>> addressEntry = new HashMap<>();
+            addressEntry.put("address", new Variant<>(address));
+            addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
+
+            if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
+                Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip6.gateway", deviceId);
+                gateway.ifPresent(gatewayAddress -> settings.put("gateway", new Variant<>(gatewayAddress)));
+            }
+
+            List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
+            settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
+
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported IPv6 address generation mode: \"%s\"", ip6ConfigMethod));
+        }
+
+        if (ip6Status.equals(KuraIpStatus.ENABLEDLAN)) {
+            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+            settings.put("ignore-auto-routes", new Variant<>(true));
+
+        } else if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
+            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
+                    deviceId);
+
+            dnsServers.ifPresent(value -> {
+                settings.put("dns", new Variant<>(convertIp6(value), "aay"));
+                settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+            });
+
+            Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip6.wan.priority",
+                    deviceId);
+
+            wanPriority.ifPresent(value -> settings.put("route-metric", new Variant<>(value.longValue())));
+
+        } else {
+            logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
+        }
 
         return settings;
     }
@@ -373,6 +468,31 @@ public class NMSettingsConverter {
         result = result << 8 | addrBytes[0] & 0xFF;
 
         return new UInt32(result);
+    }
+
+    private static List<List<Byte>> convertIp6(List<String> ipAddrList) {
+        List<List<Byte>> uint32Addresses = new ArrayList<>();
+        for (String address : ipAddrList) {
+            try {
+                uint32Addresses.add(convertIp6(address));
+            } catch (UnknownHostException e) {
+                logger.warn("Cannot convert ip address \"{}\" because: ", address, e);
+            }
+        }
+        return uint32Addresses;
+    }
+
+    private static List<Byte> convertIp6(String ipAddrString) throws UnknownHostException {
+        InetAddress address = InetAddress.getByName(ipAddrString);
+
+        byte[] dnsByteArray = address.getAddress();
+
+        List<Byte> dnsAddress = new ArrayList<>();
+        for (int i = 0; i < dnsByteArray.length; i++) {
+            dnsAddress.add(dnsByteArray[i]);
+        }
+
+        return dnsAddress;
     }
 
     private static String wifiModeConvert(String kuraMode) {

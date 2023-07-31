@@ -48,9 +48,9 @@ On unsupported devices, Kura will install an empty `jdk.dio.properties` file. He
 
 ### Kura dependencies
 
-To have all the Kura features working, the following dependencies are required:
+To have all the Kura features working on generic profiles (`generic-aarch64`, `generic-arm32`, `generic-x86_64`), the following dependencies are required:
 
-- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`.
+- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`, `telnet`.
 - Security: `polkit` or `policykit-1`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`.
 - Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`.
 - Time: `ntpdate`, `chrony`, `chronyc`, `cron` or `cronie`.
@@ -60,6 +60,8 @@ To have all the Kura features working, the following dependencies are required:
 - Python: `python3`.
 - Java: `openjdk-8-jre-headless` or `temurin-8-jdk` or `openjdk-17-jre-headless` or `temurin-17-jdk`.
 - Others: `dos2unix`
+
+To see the list of additional dependencies needed for specific devices, you can visit the [relevant section](specific-device-dependencies.md).
 
 ### Supported devices
 

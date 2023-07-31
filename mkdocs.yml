@@ -8,6 +8,7 @@ nav:
       - Docker Quick Start: getting-started/docker-quick-start.md
       - Intel Up² Quick Start: getting-started/intel-up-2-quick-start.md
       - NVIDIA Jetson Nano&trade; - Quick Start: getting-started/nvidia-jetson-nano-quick-start.md
+      - Specific devices required dependencies: getting-started/specific-device-dependencies.md
     - Gateway Configuration:
       - Gateway Administration Console: gateway-configuration/gateway-administration-console.md
       - Gateway Status: gateway-configuration/gateway-status.md

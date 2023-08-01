@@ -103,3 +103,36 @@ following steps:
     ```
     admin
     ```
+
+## Required Dependencies
+
+In addition to those required by generic profiles, listed in the [dedicated section](install-kura.md#kura-dependencies), additional Raspberry-specific dependencies are needed, listed below:
+
+### Raspberry Pi - ARM64 - NN
+- pi-bluetooth
+- rpi.gpio-common
+
+### Raspberry Pi - ARM64
+- hostapd
+- ethtool
+- wireless-tools
+- net-tools
+- ifupdown
+- pi-bluetooth
+- rpi.gpio-common
+- dmidecode
+
+### Raspberry Pi - ARMHF - NN
+- hostapd
+- ethtool
+- pi-bluetooth
+- rpi.gpio-common
+
+### Raspberry Pi - ARMHF
+- hostapd
+- ethtool
+- wireless-tools
+- net-tools
+- ifupdown
+- pi-bluetooth
+- rpi.gpio-common

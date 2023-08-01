@@ -98,3 +98,14 @@ following steps:
     ```
     admin
     ```
+
+## Required Dependencies
+
+In addition to those required by generic profiles, listed in the [dedicated section](install-kura.md#kura-dependencies), additional Intel Up²-specific dependencies are needed, listed below:
+
+- hostapd
+- ethtool
+- wireless-tools
+- net-tools
+- ifupdown
+- dmidecode

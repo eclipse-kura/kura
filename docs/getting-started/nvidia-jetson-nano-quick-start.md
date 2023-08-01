@@ -93,3 +93,13 @@ following steps:
     ```
     admin
     ```
+
+## Required Dependencies
+
+In addition to those required by generic profiles, listed in the [dedicated section](install-kura.md#kura-dependencies), additional NVIDIA Jetson Nano&trade;-specific dependencies are needed, listed below:
+
+- hostapd
+- ethtool
+- ifupdown
+- net-tools
+- dmidecode

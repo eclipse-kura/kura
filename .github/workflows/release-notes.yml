@@ -31,6 +31,7 @@ jobs:
           -Dexec.executable=echo
           -Dexec.args='${project.version}'
           --quiet exec:exec --non-recursive
+          -Pjava8
         )\" >> \"${GITHUB_OUTPUT}\""
       shell: bash
     
@@ -43,7 +44,7 @@ jobs:
 
     - name: Files exist
       id: get-old-text
-      if: steps.check_files.outputs.exists == true && github.event.inputs.overwrite == false
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
       run: |
         awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > description.txt
         awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > target-env.txt
@@ -72,17 +73,17 @@ jobs:
     
     - name: Files exist write description
       id: get-description
-      if: steps.check_files.outputs.exists == true && github.event.inputs.overwrite == false
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
       # Only runs if all of the files exist
       run: |
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
       shell: bash
         
     - name: Files exist clean up
       id: clean-up-files
-      if: steps.check_files.outputs.exists == true && github.event.inputs.overwrite == false
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
       # Only runs if all of the files exist
       run: |
         rm description.txt

@@ -9,7 +9,7 @@ on:
           required: true
         overwrite:
           type: boolean
-          description: Overwrite the content of the release notes (typically needed for RC1 notes)
+          description: Overwrite the content of TODO fields in generated release notes (typically needed for RC1 notes)
           required: true
           default: false
 jobs:

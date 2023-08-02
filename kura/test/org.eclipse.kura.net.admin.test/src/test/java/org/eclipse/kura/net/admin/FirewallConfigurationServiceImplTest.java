@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -44,11 +43,11 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.RuleType;
 import org.junit.Test;
@@ -504,10 +503,9 @@ public class FirewallConfigurationServiceImplTest {
         };
 
         List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration = new ArrayList<>();
-        FirewallOpenPortConfigIP4 port = new FirewallOpenPortConfigIP4(1234, NetProtocol.tcp, null, null, null, null,
-                null);
-        firewallConfiguration.add(port);
-
+        FirewallOpenPortConfigIP4Builder builder = FirewallOpenPortConfigIP4.builder();
+        builder.withPort(1234).withProtocol(NetProtocol.tcp);
+        firewallConfiguration.add(builder.build());
         svc.setFirewallOpenPortConfiguration(firewallConfiguration);
 
     }

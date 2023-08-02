@@ -34,7 +34,7 @@ public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Addre
     }
 
     /**
-     * @deprecated since 2.6. Uuse {@link FirewallOpenPortConfigIP4.builder()}
+     * @deprecated since 2.6. Use {@link FirewallOpenPortConfigIP4.builder()}
      */
     @Deprecated
     public FirewallOpenPortConfigIP4(int port, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork,
@@ -45,7 +45,7 @@ public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Addre
     }
 
     /**
-     * @deprecated since 2.6. Uuse {@link FirewallOpenPortConfigIP4.builder()}
+     * @deprecated since 2.6. Use {@link FirewallOpenPortConfigIP4.builder()}
      */
     @Deprecated
     public FirewallOpenPortConfigIP4(String portRange, NetProtocol protocol, NetworkPair<IP4Address> permittedNetwork,

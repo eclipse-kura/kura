@@ -200,34 +200,34 @@ public class NMStatusServiceImplTest {
     private void givenNMStatusServiceImplWithNonExistingInterface()
             throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("non-existing-interface", false, this.commandExecutorService))
                 .thenReturn(null);
     }
 
     private void givenNMStatusServiceImplThrowingUnknownMethodOnGetInterfaceStatus()
             throws DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan1", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan1", false, this.commandExecutorService))
                 .thenThrow(UnknownMethod.class);
     }
 
     private void givenNMStatusServiceImplThrowingDBusExceptionOnGetInterfaceStatus()
             throws DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan1", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan1", false, this.commandExecutorService))
                 .thenThrow(DBusException.class);
     }
 
     private void givenNMStatusServiceImplWithEthernetInterface()
             throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", false, this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
     }
 
     private void givenNMStatusServiceImplWithWifiInterface() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", false, this.commandExecutorService))
                 .thenReturn(buildWifiInterfaceStatus("wlan0"));
     }
 
@@ -239,25 +239,25 @@ public class NMStatusServiceImplTest {
     private void givenNMStatusServiceImplWithInterfaces() throws DBusException, UnknownHostException, KuraException {
         createTestObjects();
         when(this.nmDbusConnector.getInterfaceIds()).thenReturn(Arrays.asList("abcd0", "wlan0"));
-        when(this.nmDbusConnector.getInterfaceStatus("abcd0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("abcd0", false, this.commandExecutorService))
                 .thenReturn(buildEthernetInterfaceStatus("abcd0"));
-        when(this.nmDbusConnector.getInterfaceStatus("wlan0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wlan0", false, this.commandExecutorService))
                 .thenReturn(buildWifiInterfaceStatus("wlan0"));
-        when(this.nmDbusConnector.getInterfaceStatus("broken-interface", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("broken-interface", false, this.commandExecutorService))
                 .thenThrow(new DBusException("Cannot retrieve interface."));
     }
 
     private void givenNMStatusServiceImplWithLoopbackInterface()
             throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("lo", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("lo", false, this.commandExecutorService))
                 .thenReturn(buildLoopbackInterfaceStatus("lo"));
     }
 
     private void givenNMStatusServiceImplWithModemInterface()
             throws UnknownHostException, DBusException, KuraException {
         createTestObjects();
-        when(this.nmDbusConnector.getInterfaceStatus("wwan0", this.commandExecutorService))
+        when(this.nmDbusConnector.getInterfaceStatus("wwan0", false, this.commandExecutorService))
                 .thenReturn(buildModemInterfaceStatus("wwan0"));
     }
 

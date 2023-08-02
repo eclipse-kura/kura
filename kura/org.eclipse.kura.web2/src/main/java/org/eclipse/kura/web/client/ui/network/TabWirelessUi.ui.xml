@@ -269,6 +269,7 @@
                         <b:Alert type="DANGER" ui:field="scanFail">
                             <b.html:Text ui:field="scanFailText" />
                         </b:Alert>
+                        <b:Button ui:field="buttonSsidForceUpdate" icon="SEARCH" iconFixedWidth="true" text="{msgs.netWifiWirelessForceScan}" />
                     </b:PanelBody>
                 </b:Panel>
             </b:ModalBody>
@@ -283,6 +284,6 @@
                     </b:PanelBody>
                 </b:Panel>
             </b:ModalBody>
-        </b:Modal>        
+        </b:Modal>
     </b:Container>
 </ui:UiBinder> 

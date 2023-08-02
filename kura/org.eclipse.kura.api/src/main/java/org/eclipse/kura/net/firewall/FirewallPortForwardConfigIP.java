@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The base class for firewall port forward configurations
  *
  * @param <T>
+ *            the type of IPAddess
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -35,7 +36,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
     private String outboundIface;
 
     /** The LAN address to forward to **/
-    private IP4Address address;
+    private T address;
 
     /** The protocol (TCP or UDP) to listen for and forward **/
     private NetProtocol protocol;
@@ -60,7 +61,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
     /**
      * Creates and empty port forward configuration
+     * 
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
      */
+    @Deprecated
     public FirewallPortForwardConfigIP() {
         super();
     }
@@ -88,15 +92,17 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
      *            The (optional) permitted MAC address for inbound connections
      * @param sourcePortRange
      *            The (options) permitted source port range for inbound connections
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
      */
     @SuppressWarnings("checkstyle:parameterNumber")
+    @Deprecated
     public FirewallPortForwardConfigIP(String inboundIface, String outboundIface, IP4Address address,
             NetProtocol protocol, int inPort, int outPort, boolean masquerade, NetworkPair<T> permittedNetwork,
             String permittedMac, String sourcePortRange) {
         super();
         this.inboundIface = inboundIface;
         this.outboundIface = outboundIface;
-        this.address = address;
+        this.address = (T) address;
         this.protocol = protocol;
         this.inPort = inPort;
         this.outPort = outPort;
@@ -106,11 +112,28 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         this.sourcePortRange = sourcePortRange;
     }
 
+    protected FirewallPortForwardConfigIP(FirewallPortForwardConfigIPBuilder<T, ?> builder) {
+        this.inboundIface = builder.inboundIface;
+        this.outboundIface = builder.outboundIface;
+        this.address = builder.address;
+        this.protocol = builder.protocol;
+        this.inPort = builder.inPort;
+        this.outPort = builder.outPort;
+        this.masquerade = builder.masquerade;
+        this.permittedNetwork = builder.permittedNetwork;
+        this.permittedMac = builder.permittedMac;
+        this.sourcePortRange = builder.sourcePortRange;
+    }
+
     @Override
     public String getInboundInterface() {
         return this.inboundIface;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setInboundInterface(String interfaceName) {
         this.inboundIface = interfaceName;
     }
@@ -120,17 +143,34 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.outboundIface;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setOutboundInterface(String interfaceName) {
         this.outboundIface = interfaceName;
     }
 
+    /**
+     * @deprecated since 2.6. Use {@link getIPAddress}
+     */
     @Override
+    @Deprecated
     public IP4Address getAddress() {
-        return this.address;
+        return (IP4Address) this.address;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setAddress(IP4Address address) {
-        this.address = address;
+        this.address = (T) address;
+    }
+
+    @Override
+    public T getIPAddress() {
+        return this.address;
     }
 
     @Override
@@ -138,6 +178,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.protocol;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setProtocol(NetProtocol protocol) {
         this.protocol = protocol;
     }
@@ -147,6 +191,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.inPort;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setInPort(int inPort) {
         this.inPort = inPort;
     }
@@ -156,6 +204,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.outPort;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setOutPort(int outPort) {
         this.outPort = outPort;
     }
@@ -165,6 +217,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.masquerade;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setMasquerade(boolean masquerade) {
         this.masquerade = masquerade;
     }
@@ -174,6 +230,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.permittedNetwork;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setPermittedNetwork(NetworkPair<T> permittedNetwork) {
         this.permittedNetwork = permittedNetwork;
     }
@@ -183,6 +243,10 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.permittedMac;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setPermittedMac(String permittedMac) {
         this.permittedMac = permittedMac;
     }
@@ -192,8 +256,80 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         return this.sourcePortRange;
     }
 
+    /**
+     * @deprecated since 2.6. Use the FirewallPortForwardConfigIP builder
+     */
+    @Deprecated
     public void setSourcePortRange(String sourcePortRange) {
         this.sourcePortRange = sourcePortRange;
+    }
+
+    public abstract static class FirewallPortForwardConfigIPBuilder<U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
+
+        private String inboundIface = "";
+        private String outboundIface = "";
+        private U address;
+        private NetProtocol protocol = NetProtocol.tcp;
+        private int inPort = 0;
+        private int outPort = 0;
+        private boolean masquerade = false;
+        private NetworkPair<U> permittedNetwork;
+        private String permittedMac = "";
+        private String sourcePortRange = "";
+
+        public T withInboundIface(String inboundIface) {
+            this.inboundIface = inboundIface;
+            return getThis();
+        }
+
+        public T withOutboundIface(String outboundIface) {
+            this.outboundIface = outboundIface;
+            return getThis();
+        }
+
+        public T withAddress(U address) {
+            this.address = address;
+            return getThis();
+        }
+
+        public T withProtocol(NetProtocol protocol) {
+            this.protocol = protocol;
+            return getThis();
+        }
+
+        public T withInPort(int inPort) {
+            this.inPort = inPort;
+            return getThis();
+        }
+
+        public T withOutPort(int outPort) {
+            this.outPort = outPort;
+            return getThis();
+        }
+
+        public T withMasquerade(boolean masquerade) {
+            this.masquerade = masquerade;
+            return getThis();
+        }
+
+        public T withPermittedNetwork(NetworkPair<U> permittedNetwork) {
+            this.permittedNetwork = permittedNetwork;
+            return getThis();
+        }
+
+        public T withPermittedMac(String permittedMac) {
+            this.permittedMac = permittedMac;
+            return getThis();
+        }
+
+        public T withSourcePortRange(String sourcePortRange) {
+            this.sourcePortRange = sourcePortRange;
+            return getThis();
+        }
+
+        public abstract T getThis();
+
+        public abstract FirewallPortForwardConfigIP<U> build();
     }
 
     @Override
@@ -211,6 +347,31 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
         result = prime * result + (this.sourcePortRange == null ? 0 : this.sourcePortRange.hashCode());
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FirewallPortForwardConfigIP [inboundIface=");
+        builder.append(this.inboundIface);
+        builder.append(", outboundIface=");
+        builder.append(this.outboundIface);
+        builder.append(", address=");
+        builder.append(this.address);
+        builder.append(", protocol=");
+        builder.append(this.protocol);
+        builder.append(", inPort=");
+        builder.append(this.inPort);
+        builder.append(", outPort=");
+        builder.append(this.outPort);
+        builder.append(", permittedNetwork=");
+        builder.append(this.permittedNetwork);
+        builder.append(", permittedMac=");
+        builder.append(this.permittedMac);
+        builder.append(", sourcePortRange=");
+        builder.append(this.sourcePortRange);
+        builder.append("]");
+        return builder.toString();
     }
 
     @Override
@@ -308,30 +469,5 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         // TODO - add checks for optional parameters to make sure if they are not null they are valid
 
         return true;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("FirewallPortForwardConfigIP [inboundIface=");
-        builder.append(this.inboundIface);
-        builder.append(", outboundIface=");
-        builder.append(this.outboundIface);
-        builder.append(", address=");
-        builder.append(this.address);
-        builder.append(", protocol=");
-        builder.append(this.protocol);
-        builder.append(", inPort=");
-        builder.append(this.inPort);
-        builder.append(", outPort=");
-        builder.append(this.outPort);
-        builder.append(", permittedNetwork=");
-        builder.append(this.permittedNetwork);
-        builder.append(", permittedMac=");
-        builder.append(this.permittedMac);
-        builder.append(", sourcePortRange=");
-        builder.append(this.sourcePortRange);
-        builder.append("]");
-        return builder.toString();
     }
 }

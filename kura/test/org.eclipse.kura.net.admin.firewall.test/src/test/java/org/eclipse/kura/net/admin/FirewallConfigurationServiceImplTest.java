@@ -534,8 +534,7 @@ public class FirewallConfigurationServiceImplTest {
         ComponentContext mockContext = mock(ComponentContext.class);
         svc.activate(mockContext, new HashMap<String, Object>());
 
-        String[] floodingRules = {
-                "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+        String[] floodingRules = { "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
                 "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
                 "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
                 "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",

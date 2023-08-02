@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin;
+package org.eclipse.kura.net.admin.ipv6;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
@@ -18,7 +18,6 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -28,82 +27,87 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.net.FirewallConfiguration;
+import org.eclipse.kura.core.net.FirewallConfigurationIPv6;
 import org.eclipse.kura.linux.net.iptables.AbstractLinuxFirewall;
-import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
-import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.linux.net.iptables.LinuxFirewallIPv6;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.admin.AbstractFirewallConfigurationServiceImpl;
 import org.eclipse.kura.net.configuration.NetworkConfigurationMessages;
 import org.eclipse.kura.net.configuration.NetworkConfigurationPropertyNames;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
-import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP6;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP6.FirewallOpenPortConfigIP6Builder;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP6;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP6.FirewallPortForwardConfigIP6Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallConfigurationServiceImpl extends
-        AbstractFirewallConfigurationServiceImpl<IP4Address, FirewallOpenPortConfigIP4Builder, FirewallPortForwardConfigIP4Builder>
-        implements FirewallConfigurationService, SelfConfiguringComponent {
+public class FirewallConfigurationServiceIPv6Impl extends
+        AbstractFirewallConfigurationServiceImpl<IP6Address, FirewallOpenPortConfigIP6Builder, FirewallPortForwardConfigIP6Builder>
+        implements FirewallConfigurationServiceIPv6, SelfConfiguringComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceIPv6Impl.class);
 
     @Override
-    protected FirewallConfiguration buildFirewallConfigurationFromProperties(Map<String, Object> properties) {
-        return new FirewallConfiguration(properties);
+    protected FirewallConfigurationIPv6 buildFirewallConfigurationFromProperties(Map<String, Object> properties) {
+        return new FirewallConfigurationIPv6(properties);
     }
 
     @Override
-    protected FirewallConfiguration buildFirewallConfiguration() {
-        return new FirewallConfiguration();
+    protected FirewallConfigurationIPv6 buildFirewallConfiguration() {
+        return new FirewallConfigurationIPv6();
     }
 
     @Override
-    protected FirewallOpenPortConfigIP4Builder getOpenPortConfigIPBuilder() {
-        return FirewallOpenPortConfigIP4.builder();
+    protected FirewallOpenPortConfigIP6Builder getOpenPortConfigIPBuilder() {
+        return FirewallOpenPortConfigIP6.builder();
     }
 
     @Override
-    protected FirewallPortForwardConfigIP4Builder getPortForwardConfigIPBuilder() {
-        return FirewallPortForwardConfigIP4.builder();
+    protected FirewallPortForwardConfigIP6Builder getPortForwardConfigIPBuilder() {
+        return FirewallPortForwardConfigIP6.builder();
     }
 
     @Override
-    protected IP4Address getDefaultAddress() throws UnknownHostException {
-        return IP4Address.getDefaultAddress();
+    protected IP6Address getDefaultAddress() throws UnknownHostException {
+        return IP6Address.getDefaultAddress();
     }
 
     @Override
-    protected IP4Address getIPAddress(String address) throws UnknownHostException {
-        return (IP4Address) IPAddress.parseHostAddress(address);
+    protected IP6Address getIPAddress(String address) throws UnknownHostException {
+        return (IP6Address) IPAddress.parseHostAddress(address);
+    }
+
+    @Override
+    protected AbstractLinuxFirewall getLinuxFirewall() {
+        if (this.firewall == null) {
+            this.firewall = LinuxFirewallIPv6.getInstance(this.executorService);
+        }
+
+        return this.firewall;
     }
 
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
         logger.debug("getConfiguration()");
-        try {
-            Map<String, Object> firewallConfigurationProperties = getFirewallConfiguration()
-                    .getConfigurationProperties();
-            firewallConfigurationProperties.put(KURA_SERVICE_PID, PID);
-            firewallConfigurationProperties.put(SERVICE_PID, PID);
-            return new ComponentConfigurationImpl(PID, getDefinition(), firewallConfigurationProperties);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
+        Map<String, Object> firewallConfigurationProperties = getFirewallConfiguration().getConfigurationProperties();
+        firewallConfigurationProperties.put(KURA_SERVICE_PID, PID);
+        firewallConfigurationProperties.put(SERVICE_PID, PID);
+        return new ComponentConfigurationImpl(PID, getDefinition(), firewallConfigurationProperties);
     }
 
     @Override
     protected Tocd getDefinition() {
-
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
 
-        tocd.setName("FirewallConfigurationService");
-        tocd.setId("org.eclipse.kura.net.admin.FirewallConfigurationService");
-        tocd.setDescription("Firewall Configuration Service");
+        tocd.setName("FirewallConfigurationServiceIPv6");
+        tocd.setId("org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6");
+        tocd.setDescription("Firewall Configuration Service IPV6");
 
         Tad tad = objectFactory.createTad();
-        tad.setId(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
-        tad.setName(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
+        tad.setId(FirewallConfigurationIPv6.OPEN_PORTS_IPV6_PROP_NAME);
+        tad.setName(FirewallConfigurationIPv6.OPEN_PORTS_IPV6_PROP_NAME);
         tad.setType(Tscalar.STRING);
         tad.setCardinality(0);
         tad.setRequired(true);
@@ -113,8 +117,8 @@ public class FirewallConfigurationServiceImpl extends
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
-        tad.setId(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
-        tad.setName(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
+        tad.setId(FirewallConfigurationIPv6.PORT_FORWARDING_IPV6_PROP_NAME);
+        tad.setName(FirewallConfigurationIPv6.PORT_FORWARDING_IPV6_PROP_NAME);
         tad.setType(Tscalar.STRING);
         tad.setCardinality(0);
         tad.setRequired(true);
@@ -124,8 +128,8 @@ public class FirewallConfigurationServiceImpl extends
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
-        tad.setId(FirewallConfiguration.NAT_PROP_NAME);
-        tad.setName(FirewallConfiguration.NAT_PROP_NAME);
+        tad.setId(FirewallConfigurationIPv6.NAT_IPV6_PROP_NAME);
+        tad.setName(FirewallConfigurationIPv6.NAT_IPV6_PROP_NAME);
         tad.setType(Tscalar.STRING);
         tad.setCardinality(0);
         tad.setRequired(true);
@@ -134,14 +138,5 @@ public class FirewallConfigurationServiceImpl extends
         tocd.addAD(tad);
 
         return tocd;
-    }
-
-    @Override
-    protected AbstractLinuxFirewall getLinuxFirewall() {
-        if (this.firewall == null) {
-            this.firewall = LinuxFirewall.getInstance(this.executorService);
-        }
-
-        return this.firewall;
     }
 }

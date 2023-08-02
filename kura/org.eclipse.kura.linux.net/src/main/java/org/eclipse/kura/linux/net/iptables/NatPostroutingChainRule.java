@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -81,7 +81,7 @@ public class NatPostroutingChainRule {
         this.dstInterface = dstInterface;
         this.masquerade = masquerade;
         this.type = type;
-        StringBuilder sbRule = new StringBuilder("iptables -t nat -A ");
+        StringBuilder sbRule = new StringBuilder("-t nat -A ");
         sbRule.append(getRuleTypeString(type));
         sbRule.append(" -o ");
         sbRule.append(this.dstInterface);
@@ -106,7 +106,7 @@ public class NatPostroutingChainRule {
                 this.srcNetwork = srcNetwork.split("/")[0];
                 this.srcMask = Short.parseShort(srcNetwork.split("/")[1]);
             }
-            StringBuilder sbRule = new StringBuilder("iptables -t nat -A ");
+            StringBuilder sbRule = new StringBuilder("-t nat -A ");
             sbRule.append(getRuleTypeString(this.type));
             sbRule.append(" ");
             if (this.dstNetwork != null) {
@@ -159,7 +159,7 @@ public class NatPostroutingChainRule {
                     this.type = RuleType.IP_FORWARDING;
                 }
             }
-            this.rule = new StringBuilder("iptables -t nat ").append(rule).toString();
+            this.rule = new StringBuilder("-t nat ").append(rule).toString();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
@@ -167,11 +167,11 @@ public class NatPostroutingChainRule {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("-A ");
+        StringBuilder sb = new StringBuilder();
         if (this.masquerade) {
-            sb.append(getRuleTypeString(this.type));
-            if (this.srcNetwork != null
-                    && (this.type == RuleType.IP_FORWARDING || !this.srcNetwork.equals("0.0.0.0"))) {
+            sb.append("-A ").append(getRuleTypeString(this.type));
+            if (this.srcNetwork != null && (this.type == RuleType.IP_FORWARDING || (!this.srcNetwork.equals("0.0.0.0")
+                    && !this.srcNetwork.equals("::") && !this.srcNetwork.equals("0:0:0:0:0:0:0:0")))) {
                 sb.append(" -s ").append(this.srcNetwork).append('/').append(this.srcMask);
             }
             if (this.dstNetwork != null) {

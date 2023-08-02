@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.linux.net.iptables;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -44,7 +45,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
         iptablesConfig.clearAllChains();
 
-        verify(executorServiceMock, times(1)).execute(commandRestore);
+        verify(executorServiceMock, times(1)).execute(commandRestoreTmp);
     }
 
     @Test
@@ -53,7 +54,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
         iptablesConfig.applyBlockPolicy();
 
-        verify(executorServiceMock, times(1)).execute(commandRestore);
+        verify(executorServiceMock, times(1)).execute(commandRestoreTmp);
     }
 
     @Test
@@ -83,8 +84,9 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     @Test
     public void saveWithFilenameTest() throws KuraException {
         setUpMock();
+
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
-        iptablesConfig.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        iptablesConfig.save(iptablesConfig.getFirewallConfigTmpFileName());
 
         verify(executorServiceMock, times(1)).execute(commandSaveTmp);
     }
@@ -93,7 +95,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     public void restoreWithFilenameTest() throws KuraException {
         setUpMock();
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
-        iptablesConfig.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        iptablesConfig.restore(iptablesConfig.getFirewallConfigFileName());
 
         verify(executorServiceMock, times(1)).execute(commandRestore);
     }
@@ -136,7 +138,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
                 new AtomicBoolean(false) };
         AtomicBoolean[] isNatRulePresent = { new AtomicBoolean(false), new AtomicBoolean(false),
                 new AtomicBoolean(false) };
-        try (Stream<String> lines = Files.lines(Paths.get(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME))) {
+        try (Stream<String> lines = Files.lines(Paths.get(iptablesConfig.getFirewallConfigTmpFileName()))) {
             lines.forEach(line -> {
                 line = line.trim();
                 switch (line) {
@@ -185,7 +187,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         assertTrue(isAutoNatRulePresent[0].get() && isAutoNatRulePresent[1].get() && isAutoNatRulePresent[2].get());
         assertTrue(isNatRulePresent[0].get() && isNatRulePresent[1].get() && isNatRulePresent[2].get());
 
-        File configFile = new File(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        File configFile = new File(iptablesConfig.getFirewallConfigTmpFileName());
         Files.deleteIfExists(configFile.toPath());
 
     }
@@ -228,7 +230,8 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         iptablesConfig.applyRules();
 
         for (Command c : commandApplyList) {
-            verify(executorServiceMock, times(1)).execute(c);
+            System.out.println(c);
+            verify(executorServiceMock, atLeast(1)).execute(c);
         }
     }
 

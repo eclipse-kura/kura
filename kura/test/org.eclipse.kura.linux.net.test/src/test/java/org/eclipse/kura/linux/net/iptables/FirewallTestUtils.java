@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,18 +13,6 @@
 package org.eclipse.kura.linux.net.iptables;
 
 import static org.mockito.Mockito.mock;
-/*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *  Eurotech
- *******************************************************************************/
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -41,6 +29,7 @@ public class FirewallTestUtils {
     protected static final CommandStatus successStatus = new CommandStatus(new Command(new String[] {}),
             new LinuxExitStatus(0));
     protected static Command commandRestore;
+    protected static Command commandRestoreTmp;
     protected static Command commandSave;
     protected static Command commandSaveTmp;
     protected static Command commandFlushInputFilter;
@@ -67,16 +56,19 @@ public class FirewallTestUtils {
 
     protected static void setUpMock() {
         executorServiceMock = mock(CommandExecutorService.class);
-        commandRestore = new Command(
-                new String[] { "iptables-restore", IptablesConfigConstants.FIREWALL_TMP_CONFIG_FILE_NAME });
+        IptablesConfig iptablesConfig = new IptablesConfig();
+        commandRestore = new Command(new String[] { "iptables-restore", iptablesConfig.getFirewallConfigFileName() });
         commandRestore.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandRestore)).thenReturn(successStatus);
-        commandSave = new Command(
-                new String[] { "iptables-save", ">", IptablesConfigConstants.FIREWALL_CONFIG_FILE_NAME });
+        commandRestoreTmp = new Command(
+                new String[] { "iptables-restore", iptablesConfig.getFirewallConfigTmpFileName() });
+        commandRestoreTmp.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandRestoreTmp)).thenReturn(successStatus);
+        commandSave = new Command(new String[] { "iptables-save", ">", iptablesConfig.getFirewallConfigFileName() });
         commandSave.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandSave)).thenReturn(successStatus);
         commandSaveTmp = new Command(
-                new String[] { "iptables-save", ">", IptablesConfigConstants.FIREWALL_TMP_CONFIG_FILE_NAME });
+                new String[] { "iptables-save", ">", iptablesConfig.getFirewallConfigTmpFileName() });
         commandSaveTmp.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandSaveTmp)).thenReturn(successStatus);
         commandFlushInputFilter = new Command(new String[] { "iptables", "-F", "input-kura", "-t", "filter" });
@@ -160,6 +152,10 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command("iptables -N postrouting-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -N postrouting-kura-pf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -N postrouting-kura-ipf -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N input-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -N output-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -N prerouting-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -N postrouting-kura -t mangle".split(" ")));
         commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -C FORWARD -j forward-kura -t filter".split(" ")));
@@ -172,6 +168,11 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command("iptables -C POSTROUTING -j postrouting-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C postrouting-kura -j postrouting-kura-pf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C postrouting-kura -j postrouting-kura-ipf -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -C FORWARD -j forward-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -C PREROUTING -j prerouting-kura -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -C POSTROUTING -j postrouting-kura -t mangle".split(" ")));
         commandApplyList.add(new Command("iptables -A input-kura -j RETURN".split(" ")));
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN".split(" ")));
         commandApplyList.add(new Command("iptables -A forward-kura -j RETURN".split(" ")));

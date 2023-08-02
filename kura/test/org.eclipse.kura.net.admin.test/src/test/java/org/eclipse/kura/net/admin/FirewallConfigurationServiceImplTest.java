@@ -287,7 +287,7 @@ public class FirewallConfigurationServiceImplTest {
         List<FirewallOpenPortConfigIP<? extends IPAddress>> portConfigs = configuration.getOpenPortConfigs();
         assertEquals(2, portConfigs.size());
 
-        FirewallOpenPortConfigIP<? extends IPAddress> port = portConfigs.get(0);
+        FirewallOpenPortConfigIP<? extends IPAddress> port = portConfigs.get(1);
         assertEquals("eth0", port.getPermittedInterfaceName());
         assertNull(port.getPermittedMac());
         assertEquals("10.10.1.0", port.getPermittedNetwork().getIpAddress().getHostAddress());
@@ -298,7 +298,7 @@ public class FirewallConfigurationServiceImplTest {
         assertNull(port.getSourcePortRange());
         assertEquals("wlan0", port.getUnpermittedInterfaceName());
 
-        port = portConfigs.get(1);
+        port = portConfigs.get(0);
         assertEquals("eth0", port.getPermittedInterfaceName());
         assertNull(port.getPermittedMac());
         assertEquals("10.10.1.0", port.getPermittedNetwork().getIpAddress().getHostAddress());

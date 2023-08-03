@@ -99,7 +99,7 @@ public class NMDbusConnectorTest {
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
     private final Wpa_supplicant1 mockedWpaSupplicant = mock(Wpa_supplicant1.class);
-    private final Interface mockedInterface = mock(Interface.class);
+    private final Map<String, Interface> mockedInterfaces = new HashMap<>();
     private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
     private final ModemManager1 mockedModemManager = mock(ModemManager1.class);
     private final Settings mockedNetworkManagerSettings = mock(Settings.class);

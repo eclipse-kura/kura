@@ -250,7 +250,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
         private int port = -1;
         private String portRange;
-        private NetProtocol protocol = NetProtocol.tcp;
+        private NetProtocol protocol;
         private NetworkPair<U> permittedNetwork;
         private String permittedInterfaceName;
         private String unpermittedInterfaceName;

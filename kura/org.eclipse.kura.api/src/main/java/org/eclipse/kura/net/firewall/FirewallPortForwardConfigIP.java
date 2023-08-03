@@ -269,9 +269,9 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         private String inboundIface;
         private String outboundIface;
         private U address;
-        private NetProtocol protocol = NetProtocol.tcp;
-        private int inPort = -1;
-        private int outPort = -1;
+        private NetProtocol protocol;
+        private int inPort;
+        private int outPort;
         private boolean masquerade = false;
         private NetworkPair<U> permittedNetwork;
         private String permittedMac;

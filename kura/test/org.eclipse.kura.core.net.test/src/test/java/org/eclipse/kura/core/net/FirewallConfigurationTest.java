@@ -88,7 +88,7 @@ public class FirewallConfigurationTest {
             assertEquals(builder1.build(), conf.getOpenPortConfigs().get(0));
 
             FirewallOpenPortConfigIP4Builder builder2 = FirewallOpenPortConfigIP4.builder();
-            builder1.withPortRange("42:100").withProtocol(NetProtocol.udp).withPermittedNetwork(
+            builder2.withPortRange("42:100").withProtocol(NetProtocol.udp).withPermittedNetwork(
                     new NetworkPair<IP4Address>((IP4Address) IP4Address.parseHostAddress("0.0.0.0"), (short) 0));
             assertEquals(builder2.build(), conf.getOpenPortConfigs().get(1));
         } catch (UnknownHostException e) {
@@ -161,7 +161,7 @@ public class FirewallConfigurationTest {
             assertEquals(builder1.build(), conf.getPortForwardConfigs().get(0));
 
             FirewallPortForwardConfigIP4Builder builder2 = FirewallPortForwardConfigIP4.builder();
-            builder2.withAddress((IP4Address) IP4Address.parseHostAddress("127.0.0.1")).withProtocol(NetProtocol.udp)
+            builder2.withAddress((IP4Address) IP4Address.parseHostAddress("127.0.0.1")).withProtocol(NetProtocol.tcp)
                     .withPermittedNetwork(new NetworkPair<IP4Address>(
                             (IP4Address) IP4Address.parseHostAddress("0.0.0.0"), (short) 0));
             assertEquals(builder2.build(), conf.getPortForwardConfigs().get(1));

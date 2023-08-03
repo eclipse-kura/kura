@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
@@ -919,7 +918,7 @@ public class NMDbusConnectorTest {
     public void shouldTriggerWirelessNetworkScan() throws DBusException, IOException {
 
         givenBasicMockedDbusConnector();
-        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_FAILED,
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
 
@@ -935,7 +934,7 @@ public class NMDbusConnectorTest {
      * Given
      */
 
-    public void givenBasicMockedDbusConnector() throws DBusException, IOException {
+    private void givenBasicMockedDbusConnector() throws DBusException, IOException {
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
                 eq("/org/freedesktop/NetworkManager"), any()))
                 .thenReturn(this.mockedNetworkManager);
@@ -944,8 +943,6 @@ public class NMDbusConnectorTest {
                 eq("/org/freedesktop/NetworkManager/Settings"), any()))
                 .thenReturn(this.mockedNetworkManagerSettings);
 
-        this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
-
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.ModemManager1"),
                 eq("/org/freedesktop/ModemManager1"), any()))
                 .thenReturn(this.mockedModemManager);
@@ -953,6 +950,7 @@ public class NMDbusConnectorTest {
         when(this.dbusConnection.getRemoteObject(eq("fi.w1.wpa_supplicant1"),
                 eq("/fi/w1/wpa_supplicant1"), any())).thenReturn(this.mockedWpaSupplicant);
         
+        this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
 
     }
 
@@ -1010,6 +1008,12 @@ public class NMDbusConnectorTest {
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             simulateIwCommandOutputs(interfaceId, mockedProperties1);
+
+            doReturn(mockedInterface).when(this.dbusConnection).getRemoteObject("fi.w1.wpa_supplicant1",
+                    "/mock/device/" + interfaceId, Interface.class);
+
+            when(this.mockedWpaSupplicant.GetInterface(interfaceId))
+                    .thenReturn(new DBusPath("/mock/device/" + interfaceId));
         }
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {

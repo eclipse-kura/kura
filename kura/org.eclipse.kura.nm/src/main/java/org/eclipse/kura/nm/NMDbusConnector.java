@@ -80,6 +80,7 @@ public class NMDbusConnector {
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
     private final ModemManagerDbusWrapper modemManager;
+    private final WpaSupplicantDbusWrapper wpaSupplicant;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -92,6 +93,7 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
+        this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -194,11 +196,6 @@ public class NMDbusConnector {
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
 
-        if (recompute) {
-            WpaSupplicantDbusWrapper wpaSupplicantDbusWrapper = new WpaSupplicantDbusWrapper(this.dbusConnection);
-            wpaSupplicantDbusWrapper.syncScan(interfaceId, MAX_SCAN_TIME_SECONDS);
-        }
-
         Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
@@ -239,6 +236,10 @@ public class NMDbusConnector {
                         ip4configProperties);
                 break;
             case NM_DEVICE_TYPE_WIFI:
+                if (recompute) {
+                    wpaSupplicant.syncScan(interfaceId, MAX_SCAN_TIME_SECONDS);
+                }
+
                 networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
                         deviceProperties, ip4configProperties);
                 break;

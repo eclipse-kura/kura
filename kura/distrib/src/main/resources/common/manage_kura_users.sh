@@ -90,7 +90,7 @@ ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1
                 echo "polkit.addRule(function(action, subject) {
         if ((action.id.indexOf(\"org.freedesktop.NetworkManager.\") == 0 ||
             action.id.indexOf(\"org.freedesktop.ModemManager1.\") == 0 ||
-            action.id.indexOf(\"fi.w1.wpa_supplicant1.\")) &&
+            action.id.indexOf(\"fi.w1.wpa_supplicant1.\") == 0) &&
             subject.user == \"kurad\") {
             return polkit.Result.YES;
         }

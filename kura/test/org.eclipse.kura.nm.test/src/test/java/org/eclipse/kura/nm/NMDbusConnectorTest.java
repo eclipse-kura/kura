@@ -1008,12 +1008,17 @@ public class NMDbusConnectorTest {
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             simulateIwCommandOutputs(interfaceId, mockedProperties1);
+            Interface mockedInterface = mock(Interface.class);
+            mockedInterfaces.add(interfaceId, mockedInterface);
+            
+            DBusPath mockedInterfaceDbusPath = new DBusPath("/mock/device/" + interfaceId);
+            
+            when(this.mockedWpaSupplicant.GetInterface(interfaceId))
+                    .thenReturn(mockedInterfaceDbusPath);
 
             doReturn(mockedInterface).when(this.dbusConnection).getRemoteObject("fi.w1.wpa_supplicant1",
-                    "/mock/device/" + interfaceId, Interface.class);
+                    mockedInterfaceDbusPath, Interface.class);
 
-            when(this.mockedWpaSupplicant.GetInterface(interfaceId))
-                    .thenReturn(new DBusPath("/mock/device/" + interfaceId));
         }
 
         if (type == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {

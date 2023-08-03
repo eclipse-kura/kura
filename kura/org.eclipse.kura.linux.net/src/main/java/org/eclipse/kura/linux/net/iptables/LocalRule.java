@@ -331,7 +331,7 @@ public class LocalRule {
                 String[] split = this.permittedNetworkString.split("/");
                 return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
             } else {
-                return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
+                return new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0);
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

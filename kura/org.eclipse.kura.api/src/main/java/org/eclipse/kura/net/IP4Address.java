@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
+import java.net.UnknownHostException;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -24,6 +26,16 @@ public class IP4Address extends IPAddress {
 
     IP4Address(byte[] addr, java.net.InetAddress jnAddress) {
         super(addr, jnAddress);
+    }
+
+    /**
+     * Returns the default IPv4 address (0.0.0.0/0).
+     * 
+     * @return the 0.0.0.0/0 IPv4 address
+     * @throws UnknownHostException
+     */
+    public static IP4Address getDefaultAddress() throws UnknownHostException {
+        return (IP4Address) IPAddress.parseHostAddress("0.0.0.0");
     }
 
     @Override

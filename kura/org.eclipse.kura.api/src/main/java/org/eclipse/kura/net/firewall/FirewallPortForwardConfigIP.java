@@ -266,16 +266,16 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
     public abstract static class FirewallPortForwardConfigIPBuilder<U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
 
-        private String inboundIface = "";
-        private String outboundIface = "";
+        private String inboundIface;
+        private String outboundIface;
         private U address;
         private NetProtocol protocol = NetProtocol.tcp;
-        private int inPort = 0;
-        private int outPort = 0;
+        private int inPort = -1;
+        private int outPort = -1;
         private boolean masquerade = false;
         private NetworkPair<U> permittedNetwork;
-        private String permittedMac = "";
-        private String sourcePortRange = "";
+        private String permittedMac;
+        private String sourcePortRange;
 
         public T withInboundIface(String inboundIface) {
             this.inboundIface = inboundIface;

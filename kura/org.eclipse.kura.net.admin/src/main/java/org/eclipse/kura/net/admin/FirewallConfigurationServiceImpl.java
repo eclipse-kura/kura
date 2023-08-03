@@ -228,7 +228,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             if (openPortEntry.getPermittedNetwork() == null
                     || openPortEntry.getPermittedNetwork().getIpAddress() == null) {
                 try {
-                    openPortEntry.setPermittedNetwork(getNetworkPair00());
+                    openPortEntry.setPermittedNetwork(getDefaultNetworkPair());
                 } catch (UnknownHostException e) {
                     logger.info(e.getMessage(), e);
                 }
@@ -282,7 +282,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             if (portForwardEntry.getPermittedNetwork() == null
                     || portForwardEntry.getPermittedNetwork().getIpAddress() == null) {
                 try {
-                    portForwardEntry.setPermittedNetwork(getNetworkPair00());
+                    portForwardEntry.setPermittedNetwork(getDefaultNetworkPair());
                 } catch (UnknownHostException e) {
                     logger.info(e.getMessage(), e);
                 }
@@ -412,8 +412,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         return tocd;
     }
 
-    private NetworkPair getNetworkPair00() throws UnknownHostException {
-        return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
+    private NetworkPair getDefaultNetworkPair() throws UnknownHostException {
+        return new NetworkPair(IP4Address.getDefaultAddress(), (short) 0);
     }
 
     @Override

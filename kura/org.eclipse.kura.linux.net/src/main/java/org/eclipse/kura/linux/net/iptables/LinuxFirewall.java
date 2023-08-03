@@ -119,8 +119,8 @@ public class LinuxFirewall {
                         permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
             } else {
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
-                        permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
+                        new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0), permittedInterfaceName,
+                        unpermittedInterfaceName, permittedMAC, sourcePortRange);
             }
 
             ArrayList<LocalRule> locRules = new ArrayList<>();

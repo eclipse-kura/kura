@@ -249,13 +249,13 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     public abstract static class FirewallOpenPortConfigIPBuilder<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>> {
 
         private int port = -1;
-        private String portRange = "";
+        private String portRange;
         private NetProtocol protocol = NetProtocol.tcp;
         private NetworkPair<U> permittedNetwork;
-        private String permittedInterfaceName = "";
-        private String unpermittedInterfaceName = "";
-        private String permittedMac = "";
-        private String sourcePortRange = "";
+        private String permittedInterfaceName;
+        private String unpermittedInterfaceName;
+        private String permittedMac;
+        private String sourcePortRange;
 
         public T withPort(int port) {
             this.port = port;

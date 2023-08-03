@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net;
 
+import java.net.UnknownHostException;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -24,6 +26,16 @@ public class IP6Address extends IPAddress {
 
     IP6Address(byte[] addr, java.net.InetAddress jnAddress) {
         super(addr, jnAddress);
+    }
+
+    /**
+     * Returns the default IPv6 address (::/0).
+     * 
+     * @return the ::/0 IPv6 address
+     * @throws UnknownHostException
+     */
+    public static IP6Address getDefaultAddress() throws UnknownHostException {
+        return (IP6Address) IPAddress.parseHostAddress("::/0");
     }
 
     /**

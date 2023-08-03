@@ -99,7 +99,6 @@ public class NMDbusConnectorTest {
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
     private final Wpa_supplicant1 mockedWpaSupplicant = mock(Wpa_supplicant1.class);
-    private final Map<String, Interface> mockedInterfaces = new HashMap<>();
     private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
     private final ModemManager1 mockedModemManager = mock(ModemManager1.class);
     private final Settings mockedNetworkManagerSettings = mock(Settings.class);
@@ -115,6 +114,7 @@ public class NMDbusConnectorTest {
 
     private NetworkInterfaceStatus netInterface;
 
+    private Map<String, Interface> mockedInterfaces = new HashMap<>();
     private Map<String, Connection> mockedConnections = new HashMap<>();
     private List<DBusPath> mockedConnectionDbusPathList = new ArrayList<>();
 
@@ -927,7 +927,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenInterfaceStatusIsNotNull();
         thenNetInterfaceTypeIs(NetworkInterfaceType.WIFI);
-        thenScanIsTriggered();
+        thenScanIsTriggered("wlan0");
     }
 
     /*
@@ -1009,15 +1009,15 @@ public class NMDbusConnectorTest {
         if (type == NMDeviceType.NM_DEVICE_TYPE_WIFI) {
             simulateIwCommandOutputs(interfaceId, mockedProperties1);
             Interface mockedInterface = mock(Interface.class);
-            mockedInterfaces.add(interfaceId, mockedInterface);
-            
+
+            this.mockedInterfaces.put(interfaceId, mockedInterface);
+
             DBusPath mockedInterfaceDbusPath = new DBusPath("/mock/device/" + interfaceId);
-            
-            when(this.mockedWpaSupplicant.GetInterface(interfaceId))
-                    .thenReturn(mockedInterfaceDbusPath);
+
+            when(this.mockedWpaSupplicant.GetInterface(interfaceId)).thenReturn(mockedInterfaceDbusPath);
 
             doReturn(mockedInterface).when(this.dbusConnection).getRemoteObject("fi.w1.wpa_supplicant1",
-                    mockedInterfaceDbusPath, Interface.class);
+                    mockedInterfaceDbusPath.getPath(), Interface.class);
 
         }
 

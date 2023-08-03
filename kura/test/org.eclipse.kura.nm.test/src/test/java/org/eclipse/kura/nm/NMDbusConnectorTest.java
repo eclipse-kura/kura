@@ -953,12 +953,6 @@ public class NMDbusConnectorTest {
         when(this.dbusConnection.getRemoteObject(eq("fi.w1.wpa_supplicant1"),
                 eq("/fi/w1/wpa_supplicant1"), any())).thenReturn(this.mockedWpaSupplicant);
         
-        DBusPath fakeDbusInterfacePath = new DBusPath("/fake/dbus/path");
-        
-        when(this.mockedWpaSupplicant.GetInterface(anyString())).thenReturn(fakeDbusInterfacePath);
-        
-        when(this.dbusConnection.getRemoteObject(eq("fi.w1.wpa_supplicant1"), eq(fakeDbusInterfacePath.getPath()), any()))
-        .thenReturn(this.mockedInterface);
 
     }
 

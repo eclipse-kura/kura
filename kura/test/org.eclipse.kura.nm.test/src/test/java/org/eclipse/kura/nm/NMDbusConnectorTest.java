@@ -1518,8 +1518,8 @@ public class NMDbusConnectorTest {
                 .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);
     }
 
-    private void thenScanIsTriggered() {
-        verify(this.mockedInterface, times(1)).Scan(any());
+    private void thenScanIsTriggered(String interfaceId) {
+        verify(this.mockedInterfaces.get(interfaceId), times(1)).Scan(any());
     }
 
     private void thenModemStatusHasCorrectValues(boolean hasBearers, boolean hasSims) {

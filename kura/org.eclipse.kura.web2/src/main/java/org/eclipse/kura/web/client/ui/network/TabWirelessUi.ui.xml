@@ -19,6 +19,8 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:util="urn:import:org.eclipse.kura.web.client.util" xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
+    
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"/>
 
     <ui:style>
     .important {
@@ -269,6 +271,7 @@
                         <b:Alert type="DANGER" ui:field="scanFail">
                             <b.html:Text ui:field="scanFailText" />
                         </b:Alert>
+                        <b:Button ui:field="buttonSsidForceUpdate" icon="SEARCH" iconFixedWidth="true" text="{msgs.netWifiWirelessForceScan}" />
                     </b:PanelBody>
                 </b:Panel>
             </b:ModalBody>
@@ -283,6 +286,6 @@
                     </b:PanelBody>
                 </b:Panel>
             </b:ModalBody>
-        </b:Modal>        
+        </b:Modal>
     </b:Container>
 </ui:UiBinder> 

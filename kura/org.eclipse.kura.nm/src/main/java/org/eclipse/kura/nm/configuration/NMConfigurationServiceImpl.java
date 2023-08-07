@@ -359,8 +359,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             NetInterfaceType type = NetInterfaceType
                     .valueOf((String) properties.get(String.format(PREFIX + "%s.type", interfaceId)));
             if (NetInterfaceType.MODEM.equals(type)) {
-                Integer pppNum = (Integer) properties
-                        .get(String.format(PREFIX + "%s.config.pppNum", interfaceId));
+                Integer pppNum = (Integer) properties.get(String.format(PREFIX + "%s.config.pppNum", interfaceId));
                 interfaceName = "ppp" + pppNum;
             } else {
                 interfaceName = interfaceId;
@@ -430,11 +429,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         final NetInterfaceStatus status = getNetInterfaceStatus(interfaceName)
                 .orElse(NetInterfaceStatus.netIPv4StatusUnknown);
 
-        if (type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI) {
-            return false;
-        }
-
-        if (!isDhcpServerEnabled) {
+        if ((type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI) || !isDhcpServerEnabled) {
             return false;
         }
 

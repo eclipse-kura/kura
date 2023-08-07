@@ -86,7 +86,7 @@ public enum MMModemLocationSource {
     public static UInt32 toBitMaskFromMMModemLocationSource(Set<MMModemLocationSource> desiredLocationSources) {
         long bitmask = 0x00000000;
         for (MMModemLocationSource source : desiredLocationSources) {
-            bitmask = (bitmask | source.value);
+            bitmask = bitmask | source.value;
         }
 
         return new UInt32(bitmask);

@@ -29,11 +29,12 @@ public class FirewallNatConfigWriter {
     private static final Logger logger = LoggerFactory.getLogger(FirewallNatConfigWriter.class);
 
     private final CommandExecutorService executorService;
-    private LinuxFirewall firewall;
+    private final LinuxFirewall firewall;
     private final List<String> wanInterfaceNames;
     private final List<String> natInterfaceNames;
 
-    public FirewallNatConfigWriter(CommandExecutorService executorService, List<String> wanInterfaceNames, List<String> natInterfaceNames) {
+    public FirewallNatConfigWriter(CommandExecutorService executorService, List<String> wanInterfaceNames,
+            List<String> natInterfaceNames) {
         this.executorService = executorService;
         this.wanInterfaceNames = wanInterfaceNames;
         this.natInterfaceNames = natInterfaceNames;

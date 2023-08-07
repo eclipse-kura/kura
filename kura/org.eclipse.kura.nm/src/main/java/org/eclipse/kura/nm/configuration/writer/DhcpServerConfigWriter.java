@@ -107,17 +107,12 @@ public class DhcpServerConfigWriter {
                 addDNSServersOption(dhcpServerConfig, pw);
             } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
                 pw.println("interface=" + dhcpServerConfig.getInterfaceName());
-                
-                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=")
-                        .append(this.interfaceName)
-                        .append(",")
-                        .append(dhcpServerConfig.getRangeStart())
-                        .append(",")
-                        .append(dhcpServerConfig.getRangeEnd())
-                        .append(",")
-                        .append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
+
+                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=").append(this.interfaceName).append(",")
+                        .append(dhcpServerConfig.getRangeStart()).append(",").append(dhcpServerConfig.getRangeEnd())
+                        .append(",").append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
                 pw.println(dhcpRangeProp.toString());
-                
+
                 pw.println(DHCP_OPTION_KEY + this.interfaceName + ",1,"
                         + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
                 // router property

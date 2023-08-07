@@ -69,21 +69,9 @@ public class NMStatusServiceImpl implements NetworkStatusService {
     }
 
     @Override
-    public Optional<NetworkInterfaceStatus> getNetworkStatus(String id) throws KuraException {
-        Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
-        try {
-            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(id, this.commandExecutorService);
-            if (Objects.nonNull(status)) {
-                networkInterfaceStatus = Optional.of(status);
-            }
-        } catch (UnknownMethod e) {
-            throw new KuraIOException(e, "Could not retrieve status for " + id
-                    + " interface from NM because the DBus object path references got invalidated.");
-        } catch (DBusException e) {
-            throw new KuraIOException(e, "Could not retrieve status for " + id + " interface from NM.");
-        }
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceId) throws KuraException {
 
-        return networkInterfaceStatus;
+        return getNetworkStatus(interfaceId, false);
     }
 
     @Override
@@ -96,6 +84,27 @@ public class NMStatusServiceImpl implements NetworkStatusService {
         }
 
         return interfaces;
+    }
+
+    @Override
+    public Optional<NetworkInterfaceStatus> getNetworkStatus(String interfaceId, boolean recompute)
+            throws KuraException {
+
+        Optional<NetworkInterfaceStatus> networkInterfaceStatus = Optional.empty();
+        try {
+            NetworkInterfaceStatus status = this.nmDbusConnector.getInterfaceStatus(interfaceId, recompute,
+                    this.commandExecutorService);
+            if (Objects.nonNull(status)) {
+                networkInterfaceStatus = Optional.of(status);
+            }
+        } catch (UnknownMethod e) {
+            throw new KuraIOException(e, "Could not retrieve status for " + interfaceId
+                    + " interface from NM because the DBus object path references got invalidated.");
+        } catch (DBusException e) {
+            throw new KuraIOException(e, "Could not retrieve status for " + interfaceId + " interface from NM.");
+        }
+
+        return networkInterfaceStatus;
     }
 
 }

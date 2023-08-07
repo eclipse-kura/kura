@@ -32,7 +32,7 @@ public class WpaSupplicantDbusWrapper {
     private static final long DEFAULT_SCAN_TIMEOUT_SECONDS = 30;
 
     private final DBusConnection dbusConnection;
-    private Wpa_supplicant1 wpaSupplicant;
+    private final Wpa_supplicant1 wpaSupplicant;
 
     public WpaSupplicantDbusWrapper(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = dbusConnection;

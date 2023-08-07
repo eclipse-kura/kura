@@ -34,7 +34,7 @@ public class ModemManagerDbusWrapper {
     private static final String MM_MODEM_PROPERTY_STATE = "State";
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
 
-    private DBusConnection dbusConnection;
+    private final DBusConnection dbusConnection;
 
     private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
 
@@ -140,7 +140,7 @@ public class ModemManagerDbusWrapper {
 
                     Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, dbusPath, Properties.class);
                     boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
-                    boolean isPrimary = index == (primarySimSlot.intValue() - 1);
+                    boolean isPrimary = index == primarySimSlot.intValue() - 1;
 
                     simProperties.add(new SimProperties(simProp, isActive, isPrimary));
                 }

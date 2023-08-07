@@ -59,6 +59,14 @@ ResultInactive=no
 ResultActive=no
 ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla
             fi
+            if [ ! -f /etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1.pkla ]; then
+                echo "[No password prompt for kurad user when using Wpa Supplicant]
+Identity=unix-user:kurad
+Action=fi.w1.wpa_supplicant1.*
+ResultInactive=no
+ResultActive=no
+ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1.pkla
+            fi
         fi
     else
         if [[ $NN == "NO" ]]; then
@@ -81,7 +89,8 @@ ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modem
             if [ ! -f /usr/share/polkit-1/rules.d/kura-nm.rules ]; then
                 echo "polkit.addRule(function(action, subject) {
         if ((action.id.indexOf(\"org.freedesktop.NetworkManager.\") == 0 ||
-            action.id.indexOf(\"org.freedesktop.ModemManager1.\") == 0) &&
+            action.id.indexOf(\"org.freedesktop.ModemManager1.\") == 0 ||
+            action.id.indexOf(\"fi.w1.wpa_supplicant1.\") == 0) &&
             subject.user == \"kurad\") {
             return polkit.Result.YES;
         }
@@ -130,6 +139,21 @@ if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
             done = 1
         } 1' /etc/dbus-1/system.d/bluetooth.conf >tempfile && mv tempfile /etc/dbus-1/system.d/bluetooth.conf
     fi
+    
+    # grant kurad user the privileges to manage wpa supplicant via dbus
+    grep -lR kurad /etc/dbus-1/system.d/wpa_supplicant.conf
+    if [ $? != 0 ]; then
+        cp /etc/dbus-1/system.d/wpa_supplicant.conf /etc/dbus-1/system.d/wpa_supplicant.conf.save
+        awk 'done != 1 && /^<\/busconfig>/ {
+            print "  <policy user=\"kurad\">"
+            print "    <allow own=\"fi.w1.wpa_supplicant1\"/>"
+            print "    <allow send_destination=\"fi.w1.wpa_supplicant1\"/>"
+            print "    <allow send_interface=\"fi.w1.wpa_supplicant1\"/>"
+            print "    <allow receive_sender=\"fi.w1.wpa_supplicant1\" receive_type=\"signal\"/>"
+            print "  </policy>\n"
+            done = 1
+        } 1' /etc/dbus-1/system.d/wpa_supplicant.conf >tempfile && mv tempfile /etc/dbus-1/system.d/wpa_supplicant.conf
+    fi
 
     # Change kura folder ownership and permission
     chown -R kurad:kurad /opt/eclipse
@@ -161,6 +185,9 @@ function delete_users {
     if [ -f /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla ]; then
         rm -f /etc/polkit-1/localauthority/50-local.d/53-org.freedesktop.modemmanager.pkla
     fi
+    if [ -f /etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1.pkla ]; then
+        rm -f /etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1.pkla
+    fi
 
     # recover pam policy
     if [ -f /etc/pam.d/su ]; then
@@ -170,6 +197,7 @@ function delete_users {
 
     # recover old dbus config
     mv /etc/dbus-1/system.d/bluetooth.conf.save /etc/dbus-1/system.d/bluetooth.conf
+    mv /etc/dbus-1/system.d/wpa_supplicant.conf.save /etc/dbus-1/system.d/wpa_supplicant.conf
 }
 
 INSTALL=YES

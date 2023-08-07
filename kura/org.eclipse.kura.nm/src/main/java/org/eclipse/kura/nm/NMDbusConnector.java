@@ -74,10 +74,13 @@ public class NMDbusConnector {
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
             NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
 
+    private static final long MAX_SCAN_TIME_SECONDS = 30L;
+
     private static NMDbusConnector instance;
     private final DBusConnection dbusConnection;
     private final NetworkManagerDbusWrapper networkManager;
     private final ModemManagerDbusWrapper modemManager;
+    private final WpaSupplicantDbusWrapper wpaSupplicant;
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -90,6 +93,7 @@ public class NMDbusConnector {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
+        this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -188,9 +192,10 @@ public class NMDbusConnector {
         }
     }
 
-    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId,
+    public synchronized NetworkInterfaceStatus getInterfaceStatus(String interfaceId, boolean recompute,
             CommandExecutorService commandExecutorService) throws DBusException, KuraException {
         NetworkInterfaceStatus networkInterfaceStatus = null;
+
         Optional<Device> device = getNetworkManagerDeviceByInterfaceId(interfaceId);
         if (device.isPresent()) {
             NMDeviceType deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
@@ -231,6 +236,10 @@ public class NMDbusConnector {
                         ip4configProperties);
                 break;
             case NM_DEVICE_TYPE_WIFI:
+                if (recompute) {
+                    wpaSupplicant.syncScan(interfaceId, MAX_SCAN_TIME_SECONDS);
+                }
+
                 networkInterfaceStatus = createWirelessStatus(interfaceId, commandExecutorService, device.get(),
                         deviceProperties, ip4configProperties);
                 break;

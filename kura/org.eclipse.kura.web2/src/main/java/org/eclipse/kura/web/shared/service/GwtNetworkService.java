@@ -65,8 +65,8 @@ public interface GwtNetworkService extends RemoteService {
     public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "WiFi scan")
-    public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName, String wirelessSsid)
-            throws GwtKuraException;
+    public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName, String wirelessSsid,
+            boolean recompute) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi channels and frequencies")
     public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,

@@ -142,7 +142,7 @@ if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
     
     # grant kurad user the privileges to manage wpa supplicant via dbus
     grep -lR kurad /etc/dbus-1/system.d/wpa_supplicant.conf
-    if [ $?!= 0 ]; then
+    if [ $? != 0 ]; then
         cp /etc/dbus-1/system.d/wpa_supplicant.conf /etc/dbus-1/system.d/wpa_supplicant.conf.save
         awk 'done != 1 && /^<\/busconfig>/ {
             print "  <policy user=\"kurad\">"

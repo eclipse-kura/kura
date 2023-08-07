@@ -45,7 +45,7 @@ public interface NetworkStatusService {
 
     /**
      * Return an optional {@link NetworkInterfaceStatus} of the given network
-     * interface selected by its name.For Ethernet and WiFi interfaces, the
+     * interface selected by its id.For Ethernet and WiFi interfaces, the
      * identifier is typically the interface name. For the modems, instead,
      * it is the usb or pci path.
      * If the interface doesn't exist, an Empty value is returned.

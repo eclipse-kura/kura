@@ -135,6 +135,20 @@ Name                                                     | Type     | Descriptio
 ---------------------------------------------------------|----------|------------------------------------------
 `net.interface.<interface>.config.dhcpClient4.enabled` | Boolean	| Specify if the DHCP client is enabled
 
+### IPv6 properties
+
+Name                                                | Type     | Description
+----------------------------------------------------|----------|------------------------------------------
+`net.interface.<interface>.config.ip6.status`	    | String   | The status of the interface for the IPv6 configuration; possibile values are: netIPv6StatusDisabled, netIPv6StatusUnmanaged, netIPv6StatusL2Only, netIPv6StatusEnabledLAN, netIPv6StatusEnabledWAN, netIPv6StatusUnknown
+`net.interface.<interface>.config.ip6.wan.priority` | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details
+`net.interface.<interface>.config.ip6.address.method`    | String   | The IPv6 configuration method; possible values are: AUTO, DHCP, MANUAL.
+`net.interface.<interface>.config.ip6.address`    | String   | The IPv6 address assigned to the network interface
+`net.interface.<interface>.config.ip6.prefix`	    | Short    | The IPv6 netmask assigned to the network interface
+`net.interface.<interface>.config.ip6.gateway`    | String   | The IPv6 address of the default gateway
+`net.interface.<interface>.config.ip6.dnsServers`	| String   | Comma-separated list of dns servers
+`net.interface.<interface>.config.ip6.addr.gen.mode`    | String   | The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;
+`net.interface.<interface>.config.ip6.privacy`    | String   | The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD
+
 ### WiFi Master (Access Point) properties
 
 Name                                                             | Type     | Description

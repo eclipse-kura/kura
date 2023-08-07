@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,8 +51,8 @@ public class NetworkTabsUi extends Composite {
     private static final Messages MSGS = GWT.create(Messages.class);
 
     AnchorListItem hardwareTab;
-    AnchorListItem tcpIpTab;
-    AnchorListItem dhcpNatTab;
+    AnchorListItem ip4Tab;
+    AnchorListItem dhcp4NatTab;
     AnchorListItem wirelessTab;
     AnchorListItem modemTab;
     AnchorListItem modemGpsTab;
@@ -61,8 +61,8 @@ public class NetworkTabsUi extends Composite {
 
     NetworkTab selectedTab;
     TabHardwareUi hardware;
-    TabTcpIpUi tcpIp;
-    TabDhcpNatUi dhcpNat;
+    TabIp4Ui ip4;
+    TabDhcp4NatUi dhcp4Nat;
     TabWirelessUi wireless;
     TabModemUi modem;
     TabModemGpsUi modemGps;
@@ -96,9 +96,9 @@ public class NetworkTabsUi extends Composite {
     public void setNetInterface(GwtNetInterfaceConfig selection) {
         this.netIfConfig = selection;
 
-        this.tcpIp.setNetInterface(selection);
+        this.ip4.setNetInterface(selection);
         this.hardware.setNetInterface(selection);
-        this.dhcpNat.setNetInterface(selection);
+        this.dhcp4Nat.setNetInterface(selection);
         this.wireless.setNetInterface(selection);
         this.modem.setNetInterface(selection);
         this.modemGps.setNetInterface(selection);
@@ -112,18 +112,18 @@ public class NetworkTabsUi extends Composite {
         }
 
         // refresh all visible tabs
-        if (this.visibleTabs.contains(this.tcpIpTab)) {
-            setSelected(this.tcpIpTab);
-            this.selectedTab = this.tcpIp;
+        if (this.visibleTabs.contains(this.ip4Tab)) {
+            setSelected(this.ip4Tab);
+            this.selectedTab = this.ip4;
             this.content.clear();
-            this.content.add(this.tcpIp);
-            this.tcpIp.refresh();
+            this.content.add(this.ip4);
+            this.ip4.refresh();
         }
         if (this.visibleTabs.contains(this.hardwareTab)) {
             this.hardware.refresh();
         }
-        if (this.visibleTabs.contains(this.dhcpNatTab)) {
-            this.dhcpNat.refresh();
+        if (this.visibleTabs.contains(this.dhcp4NatTab)) {
+            this.dhcp4Nat.refresh();
         }
         if (this.visibleTabs.contains(this.wirelessTab)) {
             this.wireless.refresh();
@@ -140,13 +140,13 @@ public class NetworkTabsUi extends Composite {
     }
 
     public boolean isDirty() {
-        if (this.tcpIp != null && this.visibleTabs.contains(this.tcpIpTab) && this.tcpIp.isDirty()) {
+        if (this.ip4 != null && this.visibleTabs.contains(this.ip4Tab) && this.ip4.isDirty()) {
             return true;
         }
         if (this.hardware != null && this.visibleTabs.contains(this.hardwareTab) && this.hardware.isDirty()) {
             return true;
         }
-        if (this.dhcpNat != null && this.visibleTabs.contains(this.dhcpNatTab) && this.dhcpNat.isDirty()) {
+        if (this.dhcp4Nat != null && this.visibleTabs.contains(this.dhcp4NatTab) && this.dhcp4Nat.isDirty()) {
             return true;
         }
         if (this.wireless != null && this.visibleTabs.contains(this.wirelessTab) && this.wireless.isDirty()) {
@@ -166,14 +166,14 @@ public class NetworkTabsUi extends Composite {
     }
 
     public void setDirty(boolean b) {
-        if (this.tcpIp != null) {
-            this.tcpIp.setDirty(b);
+        if (this.ip4 != null) {
+            this.ip4.setDirty(b);
         }
         if (this.hardware != null) {
             this.hardware.setDirty(b);
         }
-        if (this.dhcpNat != null) {
-            this.dhcpNat.setDirty(b);
+        if (this.dhcp4Nat != null) {
+            this.dhcp4Nat.setDirty(b);
         }
         if (this.wireless != null) {
             this.wireless.setDirty(b);
@@ -190,14 +190,14 @@ public class NetworkTabsUi extends Composite {
     }
 
     public void refresh() {
-        if (this.tcpIp != null) {
-            this.tcpIp.refresh();
+        if (this.ip4 != null) {
+            this.ip4.refresh();
         }
         if (this.hardware != null) {
             this.hardware.refresh();
         }
-        if (this.dhcpNat != null) {
-            this.dhcpNat.refresh();
+        if (this.dhcp4Nat != null) {
+            this.dhcp4Nat.refresh();
         }
         if (this.wireless != null) {
             this.wireless.refresh();
@@ -215,8 +215,8 @@ public class NetworkTabsUi extends Composite {
 
     // Add/remove tabs based on the selected settings in the various tabs
     public void adjustInterfaceTabs() {
-        String netIfStatus = this.tcpIp.getStatus();
-        boolean includeDhcpNat = !this.tcpIp.isDhcp() && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
+        String netIfStatus = this.ip4.getStatus();
+        boolean includeDhcpNat = !this.ip4.isDhcp() && netIfStatus.equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
 
         if (this.netIfConfig instanceof GwtWifiNetInterfaceConfig) {
             removeTab(this.modemTab);
@@ -226,7 +226,7 @@ public class NetworkTabsUi extends Composite {
             if (!this.wirelessTab.isEnabled()) {
                 this.wirelessTab.setEnabled(true);
             }
-            insertTab(this.dhcpNatTab, 2);
+            insertTab(this.dhcp4NatTab, 2);
             // remove Dhcp/Nat Tab if not an access point
             String mode = this.wireless.getWirelessMode().name();
             if (mode != null && !mode.equals(WIFI_ACCESS_POINT)) {
@@ -236,7 +236,7 @@ public class NetworkTabsUi extends Composite {
             includeDhcpNat = false;
 
             removeTab(this.wirelessTab);
-            removeTab(this.dhcpNatTab);
+            removeTab(this.dhcp4NatTab);
             // insert Modem tab
             insertTab(this.modemTab, 1);
             if (!this.modemTab.isEnabled()) {
@@ -253,14 +253,14 @@ public class NetworkTabsUi extends Composite {
             removeTab(this.modemAntennaTab);
             if (this.netIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK
                     || this.netIfConfig.getName().startsWith("mon.wlan")) {
-                removeTab(this.dhcpNatTab);
+                removeTab(this.dhcp4NatTab);
             } else {
-                insertTab(this.dhcpNatTab, 1);
+                insertTab(this.dhcp4NatTab, 1);
             }
         }
 
         // enable dhcp/nat tab
-        this.dhcpNatTab.setEnabled(includeDhcpNat);
+        this.dhcp4NatTab.setEnabled(includeDhcpNat);
 
         if (netIfStatus.equals(IPV4_STATUS_DISABLED_MESSAGE) || netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE)) {
             // disabled - remove tabs
@@ -289,14 +289,14 @@ public class NetworkTabsUi extends Composite {
         updatedNetIf.setProperties(this.netIfConfig.getProperties());
 
         // get updated values from visible tabs
-        if (this.visibleTabs.contains(this.tcpIpTab)) {
-            this.tcpIp.getUpdatedNetInterface(updatedNetIf);
+        if (this.visibleTabs.contains(this.ip4Tab)) {
+            this.ip4.getUpdatedNetInterface(updatedNetIf);
         }
         if (this.visibleTabs.contains(this.hardwareTab)) {
             this.hardware.getUpdatedNetInterface(updatedNetIf);
         }
-        if (this.visibleTabs.contains(this.dhcpNatTab)) {
-            this.dhcpNat.getUpdatedNetInterface(updatedNetIf);
+        if (this.visibleTabs.contains(this.dhcp4NatTab)) {
+            this.dhcp4Nat.getUpdatedNetInterface(updatedNetIf);
         }
         if (this.visibleTabs.contains(this.wirelessTab)) {
             this.wireless.getUpdatedNetInterface(updatedNetIf);
@@ -323,13 +323,13 @@ public class NetworkTabsUi extends Composite {
     // all visible tabs
     public boolean isValid() {
 
-        if (this.visibleTabs.contains(this.tcpIpTab) && !this.tcpIp.isValid()) {
+        if (this.visibleTabs.contains(this.ip4Tab) && !this.ip4.isValid()) {
             return false;
         }
         if (this.visibleTabs.contains(this.hardwareTab) && !this.hardware.isValid()) {
             return false;
         }
-        if (this.visibleTabs.contains(this.dhcpNatTab) && !this.dhcpNat.isValid()) {
+        if (this.visibleTabs.contains(this.dhcp4NatTab) && !this.dhcp4Nat.isValid()) {
             return false;
         }
         if (this.visibleTabs.contains(this.wirelessTab) && !this.wireless.isValid()) {
@@ -354,22 +354,22 @@ public class NetworkTabsUi extends Composite {
         this.tabsPanel.clear();
         this.visibleTabs.clear();
 
-        // Tcp/IP
-        this.tcpIpTab = new AnchorListItem(MSGS.netIPv4());
-        this.visibleTabs.add(this.tcpIpTab);
-        this.tcpIp = new TabTcpIpUi(this.session, this);
-        this.tcpIpTab.addClickHandler(event -> {
-            setSelected(NetworkTabsUi.this.tcpIpTab);
-            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.tcpIp;
+        // IP4
+        this.ip4Tab = new AnchorListItem(MSGS.netIPv4());
+        this.visibleTabs.add(this.ip4Tab);
+        this.ip4 = new TabIp4Ui(this.session, this);
+        this.ip4Tab.addClickHandler(event -> {
+            setSelected(NetworkTabsUi.this.ip4Tab);
+            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.ip4;
             NetworkTabsUi.this.content.clear();
-            NetworkTabsUi.this.content.add(NetworkTabsUi.this.tcpIp);
+            NetworkTabsUi.this.content.add(NetworkTabsUi.this.ip4);
         });
-        this.tabsPanel.add(this.tcpIpTab);
+        this.tabsPanel.add(this.ip4Tab);
 
         // Wireless
         this.wirelessTab = new AnchorListItem(MSGS.netWifiWireless());
         this.visibleTabs.add(this.wirelessTab);
-        this.wireless = new TabWirelessUi(this.session, this.tcpIp, this);
+        this.wireless = new TabWirelessUi(this.session, this.ip4, this);
         this.wirelessTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTab);
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.wireless;
@@ -381,7 +381,7 @@ public class NetworkTabsUi extends Composite {
         // Modem
         this.modemTab = new AnchorListItem(MSGS.netModemCellular());
         this.visibleTabs.add(this.modemTab);
-        this.modem = new TabModemUi(this.session, this.tcpIp, this);
+        this.modem = new TabModemUi(this.session, this.ip4, this);
         this.modemTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemTab);
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.modem;
@@ -414,17 +414,17 @@ public class NetworkTabsUi extends Composite {
         });
         this.tabsPanel.add(this.modemAntennaTab);
 
-        // DHCP and NAT
-        this.dhcpNatTab = new AnchorListItem(MSGS.netRouter());
-        this.visibleTabs.add(this.dhcpNatTab);
-        this.dhcpNat = new TabDhcpNatUi(this.session, this.tcpIp, this.wireless, this);
-        this.dhcpNatTab.addClickHandler(event -> {
-            setSelected(NetworkTabsUi.this.dhcpNatTab);
-            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.dhcpNat;
+        // DHCPv4 and NAT
+        this.dhcp4NatTab = new AnchorListItem(MSGS.netRouter());
+        this.visibleTabs.add(this.dhcp4NatTab);
+        this.dhcp4Nat = new TabDhcp4NatUi(this.session, this.ip4, this.wireless, this);
+        this.dhcp4NatTab.addClickHandler(event -> {
+            setSelected(NetworkTabsUi.this.dhcp4NatTab);
+            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.dhcp4Nat;
             NetworkTabsUi.this.content.clear();
-            NetworkTabsUi.this.content.add(NetworkTabsUi.this.dhcpNat);
+            NetworkTabsUi.this.content.add(NetworkTabsUi.this.dhcp4Nat);
         });
-        this.tabsPanel.add(this.dhcpNatTab);
+        this.tabsPanel.add(this.dhcp4NatTab);
 
         // Hardware
         this.hardwareTab = new AnchorListItem(MSGS.netHwHardware());
@@ -438,10 +438,10 @@ public class NetworkTabsUi extends Composite {
         });
         this.tabsPanel.add(this.hardwareTab);
 
-        setSelected(this.tcpIpTab);
-        this.selectedTab = this.tcpIp;
+        setSelected(this.ip4Tab);
+        this.selectedTab = this.ip4;
         this.content.clear();
-        this.content.add(this.tcpIp);
+        this.content.add(this.ip4);
 
     }
 
@@ -449,13 +449,13 @@ public class NetworkTabsUi extends Composite {
     private void disableInterfaceTabs() {
         this.visibleTabs.remove(this.wirelessTab);
         this.visibleTabs.remove(this.modemTab);
-        this.visibleTabs.remove(this.dhcpNatTab);
+        this.visibleTabs.remove(this.dhcp4NatTab);
 
         this.wirelessTab.setEnabled(false);
         this.modemTab.setEnabled(false);
         this.modemGpsTab.setEnabled(false);
         this.modemAntennaTab.setEnabled(false);
-        this.dhcpNatTab.setEnabled(false);
+        this.dhcp4NatTab.setEnabled(false);
     }
 
     private void removeTab(AnchorListItem tab) {
@@ -485,18 +485,18 @@ public class NetworkTabsUi extends Composite {
         this.visibleTabs.remove(this.modemTab);
         this.visibleTabs.remove(this.modemGpsTab);
         this.visibleTabs.remove(this.modemAntennaTab);
-        this.visibleTabs.remove(this.dhcpNatTab);
+        this.visibleTabs.remove(this.dhcp4NatTab);
 
         this.tabsPanel.remove(this.wirelessTab);
         this.tabsPanel.remove(this.modemTab);
-        this.tabsPanel.remove(this.dhcpNatTab);
+        this.tabsPanel.remove(this.dhcp4NatTab);
     }
 
     // show the current tab as selected in the UI
     private void setSelected(AnchorListItem item) {
         this.hardwareTab.setActive(false);
-        this.tcpIpTab.setActive(false);
-        this.dhcpNatTab.setActive(false);
+        this.ip4Tab.setActive(false);
+        this.dhcp4NatTab.setActive(false);
         this.wirelessTab.setActive(false);
         this.modemTab.setActive(false);
         this.modemGpsTab.setActive(false);

@@ -141,7 +141,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final int MAX_SSID_LENGTH = 32;
 
     private final GwtSession session;
-    private final TabTcpIpUi tcpTab;
+    private final TabIp4Ui tcpTab;
     private final NetworkTabsUi netTabs;
     private final ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<>();
@@ -335,7 +335,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     Text unavailableChannelErrorText;
 
-    public TabWirelessUi(GwtSession currentSession, TabTcpIpUi tcp, NetworkTabsUi tabs) {
+    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;

@@ -53,7 +53,7 @@ public interface NetworkStatusService {
      * @param interfaceId
      *            the identifier of the network interface
      * @param recompute
-     *            If set to true, the NetworkStatusService will perform some additional expansive operations (like AP
+     *            If set to true, the NetworkStatusService will perform some additional expensive operations (like AP
      *            scanning) to ensure the status returned by the method is up to date. If set to false, it will return
      *            the status as returned by the network configuration provider.
      * @return the {@link NetworkInterfaceStatus}

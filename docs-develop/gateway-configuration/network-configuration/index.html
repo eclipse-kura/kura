@@ -563,6 +563,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#ipv6-properties" class="md-nav__link">
+    IPv6 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#wifi-master-access-point-properties" class="md-nav__link">
     WiFi Master (Access Point) properties
   </a>
@@ -3117,6 +3124,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#ipv6-properties" class="md-nav__link">
+    IPv6 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#wifi-master-access-point-properties" class="md-nav__link">
     WiFi Master (Access Point) properties
   </a>
@@ -3450,6 +3464,63 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.dhcpClient4.enabled</code></td>
 <td>Boolean</td>
 <td>Specify if the DHCP client is enabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv6-properties">IPv6 properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
+<td>String</td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: netIPv6StatusDisabled, netIPv6StatusUnmanaged, netIPv6StatusL2Only, netIPv6StatusEnabledLAN, netIPv6StatusEnabledWAN, netIPv6StatusUnknown</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code></td>
+<td>Integer</td>
+<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code></td>
+<td>String</td>
+<td>The IPv6 configuration method; possible values are: AUTO, DHCP, MANUAL.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address</code></td>
+<td>String</td>
+<td>The IPv6 address assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.prefix</code></td>
+<td>Short</td>
+<td>The IPv6 netmask assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.gateway</code></td>
+<td>String</td>
+<td>The IPv6 address of the default gateway</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.dnsServers</code></td>
+<td>String</td>
+<td>Comma-separated list of dns servers</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.addr.gen.mode</code></td>
+<td>String</td>
+<td>The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code></td>
+<td>String</td>
+<td>The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD</td>
 </tr>
 </tbody>
 </table>

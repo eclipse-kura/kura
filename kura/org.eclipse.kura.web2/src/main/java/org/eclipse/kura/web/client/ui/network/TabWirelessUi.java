@@ -361,7 +361,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     }
 
                     TabWirelessUi.this.tcpStatus = tcpIpStatus;
-                    TabWirelessUi.this.netTabs.adjustInterfaceTabs();
+                    TabWirelessUi.this.netTabs.updateTabs();
                 }
             }
 
@@ -751,7 +751,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        this.netTabs.adjustInterfaceTabs();
+        this.netTabs.updateTabs();
 
         logger.info("Finish refreshForm");
     }
@@ -866,7 +866,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 // use values from access point config
                 TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getAccessPointWifiConfig();
             }
-            TabWirelessUi.this.netTabs.adjustInterfaceTabs();
+            TabWirelessUi.this.netTabs.updateTabs();
             update();
             checkPassword();
             TabWirelessUi.this.wirelessHelp.updateHelpText();

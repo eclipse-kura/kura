@@ -627,7 +627,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.configure.addMouseOutHandler(event -> resetHelp());
         this.configure.addChangeHandler(event -> {
             setDirty(true);
-            TabIp4Ui.this.tabs.adjustInterfaceTabs();
+            TabIp4Ui.this.tabs.updateTabs();
             refreshForm();
             resetValidations();
         });
@@ -665,7 +665,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.status.addMouseOutHandler(event -> resetHelp());
         this.status.addChangeHandler(event -> {
             setDirty(true);
-            TabIp4Ui.this.tabs.adjustInterfaceTabs();
+            TabIp4Ui.this.tabs.updateTabs();
 
             refreshForm();
             resetValidations();
@@ -733,7 +733,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
             }
 
-            this.tabs.adjustInterfaceTabs();
+            this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());
             this.subnet.setText(this.selectedNetIfConfig.getSubnetMask());
             this.gateway.setText(this.selectedNetIfConfig.getGateway());

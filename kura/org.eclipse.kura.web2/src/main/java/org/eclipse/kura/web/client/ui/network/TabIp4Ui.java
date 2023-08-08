@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -59,7 +59,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabTcpIpUi extends Composite implements NetworkTab {
+public class TabIp4Ui extends Composite implements NetworkTab {
 
     private static final String DNS_REGEX = "[\\s,;\\n\\t]+";
     private static final String NET_IPV4_STATUS_ENABLED_WAN = "netIPv4StatusEnabledWAN";
@@ -81,7 +81,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(IPV4_STATUS_DISABLED);
 
     private static TabTcpIpUiUiBinder uiBinder = GWT.create(TabTcpIpUiUiBinder.class);
-    private static final Logger logger = Logger.getLogger(TabTcpIpUi.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(TabIp4Ui.class.getSimpleName());
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final ValidationMessages VMSGS = GWT.create(ValidationMessages.class);
@@ -89,10 +89,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    interface TabTcpIpUiUiBinder extends UiBinder<Widget, TabTcpIpUi> {
+    interface TabTcpIpUiUiBinder extends UiBinder<Widget, TabIp4Ui> {
     }
 
-    private final GwtSession session;
     boolean dirty;
     private GwtNetInterfaceConfig selectedNetIfConfig;
     private final NetworkTabsUi tabs;
@@ -189,9 +188,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @UiField
     HelpButton dnsHelp;
 
-    public TabTcpIpUi(GwtSession currentSession, NetworkTabsUi netTabs) {
+    public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
-        this.session = currentSession;
         this.tabs = netTabs;
         this.helpTitle.setText(MSGS.netHelpTitle());
         detectIfNet2();
@@ -375,13 +373,13 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
             @Override
             public void onFailure(Throwable caught) {
-                TabTcpIpUi.this.isNet2 = false;
+                TabIp4Ui.this.isNet2 = false;
                 FailureHandler.handle(caught);
             }
 
             @Override
             public void onSuccess(Boolean result) {
-                TabTcpIpUi.this.isNet2 = result;
+                TabIp4Ui.this.isNet2 = result;
                 initNet2FeaturesOnly(result);
             }
         });
@@ -437,16 +435,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
     private void initPriorityField() {
         this.priority.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.isNet2 && TabTcpIpUi.this.priority.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipPriority()));
+            if (TabIp4Ui.this.isNet2 && TabIp4Ui.this.priority.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipPriority()));
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelp());
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
 
-            String inputText = TabTcpIpUi.this.priority.getText();
+            String inputText = TabIp4Ui.this.priority.getText();
             boolean isInvalidValue = false;
 
             if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
@@ -460,11 +458,11 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             }
 
             if (isInvalidValue) {
-                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
+                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
             } else {
-                TabTcpIpUi.this.groupPriority.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpPriority.setText("");
+                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpPriority.setText("");
             }
         });
     }
@@ -475,7 +473,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         this.renew.setText(MSGS.netIPv4RenewDHCPLease());
         this.renew.addClickHandler(event -> {
             EntryClassUi.showWaitModal();
-            TabTcpIpUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            TabIp4Ui.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
                 public void onFailure(Throwable ex) {
@@ -485,8 +483,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    TabTcpIpUi.this.gwtNetworkService.renewDhcpLease(token,
-                            TabTcpIpUi.this.selectedNetIfConfig.getName(), new AsyncCallback<Void>() {
+                    TabIp4Ui.this.gwtNetworkService.renewDhcpLease(token,
+                            TabIp4Ui.this.selectedNetIfConfig.getName(), new AsyncCallback<Void>() {
 
                                 @Override
                                 public void onFailure(Throwable ex) {
@@ -506,9 +504,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         });
 
         this.renew.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.renew.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipRenew()));
+            if (TabIp4Ui.this.renew.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipRenew()));
             }
         });
         this.renew.addMouseOutHandler(event -> resetHelp());
@@ -516,25 +514,25 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
     private void initDnsServersField() {
         this.dns.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.dns.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipDns()));
+            if (TabIp4Ui.this.dns.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipDns()));
             }
         });
         this.dns.addMouseOutHandler(event -> resetHelp());
         this.dns.addValueChangeHandler(event -> {
             setDirty(true);
 
-            if (TabTcpIpUi.this.dns.getText().trim().length() == 0) {
-                TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpDns.setText("");
+            if (TabIp4Ui.this.dns.getText().trim().length() == 0) {
+                TabIp4Ui.this.groupDns.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpDns.setText("");
                 return;
             }
 
-            String[] aDnsServers = TabTcpIpUi.this.dns.getText().split(DNS_REGEX);
+            String[] aDnsServers = TabIp4Ui.this.dns.getText().split(DNS_REGEX);
             boolean validDnsList = true;
 
-            int dnsContentLength = TabTcpIpUi.this.dns.getText().trim().length();
+            int dnsContentLength = TabIp4Ui.this.dns.getText().trim().length();
             int aDnsServersSize = aDnsServers.length;
             if (dnsContentLength != 0 && aDnsServersSize == 0) {
                 validDnsList = false;
@@ -547,89 +545,89 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 }
             }
             if (!validDnsList) {
-                TabTcpIpUi.this.groupDns.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpDns.setText(MSGS.netIPv4InvalidAddresses());
+                TabIp4Ui.this.groupDns.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpDns.setText(MSGS.netIPv4InvalidAddresses());
             } else {
-                TabTcpIpUi.this.groupDns.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpDns.setText("");
+                TabIp4Ui.this.groupDns.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpDns.setText("");
             }
         });
     }
 
     private void initGatewayField() {
         this.gateway.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.gateway.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipGateway()));
+            if (TabIp4Ui.this.gateway.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipGateway()));
             }
         });
         this.gateway.addMouseOutHandler(event -> resetHelp());
         this.gateway.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabTcpIpUi.this.gateway.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-                    && TabTcpIpUi.this.gateway.getText().trim().length() > 0) {
-                TabTcpIpUi.this.groupGateway.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
+            if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+                    && TabIp4Ui.this.gateway.getText().trim().length() > 0) {
+                TabIp4Ui.this.groupGateway.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
             } else {
-                TabTcpIpUi.this.groupGateway.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpGateway.setText("");
+                TabIp4Ui.this.groupGateway.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpGateway.setText("");
             }
         });
     }
 
     private void initSubnetMaskField() {
         this.subnet.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.subnet.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipSubnetMask()));
+            if (TabIp4Ui.this.subnet.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipSubnetMask()));
             }
         });
         this.subnet.addMouseOutHandler(event -> resetHelp());
         this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabTcpIpUi.this.subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-                    && TabTcpIpUi.this.subnet.getText().trim().length() > 0) {
-                TabTcpIpUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
+            if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+                    && TabIp4Ui.this.subnet.getText().trim().length() > 0) {
+                TabIp4Ui.this.groupSubnet.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
             } else {
-                TabTcpIpUi.this.groupSubnet.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpSubnet.setText("");
+                TabIp4Ui.this.groupSubnet.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpSubnet.setText("");
             }
         });
     }
 
     private void initIpAddressField() {
         this.ip.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.ip.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipAddress()));
+            if (TabIp4Ui.this.ip.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipAddress()));
             }
         });
         this.ip.addMouseOutHandler(event -> resetHelp());
         this.ip.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabTcpIpUi.this.ip.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
-                    || TabTcpIpUi.this.ip.getText().trim().length() <= 0) {
-                TabTcpIpUi.this.groupIp.setValidationState(ValidationState.ERROR);
-                TabTcpIpUi.this.helpIp.setText(MSGS.netIPv4InvalidAddress());
+            if (!TabIp4Ui.this.ip.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+                    || TabIp4Ui.this.ip.getText().trim().length() <= 0) {
+                TabIp4Ui.this.groupIp.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpIp.setText(MSGS.netIPv4InvalidAddress());
             } else {
-                TabTcpIpUi.this.groupIp.setValidationState(ValidationState.NONE);
-                TabTcpIpUi.this.helpIp.setText("");
+                TabIp4Ui.this.groupIp.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpIp.setText("");
             }
         });
     }
 
     private void initConfigureField() {
         this.configure.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.configure.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipConfigure()));
+            if (TabIp4Ui.this.configure.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipConfigure()));
             }
         });
         this.configure.addMouseOutHandler(event -> resetHelp());
         this.configure.addChangeHandler(event -> {
             setDirty(true);
-            TabTcpIpUi.this.tabs.adjustInterfaceTabs();
+            TabIp4Ui.this.tabs.updateTabs();
             refreshForm();
             resetValidations();
         });
@@ -654,20 +652,20 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         initStatusValues();
 
         this.status.addMouseOverHandler(event -> {
-            if (TabTcpIpUi.this.status.isEnabled()) {
-                TabTcpIpUi.this.helpText.clear();
-                if (TabTcpIpUi.this.selectedNetIfConfig != null
-                        && TabTcpIpUi.this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-                    TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ModemToolTipStatus()));
+            if (TabIp4Ui.this.status.isEnabled()) {
+                TabIp4Ui.this.helpText.clear();
+                if (TabIp4Ui.this.selectedNetIfConfig != null
+                        && TabIp4Ui.this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+                    TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ModemToolTipStatus()));
                 } else {
-                    TabTcpIpUi.this.helpText.add(new Span(MSGS.netIPv4ToolTipStatus()));
+                    TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipStatus()));
                 }
             }
         });
         this.status.addMouseOutHandler(event -> resetHelp());
         this.status.addChangeHandler(event -> {
             setDirty(true);
-            TabTcpIpUi.this.tabs.adjustInterfaceTabs();
+            TabIp4Ui.this.tabs.updateTabs();
 
             refreshForm();
             resetValidations();
@@ -676,7 +674,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             // changed to WAN
             if (isWanEnabled()) {
                 EntryClassUi.showWaitModal();
-                TabTcpIpUi.this.gwtNetworkService.findNetInterfaceConfigurations(false,
+                TabIp4Ui.this.gwtNetworkService.findNetInterfaceConfigurations(false,
                         new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
                             @Override
@@ -688,7 +686,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                             @Override
                             public void onSuccess(List<GwtNetInterfaceConfig> result) {
                                 EntryClassUi.hideWaitModal();
-                                if (!TabTcpIpUi.this.isNet2) {
+                                if (!TabIp4Ui.this.isNet2) {
                                     showMultipleWanModal(result);
                                 }
                             }
@@ -701,9 +699,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private void showMultipleWanModal(List<GwtNetInterfaceConfig> configs) {
         for (GwtNetInterfaceConfig config : configs) {
             if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
-                    && !config.getName().equals(TabTcpIpUi.this.selectedNetIfConfig.getName())) {
+                    && !config.getName().equals(TabIp4Ui.this.selectedNetIfConfig.getName())) {
                 logger.log(Level.SEVERE, "Error: Status Invalid");
-                TabTcpIpUi.this.wanModal.show();
+                TabIp4Ui.this.wanModal.show();
                 break;
             }
         }
@@ -735,7 +733,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
             }
 
-            this.tabs.adjustInterfaceTabs();
+            this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());
             this.subnet.setText(this.selectedNetIfConfig.getSubnetMask());
             this.gateway.setText(this.selectedNetIfConfig.getGateway());

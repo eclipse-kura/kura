@@ -299,7 +299,7 @@ public class NetworkInterfacesTableUi extends Composite {
                 loadData(recompute);
                 NetworkInterfacesTableUi.this.tabs.setDirty(true);
                 NetworkInterfacesTableUi.this.tabs.refresh();
-                NetworkInterfacesTableUi.this.tabs.adjustInterfaceTabs();
+                NetworkInterfacesTableUi.this.tabs.updateTabs();
             }));
 
             confirmFooter.add(new Button(MSGS.noButton(), event -> confirm.hide()));

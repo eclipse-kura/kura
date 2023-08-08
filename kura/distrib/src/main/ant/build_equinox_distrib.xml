@@ -271,13 +271,6 @@
         <antcall target="linux-kura-network-config" />
         <antcall target="linux-network-manager-config" />
 
-        <!-- Add mToolkit to config.ini -->
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
-        </propertyfile>
-
         <propertyfile
             file="${project.build.directory}/${build.output.name}/dpa.properties">
             <entry key="kura"

@@ -2447,9 +2447,6 @@
                                         <!-- Kura User Workspace -->
                                         <echo message="Preparing target platform..." />
 
-                                        <!-- Copy the mtoolkit plugin to the target directory -->
-                                        <copy file="src/main/resources/common/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip" todir="${project.build.directory}" />
-
                                         <!-- Add the deployment agent and core packages to the target platform
                                             which is required for the emulator -->
                                         <copy todir="${project.build.directory}/staging/target-definition">

@@ -266,7 +266,6 @@ This project leverages the following third party content.
 * org.eclipse.equinox.coordinator_1.3.800.v20200422-1833, EPL-2.0, approved, eclipse.platform
 * org.eclipse.equinox.app_1.5.0.v20200717-0620, EPL-2.0, approved, eclipse.platform
 * org.eclipse.equinox.http.registry_1.2.0.v20200614-1851, EPL-2.0, approved, eclipse.platform
-* org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918, EPL-1.0, approved, CQ7880
 * com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871
 * soda.dk.comm, EPL-1.0, approved, CQ8156
 * org.hamcrest.core 1.1, New BSD License, approved, CQ7842

@@ -286,12 +286,12 @@ public class NetworkConfigurationServiceCommon {
         Tad tad;
         // DNS and WINS
         tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.dnsServers", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_IP4_DNS_SERVERS, Tscalar.STRING);
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_DNS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);
 
         tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.winsServers", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_IP4_WINS_SERVERS, Tscalar.STRING);
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_WINS_SERVERS, Tscalar.STRING);
         tad.setCardinality(10000);
         tocd.addAD(tad);
 

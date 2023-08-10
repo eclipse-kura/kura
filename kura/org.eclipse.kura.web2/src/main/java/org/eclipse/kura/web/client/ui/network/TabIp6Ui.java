@@ -694,9 +694,6 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         if (this.selectedNetIfConfig.get().getIpv6DnsServers() != null) {
             String dnsServersUi = this.selectedNetIfConfig.get().getIpv6DnsServers().replace(" ", "\n");
             this.dns.setValue(dnsServersUi);
-            this.dns.setVisible(true);
-        } else {
-            this.dns.setVisible(false);
         }
 
         for (int i = 0; i < this.privacy.getItemCount(); i++) {

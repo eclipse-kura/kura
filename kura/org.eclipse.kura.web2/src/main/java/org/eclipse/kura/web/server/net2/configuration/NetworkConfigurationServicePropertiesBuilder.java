@@ -29,12 +29,16 @@ import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkConfigurationServicePropertiesBuilder {
 
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
+
+    private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServicePropertiesBuilder.class);
 
     private final GwtNetInterfaceConfig oldGwtNetInterfaceConfig;
 
@@ -154,6 +158,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
             if (wifiMode.equals(WifiMode.INFRA.name())) {
                 setWifiInfraProperties();
             }
+
+            set8021xConfig();
         }
     }
 
@@ -188,11 +194,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 EnumsParser.getWifiMode(Optional.ofNullable(gwtWifiConfig.getWirelessMode())));
         this.properties.setWifiMasterSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
-
-        if (gwtWifiConfig.getSecurityEnum() == GwtWifiSecurity.netWifiSecurityWPA2Enterprise){
-            set8021xConfig();
-        }
-
         this.properties.setWifiMasterPairwiseCiphers(this.ifname,
                 EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
         this.properties.setWifiMasterGroupCiphers(this.ifname,
@@ -205,6 +206,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
     }
 
     private void set8021xConfig() {
+        logger.error("setting 802-1x config");
         this.properties.set8021xEap(this.ifname, this.gwtConfig.getEnterpriseConfig().getEap());
         this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.getEnterpriseConfig().getInnerAuth());
         this.properties.set8021xIdentity(this.ifname, this.gwtConfig.getEnterpriseConfig().getUsername()); 

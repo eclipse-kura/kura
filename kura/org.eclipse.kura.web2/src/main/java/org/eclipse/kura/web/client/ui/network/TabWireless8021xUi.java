@@ -234,8 +234,8 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
             }
         }
 
-        this.username.setText(config.getEnterpriseConfig().getUsername());
-        this.password.setText(config.getEnterpriseConfig().getPassword());
+        this.username.setValue(config.getEnterpriseConfig().getUsername());
+        this.password.setValue(config.getEnterpriseConfig().getPassword());
     }
 
     private void initForm() {

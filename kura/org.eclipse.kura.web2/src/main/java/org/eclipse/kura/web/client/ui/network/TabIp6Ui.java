@@ -359,7 +359,16 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         });
         this.subnet.addMouseOutHandler(event -> resetHelpText());
 
-        // TODO: validation
+        this.subnet.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (this.subnet.getValue() == null || this.subnet.getValue() < 1 || this.subnet.getValue() > 128) {
+                this.groupSubnet.setValidationState(ValidationState.ERROR);
+                this.wrongInputSubnet.setText(MSGS.netIpv6InvalidSubnet());
+            } else {
+                this.groupSubnet.setValidationState(ValidationState.NONE);
+                this.wrongInputSubnet.setText("");
+            }
+        });
     }
 
     private void initGatewayField() {

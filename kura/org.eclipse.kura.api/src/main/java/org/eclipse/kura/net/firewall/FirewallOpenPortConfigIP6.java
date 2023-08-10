@@ -12,7 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import java.net.UnknownHostException;
+
 import org.eclipse.kura.net.IP6Address;
+import org.eclipse.kura.net.NetworkPair;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -35,7 +38,10 @@ public class FirewallOpenPortConfigIP6 extends FirewallOpenPortConfigIP<IP6Addre
             extends FirewallOpenPortConfigIPBuilder<IP6Address, FirewallOpenPortConfigIP6Builder> {
 
         @Override
-        public FirewallOpenPortConfigIP6 build() {
+        public FirewallOpenPortConfigIP6 build() throws UnknownHostException {
+            if (this.permittedNetwork == null) {
+                this.withPermittedNetwork(new NetworkPair<>(IP6Address.getDefaultAddress(), (short) 0));
+            }
             return new FirewallOpenPortConfigIP6(this);
         }
 

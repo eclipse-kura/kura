@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import java.net.UnknownHostException;
+
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
@@ -56,7 +58,10 @@ public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP
             extends FirewallPortForwardConfigIPBuilder<IP4Address, FirewallPortForwardConfigIP4Builder> {
 
         @Override
-        public FirewallPortForwardConfigIP4 build() {
+        public FirewallPortForwardConfigIP4 build() throws UnknownHostException {
+            if (this.permittedNetwork == null) {
+                this.withPermittedNetwork(new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0));
+            }
             return new FirewallPortForwardConfigIP4(this);
         }
 

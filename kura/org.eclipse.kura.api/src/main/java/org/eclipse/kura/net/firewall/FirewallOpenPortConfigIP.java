@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import java.net.UnknownHostException;
 import java.util.Objects;
 
 import org.eclipse.kura.net.IPAddress;
@@ -188,6 +189,11 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         return this.permittedNetwork;
     }
 
+    @Override
+    public String getPermittedNetworkString() {
+        return this.permittedNetwork.getIpAddress().getHostAddress() + "/" + this.permittedNetwork.getPrefix();
+    }
+
     /**
      * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
      */
@@ -248,14 +254,14 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     public abstract static class FirewallOpenPortConfigIPBuilder<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>> {
 
-        private int port = -1;
-        private String portRange;
-        private NetProtocol protocol;
-        private NetworkPair<U> permittedNetwork;
-        private String permittedInterfaceName;
-        private String unpermittedInterfaceName;
-        private String permittedMac;
-        private String sourcePortRange;
+        protected int port = -1;
+        protected String portRange;
+        protected NetProtocol protocol;
+        protected NetworkPair<U> permittedNetwork;
+        protected String permittedInterfaceName;
+        protected String unpermittedInterfaceName;
+        protected String permittedMac;
+        protected String sourcePortRange;
 
         public T withPort(int port) {
             this.port = port;
@@ -299,7 +305,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
         public abstract T getThis();
 
-        public abstract FirewallOpenPortConfigIP<U> build();
+        public abstract FirewallOpenPortConfigIP<U> build() throws UnknownHostException;
     }
 
     @Override

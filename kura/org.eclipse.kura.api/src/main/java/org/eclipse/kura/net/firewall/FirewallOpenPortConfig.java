@@ -55,6 +55,15 @@ public interface FirewallOpenPortConfig extends NetConfig {
     public NetworkPair<? extends IPAddress> getPermittedNetwork();
 
     /**
+     * Gets the (optional) permitted remote network that can make inbound connections in CIDR notation (i.e.
+     * 192.168.0.0/24 or 2001:db8::/32)
+     *
+     * @return The NetworkPair representing the permitted network
+     * @since 2.6
+     */
+    public String getPermittedNetworkString();
+
+    /**
      * Gets the (optional) permitted MAC address that is allowed to make inbound connections
      *
      * @return The MAC address that is allowed to make inbound connections

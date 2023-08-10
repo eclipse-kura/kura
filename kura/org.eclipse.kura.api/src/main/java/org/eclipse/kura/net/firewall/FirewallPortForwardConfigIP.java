@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import java.net.UnknownHostException;
+
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
@@ -266,16 +268,16 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
     public abstract static class FirewallPortForwardConfigIPBuilder<U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
 
-        private String inboundIface;
-        private String outboundIface;
-        private U address;
-        private NetProtocol protocol;
-        private int inPort;
-        private int outPort;
-        private boolean masquerade = false;
-        private NetworkPair<U> permittedNetwork;
-        private String permittedMac;
-        private String sourcePortRange;
+        protected String inboundIface;
+        protected String outboundIface;
+        protected U address;
+        protected NetProtocol protocol;
+        protected int inPort;
+        protected int outPort;
+        protected boolean masquerade = false;
+        protected NetworkPair<U> permittedNetwork;
+        protected String permittedMac;
+        protected String sourcePortRange;
 
         public T withInboundIface(String inboundIface) {
             this.inboundIface = inboundIface;
@@ -329,7 +331,7 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
 
         public abstract T getThis();
 
-        public abstract FirewallPortForwardConfigIP<U> build();
+        public abstract FirewallPortForwardConfigIP<U> build() throws UnknownHostException;
     }
 
     @Override

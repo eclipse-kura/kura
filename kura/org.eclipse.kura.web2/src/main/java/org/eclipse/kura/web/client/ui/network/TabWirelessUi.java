@@ -941,13 +941,16 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.security.addMouseOutHandler(event -> resetHelp());
         for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
 
-            if ((GwtWifiSecurity.netWifiSecurityWPA2Enterprise == mode && !isNet2) || TabWirelessUi.this.wireless.getSelectedItemText().equals(WIFI_MODE_ACCESS_POINT_MESSAGE)) {
-                //do not add wifi enterprise security for net1
-                //do not add wifi enterprise security for ap mode
-            }else{
-                this.security.addItem(MessageUtils.get(mode.name()));
-            }
-
+            this.security.addItem(MessageUtils.get(mode.name()));
+            /**
+             * 
+             if ((GwtWifiSecurity.netWifiSecurityWPA2Enterprise == mode && !isNet2) || TabWirelessUi.this.wireless.getSelectedItemText().equals(WIFI_MODE_ACCESS_POINT_MESSAGE)) {
+                 //do not add wifi enterprise security for net1
+                 //do not add wifi enterprise security for ap mode
+                }else{
+                }
+            */
+                
         }
         this.security.addChangeHandler(event -> {
             setDirty(true);

@@ -28,6 +28,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
 
 public class NetworkConfigurationServicePropertiesBuilder {
 
@@ -187,6 +188,11 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 EnumsParser.getWifiMode(Optional.ofNullable(gwtWifiConfig.getWirelessMode())));
         this.properties.setWifiMasterSecurityType(this.ifname,
                 EnumsParser.getWifiSecurity(Optional.ofNullable(gwtWifiConfig.getSecurity())));
+
+        if (gwtWifiConfig.getSecurityEnum() == GwtWifiSecurity.netWifiSecurityWPA2Enterprise){
+            set8021xConfig();
+        }
+
         this.properties.setWifiMasterPairwiseCiphers(this.ifname,
                 EnumsParser.getWifiCiphers(Optional.ofNullable(gwtWifiConfig.getPairwiseCiphers())));
         this.properties.setWifiMasterGroupCiphers(this.ifname,
@@ -196,6 +202,13 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setWifiMasterRadioMode(this.ifname,
                 EnumsParser.getWifiRadioMode(Optional.ofNullable(gwtWifiConfig.getRadioMode())));
 
+    }
+
+    private void set8021xConfig() {
+        this.properties.set8021xEap(this.ifname, this.gwtConfig.getEnterpriseConfig().getEap());
+        this.properties.set8021xPhase2Auth(this.ifname, this.gwtConfig.getEnterpriseConfig().getInnerAuth());
+        this.properties.set8021xIdentity(this.ifname, this.gwtConfig.getEnterpriseConfig().getUsername()); 
+        this.properties.set8021xPassword(this.ifname, this.gwtConfig.getEnterpriseConfig().getPassword());
     }
 
     private void setWifiInfraProperties() {

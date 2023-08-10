@@ -18,8 +18,11 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
 import org.eclipse.kura.web.client.util.HelpButton;
+import org.eclipse.kura.web.client.util.MessageUtils;
+import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.shared.model.Gwt8021xConfig;
 import org.eclipse.kura.web.shared.model.Gwt8021xEap;
-import org.eclipse.kura.web.shared.model.Gwt8021xPhase2Auth;
+import org.eclipse.kura.web.shared.model.Gwt8021xInnerAuth;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelModel;
@@ -61,8 +64,7 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
     private final GwtSession session;
     private final NetworkTabsUi netTabs;
 
-    GwtWifiConfig activeConfig;
-    GwtWifiChannelModel previousSelection;
+    Gwt8021xConfig activeConfig;
 
     private boolean dirty;
 
@@ -123,6 +125,56 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
         logger.info("Constructor done.");
     }
 
+    private void reset() {
+        for (int i = 0; i < this.eap.getItemCount(); i++){
+            if (this.eap.getSelectedItemText().equals(Gwt8021xEap.ttls.name())) {
+                this.eap.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.innerAuth.getItemCount(); i++){
+            if (this.innerAuth.getSelectedItemText().equals(Gwt8021xInnerAuth.mschapv2.name())) {
+                this.innerAuth.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        this.password.setText("");
+        this.username.setText("");
+
+        update();
+    }
+
+    private void setValues() {
+        logger.info("Start setValues");
+
+        if (this.activeConfig == null) {
+            return;
+        }
+
+        for (int i = 0; i < this.eap.getItemCount(); i++){
+            if (this.eap.getItemText(i).equals(this.activeConfig.getEap())) {
+                this.eap.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.innerAuth.getItemCount(); i++){
+            if (this.innerAuth.getItemText(i).equals(this.activeConfig.getInnerAuth())) {
+                this.innerAuth.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        this.username.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getUsername()));
+        this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getPassword()));
+    }
+
+    private void update() {
+        setValues();
+    }
+
     @Override
     public void clear() {
         // Not needed
@@ -130,7 +182,14 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
 
     @Override
     public void refresh() {
-        // Not needed
+        if (isDirty()) {
+            setDirty(false);
+            if (this.activeConfig == null) {
+                reset();
+            } else {
+                update();
+            }
+        }
     }
 
     @Override
@@ -150,13 +209,33 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
 
     @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
-        // GwtWifiNetInterfaceConfig updatedWifiNetIf = (GwtWifiNetInterfaceConfig)
-        // updatedNetIf;
+        updatedNetIf.getEnterpriseConfig().setUsername(this.username.getText());
+        updatedNetIf.getEnterpriseConfig().setPassword(this.password.getText());
+        updatedNetIf.getEnterpriseConfig().setEap(this.eap.getSelectedValue());
+        updatedNetIf.getEnterpriseConfig().setInnerAuth(this.innerAuth.getSelectedValue());
     }
 
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
-        // GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) config;
+
+        this.activeConfig = config.getEnterpriseConfig();
+        
+        for (int i = 0; i < this.eap.getItemCount(); i++) {
+            if (this.eap.getValue(i).equals(config.getEnterpriseConfig().getEap())) {
+                this.eap.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        for (int i = 0; i < this.innerAuth.getItemCount(); i++) {
+            if (this.innerAuth.getValue(i).equals(config.getEnterpriseConfig().getInnerAuth())) {
+                this.innerAuth.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        this.username.setText(config.getEnterpriseConfig().getUsername());
+        this.password.setText(config.getEnterpriseConfig().getPassword());
     }
 
     private void initForm() {
@@ -172,13 +251,25 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
             TabWireless8021xUi.this.logger.info("hover detected."); //TODO: replace with real help text
         });
 
+        this.eap.addChangeHandler(event -> {
+            TabWireless8021xUi.this.logger.info("change detected.");
+            setDirty(true);
+            update();
+        });
+
         labelInnerAuth.setText("Inner Authentication (Phase2 Auth)");
-        for (Gwt8021xPhase2Auth auth : Gwt8021xPhase2Auth.values()) {
+        for (Gwt8021xInnerAuth auth : Gwt8021xInnerAuth.values()) {
             this.innerAuth.addItem(auth.name());
         }
 
         this.innerAuth.addMouseOverHandler(event -> {
             TabWireless8021xUi.this.logger.info("hover detected.");
+        });
+
+        this.innerAuth.addChangeHandler(event -> {
+            TabWireless8021xUi.this.logger.info("change detected.");
+            setDirty(true);
+            update();
         });
 
         labelUsername.setText("Identity (Username)");
@@ -189,6 +280,11 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
         this.username.setAllowBlank(true);
         this.username.addMouseOutHandler(event -> resetHelp());
 
+        this.username.addChangeHandler(event -> {
+            setDirty(true);
+        });
+
+
         labelPassword.setText("Password");
         this.password.addMouseOverHandler(event -> {
             TabWireless8021xUi.this.logger.info("hover detected.");
@@ -197,6 +293,10 @@ public class TabWireless8021xUi extends Composite implements NetworkTab {
         this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(true);
         this.password.addMouseOutHandler(event -> resetHelp());
+
+        this.password.addChangeHandler(event -> {
+            setDirty(true);
+        });
 
         logger.info("initForm FINISHED.");
     }

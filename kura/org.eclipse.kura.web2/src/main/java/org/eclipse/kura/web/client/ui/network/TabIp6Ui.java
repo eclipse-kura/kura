@@ -525,6 +525,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         if (this.status.getSelectedValue().equals(STATUS_LAN)) {
             this.priority.setEnabled(false);
             this.priority.setText("");
+            this.gateway.setEnabled(false);
+            this.gateway.setText("");
+            this.dns.setEnabled(false);
+            this.dns.setText("");
         }
 
         if (this.configure.getSelectedValue().equals(CONFIGURE_AUTO)

@@ -60,23 +60,6 @@ fi
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-# execute patch_sysctl.sh (required for disabling ipv6))
-chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
-${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf
-
-# disables IPv6 on all network interfaces in the system if the "/sys/class/net" directory exists, or applies the system-wide configuration specified in the "/etc/sysctl.conf" file using the "sysctl -p" command otherwise.
-if ! [ -d /sys/class/net ]
-then
-    sysctl -p || true
-else
-    sysctl -w net.ipv6.conf.all.disable_ipv6=1
-    sysctl -w net.ipv6.conf.default.disable_ipv6=1
-    for INTERFACE in $(ls /sys/class/net)
-    do
- 	    sysctl -w net.ipv6.conf.${INTERFACE}.disable_ipv6=1
-    done
-fi
-
 # manage running services
 systemctl daemon-reload
 systemctl stop systemd-timesyncd

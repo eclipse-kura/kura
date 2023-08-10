@@ -141,6 +141,9 @@ public class NMSettingsConverter {
                 throw new IllegalArgumentException("Security type 802-1x \"" + phase2 + "\" is not supported.");
         }
 
+        eapConf.writeConfigurationsToMap(settings);
+        phase2Conf.writeConfigurationsToMap(settings);
+
         return settings;
     }
 

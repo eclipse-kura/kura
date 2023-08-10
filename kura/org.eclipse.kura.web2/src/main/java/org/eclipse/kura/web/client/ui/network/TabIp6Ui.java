@@ -14,8 +14,8 @@ package org.eclipse.kura.web.client.ui.network;
 
 import java.util.Optional;
 
-import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
@@ -41,6 +41,18 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class TabIp6Ui extends Composite implements NetworkTab {
+
+    private static final String STATUS_DISABLED = "netIPv6StatusDisabled";
+    private static final String STATUS_LAN = "netIPv6StatusEnabledLAN";
+    private static final String STATUS_WAN = "netIPv6StatusEnabledWAN";
+    private static final String CONFIGURE_AUTO = "netIPv6MethodAuto";
+    private static final String CONFIGURE_DHCP = "netIPv6MethodDhcp";
+    private static final String CONFIGURE_MANUAL = "netIPv6MethodManual";
+    private static final String AUTOCONF_EUI64 = "netIPv6AddressGenModeEUI64";
+    private static final String AUTOCONF_STABLEPRIVACY = "netIPv6AddressGenModeStablePrivacy";
+    private static final String PRIVACY_DISABLED = "netIPv6PrivacyDisabled";
+    private static final String PRIVACY_PREFER_PUB = "netIPv6PrivacyEnabledPubAdd";
+    private static final String PRIVACY_PREFER_TEMP = "netIPv6PrivacyEnabledTempAdd";
 
     interface TabIp6UiUiBinder extends UiBinder<Widget, TabIp6Ui> {
     }
@@ -195,9 +207,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initStatusField() {
-        this.status.addItem(MessageUtils.get("netIPv6StatusDisabled"), "netIPv6StatusDisabled");
-        this.status.addItem(MessageUtils.get("netIPv6StatusEnabledLAN"), "netIPv6StatusEnabledLAN");
-        this.status.addItem(MessageUtils.get("netIPv6StatusEnabledWAN"), "netIPv6StatusEnabledWAN");
+        this.status.addItem(MessageUtils.get(STATUS_DISABLED), STATUS_DISABLED);
+        this.status.addItem(MessageUtils.get(STATUS_LAN), STATUS_LAN);
+        this.status.addItem(MessageUtils.get(STATUS_WAN), STATUS_WAN);
 
         this.status.addMouseOverHandler(event -> {
             if (this.status.isEnabled()) {
@@ -205,7 +217,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                         && this.selectedNetIfConfig.get().getHwTypeEnum() == GwtNetIfType.MODEM) {
                     setHelpText(MSGS.netIPv4ModemToolTipStatus());
                 } else {
-                    setHelpText(MSGS.netIPv4ToolTipStatus());
+                    setHelpText(MSGS.netIPv6ToolTipStatus());
                 }
             }
         });
@@ -222,9 +234,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initConfigureField() {
-        this.configure.addItem(MessageUtils.get("netIPv6MethodAuto"), "netIPv6MethodAuto");
-        this.configure.addItem(MessageUtils.get("netIPv6MethodDhcp"), "netIPv6MethodDhcp");
-        this.configure.addItem(MessageUtils.get("netIPv6MethodManual"), "netIPv6MethodManual");
+        this.configure.addItem(MessageUtils.get(CONFIGURE_AUTO), CONFIGURE_AUTO);
+        this.configure.addItem(MessageUtils.get(CONFIGURE_DHCP), CONFIGURE_DHCP);
+        this.configure.addItem(MessageUtils.get(CONFIGURE_MANUAL), CONFIGURE_MANUAL);
 
         this.configure.addMouseOverHandler(event -> {
             if (this.configure.isEnabled()) {
@@ -244,9 +256,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initAutoconfigurationField() {
-        this.autoconfiguration.addItem(MessageUtils.get("netIPv6AddressGenModeEUI64"), "netIPv6AddressGenModeEUI64");
-        this.autoconfiguration.addItem(MessageUtils.get("netIPv6AddressGenModeStablePrivacy"),
-                "netIPv6AddressGenModeStablePrivacy");
+        this.autoconfiguration.addItem(MessageUtils.get(AUTOCONF_EUI64), AUTOCONF_EUI64);
+        this.autoconfiguration.addItem(MessageUtils.get(AUTOCONF_STABLEPRIVACY), AUTOCONF_STABLEPRIVACY);
 
         this.autoconfiguration.addMouseOverHandler(event -> {
             if (this.autoconfiguration.isEnabled()) {
@@ -266,9 +277,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initPrivacyField() {
-        this.privacy.addItem(MessageUtils.get("netIPv6PrivacyDisabled"), "netIPv6PrivacyDisabled");
-        this.privacy.addItem(MessageUtils.get("netIPv6PrivacyEnabledPubAdd"), "netIPv6PrivacyEnabledPubAdd");
-        this.privacy.addItem(MessageUtils.get("netIPv6PrivacyEnabledTempAdd"), "netIPv6PrivacyEnabledTempAdd");
+        this.privacy.addItem(MessageUtils.get(PRIVACY_DISABLED), PRIVACY_DISABLED);
+        this.privacy.addItem(MessageUtils.get(PRIVACY_PREFER_PUB), PRIVACY_PREFER_PUB);
+        this.privacy.addItem(MessageUtils.get(PRIVACY_PREFER_TEMP), PRIVACY_PREFER_TEMP);
 
         this.privacy.addMouseOverHandler(event -> {
             if (this.privacy.isEnabled()) {
@@ -367,7 +378,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void refreshFieldsBasedOnSelectedValues() {
-        if (this.status.getSelectedValue().equals("netIPv6StatusDisabled")) {
+        if (this.status.getSelectedValue().equals(STATUS_DISABLED)) {
             this.priority.setEnabled(false);
             this.priority.setText("");
             this.configure.setEnabled(false);
@@ -386,13 +397,13 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             this.privacy.setSelectedIndex(0);
         }
 
-        if (this.status.getSelectedValue().equals("netIPv6StatusEnabledLAN")) {
+        if (this.status.getSelectedValue().equals(STATUS_LAN)) {
             this.priority.setEnabled(false);
             this.priority.setText("");
         }
 
-        if (this.configure.getSelectedValue().equals("netIPv6MethodAuto")
-                || this.configure.getSelectedValue().equals("netIPv6MethodDhcp")) {
+        if (this.configure.getSelectedValue().equals(CONFIGURE_AUTO)
+                || this.configure.getSelectedValue().equals(CONFIGURE_DHCP)) {
             this.ip.setEnabled(false);
             this.ip.setText("");
             this.subnet.setEnabled(false);
@@ -401,8 +412,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             this.gateway.setText("");
         }
 
-        if (this.configure.getSelectedValue().equals("netIPv6MethodManual")
-                || this.configure.getSelectedValue().equals("netIPv6MethodDhcp")) {
+        if (this.configure.getSelectedValue().equals(CONFIGURE_MANUAL)
+                || this.configure.getSelectedValue().equals(CONFIGURE_DHCP)) {
             this.autoconfiguration.setEnabled(false);
             this.privacy.setEnabled(false);
         }
@@ -462,8 +473,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        boolean isWan = this.status.getSelectedValue().equals("netIPv6StatusEnabledWAN");
-        boolean isManual = this.configure.getSelectedValue().equals("netIPv6MethodManual");
+        boolean isWan = this.status.getSelectedValue().equals(STATUS_WAN);
+        boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
 
         if (isWan && isManual) {
             if (!notNullOrEmpty(this.ip.getValue()) || !notNullOrEmpty(this.subnet.getValue())

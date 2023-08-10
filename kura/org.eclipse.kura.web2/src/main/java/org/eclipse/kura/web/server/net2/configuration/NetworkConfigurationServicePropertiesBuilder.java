@@ -206,7 +206,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void set8021xConfig() {
         this.properties.set8021xEap(this.ifname, this.gwtConfig.getEnterpriseConfig().getEap());
-        this.properties.set8021xPhase2Auth(this.ifname, this.gwtConfig.getEnterpriseConfig().getInnerAuth());
+        this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.getEnterpriseConfig().getInnerAuth());
         this.properties.set8021xIdentity(this.ifname, this.gwtConfig.getEnterpriseConfig().getUsername()); 
         this.properties.set8021xPassword(this.ifname, this.gwtConfig.getEnterpriseConfig().getPassword());
     }

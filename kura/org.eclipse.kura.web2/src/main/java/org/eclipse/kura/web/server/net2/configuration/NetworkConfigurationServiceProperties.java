@@ -719,7 +719,7 @@ public class NetworkConfigurationServiceProperties {
      */
 
     private static final String NET_INTERFACE_CONFIG_8021X_EAP = "net.interface.%s.config.802-1x.eap";
-    private static final String NET_INTERFACE_CONFIG_8021X_PHASE2 = "net.interface.%s.config.802-1x.phase2";
+    private static final String NET_INTERFACE_CONFIG_8021X_PHASE2 = "net.interface.%s.config.802-1x.innerAuth";
     private static final String NET_INTERFACE_CONFIG_8021X_IDENTITY = "net.interface.%s.config.802-1x.identity";
     private static final String NET_INTERFACE_CONFIG_8021X_PASSWORD = "net.interface.%s.config.802-1x.password";
 
@@ -731,11 +731,11 @@ public class NetworkConfigurationServiceProperties {
         return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname), "");
     }
 
-    public void set8021xPhase2Auth(String ifname, String phase2) {
+    public void set8021xInnerAuth(String ifname, String phase2) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname), phase2);
     }
 
-    public String get8021xPhase2Auth(String ifname) {
+    public String get8021xInnerAuth(String ifname) {
         return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname), "");
     }
 

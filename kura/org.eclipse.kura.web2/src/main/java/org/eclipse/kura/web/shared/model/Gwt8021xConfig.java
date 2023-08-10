@@ -41,7 +41,7 @@ public class Gwt8021xConfig extends KuraBaseModel implements Serializable {
     }
 
     public String getInnerAuth() {
-        return get("phase2Auth");
+        return get("innerAuth");
     }
 
     public void setInnerAuth(String innerAuth) {

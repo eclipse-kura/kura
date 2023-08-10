@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -316,21 +315,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.priority.addMouseOutHandler(event -> resetHelpText());
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
-
-            String inputText = this.priority.getText();
-            boolean isInvalidValue = false;
-
-            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
-                try {
-                    if (Integer.parseInt(inputText) < -1) {
-                        isInvalidValue = true;
-                    }
-                } catch (NumberFormatException e) {
-                    isInvalidValue = true;
-                }
-            }
-
-            if (isInvalidValue) {
+            if (this.priority.getValue() == null || this.priority.getValue() < 1) {
                 this.groupPriority.setValidationState(ValidationState.ERROR);
                 this.wrongInputPriority.setText(MSGS.netIPv4InvalidPriority());
             } else {

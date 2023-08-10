@@ -255,20 +255,13 @@ public class NetworkTabsUi extends Composite {
         this.modemAntennaTab.setNetInterface(selection);
         this.hardwareTab.setNetInterface(selection);
 
-        removeOptionalTabs();
         updateTabs();
         refreshAllVisibleTabs();
     }
 
-    private void removeOptionalTabs() {
-        this.tabsPanel.remove(this.wirelessTabAnchorItem);
-        this.tabsPanel.remove(this.dhcp4NatTabAnchorItem);
-        this.tabsPanel.remove(this.modemTabAnchorItem);
-        this.tabsPanel.remove(this.modemGpsTabAnchorItem);
-        this.tabsPanel.remove(this.modemAntennaTabAnchorItem);
-    }
-
     public void updateTabs() {
+        removeAllTabs();
+
         insertTab(this.ip4TabAnchorItem);
         if (this.isNet2) {
             insertTab(this.ip6TabAnchorItem);
@@ -277,6 +270,17 @@ public class NetworkTabsUi extends Composite {
         arrangeOptionalTabs();
 
         insertTab(this.hardwareTabAnchorItem);
+    }
+
+    private void removeAllTabs() {
+        removeTab(this.ip4TabAnchorItem);
+        removeTab(this.ip6TabAnchorItem);
+        removeTab(this.wirelessTabAnchorItem);
+        removeTab(this.dhcp4NatTabAnchorItem);
+        removeTab(this.modemTabAnchorItem);
+        removeTab(this.modemGpsTabAnchorItem);
+        removeTab(this.modemAntennaTabAnchorItem);
+        removeTab(this.hardwareTabAnchorItem);
     }
 
     private void arrangeOptionalTabs() {

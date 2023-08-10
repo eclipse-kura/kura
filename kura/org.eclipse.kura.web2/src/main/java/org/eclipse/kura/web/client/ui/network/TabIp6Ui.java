@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -136,7 +137,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     @UiField
     TextBox ip;
     @UiField
-    TextBox subnet;
+    IntegerBox subnet;
     @UiField
     TextBox gateway;
     @UiField
@@ -192,7 +193,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.helpButtonPriority.setHelpText(MSGS.netIPv4ToolTipPriority());
         this.helpButtonConfigure.setHelpText(MSGS.netIPv4ToolTipConfigure());
         this.helpButtonAutoconfiguration.setHelpText(MSGS.netIPv6ToolTipAutoconfiguration());
-        this.helpButtonIp.setHelpText(MSGS.netIPv4ToolTipAddress());
+        this.helpButtonIp.setHelpText(MSGS.netIPv6ToolTipAddress());
         this.helpButtonSubnet.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
         this.helpButtonGateway.setHelpText(MSGS.netIPv4ToolTipGateway());
         this.helpButtonDns.setHelpText(MSGS.netIPv4ToolTipDns());
@@ -299,12 +300,88 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initTextBoxes() {
-        // TODO
-        // priority
-        // ip
-        // subnet
-        // gateway
-        // dns
+        initPriorityField();
+        initIpField();
+        initSubnetField();
+        initGatewayField();
+        initDnsField();
+    }
+
+    private void initPriorityField() {
+        this.priority.addMouseOverHandler(event -> {
+            if (this.priority.isEnabled()) {
+                setHelpText(MSGS.netIPv4ToolTipPriority());
+            }
+        });
+        this.priority.addMouseOutHandler(event -> resetHelpText());
+        this.priority.addValueChangeHandler(valChangeEvent -> {
+            setDirty(true);
+
+            String inputText = this.priority.getText();
+            boolean isInvalidValue = false;
+
+            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
+                try {
+                    if (Integer.parseInt(inputText) < -1) {
+                        isInvalidValue = true;
+                    }
+                } catch (NumberFormatException e) {
+                    isInvalidValue = true;
+                }
+            }
+
+            if (isInvalidValue) {
+                this.groupPriority.setValidationState(ValidationState.ERROR);
+                this.wrongInputPriority.setText(MSGS.netIPv4InvalidPriority());
+            } else {
+                this.groupPriority.setValidationState(ValidationState.NONE);
+                this.wrongInputPriority.setText("");
+            }
+        });
+    }
+
+    private void initIpField() {
+        this.ip.addMouseOverHandler(event -> {
+            if (this.ip.isEnabled()) {
+                setHelpText(MSGS.netIPv6ToolTipAddress());
+            }
+        });
+        this.ip.addMouseOutHandler(event -> resetHelpText());
+
+        // TODO: validation
+    }
+
+    private void initSubnetField() {
+        this.subnet.addMouseOverHandler(event -> {
+            if (this.subnet.isEnabled()) {
+                setHelpText(MSGS.netIPv4ToolTipSubnetMask());
+            }
+        });
+        this.subnet.addMouseOutHandler(event -> resetHelpText());
+
+        // TODO: validation
+    }
+
+    private void initGatewayField() {
+        this.gateway.addMouseOverHandler(event -> {
+            if (this.gateway.isEnabled()) {
+                setHelpText(MSGS.netIPv4ToolTipGateway());
+            }
+        });
+        this.gateway.addMouseOutHandler(event -> resetHelpText());
+
+        // TODO: validation
+    }
+
+    private void initDnsField() {
+        this.dns.addMouseOverHandler(event -> {
+            if (this.dns.isEnabled()) {
+                setHelpText(MSGS.netIPv4ToolTipDns());
+            }
+        });
+        this.dns.addMouseOutHandler(event -> resetHelpText());
+
+        // TODO: validation
     }
 
     private void setHelpText(String message) {
@@ -453,8 +530,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             if (notNullOrEmpty(this.ip.getValue())) {
                 updatedNetIf.setIpv6Address(this.ip.getValue().trim());
             }
-            if (notNullOrEmpty(this.subnet.getValue())) {
-                updatedNetIf.setIpv6SubnetMask(this.subnet.getValue().trim());
+            if (this.subnet.getValue() != null) {
+                updatedNetIf.setIpv6SubnetMask(this.subnet.getValue());
             }
             if (notNullOrEmpty(this.gateway.getValue())) {
                 updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
@@ -477,7 +554,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
 
         if (isWan && isManual) {
-            if (!notNullOrEmpty(this.ip.getValue()) || !notNullOrEmpty(this.subnet.getValue())
+            if (!notNullOrEmpty(this.ip.getValue()) || this.subnet.getValue() != null
                     || !notNullOrEmpty(this.gateway.getValue())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);
@@ -551,7 +628,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         }
 
         this.ip.setText(this.selectedNetIfConfig.get().getIpv6Address());
-        this.subnet.setText(this.selectedNetIfConfig.get().getIpv6SubnetMask());
+        this.subnet.setValue(this.selectedNetIfConfig.get().getIpv6SubnetMask());
         this.gateway.setText(this.selectedNetIfConfig.get().getIpv6Gateway());
 
         if (this.selectedNetIfConfig.get().getIpv6ReadOnlyDnsServers() != null) {

@@ -325,11 +325,11 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("ipv6.address", ipAddress);
     }
 
-    public String getIpv6SubnetMask() {
+    public Integer getIpv6SubnetMask() {
         return get("ipv6.subnet");
     }
 
-    public void setIpv6SubnetMask(String subnetMask) {
+    public void setIpv6SubnetMask(Integer subnetMask) {
         set("ipv6.subnet", subnetMask);
     }
 

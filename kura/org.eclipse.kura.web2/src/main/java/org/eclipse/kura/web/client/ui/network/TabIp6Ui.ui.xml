@@ -92,7 +92,7 @@
                                 <b:FormLabel for="subnet" ui:field="labelSubnet"></b:FormLabel>
                                 <util:HelpButton ui:field="helpButtonSubnet" />
                                 <b:HelpBlock color="red" ui:field="wrongInputSubnet" />
-                                <b:TextBox allowBlank="false" b:id="subnet" ui:field="subnet" />
+                                <b:IntegerBox b:id="subnet" ui:field="subnet" />
                             </b:FormGroup>
 
                             <b:FormGroup ui:field="groupGateway">

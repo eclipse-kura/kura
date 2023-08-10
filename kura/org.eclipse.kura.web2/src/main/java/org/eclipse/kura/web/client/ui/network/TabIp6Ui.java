@@ -54,6 +54,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     private static final String PRIVACY_PREFER_PUB = "netIPv6PrivacyEnabledPubAdd";
     private static final String PRIVACY_PREFER_TEMP = "netIPv6PrivacyEnabledTempAdd";
 
+    private static final String IPV6_ADDRESS_REGEX = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+    private static final String DNS_REGEX = "[\\s,;\\n\\t]+";
+
     interface TabIp6UiUiBinder extends UiBinder<Widget, TabIp6Ui> {
     }
 
@@ -333,7 +336,21 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         });
         this.ip.addMouseOutHandler(event -> resetHelpText());
 
-        // TODO: validation
+        this.ip.addValueChangeHandler(event -> {
+            setDirty(true);
+
+            String address = this.ip.getText();
+            boolean isValid = address != null && address.trim().length() > 0
+                    && address.trim().matches(IPV6_ADDRESS_REGEX);
+
+            if (!isValid) {
+                this.groupIp.setValidationState(ValidationState.ERROR);
+                this.wrongInputIp.setText(MSGS.netIPv6InvalidAddress());
+            } else {
+                this.groupIp.setValidationState(ValidationState.NONE);
+                this.wrongInputIp.setText("");
+            }
+        });
     }
 
     private void initSubnetField() {
@@ -364,7 +381,21 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         });
         this.gateway.addMouseOutHandler(event -> resetHelpText());
 
-        // TODO: validation
+        this.gateway.addValueChangeHandler(event -> {
+            setDirty(true);
+
+            String address = this.gateway.getText();
+            boolean isValid = address != null && address.trim().length() > 0
+                    && address.trim().matches(IPV6_ADDRESS_REGEX);
+
+            if (!isValid) {
+                this.groupGateway.setValidationState(ValidationState.ERROR);
+                this.wrongInputGateway.setText(MSGS.netIPv6InvalidAddress());
+            } else {
+                this.groupGateway.setValidationState(ValidationState.NONE);
+                this.wrongInputGateway.setText("");
+            }
+        });
     }
 
     private void initDnsField() {
@@ -375,7 +406,30 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         });
         this.dns.addMouseOutHandler(event -> resetHelpText());
 
-        // TODO: validation
+        this.dns.addValueChangeHandler(event -> {
+            setDirty(true);
+            
+            if (this.dns.getText().trim().length() == 0) {
+                this.groupDns.setValidationState(ValidationState.NONE);
+                this.wrongInputDns.setText("");
+                return;
+            }
+            
+            String[] addresses = this.dns.getText().trim().split(DNS_REGEX);
+            boolean isValid = addresses.length > 0;
+
+            for (String address : addresses) {
+                isValid = isValid && address.matches(IPV6_ADDRESS_REGEX);
+            }
+
+            if (!isValid) {
+                this.groupDns.setValidationState(ValidationState.ERROR);
+                this.wrongInputDns.setText(MSGS.netIPv4InvalidAddresses());
+            } else {
+                this.groupDns.setValidationState(ValidationState.NONE);
+                this.wrongInputDns.setText("");
+            }
+        });
     }
 
     private void setHelpText(String message) {

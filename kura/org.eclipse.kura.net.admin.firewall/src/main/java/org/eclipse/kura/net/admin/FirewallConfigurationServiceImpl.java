@@ -138,25 +138,29 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         while (localRules.hasNext()) {
             LocalRule localRule = localRules.next();
             FirewallOpenPortConfigIP4Builder builder = FirewallOpenPortConfigIP4.builder();
-            if (localRule.getPortRange() != null) {
-                logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
-                builder.withPortRange(localRule.getPortRange())
-                        .withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
-                        .withPermittedNetwork(localRule.getPermittedNetwork())
-                        .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
-                        .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
-                        .withPermittedMac(localRule.getPermittedMAC())
-                        .withSourcePortRange(localRule.getSourcePortRange());
-                firewallConfiguration.addConfig(builder.build());
-            } else {
-                logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
-                builder.withPort(localRule.getPort()).withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
-                        .withPermittedNetwork(localRule.getPermittedNetwork())
-                        .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
-                        .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
-                        .withPermittedMac(localRule.getPermittedMAC())
-                        .withSourcePortRange(localRule.getSourcePortRange());
-                firewallConfiguration.addConfig(builder.build());
+            try {
+                if (localRule.getPortRange() != null) {
+                    logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
+                    builder.withPortRange(localRule.getPortRange())
+                            .withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
+                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
+                            .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
+                            .withPermittedMac(localRule.getPermittedMAC())
+                            .withSourcePortRange(localRule.getSourcePortRange());
+                    firewallConfiguration.addConfig(builder.build());
+                } else {
+                    logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
+                    builder.withPort(localRule.getPort()).withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
+                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
+                            .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
+                            .withPermittedMac(localRule.getPermittedMAC())
+                            .withSourcePortRange(localRule.getSourcePortRange());
+                    firewallConfiguration.addConfig(builder.build());
+                }
+            } catch (UnknownHostException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
         }
         Iterator<PortForwardRule> portForwardRules = getPortForwardRules().iterator();

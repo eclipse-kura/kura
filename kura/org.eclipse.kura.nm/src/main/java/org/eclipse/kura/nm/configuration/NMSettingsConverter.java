@@ -29,6 +29,11 @@ import org.eclipse.kura.nm.KuraIpStatus;
 import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.configuration.enterprise.NM8021xEapAndPhase2Configurator;
+import org.eclipse.kura.nm.configuration.enterprise.NM8021xEapTtls;
+import org.eclipse.kura.nm.configuration.enterprise.NM8021xPhase2MschapV2;
+import org.eclipse.kura.nm.enums.NM8021xEAP;
+import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -109,43 +114,32 @@ public class NMSettingsConverter {
 
         String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
 
+        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId, propMode.toLowerCase());
+        String phase2 = props.get(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId,
+                propMode.toLowerCase());
+
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId, propMode.toLowerCase());
-        settings.put("eap", new Variant<>(new String[] { eap }));
+        NM8021xEapAndPhase2Configurator eapConf;
+        NM8021xEapAndPhase2Configurator phase2Conf;
 
-        String innerAuth = props.get(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId,
-                propMode.toLowerCase());
-        settings.put("phase2-auth", new Variant<>(innerAuth));
+        // Configure Eap Method
+        switch (NM8021xEAP.valueOf(eap)) {
+            case ttls:
+                eapConf = new NM8021xEapTtls(props, deviceId, propMode);
+                break;
+            default:
+                throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
+        }
 
-        String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId,
-                propMode.toLowerCase());
-        settings.put("identity", new Variant<>(identity));
-
-        String password = props
-                .get(Password.class, "net.interface.%s.config.802-1x.password", deviceId, propMode.toLowerCase())
-                .toString();
-        settings.put("password", new Variant<>(password));
-
-        // String caCert = props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.caCert", deviceId,
-        // propMode.toLowerCase());
-        // settings.put("ca-cert", new Variant<>(caCert));
-
-        // String clientCert = props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.clientCert", deviceId,
-        // propMode.toLowerCase());
-        // settings.put("client-cert", new Variant<>(clientCert));
-
-        // String privatekey = props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.privateKey", deviceId,
-        // propMode.toLowerCase());
-        // settings.put("private-key", new Variant<>(privatekey));
-
-        // String privatekeyPassphrase = props.get(String.class,
-        // "net.interface.%s.config.wifi.%s.privateKeyPassphrase",
-        // deviceId, propMode.toLowerCase());
-        // settings.put("private-key-passphrase", new Variant<>(privatekeyPassphrase));
+        // Configure Phase2 (innerAuth) Method
+        switch (NM8021xPhase2Auth.valueOf(phase2)) {
+            case mschapv2:
+                phase2Conf = new NM8021xPhase2MschapV2(props, deviceId, propMode);
+                break;
+            default:
+                throw new IllegalArgumentException("Security type 802-1x \"" + phase2 + "\" is not supported.");
+        }
 
         return settings;
     }

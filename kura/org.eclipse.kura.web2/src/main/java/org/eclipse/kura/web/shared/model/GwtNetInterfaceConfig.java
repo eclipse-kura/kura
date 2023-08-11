@@ -285,6 +285,86 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set(ROUTER_DNS_PASS, routerDnsPass);
     }
 
+    public String getIpv6Status() {
+        return get("ipv6.status");
+    }
+
+    public void setIpv6Status(String status) {
+        set("ipv6.status", status);
+    }
+    
+    public Integer getIpv6WanPriority() {
+        return get("ipv6.priority");
+    }
+
+    public void setIpv6WanPriority(Integer priority) {
+        set("ipv6.priority", priority);
+    }
+
+    public String getIpv6ConfigMode() {
+        return get("ipv6.configmode");
+    }
+
+    public void setIpv6ConfigMode(String configMode) {
+        set("ipv6.configmode", configMode);
+    }
+
+    public String getIpv6AutoconfigurationMode() {
+        return get("ipv6.autoconfiguration");
+    }
+
+    public void setIpv6AutoconfigurationMode(String autoconfigMode) {
+        set("ipv6.autoconfiguration", autoconfigMode);
+    }
+
+    public String getIpv6Address() {
+        return get("ipv6.address");
+    }
+
+    public void setIpv6Address(String ipAddress) {
+        set("ipv6.address", ipAddress);
+    }
+
+    public Integer getIpv6SubnetMask() {
+        return get("ipv6.subnet");
+    }
+
+    public void setIpv6SubnetMask(Integer subnetMask) {
+        set("ipv6.subnet", subnetMask);
+    }
+
+    public String getIpv6Gateway() {
+        return get("ipv6.gateway");
+    }
+
+    public void setIpv6Gateway(String gateway) {
+        set("ipv6.gateway", gateway);
+    }
+
+    public String getIpv6DnsServers() {
+        return get("ipv6.dns");
+    }
+
+    public void setIpv6DnsServers(String dnsServers) {
+        set("ipv6.dns", dnsServers);
+    }
+
+    public String getIpv6Privacy() {
+        return get("ipv6.privacy");
+    }
+
+    public void setIpv6Privacy(String privacy) {
+        set("ipv6.privacy", privacy);
+    }
+
+    public String getIpv6ReadOnlyDnsServers() {
+        return get("ipv6.dnsReadOnly");
+    }
+
+    public void setIpv6ReadOnlyDnsServers(String dnsServers) {
+        set("ipv6.dnsReadOnly", dnsServers);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof GwtNetInterfaceConfig)) {

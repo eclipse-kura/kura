@@ -294,10 +294,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
         this.privacy.addChangeHandler(event -> {
             setDirty(true);
-            this.tabs.updateTabs();
-
             refreshForm();
             resetValidations();
+            this.tabs.updateTabs();
         });
     }
 
@@ -565,6 +564,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     public void setNetInterface(GwtNetInterfaceConfig config) {
         setDirty(true);
         this.selectedNetIfConfig = Optional.of(config);
+        refreshForm();
+        resetValidations();
+        this.tabs.updateTabs();
     }
 
     @Override

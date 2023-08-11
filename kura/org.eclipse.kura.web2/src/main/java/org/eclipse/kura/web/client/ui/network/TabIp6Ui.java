@@ -564,9 +564,6 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     public void setNetInterface(GwtNetInterfaceConfig config) {
         setDirty(true);
         this.selectedNetIfConfig = Optional.of(config);
-        refreshForm();
-        resetValidations();
-        this.tabs.updateTabs();
     }
 
     @Override
@@ -658,7 +655,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
     private void fillFormWithCachedConfig() {
         for (int i = 0; i < this.status.getItemCount(); i++) {
-            if (this.status.getItemText(i).equals(this.selectedNetIfConfig.get().getIpv6Status())) {
+            if (this.status.getValue(i).equals(this.selectedNetIfConfig.get().getIpv6Status())) {
                 this.status.setSelectedIndex(i);
                 break;
             }

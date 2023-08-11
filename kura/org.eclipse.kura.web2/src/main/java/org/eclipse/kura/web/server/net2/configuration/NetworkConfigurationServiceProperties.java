@@ -146,6 +146,97 @@ public class NetworkConfigurationServiceProperties {
     }
 
     /*
+     * IPv6 properties
+     */
+
+    private static final String NET_INTERFACE_CONFIG_IP6_STATUS = "net.interface.%s.config.ip6.status";
+    private static final String NET_INTERFACE_CONFIG_IP6_WAN_PRIORITY = "net.interface.%s.config.ip6.wan.priority";
+    private static final String NET_INTERFACE_CONFIG_IP6_ADDRESS_METHOD = "net.interface.%s.config.ip6.address.method";
+    private static final String NET_INTERFACE_CONFIG_IP6_ADDR_GEN_MODE = "net.interface.%s.config.ip6.addr.gen.mode";
+    private static final String NET_INTERFACE_CONFIG_IP6_PRIVACY = "net.interface.%s.config.ip6.privacy";
+    private static final String NET_INTERFACE_CONFIG_IP6_ADDRESS = "net.interface.%s.config.ip6.address";
+    private static final String NET_INTERFACE_CONFIG_IP6_NETMASK = "net.interface.%s.config.ip6.prefix";
+    private static final String NET_INTERFACE_CONFIG_IP6_GATEWAY = "net.interface.%s.config.ip6.gateway";
+    private static final String NET_INTERFACE_CONFIG_IP6_DNS_SERVERS = "net.interface.%s.config.ip6.dnsServers";
+
+    public Optional<String> getIp6Status(String ifname) {
+        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_STATUS, ifname)));
+    }
+
+    public void setIp6Status(String ifname, String status) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_STATUS, ifname), status);
+    }
+
+    public Optional<Integer> getIp6WanPriority(String ifname) {
+        return Optional.ofNullable(
+                (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_WAN_PRIORITY, ifname)));
+    }
+
+    public void setIp6WanPriority(String ifname, int priority) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_WAN_PRIORITY, ifname), priority);
+    }
+
+    public Optional<String> getIp6AddressMethod(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_ADDRESS_METHOD, ifname)));
+    }
+
+    public void setIp6AddressMethod(String ifname, String addressMethod) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_ADDRESS_METHOD, ifname), addressMethod);
+    }
+
+    public Optional<String> getIp6AddressGenMode(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_ADDR_GEN_MODE, ifname)));
+    }
+
+    public void setIp6AddressGenMode(String ifname, String addrGenMode) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_ADDR_GEN_MODE, ifname), addrGenMode);
+    }
+
+    public Optional<String> getIp6Privacy(String ifname) {
+        return getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_PRIVACY, ifname)));
+    }
+
+    public void setIp6Privacy(String ifname, String privacy) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_PRIVACY, ifname), privacy);
+    }
+
+    public String getIp6Address(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP6_ADDRESS, ifname), "");
+    }
+
+    public void setIp6Address(String ifname, String address) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_ADDRESS, ifname), address);
+    }
+
+    public Optional<Integer> getIp6Netmask(String ifname) {
+        return Optional
+                .ofNullable((Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname)));
+    }
+
+    public void setIp6Netmask(String ifname, int netmask) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname), netmask);
+    }
+
+    public String getIp6Gateway(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP6_GATEWAY, ifname), "");
+    }
+
+    public void setIp6Gateway(String ifname, String gateway) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_GATEWAY, ifname), gateway);
+    }
+
+    public String getIp6DnsServers(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP6_DNS_SERVERS, ifname), "");
+    }
+
+    public void setIp6DnsServers(String ifname, String dnsServers) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_DNS_SERVERS, ifname), dnsServers);
+    }
+
+    /*
      * IPv4 DHCP Server properties
      */
 

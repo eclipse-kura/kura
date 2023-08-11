@@ -179,26 +179,26 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initLabels() {
-        this.labelStatus.setText(MSGS.netIPv4Status());
-        this.labelPriority.setText(MSGS.netIPv4Priority());
-        this.labelConfigure.setText(MSGS.netIPv4Configure());
+        this.labelStatus.setText(MSGS.netIPv6Status());
+        this.labelPriority.setText(MSGS.netIPv6Priority());
+        this.labelConfigure.setText(MSGS.netIPv6Configure());
         this.labelAutoconfiguration.setText(MSGS.netIPv6AutoconfigurationMode());
-        this.labelIp.setText(MSGS.netIPv4Address());
-        this.labelSubnet.setText(MSGS.netIPv4SubnetMask());
-        this.labelGateway.setText(MSGS.netIPv4Gateway());
-        this.labelDns.setText(MSGS.netIPv4DNSServers());
+        this.labelIp.setText(MSGS.netIPv6Address());
+        this.labelSubnet.setText(MSGS.netIPv6SubnetMask());
+        this.labelGateway.setText(MSGS.netIPv6Gateway());
+        this.labelDns.setText(MSGS.netIPv6DNSServers());
         this.labelPrivacy.setText(MSGS.netIPv6Privacy());
     }
 
     private void initHelpButtons() {
-        this.helpButtonStatus.setHelpText(MSGS.netIPv4ToolTipStatus());
-        this.helpButtonPriority.setHelpText(MSGS.netIPv4ToolTipPriority());
-        this.helpButtonConfigure.setHelpText(MSGS.netIPv4ToolTipConfigure());
+        this.helpButtonStatus.setHelpText(MSGS.netIPv6ToolTipStatus());
+        this.helpButtonPriority.setHelpText(MSGS.netIPv6ToolTipPriority());
+        this.helpButtonConfigure.setHelpText(MSGS.netIPv6ToolTipConfigure());
         this.helpButtonAutoconfiguration.setHelpText(MSGS.netIPv6ToolTipAutoconfiguration());
         this.helpButtonIp.setHelpText(MSGS.netIPv6ToolTipAddress());
-        this.helpButtonSubnet.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
-        this.helpButtonGateway.setHelpText(MSGS.netIPv4ToolTipGateway());
-        this.helpButtonDns.setHelpText(MSGS.netIPv4ToolTipDns());
+        this.helpButtonSubnet.setHelpText(MSGS.netIPv6ToolTipSubnetMask());
+        this.helpButtonGateway.setHelpText(MSGS.netIPv6ToolTipGateway());
+        this.helpButtonDns.setHelpText(MSGS.netIPv6ToolTipDns());
         this.helpButtonPrivacy.setHelpText(MSGS.netIPv6ToolTipPrivacy());
     }
 
@@ -218,7 +218,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             if (this.status.isEnabled()) {
                 if (this.selectedNetIfConfig.isPresent()
                         && this.selectedNetIfConfig.get().getHwTypeEnum() == GwtNetIfType.MODEM) {
-                    setHelpText(MSGS.netIPv4ModemToolTipStatus());
+                    setHelpText(MSGS.netIPv6ModemToolTipStatus());
                 } else {
                     setHelpText(MSGS.netIPv6ToolTipStatus());
                 }
@@ -311,7 +311,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     private void initPriorityField() {
         this.priority.addMouseOverHandler(event -> {
             if (this.priority.isEnabled()) {
-                setHelpText(MSGS.netIPv4ToolTipPriority());
+                setHelpText(MSGS.netIPv6ToolTipPriority());
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelpText());
@@ -319,7 +319,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             setDirty(true);
             if (this.priority.getValue() == null || this.priority.getValue() < 1) {
                 this.groupPriority.setValidationState(ValidationState.ERROR);
-                this.wrongInputPriority.setText(MSGS.netIPv4InvalidPriority());
+                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
             } else {
                 this.groupPriority.setValidationState(ValidationState.NONE);
                 this.wrongInputPriority.setText("");
@@ -355,7 +355,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     private void initSubnetField() {
         this.subnet.addMouseOverHandler(event -> {
             if (this.subnet.isEnabled()) {
-                setHelpText(MSGS.netIPv4ToolTipSubnetMask());
+                setHelpText(MSGS.netIPv6ToolTipSubnetMask());
             }
         });
         this.subnet.addMouseOutHandler(event -> resetHelpText());
@@ -375,7 +375,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     private void initGatewayField() {
         this.gateway.addMouseOverHandler(event -> {
             if (this.gateway.isEnabled()) {
-                setHelpText(MSGS.netIPv4ToolTipGateway());
+                setHelpText(MSGS.netIPv6ToolTipGateway());
             }
         });
         this.gateway.addMouseOutHandler(event -> resetHelpText());
@@ -400,7 +400,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     private void initDnsField() {
         this.dns.addMouseOverHandler(event -> {
             if (this.dns.isEnabled()) {
-                setHelpText(MSGS.netIPv4ToolTipDns());
+                setHelpText(MSGS.netIPv6ToolTipDns());
             }
         });
         this.dns.addMouseOutHandler(event -> resetHelpText());
@@ -423,7 +423,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
             if (!isValid) {
                 this.groupDns.setValidationState(ValidationState.ERROR);
-                this.wrongInputDns.setText(MSGS.netIPv4InvalidAddresses());
+                this.wrongInputDns.setText(MSGS.netIPv6InvalidAddress());
             } else {
                 this.groupDns.setValidationState(ValidationState.NONE);
                 this.wrongInputDns.setText("");
@@ -610,8 +610,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);
                 this.groupGateway.setValidationState(ValidationState.ERROR);
-                this.wrongInputIp.setText(MSGS.netIPv4InvalidAddress());
-                this.wrongInputGateway.setText(MSGS.netIPv4InvalidAddress());
+                this.wrongInputIp.setText(MSGS.netIPv6InvalidAddress());
+                this.wrongInputGateway.setText(MSGS.netIPv6InvalidAddress());
                 return false;
             }
         }

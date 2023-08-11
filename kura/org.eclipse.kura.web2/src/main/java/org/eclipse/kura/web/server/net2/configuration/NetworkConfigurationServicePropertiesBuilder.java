@@ -49,6 +49,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
     public Map<String, Object> build() throws GwtKuraException {
         setCommonProperties();
         setIpv4Properties();
+        setIpv6Properties();
         setIpv4DhcpClientProperties();
         setIpv4DhcpServerProperties();
 
@@ -101,6 +102,37 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
         if (isManual && isWan) {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
+        }
+    }
+
+    private void setIpv6Properties() {
+        this.properties.setIp6Status(this.ifname, this.gwtConfig.getIpv6Status());
+        this.properties.setIp6AddressMethod(this.ifname, this.gwtConfig.getIpv6ConfigMode());
+
+        boolean isManual = this.gwtConfig.getIpv6ConfigMode().equals("netIPv6MethodManual");
+        boolean isWan = this.gwtConfig.getIpv6Status().equals("netIPv6StatusEnabledWAN");
+        boolean isAuto = this.gwtConfig.getIpv6ConfigMode().equals("netIPv6MethodAuto");
+
+        if (isWan) {
+            if (!Objects.isNull(this.gwtConfig.getIpv6WanPriority())) {
+                this.properties.setIp6WanPriority(this.ifname, this.gwtConfig.getIpv6WanPriority());
+            }
+
+            this.properties.setIp6DnsServers(this.ifname, this.gwtConfig.getIpv6DnsServers());
+        }
+
+        if (isManual) {
+            this.properties.setIp6Address(this.ifname, this.gwtConfig.getIpv6Address());
+            this.properties.setIp6Netmask(this.ifname, this.gwtConfig.getIpv6SubnetMask());
+        }
+
+        if (isManual && isWan) {
+            this.properties.setIp6Gateway(this.ifname, this.gwtConfig.getIpv6Gateway());
+        }
+
+        if (isAuto) {
+            this.properties.setIp6AddressGenMode(this.ifname, this.gwtConfig.getIpv6AutoconfigurationMode());
+            this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
         }
     }
 

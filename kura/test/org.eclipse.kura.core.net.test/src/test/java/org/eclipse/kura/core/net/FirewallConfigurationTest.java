@@ -391,7 +391,7 @@ public class FirewallConfigurationTest {
 
             Map<String, Object> expected = new HashMap<String, Object>();
             expected.put(FirewallConfiguration.OPEN_PORTS_PROP_NAME,
-                    "42,tcp,10.0.0.1/24,PIN,UIN,PM,SPR,#;" + "42:100,,,,,,,#");
+                    "42,tcp,10.0.0.1/24,PIN,UIN,PM,SPR,#;" + "42:100,,0.0.0.0/0,,,,,#");
             expected.put(FirewallConfiguration.PORT_FORWARDING_PROP_NAME, "");
             expected.put(FirewallConfiguration.NAT_PROP_NAME, "");
 
@@ -420,7 +420,7 @@ public class FirewallConfigurationTest {
             Map<String, Object> expected = new HashMap<String, Object>();
             expected.put(FirewallConfiguration.OPEN_PORTS_PROP_NAME, "");
             expected.put(FirewallConfiguration.PORT_FORWARDING_PROP_NAME,
-                    "IF,OF,10.0.1.1,udp,42,100,true,10.0.0.1/24,PM,SPR,#;" + ",,,,0,0,false,,,,#");
+                    "IF,OF,10.0.1.1,udp,42,100,true,10.0.0.1/24,PM,SPR,#;" + ",,,,0,0,false,0.0.0.0/0,,,#");
             expected.put(FirewallConfiguration.NAT_PROP_NAME, "");
 
             assertEquals(expected, conf.getConfigurationProperties());

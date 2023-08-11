@@ -484,7 +484,7 @@ public class FirewallConfigurationServiceImplTest {
     }
 
     @Test
-    public void testSetFirewallOpenPortConfiguration() throws KuraException {
+    public void testSetFirewallOpenPortConfiguration() throws KuraException, UnknownHostException {
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override

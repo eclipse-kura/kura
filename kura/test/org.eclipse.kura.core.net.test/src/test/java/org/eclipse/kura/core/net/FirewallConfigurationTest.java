@@ -313,7 +313,7 @@ public class FirewallConfigurationTest {
     }
 
     @Test
-    public void testAddConfig() {
+    public void testAddConfig() throws UnknownHostException {
         FirewallConfiguration conf = new FirewallConfiguration();
 
         assertTrue(conf.getOpenPortConfigs().isEmpty());
@@ -341,7 +341,7 @@ public class FirewallConfigurationTest {
     }
 
     @Test
-    public void testGetConfigs() {
+    public void testGetConfigs() throws UnknownHostException {
         FirewallConfiguration conf = new FirewallConfiguration();
         List<NetConfig> netConfigs = new ArrayList<NetConfig>();
 

@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
@@ -90,6 +91,7 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_WIRED_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wired";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
+    private static final String NM_IP6CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP6Config";
     private static final String NM_DEVICE_PROPERTY_HW_ADDRESS = "HwAddress";
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_BUS_NAME = "org.freedesktop.ModemManager1.Sim";
@@ -105,7 +107,8 @@ public class NMStatusConverter {
     }
 
     public static NetworkInterfaceStatus buildEthernetStatus(String interfaceId,
-            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
+            Optional<Properties> ip6configProperties) {
 
         EthernetInterfaceStatusBuilder builder = EthernetInterfaceStatus.builder();
         builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
@@ -117,13 +120,15 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
+        setIP6Status(builder, ip6configProperties);
 
         return builder.build();
 
     }
 
     public static NetworkInterfaceStatus buildLoopbackStatus(String interfaceId,
-            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties) {
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
+            Optional<Properties> ip6configProperties) {
         LoopbackInterfaceStatusBuilder builder = LoopbackInterfaceStatus.builder();
         builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
 
@@ -133,13 +138,15 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
+        setIP6Status(builder, ip6configProperties);
 
         return builder.build();
     }
 
     public static NetworkInterfaceStatus buildWirelessStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
-            AccessPointsProperties accessPointsProperties, SupportedChannelsProperties supportedChannelsProperties) {
+            Optional<Properties> ip6configProperties, AccessPointsProperties accessPointsProperties,
+            SupportedChannelsProperties supportedChannelsProperties) {
         WifiInterfaceStatusBuilder builder = WifiInterfaceStatus.builder();
         builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(false);
 
@@ -149,6 +156,7 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
+        setIP6Status(builder, ip6configProperties);
         setWifiStatus(builder, devicePropertiesWrapper.getDeviceSpecificProperties(),
                 accessPointsProperties.getActiveAccessPoint(), accessPointsProperties.getAvailableAccessPoints(),
                 supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
@@ -172,7 +180,8 @@ public class NMStatusConverter {
 
     public static NetworkInterfaceStatus buildModemStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
-            List<SimProperties> simProperties, List<Properties> bearerProperties) {
+            Optional<Properties> ip6configProperties, List<SimProperties> simProperties,
+            List<Properties> bearerProperties) {
         ModemInterfaceStatusBuilder builder = ModemInterfaceStatus.builder();
         Properties deviceProperties = devicePropertiesWrapper.getDeviceProperties();
         Optional<Properties> modemProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
@@ -184,6 +193,7 @@ public class NMStatusConverter {
 
         setDeviceStatus(builder, devicePropertiesWrapper);
         setIP4Status(builder, ip4configProperties);
+        setIP6Status(builder, ip6configProperties);
         setModemStatus(builder, modemProperties, simProperties, bearerProperties);
 
         String driver = deviceProperties.Get(NM_DEVICE_BUS_NAME, "Driver");
@@ -251,6 +261,47 @@ public class NMStatusConverter {
                 builder.withInterfaceIp4Addresses(Optional.of(ip4AddressStatusBuilder.build()));
             } catch (UnknownHostException e) {
                 logger.error("Failed to set IP4 address.", e);
+            }
+        });
+    }
+
+    private static void setIP6Status(NetworkInterfaceStatusBuilder<?> builder,
+            Optional<Properties> ip6configProperties) {
+        ip6configProperties.ifPresent(properties -> {
+            try {
+                NetworkInterfaceIpAddressStatus.Builder<IP6Address> ip6AddressStatusBuilder = NetworkInterfaceIpAddressStatus
+                        .builder();
+
+                // Gateway
+                String gateway = properties.Get(NM_IP6CONFIG_BUS_NAME, "Gateway");
+                final IP6Address gwAddress = (IP6Address) IPAddress.parseHostAddress(gateway);
+                ip6AddressStatusBuilder.withGateway(Optional.of(gwAddress));
+
+                // DNS Servers
+                List<Map<String, Variant<?>>> nameserverData = properties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
+                final List<IP6Address> dnsAddresses = new ArrayList<>();
+                for (Map<String, Variant<?>> dns : nameserverData) {
+                    dnsAddresses.add(
+                            (IP6Address) IPAddress.parseHostAddress(String.class.cast(dns.get("address").getValue())));
+                }
+                ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
+
+                // Addresses
+                List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+
+                final List<NetworkInterfaceIpAddress<IP6Address>> addresses = new ArrayList<>();
+                for (Map<String, Variant<?>> data : addressData) {
+                    String addressStr = String.class.cast(data.get("address").getValue());
+                    UInt32 prefix = UInt32.class.cast(data.get("prefix").getValue());
+                    NetworkInterfaceIpAddress<IP6Address> address = new NetworkInterfaceIpAddress<>(
+                            (IP6Address) IPAddress.parseHostAddress(addressStr), prefix.shortValue());
+                    addresses.add(address);
+                }
+                ip6AddressStatusBuilder.withAddresses(addresses);
+
+                builder.withInterfaceIp6Addresses(Optional.of(ip6AddressStatusBuilder.build()));
+            } catch (UnknownHostException e) {
+                logger.error("Failed to set IP6 address.", e);
             }
         });
     }

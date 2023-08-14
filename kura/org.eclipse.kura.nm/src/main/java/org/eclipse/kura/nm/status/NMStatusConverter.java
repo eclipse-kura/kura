@@ -274,8 +274,10 @@ public class NMStatusConverter {
 
                 // Gateway
                 String gateway = properties.Get(NM_IP6CONFIG_BUS_NAME, "Gateway");
-                final IP6Address gwAddress = (IP6Address) IPAddress.parseHostAddress(gateway);
-                ip6AddressStatusBuilder.withGateway(Optional.of(gwAddress));
+                if (Objects.nonNull(gateway) && !gateway.isEmpty()) {
+                    final IP6Address gwAddress = (IP6Address) IPAddress.parseHostAddress(gateway);
+                    ip6AddressStatusBuilder.withGateway(Optional.of(gwAddress));
+                }
 
                 // DNS Servers
                 List<List<Byte>> nameservers = properties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers");

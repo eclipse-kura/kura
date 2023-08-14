@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.nm.status;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -197,9 +209,8 @@ public class NMStatusConverterTest {
     // givenDevicePropertiesWith("Autoconnect", false);
     // givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
     // givenDevicePropertiesWith("Driver", "isThisJustFantasy");
-    // givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
-    // givenDevicePropertiesWith("Mtu", new UInt32(69));
-    // givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+    // nDevicePropertiesWith("HwA
 
     // givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
     // givenIpv4ConfigPropertiesWithDNS(Arrays.asList("192.168.1.10"));
@@ -209,13 +220,13 @@ public class NMStatusConverterTest {
 
     // whenBuildLoopbackStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper,
     // Optional.of(this.mockIp4ConfigProperties), Optional.empty(
-
-    
-    //     thenNoExceptionIsThrown();
  
+
+    // thenNoExceptionIsThrown();
+
     // thenResultingNetworkInterfaceIsVirtual(false);
     // thenResultingNetworkInterfaceAutoConnectIs(false);
-    // thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+    // ResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
     // thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
     // thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
     // thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");

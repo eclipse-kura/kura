@@ -278,13 +278,9 @@ public class NMStatusConverter {
                 ip6AddressStatusBuilder.withGateway(Optional.of(gwAddress));
 
                 // DNS Servers
-                List<Map<String, Variant<?>>> nameserverData = properties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData");
-                final List<IP6Address> dnsAddresses = new ArrayList<>();
-                for (Map<String, Variant<?>> dns : nameserverData) {
-                    dnsAddresses.add(
-                            (IP6Address) IPAddress.parseHostAddress(String.class.cast(dns.get("address").getValue())));
-                }
-                ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
+                List<List<Byte>> nameservers = properties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers");
+                // TODO
+                // ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
 
                 // Addresses
                 List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");

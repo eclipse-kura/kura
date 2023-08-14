@@ -281,8 +281,17 @@ public class NMStatusConverter {
 
                 // DNS Servers
                 List<List<Byte>> nameservers = properties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers");
-                // TODO
-                // ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
+                for (List<Byte> nameserver : nameservers) {
+                    // Convert to byte array
+                    // jeez Java sucks sometimes
+                    byte[] dnsByteArray = new byte[nameserver.size()];
+                    for (int i = 0; i < nameserver.size(); i++) {
+                        dnsByteArray[i] = nameserver.get(i);
+                    }
+
+                    final IP6Address dnsAddress = (IP6Address) IPAddress.getByAddress(dnsByteArray);
+                    ip6AddressStatusBuilder.withDnsServerAddresses(Collections.singletonList(dnsAddress));
+                }
 
                 // Addresses
                 List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP6CONFIG_BUS_NAME, "AddressData");

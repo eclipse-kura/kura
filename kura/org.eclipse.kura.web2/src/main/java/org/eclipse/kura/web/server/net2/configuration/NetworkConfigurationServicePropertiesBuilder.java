@@ -88,7 +88,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
         boolean isWan = this.gwtConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
 
         if (isWan) {
-            if (!Objects.isNull(this.gwtConfig.getWanPriority())) {
+            if (Objects.nonNull(this.gwtConfig.getWanPriority())) {
                 this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
             }
 
@@ -114,7 +114,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
         boolean isAuto = this.gwtConfig.getIpv6ConfigMode().equals("netIPv6MethodAuto");
 
         if (isWan) {
-            if (!Objects.isNull(this.gwtConfig.getIpv6WanPriority())) {
+            if (Objects.nonNull(this.gwtConfig.getIpv6WanPriority())) {
                 this.properties.setIp6WanPriority(this.ifname, this.gwtConfig.getIpv6WanPriority());
             }
 

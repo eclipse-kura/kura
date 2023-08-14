@@ -59,6 +59,7 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig = createGwtNetInterfaceConfigSubtype();
         setCommonProperties();
         setIpv4Properties();
+        setIpv6Properties();
         setIpv4DhcpClientProperties();
         setIpv4DhcpServerProperties();
         setRouterMode();
@@ -116,6 +117,42 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setSubnetMask(this.properties.getIp4Netmask(this.ifName));
         this.gwtConfig.setGateway(this.properties.getIp4Gateway(this.ifName));
         this.gwtConfig.setDnsServers(this.properties.getIp4DnsServers(this.ifName));
+    }
+
+    private void setIpv6Properties() {
+        Optional<String> status = this.properties.getIp6Status(this.ifName);
+        if (status.isPresent()) {
+            this.gwtConfig.setIpv6Status(status.get());
+        }
+
+        Optional<Integer> priority = this.properties.getIp6WanPriority(this.ifName);
+        if (priority.isPresent()) {
+            this.gwtConfig.setIpv6WanPriority(priority.get());
+        }
+
+        Optional<String> configure = this.properties.getIp6AddressMethod(this.ifName);
+        if (configure.isPresent()) {
+            this.gwtConfig.setIpv6ConfigMode(configure.get());
+        }
+
+        Optional<String> autoconfiguration = this.properties.getIp6AddressGenMode(this.ifName);
+        if (autoconfiguration.isPresent()) {
+            this.gwtConfig.setIpv6AutoconfigurationMode(autoconfiguration.get());
+        }
+
+        this.gwtConfig.setIpv6Address(this.properties.getIp6Address(this.ifName));
+
+        Optional<Integer> netmask = this.properties.getIp6Netmask(this.ifName);
+        if (netmask.isPresent()) {
+            this.gwtConfig.setIpv6SubnetMask(netmask.get());
+        }
+
+        this.gwtConfig.setIpv6Gateway(this.properties.getIp6Gateway(this.ifName));
+
+        Optional<String> privacy = this.properties.getIp6Privacy(this.ifName);
+        if (privacy.isPresent()) {
+            this.gwtConfig.setIpv6Privacy(privacy.get());
+        }
     }
 
     private void setIpv4DhcpClientProperties() {

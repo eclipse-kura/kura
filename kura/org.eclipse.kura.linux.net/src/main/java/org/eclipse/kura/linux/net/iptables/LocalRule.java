@@ -407,61 +407,34 @@ public class LocalRule {
      */
     @Override
     public String toString() {
-        String interfaceString = null;
+        StringBuilder localRuleSB = new StringBuilder(A_INPUT_KURA_P).append(this.protocol);
+        
+        this.permittedNetworkString.ifPresent(permittedNetwork -> {
+            localRuleSB.append(" -s ").append(permittedNetwork);
+        });
+        
         if (this.permittedInterfaceName.isPresent()) {
-            interfaceString = new StringBuilder().append(" -i ").append(this.permittedInterfaceName.get()).toString();
+            localRuleSB.append(" -i ").append(this.permittedInterfaceName.get()).toString();
         } else if (this.unpermittedInterfaceName.isPresent()) {
-            interfaceString = new StringBuilder().append(" ! -i ").append(this.unpermittedInterfaceName.get())
-                    .toString();
+            localRuleSB.append(" ! -i ").append(this.unpermittedInterfaceName.get()).toString();
         }
 
+        this.permittedMAC.ifPresent(permittedMAC -> {
+            localRuleSB.append(M_MAC_MAC_SOURCE).append(permittedMAC);
+        });
+        
+        this.sourcePortRange.ifPresent(sourcePortRange -> {
+            localRuleSB.append(SPORT).append(sourcePortRange);
+        });
+        
         if (this.port != -1) {
-            return getLocalRuleWithPort(interfaceString);
+            localRuleSB.append(DPORT).append(this.port);
         } else {
-            return getLocalRuleWithoutPort(interfaceString);
+            localRuleSB.append(DPORT).append(this.portRange.get());
         }
-    }
 
-    private String getLocalRuleWithPort(String interfaceString) {
-        String localRuleString = "";
-        if (!this.permittedMAC.isPresent() && !this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + DPORT + this.port + J_ACCEPT;
-        } else if (!this.permittedMAC.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + SPORT + this.sourcePortRange.get() + DPORT
-                    + this.port + J_ACCEPT;
-        } else if (!this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + DPORT + this.port + J_ACCEPT;
-        } else {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + SPORT + this.sourcePortRange.get() + DPORT + this.port + J_ACCEPT;
-        }
-        return localRuleString;
-    }
-
-    private String getLocalRuleWithoutPort(String interfaceString) {
-        String localRuleString = "";
-        if (!this.permittedMAC.isPresent() && !this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + DPORT + this.portRange.get() + J_ACCEPT;
-        } else if (!this.permittedMAC.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + SPORT + this.sourcePortRange.get() + DPORT
-                    + this.portRange.get() + J_ACCEPT;
-        } else if (!this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + DPORT + this.portRange.get() + J_ACCEPT;
-        } else {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + SPORT + this.sourcePortRange.get() + DPORT + this.portRange.get() + J_ACCEPT;
-        }
-        return localRuleString;
+        localRuleSB.append(J_ACCEPT);
+        return localRuleSB.toString();
     }
 
     private boolean isPortRangeValid(String range) {

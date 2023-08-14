@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -41,12 +41,18 @@
         <b:Row>
             <b:Well size="SMALL">
                 <b:NavTabs>
-                    <b:TabListItem dataTarget="#openPortsPanel" text="Open Ports"
+                    <b:TabListItem dataTarget="#openPortsPanel" text="{msgs.firewallOpenPorts}"
                         ui:field="openPorts" active="true"/>
-                    <b:TabListItem dataTarget="#portForwardingPanel" text="Port Forwarding"
+                    <b:TabListItem dataTarget="#portForwardingPanel" text="{msgs.firewallPortForwarding}"
                         ui:field="portForwarding"/>
-                    <b:TabListItem dataTarget="#ipForwardingPanel" text="IP Forwarding/Masquerading"
+                    <b:TabListItem dataTarget="#ipForwardingPanel" text="{msgs.firewallNat}"
                         ui:field="ipForwarding" />
+                    <b:TabListItem dataTarget="#openPortsIPv6Panel" text="{msgs.firewallOpenPortsIPv6}"
+                        ui:field="openPortsIPv6"/>
+                    <b:TabListItem dataTarget="#portForwardingIPv6Panel" text="{msgs.firewallPortForwardingIPv6}"
+                        ui:field="portForwardingIPv6"/>
+                    <b:TabListItem dataTarget="#ipForwardingIPv6Panel" text="{msgs.firewallNatIPv6}"
+                        ui:field="ipForwardingIPv6" />
                 </b:NavTabs>
                 <b:TabContent>
                     <b:TabPane b:id="openPortsPanel" active="true">
@@ -57,6 +63,15 @@
                     </b:TabPane>
                     <b:TabPane b:id="ipForwardingPanel">
                         <firewall:NatTabUi ui:field="ipForwardingPanel"></firewall:NatTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="openPortsIPv6Panel">
+                        <firewall:OpenPortsIPv6TabUi ui:field="openPortsIPv6Panel"></firewall:OpenPortsIPv6TabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="portForwardingIPv6Panel">
+                        <firewall:PortForwardingIPv6TabUi ui:field="portForwardingIPv6Panel"></firewall:PortForwardingIPv6TabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="ipForwardingIPv6Panel">
+                        <firewall:NatIPv6TabUi ui:field="ipForwardingIPv6Panel"></firewall:NatIPv6TabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

@@ -26,6 +26,7 @@ public class PortForwardRule {
     private String inboundIface;
     private String outboundIface;
     private String address;
+    private int addressMask;
     private String protocol;
     private int inPort;
     private int outPort;
@@ -51,6 +52,8 @@ public class PortForwardRule {
      *            protocol of port connection (tcp, udp)
      * @param address
      *            destination IP address to forward IP traffic
+     * @param addressMask
+     *            destination IP address netmask
      * @param outPort
      *            destination port to forward IP traffic
      * @param masquerade
@@ -70,6 +73,7 @@ public class PortForwardRule {
         this.inPort = 0;
         this.protocol = null;
         this.address = null;
+        this.addressMask = 0;
         this.outPort = 0;
         this.masquerade = false;
         this.permittedNetworkMask = 0;
@@ -91,6 +95,11 @@ public class PortForwardRule {
 
     public PortForwardRule address(String address) {
         this.address = address;
+        return this;
+    }
+
+    public PortForwardRule addressMask(int addressMask) {
+        this.addressMask = addressMask;
         return this;
     }
 
@@ -170,7 +179,7 @@ public class PortForwardRule {
     }
 
     public NatPostroutingChainRule getNatPostroutingChainRule() {
-        return new NatPostroutingChainRule().dstNetwork(this.address).dstMask((short) 32)
+        return new NatPostroutingChainRule().dstNetwork(this.address).dstMask((short) this.addressMask)
                 .srcNetwork(this.permittedNetwork).srcMask((short) this.permittedNetworkMask)
                 .dstInterface(this.outboundIface).protocol(this.protocol).masquerade(this.masquerade)
                 .type(RuleType.PORT_FORWARDING);
@@ -179,7 +188,7 @@ public class PortForwardRule {
     public FilterForwardChainRule getFilterForwardChainRule() {
         return new FilterForwardChainRule().inputInterface(this.inboundIface).outputInterface(this.outboundIface)
                 .srcNetwork(this.permittedNetwork).srcMask((short) this.permittedNetworkMask).dstNetwork(this.address)
-                .dstMask((short) 32).protocol(this.protocol).permittedMacAddress(this.permittedMAC)
+                .dstMask((short) this.addressMask).protocol(this.protocol).permittedMacAddress(this.permittedMAC)
                 .srcPortFirst(this.sourcePortStart).srcPortLast(this.sourcePortEnd).type(RuleType.PORT_FORWARDING);
     }
 

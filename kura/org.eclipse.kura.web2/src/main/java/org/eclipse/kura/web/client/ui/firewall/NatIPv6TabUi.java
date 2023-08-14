@@ -56,13 +56,13 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
+public class NatIPv6TabUi extends Composite implements Tab, ButtonBar.Listener {
 
-    private static final String ZERO_ADDRESS_CIDR = "0.0.0.0/0";
+    private static final String ZERO_ADDRESS_CIDR = "::/0";
 
     private static NatTabUiUiBinder uiBinder = GWT.create(NatTabUiUiBinder.class);
 
-    interface NatTabUiUiBinder extends UiBinder<Widget, NatTabUi> {
+    interface NatTabUiUiBinder extends UiBinder<Widget, NatIPv6TabUi> {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
@@ -156,10 +156,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     private HandlerRegistration modalHideHandlerRegistration;
 
-    public NatTabUi() {
+    public NatIPv6TabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.selectionModel.addSelectionChangeHandler(event -> NatTabUi.this.buttonBar
-                .setEditDeleteButtonsDirty(NatTabUi.this.selectionModel.getSelectedObject() != null));
+        this.selectionModel.addSelectionChangeHandler(event -> NatIPv6TabUi.this.buttonBar
+                .setEditDeleteButtonsDirty(NatIPv6TabUi.this.selectionModel.getSelectedObject() != null));
         this.natGrid.setSelectionModel(this.selectionModel);
 
         initTable();
@@ -194,21 +194,21 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                NatTabUi.this.setDirty(false);
-                NatTabUi.this.gwtNetworkService.findDeviceFirewallNATs(token,
+                NatIPv6TabUi.this.setDirty(false);
+                NatIPv6TabUi.this.gwtNetworkService.findDeviceFirewallNATsIPv6(token,
                         new AsyncCallback<List<GwtFirewallNatEntry>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
                                 EntryClassUi.hideWaitModal();
                                 FailureHandler.handle(caught,
-                                        NatTabUi.this.gwtNetworkService.getClass().getSimpleName());
+                                        NatIPv6TabUi.this.gwtNetworkService.getClass().getSimpleName());
                             }
 
                             @Override
                             public void onSuccess(List<GwtFirewallNatEntry> result) {
                                 for (GwtFirewallNatEntry pair : result) {
-                                    NatTabUi.this.natDataProvider.getList().add(pair);
+                                    NatIPv6TabUi.this.natDataProvider.getList().add(pair);
                                 }
                                 refreshTable();
                                 setVisibility();
@@ -237,8 +237,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @Override
     public void clear() {
         this.natDataProvider.getList().clear();
-        NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
-        NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+        NatIPv6TabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+        NatIPv6TabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
         setVisibility();
         refreshTable();
     }
@@ -346,14 +346,14 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onApply() {
-        List<GwtFirewallNatEntry> intermediateList = NatTabUi.this.natDataProvider.getList();
+        List<GwtFirewallNatEntry> intermediateList = NatIPv6TabUi.this.natDataProvider.getList();
         final List<GwtFirewallNatEntry> updatedNatConf = new ArrayList<>();
         for (GwtFirewallNatEntry entry : intermediateList) {
             updatedNatConf.add(entry);
         }
 
         EntryClassUi.showWaitModal();
-        NatTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        NatIPv6TabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -363,7 +363,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                NatTabUi.this.gwtNetworkService.updateDeviceFirewallNATs(token, updatedNatConf,
+                NatIPv6TabUi.this.gwtNetworkService.updateDeviceFirewallNATsIPv6(token, updatedNatConf,
                         new AsyncCallback<Void>() {
 
                             @Override
@@ -375,7 +375,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                             @Override
                             public void onSuccess(Void result) {
                                 setDirty(false);
-                                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
+                                NatIPv6TabUi.this.buttonBar.setApplyResetButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -386,21 +386,21 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onCancel() {
-        NatTabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), NatTabUi.this::refresh);
+        NatIPv6TabUi.this.alertDialog.show(MSGS.deviceConfigDirty(), NatIPv6TabUi.this::refresh);
     }
 
     @Override
     public void onCreate() {
         replaceModalHideHandler(evt -> {
-            if (NatTabUi.this.newNatEntry != null) {
+            if (NatIPv6TabUi.this.newNatEntry != null) {
                 // Avoid duplicates
-                if (!duplicateEntry(NatTabUi.this.newNatEntry)) {
-                    NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.newNatEntry);
-                    NatTabUi.this.natDataProvider.flush();
+                if (!duplicateEntry(NatIPv6TabUi.this.newNatEntry)) {
+                    NatIPv6TabUi.this.natDataProvider.getList().add(NatIPv6TabUi.this.newNatEntry);
+                    NatIPv6TabUi.this.natDataProvider.flush();
                     setVisibility();
                     refreshTable();
-                    NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                    NatTabUi.this.newNatEntry = null;
+                    NatIPv6TabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                    NatIPv6TabUi.this.newNatEntry = null;
                 } else {
                     this.existingRule.show();
                 }
@@ -414,30 +414,30 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @Override
     public void onEdit() {
 
-        GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
+        GwtFirewallNatEntry selection = NatIPv6TabUi.this.selectionModel.getSelectedObject();
 
         if (selection == null) {
             return;
         }
 
         replaceModalHideHandler(evt -> {
-            if (NatTabUi.this.editNatEntry != null) {
-                GwtFirewallNatEntry oldEntry = NatTabUi.this.selectionModel.getSelectedObject();
-                NatTabUi.this.natDataProvider.getList().remove(oldEntry);
+            if (NatIPv6TabUi.this.editNatEntry != null) {
+                GwtFirewallNatEntry oldEntry = NatIPv6TabUi.this.selectionModel.getSelectedObject();
+                NatIPv6TabUi.this.natDataProvider.getList().remove(oldEntry);
                 refreshTable();
-                if (!duplicateEntry(NatTabUi.this.editNatEntry)) {
-                    NatTabUi.this.natDataProvider.getList().add(NatTabUi.this.editNatEntry);
-                    NatTabUi.this.natDataProvider.flush();
-                    NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                    NatTabUi.this.editNatEntry = null;
-                } else {    // end duplicate
+                if (!duplicateEntry(NatIPv6TabUi.this.editNatEntry)) {
+                    NatIPv6TabUi.this.natDataProvider.getList().add(NatIPv6TabUi.this.editNatEntry);
+                    NatIPv6TabUi.this.natDataProvider.flush();
+                    NatIPv6TabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                    NatIPv6TabUi.this.editNatEntry = null;
+                } else { // end duplicate
                     this.existingRule.show();
-                    NatTabUi.this.natDataProvider.getList().add(oldEntry);
-                    NatTabUi.this.natDataProvider.flush();
+                    NatIPv6TabUi.this.natDataProvider.getList().add(oldEntry);
+                    NatIPv6TabUi.this.natDataProvider.flush();
                 }
                 refreshTable();
-                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
-                NatTabUi.this.selectionModel.setSelected(selection, false);
+                NatIPv6TabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                NatIPv6TabUi.this.selectionModel.setSelected(selection, false);
             }
             resetFields();
         });
@@ -447,13 +447,13 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     @Override
     public void onDelete() {
-        final GwtFirewallNatEntry selection = NatTabUi.this.selectionModel.getSelectedObject();
+        final GwtFirewallNatEntry selection = NatIPv6TabUi.this.selectionModel.getSelectedObject();
         if (selection != null) {
             this.alertDialog.show(MSGS.firewallNatDeleteConfirmation(selection.getInInterface()), () -> {
-                NatTabUi.this.natDataProvider.getList().remove(selection);
-                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(true);
-                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
-                NatTabUi.this.selectionModel.setSelected(selection, false);
+                NatIPv6TabUi.this.natDataProvider.getList().remove(selection);
+                NatIPv6TabUi.this.buttonBar.setApplyResetButtonsDirty(true);
+                NatIPv6TabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                NatIPv6TabUi.this.selectionModel.setSelected(selection, false);
                 setVisibility();
                 refreshTable();
                 setDirty(true);
@@ -464,7 +464,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     private void initModal() {
         // Handle Buttons
         this.cancel.addClickHandler(event -> {
-            NatTabUi.this.natForm.hide();
+            NatIPv6TabUi.this.natForm.hide();
             resetFields();
         });
 
@@ -475,32 +475,33 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             }
             // Fetch form data
             GwtFirewallNatEntry natEntry = new GwtFirewallNatEntry();
-            natEntry.setInInterface(NatTabUi.this.input.getText());
-            natEntry.setOutInterface(NatTabUi.this.output.getText());
-            natEntry.setProtocol(NatTabUi.this.protocol.getSelectedItemText());
+            natEntry.setInInterface(NatIPv6TabUi.this.input.getText());
+            natEntry.setOutInterface(NatIPv6TabUi.this.output.getText());
+            natEntry.setProtocol(NatIPv6TabUi.this.protocol.getSelectedItemText());
 
-            if (NatTabUi.this.source.getText() != null && !"".equals(NatTabUi.this.source.getText().trim())) {
-                natEntry.setSourceNetwork(NatTabUi.this.source.getText());
+            if (NatIPv6TabUi.this.source.getText() != null && !"".equals(NatIPv6TabUi.this.source.getText().trim())) {
+                natEntry.setSourceNetwork(NatIPv6TabUi.this.source.getText());
             } else {
                 natEntry.setSourceNetwork(ZERO_ADDRESS_CIDR);
             }
 
-            if (NatTabUi.this.destination.getText() != null && !"".equals(NatTabUi.this.destination.getText().trim())) {
-                natEntry.setDestinationNetwork(NatTabUi.this.destination.getText());
+            if (NatIPv6TabUi.this.destination.getText() != null
+                    && !"".equals(NatIPv6TabUi.this.destination.getText().trim())) {
+                natEntry.setDestinationNetwork(NatIPv6TabUi.this.destination.getText());
             } else {
                 natEntry.setDestinationNetwork(ZERO_ADDRESS_CIDR);
             }
 
-            natEntry.setMasquerade(NatTabUi.this.enable.getSelectedItemText());
+            natEntry.setMasquerade(NatIPv6TabUi.this.enable.getSelectedItemText());
 
-            if (NatTabUi.this.submit.getId().equals("new")) {
-                NatTabUi.this.newNatEntry = natEntry;
-                NatTabUi.this.editNatEntry = null;
-            } else if (NatTabUi.this.submit.getId().equals("edit")) {
-                NatTabUi.this.editNatEntry = natEntry;
-                NatTabUi.this.newNatEntry = null;
+            if (NatIPv6TabUi.this.submit.getId().equals("new")) {
+                NatIPv6TabUi.this.newNatEntry = natEntry;
+                NatIPv6TabUi.this.editNatEntry = null;
+            } else if (NatIPv6TabUi.this.submit.getId().equals("edit")) {
+                NatIPv6TabUi.this.editNatEntry = natEntry;
+                NatIPv6TabUi.this.newNatEntry = null;
             }
-            NatTabUi.this.natForm.hide();
+            NatIPv6TabUi.this.natForm.hide();
 
             setDirty(true);
         });
@@ -536,10 +537,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     }
 
     private void resetValidationStates() {
-        NatTabUi.this.groupInput.setValidationState(ValidationState.NONE);
-        NatTabUi.this.groupOutput.setValidationState(ValidationState.NONE);
-        NatTabUi.this.groupSource.setValidationState(ValidationState.NONE);
-        NatTabUi.this.groupDestination.setValidationState(ValidationState.NONE);
+        NatIPv6TabUi.this.groupInput.setValidationState(ValidationState.NONE);
+        NatIPv6TabUi.this.groupOutput.setValidationState(ValidationState.NONE);
+        NatIPv6TabUi.this.groupSource.setValidationState(ValidationState.NONE);
+        NatIPv6TabUi.this.groupDestination.setValidationState(ValidationState.NONE);
     }
 
     private void setModalFieldsHandlers() {
@@ -563,12 +564,12 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())
-                        || NatTabUi.this.input.getText().trim().isEmpty()
-                        || !NatTabUi.this.input.getText().trim().matches(FieldType.NIC_NAME.getRegex())
-                        || NatTabUi.this.input.getText().trim()
+                if (NatIPv6TabUi.this.input.getText() == null || "".equals(NatIPv6TabUi.this.input.getText().trim())
+                        || NatIPv6TabUi.this.input.getText().trim().isEmpty()
+                        || !NatIPv6TabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || NatIPv6TabUi.this.input.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                    result.add(new BasicEditorError(NatTabUi.this.input, value,
+                    result.add(new BasicEditorError(NatIPv6TabUi.this.input, value,
                             MSGS.firewallNatFormInputInterfaceErrorMessage()));
                 }
                 return result;
@@ -587,12 +588,12 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())
-                        || NatTabUi.this.output.getText().trim().isEmpty()
-                        || !NatTabUi.this.output.getText().trim().matches(FieldType.NIC_NAME.getRegex())
-                        || NatTabUi.this.output.getText().trim()
+                if (NatIPv6TabUi.this.output.getText() == null || "".equals(NatIPv6TabUi.this.output.getText().trim())
+                        || NatIPv6TabUi.this.output.getText().trim().isEmpty()
+                        || !NatIPv6TabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || NatIPv6TabUi.this.output.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
-                    result.add(new BasicEditorError(NatTabUi.this.output, value,
+                    result.add(new BasicEditorError(NatIPv6TabUi.this.output, value,
                             MSGS.firewallNatFormOutputInterfaceErrorMessage()));
                 }
                 return result;
@@ -611,10 +612,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!NatTabUi.this.source.getText().trim().isEmpty()
-                        && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK_IPV4.getRegex())) {
-                    result.add(new BasicEditorError(NatTabUi.this.source, value,
-                            MSGS.firewallNatFormSourceNetworkErrorMessage()));
+                if (!NatIPv6TabUi.this.source.getText().trim().isEmpty()
+                        && !NatIPv6TabUi.this.source.getText().trim().matches(FieldType.NETWORK_IPV6.getRegex())) {
+                    result.add(new BasicEditorError(NatIPv6TabUi.this.source, value,
+                            MSGS.firewallNatFormSourceNetworkIPv6ErrorMessage()));
                 }
                 return result;
             }
@@ -632,10 +633,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!NatTabUi.this.destination.getText().trim().isEmpty()
-                        && !NatTabUi.this.destination.getText().trim().matches(FieldType.NETWORK_IPV4.getRegex())) {
-                    result.add(new BasicEditorError(NatTabUi.this.destination, value,
-                            MSGS.firewallNatFormDestinationNetworkErrorMessage()));
+                if (!NatIPv6TabUi.this.destination.getText().trim().isEmpty()
+                        && !NatIPv6TabUi.this.destination.getText().trim().matches(FieldType.NETWORK_IPV6.getRegex())) {
+                    result.add(new BasicEditorError(NatIPv6TabUi.this.destination, value,
+                            MSGS.firewallNatFormDestinationNetworkIPv6ErrorMessage()));
                 }
                 return result;
             }
@@ -683,8 +684,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         this.tooltipInput.setTitle(MSGS.firewallNatFormInputInterfaceToolTip());
         this.tooltipOutput.setTitle(MSGS.firewallNatFormOutputInterfaceToolTip());
         this.tooltipProtocol.setTitle(MSGS.firewallNatFormProtocolToolTip());
-        this.tooltipSource.setTitle(MSGS.firewallNatFormSourceNetworkToolTip());
-        this.tooltipDestination.setTitle(MSGS.firewallNatFormDestinationNetworkToolTip());
+        this.tooltipSource.setTitle(MSGS.firewallNatFormSourceNetworkIPv6ToolTip());
+        this.tooltipDestination.setTitle(MSGS.firewallNatFormDestinationNetworkIPv6ToolTip());
         this.tooltipEnable.setTitle(MSGS.firewallNatFormMasqueradingToolTip());
         this.tooltipInput.reconfigure();
         this.tooltipOutput.reconfigure();
@@ -765,20 +766,20 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     private boolean checkEntries() {
         boolean valid = true;
 
-        if (NatTabUi.this.groupInput.getValidationState() == ValidationState.ERROR
-                || NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())) {
-            NatTabUi.this.groupInput.setValidationState(ValidationState.ERROR);
+        if (NatIPv6TabUi.this.groupInput.getValidationState() == ValidationState.ERROR
+                || NatIPv6TabUi.this.input.getText() == null || "".equals(NatIPv6TabUi.this.input.getText().trim())) {
+            NatIPv6TabUi.this.groupInput.setValidationState(ValidationState.ERROR);
             valid = false;
         }
 
-        if (NatTabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
-                || NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())) {
-            NatTabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
+        if (NatIPv6TabUi.this.groupOutput.getValidationState() == ValidationState.ERROR
+                || NatIPv6TabUi.this.output.getText() == null || "".equals(NatIPv6TabUi.this.output.getText().trim())) {
+            NatIPv6TabUi.this.groupOutput.setValidationState(ValidationState.ERROR);
             valid = false;
         }
 
-        if (NatTabUi.this.groupSource.getValidationState() == ValidationState.ERROR
-                || NatTabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
+        if (NatIPv6TabUi.this.groupSource.getValidationState() == ValidationState.ERROR
+                || NatIPv6TabUi.this.groupDestination.getValidationState() == ValidationState.ERROR) {
             valid = false;
         }
 

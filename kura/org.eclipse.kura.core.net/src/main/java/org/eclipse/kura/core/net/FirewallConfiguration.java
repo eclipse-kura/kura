@@ -377,7 +377,7 @@ public class FirewallConfiguration {
             }
             sb.append(',');
             if (portForwardConfig.getIPAddress() != null) {
-                sb.append(portForwardConfig.getIPAddress());
+                sb.append(portForwardConfig.getIPAddress().getHostAddress());
             }
             sb.append(',');
             if (portForwardConfig.getProtocol() != null) {

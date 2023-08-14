@@ -285,7 +285,7 @@ public class NMStatusConverter {
                 // ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
 
                 // Addresses
-                List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData");
+                List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP6CONFIG_BUS_NAME, "AddressData");
 
                 final List<NetworkInterfaceIpAddress<IP6Address>> addresses = new ArrayList<>();
                 for (Map<String, Variant<?>> data : addressData) {

@@ -107,6 +107,12 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setIpv6Properties() {
         this.properties.setIp6Status(this.ifname, this.gwtConfig.getIpv6Status());
+
+        if (this.gwtConfig.getIpv6Status().equals("netIPv6StatusDisabled")
+                || this.gwtConfig.getIpv6Status().equals("netIPv6StatusUnmanaged")) {
+            return;
+        }
+
         this.properties.setIp6AddressMethod(this.ifname, this.gwtConfig.getIpv6ConfigMode());
 
         boolean isManual = this.gwtConfig.getIpv6ConfigMode().equals("netIPv6MethodManual");

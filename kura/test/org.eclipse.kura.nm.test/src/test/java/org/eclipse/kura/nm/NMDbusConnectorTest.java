@@ -1167,10 +1167,8 @@ public class NMDbusConnectorTest {
         when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "HwAddress"))
                 .thenReturn("F5:5B:32:7C:40:EA");
 
-        DBusPath path = mock(DBusPath.class);
-        when(path.getPath()).thenReturn("/");
-
-        when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "Ip4Config")).thenReturn(path);
+        when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "Ip4Config")).thenReturn(new DBusPath("/"));
+        when(mockedProperties.Get("org.freedesktop.NetworkManager.Device", "Ip6Config")).thenReturn(new DBusPath("/"));
     }
 
     private void givenModemMocksFor(String deviceId, String interfaceName, Properties mockedProperties, boolean hasBearers,

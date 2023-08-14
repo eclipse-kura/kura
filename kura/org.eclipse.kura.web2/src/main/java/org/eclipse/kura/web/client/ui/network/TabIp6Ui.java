@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TabIp6Ui extends Composite implements NetworkTab {
 
+    private static final String STATUS_UNMANAGED = "netIPv6StatusUnmanaged";
     private static final String STATUS_DISABLED = "netIPv6StatusDisabled";
     private static final String STATUS_LAN = "netIPv6StatusEnabledLAN";
     private static final String STATUS_WAN = "netIPv6StatusEnabledWAN";
@@ -569,30 +570,38 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         if (this.form != null) {
-            updatedNetIf.setIpv6Status(this.status.getSelectedValue());
-
-            if (this.priority.getValue() != null) {
-                updatedNetIf.setIpv6WanPriority(this.priority.getValue());
+            if (this.tabs.isUnmanagedSelected()) {
+                updatedNetIf.setIpv6Status(STATUS_UNMANAGED);
+            } else {
+                updateConfigWithSelectedValues(updatedNetIf);
             }
-
-            updatedNetIf.setIpv6ConfigMode(this.configure.getSelectedValue());
-            updatedNetIf.setIpv6AutoconfigurationMode(this.autoconfiguration.getSelectedValue());
-            
-            if (notNullOrEmpty(this.ip.getValue())) {
-                updatedNetIf.setIpv6Address(this.ip.getValue().trim());
-            }
-            if (this.subnet.getValue() != null) {
-                updatedNetIf.setIpv6SubnetMask(this.subnet.getValue());
-            }
-            if (notNullOrEmpty(this.gateway.getValue())) {
-                updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
-            }
-            if (notNullOrEmpty(this.dns.getValue())) {
-                updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());
-            }
-
-            updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
         }
+    }
+
+    private void updateConfigWithSelectedValues(GwtNetInterfaceConfig updatedNetIf) {
+        updatedNetIf.setIpv6Status(this.status.getSelectedValue());
+
+        if (this.priority.getValue() != null) {
+            updatedNetIf.setIpv6WanPriority(this.priority.getValue());
+        }
+
+        updatedNetIf.setIpv6ConfigMode(this.configure.getSelectedValue());
+        updatedNetIf.setIpv6AutoconfigurationMode(this.autoconfiguration.getSelectedValue());
+
+        if (notNullOrEmpty(this.ip.getValue())) {
+            updatedNetIf.setIpv6Address(this.ip.getValue().trim());
+        }
+        if (this.subnet.getValue() != null) {
+            updatedNetIf.setIpv6SubnetMask(this.subnet.getValue());
+        }
+        if (notNullOrEmpty(this.gateway.getValue())) {
+            updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
+        }
+        if (notNullOrEmpty(this.dns.getValue())) {
+            updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());
+        }
+
+        updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
     }
 
     private boolean notNullOrEmpty(String value) {

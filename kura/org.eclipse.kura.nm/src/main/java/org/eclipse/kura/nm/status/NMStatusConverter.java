@@ -544,11 +544,11 @@ public class NMStatusConverter {
 
     private static void setIP6DnsServers(Properties ip6configProperties,
             NetworkInterfaceIpAddressStatus.Builder<IP6Address> builder) throws UnknownHostException {
-        List<IP6Address> dnsAddresses = new ArrayList<>();
         List<List<Byte>> nameservers = ip6configProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers");
+
+        List<IP6Address> dnsAddresses = new ArrayList<>();
         for (List<Byte> nameserver : nameservers) {
-            // Convert to byte array
-            // jeez Java sucks sometimes
+            // Convert List<Byte> to byte[]
             byte[] dnsByteArray = new byte[nameserver.size()];
             for (int i = 0; i < nameserver.size(); i++) {
                 dnsByteArray[i] = nameserver.get(i);

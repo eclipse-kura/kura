@@ -133,7 +133,7 @@ public class NMStatusConverterTest {
 
         givenIpv4ConfigPropertiesWith("Gateway", "");
         givenIpv4ConfigPropertiesWithDNS(Arrays.asList());
-        givenIpv4ConfigPropertiesWithAddress("127.0.0.1", new UInt32(8));
+        givenIpv4ConfigPropertiesWithAddress(Arrays.asList("127.0.0.1/8"));
 
         givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
                 NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
@@ -155,7 +155,8 @@ public class NMStatusConverterTest {
 
         thenResultingIp4InterfaceGatewayIsMissing();
         thenResultingIp4InterfaceDNSIsMissing();
-        thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("127.0.0.1"), (short) 8);
+        thenResultingIp4InterfaceAddressIs(Arrays.asList(new NetworkInterfaceIpAddress<IP4Address>(
+                (IP4Address) IPAddress.parseHostAddress("127.0.0.1"), (short) 8)));
 
         thenResultingIp6InterfaceAddressIsMissing();
     }
@@ -172,7 +173,7 @@ public class NMStatusConverterTest {
 
         givenIpv4ConfigPropertiesWith("Gateway", "");
         givenIpv4ConfigPropertiesWithDNS(Arrays.asList());
-        givenIpv4ConfigPropertiesWithAddress("not-an-ip-address", new UInt32(8));
+        givenIpv4ConfigPropertiesWithAddress(Arrays.asList("not-an-ip-address/8"));
 
         givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
                 NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
@@ -299,7 +300,7 @@ public class NMStatusConverterTest {
 
         givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
         givenIpv4ConfigPropertiesWithDNS(Arrays.asList("192.168.1.10"));
-        givenIpv4ConfigPropertiesWithAddress("192.168.1.82", new UInt32(24));
+        givenIpv4ConfigPropertiesWithAddress(Arrays.asList("192.168.1.82/24", "192.168.3.69/24"));
 
         givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
@@ -323,7 +324,11 @@ public class NMStatusConverterTest {
 
         thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
         thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("192.168.1.10")));
-        thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
+        thenResultingIp4InterfaceAddressIs(Arrays.asList(
+                new NetworkInterfaceIpAddress<IP4Address>((IP4Address) IP4Address.parseHostAddress("192.168.1.82"),
+                        (short) 24),
+                new NetworkInterfaceIpAddress<IP4Address>((IP4Address) IP4Address.parseHostAddress("192.168.3.69"),
+                        (short) 24)));
 
         thenResultingIp6InterfaceAddressIsMissing();
     }
@@ -398,13 +403,21 @@ public class NMStatusConverterTest {
         when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData")).thenReturn(addressList);
     }
 
-    private void givenIpv4ConfigPropertiesWithAddress(String address, UInt32 prefix) {
-        Map<String, Variant<?>> structure = new HashMap<>();
-        structure.put("address", new Variant<>(address));
-        structure.put("prefix", new Variant<>(prefix));
+    private void givenIpv4ConfigPropertiesWithAddress(List<String> addressList) {
+        List<Map<String, Variant<?>>> structureList = new ArrayList<>();
 
-        when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData"))
-                .thenReturn(Arrays.asList(structure));
+        for (String address : addressList) {
+            String addressString = address.split("/")[0];
+            UInt32 prefix = new UInt32(Integer.parseInt(address.split("/")[1]));
+
+            Map<String, Variant<?>> structure = new HashMap<>();
+            structure.put("address", new Variant<>(addressString));
+            structure.put("prefix", new Variant<>(prefix));
+
+            structureList.add(structure);
+        }
+
+        when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData")).thenReturn(structureList);
     }
 
     private void givenIpv6ConfigPropertiesWith(String propertyName, String propertyValue) {
@@ -555,15 +568,16 @@ public class NMStatusConverterTest {
         }
     }
 
-    private void thenResultingIp4InterfaceAddressIs(IPAddress expectedAddress, short expectedPrefix) {
+    private void thenResultingIp4InterfaceAddressIs(List<NetworkInterfaceIpAddress<IP4Address>> expectedAddresses) {
         assertTrue(this.resultingStatus.getInterfaceIp4Addresses().isPresent());
         NetworkInterfaceIpAddressStatus<IP4Address> address = this.resultingStatus.getInterfaceIp4Addresses().get();
 
         List<NetworkInterfaceIpAddress<IP4Address>> addresses = address.getAddresses();
-        assertEquals(1, addresses.size());
+        assertEquals(expectedAddresses.size(), addresses.size());
 
-        assertEquals(expectedAddress, addresses.get(0).getAddress());
-        assertEquals(expectedPrefix, addresses.get(0).getPrefix());
+        for (NetworkInterfaceIpAddress<IP4Address> expectedAddress : expectedAddresses) {
+            assertTrue(addresses.contains(expectedAddress));
+        }
     }
 
     private void thenResultingEthernetInterfaceLinkUpIs(boolean expectedResult) {

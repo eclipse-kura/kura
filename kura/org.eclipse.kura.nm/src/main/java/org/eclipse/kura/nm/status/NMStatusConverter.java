@@ -280,6 +280,7 @@ public class NMStatusConverter {
                 }
 
                 // DNS Servers
+                List<IP6Address> dnsAddresses = new ArrayList<>();
                 List<List<Byte>> nameservers = properties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers");
                 for (List<Byte> nameserver : nameservers) {
                     // Convert to byte array
@@ -289,9 +290,9 @@ public class NMStatusConverter {
                         dnsByteArray[i] = nameserver.get(i);
                     }
 
-                    final IP6Address dnsAddress = (IP6Address) IPAddress.getByAddress(dnsByteArray);
-                    ip6AddressStatusBuilder.withDnsServerAddresses(Collections.singletonList(dnsAddress));
+                    dnsAddresses.add((IP6Address) IPAddress.getByAddress(dnsByteArray));
                 }
+                ip6AddressStatusBuilder.withDnsServerAddresses(dnsAddresses);
 
                 // Addresses
                 List<Map<String, Variant<?>>> addressData = properties.Get(NM_IP6CONFIG_BUS_NAME, "AddressData");

@@ -161,6 +161,42 @@ public class NMStatusConverterTest {
     }
 
     @Test
+    public void buildLoopbackStatusWorksWithWrongIPV4Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+        givenIpv4ConfigPropertiesWith("Gateway", "");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList());
+        givenIpv4ConfigPropertiesWithAddress("not-an-ip-address", new UInt32(8));
+
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
+                NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper,
+                Optional.of(this.mockIp4ConfigProperties), Optional.empty());
+
+        thenNoExceptionOccurred();
+
+        thenResultingNetworkInterfaceIsVirtual(true);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+
+        thenResultingIp4InterfaceAddressIsMissing();
+        thenResultingIp6InterfaceAddressIsMissing();
+    }
+
+    @Test
     public void buildLoopbackStatusWorksWithIPV6Info() throws UnknownHostException {
         givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
         givenDevicePropertiesWith("Autoconnect", false);

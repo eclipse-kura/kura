@@ -286,7 +286,6 @@ public class NetworkTabsUi extends Composite {
     private void arrangeOptionalTabs() {
         boolean isIpv4EnabledLAN = this.ip4Tab.getStatus().equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
         boolean isIpv4Disabled = this.ip4Tab.getStatus().equals(IPV4_STATUS_DISABLED_MESSAGE);
-        boolean isIpv4Unmanaged = this.ip4Tab.getStatus().equals(IPV4_STATUS_UNMANAGED_MESSAGE);
         boolean isWirelessAP = this.wirelessTab.getWirelessMode() != null
                 && this.wirelessTab.getWirelessMode().name().equals(WIFI_ACCESS_POINT);
         boolean isDhcp = this.ip4Tab.isDhcp();
@@ -302,7 +301,7 @@ public class NetworkTabsUi extends Composite {
             }
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
-            this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isIpv4Unmanaged);
+            this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
             showModemTabs();
         } else {
             showEthernetTabs();
@@ -314,9 +313,10 @@ public class NetworkTabsUi extends Composite {
         }
 
         this.dhcp4NatTabAnchorItem.setEnabled(includeDhcpNat);
+        this.ip6TabAnchorItem.setEnabled(!isUnmanagedSelected());
 
-        if (isIpv4Disabled || isIpv4Unmanaged) {
-            disableOptionalTabs();
+        if (isIpv4Disabled || isUnmanagedSelected()) {
+            removeOptionalTabs();
         }
     }
 
@@ -361,16 +361,12 @@ public class NetworkTabsUi extends Composite {
         return false;
     }
 
-    private void disableOptionalTabs() {
+    private void removeOptionalTabs() {
         this.visibleTabs.remove(this.wirelessTabAnchorItem);
-        this.visibleTabs.remove(this.modemTabAnchorItem);
         this.visibleTabs.remove(this.dhcp4NatTabAnchorItem);
-
-        this.wirelessTabAnchorItem.setEnabled(false);
-        this.modemTabAnchorItem.setEnabled(false);
-        this.modemGpsTabAnchorItem.setEnabled(false);
-        this.modemAntennaTabAnchorItem.setEnabled(false);
-        this.dhcp4NatTabAnchorItem.setEnabled(false);
+        this.visibleTabs.remove(this.modemTabAnchorItem);
+        this.visibleTabs.remove(this.modemGpsTabAnchorItem);
+        this.visibleTabs.remove(this.modemAntennaTabAnchorItem);
     }
 
     private void refreshAllVisibleTabs() {
@@ -514,7 +510,8 @@ public class NetworkTabsUi extends Composite {
             return false;
         }
 
-        if (this.visibleTabs.contains(this.ip6TabAnchorItem) && !this.ip6Tab.isValid()) {
+        if (this.visibleTabs.contains(this.ip6TabAnchorItem) && this.ip6TabAnchorItem.isEnabled()
+                && !this.ip6Tab.isValid()) {
             return false;
         }
 
@@ -522,7 +519,8 @@ public class NetworkTabsUi extends Composite {
             return false;
         }
 
-        if (this.visibleTabs.contains(this.dhcp4NatTabAnchorItem) && !this.dhcp4NatTab.isValid()) {
+        if (this.visibleTabs.contains(this.dhcp4NatTabAnchorItem) && this.dhcp4NatTabAnchorItem.isEnabled()
+                && !this.dhcp4NatTab.isValid()) {
             return false;
         }
 
@@ -534,15 +532,21 @@ public class NetworkTabsUi extends Composite {
             return false;
         }
 
-        if (this.visibleTabs.contains(this.modemGpsTabAnchorItem) && !this.modemGpsTab.isValid()) {
+        if (this.visibleTabs.contains(this.modemGpsTabAnchorItem) && this.modemGpsTabAnchorItem.isEnabled()
+                && !this.modemGpsTab.isValid()) {
             return false;
         }
 
-        if (this.visibleTabs.contains(this.modemAntennaTabAnchorItem) && !this.modemAntennaTab.isValid()) {
+        if (this.visibleTabs.contains(this.modemAntennaTabAnchorItem) && this.modemAntennaTabAnchorItem.isEnabled()
+                && !this.modemAntennaTab.isValid()) {
             return false;
         }
 
         return true;
+    }
+
+    public boolean isUnmanagedSelected() {
+        return this.ip4Tab.getStatus().equals(IPV4_STATUS_UNMANAGED_MESSAGE);
     }
 
     /*

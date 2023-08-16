@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
@@ -50,9 +51,11 @@ public class NMStatusConverterTest {
 
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
+    private static final String NM_IP6CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP6Config";
 
     private Properties mockDeviceProperties = mock(Properties.class);
     private Properties mockIp4ConfigProperties = mock(Properties.class);
+    private Properties mockIp6ConfigProperties = mock(Properties.class);
 
     private DevicePropertiesWrapper mockDevicePropertiesWrapper;
 
@@ -89,7 +92,7 @@ public class NMStatusConverterTest {
     }
 
     @Test
-    public void buildLoopbackStatusWorksWithoutIPV4Info() {
+    public void buildLoopbackStatusWorksWithoutIPInfo() {
         givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
         givenDevicePropertiesWith("Autoconnect", true);
         givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
@@ -115,6 +118,7 @@ public class NMStatusConverterTest {
         thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
 
         thenResultingIp4InterfaceAddressIsMissing();
+        thenResultingIp6InterfaceAddressIsMissing();
     }
 
     @Test
@@ -152,6 +156,45 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceGatewayIsMissing();
         thenResultingIp4InterfaceDNSIsMissing();
         thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("127.0.0.1"), (short) 8);
+
+        thenResultingIp6InterfaceAddressIsMissing();
+    }
+
+    @Test
+    public void buildLoopbackStatusWorksWithIPV6Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+        givenIpv6ConfigPropertiesWith("Gateway", "");
+        givenIpv6ConfigPropertiesWithDNS(Arrays.asList());
+        givenIpv6ConfigPropertiesWithAddress("::1", new UInt32(128));
+
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
+                NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+
+        whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(),
+                Optional.of(this.mockIp6ConfigProperties));
+
+        thenNoExceptionIsThrown();
+
+        thenResultingNetworkInterfaceIsVirtual(true);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+
+        thenResultingIp6InterfaceGatewayIsMissing();
+        thenResultingIp6InterfaceDNSIsMissing();
+        thenResultingIp6InterfaceAddressIs(IPAddress.parseHostAddress("::1"), (short) 128);
     }
 
     @Test
@@ -178,7 +221,7 @@ public class NMStatusConverterTest {
     }
 
     @Test
-    public void buildEthernetStatusWorksWithoutIPV4Info() {
+    public void buildEthernetStatusWorksWithoutIPInfo() {
         givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_UNMANAGED));
         givenDevicePropertiesWith("Autoconnect", true);
         givenDevicePropertiesWith("FirmwareVersion", "awesomeFirmwareVersion");
@@ -205,6 +248,7 @@ public class NMStatusConverterTest {
         thenResultingNetworkInterfaceHardwareAddressIs(new byte[] { 0, 0, 0, 0, 0, 0 });
 
         thenResultingIp4InterfaceAddressIsMissing();
+        thenResultingIp6InterfaceAddressIsMissing();
     }
 
     @Test
@@ -244,6 +288,8 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
         thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("192.168.1.10")));
         thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
+
+        thenResultingIp6InterfaceAddressIsMissing();
     }
 
     /*
@@ -279,6 +325,28 @@ public class NMStatusConverterTest {
         structure.put("prefix", new Variant<>(prefix));
 
         when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData"))
+                .thenReturn(Arrays.asList(structure));
+    }
+
+    private void givenIpv6ConfigPropertiesWith(String propertyName, String propertyValue) {
+        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, propertyName))
+                .thenReturn(propertyValue);
+    }
+
+    private void givenIpv6ConfigPropertiesWithDNS(List<String> dnsAddresses) {
+        List<List<Byte>> addressList = new ArrayList<>();
+
+        // WIP
+
+        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers")).thenReturn(addressList);
+    }
+
+    private void givenIpv6ConfigPropertiesWithAddress(String address, UInt32 prefix) {
+        Map<String, Variant<?>> structure = new HashMap<>();
+        structure.put("address", new Variant<>(address));
+        structure.put("prefix", new Variant<>(prefix));
+
+        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "AddressData"))
                 .thenReturn(Arrays.asList(structure));
     }
 
@@ -413,6 +481,36 @@ public class NMStatusConverterTest {
 
     private void thenResultingEthernetInterfaceLinkUpIs(boolean expectedResult) {
         assertEquals(expectedResult, this.resultingEthernetStatus.isLinkUp());
+    }
+
+    private void thenResultingIp6InterfaceAddressIsMissing() {
+        assertFalse(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+    }
+
+    private void thenResultingIp6InterfaceGatewayIsMissing() {
+        assertTrue(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP6Address> address = this.resultingStatus.getInterfaceIp6Addresses().get();
+
+        assertFalse(address.getGateway().isPresent());
+    }
+
+    private void thenResultingIp6InterfaceDNSIsMissing() {
+        assertTrue(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP6Address> address = this.resultingStatus.getInterfaceIp6Addresses().get();
+
+        List<IP6Address> dns = address.getDnsServerAddresses();
+        assertTrue(dns.isEmpty());
+    }
+
+    private void thenResultingIp6InterfaceAddressIs(IPAddress expectedAddress, short expectedPrefix) {
+        assertTrue(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP6Address> address = this.resultingStatus.getInterfaceIp6Addresses().get();
+
+        List<NetworkInterfaceIpAddress<IP6Address>> addresses = address.getAddresses();
+        assertEquals(1, addresses.size());
+
+        assertEquals(expectedAddress, addresses.get(0).getAddress());
+        assertEquals(expectedPrefix, addresses.get(0).getPrefix());
     }
 
 }

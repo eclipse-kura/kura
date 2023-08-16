@@ -16,7 +16,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -247,12 +246,12 @@ public class NMStatusConverterTest {
      */
 
     private void givenDevicePropertiesWith(String propertyName, Object propertyValue) {
-        when(this.mockDeviceProperties.Get(eq(NM_DEVICE_BUS_NAME), eq(propertyName)))
+        when(this.mockDeviceProperties.Get(NM_DEVICE_BUS_NAME, propertyName))
                 .thenReturn(propertyValue);
     }
 
     private void givenIpv4ConfigPropertiesWith(String propertyName, Object propertyValue) {
-        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq(propertyName)))
+        when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, propertyName))
                 .thenReturn(propertyValue);
     }
 
@@ -266,7 +265,7 @@ public class NMStatusConverterTest {
             addressList.add(structure);
         }
 
-        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("NameserverData"))).thenReturn(addressList);
+        when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "NameserverData")).thenReturn(addressList);
     }
 
     private void givenIpv4ConfigPropertiesWithAddress(String address, UInt32 prefix) {
@@ -274,7 +273,7 @@ public class NMStatusConverterTest {
         structure.put("address", new Variant<>(address));
         structure.put("prefix", new Variant<>(prefix));
 
-        when(this.mockIp4ConfigProperties.Get(eq(NM_IP4CONFIG_BUS_NAME), eq("AddressData")))
+        when(this.mockIp4ConfigProperties.Get(NM_IP4CONFIG_BUS_NAME, "AddressData"))
                 .thenReturn(Arrays.asList(structure));
     }
 

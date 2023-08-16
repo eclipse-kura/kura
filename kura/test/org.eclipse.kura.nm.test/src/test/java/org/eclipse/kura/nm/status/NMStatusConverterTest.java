@@ -64,6 +64,9 @@ public class NMStatusConverterTest {
 
     private Exception occurredException;
 
+    private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays.asList(new Byte[] { 0x20, 0x01, 0x48, 0x60, 0x48,
+            0x60, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, (byte) (0x88 & 0xFF), (byte) (0x88 & 0xFF) });
+
     @Test
     public void buildLoopbackStatusThrowsWithEmptyProperties() {
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(), Optional.empty());
@@ -292,6 +295,47 @@ public class NMStatusConverterTest {
         thenResultingIp6InterfaceAddressIsMissing();
     }
 
+    @Test
+    public void buildEthernetStatusWorksWithIPV6Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
+
+        givenIpv6ConfigPropertiesWith("Gateway", "fe80:0:0:0:dea6:32ff:fee0:0001");
+        givenIpv6ConfigPropertiesWithDNS(Arrays.asList(IP6_BYTE_ARRAY_ADDRESS));
+        givenIpv6ConfigPropertiesWithAddress("fe80::dea6:32ff:fee0:54f0", new UInt32(64));
+
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
+                NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper, Optional.empty(),
+                Optional.of(this.mockIp6ConfigProperties));
+
+        thenNoExceptionOccurred();
+
+        thenResultingNetworkInterfaceIsVirtual(false);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+
+        thenResultingEthernetInterfaceLinkUpIs(true);
+
+        thenResultingIp4InterfaceAddressIsMissing();
+
+        thenResultingIp6InterfaceGatewayIs(IPAddress.parseHostAddress("fe80::dea6:32ff:fee0:0001"));
+        thenResultingIp6InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8888")));
+        thenResultingIp6InterfaceAddressIs(IPAddress.parseHostAddress("fe80::dea6:32ff:fee0:54f0"), (short) 64);
+    }
+
     /*
      * Given
      */
@@ -333,12 +377,8 @@ public class NMStatusConverterTest {
                 .thenReturn(propertyValue);
     }
 
-    private void givenIpv6ConfigPropertiesWithDNS(List<String> dnsAddresses) {
-        List<List<Byte>> addressList = new ArrayList<>();
-
-        // WIP
-
-        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers")).thenReturn(addressList);
+    private void givenIpv6ConfigPropertiesWithDNS(List<List<Byte>> dnsAddresses) {
+        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers")).thenReturn(dnsAddresses);
     }
 
     private void givenIpv6ConfigPropertiesWithAddress(String address, UInt32 prefix) {
@@ -513,4 +553,23 @@ public class NMStatusConverterTest {
         assertEquals(expectedPrefix, addresses.get(0).getPrefix());
     }
 
+    private void thenResultingIp6InterfaceDNSIs(List<IPAddress> expectedDNSAddresses) {
+        assertTrue(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP6Address> address = this.resultingStatus.getInterfaceIp6Addresses().get();
+
+        List<IP6Address> dns = address.getDnsServerAddresses();
+        assertEquals(expectedDNSAddresses.size(), dns.size());
+
+        for (IPAddress expectedDNSAddress : expectedDNSAddresses) {
+            assertTrue(dns.contains(expectedDNSAddress));
+        }
+    }
+
+    private void thenResultingIp6InterfaceGatewayIs(IPAddress expectedResult) {
+        assertTrue(this.resultingStatus.getInterfaceIp6Addresses().isPresent());
+        NetworkInterfaceIpAddressStatus<IP6Address> address = this.resultingStatus.getInterfaceIp6Addresses().get();
+
+        assertTrue(address.getGateway().isPresent());
+        assertEquals(expectedResult, address.getGateway().get());
+    }
 }

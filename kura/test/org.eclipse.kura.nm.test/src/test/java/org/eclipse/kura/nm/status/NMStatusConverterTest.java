@@ -461,6 +461,65 @@ public class NMStatusConverterTest {
                         (IP6Address) IP6Address.parseHostAddress("fe80::dea6:32ff:fee0:54f6"), (short) 64)));
     }
 
+    @Test
+    public void buildEthernetStatusWorksWithBothIPV4AndIPV6Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "anAwesomeFirmwareVersion");
+        givenDevicePropertiesWith("Driver", "anAwesomeDriver");
+        givenDevicePropertiesWith("DriverVersion", "anAwesomeDriverVersion");
+        givenDevicePropertiesWith("Mtu", new UInt32(42));
+        givenDevicePropertiesWith("HwAddress", "DE:AD:BE:EF:66:69");
+
+        givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList("8.8.8.8", "8.8.4.4"));
+        givenIpv4ConfigPropertiesWithAddress(Arrays.asList("192.168.1.82/24", "192.168.3.69/24"));
+
+        givenIpv6ConfigPropertiesWith("Gateway", "fe80:0:0:0:dea6:32ff:fee0:0001");
+        givenIpv6ConfigPropertiesWithDNS(Arrays.asList("20.01.48.60.48.60.00.00.00.00.00.00.00.00.88.88",
+                "20.01.48.60.48.60.00.00.00.00.00.00.00.00.88.44"));
+        givenIpv6ConfigPropertiesWithAddress(
+                Arrays.asList("fe80::dea6:32ff:fee0:54f0/64", "fe80::dea6:32ff:fee0:54f6/64"));
+
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
+                NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper,
+                Optional.of(this.mockIp4ConfigProperties), Optional.of(this.mockIp6ConfigProperties));
+
+        thenNoExceptionOccurred();
+
+        thenResultingNetworkInterfaceIsVirtual(false);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("anAwesomeFirmwareVersion");
+        thenResultingNetworkInterfaceDriverIs("anAwesomeDriver");
+        thenResultingNetworkInterfaceDriverVersionIs("anAwesomeDriverVersion");
+        thenResultingNetworkInterfaceMtuIs(42);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF, (byte) 0x66, (byte) 0x69 });
+
+        thenResultingEthernetInterfaceLinkUpIs(true);
+
+        thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
+        thenResultingIp4InterfaceDNSIs(
+                Arrays.asList(IPAddress.parseHostAddress("8.8.4.4"), IPAddress.parseHostAddress("8.8.8.8")));
+        thenResultingIp4InterfaceAddressIs(Arrays.asList(
+                new NetworkInterfaceIpAddress<IP4Address>((IP4Address) IP4Address.parseHostAddress("192.168.1.82"),
+                        (short) 24),
+                new NetworkInterfaceIpAddress<IP4Address>((IP4Address) IP4Address.parseHostAddress("192.168.3.69"),
+                        (short) 24)));
+
+        thenResultingIp6InterfaceGatewayIs(IPAddress.parseHostAddress("fe80::dea6:32ff:fee0:0001"));
+        thenResultingIp6InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8844"),
+                IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8888")));
+        thenResultingIp6InterfaceAddressIs(Arrays.asList(
+                new NetworkInterfaceIpAddress<IP6Address>(
+                        (IP6Address) IP6Address.parseHostAddress("fe80::dea6:32ff:fee0:54f0"), (short) 64),
+                new NetworkInterfaceIpAddress<IP6Address>(
+                        (IP6Address) IP6Address.parseHostAddress("fe80::dea6:32ff:fee0:54f6"), (short) 64)));
+    }
+
     /*
      * Given
      */

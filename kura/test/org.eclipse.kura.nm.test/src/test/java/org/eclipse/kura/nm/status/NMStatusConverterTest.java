@@ -203,43 +203,44 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceAddressIsMissing();
     }
 
-    // @Test
-    // public void buildEthernetStatusWorksWithIPV4Info() throws UnknownHostException {
-    // givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
-    // givenDevicePropertiesWith("Autoconnect", false);
-    // givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
-    // givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+    @Test
+    public void buildEthernetStatusWorksWithIPV4Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "isThisRealLife");
+        givenDevicePropertiesWith("Driver", "isThisJustFantasy");
+        givenDevicePropertiesWith("DriverVersion", "caughtInALandslide");
+        givenDevicePropertiesWith("Mtu", new UInt32(69));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
 
-    // nDevicePropertiesWith("HwA
+        givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList("192.168.1.10"));
+        givenIpv4ConfigPropertiesWithAddress("192.168.1.82", new UInt32(24));
 
-    // givenIpv4ConfigPropertiesWith("Gateway", "192.168.1.1");
-    // givenIpv4ConfigPropertiesWithDNS(Arrays.asList("192.168.1.10"));
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
+                NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-    // givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
-    // NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
+        whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper,
+                Optional.of(this.mockIp4ConfigProperties), Optional.empty());
 
-    // whenBuildLoopbackStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper,
-    // Optional.of(this.mockIp4ConfigProperties), Optional.empty(
- 
+        thenNoExceptionIsThrown();
 
-    // thenNoExceptionIsThrown();
+        thenResultingNetworkInterfaceIsVirtual(false);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
+        thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
+        thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
+        thenResultingNetworkInterfaceMtuIs(69);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
 
-    // thenResultingNetworkInterfaceIsVirtual(false);
-    // thenResultingNetworkInterfaceAutoConnectIs(false);
-    // ResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
-    // thenResultingNetworkInterfaceFirmwareVersionIs("isThisRealLife");
-    // thenResultingNetworkInterfaceDriverIs("isThisJustFantasy");
-    // thenResultingNetworkInterfaceDriverVersionIs("caughtInALandslide");
-    // thenResultingNetworkInterfaceMtuIs(69);
-    // ltingNetworkInterfaceHardwareAddressIs(
-    //             new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x32, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
- 
-    //     thenResultingEthernetInterfaceLinkUpIs(true);
- 
-    // thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
-    // thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("192.168.1.10")));
-    //     thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
-    // }
+        thenResultingEthernetInterfaceLinkUpIs(true);
+
+        thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.1.1"));
+        thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("192.168.1.10")));
+        thenResultingIp4InterfaceAddressIs(IPAddress.parseHostAddress("192.168.1.82"), (short) 24);
+    }
 
     /*
      * Given

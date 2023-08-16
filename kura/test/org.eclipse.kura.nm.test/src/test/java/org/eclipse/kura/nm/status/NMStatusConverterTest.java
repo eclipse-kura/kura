@@ -64,9 +64,6 @@ public class NMStatusConverterTest {
 
     private Exception occurredException;
 
-    private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays.asList(new Byte[] { 0x20, 0x01, 0x48, 0x60, 0x48,
-            0x60, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, (byte) (0x88 & 0xFF), (byte) (0x88 & 0xFF) });
-
     @Test
     public void buildLoopbackStatusThrowsWithEmptyProperties() {
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(), Optional.empty());
@@ -306,7 +303,8 @@ public class NMStatusConverterTest {
         givenDevicePropertiesWith("HwAddress", "F5:5B:32:7C:40:EA");
 
         givenIpv6ConfigPropertiesWith("Gateway", "fe80:0:0:0:dea6:32ff:fee0:0001");
-        givenIpv6ConfigPropertiesWithDNS(Arrays.asList(IP6_BYTE_ARRAY_ADDRESS));
+        givenIpv6ConfigPropertiesWithDNS(Arrays.asList("20.01.48.60.48.60.00.00.00.00.00.00.00.00.88.88",
+                "20.01.48.60.48.60.00.00.00.00.00.00.00.00.88.44"));
         givenIpv6ConfigPropertiesWithAddress("fe80::dea6:32ff:fee0:54f0", new UInt32(64));
 
         givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.empty(),
@@ -332,7 +330,8 @@ public class NMStatusConverterTest {
         thenResultingIp4InterfaceAddressIsMissing();
 
         thenResultingIp6InterfaceGatewayIs(IPAddress.parseHostAddress("fe80::dea6:32ff:fee0:0001"));
-        thenResultingIp6InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8888")));
+        thenResultingIp6InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8844"),
+                IPAddress.parseHostAddress("2001:4860:4860:0:0:0:0:8888")));
         thenResultingIp6InterfaceAddressIs(IPAddress.parseHostAddress("fe80::dea6:32ff:fee0:54f0"), (short) 64);
     }
 
@@ -377,8 +376,20 @@ public class NMStatusConverterTest {
                 .thenReturn(propertyValue);
     }
 
-    private void givenIpv6ConfigPropertiesWithDNS(List<List<Byte>> dnsAddresses) {
-        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers")).thenReturn(dnsAddresses);
+    private void givenIpv6ConfigPropertiesWithDNS(List<String> dnsAddresses) {
+        List<List<Byte>> dnsAddressesByteList = new ArrayList<>();
+
+        for (String stringAddress : dnsAddresses) {
+            List<Byte> byteAddress = new ArrayList<>();
+
+            for (String sAddressByte : stringAddress.split("\\.")) {
+                Integer addressByteInt = Integer.parseInt(sAddressByte, 16);
+                byteAddress.add(addressByteInt.byteValue());
+            }
+
+            dnsAddressesByteList.add(byteAddress);
+        }
+        when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "Nameservers")).thenReturn(dnsAddressesByteList);
     }
 
     private void givenIpv6ConfigPropertiesWithAddress(String address, UInt32 prefix) {

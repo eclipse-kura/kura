@@ -106,7 +106,7 @@ public class NMStatusConverterTest {
 
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(), Optional.empty());
 
-        thenNoExceptionIsThrown();
+        thenNoExceptionOccurred();
 
         thenResultingNetworkInterfaceIsVirtual(true);
         thenResultingNetworkInterfaceAutoConnectIs(true);
@@ -141,7 +141,7 @@ public class NMStatusConverterTest {
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper,
                 Optional.of(this.mockIp4ConfigProperties), Optional.empty());
 
-        thenNoExceptionIsThrown();
+        thenNoExceptionOccurred();
 
         thenResultingNetworkInterfaceIsVirtual(true);
         thenResultingNetworkInterfaceAutoConnectIs(false);
@@ -180,7 +180,7 @@ public class NMStatusConverterTest {
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(),
                 Optional.of(this.mockIp6ConfigProperties));
 
-        thenNoExceptionIsThrown();
+        thenNoExceptionOccurred();
 
         thenResultingNetworkInterfaceIsVirtual(true);
         thenResultingNetworkInterfaceAutoConnectIs(false);
@@ -236,7 +236,7 @@ public class NMStatusConverterTest {
         whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper, Optional.empty(),
                 Optional.empty());
 
-        thenNoExceptionIsThrown();
+        thenNoExceptionOccurred();
 
         thenResultingNetworkInterfaceIsVirtual(false);
         thenResultingNetworkInterfaceAutoConnectIs(true);
@@ -271,7 +271,7 @@ public class NMStatusConverterTest {
         whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper,
                 Optional.of(this.mockIp4ConfigProperties), Optional.empty());
 
-        thenNoExceptionIsThrown();
+        thenNoExceptionOccurred();
 
         thenResultingNetworkInterfaceIsVirtual(false);
         thenResultingNetworkInterfaceAutoConnectIs(false);
@@ -379,7 +379,7 @@ public class NMStatusConverterTest {
      * Then
      */
 
-    private void thenNoExceptionIsThrown() {
+    private void thenNoExceptionOccurred() {
         String errorMessage = "Empty message";
         if (Objects.nonNull(this.occurredException)) {
             StringWriter sw = new StringWriter();

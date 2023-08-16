@@ -15,16 +15,21 @@ package org.eclipse.kura.nm.status;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.net.IP4Address;
@@ -54,13 +59,13 @@ public class NMStatusConverterTest {
     private NetworkInterfaceStatus resultingStatus;
     private EthernetInterfaceStatus resultingEthernetStatus;
 
-    private boolean nullPointerExceptionWasThrown = false;
+    private Exception occurredException;
 
     @Test
     public void buildLoopbackStatusThrowsWithEmptyProperties() {
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(), Optional.empty());
 
-        thenNullPointerExceptionIsThrown();
+        thenExceptionOccurred(NullPointerException.class);
     }
 
     @Test
@@ -74,7 +79,7 @@ public class NMStatusConverterTest {
 
         whenBuildLoopbackStatusIsCalledWith("lo", this.mockDevicePropertiesWrapper, Optional.empty(), Optional.empty());
 
-        thenNullPointerExceptionIsThrown();
+        thenExceptionOccurred(NullPointerException.class);
     }
 
     private void givenDevicePropertiesWrapperBuiltWith(Properties deviceProperties,
@@ -154,7 +159,7 @@ public class NMStatusConverterTest {
         whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper, Optional.empty(),
                 Optional.empty());
 
-        thenNullPointerExceptionIsThrown();
+        thenExceptionOccurred(NullPointerException.class);
     }
 
     @Test
@@ -169,7 +174,7 @@ public class NMStatusConverterTest {
         whenBuildEthernetStatusIsCalledWith("eth0", this.mockDevicePropertiesWrapper, Optional.empty(),
                 Optional.empty());
 
-        thenNullPointerExceptionIsThrown();
+        thenExceptionOccurred(NullPointerException.class);
     }
 
     @Test
@@ -286,8 +291,8 @@ public class NMStatusConverterTest {
         try {
             this.resultingStatus = NMStatusConverter.buildLoopbackStatus(ifaceName, deviceProps, ip4Properties,
                     ip6Properties);
-        } catch (NullPointerException e) {
-            this.nullPointerExceptionWasThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
@@ -297,8 +302,8 @@ public class NMStatusConverterTest {
             this.resultingStatus = NMStatusConverter.buildEthernetStatus(ifaceName, deviceProps, ip4Properties,
                     ip6Properties);
             this.resultingEthernetStatus = (EthernetInterfaceStatus) this.resultingStatus;
-        } catch (NullPointerException e) {
-            this.nullPointerExceptionWasThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
@@ -307,11 +312,21 @@ public class NMStatusConverterTest {
      */
 
     private void thenNoExceptionIsThrown() {
-        assertFalse(this.nullPointerExceptionWasThrown);
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
     }
 
-    private void thenNullPointerExceptionIsThrown() {
-        assertTrue(this.nullPointerExceptionWasThrown);
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
     private void thenResultingNetworkInterfaceIsVirtual(boolean expectedResult) {

@@ -534,11 +534,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         if (this.configure.getSelectedValue().equals(CONFIGURE_AUTO)
                 || this.configure.getSelectedValue().equals(CONFIGURE_DHCP)) {
             this.ip.setEnabled(false);
-            this.ip.setText("");
             this.subnet.setEnabled(false);
-            this.subnet.setText("");
             this.gateway.setEnabled(false);
-            this.gateway.setText("");
         }
 
         if (this.configure.getSelectedValue().equals(CONFIGURE_MANUAL)

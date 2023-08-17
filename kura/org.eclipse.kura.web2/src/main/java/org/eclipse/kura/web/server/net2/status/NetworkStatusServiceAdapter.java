@@ -234,7 +234,7 @@ public class NetworkStatusServiceAdapter {
                 if (!address.getAddresses().isEmpty()) {
                     NetworkInterfaceIpAddress<IP6Address> firstAddress = address.getAddresses().get(0);
                     gwtConfig.setIpv6Address(firstAddress.getAddress().getHostAddress());
-                    // gwtConfig.setIpv6SubnetMask(new Integer(firstAddress.getPrefix())); WIP
+                    gwtConfig.setIpv6SubnetMask((int) firstAddress.getPrefix());
                 }
                 if (address.getGateway().isPresent()) {
                     gwtConfig.setIpv6Gateway(address.getGateway().get().getHostAddress());

@@ -470,6 +470,16 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             refreshFieldsBasedOnInterface(this.selectedNetIfConfig.get());
             refreshFieldsBasedOnSelectedValues();
         }
+
+        // Show read-only dns field when DHCP is selected and there are no
+        // custom DNS entries
+        String configureValue = this.configure.getSelectedItemText();
+        if (configureValue.equals("netIPv6MethodDhcp")
+                && (this.dns.getValue() == null || this.dns.getValue().isEmpty())) {
+            this.dnsRead.setVisible(true);
+        } else {
+            this.dnsRead.setVisible(false);
+        }
     }
 
     private void refreshFieldsBasedOnInterface(GwtNetInterfaceConfig config) {

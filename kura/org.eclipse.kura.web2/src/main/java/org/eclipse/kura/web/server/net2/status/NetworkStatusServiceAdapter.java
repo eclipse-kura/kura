@@ -224,7 +224,7 @@ public class NetworkStatusServiceAdapter {
 
     private void setIpv6StatusProperties(GwtNetInterfaceConfig gwtConfig, NetworkInterfaceStatus networkInterfaceInfo) {
 
-        String ipConfigMode = gwtConfig.getIpv6AutoconfigurationMode();
+        String ipConfigMode = gwtConfig.getIpv6ConfigMode();
         if (isIpv6AutoConfig(ipConfigMode)) {
             /*
              * An interface can have multiple active addresses, we select just the first
@@ -245,9 +245,8 @@ public class NetworkStatusServiceAdapter {
     }
 
     private boolean isIpv6AutoConfig(String ipConfigMode) {
-        // WIP
-        // return ipConfigMode != null && ipConfigMode.equals("..?");
-        return true;
+        return ipConfigMode != null
+                && (ipConfigMode.equals("netIPv6MethodAuto") || ipConfigMode.equals("netIPv6MethodDhcp"));
     }
 
     private <T extends IPAddress> String prettyPrintDnsServers(List<T> dnsAddresses) {

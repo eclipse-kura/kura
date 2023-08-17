@@ -590,12 +590,18 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
         if (notNullOrEmpty(this.ip.getValue())) {
             updatedNetIf.setIpv6Address(this.ip.getValue().trim());
+        } else {
+            updatedNetIf.setIpv6Address("");
         }
         if (this.subnet.getValue() != null) {
             updatedNetIf.setIpv6SubnetMask(this.subnet.getValue());
+        } else {
+            updatedNetIf.setIpv6SubnetMask(0);
         }
         if (notNullOrEmpty(this.gateway.getValue())) {
             updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
+        } else {
+            updatedNetIf.setIpv6Gateway("");
         }
         if (notNullOrEmpty(this.dns.getValue())) {
             updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());

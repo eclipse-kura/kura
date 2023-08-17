@@ -470,9 +470,6 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             refreshFieldsBasedOnInterface(this.selectedNetIfConfig.get());
             refreshFieldsBasedOnSelectedValues();
         }
-
-        // Show read-only dns field when there are no custom DNS entries
-        this.dnsRead.setVisible(this.dns.getValue() == null || this.dns.getValue().isEmpty());
     }
 
     private void refreshFieldsBasedOnInterface(GwtNetInterfaceConfig config) {
@@ -546,6 +543,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             this.autoconfiguration.setEnabled(false);
             this.privacy.setEnabled(false);
         }
+
+        // Show read-only dns field when there are no custom DNS entries
+        this.dnsRead.setVisible(this.dns.getValue() == null || this.dns.getValue().isEmpty());
     }
 
     @Override

@@ -213,7 +213,7 @@ public class NetworkStatusServiceAdapter {
                 if (address.getGateway().isPresent()) {
                     gwtConfig.setGateway(address.getGateway().get().getHostAddress());
                 }
-                gwtConfig.setReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
+                gwtConfig.setReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses(), "\n"));
             });
         }
     }
@@ -239,7 +239,11 @@ public class NetworkStatusServiceAdapter {
                 if (address.getGateway().isPresent()) {
                     gwtConfig.setIpv6Gateway(address.getGateway().get().getHostAddress());
                 }
-                gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
+                if (ipConfigMode.equals("netIPv6MethodDhcp")) {
+                    gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses(), "\n"));
+                } else {
+                    gwtConfig.setIpv6DnsServers(prettyPrintDnsServers(address.getDnsServerAddresses(), ","));
+                }
             });
         }
     }
@@ -249,11 +253,11 @@ public class NetworkStatusServiceAdapter {
                 && (ipConfigMode.equals("netIPv6MethodAuto") || ipConfigMode.equals("netIPv6MethodDhcp"));
     }
 
-    private <T extends IPAddress> String prettyPrintDnsServers(List<T> dnsAddresses) {
+    private <T extends IPAddress> String prettyPrintDnsServers(List<T> dnsAddresses, String separator) {
         StringBuilder result = new StringBuilder();
         for (T dnsAddress : dnsAddresses) {
             result.append(dnsAddress.getHostAddress());
-            result.append("\n");
+            result.append(separator);
         }
 
         return result.toString();

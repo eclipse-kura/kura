@@ -408,13 +408,13 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
         this.dns.addValueChangeHandler(event -> {
             setDirty(true);
-            
+
             if (this.dns.getText().trim().length() == 0) {
                 this.groupDns.setValidationState(ValidationState.NONE);
                 this.wrongInputDns.setText("");
                 return;
             }
-            
+
             String[] addresses = this.dns.getText().trim().split(DNS_REGEX);
             boolean isValid = addresses.length > 0;
 
@@ -474,30 +474,30 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
     private void refreshFieldsBasedOnInterface(GwtNetInterfaceConfig config) {
         switch (config.getHwTypeEnum()) {
-            case ETHERNET:
-                break;
-            case LOOPBACK:
-                this.status.setEnabled(false);
-                this.priority.setEnabled(false);
-                this.configure.setEnabled(false);
-                this.autoconfiguration.setEnabled(false);
-                this.ip.setEnabled(false);
-                this.subnet.setEnabled(false);
-                this.gateway.setEnabled(false);
-                this.dns.setEnabled(false);
-                this.privacy.setEnabled(false);
-                break;
-            case MODEM:
-                this.configure.setEnabled(false);
-                this.configure.setSelectedIndex(0);
-                this.ip.setEnabled(false);
-                this.subnet.setEnabled(false);
-                this.gateway.setEnabled(false);
-                break;
-            case WIFI:
-                break;
-            default:
-                break;
+        case ETHERNET:
+            break;
+        case LOOPBACK:
+            this.status.setEnabled(false);
+            this.priority.setEnabled(false);
+            this.configure.setEnabled(false);
+            this.autoconfiguration.setEnabled(false);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            this.dns.setEnabled(false);
+            this.privacy.setEnabled(false);
+            break;
+        case MODEM:
+            this.configure.setEnabled(false);
+            this.configure.setSelectedIndex(0);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            break;
+        case WIFI:
+            break;
+        default:
+            break;
 
         }
     }
@@ -639,10 +639,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             setDirty(false);
             resetValidations();
 
-            if (this.selectedNetIfConfig.isEmpty()) {
-                reset();
-            } else {
+            if (this.selectedNetIfConfig.isPresent()) {
                 fillFormWithCachedConfig();
+            } else {
+                reset();
             }
         }
     }

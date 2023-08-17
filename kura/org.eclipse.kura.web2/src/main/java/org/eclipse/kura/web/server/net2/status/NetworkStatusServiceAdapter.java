@@ -241,8 +241,6 @@ public class NetworkStatusServiceAdapter {
                 }
                 if (ipConfigMode.equals("netIPv6MethodDhcp")) {
                     gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses(), "\n"));
-                } else {
-                    gwtConfig.setIpv6DnsServers(prettyPrintDnsServers(address.getDnsServerAddresses(), ","));
                 }
             });
         }

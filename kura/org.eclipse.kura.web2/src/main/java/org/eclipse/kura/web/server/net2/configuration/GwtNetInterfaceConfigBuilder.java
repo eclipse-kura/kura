@@ -148,6 +148,7 @@ public class GwtNetInterfaceConfigBuilder {
         }
 
         this.gwtConfig.setIpv6Gateway(this.properties.getIp6Gateway(this.ifName));
+        this.gwtConfig.setIpv6DnsServers(this.properties.getIp6DnsServers(this.ifName));
 
         Optional<String> privacy = this.properties.getIp6Privacy(this.ifName);
         if (privacy.isPresent()) {

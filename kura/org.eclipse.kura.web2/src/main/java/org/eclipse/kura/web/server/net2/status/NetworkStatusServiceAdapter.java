@@ -76,7 +76,7 @@ public class NetworkStatusServiceAdapter {
         if (networkInterfaceInfo.isPresent()) {
             setCommonStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setIpv4DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
-            setIpv6DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
+            setIpv6StatusProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setWifiStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setModemStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
         }
@@ -222,8 +222,7 @@ public class NetworkStatusServiceAdapter {
         return ipConfigMode != null && ipConfigMode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
     }
 
-    private void setIpv6DhcpClientProperties(GwtNetInterfaceConfig gwtConfig,
-            NetworkInterfaceStatus networkInterfaceInfo) {
+    private void setIpv6StatusProperties(GwtNetInterfaceConfig gwtConfig, NetworkInterfaceStatus networkInterfaceInfo) {
 
         String ipConfigMode = gwtConfig.getIpv6AutoconfigurationMode();
         if (isIpv6AutoConfig(ipConfigMode)) {

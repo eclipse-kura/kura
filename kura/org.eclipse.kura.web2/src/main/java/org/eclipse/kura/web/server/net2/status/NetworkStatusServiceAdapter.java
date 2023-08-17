@@ -239,9 +239,7 @@ public class NetworkStatusServiceAdapter {
                 if (address.getGateway().isPresent()) {
                     gwtConfig.setIpv6Gateway(address.getGateway().get().getHostAddress());
                 }
-                if (ipConfigMode.equals("netIPv6MethodDhcp")) {
-                    gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
-                }
+                gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
             });
         }
     }

@@ -408,13 +408,13 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
         this.dns.addValueChangeHandler(event -> {
             setDirty(true);
-            
+
             if (this.dns.getText().trim().length() == 0) {
                 this.groupDns.setValidationState(ValidationState.NONE);
                 this.wrongInputDns.setText("");
                 return;
             }
-            
+
             String[] addresses = this.dns.getText().trim().split(DNS_REGEX);
             boolean isValid = addresses.length > 0;
 
@@ -474,30 +474,30 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
     private void refreshFieldsBasedOnInterface(GwtNetInterfaceConfig config) {
         switch (config.getHwTypeEnum()) {
-            case ETHERNET:
-                break;
-            case LOOPBACK:
-                this.status.setEnabled(false);
-                this.priority.setEnabled(false);
-                this.configure.setEnabled(false);
-                this.autoconfiguration.setEnabled(false);
-                this.ip.setEnabled(false);
-                this.subnet.setEnabled(false);
-                this.gateway.setEnabled(false);
-                this.dns.setEnabled(false);
-                this.privacy.setEnabled(false);
-                break;
-            case MODEM:
-                this.configure.setEnabled(false);
-                this.configure.setSelectedIndex(0);
-                this.ip.setEnabled(false);
-                this.subnet.setEnabled(false);
-                this.gateway.setEnabled(false);
-                break;
-            case WIFI:
-                break;
-            default:
-                break;
+        case ETHERNET:
+            break;
+        case LOOPBACK:
+            this.status.setEnabled(false);
+            this.priority.setEnabled(false);
+            this.configure.setEnabled(false);
+            this.autoconfiguration.setEnabled(false);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            this.dns.setEnabled(false);
+            this.privacy.setEnabled(false);
+            break;
+        case MODEM:
+            this.configure.setEnabled(false);
+            this.configure.setSelectedIndex(0);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            break;
+        case WIFI:
+            break;
+        default:
+            break;
 
         }
     }
@@ -534,11 +534,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         if (this.configure.getSelectedValue().equals(CONFIGURE_AUTO)
                 || this.configure.getSelectedValue().equals(CONFIGURE_DHCP)) {
             this.ip.setEnabled(false);
-            this.ip.setText("");
             this.subnet.setEnabled(false);
-            this.subnet.setText("");
             this.gateway.setEnabled(false);
-            this.gateway.setText("");
         }
 
         if (this.configure.getSelectedValue().equals(CONFIGURE_MANUAL)
@@ -546,6 +543,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             this.autoconfiguration.setEnabled(false);
             this.privacy.setEnabled(false);
         }
+
+        // Show read-only dns field when there are no custom DNS entries
+        this.dnsRead.setVisible(this.dns.getValue() == null || this.dns.getValue().isEmpty());
     }
 
     @Override
@@ -590,15 +590,23 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
         if (notNullOrEmpty(this.ip.getValue())) {
             updatedNetIf.setIpv6Address(this.ip.getValue().trim());
+        } else {
+            updatedNetIf.setIpv6Address("");
         }
         if (this.subnet.getValue() != null) {
             updatedNetIf.setIpv6SubnetMask(this.subnet.getValue());
+        } else {
+            updatedNetIf.setIpv6SubnetMask(0);
         }
         if (notNullOrEmpty(this.gateway.getValue())) {
             updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
+        } else {
+            updatedNetIf.setIpv6Gateway("");
         }
         if (notNullOrEmpty(this.dns.getValue())) {
             updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());
+        } else {
+            updatedNetIf.setIpv6DnsServers("");
         }
 
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
@@ -642,10 +650,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             setDirty(false);
             resetValidations();
 
-            if (this.selectedNetIfConfig.isEmpty()) {
-                reset();
-            } else {
+            if (this.selectedNetIfConfig.isPresent()) {
                 fillFormWithCachedConfig();
+            } else {
+                reset();
             }
         }
     }

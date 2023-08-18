@@ -78,7 +78,8 @@ public class TextFieldValidator {
         IPv4_ADDRESS("ipv4_address", "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b"),
         PORT("port", "^[0-9]*$"),
         PORT_RANGE("port_range", "^[0-9]+:[0-9]+$"),
-        MAC_ADDRESS("mac_address", "^([0-9a-fA-F]{2}:){5}([0-9a-fA-F]{2})$");
+        MAC_ADDRESS("mac_address", "^([0-9a-fA-F]{2}:){5}([0-9a-fA-F]{2})$"),
+        NIC_NAME("nic_name", "^[a-zA-Z0-9_]+\\.?[a-zA-Z0-9_]+$");
 
         private final String m_name;
         private final String m_regex;

@@ -679,7 +679,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (PortForwardingTabUi.this.input.getText().trim().isEmpty()
-                        || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || !PortForwardingTabUi.this.input.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         || PortForwardingTabUi.this.input.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.input, value,
@@ -702,7 +702,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (PortForwardingTabUi.this.output.getText().trim().isEmpty()
-                        || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || !PortForwardingTabUi.this.output.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         || PortForwardingTabUi.this.output.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.output, value,

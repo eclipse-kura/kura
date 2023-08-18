@@ -565,7 +565,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 List<EditorError> result = new ArrayList<>();
                 if (NatTabUi.this.input.getText() == null || "".equals(NatTabUi.this.input.getText().trim())
                         || NatTabUi.this.input.getText().trim().isEmpty()
-                        || !NatTabUi.this.input.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || !NatTabUi.this.input.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         || NatTabUi.this.input.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(NatTabUi.this.input, value,
@@ -589,7 +589,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 List<EditorError> result = new ArrayList<>();
                 if (NatTabUi.this.output.getText() == null || "".equals(NatTabUi.this.output.getText().trim())
                         || NatTabUi.this.output.getText().trim().isEmpty()
-                        || !NatTabUi.this.output.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                        || !NatTabUi.this.output.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         || NatTabUi.this.output.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
                     result.add(new BasicEditorError(NatTabUi.this.output, value,

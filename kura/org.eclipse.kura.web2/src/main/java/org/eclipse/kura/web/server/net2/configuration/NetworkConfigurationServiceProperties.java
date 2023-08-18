@@ -212,12 +212,16 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<Integer> getIp6Netmask(String ifname) {
-        return Optional
-                .ofNullable((Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname)));
+        if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname))) {
+            Short netmask = (Short) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname));
+            return Optional.ofNullable((Integer) netmask.intValue());
+        }
+
+        return Optional.empty();
     }
 
     public void setIp6Netmask(String ifname, int netmask) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname), netmask);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_NETMASK, ifname), ((Integer) netmask).shortValue());
     }
 
     public String getIp6Gateway(String ifname) {

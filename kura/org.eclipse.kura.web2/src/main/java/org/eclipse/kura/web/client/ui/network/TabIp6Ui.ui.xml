@@ -60,9 +60,7 @@
                                 <b:FormLabel for="priority" ui:field="labelPriority"></b:FormLabel>
                                 <util:HelpButton ui:field="helpButtonPriority" />
                                 <b:HelpBlock color="red" ui:field="wrongInputPriority" />
-                                <g:FlowPanel>
-                                    <b:IntegerBox b:id="priority" ui:field="priority" />
-                                </g:FlowPanel>
+                                <b:IntegerBox b:id="priority" ui:field="priority" />
                             </b:FormGroup>
 
                             <b:FormGroup ui:field="groupConfigure">

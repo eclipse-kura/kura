@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -588,7 +589,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         updatedNetIf.setIpv6ConfigMode(this.configure.getSelectedValue());
         updatedNetIf.setIpv6AutoconfigurationMode(this.autoconfiguration.getSelectedValue());
 
-        if (notNullOrEmpty(this.ip.getValue())) {
+        if (!nullOrEmpty(this.ip.getValue())) {
             updatedNetIf.setIpv6Address(this.ip.getValue().trim());
         } else {
             updatedNetIf.setIpv6Address("");
@@ -598,12 +599,12 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         } else {
             updatedNetIf.setIpv6SubnetMask(0);
         }
-        if (notNullOrEmpty(this.gateway.getValue())) {
+        if (!nullOrEmpty(this.gateway.getValue())) {
             updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
         } else {
             updatedNetIf.setIpv6Gateway("");
         }
-        if (notNullOrEmpty(this.dns.getValue())) {
+        if (!nullOrEmpty(this.dns.getValue())) {
             updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());
         } else {
             updatedNetIf.setIpv6DnsServers("");
@@ -612,8 +613,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
     }
 
-    private boolean notNullOrEmpty(String value) {
-        return value != null && value.trim().length() > 0;
+    private boolean nullOrEmpty(String value) {
+        return Objects.isNull(value) || value.trim().isEmpty();
     }
 
     @Override
@@ -622,8 +623,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
 
         if (isWan && isManual) {
-            if (!notNullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null
-                    || !notNullOrEmpty(this.gateway.getValue())) {
+            if (nullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null
+                    || nullOrEmpty(this.gateway.getValue())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);
                 this.groupGateway.setValidationState(ValidationState.ERROR);

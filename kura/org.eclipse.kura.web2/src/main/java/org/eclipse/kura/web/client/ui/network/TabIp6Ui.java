@@ -622,7 +622,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
 
         if (isWan && isManual) {
-            if (!notNullOrEmpty(this.ip.getValue()) || this.subnet.getValue() != null
+            if (!notNullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null
                     || !notNullOrEmpty(this.gateway.getValue())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);

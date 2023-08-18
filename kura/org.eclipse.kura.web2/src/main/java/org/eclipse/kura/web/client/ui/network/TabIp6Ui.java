@@ -317,16 +317,38 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelpText());
+
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
-            if (this.priority.getValue() == null || this.priority.getValue() < 1) {
-                this.groupPriority.setValidationState(ValidationState.ERROR);
-                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
-            } else {
+
+            String inputText = this.priority.getText();
+            boolean isValidValue = false;
+
+            if (inputText != null) {
+                if (inputText.trim().isEmpty()) {
+                    isValidValue = true;
+                } else {
+                    isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE);
+                }
+            }
+
+            if (isValidValue) {
                 this.groupPriority.setValidationState(ValidationState.NONE);
                 this.wrongInputPriority.setText("");
+            } else {
+                this.groupPriority.setValidationState(ValidationState.ERROR);
+                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
             }
         });
+    }
+
+    private boolean isValidIntegerInRange(String integerText, int min, int max) {
+        try {
+            int value = Integer.parseInt(integerText.trim());
+            return value >= min && value <= max;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void initIpField() {
@@ -679,7 +701,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         }
 
-        this.priority.setValue(this.selectedNetIfConfig.get().getIpv6WanPriority());
+        Integer wanPriority = this.selectedNetIfConfig.get().getIpv6WanPriority();
+        if (wanPriority != null) {
+            this.priority.setText(wanPriority.toString());
+        }
 
         for (int i = 0; i < this.configure.getItemCount(); i++) {
             if (this.configure.getValue(i).equals(this.selectedNetIfConfig.get().getIpv6ConfigMode())) {

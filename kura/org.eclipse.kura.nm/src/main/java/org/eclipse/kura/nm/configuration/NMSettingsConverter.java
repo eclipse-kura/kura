@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm.configuration;
 
@@ -93,6 +94,13 @@ public class NMSettingsConverter {
             Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, deviceId);
             newConnectionSettings.put("gsm", gsmSettingsMap);
             newConnectionSettings.put("ppp", pppSettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
+            if (oldConnection.isPresent()) {
+                Map<String, Variant<?>> reusedVlan = oldConnection.get().GetSettings().get("vlan");
+                newConnectionSettings.put("vlan", reusedVlan);
+            } else {
+                logger.warn("No reusable connection settings for vlan {}, ignoring.", deviceId);
+            }
         }
 
         return newConnectionSettings;
@@ -568,6 +576,8 @@ public class NMSettingsConverter {
             return "802-11-wireless";
         case NM_DEVICE_TYPE_MODEM:
             return "gsm";
+        case NM_DEVICE_TYPE_VLAN:
+            return "vlan";
         // ... WIP
         default:
             throw new IllegalArgumentException(String

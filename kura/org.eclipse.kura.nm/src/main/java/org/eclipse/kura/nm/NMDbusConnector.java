@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm;
 
@@ -47,6 +48,7 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
+import org.freedesktop.networkmanager.device.Vlan;
 import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -66,13 +68,14 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_PROPERTY_IP4CONFIG = "Ip4Config";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
-            NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
+            NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM,
+            NMDeviceType.NM_DEVICE_TYPE_VLAN);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
             KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
-            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceType.NM_DEVICE_TYPE_VLAN);
 
     private static final long MAX_SCAN_TIME_SECONDS = 30L;
 
@@ -228,6 +231,25 @@ public class NMDbusConnector {
                 networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId, ethernetPropertiesWrapper,
                         ip4configProperties);
                 break;
+            case NM_DEVICE_TYPE_VLAN:
+                Vlan vlanDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
+                        Vlan.class);
+                Properties vlanDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        vlanDevice.getObjectPath(), Properties.class);
+                
+                DevicePropertiesWrapper vlanPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                        Optional.of(vlanDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_VLAN);
+                Optional<Map<String, Variant<?>>> vlanSettings;
+                Optional<Connection> optVlanCon = this.networkManager.getAppliedConnection(device.get());
+                if (optVlanCon.isPresent()) {
+                    vlanSettings = Optional.of(optVlanCon.get().GetSettings().get("vlan"));
+                    networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper, 
+                            ip4configProperties, vlanSettings);
+                } else {
+                    logger.warn("VLAN interface {} not configured to be managed", interfaceId);
+                    return null;
+                }                
+                break;
             case NM_DEVICE_TYPE_LOOPBACK:
                 DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
@@ -304,7 +326,7 @@ public class NMDbusConnector {
                 new SupportedChannelsProperties(countryCode, supportedChannels));
         return networkInterfaceStatus;
     }
-
+    
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();

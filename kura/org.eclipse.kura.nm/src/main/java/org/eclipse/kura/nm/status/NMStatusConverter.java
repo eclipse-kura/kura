@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm.status;
 
@@ -44,6 +45,8 @@ import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus.VlanInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
 import org.eclipse.kura.net.status.modem.ModemPortType;
@@ -154,6 +157,35 @@ public class NMStatusConverter {
                 supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
         return builder.build();
+    }
+    
+    public static NetworkInterfaceStatus buildVlanStatus(String interfaceId,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties, 
+            Optional<Map<String, Variant<?>>> vlanProperties) {
+
+        VlanInterfaceStatusBuilder builder = VlanInterfaceStatus.builder();
+        builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
+        
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
+        builder.withState(deviceStateConvert(deviceState));
+
+        setDeviceStatus(builder, devicePropertiesWrapper);
+        setIP4Status(builder, ip4configProperties);
+        setVlanStatus(builder, vlanProperties);
+        NetworkInterfaceStatus obj = builder.build();
+        logger.debug("REMOVEME-VlanStatus: {}", obj);
+        return obj;
+
+    }
+    
+    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Map<String, Variant<?>>> vlanProperties) {
+        if (!vlanProperties.isPresent()) {
+            return;
+        }
+        builder.withFlags(((UInt32) vlanProperties.get().get("flags").getValue()).intValue());
+        builder.withParentInterface((String) vlanProperties.get().get("parent").getValue());
+        builder.withVlanId(((UInt32) vlanProperties.get().get("id").getValue()).intValue());
     }
 
     private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder,

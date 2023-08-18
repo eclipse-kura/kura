@@ -25,6 +25,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceIpAddress;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
@@ -75,6 +76,7 @@ public class NetworkStatusServiceAdapter {
         if (networkInterfaceInfo.isPresent()) {
             setCommonStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setIpv4DhcpClientProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
+            setIpv6StatusProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setWifiStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
             setModemStateProperties(gwtConfigToUpdate, networkInterfaceInfo.get());
         }
@@ -218,6 +220,33 @@ public class NetworkStatusServiceAdapter {
 
     private boolean isDhcpClient(String ipConfigMode) {
         return ipConfigMode != null && ipConfigMode.equals(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+    }
+
+    private void setIpv6StatusProperties(GwtNetInterfaceConfig gwtConfig, NetworkInterfaceStatus networkInterfaceInfo) {
+
+        String ipConfigMode = gwtConfig.getIpv6ConfigMode();
+        if (isIpv6AutoConfig(ipConfigMode)) {
+            /*
+             * An interface can have multiple active addresses, we select just the first
+             * one. This is a limit of the current GWT UI.
+             */
+            networkInterfaceInfo.getInterfaceIp6Addresses().ifPresent(address -> {
+                if (!address.getAddresses().isEmpty()) {
+                    NetworkInterfaceIpAddress<IP6Address> firstAddress = address.getAddresses().get(0);
+                    gwtConfig.setIpv6Address(firstAddress.getAddress().getHostAddress());
+                    gwtConfig.setIpv6SubnetMask((int) firstAddress.getPrefix());
+                }
+                if (address.getGateway().isPresent()) {
+                    gwtConfig.setIpv6Gateway(address.getGateway().get().getHostAddress());
+                }
+                gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
+            });
+        }
+    }
+
+    private boolean isIpv6AutoConfig(String ipConfigMode) {
+        return ipConfigMode != null
+                && (ipConfigMode.equals("netIPv6MethodAuto") || ipConfigMode.equals("netIPv6MethodDhcp"));
     }
 
     private <T extends IPAddress> String prettyPrintDnsServers(List<T> dnsAddresses) {

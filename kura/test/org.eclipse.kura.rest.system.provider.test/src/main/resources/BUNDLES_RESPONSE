@@ -1,0 +1,58 @@
+{
+    "bundles": [
+        {
+            "bundleId": 0,
+            "location": "test.location",
+            "state": "ACTIVE",
+            "symbolicName": "bundle0",
+            "version": "1.0.0.SNAPSHOT",
+            "signed": true,
+            "lastModified": 0
+        },
+        {
+            "bundleId": 1,
+            "location": "test.location",
+            "state": "INSTALLED",
+            "symbolicName": "bundle1",
+            "version": "1.0.0.SNAPSHOT",
+            "signed": false,
+            "lastModified": 0
+        },
+        {
+            "bundleId": 2,
+            "location": "test.location",
+            "state": "RESOLVED",
+            "symbolicName": "bundle2",
+            "version": "1.1.1.SNAPSHOT",
+            "signed": false,
+            "lastModified": 0
+        },
+        {
+            "bundleId": 3,
+            "location": "test.location",
+            "state": "STARTING",
+            "symbolicName": "bundle3",
+            "version": "2.0.1.",
+            "signed": false,
+            "lastModified": 0
+        },
+        {
+            "bundleId": 4,
+            "location": "test.location",
+            "state": "STOPPING",
+            "symbolicName": "bundle4",
+            "version": "0.1.0.alpha",
+            "signed": false,
+            "lastModified": 0
+        },
+        {
+            "bundleId": 5,
+            "location": "test.location",
+            "state": "UNINSTALLED",
+            "symbolicName": "bundle5",
+            "version": "0.1.1.beta",
+            "signed": false,
+            "lastModified": 0
+        }
+    ]
+}

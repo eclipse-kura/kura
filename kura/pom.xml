@@ -111,6 +111,7 @@
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.command.provider</module>
         <module>org.eclipse.kura.rest.position.provider</module>
+        <module>org.eclipse.kura.rest.system.provider</module>
         <module>org.eclipse.kura.request.handler.jaxrs</module>
         <module>org.eclipse.kura.rest.wire.provider</module>
         <module>org.eclipse.kura.container.orchestration.provider</module>

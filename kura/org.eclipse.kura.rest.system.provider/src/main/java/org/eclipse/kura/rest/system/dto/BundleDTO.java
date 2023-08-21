@@ -14,6 +14,7 @@ package org.eclipse.kura.rest.system.dto;
 
 import org.osgi.framework.Bundle;
 
+@SuppressWarnings("unused")
 public class BundleDTO {
 
     private long bundleId;
@@ -42,34 +43,6 @@ public class BundleDTO {
         this.version = versionSb.toString();
         this.signed = !bundle.getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty();
         this.lastModified = bundle.getLastModified();
-    }
-
-    public long getBundleId() {
-        return this.bundleId;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public String getState() {
-        return this.state;
-    }
-
-    public String getSymbolicName() {
-        return this.symbolicName;
-    }
-
-    public String getVersion() {
-        return this.version;
-    }
-
-    public boolean getSigned() {
-        return this.signed;
-    }
-
-    public long getLastModified() {
-        return this.lastModified;
     }
 
     private String getStateStringFrom(int code) {

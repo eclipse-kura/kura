@@ -33,6 +33,7 @@ public class IP4Address extends IPAddress {
      * 
      * @return the 0.0.0.0/0 IPv4 address
      * @throws UnknownHostException
+     * @since 2.6
      */
     public static IP4Address getDefaultAddress() throws UnknownHostException {
         return (IP4Address) IPAddress.parseHostAddress("0.0.0.0");

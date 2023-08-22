@@ -33,6 +33,7 @@ public class IP6Address extends IPAddress {
      * 
      * @return the ::/0 IPv6 address
      * @throws UnknownHostException
+     * @since 2.6
      */
     public static IP6Address getDefaultAddress() throws UnknownHostException {
         return (IP6Address) IPAddress.parseHostAddress("::/0");

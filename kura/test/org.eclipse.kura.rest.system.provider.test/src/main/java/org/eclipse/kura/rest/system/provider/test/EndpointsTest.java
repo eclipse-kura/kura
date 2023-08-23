@@ -46,16 +46,16 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(Parameterized.class)
-public class SystemRestServiceTest extends AbstractRequestHandlerTest {
+public class EndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String EXPECTED_PROPERTIES_RESPONSE = new Scanner(
-            SystemRestServiceTest.class.getResourceAsStream("/PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
+            EndpointsTest.class.getResourceAsStream("/PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
     private static final String EXPECTED_EXTENDED_PROPERTIES_RESPONSE = new Scanner(
-            SystemRestServiceTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
+            EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
     private static final String EXPECTED_BUNDLES_RESPONSE = new Scanner(
-            SystemRestServiceTest.class.getResourceAsStream("/BUNDLES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
+            EndpointsTest.class.getResourceAsStream("/BUNDLES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
 
     private static final String METHOD_SPEC_GET = "GET";
@@ -67,7 +67,7 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
         return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
     }
 
-    public SystemRestServiceTest(Transport transport) {
+    public EndpointsTest(Transport transport) {
         super(transport);
     }
 
@@ -168,7 +168,7 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockSystemService");
-        FrameworkUtil.getBundle(SystemRestServiceTest.class).getBundleContext().registerService(SystemService.class,
+        FrameworkUtil.getBundle(EndpointsTest.class).getBundleContext().registerService(SystemService.class,
                 systemServiceMock, configurationServiceProperties);
     }
 

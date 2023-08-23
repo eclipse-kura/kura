@@ -28,8 +28,4 @@ public class BundlesDTO {
         }
     }
 
-    public List<BundleDTO> getBundles() {
-        return this.bundles;
-    }
-
 }

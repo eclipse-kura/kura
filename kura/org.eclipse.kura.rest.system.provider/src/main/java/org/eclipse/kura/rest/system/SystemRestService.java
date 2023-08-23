@@ -12,12 +12,14 @@
  ******************************************************************************/
 package org.eclipse.kura.rest.system;
 
+import static org.eclipse.kura.rest.system.Constants.KURA_PERMISSION_REST_ROLE;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_BUNDLES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
+import static org.eclipse.kura.rest.system.Constants.REST_ROLE_NAME;
 
-import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -30,6 +32,8 @@ import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.system.dto.BundlesDTO;
 import org.eclipse.kura.rest.system.dto.PropertiesDTO;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +45,15 @@ public class SystemRestService {
     private SystemService systemService;
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    protected void bindSystemService(SystemService systemService) {
+    public void bindSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
 
-    protected void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+    public void bindUserAdmin(UserAdmin userAdmin) {
+        userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
+    }
+
+    public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
         } catch (final Exception e) {
@@ -53,7 +61,7 @@ public class SystemRestService {
         }
     }
 
-    protected void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+    public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.unregister(MQTT_APP_ID);
         } catch (final Exception e) {
@@ -62,7 +70,7 @@ public class SystemRestService {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed(REST_ROLE_NAME)
     @Path(RESOURCE_PROPERTIES)
     @Produces(MediaType.APPLICATION_JSON)
     public PropertiesDTO getProperties() {
@@ -75,7 +83,7 @@ public class SystemRestService {
     }
 
     @GET
-    @PermitAll
+    @RolesAllowed(REST_ROLE_NAME)
     @Path(RESOURCE_BUNDLES)
     @Produces(MediaType.APPLICATION_JSON)
     public BundlesDTO getBundles() {

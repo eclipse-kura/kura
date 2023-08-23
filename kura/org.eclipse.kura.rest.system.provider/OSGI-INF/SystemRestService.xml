@@ -31,6 +31,12 @@
                name="SystemService"
                policy="static"/>
 
+    <reference interface="org.osgi.service.useradmin.UserAdmin"
+               bind="bindUserAdmin"
+               cardinality="0..1"
+               name="UserAdmin"
+               policy="static"/>
+
     <service>
         <provide interface="org.eclipse.kura.rest.system.SystemRestService"/>
     </service>

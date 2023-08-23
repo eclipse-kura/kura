@@ -26,6 +26,14 @@ Kura aims at offering a Java/OSGi-based container for M2M applications running i
 
 For more information, see the [Eclipse project proposal](http://www.eclipse.org/proposals/technology.kura/).
 
+Documentation
+-------------------
+
+- [**User Documentation**](https://eclipse.github.io/kura/latest/): here you'll find information on how to **use** Eclipse Kura i.e. installation instructions, informations on how to use the web UI and tutorials.
+- [**Developer Documentation**](https://github.com/eclipse/kura/wiki): the Eclipse Kura Github Wiki serves as a reference for **developers** who want to contribute to the Eclipse Kura project and/or develop new add-ons. Here you'll find Kura development/release model, guidelines on how to import internal packages, creating new bundles and development environment tips & tricks.
+- [**Developer Quickstart Guide**](https://github.com/eclipse/kura#getting-started): a quick guide on how to setup the development environment and build the project is also provided in this README.
+- [**Docker Container Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura team also provides Docker containers for the project. Informations on how to build and run them are available at the project's Docker Hub page.
+
 
 System Requirements
 -------------------

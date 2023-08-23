@@ -151,6 +151,7 @@ nav:
         - REST Inventory API: references/rest-apis/rest-inventory-api.md
         - REST Command API: references/rest-apis/rest-command-api.md
         - REST Position API: references/rest-apis/rest-position-api.md
+        - REST System API: references/rest-apis/rest-system-api.md
     - Tutorials:
       - Anomaly Detection: tutorials/AD-EdgeAI.ipynb
 

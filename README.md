@@ -34,7 +34,7 @@ Documentation
 - [**Docker Containers Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura team also provides Docker containers for the project. Informations on how to build and run them are available at the project's Docker Hub page.
 - [**Developer Quickstart Guide**](https://github.com/eclipse/kura#getting-started): a quick guide on how to setup the development environment and build the project is also provided in this README.
 
-Additionally we provide two channels if you encounter any issue with the project:
+Additionally we provide two channels for reporting any issue you find with the project
 - [**Github Issues**](https://github.com/eclipse/kura/issues): for bug reporting.
 - [**Github Discussions**](https://github.com/eclipse/kura/discussions): for receiving feedback, making new proposals and generally talking about the project.
 

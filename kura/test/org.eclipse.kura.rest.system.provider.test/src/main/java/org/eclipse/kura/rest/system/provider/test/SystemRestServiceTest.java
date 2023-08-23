@@ -51,6 +51,9 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
     private static final String EXPECTED_PROPERTIES_RESPONSE = new Scanner(
             SystemRestServiceTest.class.getResourceAsStream("/PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
+    private static final String EXPECTED_EXTENDED_PROPERTIES_RESPONSE = new Scanner(
+            SystemRestServiceTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
     private static final String EXPECTED_BUNDLES_RESPONSE = new Scanner(
             SystemRestServiceTest.class.getResourceAsStream("/BUNDLES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
@@ -74,7 +77,7 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnExpectedProperties() {
-        givenWorkingSystemServiceMock();
+        givenSystemServiceMockWithoutExtendedProperties();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
 
@@ -84,12 +87,22 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnExpectedBundles() {
-        givenWorkingSystemServiceMock();
+        givenSystemServiceMockWithoutExtendedProperties();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_BUNDLES);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_BUNDLES_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnExpectedExtendedProperties() {
+        givenSystemServiceMockWithExtendedProperties();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
     }
 
     @Test
@@ -110,14 +123,28 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
+    @Test
+    public void shouldRethrowWebApplicationExceptionOnFailingExtendedProperties() {
+        givenFailingSystemServiceMock();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+
+        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
 
     /*
      * Steps
      */
 
-    private static void givenWorkingSystemServiceMock() {
+    private static void givenSystemServiceMockWithoutExtendedProperties() {
         reset(systemServiceMock);
-        SystemServiceMockDecorator.addMockMethods(systemServiceMock);
+        SystemServiceMockDecorator.addPropertiesMockMethods(systemServiceMock);
+    }
+
+    private static void givenSystemServiceMockWithExtendedProperties() {
+        reset(systemServiceMock);
+        SystemServiceMockDecorator.addPropertiesMockMethods(systemServiceMock);
+        SystemServiceMockDecorator.addExtendedPropertiesMockMethods(systemServiceMock);
     }
 
     private static void givenFailingSystemServiceMock() {
@@ -136,7 +163,7 @@ public class SystemRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private static void createSystemServiceMock() {
-        givenWorkingSystemServiceMock();
+        givenSystemServiceMockWithoutExtendedProperties();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);

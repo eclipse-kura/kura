@@ -12,8 +12,12 @@
  ******************************************************************************/
 package org.eclipse.kura.rest.system.dto;
 
+import java.util.Optional;
+
+import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemService;
 
+@SuppressWarnings("unused")
 public class PropertiesDTO {
 
     // hardware
@@ -74,6 +78,9 @@ public class PropertiesDTO {
     private int commandZipMaxUploadNumber;
     private int commandZipMaxUploadSize;
 
+    // extended properties
+    private ExtendedPropertiesDTO extendedProperties;
+
     public PropertiesDTO(SystemService systemService) {
         this.biosVersion = systemService.getBiosVersion();
         this.cpuVersion = systemService.getCpuVersion();
@@ -125,17 +132,11 @@ public class PropertiesDTO {
         this.commandUser = systemService.getCommandUser();
         this.commandZipMaxUploadNumber = systemService.getFileCommandZipMaxUploadNumber();
         this.commandZipMaxUploadSize = systemService.getFileCommandZipMaxUploadSize();
+        
+        Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
+        if (properties.isPresent()) {
+            this.extendedProperties = new ExtendedPropertiesDTO(properties.get());
+        }
     }
-
-    /*
-     * Left out properties
-     */
-
-    // systemService.getProperties()
-    // systemService.getDeviceManagementServiceIgnore()
-    // systemService.getExtendedProperties()
-    // systemService.getJavaKeyStorePassword()
-    // systemService.getJavaTrustStorePassword()
-    // systemService.getSystemPackages()
 
 }

@@ -17,9 +17,13 @@ import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
@@ -27,16 +31,17 @@ import org.osgi.framework.Version;
 
 public class SystemServiceMockDecorator {
 
-    public static final String PROPERTIES_VALUE = "test";
-    public static final String BUNDLE_LOCATION_VALUE = "test.location";
+    private static final String PROPERTIES_VALUE = "test";
+    private static final String BUNDLE_LOCATION_VALUE = "test.location";
+    private static final String EXT_PROPERTIES_VERSION = "1.0.0";
 
     /**
      * 
      * @param service
-     *            the mock SystemService to modify. Its mock methods are modified to return all the properties specified
+     *            the mock SystemService to modify. It adds mock methods that return all the properties specified
      *            in resource {@link PROPERTIES_RESPONSE} and bundles in resource {@link BUNDLE_RESPONSE}.
      */
-    public static void addMockMethods(SystemService service) {
+    public static void addPropertiesMockMethods(SystemService service) {
         List<Bundle> bundles = new ArrayList<>();
 
         addBundle(bundles, 0, BUNDLE_LOCATION_VALUE, Bundle.ACTIVE, "bundle0", true, 0L, 1, 0, 0, "SNAPSHOT");
@@ -48,6 +53,16 @@ public class SystemServiceMockDecorator {
 
         initBundles(service, bundles);
         initProperties(service);
+    }
+
+    /**
+     * 
+     * @param service
+     *            the mock SystemService to modify. It adds mock methods to include all the extended properties
+     *            specified in resource {@link EXTENDED_PROPERTIES_RESPONSE}.
+     */
+    public static void addExtendedPropertiesMockMethods(SystemService service) {
+        initExtendedProperties(service);
     }
 
     /**
@@ -149,6 +164,31 @@ public class SystemServiceMockDecorator {
         when(service.isLegacyPPPLoggingEnabled()).thenReturn(false);
     }
 
+    private static void initExtendedProperties(SystemService service) {
+        ExtendedProperties extendedProperties = mock(ExtendedProperties.class);
+        
+        List<ExtendedPropertyGroup> groups = new ArrayList<>();
+        groups.add(createExtendedPropertyGroup("group1"));
+        groups.add(createExtendedPropertyGroup("group2"));
+
+        when(extendedProperties.getVersion()).thenReturn(EXT_PROPERTIES_VERSION);
+        when(extendedProperties.getPropertyGroups()).thenReturn(groups);
+        when(service.getExtendedProperties()).thenReturn(Optional.of(extendedProperties));
+    }
+
+    private static ExtendedPropertyGroup createExtendedPropertyGroup(String name) {
+        ExtendedPropertyGroup group = mock(ExtendedPropertyGroup.class);
+
+        Map<String, String> propertiesGroup = new HashMap<>();
+        propertiesGroup.put("key1", "val1");
+        propertiesGroup.put("key2", "val2");
+
+        when(group.getName()).thenReturn(name);
+        when(group.getProperties()).thenReturn(propertiesGroup);
+
+        return group;
+    }
+
     private static void initExceptions(SystemService service) {
         Mockito.when(service.getBundles()).thenThrow(RuntimeException.class);
 
@@ -199,6 +239,8 @@ public class SystemServiceMockDecorator {
         when(service.getFileCommandZipMaxUploadSize()).thenThrow(RuntimeException.class);
         when(service.isLegacyBluetoothBeaconScan()).thenThrow(RuntimeException.class);
         when(service.isLegacyPPPLoggingEnabled()).thenThrow(RuntimeException.class);
+
+        when(service.getExtendedProperties()).thenThrow(RuntimeException.class);
     }
 
 }

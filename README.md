@@ -22,15 +22,6 @@ Eclipse Kura™
 
 **Eclipse Kura**, from [the maori word for tank/container](https://maoridictionary.co.nz/search/?keywords=kura), is an OSGi-based Application Framework for M2M Service Gateways
 
-Background
-----------
-Until recently, machine-to-machine projects have been approached as embedded systems designed around custom hardware, custom software, and custom network connectivity. The challenge of developing such projects was given by the large customization and integration costs and the small re-usability across similar engagements. The results were often proprietary systems leveraging proprietary protocols.
-
-The emergence of the service gateway model, which operates on the edge of an M2M deployment as an aggregator and controller, has opened up new possibilities. Cost effective service gateways are now capable of running modern software stacks opening the world of M2M to enterprise technologies and programming languages. Advanced software frameworks, which isolate the developer from the complexity of the hardware and the networking sub-systems, can now be offered to complement the service gateway hardware into an integrated hardware and software solution.
-
-
-Description
------------
 Kura aims at offering a Java/OSGi-based container for M2M applications running in service gateways. Kura provides or, when available, aggregates open source implementations for the most common services needed by M2M applications. Kura components are designed as configurable OSGi Declarative Service exposing service API and raising events. While several Kura components are in pure Java, others are invoked through JNI and have a dependency on the Linux operating system.
 
 For more information, see the [Eclipse project proposal](http://www.eclipse.org/proposals/technology.kura/).

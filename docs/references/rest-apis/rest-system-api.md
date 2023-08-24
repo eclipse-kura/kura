@@ -2,11 +2,13 @@
 
     This API can also be accessed via the RequestHandler with app-id: `SYS-V1`.
 
-#### Get Properties
+#### Get properties
+
 - Method: GET
 - API PATH: `/services/system/v1/properties`
 
 ##### Responses
+
 - 200 OK status
 
 ```JSON
@@ -80,12 +82,40 @@
 
 - 500 Internal Server Error
 
----
-#### Get Bundles
+#### Filter properties by property names
+
+- Method: POST
+- API PATH: `/services/system/v1/properties/filter`
+
+##### Request Body
+
+```JSON
+{
+    "names": ["deviceName", "serialNumber", "osArch"]
+}
+```
+
+##### Responses
+
+- 200 OK status
+
+```JSON
+{
+    "deviceName": "raspberry",
+    "serialNumber": "not_defined",
+    "osArch": "arm"
+}
+```
+
+- 500 Internal Server Error
+
+#### Get bundles
+
 - Method: GET
 - API PATH: `/services/system/v1/bundles`
 
 ##### Responses
+
 - 200 OK status
 
 ```JSON

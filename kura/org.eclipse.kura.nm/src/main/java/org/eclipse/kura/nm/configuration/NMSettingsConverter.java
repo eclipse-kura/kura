@@ -399,16 +399,14 @@ public class NMSettingsConverter {
         Integer vlanId = props.get(Integer.class, "net.interface.%s.config.vlan.id", deviceId);
         settings.put("id", new Variant<>(new UInt32(vlanId)));
         Optional<Integer> vlanFlags = props.getOpt(Integer.class, "net.interface.%s.config.vlan.flags", deviceId);
-        vlanFlags.ifPresentOrElse(flags -> settings.put("flags", new Variant<>(new UInt32(flags))),
-                () -> settings.put("flags", new Variant<>(new UInt32(1))));
+        settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
         DBusListType listType = new DBusListType(String.class);
         Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
-        ingressMap.ifPresentOrElse(ingress -> settings.put("ingress-priority-map", new Variant<>(ingress, listType)),
-                () -> settings.put("ingress-priority-map", new Variant<>(new ArrayList<String>(0), listType)));
+        settings.put("ingress-priority-map", new Variant<>(ingressMap
+                .orElse(new ArrayList<String>()), listType));
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
-        egressMap.ifPresentOrElse(egress -> settings.put("egress-priority-map", new Variant<>(egress, listType)),
-                () -> settings.put("egress-priority-map", new Variant<>(new ArrayList<String>(0), listType)));
-        logger.info("REMOVEME-build vlan map: {}", settings);
+        settings.put("egress-priority-map", new Variant<>(egressMap
+                .orElse(new ArrayList<String>()), listType));
         return settings;
     }
 

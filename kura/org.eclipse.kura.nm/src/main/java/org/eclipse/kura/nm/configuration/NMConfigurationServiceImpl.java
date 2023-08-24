@@ -221,7 +221,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             this.dhcpServerMonitor.start();
             this.dnsServerMonitor.start();
-            logger.info("ModifiedProps: {}", modifiedProps);
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
         } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);

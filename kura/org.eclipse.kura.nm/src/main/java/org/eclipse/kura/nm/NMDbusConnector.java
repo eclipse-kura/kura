@@ -408,12 +408,11 @@ public class NMDbusConnector {
     private synchronized void checkVlanConfiguration(Map<String, Object> networkConfiguration) {
         NetworkProperties properties = new NetworkProperties(networkConfiguration);
         List<String> configuredVlans = NMSettingsConverter.getConfiguredVlansFromProperties(properties);
-        logger.info("checking list {} for vlans", configuredVlans);
         configuredVlans.forEach(vlanIfName -> {
             try {
                 Optional<Device> device = getNetworkManagerDeviceByInterfaceId(vlanIfName);
                 if (!device.isPresent()) {
-                    if (!KuraInterfaceStatus.DISABLED
+                    if (KuraInterfaceStatus.DISABLED
                             .equals(getInterfaceStatusFromProperties(vlanIfName, properties))) {
                         logger.info("Ignoring disabled vlan {}", vlanIfName);
                     } else {
@@ -439,7 +438,7 @@ public class NMDbusConnector {
     private KuraInterfaceStatus getInterfaceStatusFromProperties(String deviceId, NetworkProperties properties) {
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
-
+        logger.info("ip4Status for {} {}", deviceId, ip4Status);
         Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
                 .fromString(properties.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));
         KuraIpStatus ip6Status;
@@ -449,7 +448,8 @@ public class NMDbusConnector {
         } else {
             ip6Status = ip6OptStatus.get();
         }
-
+        logger.info("ip6Status for {} {}", deviceId, ip6Status);
+        logger.info("returning {} {}", KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status));
         return KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
     }
 

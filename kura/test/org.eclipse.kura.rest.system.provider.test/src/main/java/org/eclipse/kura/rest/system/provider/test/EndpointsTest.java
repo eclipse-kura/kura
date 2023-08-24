@@ -15,6 +15,7 @@ package org.eclipse.kura.rest.system.provider.test;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_BUNDLES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -57,8 +58,12 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     private static final String EXPECTED_BUNDLES_RESPONSE = new Scanner(
             EndpointsTest.class.getResourceAsStream("/BUNDLES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
+    private static final String PROPERTIES_FILTER_REQUEST = new Scanner(
+            EndpointsTest.class.getResourceAsStream("/PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A").next()
+                    .replace(" ", "");
 
     private static final String METHOD_SPEC_GET = "GET";
+    private static final String METHOD_SPEC_POST = "POST";
 
     private static SystemService systemServiceMock = mock(SystemService.class);
 
@@ -106,6 +111,18 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnFilteredProperties() {
+        givenSystemServiceMockWithExtendedProperties();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
+    }
+
+    // Exceptions test
+
+    @Test
     public void shouldRethrowWebApplicationExceptionOnFailingProperties() {
         givenFailingSystemServiceMock();
 
@@ -128,6 +145,15 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         givenFailingSystemServiceMock();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+
+        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    public void shouldRethrowWebApplicationExceptionOnFailingPropertiesFilter() {
+        givenFailingSystemServiceMock();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }

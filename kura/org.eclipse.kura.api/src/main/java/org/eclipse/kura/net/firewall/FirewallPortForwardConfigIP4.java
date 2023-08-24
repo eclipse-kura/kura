@@ -20,6 +20,8 @@ import org.eclipse.kura.net.NetworkPair;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
+ * The class for IPv4 firewall port forward configurations
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

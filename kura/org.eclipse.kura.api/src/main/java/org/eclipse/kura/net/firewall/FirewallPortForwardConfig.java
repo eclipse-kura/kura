@@ -54,6 +54,7 @@ public interface FirewallPortForwardConfig extends NetConfig {
      * The LAN IP address to forward connections to
      *
      * @return The LAN IPAddress to forward connections to
+     * @since 2.6
      */
     public IPAddress getIPAddress();
 

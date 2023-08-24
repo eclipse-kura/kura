@@ -22,6 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The implementation of IPv6 firewall open port configurations
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.6
  */
 @ProviderType
 public class FirewallOpenPortConfigIP6 extends FirewallOpenPortConfigIP<IP6Address> implements FirewallOpenPortConfig6 {

@@ -24,6 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The base class for firewall open port configurations
  *
  * @param <T>
+ *            the type of IPAddess
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -189,6 +190,9 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         return this.permittedNetwork;
     }
 
+    /**
+     * @since 2.6
+     */
     @Override
     public String getPermittedNetworkString() {
         return this.permittedNetwork.getIpAddress().getHostAddress() + "/" + this.permittedNetwork.getPrefix();

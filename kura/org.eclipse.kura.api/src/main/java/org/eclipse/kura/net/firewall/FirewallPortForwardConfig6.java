@@ -18,6 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Marker interface for IPv6 firewall port forward configurations
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 2.6
  */
 @ProviderType
 public interface FirewallPortForwardConfig6 extends FirewallPortForwardConfig {

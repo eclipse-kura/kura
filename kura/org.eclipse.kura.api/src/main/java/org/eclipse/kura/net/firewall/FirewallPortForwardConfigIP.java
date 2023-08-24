@@ -170,6 +170,9 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         this.address = (T) address;
     }
 
+    /**
+     * @since 2.6
+     */
     @Override
     public T getIPAddress() {
         return this.address;

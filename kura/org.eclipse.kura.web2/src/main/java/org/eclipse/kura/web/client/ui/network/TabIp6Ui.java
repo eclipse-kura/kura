@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -316,16 +317,38 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         });
         this.priority.addMouseOutHandler(event -> resetHelpText());
+
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
-            if (this.priority.getValue() == null || this.priority.getValue() < 1) {
-                this.groupPriority.setValidationState(ValidationState.ERROR);
-                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
-            } else {
+
+            String inputText = this.priority.getText();
+            boolean isValidValue = false;
+
+            if (inputText != null) {
+                if (inputText.trim().isEmpty()) {
+                    isValidValue = true;
+                } else {
+                    isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE);
+                }
+            }
+
+            if (isValidValue) {
                 this.groupPriority.setValidationState(ValidationState.NONE);
                 this.wrongInputPriority.setText("");
+            } else {
+                this.groupPriority.setValidationState(ValidationState.ERROR);
+                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
             }
         });
+    }
+
+    private boolean isValidIntegerInRange(String integerText, int min, int max) {
+        try {
+            int value = Integer.parseInt(integerText.trim());
+            return value >= min && value <= max;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void initIpField() {
@@ -588,7 +611,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         updatedNetIf.setIpv6ConfigMode(this.configure.getSelectedValue());
         updatedNetIf.setIpv6AutoconfigurationMode(this.autoconfiguration.getSelectedValue());
 
-        if (notNullOrEmpty(this.ip.getValue())) {
+        if (!nullOrEmpty(this.ip.getValue())) {
             updatedNetIf.setIpv6Address(this.ip.getValue().trim());
         } else {
             updatedNetIf.setIpv6Address("");
@@ -598,12 +621,12 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         } else {
             updatedNetIf.setIpv6SubnetMask(0);
         }
-        if (notNullOrEmpty(this.gateway.getValue())) {
+        if (!nullOrEmpty(this.gateway.getValue())) {
             updatedNetIf.setIpv6Gateway(this.gateway.getValue().trim());
         } else {
             updatedNetIf.setIpv6Gateway("");
         }
-        if (notNullOrEmpty(this.dns.getValue())) {
+        if (!nullOrEmpty(this.dns.getValue())) {
             updatedNetIf.setIpv6DnsServers(this.dns.getValue().trim());
         } else {
             updatedNetIf.setIpv6DnsServers("");
@@ -612,8 +635,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
     }
 
-    private boolean notNullOrEmpty(String value) {
-        return value != null && value.trim().length() > 0;
+    private boolean nullOrEmpty(String value) {
+        return Objects.isNull(value) || value.trim().isEmpty();
     }
 
     @Override
@@ -622,8 +645,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
 
         if (isWan && isManual) {
-            if (!notNullOrEmpty(this.ip.getValue()) || this.subnet.getValue() != null
-                    || !notNullOrEmpty(this.gateway.getValue())) {
+            if (nullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null
+                    || nullOrEmpty(this.gateway.getValue())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);
                 this.groupGateway.setValidationState(ValidationState.ERROR);
@@ -678,7 +701,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         }
 
-        this.priority.setValue(this.selectedNetIfConfig.get().getIpv6WanPriority());
+        Integer wanPriority = this.selectedNetIfConfig.get().getIpv6WanPriority();
+        if (wanPriority != null) {
+            this.priority.setText(wanPriority.toString());
+        }
 
         for (int i = 0; i < this.configure.getItemCount(); i++) {
             if (this.configure.getValue(i).equals(this.selectedNetIfConfig.get().getIpv6ConfigMode())) {

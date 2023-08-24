@@ -3,33 +3,53 @@ name: "Release Notes automation"
 on:
   workflow_dispatch:
     inputs:
-        target_branch:
-          type: string
-          default: 'master'
-          description: Target branch
-          required: true
         starting_commit:
           type: string
-          description: Commit from which to start generating the release notes (non-inclusive)
+          description: Commit from which to start generating the Release Notes (non-inclusive)
           required: true
-
+        overwrite:
+          type: boolean
+          description: Overwrite the content of TODO fields in generated release notes (typically needed for RC1 notes)
+          required: true
+          default: false
 jobs:
   main:
     name: Generate Release Notes
     runs-on: ubuntu-latest
     steps:
 
-    - name: Checkout target branch
+    - name: Checkout ${{ github.ref }} branch in ${{ github.repository }} repository.
       uses: actions/checkout@v3
       with:
-        ref: ${{ github.event.inputs.target_branch }}
         fetch-depth: '0'
 
     - name: Get version
       id: get-version
-      uses: JActions/maven-version@v1.0.1
+      run: "echo \"resolved-version=\
+        $(mvn
+          --file ./kura/pom.xml
+          -Dexec.executable=echo
+          -Dexec.args='${project.version}'
+          --quiet exec:exec --non-recursive
+          -Pjava8
+        )\" >> \"${GITHUB_OUTPUT}\""
+      shell: bash
+    
+    - name: Check file existence
+      id: check_files
+      continue-on-error: true
+      uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
-        pom: ./kura/pom.xml
+        files: './kura/distrib/RELEASE_NOTES.txt'
+
+    - name: Files exist
+      id: get-old-text
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
+      run: |
+        awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > description.txt
+        awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > target-env.txt
+        awk '/Known Issues:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > known-issues.txt
+      shell: bash
 
     - name: Download git-changelog-command-line tool
       id: download-changelog-cli
@@ -46,15 +66,34 @@ jobs:
       run: |
         java -jar ${{ steps.download-changelog-cli.outputs.file }} \
         -fc "${{ github.event.inputs.starting_commit }}" \
-        -ex "{\"version\":\"${{ steps.get-version.outputs.version }}\"}" \
+        -ex "{\"version\":\"${{ steps.get-version.outputs.resolved-version }}\"}" \
         -t .github/release_notes_template/template.hbs \
         -hhf .github/release_notes_template/helper.hbs \
-        -of kura/distrib/RELEASE_NOTES.txt
+        -of ./kura/distrib/RELEASE_NOTES.txt
+    
+    - name: Files exist write description
+      id: get-description
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
+      # Only runs if all of the files exist
+      run: |
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+      shell: bash
+        
+    - name: Files exist clean up
+      id: clean-up-files
+      if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
+      # Only runs if all of the files exist
+      run: |
+        rm description.txt
+        rm target-env.txt
+        rm known-issues.txt
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
-        title: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
-        commit-message: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
-        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.version }} version release notes since commit `${{ github.event.inputs.starting_commit }}` (non-inclusive)"
+        title: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
+        commit-message: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
+        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.resolved-version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
         branch-suffix: short-commit-hash

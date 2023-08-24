@@ -92,6 +92,7 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_DEVICE_WIRED_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wired";
+    private static final String NM_DEVICE_VLAN_BUS_NAME = "org.freedesktop.NetworkManager.Device.Vlan";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
     private static final String NM_IP6CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP6Config";
@@ -169,7 +170,7 @@ public class NMStatusConverter {
     
     public static NetworkInterfaceStatus buildVlanStatus(String interfaceId,
             DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties, 
-            Optional<Map<String, Variant<?>>> vlanProperties) {
+            Optional<Properties> ip6configProperties, Properties parentProperties) {
 
         VlanInterfaceStatusBuilder builder = VlanInterfaceStatus.builder();
         builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
@@ -178,22 +179,24 @@ public class NMStatusConverter {
                 .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
         builder.withState(deviceStateConvert(deviceState));
 
+        Optional<Properties> vlanProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
+        
         setDeviceStatus(builder, devicePropertiesWrapper);
+        setVlanStatus(builder, vlanProperties, parentProperties);
         setIP4Status(builder, ip4configProperties);
-        setVlanStatus(builder, vlanProperties);
+        setIP6Status(builder, ip6configProperties);
         NetworkInterfaceStatus obj = builder.build();
-        logger.debug("REMOVEME-VlanStatus: {}", obj);
         return obj;
 
     }
     
-    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Map<String, Variant<?>>> vlanProperties) {
-        if (!vlanProperties.isPresent()) {
-            return;
-        }
-        builder.withFlags(((UInt32) vlanProperties.get().get("flags").getValue()).intValue());
-        builder.withParentInterface((String) vlanProperties.get().get("parent").getValue());
-        builder.withVlanId(((UInt32) vlanProperties.get().get("id").getValue()).intValue());
+    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Properties> vlanProperties, Properties parentProperties) {
+        String parentInterfaceName = parentProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
+        builder.withParentInterface(parentInterfaceName);
+        vlanProperties.ifPresent(properties -> {
+        UInt32 vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
+            builder.withVlanId(vlanId.intValue());
+        });
     }
 
     private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder,
@@ -272,6 +275,8 @@ public class NMStatusConverter {
             return specificProperties.get().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         case NM_DEVICE_TYPE_WIFI:
             return specificProperties.get().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
+        case NM_DEVICE_TYPE_VLAN:
+            return specificProperties.get().Get(NM_DEVICE_VLAN_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         case NM_DEVICE_TYPE_MODEM:
         case NM_DEVICE_TYPE_GENERIC:
         case NM_DEVICE_TYPE_LOOPBACK:

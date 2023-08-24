@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.eclipse.kura.nm.KuraIp6AddressGenerationMode;
 import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
@@ -31,6 +33,7 @@ import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.freedesktop.dbus.types.DBusListType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -95,12 +98,8 @@ public class NMSettingsConverter {
             newConnectionSettings.put("gsm", gsmSettingsMap);
             newConnectionSettings.put("ppp", pppSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
-            if (oldConnection.isPresent()) {
-                Map<String, Variant<?>> reusedVlan = oldConnection.get().GetSettings().get("vlan");
-                newConnectionSettings.put("vlan", reusedVlan);
-            } else {
-                logger.warn("No reusable connection settings for vlan {}, ignoring.", deviceId);
-            }
+            Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
+            newConnectionSettings.put("vlan", vlanSettingsMap);
         }
 
         return newConnectionSettings;
@@ -391,6 +390,27 @@ public class NMSettingsConverter {
 
         return settings;
     }
+    
+    public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        settings.put("interface-name", new Variant<>(deviceId));
+        String parent = props.get(String.class, "net.interface.%s.config.vlan.parent", deviceId);
+        settings.put("parent", new Variant<>(parent));
+        Integer vlanId = props.get(Integer.class, "net.interface.%s.config.vlan.id", deviceId);
+        settings.put("id", new Variant<>(new UInt32(vlanId)));
+        Optional<Integer> vlanFlags = props.getOpt(Integer.class, "net.interface.%s.config.vlan.flags", deviceId);
+        vlanFlags.ifPresentOrElse(flags -> settings.put("flags", new Variant<>(new UInt32(flags))),
+                () -> settings.put("flags", new Variant<>(new UInt32(1))));
+        DBusListType listType = new DBusListType(String.class);
+        Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
+        ingressMap.ifPresentOrElse(ingress -> settings.put("ingress-priority-map", new Variant<>(ingress, listType)),
+                () -> settings.put("ingress-priority-map", new Variant<>(new ArrayList<String>(0), listType)));
+        Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
+        egressMap.ifPresentOrElse(egress -> settings.put("egress-priority-map", new Variant<>(egress, listType)),
+                () -> settings.put("egress-priority-map", new Variant<>(new ArrayList<String>(0), listType)));
+        logger.info("REMOVEME-build vlan map: {}", settings);
+        return settings;
+    }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
@@ -411,6 +431,19 @@ public class NMSettingsConverter {
                                                                     // enforcement mechanism
 
         return connectionMap;
+    }
+    
+    public static List<String> getConfiguredVlansFromProperties(NetworkProperties properties) {
+        List<String> vlanNames = new ArrayList<>();
+        NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(properties.getProperties())
+            .forEach(name -> {
+                Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.
+                        getNetworkTypeFromProperties(name, properties.getProperties());
+                if (type.isPresent() && NetInterfaceType.VLAN.equals(type.get())) {
+                    vlanNames.add(name);
+                }
+            });
+        return vlanNames;
     }
 
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {

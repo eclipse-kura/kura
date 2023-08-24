@@ -196,7 +196,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         final Map<String, Object> modifiedProps = migrateModemConfigs(receivedProperties);
         final Set<String> interfaces = NetworkConfigurationServiceCommon
                 .getNetworkInterfaceNamesInConfig(modifiedProps);
-
         try {
             for (final String interfaceName : interfaces) {
                 Optional<NetInterfaceType> interfaceTypeProperty = NetworkConfigurationServiceCommon
@@ -207,7 +206,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
                 if (NetInterfaceType.MODEM.equals(interfaceTypeProperty.get())) {
                     setModemPppNumber(modifiedProps, interfaceName);
-                }
+                } 
             }
 
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
@@ -222,7 +221,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             this.dhcpServerMonitor.start();
             this.dnsServerMonitor.start();
-
+            logger.info("ModifiedProps: {}", modifiedProps);
             this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
         } catch (KuraException e) {
             logger.error("Failed to apply network configuration", e);
@@ -247,7 +246,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
         modifiedProps.put(String.format(PREFIX + "%s.config.pppNum", interfaceName), pppNum);
     }
-
+    
     protected void setInterfaceType(Map<String, Object> modifiedProps, String interfaceName, NetInterfaceType type) {
         modifiedProps.put(String.format(PREFIX + "%s.type", interfaceName), type.toString());
     }

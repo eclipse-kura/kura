@@ -62,6 +62,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
+    private static final String NM_DEVICE_VLAN_BUS_NAME = "org.freedesktop.NetworkManager.Device.Vlan";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
@@ -246,18 +247,14 @@ public class NMDbusConnector {
                 Properties vlanDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                         vlanDevice.getObjectPath(), Properties.class);
                 
+                DBusPath parent = (DBusPath) vlanDeviceProperties.Get(NM_DEVICE_VLAN_BUS_NAME, "Parent");
+                Properties parentProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, parent.getPath(),
+                        Properties.class);
+                
                 DevicePropertiesWrapper vlanPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.of(vlanDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_VLAN);
-                Optional<Map<String, Variant<?>>> vlanSettings;
-                Optional<Connection> optVlanCon = this.networkManager.getAppliedConnection(device.get());
-                if (optVlanCon.isPresent()) {
-                    vlanSettings = Optional.of(optVlanCon.get().GetSettings().get("vlan"));
-                    networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper, 
-                            ip4configProperties, vlanSettings);
-                } else {
-                    logger.warn("VLAN interface {} not configured to be managed", interfaceId);
-                    return null;
-                }                
+                networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper, 
+                            ip4configProperties, ip6configProperties, parentProperties);
                 break;
             case NM_DEVICE_TYPE_LOOPBACK:
                 DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
@@ -381,6 +378,7 @@ public class NMDbusConnector {
 
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
+        checkVlanConfiguration(networkConfiguration);
         List<Device> availableDevices = this.networkManager.getAllDevices();
         availableDevices.forEach(device -> {
             try {
@@ -405,6 +403,54 @@ public class NMDbusConnector {
                 manageNonConfiguredInterface(device.get(), deviceIdToBeConfigured);
             }
         }
+    }
+    
+    private synchronized void checkVlanConfiguration(Map<String, Object> networkConfiguration) {
+        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+        List<String> configuredVlans = NMSettingsConverter.getConfiguredVlansFromProperties(properties);
+        logger.info("checking list {} for vlans", configuredVlans);
+        configuredVlans.forEach(vlanIfName -> {
+            try {
+                Optional<Device> device = getNetworkManagerDeviceByInterfaceId(vlanIfName);
+                if (!device.isPresent()) {
+                    if (!KuraInterfaceStatus.DISABLED
+                            .equals(getInterfaceStatusFromProperties(vlanIfName, properties))) {
+                        logger.info("Ignoring disabled vlan {}", vlanIfName);
+                    } else {
+                        logger.debug("Creating missing vlan {}", vlanIfName);
+                        setupVlan(vlanIfName, properties);
+                        logger.debug("Missing vlan {} successfully created", vlanIfName);
+                    }
+                }
+            } catch (DBusException | NoSuchElementException e) {
+                logger.warn("Unable to create missing configured vlan {}", vlanIfName, e);
+            }
+        });
+    }
+    
+    private synchronized void setupVlan(String iface, NetworkProperties networkProperties)
+            throws DBusException {
+        Map<String, Map<String, Variant<?>>> connectionProperties = NMSettingsConverter.buildSettings(networkProperties, 
+                Optional.empty(), iface, iface, NMDeviceType.NM_DEVICE_TYPE_VLAN);
+        Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+        settings.AddConnection(connectionProperties);
+    }
+    
+    private KuraInterfaceStatus getInterfaceStatusFromProperties(String deviceId, NetworkProperties properties) {
+        KuraIpStatus ip4Status = KuraIpStatus
+                .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
+
+        Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
+                .fromString(properties.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));
+        KuraIpStatus ip6Status;
+
+        if (!ip6OptStatus.isPresent()) {
+            ip6Status = ip4Status == KuraIpStatus.UNMANAGED ? KuraIpStatus.UNMANAGED : KuraIpStatus.DISABLED;
+        } else {
+            ip6Status = ip6OptStatus.get();
+        }
+
+        return KuraInterfaceStatus.fromKuraIpStatus(ip4Status, ip6Status);
     }
 
     private synchronized void manageConfiguredInterface(Device device, String deviceId, NetworkProperties properties)
@@ -528,7 +574,7 @@ public class NMDbusConnector {
 
     private void disable(Device device) throws DBusException {
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
-
+        
         NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
@@ -536,7 +582,7 @@ public class NMDbusConnector {
             device.Disconnect();
             dsLock.waitForSignal();
         }
-
+        
         // Housekeeping
         if (appliedConnection.isPresent()) {
             appliedConnection.get().Delete();

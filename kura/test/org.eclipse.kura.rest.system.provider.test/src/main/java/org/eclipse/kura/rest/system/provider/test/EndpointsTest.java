@@ -13,7 +13,6 @@
 package org.eclipse.kura.rest.system.provider.test;
 
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_BUNDLES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
@@ -55,9 +54,6 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     private static final String EXPECTED_EXTENDED_PROPERTIES_RESPONSE = new Scanner(
             EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
-    private static final String EXPECTED_BUNDLES_RESPONSE = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/BUNDLES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
-                    .replace(" ", "");
     private static final String PROPERTIES_FILTER_REQUEST = new Scanner(
             EndpointsTest.class.getResourceAsStream("/PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
@@ -91,16 +87,6 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnExpectedBundles() {
-        givenSystemServiceMockWithoutExtendedProperties();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_BUNDLES);
-
-        thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_BUNDLES_RESPONSE);
-    }
-
-    @Test
     public void shouldReturnExpectedExtendedProperties() {
         givenSystemServiceMockWithExtendedProperties();
 
@@ -127,15 +113,6 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         givenFailingSystemServiceMock();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    @Test
-    public void shouldRethrowWebApplicationExceptionOnFailingBundles() {
-        givenFailingSystemServiceMock();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_BUNDLES);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }

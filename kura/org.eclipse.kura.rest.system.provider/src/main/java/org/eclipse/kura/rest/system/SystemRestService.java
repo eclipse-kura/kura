@@ -14,7 +14,6 @@ package org.eclipse.kura.rest.system;
 
 import static org.eclipse.kura.rest.system.Constants.KURA_PERMISSION_REST_ROLE;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_BUNDLES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
@@ -32,7 +31,6 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
-import org.eclipse.kura.rest.system.dto.BundlesDTO;
 import org.eclipse.kura.rest.system.dto.FilterDTO;
 import org.eclipse.kura.rest.system.dto.PropertiesDTO;
 import org.eclipse.kura.system.SystemService;
@@ -96,19 +94,6 @@ public class SystemRestService {
         try {
             logger.debug(DEBUG_MESSSAGE, RESOURCE_PROPERTIES_FILTER);
             return new PropertiesDTO(this.systemService, filter.getNames());
-        } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
-        }
-    }
-
-    @GET
-    @RolesAllowed(REST_ROLE_NAME)
-    @Path(RESOURCE_BUNDLES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public BundlesDTO getBundles() {
-        try {
-            logger.debug(DEBUG_MESSSAGE, RESOURCE_BUNDLES);
-            return new BundlesDTO(this.systemService.getBundles());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

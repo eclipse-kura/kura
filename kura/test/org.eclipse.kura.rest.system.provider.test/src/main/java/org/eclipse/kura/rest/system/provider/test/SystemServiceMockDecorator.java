@@ -15,7 +15,6 @@ package org.eclipse.kura.rest.system.provider.test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +25,6 @@ import java.util.Properties;
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
-import org.mockito.Mockito;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
 
 public class SystemServiceMockDecorator {
 
@@ -41,19 +37,9 @@ public class SystemServiceMockDecorator {
      * 
      * @param service
      *            the mock SystemService to modify. It adds mock methods that return all the properties specified
-     *            in resource {@link PROPERTIES_RESPONSE} and bundles in resource {@link BUNDLE_RESPONSE}.
+     *            in resource {@link PROPERTIES_RESPONSE}.
      */
     public static void addPropertiesMockMethods(SystemService service) {
-        List<Bundle> bundles = new ArrayList<>();
-
-        addBundle(bundles, 0, BUNDLE_LOCATION_VALUE, Bundle.ACTIVE, "bundle0", true, 0L, 1, 0, 0, "SNAPSHOT");
-        addBundle(bundles, 1, BUNDLE_LOCATION_VALUE, Bundle.INSTALLED, "bundle1", false, 0L, 1, 0, 0, "SNAPSHOT");
-        addBundle(bundles, 2, BUNDLE_LOCATION_VALUE, Bundle.RESOLVED, "bundle2", false, 0L, 1, 1, 1, "SNAPSHOT");
-        addBundle(bundles, 3, BUNDLE_LOCATION_VALUE, Bundle.STARTING, "bundle3", false, 0L, 2, 0, 1, "");
-        addBundle(bundles, 4, BUNDLE_LOCATION_VALUE, Bundle.STOPPING, "bundle4", false, 0L, 0, 1, 0, "alpha");
-        addBundle(bundles, 5, BUNDLE_LOCATION_VALUE, Bundle.UNINSTALLED, "bundle5", false, 0L, 0, 1, 1, "beta");
-
-        initBundles(service, bundles);
         initProperties(service);
     }
 
@@ -75,45 +61,6 @@ public class SystemServiceMockDecorator {
      */
     public static void addFailingMockMethods(SystemService service) {
         initExceptions(service);
-    }
-
-    private static void addBundle(List<Bundle> bundles, long id, String location, int state, String symbolicName,
-            boolean signed, long lastModified, int versionMajor, int versionMinor, int versionMicro, String versionQualifier) {
-        Bundle b = mock(Bundle.class);
-
-        Mockito.when(b.getBundleId()).thenReturn(id);
-        Mockito.when(b.getLocation()).thenReturn(location);
-        Mockito.when(b.getState()).thenReturn(state);
-        Mockito.when(b.getSymbolicName()).thenReturn(symbolicName);
-
-        @SuppressWarnings("unchecked")
-        Map<X509Certificate, List<X509Certificate>> certs = mock(Map.class);
-        Mockito.when(certs.isEmpty()).thenReturn(!signed);
-        Mockito.when(b.getSignerCertificates(Bundle.SIGNERS_ALL)).thenReturn(certs);
-
-        Mockito.when(b.getLastModified()).thenReturn(lastModified);
-
-        Version version = mock(Version.class);
-        Mockito.when(version.getMajor()).thenReturn(versionMajor);
-        Mockito.when(version.getMinor()).thenReturn(versionMinor);
-        Mockito.when(version.getMicro()).thenReturn(versionMicro);
-        Mockito.when(version.getQualifier()).thenReturn(versionQualifier);
-
-        Mockito.when(b.getVersion()).thenReturn(version);
-
-        bundles.add(b);
-    }
-
-    private static void initBundles(SystemService service, List<Bundle> bundles) {
-        Mockito.when(service.getBundles()).thenReturn(getBundleArrayFrom(bundles));
-    }
-
-    private static Bundle[] getBundleArrayFrom(List<Bundle> bundleList) {
-        Bundle[] bundles = new Bundle[bundleList.size()];
-        for (int i = 0; i < bundleList.size(); i++) {
-            bundles[i] = bundleList.get(i);
-        }
-        return bundles;
     }
 
     private static void initProperties(SystemService service) {
@@ -196,8 +143,6 @@ public class SystemServiceMockDecorator {
     }
 
     private static void initExceptions(SystemService service) {
-        Mockito.when(service.getBundles()).thenThrow(RuntimeException.class);
-
         when(service.getBiosVersion()).thenThrow(RuntimeException.class);
         when(service.getCommandUser()).thenThrow(RuntimeException.class);
         when(service.getCpuVersion()).thenThrow(RuntimeException.class);

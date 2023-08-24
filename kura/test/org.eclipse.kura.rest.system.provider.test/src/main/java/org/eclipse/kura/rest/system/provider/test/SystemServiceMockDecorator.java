@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
@@ -32,6 +33,7 @@ import org.osgi.framework.Version;
 public class SystemServiceMockDecorator {
 
     private static final String PROPERTIES_VALUE = "test";
+    private static final String PROPERTIES_FALSE_STRING_VALUE = "false";
     private static final String BUNDLE_LOCATION_VALUE = "test.location";
     private static final String EXT_PROPERTIES_VERSION = "1.0.0";
 
@@ -137,7 +139,6 @@ public class SystemServiceMockDecorator {
         when(service.getKuraTemporaryConfigDirectory()).thenReturn(PROPERTIES_VALUE);
         when(service.getKuraUserConfigDirectory()).thenReturn(PROPERTIES_VALUE);
         when(service.getKuraVersion()).thenReturn(PROPERTIES_VALUE);
-        when(service.getKuraWebEnabled()).thenReturn(PROPERTIES_VALUE);
         when(service.getModelId()).thenReturn(PROPERTIES_VALUE);
         when(service.getModelName()).thenReturn(PROPERTIES_VALUE);
         when(service.getNetVirtualDevicesConfig()).thenReturn(PROPERTIES_VALUE);
@@ -162,6 +163,11 @@ public class SystemServiceMockDecorator {
         when(service.getFileCommandZipMaxUploadSize()).thenReturn(0);
         when(service.isLegacyBluetoothBeaconScan()).thenReturn(false);
         when(service.isLegacyPPPLoggingEnabled()).thenReturn(false);
+        when(service.getKuraWebEnabled()).thenReturn(PROPERTIES_FALSE_STRING_VALUE);
+        
+        Properties kuraProperties = new Properties();
+        kuraProperties.put(SystemService.KEY_KURA_HAVE_NET_ADMIN, false);
+        when(service.getProperties()).thenReturn(kuraProperties);
     }
 
     private static void initExtendedProperties(SystemService service) {
@@ -214,7 +220,6 @@ public class SystemServiceMockDecorator {
         when(service.getKuraTemporaryConfigDirectory()).thenThrow(RuntimeException.class);
         when(service.getKuraUserConfigDirectory()).thenThrow(RuntimeException.class);
         when(service.getKuraVersion()).thenThrow(RuntimeException.class);
-        when(service.getKuraWebEnabled()).thenThrow(RuntimeException.class);
         when(service.getModelId()).thenThrow(RuntimeException.class);
         when(service.getModelName()).thenThrow(RuntimeException.class);
         when(service.getNetVirtualDevicesConfig()).thenThrow(RuntimeException.class);
@@ -239,6 +244,7 @@ public class SystemServiceMockDecorator {
         when(service.getFileCommandZipMaxUploadSize()).thenThrow(RuntimeException.class);
         when(service.isLegacyBluetoothBeaconScan()).thenThrow(RuntimeException.class);
         when(service.isLegacyPPPLoggingEnabled()).thenThrow(RuntimeException.class);
+        when(service.getKuraWebEnabled()).thenThrow(RuntimeException.class);
 
         when(service.getExtendedProperties()).thenThrow(RuntimeException.class);
     }

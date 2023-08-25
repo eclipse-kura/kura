@@ -854,7 +854,10 @@ public class CloudServiceImpl
     private void publishWithDelay(LifecycleMessage message) {
         if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
             this.scheduledBirthPublisherFuture.cancel(false);
+            logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
         }
+
+        logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
 
         if (message.isBirthCertificateMessage()) {
             this.lastBirthMessage = message;
@@ -868,10 +871,12 @@ public class CloudServiceImpl
             try {
 
                 if (Objects.nonNull(this.lastBirthMessage)) {
+                    logger.debug("CloudServiceImpl: publishing cached BIRTH message.");
                     publishLifeCycleMessage(lastBirthMessage);
                 }
 
                 if (Objects.nonNull(this.lastAppMessage)) {
+                    logger.debug("CloudServiceImpl: publishing cached APP message.");
                     publishLifeCycleMessage(lastAppMessage);
                 }
 

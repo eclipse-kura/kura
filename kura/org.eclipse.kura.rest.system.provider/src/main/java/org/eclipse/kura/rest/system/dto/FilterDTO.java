@@ -15,10 +15,7 @@ package org.eclipse.kura.rest.system.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.rest.configuration.api.FailureHandler;
-import org.eclipse.kura.rest.configuration.api.Validable;
-
-public class FilterDTO implements Validable {
+public class FilterDTO {
 
     private List<String> names;
 
@@ -28,11 +25,6 @@ public class FilterDTO implements Validable {
 
     public List<String> getNames() {
         return this.names;
-    }
-
-    @Override
-    public void validate() {
-        FailureHandler.requireParameter(this.names, "names");
     }
 
 }

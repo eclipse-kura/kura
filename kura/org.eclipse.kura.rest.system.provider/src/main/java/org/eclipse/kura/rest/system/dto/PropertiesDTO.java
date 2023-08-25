@@ -125,7 +125,7 @@ public class PropertiesDTO {
         this.kuraTemporaryConfigDirectory = systemService.getKuraTemporaryConfigDirectory();
         this.kuraUserConfigDirectory = systemService.getKuraUserConfigDirectory();
         this.kuraVersion = systemService.getKuraVersion();
-        this.kuraHaveWebInterface = new Boolean(systemService.getKuraWebEnabled());
+        this.kuraHaveWebInterface = Boolean.parseBoolean(systemService.getKuraWebEnabled());
         this.kuraHaveNetAdmin = (Boolean) systemService.getProperties().get(SystemService.KEY_KURA_HAVE_NET_ADMIN);
         this.kuraWifiTopChannel = systemService.getKuraWifiTopChannel();
         this.kuraDefaultNetVirtualDevicesConfig = systemService.getNetVirtualDevicesConfig();
@@ -325,7 +325,7 @@ public class PropertiesDTO {
         }
 
         if (name.equals("kuraHaveWebInterface")) {
-            this.kuraHaveWebInterface = new Boolean(systemService.getKuraWebEnabled());
+            this.kuraHaveWebInterface = Boolean.parseBoolean(systemService.getKuraWebEnabled());
         }
 
         if (name.equals("kuraHaveNetAdmin")) {

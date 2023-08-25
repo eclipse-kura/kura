@@ -269,6 +269,12 @@ public abstract class FirewallPortForwardConfigIP<T extends IPAddress> implement
         this.sourcePortRange = sourcePortRange;
     }
 
+    /**
+     * The base builder class for firewall port forward configurations
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public abstract static class FirewallPortForwardConfigIPBuilder<U extends IPAddress, T extends FirewallPortForwardConfigIPBuilder<U, T>> {
 
         protected String inboundIface;

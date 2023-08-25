@@ -65,9 +65,18 @@ public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Addre
         return new FirewallOpenPortConfigIP4Builder();
     }
 
+    /**
+     * The builder class for the IPv4 firewall open port configuration
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public static class FirewallOpenPortConfigIP4Builder
             extends FirewallOpenPortConfigIPBuilder<IP4Address, FirewallOpenPortConfigIP4Builder> {
 
+        /**
+         * Builds a new IPv4 firewall open port configuration
+         */
         @Override
         public FirewallOpenPortConfigIP4 build() throws UnknownHostException {
             if (this.permittedNetwork == null) {

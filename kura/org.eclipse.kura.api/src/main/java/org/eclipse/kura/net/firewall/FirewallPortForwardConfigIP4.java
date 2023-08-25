@@ -56,9 +56,18 @@ public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP
         return new FirewallPortForwardConfigIP4Builder();
     }
 
+    /**
+     * The builder class for the IPv4 firewall port forward configuration
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public static class FirewallPortForwardConfigIP4Builder
             extends FirewallPortForwardConfigIPBuilder<IP4Address, FirewallPortForwardConfigIP4Builder> {
 
+        /**
+         * Builds a new IPv4 firewall port forward configuration
+         */
         @Override
         public FirewallPortForwardConfigIP4 build() throws UnknownHostException {
             if (this.permittedNetwork == null) {

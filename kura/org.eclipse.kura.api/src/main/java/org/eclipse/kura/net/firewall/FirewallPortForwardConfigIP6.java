@@ -35,9 +35,18 @@ public class FirewallPortForwardConfigIP6 extends FirewallPortForwardConfigIP<IP
         return new FirewallPortForwardConfigIP6Builder();
     }
 
+    /**
+     * The builder class for the IPv6 firewall port forward configuration
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public static class FirewallPortForwardConfigIP6Builder
             extends FirewallPortForwardConfigIPBuilder<IP6Address, FirewallPortForwardConfigIP6Builder> {
 
+        /**
+         * Builds a new IPv6 firewall port forward configuration
+         */
         @Override
         public FirewallPortForwardConfigIP6 build() throws UnknownHostException {
             if (this.permittedNetwork == null) {

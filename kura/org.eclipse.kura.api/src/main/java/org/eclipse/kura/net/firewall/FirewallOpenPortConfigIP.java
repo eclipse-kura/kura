@@ -256,6 +256,12 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         this.sourcePortRange = sourcePortRange;
     }
 
+    /**
+     * The base builder class for firewall open port configurations
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public abstract static class FirewallOpenPortConfigIPBuilder<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>> {
 
         protected int port = -1;

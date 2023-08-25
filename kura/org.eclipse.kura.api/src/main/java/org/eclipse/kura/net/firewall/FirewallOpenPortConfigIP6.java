@@ -35,9 +35,18 @@ public class FirewallOpenPortConfigIP6 extends FirewallOpenPortConfigIP<IP6Addre
         return new FirewallOpenPortConfigIP6Builder();
     }
 
+    /**
+     * The builder class for the IPv6 firewall open port configuration
+     * 
+     * @since 2.6
+     */
+    @ProviderType
     public static class FirewallOpenPortConfigIP6Builder
             extends FirewallOpenPortConfigIPBuilder<IP6Address, FirewallOpenPortConfigIP6Builder> {
 
+        /**
+         * Builds a new IPv6 firewall open port configuration
+         */
         @Override
         public FirewallOpenPortConfigIP6 build() throws UnknownHostException {
             if (this.permittedNetwork == null) {

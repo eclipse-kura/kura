@@ -13,8 +13,8 @@
 package org.eclipse.kura.rest.system.provider.test;
 
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES_FILTER;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -80,7 +80,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnExpectedProperties() {
         givenSystemServiceMockWithoutExtendedProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_PROPERTIES_RESPONSE);
@@ -90,7 +90,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnExpectedExtendedProperties() {
         givenSystemServiceMockWithExtendedProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
@@ -100,7 +100,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnFilteredProperties() {
         givenSystemServiceMockWithExtendedProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
@@ -112,7 +112,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingProperties() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -121,7 +121,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingExtendedProperties() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_PROPERTIES);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -130,7 +130,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnFailingPropertiesFilter() {
         givenFailingSystemServiceMock();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }

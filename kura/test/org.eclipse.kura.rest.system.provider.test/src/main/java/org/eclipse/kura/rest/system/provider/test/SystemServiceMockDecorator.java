@@ -30,7 +30,6 @@ public class SystemServiceMockDecorator {
 
     private static final String PROPERTIES_VALUE = "test";
     private static final String PROPERTIES_FALSE_STRING_VALUE = "false";
-    private static final String BUNDLE_LOCATION_VALUE = "test.location";
     private static final String EXT_PROPERTIES_VERSION = "1.0.0";
 
     /**

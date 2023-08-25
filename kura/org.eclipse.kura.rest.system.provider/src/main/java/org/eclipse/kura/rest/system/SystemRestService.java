@@ -14,8 +14,8 @@ package org.eclipse.kura.rest.system;
 
 import static org.eclipse.kura.rest.system.Constants.KURA_PERMISSION_REST_ROLE;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES;
-import static org.eclipse.kura.rest.system.Constants.RESOURCE_PROPERTIES_FILTER;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.REST_ROLE_NAME;
 
@@ -32,7 +32,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.system.dto.FilterDTO;
-import org.eclipse.kura.rest.system.dto.PropertiesDTO;
+import org.eclipse.kura.rest.system.dto.FrameworkPropertiesDTO;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -74,12 +74,12 @@ public class SystemRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
-    @Path(RESOURCE_PROPERTIES)
+    @Path(RESOURCE_FRAMEWORK_PROPERTIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public PropertiesDTO getProperties() {
+    public FrameworkPropertiesDTO getFrameworkProperties() {
         try {
-            logger.debug(DEBUG_MESSSAGE, RESOURCE_PROPERTIES);
-            return new PropertiesDTO(this.systemService);
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES);
+            return new FrameworkPropertiesDTO(this.systemService);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -87,13 +87,13 @@ public class SystemRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path(RESOURCE_PROPERTIES_FILTER)
+    @Path(RESOURCE_FRAMEWORK_PROPERTIES_FILTER)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public PropertiesDTO postPropertiesFilter(FilterDTO filter) {
+    public FrameworkPropertiesDTO postFrameworkPropertiesFilter(FilterDTO filter) {
         try {
-            logger.debug(DEBUG_MESSSAGE, RESOURCE_PROPERTIES_FILTER);
-            return new PropertiesDTO(this.systemService, filter.getNames());
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES_FILTER);
+            return new FrameworkPropertiesDTO(this.systemService, filter.getNames());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

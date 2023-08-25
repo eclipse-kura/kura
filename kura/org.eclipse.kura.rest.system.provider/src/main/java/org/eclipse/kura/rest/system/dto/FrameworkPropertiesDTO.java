@@ -19,7 +19,7 @@ import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemService;
 
 @SuppressWarnings("unused")
-public class PropertiesDTO {
+public class FrameworkPropertiesDTO {
 
     // hardware
     private String biosVersion;
@@ -83,7 +83,7 @@ public class PropertiesDTO {
     // extended properties
     private ExtendedPropertiesDTO extendedProperties;
 
-    public PropertiesDTO(SystemService systemService) {
+    public FrameworkPropertiesDTO(SystemService systemService) {
         this.biosVersion = systemService.getBiosVersion();
         this.cpuVersion = systemService.getCpuVersion();
         this.deviceName = systemService.getDeviceName();
@@ -143,7 +143,7 @@ public class PropertiesDTO {
         }
     }
 
-    public PropertiesDTO(SystemService systemService, List<String> names) {
+    public FrameworkPropertiesDTO(SystemService systemService, List<String> names) {
         for (String name : names) {
             populatePropertyBasedOnName(systemService, name);
         }

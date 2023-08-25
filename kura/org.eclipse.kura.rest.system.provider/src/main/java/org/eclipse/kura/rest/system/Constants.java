@@ -20,6 +20,7 @@ public class Constants {
     public static final String REST_APP_ID = "system/v1";
     public static final String RESOURCE_FRAMEWORK_PROPERTIES = "/frameworkProperties";
     public static final String RESOURCE_FRAMEWORK_PROPERTIES_FILTER = "/frameworkProperties/filter";
+    public static final String RESOURCE_KURA_PROPERTIES = "/kuraProperties";
     public static final String REST_ROLE_NAME = "system";
     public static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 

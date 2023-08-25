@@ -38,8 +38,8 @@ public class SystemServiceMockDecorator {
      *            the mock SystemService to modify. It adds mock methods that return all the properties specified
      *            in resource {@link PROPERTIES_RESPONSE}.
      */
-    public static void addPropertiesMockMethods(SystemService service) {
-        initProperties(service);
+    public static void addFrameworkPropertiesMockMethods(SystemService service) {
+        initFrameworkProperties(service);
     }
 
     /**
@@ -55,6 +55,16 @@ public class SystemServiceMockDecorator {
     /**
      * 
      * @param service
+     *            the mock SystemService to modify. It adds mock methods to include all the kura properties
+     *            specified in resource {@link KURA_PROPERTIES_RESPONSE}.
+     */
+    public static void addKuraPropertiesMockMethods(SystemService service) {
+        initKuraProperties(service);
+    }
+
+    /**
+     * 
+     * @param service
      *            the mock SystemService to modify. Its mock methods are all modified to throw a
      *            {@link RuntimeException}.
      */
@@ -62,7 +72,7 @@ public class SystemServiceMockDecorator {
         initExceptions(service);
     }
 
-    private static void initProperties(SystemService service) {
+    private static void initFrameworkProperties(SystemService service) {
         when(service.getBiosVersion()).thenReturn(PROPERTIES_VALUE);
         when(service.getCommandUser()).thenReturn(PROPERTIES_VALUE);
         when(service.getCpuVersion()).thenReturn(PROPERTIES_VALUE);
@@ -141,6 +151,16 @@ public class SystemServiceMockDecorator {
         return group;
     }
 
+    private static void initKuraProperties(SystemService service) {
+        Properties kuraProperties = new Properties();
+        kuraProperties.setProperty(SystemService.KEY_KURA_HOME_DIR, PROPERTIES_VALUE);
+        kuraProperties.setProperty(SystemService.KEY_KURA_PACKAGES_DIR, PROPERTIES_VALUE);
+        kuraProperties.setProperty(SystemService.KEY_KURA_NAME, PROPERTIES_VALUE);
+        kuraProperties.setProperty(SystemService.KEY_KURA_HAVE_NET_ADMIN, PROPERTIES_VALUE);
+
+        when(service.getProperties()).thenReturn(kuraProperties);
+    }
+
     private static void initExceptions(SystemService service) {
         when(service.getBiosVersion()).thenThrow(RuntimeException.class);
         when(service.getCommandUser()).thenThrow(RuntimeException.class);
@@ -191,6 +211,8 @@ public class SystemServiceMockDecorator {
         when(service.getKuraWebEnabled()).thenThrow(RuntimeException.class);
 
         when(service.getExtendedProperties()).thenThrow(RuntimeException.class);
+        
+        when(service.getProperties()).thenThrow(RuntimeException.class);
     }
 
 }

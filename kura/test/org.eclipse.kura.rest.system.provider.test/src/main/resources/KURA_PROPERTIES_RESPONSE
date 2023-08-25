@@ -1,0 +1,6 @@
+{
+    "kura.name":"test",
+    "kura.packages":"test",
+    "kura.have.net.admin":"test",
+    "kura.home":"test"    
+}

@@ -16,8 +16,11 @@ import static org.eclipse.kura.rest.system.Constants.KURA_PERMISSION_REST_ROLE;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.REST_ROLE_NAME;
+
+import java.util.Properties;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -94,6 +97,19 @@ public class SystemRestService {
         try {
             logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES_FILTER);
             return new FrameworkPropertiesDTO(this.systemService, filter.getNames());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @GET
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path(RESOURCE_KURA_PROPERTIES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Properties getKuraProperties() {
+        try {
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_KURA_PROPERTIES);
+            return this.systemService.getProperties();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

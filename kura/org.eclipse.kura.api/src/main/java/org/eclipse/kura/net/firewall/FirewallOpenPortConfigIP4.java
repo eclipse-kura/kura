@@ -61,6 +61,11 @@ public class FirewallOpenPortConfigIP4 extends FirewallOpenPortConfigIP<IP4Addre
         super(builder);
     }
 
+    /**
+     * Return the builder for the IPv4 firewall open port configuration
+     * 
+     * @since 2.6
+     */
     public static FirewallOpenPortConfigIP4Builder builder() {
         return new FirewallOpenPortConfigIP4Builder();
     }

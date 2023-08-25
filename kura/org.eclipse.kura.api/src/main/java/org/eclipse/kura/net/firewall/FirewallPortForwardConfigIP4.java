@@ -52,6 +52,11 @@ public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP
         super(builder);
     }
 
+    /**
+     * Return the builder for the IPv4 firewall port forward configuration
+     * 
+     * @since 2.6
+     */
     public static FirewallPortForwardConfigIP4Builder builder() {
         return new FirewallPortForwardConfigIP4Builder();
     }

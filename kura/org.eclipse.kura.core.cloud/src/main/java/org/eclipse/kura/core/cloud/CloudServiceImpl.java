@@ -168,6 +168,8 @@ public class CloudServiceImpl
 
     private ScheduledFuture<?> scheduledBirthPublisherFuture;
     private ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
+    private LifecycleMessage lastBirthMessage;
+    private LifecycleMessage lastAppMessage;
 
     public CloudServiceImpl() {
         this.cloudClients = new CopyOnWriteArrayList<>();
@@ -833,20 +835,6 @@ public class CloudServiceImpl
         }
     }
 
-    private void publishWithDelay(LifecycleMessage birthMessage) {
-        if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
-            this.scheduledBirthPublisherFuture.cancel(false);
-        }
-
-        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
-            try {
-                publishLifeCycleMessage(birthMessage);
-            } catch (KuraException e) {
-                logger.error("Error sending birth certificate.", e);
-            }
-        }, 30L, TimeUnit.SECONDS);
-    }
-
     private void publishDisconnectCertificate() throws KuraException {
         if (this.options.isLifecycleCertsDisabled()) {
             return;
@@ -860,7 +848,37 @@ public class CloudServiceImpl
             return;
         }
 
-        publishLifeCycleMessage(new LifecycleMessage(this.options, this).asAppCertificateMessage());
+        publishWithDelay(new LifecycleMessage(this.options, this).asAppCertificateMessage());
+    }
+
+    private void publishWithDelay(LifecycleMessage message) {
+        if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
+            this.scheduledBirthPublisherFuture.cancel(false);
+        }
+
+        if (message.isBirthCertificateMessage()) {
+            this.lastBirthMessage = message;
+        }
+
+        if (message.isAppCertificateMessage()) {
+            this.lastAppMessage = message;
+        }
+
+        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
+            try {
+
+                if (Objects.nonNull(this.lastBirthMessage)) {
+                    publishLifeCycleMessage(lastBirthMessage);
+                }
+
+                if (Objects.nonNull(this.lastAppMessage)) {
+                    publishLifeCycleMessage(lastAppMessage);
+                }
+
+            } catch (KuraException e) {
+                logger.error("Error sending cached BIRTH/APP certificate.", e);
+            }
+        }, 30L, TimeUnit.SECONDS);
     }
 
     private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {

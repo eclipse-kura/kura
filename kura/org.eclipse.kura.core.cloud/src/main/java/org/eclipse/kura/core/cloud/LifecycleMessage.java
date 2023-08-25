@@ -19,6 +19,8 @@ public class LifecycleMessage {
     private StringBuilder topicBuilder;
     private LifeCyclePayloadBuilder payloadBuilder;
     private KuraPayload payload;
+    private boolean isAppCertificateMessage = false;
+    private boolean isBirthCertificateMessage = false;
 
     public LifecycleMessage(CloudServiceOptions options, CloudServiceImpl cloudServiceImpl) {
         this.topicBuilder = new StringBuilder(options.getTopicControlPrefix());
@@ -34,12 +36,14 @@ public class LifecycleMessage {
     public LifecycleMessage asBirthCertificateMessage() {
         this.topicBuilder.append(CloudServiceOptions.getTopicBirthSuffix());
         this.payload = this.payloadBuilder.buildBirthPayload();
+        this.isBirthCertificateMessage = true;
         return this;
     }
 
     public LifecycleMessage asAppCertificateMessage() {
         this.topicBuilder.append(CloudServiceOptions.getTopicAppsSuffix());
         this.payload = this.payloadBuilder.buildBirthPayload();
+        this.isAppCertificateMessage = true;
         return this;
     }
 
@@ -55,6 +59,14 @@ public class LifecycleMessage {
 
     public KuraPayload getPayload() {
         return this.payload;
+    }
+
+    public boolean isAppCertificateMessage() {
+        return this.isAppCertificateMessage;
+    }
+
+    public boolean isBirthCertificateMessage() {
+        return this.isBirthCertificateMessage;
     }
 
 }

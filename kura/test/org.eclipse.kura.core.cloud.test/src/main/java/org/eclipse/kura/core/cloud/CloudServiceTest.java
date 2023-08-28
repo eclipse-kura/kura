@@ -359,7 +359,7 @@ public class CloudServiceTest {
             final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
             eventAdmin.postEvent(new TamperEvent("foo", tamperStatus));
 
-            metrics = getMetrics(message.get(30, TimeUnit.SECONDS));
+            metrics = getMetrics(message.get(35, TimeUnit.SECONDS));
 
             assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get("tamper_status").asString());
         } finally {

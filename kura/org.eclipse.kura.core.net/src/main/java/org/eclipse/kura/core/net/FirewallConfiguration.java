@@ -35,8 +35,6 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP6;
 import org.eclipse.kura.net.firewall.RuleType;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
-import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

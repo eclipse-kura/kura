@@ -45,7 +45,8 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractFirewallConfigurationServiceImpl<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>, Z extends FirewallPortForwardConfigIPBuilder<U, Z>> {
+public abstract class AbstractFirewallConfigurationServiceImpl<U extends IPAddress, T extends FirewallOpenPortConfigIPBuilder<U, T>,
+ Z extends FirewallPortForwardConfigIPBuilder<U, Z>> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractFirewallConfigurationServiceImpl.class);
 

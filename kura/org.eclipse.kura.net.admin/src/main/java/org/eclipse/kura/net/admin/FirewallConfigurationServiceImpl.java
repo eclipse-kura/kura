@@ -17,6 +17,7 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +63,12 @@ import org.slf4j.LoggerFactory;
 public class FirewallConfigurationServiceImpl implements FirewallConfigurationService, SelfConfiguringComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
+    private static final String[] FP_FILTER_RULES = {
+            "-A input-kura -p tcp -m connlimit --connlimit-above 111 -j REJECT --reject-with tcp-reset",
+            "-A input-kura -p tcp --tcp-flags RST RST -m limit --limit 2/s --limit-burst 2 -j ACCEPT",
+            "-A input-kura -p tcp --tcp-flags RST RST -j DROP",
+            "-A input-kura -p tcp -m conntrack --ctstate NEW -m limit --limit 60/s --limit-burst 20 -j ACCEPT",
+            "-A input-kura -p tcp -m conntrack --ctstate NEW -j DROP" };
 
     private EventAdmin eventAdmin;
     private LinuxFirewall firewall;
@@ -406,8 +413,16 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
     @Override
     public void addFloodingProtectionRules(Set<String> floodingRules) {
+        // Since the flooding protection rules passed as a parameter
+        // is only for the mangle table, a default set of rules for the
+        // filter tables is added.
         try {
-            this.firewall.setAdditionalRules(new HashSet<>(), new HashSet<>(), floodingRules);
+            if (floodingRules == null || floodingRules.isEmpty()) {
+                this.firewall.setAdditionalRules(new HashSet<>(), new HashSet<>(), new HashSet<>());
+            } else {
+                this.firewall.setAdditionalRules(new HashSet<>(Arrays.asList(FP_FILTER_RULES)), new HashSet<>(),
+                        floodingRules);
+            }
         } catch (KuraException e) {
             logger.error("Failed to set Firewall Flooding Protection Configuration", e);
         }

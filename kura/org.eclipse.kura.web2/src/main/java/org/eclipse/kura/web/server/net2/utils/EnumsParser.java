@@ -166,6 +166,10 @@ public class EnumsParser {
             if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA_WPA2.name())) {
                 return GwtWifiSecurity.netWifiSecurityWPA_WPA2.name();
             }
+
+            if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA2_ENTERPRISE.name())) {
+                return GwtWifiSecurity.netWifiSecurityWPA2Enterprise.name();
+            }
         }
 
         return GwtWifiSecurity.netWifiSecurityWPA2.name();
@@ -191,6 +195,10 @@ public class EnumsParser {
 
             if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())) {
                 return WifiSecurity.SECURITY_WPA_WPA2.name();
+            }
+
+            if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA2Enterprise.name())) {
+                return WifiSecurity.SECURITY_WPA2_ENTERPRISE.name();
             }
         }
 

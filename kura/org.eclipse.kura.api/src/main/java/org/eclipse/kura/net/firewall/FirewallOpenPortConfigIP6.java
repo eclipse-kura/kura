@@ -37,8 +37,6 @@ public class FirewallOpenPortConfigIP6 extends FirewallOpenPortConfigIP<IP6Addre
 
     /**
      * The builder class for the IPv6 firewall open port configuration
-     * 
-     * @since 2.6
      */
     @ProviderType
     public static class FirewallOpenPortConfigIP6Builder

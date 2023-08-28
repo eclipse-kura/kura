@@ -22,6 +22,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The implementation of IPv6 firewall port forward configurations
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.6
  */
 @ProviderType
 public class FirewallPortForwardConfigIP6 extends FirewallPortForwardConfigIP<IP6Address>
@@ -37,8 +38,6 @@ public class FirewallPortForwardConfigIP6 extends FirewallPortForwardConfigIP<IP
 
     /**
      * The builder class for the IPv6 firewall port forward configuration
-     * 
-     * @since 2.6
      */
     @ProviderType
     public static class FirewallPortForwardConfigIP6Builder

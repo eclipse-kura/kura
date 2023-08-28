@@ -36,7 +36,7 @@ public class SystemServiceMockDecorator {
      * 
      * @param service
      *            the mock SystemService to modify. It adds mock methods that return all the properties specified
-     *            in resource {@link PROPERTIES_RESPONSE}.
+     *            in resource {@link FRAMEWORK_PROPERTIES_RESPONSE}.
      */
     public static void addFrameworkPropertiesMockMethods(SystemService service) {
         initFrameworkProperties(service);
@@ -152,11 +152,14 @@ public class SystemServiceMockDecorator {
     }
 
     private static void initKuraProperties(SystemService service) {
-        Properties kuraProperties = new Properties();
+        Properties defaults = new Properties();
+        defaults.setProperty(SystemService.KEY_KURA_HAVE_NET_ADMIN, PROPERTIES_VALUE);
+        defaults.setProperty(SystemService.KEY_KURA_PLUGINS_DIR, PROPERTIES_VALUE);
+
+        Properties kuraProperties = new Properties(defaults);
         kuraProperties.setProperty(SystemService.KEY_KURA_HOME_DIR, PROPERTIES_VALUE);
         kuraProperties.setProperty(SystemService.KEY_KURA_PACKAGES_DIR, PROPERTIES_VALUE);
         kuraProperties.setProperty(SystemService.KEY_KURA_NAME, PROPERTIES_VALUE);
-        kuraProperties.setProperty(SystemService.KEY_KURA_HAVE_NET_ADMIN, PROPERTIES_VALUE);
 
         when(service.getProperties()).thenReturn(kuraProperties);
     }

@@ -22,8 +22,6 @@ import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.REST_ROLE_NAME;
 
-import java.util.Properties;
-
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -39,6 +37,7 @@ import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.system.dto.ExtendedPropertiesDTO;
 import org.eclipse.kura.rest.system.dto.FilterDTO;
 import org.eclipse.kura.rest.system.dto.FrameworkPropertiesDTO;
+import org.eclipse.kura.rest.system.dto.KuraPropertiesDTO;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -108,10 +107,10 @@ public class SystemRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path(RESOURCE_KURA_PROPERTIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public Properties getKuraProperties() {
+    public KuraPropertiesDTO getKuraProperties() {
         try {
             logger.debug(DEBUG_MESSSAGE, RESOURCE_KURA_PROPERTIES);
-            return this.systemService.getProperties();
+            return new KuraPropertiesDTO(this.systemService.getProperties());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

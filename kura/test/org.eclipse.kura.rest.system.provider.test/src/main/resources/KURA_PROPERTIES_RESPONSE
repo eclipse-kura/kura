@@ -1,6 +1,9 @@
 {
-    "kura.name":"test",
-    "kura.packages":"test",
-    "kura.have.net.admin":"test",
-    "kura.home":"test"    
+    "kuraProperties": {
+        "kura.have.net.admin":"test",
+        "kura.name":"test",
+        "kura.home":"test",
+        "kura.plugins":"test",
+        "kura.packages":"test"
+    }
 }

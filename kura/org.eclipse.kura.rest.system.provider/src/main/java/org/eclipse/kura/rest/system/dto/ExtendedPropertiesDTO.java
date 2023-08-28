@@ -32,7 +32,7 @@ public class ExtendedPropertiesDTO {
         Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
 
         if (properties.isPresent()) {
-            populateExtendedProperties(properties.get(), ((String s) -> true));
+            populateExtendedProperties(properties.get(), s -> true);
         }
     }
 

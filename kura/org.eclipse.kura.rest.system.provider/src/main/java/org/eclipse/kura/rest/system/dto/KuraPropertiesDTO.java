@@ -25,7 +25,7 @@ public class KuraPropertiesDTO {
     public KuraPropertiesDTO(Properties kuraProperties) {
         this.kuraProperties = new HashMap<>();
 
-        populateKuraProperties(kuraProperties, ((String s) -> true));
+        populateKuraProperties(kuraProperties, s -> true);
     }
 
     public KuraPropertiesDTO(Properties kuraProperties, List<String> names) {

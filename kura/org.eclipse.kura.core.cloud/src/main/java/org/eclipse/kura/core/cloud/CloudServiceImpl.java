@@ -488,11 +488,7 @@ public class CloudServiceImpl
 
         // publish updated birth certificate with updated list of active apps
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Cannot publish app certificate");
-            }
+            publishAppCertificate();
         }
     }
 
@@ -843,7 +839,7 @@ public class CloudServiceImpl
         publishLifeCycleMessage(new LifecycleMessage(this.options, this).asDisconnectCertificateMessage());
     }
 
-    private void publishAppCertificate() throws KuraException {
+    private void publishAppCertificate() {
         if (this.options.isLifecycleCertsDisabled()) {
             return;
         }
@@ -970,11 +966,7 @@ public class CloudServiceImpl
         }
 
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Unable to publish updated App Certificate");
-            }
+            publishAppCertificate();
         }
     }
 
@@ -988,11 +980,7 @@ public class CloudServiceImpl
         }
 
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Unable to publish updated App Certificate");
-            }
+            publishAppCertificate();
         }
     }
 

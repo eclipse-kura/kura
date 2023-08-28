@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,8 +50,10 @@ import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -135,18 +137,30 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         Iterator<LocalRule> localRules = getLocalRules().iterator();
         while (localRules.hasNext()) {
             LocalRule localRule = localRules.next();
-            if (localRule.getPortRange() != null) {
-                logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
-                firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPortRange(),
-                        NetProtocol.valueOf(localRule.getProtocol()), localRule.getPermittedNetwork(),
-                        localRule.getPermittedInterfaceName(), localRule.getUnpermittedInterfaceName(),
-                        localRule.getPermittedMAC(), localRule.getSourcePortRange()));
-            } else {
-                logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
-                firewallConfiguration.addConfig(new FirewallOpenPortConfigIP4(localRule.getPort(),
-                        NetProtocol.valueOf(localRule.getProtocol()), localRule.getPermittedNetwork(),
-                        localRule.getPermittedInterfaceName(), localRule.getUnpermittedInterfaceName(),
-                        localRule.getPermittedMAC(), localRule.getSourcePortRange()));
+            FirewallOpenPortConfigIP4Builder builder = FirewallOpenPortConfigIP4.builder();
+            try {
+                if (localRule.getPortRange() != null) {
+                    logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
+                    builder.withPortRange(localRule.getPortRange())
+                            .withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
+                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
+                            .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
+                            .withPermittedMac(localRule.getPermittedMAC())
+                            .withSourcePortRange(localRule.getSourcePortRange());
+                    firewallConfiguration.addConfig(builder.build());
+                } else {
+                    logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
+                    builder.withPort(localRule.getPort()).withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
+                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
+                            .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
+                            .withPermittedMac(localRule.getPermittedMAC())
+                            .withSourcePortRange(localRule.getSourcePortRange());
+                    firewallConfiguration.addConfig(builder.build());
+                }
+            } catch (UnknownHostException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
         }
         Iterator<PortForwardRule> portForwardRules = getPortForwardRules().iterator();
@@ -155,15 +169,19 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             try {
                 logger.debug("getFirewallConfiguration() :: Adding port forwarding - inbound iface is {}",
                         portForwardRule.getInboundIface());
-                firewallConfiguration.addConfig(new FirewallPortForwardConfigIP4(portForwardRule.getInboundIface(),
-                        portForwardRule.getOutboundIface(),
-                        (IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()),
-                        NetProtocol.valueOf(portForwardRule.getProtocol()), portForwardRule.getInPort(),
-                        portForwardRule.getOutPort(), portForwardRule.isMasquerade(),
-                        new NetworkPair<>(
+                FirewallPortForwardConfigIP4Builder builder = FirewallPortForwardConfigIP4.builder();
+                builder.withInboundIface(portForwardRule.getInboundIface())
+                        .withOutboundIface(portForwardRule.getOutboundIface())
+                        .withAddress((IP4Address) IPAddress.parseHostAddress(portForwardRule.getAddress()))
+                        .withProtocol(NetProtocol.valueOf(portForwardRule.getProtocol()))
+                        .withInPort(portForwardRule.getInPort()).withOutPort(portForwardRule.getOutPort())
+                        .withMasquerade(portForwardRule.isMasquerade())
+                        .withPermittedNetwork(new NetworkPair<>(
                                 (IP4Address) IPAddress.parseHostAddress(portForwardRule.getPermittedNetwork()),
-                                (short) portForwardRule.getPermittedNetworkMask()),
-                        portForwardRule.getPermittedMAC(), portForwardRule.getSourcePortRange()));
+                                (short) portForwardRule.getPermittedNetworkMask()))
+                        .withPermittedMac(portForwardRule.getPermittedMAC())
+                        .withSourcePortRange(portForwardRule.getSourcePortRange());
+                firewallConfiguration.addConfig(builder.build());
             } catch (UnknownHostException e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
             }
@@ -214,7 +232,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             if (openPortEntry.getPermittedNetwork() == null
                     || openPortEntry.getPermittedNetwork().getIpAddress() == null) {
                 try {
-                    openPortEntry.setPermittedNetwork(getNetworkPair00());
+                    openPortEntry.setPermittedNetwork(getDefaultNetworkPair());
                 } catch (UnknownHostException e) {
                     logger.info(e.getMessage(), e);
                 }
@@ -268,7 +286,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             if (portForwardEntry.getPermittedNetwork() == null
                     || portForwardEntry.getPermittedNetwork().getIpAddress() == null) {
                 try {
-                    portForwardEntry.setPermittedNetwork(getNetworkPair00());
+                    portForwardEntry.setPermittedNetwork(getDefaultNetworkPair());
                 } catch (UnknownHostException e) {
                     logger.info(e.getMessage(), e);
                 }
@@ -398,8 +416,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         return tocd;
     }
 
-    private NetworkPair getNetworkPair00() throws UnknownHostException {
-        return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
+    private NetworkPair getDefaultNetworkPair() throws UnknownHostException {
+        return new NetworkPair(IP4Address.getDefaultAddress(), (short) 0);
     }
 
     @Override

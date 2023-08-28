@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,8 +45,18 @@ public interface FirewallPortForwardConfig extends NetConfig {
      * The LAN IP address to forward connections to
      *
      * @return The LAN IPAddress to forward connections to
+     * @deprecated since 2.6. Use {@link FirewallPortForwardConfig#getIPAddress}
      */
+    @Deprecated
     public IP4Address getAddress();
+
+    /**
+     * The LAN IP address to forward connections to
+     *
+     * @return The LAN IPAddress to forward connections to
+     * @since 2.6
+     */
+    public IPAddress getIPAddress();
 
     /**
      * Gets the type of network protocol (TCP or UDP) that is used for this configuration

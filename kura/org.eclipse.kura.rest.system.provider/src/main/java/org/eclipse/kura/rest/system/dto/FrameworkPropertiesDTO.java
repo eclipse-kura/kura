@@ -13,9 +13,7 @@
 package org.eclipse.kura.rest.system.dto;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemService;
 
 @SuppressWarnings("unused")
@@ -80,9 +78,6 @@ public class FrameworkPropertiesDTO {
     private Integer commandZipMaxUploadNumber;
     private Integer commandZipMaxUploadSize;
 
-    // extended properties
-    private ExtendedPropertiesDTO extendedProperties;
-
     public FrameworkPropertiesDTO(SystemService systemService) {
         this.biosVersion = systemService.getBiosVersion();
         this.cpuVersion = systemService.getCpuVersion();
@@ -136,11 +131,6 @@ public class FrameworkPropertiesDTO {
         this.commandUser = systemService.getCommandUser();
         this.commandZipMaxUploadNumber = systemService.getFileCommandZipMaxUploadNumber();
         this.commandZipMaxUploadSize = systemService.getFileCommandZipMaxUploadSize();
-        
-        Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
-        if (properties.isPresent()) {
-            this.extendedProperties = new ExtendedPropertiesDTO(properties.get());
-        }
     }
 
     public FrameworkPropertiesDTO(SystemService systemService, List<String> names) {
@@ -156,13 +146,6 @@ public class FrameworkPropertiesDTO {
         populateKuraPropertiesBasedOnName(systemService, name);
         populateOsgiPropertiesBasedOnName(systemService, name);
         populateCommandPropertiesBasedOnName(systemService, name);
-
-        if (name.equals("extendedProperties")) {
-            Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
-            if (properties.isPresent()) {
-                this.extendedProperties = new ExtendedPropertiesDTO(properties.get());
-            }
-        }
     }
 
     private void populateHardwarePropertiesBasedOnName(SystemService systemService, String name) {

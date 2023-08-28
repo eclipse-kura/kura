@@ -13,6 +13,8 @@
 package org.eclipse.kura.rest.system.provider.test;
 
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
@@ -49,18 +51,23 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @RunWith(Parameterized.class)
 public class EndpointsTest extends AbstractRequestHandlerTest {
 
-    private static final String EXPECTED_PROPERTIES_RESPONSE = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
-                    .replace(" ", "");
+    private static final String EXPECTED_FRAMEWORK_PROPERTIES_RESPONSE = new Scanner(
+            EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_RESPONSE"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
     private static final String EXPECTED_EXTENDED_PROPERTIES_RESPONSE = new Scanner(
             EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_RESPONSE"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
-    private static final String PROPERTIES_FILTER_REQUEST = new Scanner(
-            EndpointsTest.class.getResourceAsStream("/PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A").next()
-                    .replace(" ", "");
-    private static final String KURA_PROPERTIES_RESPONSE = new Scanner(
+    private static final String EXPECTED_KURA_PROPERTIES_RESPONSE = new Scanner(
             EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_RESPONSE"), "UTF-8").useDelimiter("\\A").next()
                     .replace(" ", "");
+
+    private static final String FRAMEWORK_PROPERTIES_FILTER_REQUEST = new Scanner(
+            EndpointsTest.class.getResourceAsStream("/FRAMEWORK_PROPERTIES_FILTER_REQUEST"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
+    private static final String EXTENDED_PROPERTIES_FILTER_REQUEST = new Scanner(
+            EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A")
+                    .next().replace(" ", "");
+
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
@@ -82,31 +89,23 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
 
     // Positive tests
 
+    // GET
+
     @Test
     public void shouldReturnExpectedFrameworkProperties() {
-        givenSystemServiceMockWithoutExtendedProperties();
+        givenSystemServiceMockWithFrameworkProperties();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_PROPERTIES_RESPONSE);
+        thenResponseBodyEqualsJson(EXPECTED_FRAMEWORK_PROPERTIES_RESPONSE);
     }
 
     @Test
     public void shouldReturnExpectedExtendedProperties() {
         givenSystemServiceMockWithExtendedProperties();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_FRAMEWORK_PROPERTIES);
-
-        thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
-    }
-
-    @Test
-    public void shouldReturnFilteredFrameworkProperties() {
-        givenSystemServiceMockWithExtendedProperties();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_EXTENDED_PROPERTIES);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
@@ -119,10 +118,36 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), RESOURCE_KURA_PROPERTIES);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(KURA_PROPERTIES_RESPONSE);
+        thenResponseBodyEqualsJson(EXPECTED_KURA_PROPERTIES_RESPONSE);
+    }
+
+    // POST
+
+    @Test
+    public void shouldReturnFilteredFrameworkProperties() {
+        givenSystemServiceMockWithFrameworkProperties();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
+                FRAMEWORK_PROPERTIES_FILTER_REQUEST);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_FRAMEWORK_PROPERTIES_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnFilteredExtendedProperties() {
+        givenSystemServiceMockWithExtendedProperties();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_EXTENDED_PROPERTIES_FILTER,
+                EXTENDED_PROPERTIES_FILTER_REQUEST);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
     }
 
     // Exceptions test
+
+    // GET
 
     @Test
     public void shouldRethrowWebApplicationExceptionOnFailingFrameworkProperties() {
@@ -143,15 +168,6 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldRethrowWebApplicationExceptionOnFailingPropertiesFilter() {
-        givenFailingSystemServiceMock();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER, PROPERTIES_FILTER_REQUEST);
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    @Test
     public void shouldRethrowWebApplicationExceptionOnFailingKuraProperties() {
         givenFailingSystemServiceMock();
 
@@ -160,24 +176,44 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
+    // POST
+
+    @Test
+    public void shouldRethrowWebApplicationExceptionOnFailingFrameworkPropertiesFilter() {
+        givenFailingSystemServiceMock();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_FRAMEWORK_PROPERTIES_FILTER,
+                FRAMEWORK_PROPERTIES_FILTER_REQUEST);
+
+        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    public void shouldRethrowWebApplicationExceptionOnFailingExtendedPropertiesFilter() {
+        givenFailingSystemServiceMock();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_EXTENDED_PROPERTIES_FILTER,
+                EXTENDED_PROPERTIES_FILTER_REQUEST);
+
+        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
     /*
      * Steps
      */
 
-    private static void givenSystemServiceMockWithoutExtendedProperties() {
+    private static void givenSystemServiceMockWithFrameworkProperties() {
         reset(systemServiceMock);
         SystemServiceMockDecorator.addFrameworkPropertiesMockMethods(systemServiceMock);
     }
 
     private static void givenSystemServiceMockWithExtendedProperties() {
         reset(systemServiceMock);
-        SystemServiceMockDecorator.addFrameworkPropertiesMockMethods(systemServiceMock);
         SystemServiceMockDecorator.addExtendedPropertiesMockMethods(systemServiceMock);
     }
 
     private static void givenSystemServiceMockWithKuraProperties() {
         reset(systemServiceMock);
-        SystemServiceMockDecorator.addFrameworkPropertiesMockMethods(systemServiceMock);
         SystemServiceMockDecorator.addKuraPropertiesMockMethods(systemServiceMock);
     }
 
@@ -197,7 +233,7 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     private static void createSystemServiceMock() {
-        givenSystemServiceMockWithoutExtendedProperties();
+        givenSystemServiceMockWithFrameworkProperties();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);

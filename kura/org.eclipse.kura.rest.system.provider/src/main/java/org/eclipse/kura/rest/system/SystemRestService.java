@@ -14,6 +14,8 @@ package org.eclipse.kura.rest.system;
 
 import static org.eclipse.kura.rest.system.Constants.KURA_PERMISSION_REST_ROLE;
 import static org.eclipse.kura.rest.system.Constants.MQTT_APP_ID;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
@@ -34,6 +36,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
+import org.eclipse.kura.rest.system.dto.ExtendedPropertiesDTO;
 import org.eclipse.kura.rest.system.dto.FilterDTO;
 import org.eclipse.kura.rest.system.dto.FrameworkPropertiesDTO;
 import org.eclipse.kura.system.SystemService;
@@ -88,15 +91,14 @@ public class SystemRestService {
         }
     }
 
-    @POST
+    @GET
     @RolesAllowed(REST_ROLE_NAME)
-    @Path(RESOURCE_FRAMEWORK_PROPERTIES_FILTER)
+    @Path(RESOURCE_EXTENDED_PROPERTIES)
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public FrameworkPropertiesDTO postFrameworkPropertiesFilter(FilterDTO filter) {
+    public ExtendedPropertiesDTO getExtendedProperties() {
         try {
-            logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES_FILTER);
-            return new FrameworkPropertiesDTO(this.systemService, filter.getNames());
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_EXTENDED_PROPERTIES);
+            return new ExtendedPropertiesDTO(this.systemService);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -114,5 +116,35 @@ public class SystemRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
+
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path(RESOURCE_FRAMEWORK_PROPERTIES_FILTER)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public FrameworkPropertiesDTO postFrameworkPropertiesFilter(FilterDTO filter) {
+        try {
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES_FILTER);
+            return new FrameworkPropertiesDTO(this.systemService, filter.getNames());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path(RESOURCE_EXTENDED_PROPERTIES_FILTER)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public ExtendedPropertiesDTO postExtendedPropertiesFilter(FilterDTO filter) {
+        try {
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_EXTENDED_PROPERTIES_FILTER);
+            return new ExtendedPropertiesDTO(this.systemService, filter.getGroupNames());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+
 
 }

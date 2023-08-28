@@ -18,13 +18,19 @@ import java.util.List;
 public class FilterDTO {
 
     private List<String> names;
+    private List<String> groupNames;
 
     public FilterDTO() {
         this.names = new ArrayList<>();
+        this.groupNames = new ArrayList<>();
     }
 
     public List<String> getNames() {
         return this.names;
+    }
+
+    public List<String> getGroupNames() {
+        return this.groupNames;
     }
 
 }

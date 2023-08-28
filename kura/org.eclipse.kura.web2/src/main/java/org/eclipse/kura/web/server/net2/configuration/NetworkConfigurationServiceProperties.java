@@ -810,6 +810,47 @@ public class NetworkConfigurationServiceProperties {
     }
 
     /**
+     *  Wifi Enterprise / 802-1x Configuration
+     */
+
+    private static final String NET_INTERFACE_CONFIG_8021X_EAP = "net.interface.%s.config.802-1x.eap";
+    private static final String NET_INTERFACE_CONFIG_8021X_PHASE2 = "net.interface.%s.config.802-1x.innerAuth";
+    private static final String NET_INTERFACE_CONFIG_8021X_IDENTITY = "net.interface.%s.config.802-1x.identity";
+    private static final String NET_INTERFACE_CONFIG_8021X_PASSWORD = "net.interface.%s.config.802-1x.password";
+
+    public void set8021xEap(String ifname, String eap) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname), eap);
+    }
+
+    public String get8021xEap(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname), "");
+    }
+
+    public void set8021xInnerAuth(String ifname, String phase2) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname), phase2);
+    }
+
+    public String get8021xInnerAuth(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname), "");
+    }
+
+    public void set8021xIdentity(String ifname, String identity) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_IDENTITY, ifname), identity);
+    }
+
+    public String get8021xIdentity(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_IDENTITY, ifname), "");
+    }
+
+    public void set8021xPassword(String ifname, String password) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_PASSWORD, ifname), new Password(password));
+    }
+
+    public Password get8021xPassword(String ifname) {
+        return getPasswordFromProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_8021X_PASSWORD, ifname)));
+    }
+
+    /**
      * Password properties of the NetworkConfigurationService can be empty strings.
      * This method deals with that.
      */

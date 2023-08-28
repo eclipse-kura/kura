@@ -26,7 +26,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class VlanInterfaceStatus extends NetworkInterfaceStatus {
 
-    private final int flags;
     private final String parentInterface;
     private final int vlanId;
     
@@ -34,15 +33,14 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
         super(builder);
         this.vlanId = builder.vlanId;
         this.parentInterface = builder.parentInterface;
-        this.flags = builder.flags;
     }
 
     public int getVlanId() {
-        return vlanId;
+        return this.vlanId;
     }
 
     public String getParentInterface() {
-        return parentInterface;
+        return this.parentInterface;
     }
     
     public static VlanInterfaceStatusBuilder builder() {
@@ -52,15 +50,9 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
     public static class VlanInterfaceStatusBuilder
         extends NetworkInterfaceStatusBuilder<VlanInterfaceStatusBuilder> {
         
-        private int flags;
         private String parentInterface;
         private int vlanId;
         
-        public VlanInterfaceStatusBuilder withFlags(int flags) {
-            this.flags = flags;
-            return getThis();
-        }
-
         public VlanInterfaceStatusBuilder withParentInterface(String parentInterface) {
             this.parentInterface = parentInterface;
             return getThis();
@@ -85,7 +77,7 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(this.vlanId, this.parentInterface, this.flags);
+        result = prime * result + Objects.hash(this.vlanId, this.parentInterface);
         return result;
     }
     
@@ -99,7 +91,6 @@ public class VlanInterfaceStatus extends NetworkInterfaceStatus {
         }
         VlanInterfaceStatus other = (VlanInterfaceStatus) obj;
         return this.vlanId == other.vlanId 
-                && this.flags == other.flags
                 && Objects.equals(this.parentInterface, other.getParentInterface());
     }
     

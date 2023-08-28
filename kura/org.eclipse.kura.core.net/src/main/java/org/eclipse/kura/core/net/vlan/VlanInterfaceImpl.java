@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,8 @@ public class VlanInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNe
     private int flags;
     private String parentInterface;
     private int vlanId;
+    private List<String> ingressMap;
+    private List<String> egressMap;
 
     public VlanInterfaceImpl(String name) {
         super(name);
@@ -85,15 +87,31 @@ public class VlanInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNe
     public void setVlanId(int vlanId) {
         this.vlanId = vlanId;
     }
-
-
+    
+    public List<String> getIngressMap() {
+        return this.ingressMap;
+    }
+    
+    public void setIngressMap(List<String> ingressMap) {
+        this.ingressMap = ingressMap;
+    }
+    
+    public List<String> getEgressMap() {
+        return this.egressMap;
+    }
+    
+    public void setEgressMap(List<String> egressMap) {
+        this.egressMap = egressMap;
+    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString()).append(" :: flags=")
             .append(this.flags).append(" :: parentInterface=")
-            .append(this.parentInterface).append(" :: vlanId=").append(this.vlanId);
+            .append(this.parentInterface).append(" :: vlanId=").append(this.vlanId)
+            .append(" :: ingressMap=").append(this.ingressMap)
+            .append(" :: egressMap=").append(this.egressMap);
         return sb.toString();
     }
 
@@ -101,7 +119,8 @@ public class VlanInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNe
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(this.flags, this.parentInterface, this.vlanId);
+        result = prime * result + Objects.hash(this.flags, this.parentInterface, 
+                this.vlanId, this.ingressMap, this.egressMap);
         return result;
     }
 
@@ -118,6 +137,8 @@ public class VlanInterfaceImpl<T extends NetInterfaceAddress> extends AbstractNe
         }
         VlanInterfaceImpl other = (VlanInterfaceImpl) obj;
         return this.vlanId == other.vlanId && this.flags == other.flags
-                && Objects.equals(this.parentInterface, other.getParentInterface());
+                && Objects.equals(this.parentInterface, other.getParentInterface())
+                && Objects.equals(this.ingressMap, other.getIngressMap())
+                && Objects.equals(this.egressMap, other.getEgressMap());
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,20 +19,18 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
-import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.service.component.ComponentContext;
 
 public class FloodingProtectionConfiguratorTest {
 
@@ -99,25 +97,35 @@ public class FloodingProtectionConfiguratorTest {
         assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionMangleRules()
                 .containsAll(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
-    
+
     @Test(expected = NullPointerException.class)
-    public void addFloodingRulesTest() {
+    public void shouldThrowNPEWithoutFirewallConfigurationService() {
         this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(mockFirewallService);
-        
-        ComponentContext mockContext = mock(ComponentContext.class);
         this.properties.put("flooding.protection.enabled", false);
-        this.floodingProtectionConfigurator.activate(mockContext, this.properties);
-        
+        this.floodingProtectionConfigurator.activate(this.properties);
+    }
+
+    @Test
+    public void shouldDeleteAllRules() {
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+
+        this.properties.put("flooding.protection.enabled", false);
+        this.floodingProtectionConfigurator.activate(this.properties);
+
+        verify(this.mockFirewallService, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
+                new HashSet<>());
+    }
+
+    @Test
+    public void shouldApplyMangleRules() {
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+
         this.properties.put("flooding.protection.enabled", true);
-        this.floodingProtectionConfigurator.updated(this.properties);
-        
-        verify(this.mockFirewallService, times(2)).addFloodingProtectionRules(any());
-        
-        this.floodingProtectionConfigurator.deactivate(mockContext);
-        
-        this.floodingProtectionConfigurator.unsetFirewallConfigurationService(mockFirewallService);
-        
-        this.floodingProtectionConfigurator.updated(this.properties);
+        this.floodingProtectionConfigurator.activate(this.properties);
+
+        verify(this.mockFirewallService, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
+                new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
 }

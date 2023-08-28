@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,6 @@ import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.security.FloodingProtectionConfigurationService;
 import org.eclipse.kura.security.ThreatManagerService;
-import org.osgi.service.component.ComponentContext;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class FloodingProtectionConfigurator
         }
     }
 
-    public void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public void activate(Map<String, Object> properties) {
         logger.info("Activating FloodingConfigurator...");
         doUpdate(properties);
         logger.info("Activating FloodingConfigurator... Done.");
@@ -56,7 +55,7 @@ public class FloodingProtectionConfigurator
         logger.info("Updating FloodingConfigurator... Done.");
     }
 
-    public void deactivate(ComponentContext componentContext) {
+    public void deactivate() {
         logger.info("Deactivating FloodingConfigurator...");
         logger.info("Deactivating FloodingConfigurator... Done.");
     }
@@ -64,8 +63,10 @@ public class FloodingProtectionConfigurator
     private void doUpdate(Map<String, Object> properties) {
         logger.info("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
-        this.firewallService
-                .addFloodingProtectionRules(this.floodingProtectionOptions.getFloodingProtectionMangleRules());
+        Set<String> filterRules = this.floodingProtectionOptions.getFloodingProtectionFilterRules();
+        Set<String> natRules = this.floodingProtectionOptions.getFloodingProtectionNatRules();
+        Set<String> mangleRules = this.floodingProtectionOptions.getFloodingProtectionMangleRules();
+        this.firewallService.addFloodingProtectionRules(filterRules, natRules, mangleRules);
         logger.info("Updating firewall configuration... Done.");
     }
 

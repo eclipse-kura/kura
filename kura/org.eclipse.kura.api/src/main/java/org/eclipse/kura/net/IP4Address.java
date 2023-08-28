@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,8 @@
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.net;
+
+import java.net.UnknownHostException;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -24,6 +26,17 @@ public class IP4Address extends IPAddress {
 
     IP4Address(byte[] addr, java.net.InetAddress jnAddress) {
         super(addr, jnAddress);
+    }
+
+    /**
+     * Returns the default IPv4 address (0.0.0.0/0).
+     * 
+     * @return the 0.0.0.0/0 IPv4 address
+     * @throws UnknownHostException
+     * @since 2.6
+     */
+    public static IP4Address getDefaultAddress() throws UnknownHostException {
+        return (IP4Address) IPAddress.parseHostAddress("0.0.0.0");
     }
 
     @Override

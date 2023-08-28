@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,15 @@ public interface FirewallOpenPortConfig extends NetConfig {
      * @return The NetworkPair representing the permitted network
      */
     public NetworkPair<? extends IPAddress> getPermittedNetwork();
+
+    /**
+     * Gets the (optional) permitted remote network that can make inbound connections in CIDR notation (i.e.
+     * 192.168.0.0/24 or 2001:db8::/32)
+     *
+     * @return The NetworkPair representing the permitted network
+     * @since 2.6
+     */
+    public String getPermittedNetworkString();
 
     /**
      * Gets the (optional) permitted MAC address that is allowed to make inbound connections

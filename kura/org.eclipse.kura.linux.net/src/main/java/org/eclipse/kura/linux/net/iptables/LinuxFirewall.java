@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -119,8 +119,8 @@ public class LinuxFirewall {
                         permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
             } else {
                 newLocalRule = new LocalRule(port, protocol,
-                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
-                        permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
+                        new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0), permittedInterfaceName,
+                        unpermittedInterfaceName, permittedMAC, sourcePortRange);
             }
 
             ArrayList<LocalRule> locRules = new ArrayList<>();

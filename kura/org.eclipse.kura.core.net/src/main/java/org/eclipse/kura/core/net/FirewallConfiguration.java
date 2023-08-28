@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,8 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.eclipse.kura.net.firewall.RuleType;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,12 +154,14 @@ public class FirewallConfiguration {
                 if (!sa[9].isEmpty()) {
                     sourcePortRange = sa[9];
                 }
-                FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry = new FirewallPortForwardConfigIP4(
-                        inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade,
-                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
-                                permittedNetworkMask),
-                        permittedMAC, sourcePortRange);
-                this.portForwardConfigs.add(portForwardEntry);
+                FirewallPortForwardConfigIP4Builder builder = FirewallPortForwardConfigIP4.builder();
+                builder.withInboundIface(inboundIface).withOutboundIface(outboundIface).withAddress(address)
+                        .withProtocol(protocol).withInPort(inPort).withOutPort(outPort).withMasquerade(masquerade)
+                        .withPermittedNetwork(new NetworkPair<>(
+                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask))
+                        .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
+
+                this.portForwardConfigs.add(builder.build());
             }
         } catch (Exception e) {
             logger.error("Failed to parse Port Forward Entry", e);
@@ -190,6 +194,7 @@ public class FirewallConfiguration {
     private FirewallOpenPortConfigIP<? extends IPAddress> buildOpenPortConfigIP(String[] sa)
             throws UnknownHostException {
         FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry = null;
+        FirewallOpenPortConfigIP4Builder builder = FirewallOpenPortConfigIP4.builder();
         NetProtocol protocol = NetProtocol.valueOf(sa[1]);
         String permittedNetwork = "0.0.0.0";
         short permittedNetworkMask = 0;
@@ -217,14 +222,20 @@ public class FirewallConfiguration {
         String portRange = null;
         if (sa[0].contains(":")) {
             portRange = sa[0];
-            openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
-                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask),
-                    permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
+            builder.withPortRange(portRange).withProtocol(protocol)
+                    .withPermittedNetwork(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                            permittedNetworkMask))
+                    .withPermittedInterfaceName(permittedIface).withUnpermittedInterfaceName(unpermittedIface)
+                    .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
+            openPortEntry = builder.build();
         } else {
             port = Integer.parseInt(sa[0]);
-            openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
-                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask),
-                    permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
+            builder.withPort(port).withProtocol(protocol)
+                    .withPermittedNetwork(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                            permittedNetworkMask))
+                    .withPermittedInterfaceName(permittedIface).withUnpermittedInterfaceName(unpermittedIface)
+                    .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
+            openPortEntry = builder.build();
         }
         return openPortEntry;
     }
@@ -335,8 +346,8 @@ public class FirewallConfiguration {
                 sb.append(portForwardConfig.getOutboundInterface());
             }
             sb.append(',');
-            if (portForwardConfig.getAddress() != null) {
-                sb.append(portForwardConfig.getAddress());
+            if (portForwardConfig.getIPAddress() != null) {
+                sb.append(portForwardConfig.getIPAddress());
             }
             sb.append(',');
             if (portForwardConfig.getProtocol() != null) {

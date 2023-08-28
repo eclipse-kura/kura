@@ -13,6 +13,7 @@
 package org.eclipse.kura.rest.system.dto;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.system.SystemService;
 
@@ -79,271 +80,220 @@ public class FrameworkPropertiesDTO {
     private Integer commandZipMaxUploadSize;
 
     public FrameworkPropertiesDTO(SystemService systemService) {
-        this.biosVersion = systemService.getBiosVersion();
-        this.cpuVersion = systemService.getCpuVersion();
-        this.deviceName = systemService.getDeviceName();
-        this.modelId = systemService.getModelId();
-        this.modelName = systemService.getModelName();
-        this.partNumber = systemService.getPartNumber();
-        this.platform = systemService.getPlatform();
-        this.numberOfProcessors = systemService.getNumberOfProcessors();
-        this.totalMemory = systemService.getTotalMemory();
-        this.freeMemory = systemService.getFreeMemory();
-        this.serialNumber = systemService.getSerialNumber();
-
-        this.javaHome = systemService.getJavaHome();
-        this.javaVendor = systemService.getJavaVendor();
-        this.javaVersion = systemService.getJavaVersion();
-        this.javaVmInfo = systemService.getJavaVmInfo();
-        this.javaVmName = systemService.getJavaVmName();
-        this.javaVmVersion = systemService.getJavaVmVersion();
-
-        this.osArch = systemService.getOsArch();
-        this.osDistro = systemService.getOsDistro();
-        this.osDistroVersion = systemService.getOsDistroVersion();
-        this.osName = systemService.getOsName();
-        this.osVersion = systemService.getOsVersion();
-        this.isLegacyBluetoothBeaconScan = systemService.isLegacyBluetoothBeaconScan();
-        this.isLegacyPPPLoggingEnabled = systemService.isLegacyPPPLoggingEnabled();
-        this.primaryMacAddress = systemService.getPrimaryMacAddress();
-        this.primaryNetworkInterfaceName = systemService.getPrimaryNetworkInterfaceName();
-        this.fileSeparator = systemService.getFileSeparator();
-        this.firmwareVersion = systemService.getFirmwareVersion();
-
-        this.kuraDataDirectory = systemService.getKuraDataDirectory();
-        this.kuraFrameworkConfigDirectory = systemService.getKuraFrameworkConfigDirectory();
-        this.kuraHomeDirectory = systemService.getKuraHome();
-        this.kuraMarketplaceCompatibilityVersion = systemService.getKuraMarketplaceCompatibilityVersion();
-        this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
-        this.kuraSnapshotsDirectory = systemService.getKuraSnapshotsDirectory();
-        this.kuraStyleDirectory = systemService.getKuraStyleDirectory();
-        this.kuraTemporaryConfigDirectory = systemService.getKuraTemporaryConfigDirectory();
-        this.kuraUserConfigDirectory = systemService.getKuraUserConfigDirectory();
-        this.kuraVersion = systemService.getKuraVersion();
-        this.kuraHaveWebInterface = Boolean.parseBoolean(systemService.getKuraWebEnabled());
-        this.kuraHaveNetAdmin = (Boolean) systemService.getProperties().get(SystemService.KEY_KURA_HAVE_NET_ADMIN);
-        this.kuraWifiTopChannel = systemService.getKuraWifiTopChannel();
-        this.kuraDefaultNetVirtualDevicesConfig = systemService.getNetVirtualDevicesConfig();
-
-        this.osgiFirmwareName = systemService.getOsgiFwName();
-        this.osgiFirmwareVersion = systemService.getOsgiFwVersion();
-
-        this.commandUser = systemService.getCommandUser();
-        this.commandZipMaxUploadNumber = systemService.getFileCommandZipMaxUploadNumber();
-        this.commandZipMaxUploadSize = systemService.getFileCommandZipMaxUploadSize();
+        populateProperties(systemService, "[\\w]+");
     }
 
     public FrameworkPropertiesDTO(SystemService systemService, List<String> names) {
         for (String name : names) {
-            populatePropertyBasedOnName(systemService, name);
+            populateProperties(systemService, name);
         }
     }
 
-    private void populatePropertyBasedOnName(SystemService systemService, String name) {
-        populateHardwarePropertiesBasedOnName(systemService, name);
-        populateJavaPropertiesBasedOnName(systemService, name);
-        populateOsPropertiesBasedOnName(systemService, name);
-        populateKuraPropertiesBasedOnName(systemService, name);
-        populateOsgiPropertiesBasedOnName(systemService, name);
-        populateCommandPropertiesBasedOnName(systemService, name);
+    private void populateProperties(SystemService systemService, String regex) {
+        populateHardwareProperties(systemService, regex);
+        populateJavaProperties(systemService, regex);
+        populateOsProperties(systemService, regex);
+        populateKuraProperties(systemService, regex);
+        populateOsgiProperties(systemService, regex);
+        populateCommandProperties(systemService, regex);
     }
 
-    private void populateHardwarePropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("biosVersion")) {
+    private void populateHardwareProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "biosVersion")) {
             this.biosVersion = systemService.getBiosVersion();
         }
 
-        if (name.equals("cpuVersion")) {
+        if (Pattern.matches(regex, "cpuVersion")) {
             this.cpuVersion = systemService.getCpuVersion();
         }
 
-        if (name.equals("deviceName")) {
+        if (Pattern.matches(regex, "deviceName")) {
             this.deviceName = systemService.getDeviceName();
         }
 
-        if (name.equals("modelId")) {
+        if (Pattern.matches(regex, "modelId")) {
             this.modelId = systemService.getModelId();
         }
 
-        if (name.equals("modelName")) {
+        if (Pattern.matches(regex, "modelName")) {
             this.modelName = systemService.getModelName();
         }
 
-        if (name.equals("partNumber")) {
+        if (Pattern.matches(regex, "partNumber")) {
             this.partNumber = systemService.getPartNumber();
         }
 
-        if (name.equals("platform")) {
+        if (Pattern.matches(regex, "platform")) {
             this.platform = systemService.getPlatform();
         }
 
-        if (name.equals("numberOfProcessors")) {
+        if (Pattern.matches(regex, "numberOfProcessors")) {
             this.numberOfProcessors = systemService.getNumberOfProcessors();
         }
 
-        if (name.equals("totalMemory")) {
+        if (Pattern.matches(regex, "totalMemory")) {
             this.totalMemory = systemService.getTotalMemory();
         }
 
-        if (name.equals("freeMemory")) {
+        if (Pattern.matches(regex, "freeMemory")) {
             this.freeMemory = systemService.getFreeMemory();
         }
 
-        if (name.equals("serialNumber")) {
+        if (Pattern.matches(regex, "serialNumber")) {
             this.serialNumber = systemService.getSerialNumber();
         }
     }
 
-    private void populateJavaPropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("javaHome")) {
+    private void populateJavaProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "javaHome")) {
             this.javaHome = systemService.getJavaHome();
         }
 
-        if (name.equals("javaVendor")) {
+        if (Pattern.matches(regex, "javaVendor")) {
             this.javaVendor = systemService.getJavaVendor();
         }
 
-        if (name.equals("javaVersion")) {
+        if (Pattern.matches(regex, "javaVersion")) {
             this.javaVersion = systemService.getJavaVersion();
         }
 
-        if (name.equals("javaVmInfo")) {
+        if (Pattern.matches(regex, "javaVmInfo")) {
             this.javaVmInfo = systemService.getJavaVmInfo();
         }
 
-        if (name.equals("javaVmName")) {
+        if (Pattern.matches(regex, "javaVmName")) {
             this.javaVmName = systemService.getJavaVmName();
         }
 
-        if (name.equals("javaVmVersion")) {
+        if (Pattern.matches(regex, "javaVmVersion")) {
             this.javaVmVersion = systemService.getJavaVmVersion();
         }
     }
 
-    private void populateOsPropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("osArch")) {
+    private void populateOsProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "osArch")) {
             this.osArch = systemService.getOsArch();
         }
 
-        if (name.equals("osDistro")) {
+        if (Pattern.matches(regex, "osDistro")) {
             this.osDistro = systemService.getOsDistro();
         }
 
-        if (name.equals("osDistroVersion")) {
+        if (Pattern.matches(regex, "osDistroVersion")) {
             this.osDistroVersion = systemService.getOsDistroVersion();
         }
 
-        if (name.equals("osName")) {
+        if (Pattern.matches(regex, "osName")) {
             this.osName = systemService.getOsName();
         }
 
-        if (name.equals("osVersion")) {
+        if (Pattern.matches(regex, "osVersion")) {
             this.osVersion = systemService.getOsVersion();
         }
 
-        if (name.equals("isLegacyBluetoothBeaconScan")) {
+        if (Pattern.matches(regex, "isLegacyBluetoothBeaconScan")) {
             this.isLegacyBluetoothBeaconScan = systemService.isLegacyBluetoothBeaconScan();
         }
 
-        if (name.equals("isLegacyPPPLoggingEnabled")) {
+        if (Pattern.matches(regex, "isLegacyPPPLoggingEnabled")) {
             this.isLegacyPPPLoggingEnabled = systemService.isLegacyPPPLoggingEnabled();
         }
 
-        if (name.equals("primaryMacAddress")) {
+        if (Pattern.matches(regex, "primaryMacAddress")) {
             this.primaryMacAddress = systemService.getPrimaryMacAddress();
         }
 
-        if (name.equals("primaryNetworkInterfaceName")) {
+        if (Pattern.matches(regex, "primaryNetworkInterfaceName")) {
             this.primaryNetworkInterfaceName = systemService.getPrimaryNetworkInterfaceName();
         }
 
-        if (name.equals("fileSeparator")) {
+        if (Pattern.matches(regex, "fileSeparator")) {
             this.fileSeparator = systemService.getFileSeparator();
         }
 
-        if (name.equals("firmwareVersion")) {
+        if (Pattern.matches(regex, "firmwareVersion")) {
             this.firmwareVersion = systemService.getFirmwareVersion();
         }
     }
 
-    private void populateKuraPropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("kuraDataDirectory")) {
+    private void populateKuraProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "kuraDataDirectory")) {
             this.kuraDataDirectory = systemService.getKuraDataDirectory();
         }
 
-        if (name.equals("kuraFrameworkConfigDirectory")) {
+        if (Pattern.matches(regex, "kuraFrameworkConfigDirectory")) {
             this.kuraFrameworkConfigDirectory = systemService.getKuraFrameworkConfigDirectory();
         }
 
-        if (name.equals("kuraHomeDirectory")) {
+        if (Pattern.matches(regex, "kuraHomeDirectory")) {
             this.kuraHomeDirectory = systemService.getKuraHome();
         }
 
-        if (name.equals("kuraMarketplaceCompatibilityVersion")) {
+        if (Pattern.matches(regex, "kuraMarketplaceCompatibilityVersion")) {
             this.kuraMarketplaceCompatibilityVersion = systemService.getKuraMarketplaceCompatibilityVersion();
         }
 
-        if (name.equals("kuraSnapshotsCount")) {
+        if (Pattern.matches(regex, "kuraSnapshotsCount")) {
             this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
         }
 
-        if (name.equals("kuraSnapshotsDirectory")) {
+        if (Pattern.matches(regex, "kuraSnapshotsDirectory")) {
             this.kuraSnapshotsDirectory = systemService.getKuraSnapshotsDirectory();
         }
 
-        if (name.equals("kuraStyleDirectory")) {
+        if (Pattern.matches(regex, "kuraStyleDirectory")) {
             this.kuraStyleDirectory = systemService.getKuraStyleDirectory();
         }
 
-        if (name.equals("kuraTemporaryConfigDirectory")) {
+        if (Pattern.matches(regex, "kuraTemporaryConfigDirectory")) {
             this.kuraTemporaryConfigDirectory = systemService.getKuraTemporaryConfigDirectory();
         }
 
-        if (name.equals("kuraUserConfigDirectory")) {
+        if (Pattern.matches(regex, "kuraUserConfigDirectory")) {
             this.kuraUserConfigDirectory = systemService.getKuraUserConfigDirectory();
         }
 
-        if (name.equals("kuraVersion")) {
+        if (Pattern.matches(regex, "kuraVersion")) {
             this.kuraVersion = systemService.getKuraVersion();
         }
 
-        if (name.equals("kuraHaveWebInterface")) {
+        if (Pattern.matches(regex, "kuraHaveWebInterface")) {
             this.kuraHaveWebInterface = Boolean.parseBoolean(systemService.getKuraWebEnabled());
         }
 
-        if (name.equals("kuraHaveNetAdmin")) {
+        if (Pattern.matches(regex, "kuraHaveNetAdmin")) {
             this.kuraHaveNetAdmin = (Boolean) systemService.getProperties().get(SystemService.KEY_KURA_HAVE_NET_ADMIN);
         }
 
-        if (name.equals("kuraWifiTopChannel")) {
+        if (Pattern.matches(regex, "kuraWifiTopChannel")) {
             this.kuraWifiTopChannel = systemService.getKuraWifiTopChannel();
         }
 
-        if (name.equals("kuraDefaultNetVirtualDevicesConfig")) {
+        if (Pattern.matches(regex, "kuraDefaultNetVirtualDevicesConfig")) {
             this.kuraDefaultNetVirtualDevicesConfig = systemService.getNetVirtualDevicesConfig();
         }
     }
 
-    private void populateOsgiPropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("osgiFirmwareName")) {
+    private void populateOsgiProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "osgiFirmwareName")) {
             this.osgiFirmwareName = systemService.getOsgiFwName();
         }
 
-        if (name.equals("osgiFirmwareVersion")) {
+        if (Pattern.matches(regex, "osgiFirmwareVersion")) {
             this.osgiFirmwareVersion = systemService.getOsgiFwVersion();
         }
     }
 
-    private void populateCommandPropertiesBasedOnName(SystemService systemService, String name) {
-        if (name.equals("commandUser")) {
+    private void populateCommandProperties(SystemService systemService, String regex) {
+        if (Pattern.matches(regex, "commandUser")) {
             this.commandUser = systemService.getCommandUser();
         }
 
-        if (name.equals("commandZipMaxUploadNumber")) {
+        if (Pattern.matches(regex, "commandZipMaxUploadNumber")) {
             this.commandZipMaxUploadNumber = systemService.getFileCommandZipMaxUploadNumber();
         }
 
-        if (name.equals("commandZipMaxUploadSize")) {
+        if (Pattern.matches(regex, "commandZipMaxUploadSize")) {
             this.commandZipMaxUploadSize = systemService.getFileCommandZipMaxUploadSize();
         }
     }

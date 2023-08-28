@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 public class KuraPropertiesDTO {
 
@@ -24,18 +25,24 @@ public class KuraPropertiesDTO {
     public KuraPropertiesDTO(Properties kuraProperties) {
         this.kuraProperties = new HashMap<>();
 
-        for (String key : kuraProperties.stringPropertyNames()) {
-            this.kuraProperties.put(key, kuraProperties.getProperty(key));
-        }
+        populateKuraProperties(kuraProperties, ((String s) -> true));
     }
 
     public KuraPropertiesDTO(Properties kuraProperties, List<String> names) {
         this.kuraProperties = new HashMap<>();
 
-        for (String key : kuraProperties.stringPropertyNames()) {
-            if (names.contains(key)) {
-                this.kuraProperties.put(key, kuraProperties.getProperty(key));
-            }
+        populateKuraProperties(kuraProperties, names::contains);
+    }
+
+    private void populateKuraProperties(Properties properties, Predicate<String> condition) {
+        for (String key : properties.stringPropertyNames()) {
+            putIf(key, properties.getProperty(key), condition.test(key));
+        }
+    }
+
+    private void putIf(String key, String value, boolean condition) {
+        if (condition) {
+            this.kuraProperties.put(key, value);
         }
     }
 

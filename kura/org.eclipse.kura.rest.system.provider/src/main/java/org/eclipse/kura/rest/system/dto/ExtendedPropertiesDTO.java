@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
@@ -31,12 +32,7 @@ public class ExtendedPropertiesDTO {
         Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
 
         if (properties.isPresent()) {
-            this.version = properties.get().getVersion();
-            this.extendedProperties = new HashMap<>();
-
-            for (ExtendedPropertyGroup group : properties.get().getPropertyGroups()) {
-                this.extendedProperties.put(group.getName(), group.getProperties());
-            }
+            populateExtendedProperties(properties.get(), ((String s) -> true));
         }
     }
 
@@ -44,19 +40,22 @@ public class ExtendedPropertiesDTO {
         Optional<ExtendedProperties> properties = systemService.getExtendedProperties();
 
         if (properties.isPresent()) {
-            this.version = properties.get().getVersion();
-            this.extendedProperties = new HashMap<>();
-            populateSearchedGroups(properties.get(), groupNames);
+            populateExtendedProperties(properties.get(), groupNames::contains);
         }
     }
 
-    private void populateSearchedGroups(ExtendedProperties properties, List<String> groupNames) {
-        for (ExtendedPropertyGroup group : properties.getPropertyGroups()) {
-            String groupName = group.getName();
+    private void populateExtendedProperties(ExtendedProperties properties, Predicate<String> condition) {
+        this.version = properties.getVersion();
+        this.extendedProperties = new HashMap<>();
 
-            if (groupNames.contains(groupName)) {
-                this.extendedProperties.put(groupName, group.getProperties());
-            }
+        for (ExtendedPropertyGroup group : properties.getPropertyGroups()) {
+            putIf(group.getName(), group.getProperties(), condition.test(group.getName()));
+        }
+    }
+
+    private void putIf(String key, Map<String, String> value, boolean condition) {
+        if (condition) {
+            this.extendedProperties.put(key, value);
         }
     }
 

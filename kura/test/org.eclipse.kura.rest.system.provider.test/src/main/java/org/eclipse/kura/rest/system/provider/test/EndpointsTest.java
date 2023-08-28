@@ -18,6 +18,7 @@ import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIE
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -66,6 +67,9 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
                     .useDelimiter("\\A").next().replace(" ", "");
     private static final String EXTENDED_PROPERTIES_FILTER_REQUEST = new Scanner(
             EndpointsTest.class.getResourceAsStream("/EXTENDED_PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A")
+                    .next().replace(" ", "");
+    private static final String KURA_PROPERTIES_FILTER_REQUEST = new Scanner(
+            EndpointsTest.class.getResourceAsStream("/KURA_PROPERTIES_FILTER_REQUEST"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
 
@@ -145,6 +149,17 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
         thenResponseBodyEqualsJson(EXPECTED_EXTENDED_PROPERTIES_RESPONSE);
     }
 
+    @Test
+    public void shouldReturnFilteredKuraProperties() {
+        givenSystemServiceMockWithKuraProperties();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER,
+                KURA_PROPERTIES_FILTER_REQUEST);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_KURA_PROPERTIES_RESPONSE);
+    }
+
     // Exceptions test
 
     // GET
@@ -194,6 +209,16 @@ public class EndpointsTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_EXTENDED_PROPERTIES_FILTER,
                 EXTENDED_PROPERTIES_FILTER_REQUEST);
+
+        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    public void shouldRethrowWebApplicationExceptionOnFailingKuraPropertiesFilter() {
+        givenFailingSystemServiceMock();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), RESOURCE_KURA_PROPERTIES_FILTER,
+                KURA_PROPERTIES_FILTER_REQUEST);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }

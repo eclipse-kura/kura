@@ -23,6 +23,7 @@ public class Constants {
     public static final String RESOURCE_EXTENDED_PROPERTIES = "/properties/extended";
     public static final String RESOURCE_EXTENDED_PROPERTIES_FILTER = "/properties/extended/filter";
     public static final String RESOURCE_KURA_PROPERTIES = "/properties/kura";
+    public static final String RESOURCE_KURA_PROPERTIES_FILTER = "/properties/kura/filter";
     public static final String REST_ROLE_NAME = "system";
     public static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 

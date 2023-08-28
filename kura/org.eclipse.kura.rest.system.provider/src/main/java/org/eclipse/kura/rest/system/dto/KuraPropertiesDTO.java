@@ -13,6 +13,7 @@
 package org.eclipse.kura.rest.system.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -25,6 +26,16 @@ public class KuraPropertiesDTO {
 
         for (String key : kuraProperties.stringPropertyNames()) {
             this.kuraProperties.put(key, kuraProperties.getProperty(key));
+        }
+    }
+
+    public KuraPropertiesDTO(Properties kuraProperties, List<String> names) {
+        this.kuraProperties = new HashMap<>();
+
+        for (String key : kuraProperties.stringPropertyNames()) {
+            if (names.contains(key)) {
+                this.kuraProperties.put(key, kuraProperties.getProperty(key));
+            }
         }
     }
 

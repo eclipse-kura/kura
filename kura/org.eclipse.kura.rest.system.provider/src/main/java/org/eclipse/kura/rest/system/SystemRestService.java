@@ -19,6 +19,7 @@ import static org.eclipse.kura.rest.system.Constants.RESOURCE_EXTENDED_PROPERTIE
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_FRAMEWORK_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES;
+import static org.eclipse.kura.rest.system.Constants.RESOURCE_KURA_PROPERTIES_FILTER;
 import static org.eclipse.kura.rest.system.Constants.REST_APP_ID;
 import static org.eclipse.kura.rest.system.Constants.REST_ROLE_NAME;
 
@@ -144,6 +145,18 @@ public class SystemRestService {
         }
     }
 
-
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path(RESOURCE_KURA_PROPERTIES_FILTER)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public KuraPropertiesDTO postKuraPropertiesFilter(FilterDTO filter) {
+        try {
+            logger.debug(DEBUG_MESSSAGE, RESOURCE_KURA_PROPERTIES_FILTER);
+            return new KuraPropertiesDTO(this.systemService.getProperties(), filter.getNames());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
 
 }

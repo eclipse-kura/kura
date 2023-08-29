@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.nm.configuration;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -444,6 +445,55 @@ public class NMSettingsConverterTest {
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfIsEmpty() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoSuchElementExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfEapIsInvalid() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "invalid eap value");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfInnerAuthIsInvalid() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "invalid eap value");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "invalid Inner Auth value");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsTtlsAndMschapV2() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "ttls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+
     }
 
     @Test
@@ -2577,6 +2627,18 @@ public class NMSettingsConverterTest {
         }
     }
 
+    public void whenBuild8021xSettingsIsRunWith(NetworkProperties props, String iface) {
+        try {
+            this.resultMap = NMSettingsConverter.build8021xSettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+
     public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
@@ -2643,6 +2705,10 @@ public class NMSettingsConverterTest {
 
     public void thenResultingMapContains(String key, Object value) {
         assertEquals(value, this.resultMap.get(key).getValue());
+    }
+
+    public void thenResultingMapContainsArray(String key, Object[] value) {
+        assertArrayEquals(value, (Object[]) this.resultMap.get(key).getValue());
     }
 
     public void thenResultingMapNotContains(String key) {

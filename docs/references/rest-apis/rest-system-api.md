@@ -3,11 +3,123 @@
 
 The `SystemService` APIs return properties that are divided into 3 categories:
 
-- **framework** properties,
+- [**framework** properties](#framework-properties),
 - **extended** properties, and
-- **kura** properties.
+- [**kura** properties](#kura-properties).
 
 Identities with `rest.system` permissions can access these APIs.
+
+#### Framework properties
+
+| Property name | Type |
+| - | - |
+| biosVersion | String |
+| cpuVersion | String |
+| deviceName | String |
+| modelId | String |
+| modelName | String |
+| partNumber | String |
+| platform | String |
+| numberOfProcessors | Integer |
+| totalMemory | Integer |
+| freeMemory | Integer |
+| serialNumber | String |
+| javaHome | String |
+| javaVendor | String |
+| javaVersion | String |
+| javaVmInfo | String |
+| javaVmName | String |
+| javaVmVersion | String |
+| osArch | String |
+| osDistro | String |
+| osDistroVersion | String |
+| osName | String |
+| osVersion | String |
+| isLegacyBluetoothBeaconScan | Boolean |
+| isLegacyPPPLoggingEnabled | Boolean |
+| primaryMacAddress | String |
+| primaryNetworkInterfaceName | String |
+| fileSeparator | String |
+| firmwareVersion | String |
+| kuraDataDirectory | String |
+| kuraFrameworkConfigDirectory | String |
+| kuraHomeDirectory | String |
+| kuraMarketplaceCompatibilityVersion | String |
+| kuraSnapshotsCount | Integer |
+| kuraSnapshotsDirectory | String |
+| kuraStyleDirectory | String |
+| kuraTemporaryConfigDirectory | String |
+| kuraUserConfigDirectory | String |
+| kuraVersion | String |
+| kuraHaveWebInterface | Boolean |
+| kuraHaveNetAdmin | Boolean |
+| kuraWifiTopChannel | Integer |
+| kuraDefaultNetVirtualDevicesConfig | String |
+| osgiFirmwareName | String |
+| osgiFirmwareVersion | String |
+| commandUser | String |
+| commandZipMaxUploadNumber | Integer |
+| commandZipMaxUploadSize | Integer |
+
+#### Kura properties
+
+| Property name | Type |
+| - | - |
+| kura.platform | String |
+| org.osgi.framework.version | String |
+| kura.user.config | String |
+| kura.name | String |
+| file.command.zip.max.number | String |
+| kura.legacy.ppp.logging.enabled | String |
+| kura.tmp | String |
+| kura.packages | String |
+| build.version | String |
+| kura.log.download.journal.fields | String |
+| kura.data | String |
+| os.name | String |
+| dpa.read.timeout | String |
+| file.upload.size.max | String |
+| console.device.management.service.ignore | String |
+| kura.command.user | String |
+| kura.device.name | String |
+| kura.partNumber | String |
+| kura.project | String |
+| kura.company | String |
+| java.home | String |
+| version | String |
+| kura.style.dir | String |
+| kura.model.id | String |
+| file.separator | String |
+| kura.model.name | String |
+| kura.serialNumber.provider | String |
+| kura.have.web.inter | String |
+| kura.legacy.bluetooth.beacon.scan | String |
+| java.runtime.version | String |
+| kura.bios.version | String |
+| kura.marketplace.compatibility.version | String |
+| kura.framework.config | String |
+| kura.firmware.version | String |
+| kura.plugins | String |
+| os.version | String |
+| kura.version | String |
+| org.osgi.framework.vendor | String |
+| java.runtime.name | String |
+| kura.log.download.sources | String |
+| os.distribution | String |
+| java.vm.name | String |
+| kura.primary.network.interface | String |
+| kura.home | String |
+| file.command.zip.max.size | String |
+| os.arch | String |
+| os.distribution.version | String |
+| file.upload.in.memory.size.threshold | String |
+| kura.net.virtual.devices.config | String |
+| kura.snapshots | String |
+| java.vm.info | String |
+| java.vm.version | String |
+| dpa.connection.timeout | String |
+| build.number | String |
+| ccs.status.notification.url | String |
 
 
 
@@ -186,57 +298,7 @@ Identities with `rest.system` permissions can access these APIs.
 
 #### Filter framework properties
 
-This method allows to retrieve framework-related properties by their name. Available properties are in table below.
-
-| Property name | Type |
-| - | - |
-| biosVersion | String |
-| cpuVersion | String |
-| deviceName | String |
-| modelId | String |
-| modelName | String |
-| partNumber | String |
-| platform | String |
-| numberOfProcessors | Integer |
-| totalMemory | Integer |
-| freeMemory | Integer |
-| serialNumber | String |
-| javaHome | String |
-| javaVendor | String |
-| javaVersion | String |
-| javaVmInfo | String |
-| javaVmName | String |
-| javaVmVersion | String |
-| osArch | String |
-| osDistro | String |
-| osDistroVersion | String |
-| osName | String |
-| osVersion | String |
-| isLegacyBluetoothBeaconScan | Boolean |
-| isLegacyPPPLoggingEnabled | Boolean |
-| primaryMacAddress | String |
-| primaryNetworkInterfaceName | String |
-| fileSeparator | String |
-| firmwareVersion | String |
-| kuraDataDirectory | String |
-| kuraFrameworkConfigDirectory | String |
-| kuraHomeDirectory | String |
-| kuraMarketplaceCompatibilityVersion | String |
-| kuraSnapshotsCount | Integer |
-| kuraSnapshotsDirectory | String |
-| kuraStyleDirectory | String |
-| kuraTemporaryConfigDirectory | String |
-| kuraUserConfigDirectory | String |
-| kuraVersion | String |
-| kuraHaveWebInterface | Boolean |
-| kuraHaveNetAdmin | Boolean |
-| kuraWifiTopChannel | Integer |
-| kuraDefaultNetVirtualDevicesConfig | String |
-| osgiFirmwareName | String |
-| osgiFirmwareVersion | String |
-| commandUser | String |
-| commandZipMaxUploadNumber | Integer |
-| commandZipMaxUploadSize | Integer |
+This method allows to retrieve framework-related properties by their name. Available properties are in [table Framework properties](#framework-properties).
 
 - Method: POST
 - API PATH: `/services/system/v1/properties/framework/filter`
@@ -301,65 +363,7 @@ This method allows to retrieve the extended properties and to filter them by gro
 
 #### Filter kura properties
 
-This method allows to retrieve Kura-related properties (derived from the `kura.properties` file) and filter by their name. Available properties are listed in the table below.
-
-| Property name | Type |
-| - | - |
-| kura.platform | String |
-| org.osgi.framework.version | String |
-| kura.user.config | String |
-| kura.name | String |
-| file.command.zip.max.number | String |
-| kura.legacy.ppp.logging.enabled | String |
-| kura.tmp | String |
-| kura.packages | String |
-| build.version | String |
-| kura.log.download.journal.fields | String |
-| kura.data | String |
-| os.name | String |
-| dpa.read.timeout | String |
-| file.upload.size.max | String |
-| console.device.management.service.ignore | String |
-| kura.command.user | String |
-| kura.device.name | String |
-| kura.partNumber | String |
-| kura.project | String |
-| kura.company | String |
-| java.home | String |
-| version | String |
-| kura.style.dir | String |
-| kura.model.id | String |
-| file.separator | String |
-| kura.model.name | String |
-| kura.serialNumber.provider | String |
-| kura.have.web.inter | String |
-| kura.legacy.bluetooth.beacon.scan | String |
-| java.runtime.version | String |
-| kura.bios.version | String |
-| kura.marketplace.compatibility.version | String |
-| kura.framework.config | String |
-| kura.firmware.version | String |
-| kura.plugins | String |
-| os.version | String |
-| kura.version | String |
-| org.osgi.framework.vendor | String |
-| java.runtime.name | String |
-| kura.log.download.sources | String |
-| os.distribution | String |
-| java.vm.name | String |
-| kura.primary.network.interface | String |
-| kura.home | String |
-| file.command.zip.max.size | String |
-| os.arch | String |
-| os.distribution.version | String |
-| file.upload.in.memory.size.threshold | String |
-| kura.net.virtual.devices.config | String |
-| kura.snapshots | String |
-| java.vm.info | String |
-| java.vm.version | String |
-| dpa.connection.timeout | String |
-| build.number | String |
-| ccs.status.notification.url | String |
+This method allows to retrieve Kura-related properties (derived from the `kura.properties` file) and filter by their name. Available properties are listed in the [table Kura properties](#kura-properties).
 
 - Method: POST
 - API PATH: `/services/system/v1/properties/kura/filter`

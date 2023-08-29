@@ -13,7 +13,7 @@
     
     
       
-        <title>REST Inventory API - Eclipse Kura™ Documentation</title>
+        <title>REST System API - Eclipse Kura™ Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#rest-inventory-v1-api" class="md-skip">
+        <a href="#framework-properties" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              REST Inventory API
+              REST System API
             
           </span>
         </div>
@@ -2736,405 +2736,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          REST Inventory API
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../rest-inventory-api/" class="md-nav__link">
         REST Inventory API
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#global" class="md-nav__link">
-    Global
-  </a>
-  
-    <nav class="md-nav" aria-label="Global">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-inventory-summary" class="md-nav__link">
-    GET Inventory Summary
-  </a>
-  
-    <nav class="md-nav" aria-label="GET Inventory Summary">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bundles" class="md-nav__link">
-    Bundles
-  </a>
-  
-    <nav class="md-nav" aria-label="Bundles">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-bundles" class="md-nav__link">
-    GET bundles
-  </a>
-  
-    <nav class="md-nav" aria-label="GET bundles">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_1" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#start-bundle" class="md-nav__link">
-    Start bundle
-  </a>
-  
-    <nav class="md-nav" aria-label="Start bundle">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stop-bundle" class="md-nav__link">
-    Stop bundle
-  </a>
-  
-    <nav class="md-nav" aria-label="Stop bundle">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_1" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_1" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-packages" class="md-nav__link">
-    Deployment Packages
-  </a>
-  
-    <nav class="md-nav" aria-label="Deployment Packages">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-packages" class="md-nav__link">
-    GET packages
-  </a>
-  
-    <nav class="md-nav" aria-label="GET packages">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_2" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#system-packages-debrpmapk" class="md-nav__link">
-    System Packages (DEB/RPM/APK)
-  </a>
-  
-    <nav class="md-nav" aria-label="System Packages (DEB/RPM/APK)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-system-packages" class="md-nav__link">
-    GET System Packages
-  </a>
-  
-    <nav class="md-nav" aria-label="GET System Packages">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_3" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#containers" class="md-nav__link">
-    Containers
-  </a>
-  
-    <nav class="md-nav" aria-label="Containers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-containers" class="md-nav__link">
-    GET Containers
-  </a>
-  
-    <nav class="md-nav" aria-label="GET Containers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_4" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#start-container" class="md-nav__link">
-    Start container
-  </a>
-  
-    <nav class="md-nav" aria-label="Start container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_2" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_2" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stop-container" class="md-nav__link">
-    Stop container
-  </a>
-  
-    <nav class="md-nav" aria-label="Stop container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_3" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_3" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#images" class="md-nav__link">
-    Images
-  </a>
-  
-    <nav class="md-nav" aria-label="Images">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#images-images" class="md-nav__link">
-    Images Images
-  </a>
-  
-    <nav class="md-nav" aria-label="Images Images">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_5" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete-image" class="md-nav__link">
-    Delete Image
-  </a>
-  
-    <nav class="md-nav" aria-label="Delete Image">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_4" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_4" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#states" class="md-nav__link">
-    States
-  </a>
-  
-    <nav class="md-nav" aria-label="States">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#bundle-states" class="md-nav__link">
-    Bundle States
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#container-states" class="md-nav__link">
-    Container States
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3172,11 +2778,222 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../rest-system-api/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          REST System API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         REST System API
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#framework-properties" class="md-nav__link">
+    Framework properties
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kura-properties" class="md-nav__link">
+    Kura properties
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-methods" class="md-nav__link">
+    GET methods
+  </a>
+  
+    <nav class="md-nav" aria-label="GET methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-framework-properties" class="md-nav__link">
+    Get framework properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Get framework properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#responses" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-extended-properties" class="md-nav__link">
+    Get extended properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Get extended properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#responses_1" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-kura-properties" class="md-nav__link">
+    Get Kura properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Get Kura properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#responses_2" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-methods" class="md-nav__link">
+    POST methods
+  </a>
+  
+    <nav class="md-nav" aria-label="POST methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filter-framework-properties" class="md-nav__link">
+    Filter framework properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter framework properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_3" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-extended-properties" class="md-nav__link">
+    Filter extended properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter extended properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_1" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_4" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-kura-properties" class="md-nav__link">
+    Filter kura properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter kura properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_2" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_5" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3260,8 +3077,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -3270,80 +3085,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#global" class="md-nav__link">
-    Global
+  <a href="#framework-properties" class="md-nav__link">
+    Framework properties
   </a>
-  
-    <nav class="md-nav" aria-label="Global">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-inventory-summary" class="md-nav__link">
-    GET Inventory Summary
-  </a>
-  
-    <nav class="md-nav" aria-label="GET Inventory Summary">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#bundles" class="md-nav__link">
-    Bundles
-  </a>
-  
-    <nav class="md-nav" aria-label="Bundles">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-bundles" class="md-nav__link">
-    GET bundles
-  </a>
-  
-    <nav class="md-nav" aria-label="GET bundles">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_1" class="md-nav__link">
-    Response
+  <a href="#kura-properties" class="md-nav__link">
+    Kura properties
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#start-bundle" class="md-nav__link">
-    Start bundle
+      
+        <li class="md-nav__item">
+  <a href="#get-methods" class="md-nav__link">
+    GET methods
   </a>
   
-    <nav class="md-nav" aria-label="Start bundle">
+    <nav class="md-nav" aria-label="GET methods">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#request-body" class="md-nav__link">
-    Request Body
+  <a href="#get-framework-properties" class="md-nav__link">
+    Get framework properties
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Get framework properties">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#responses" class="md-nav__link">
@@ -3358,19 +3127,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
-  <a href="#stop-bundle" class="md-nav__link">
-    Stop bundle
+  <a href="#get-extended-properties" class="md-nav__link">
+    Get extended properties
   </a>
   
-    <nav class="md-nav" aria-label="Stop bundle">
+    <nav class="md-nav" aria-label="Get extended properties">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_1" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#responses_1" class="md-nav__link">
@@ -3384,119 +3146,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deployment-packages" class="md-nav__link">
-    Deployment Packages
+          <li class="md-nav__item">
+  <a href="#get-kura-properties" class="md-nav__link">
+    Get Kura properties
   </a>
   
-    <nav class="md-nav" aria-label="Deployment Packages">
+    <nav class="md-nav" aria-label="Get Kura properties">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-packages" class="md-nav__link">
-    GET packages
-  </a>
-  
-    <nav class="md-nav" aria-label="GET packages">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_2" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#system-packages-debrpmapk" class="md-nav__link">
-    System Packages (DEB/RPM/APK)
-  </a>
-  
-    <nav class="md-nav" aria-label="System Packages (DEB/RPM/APK)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-system-packages" class="md-nav__link">
-    GET System Packages
-  </a>
-  
-    <nav class="md-nav" aria-label="GET System Packages">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_3" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#containers" class="md-nav__link">
-    Containers
-  </a>
-  
-    <nav class="md-nav" aria-label="Containers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-containers" class="md-nav__link">
-    GET Containers
-  </a>
-  
-    <nav class="md-nav" aria-label="GET Containers">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_4" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#start-container" class="md-nav__link">
-    Start container
-  </a>
-  
-    <nav class="md-nav" aria-label="Start container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_2" class="md-nav__link">
-    Request Body
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#responses_2" class="md-nav__link">
@@ -3510,16 +3166,29 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#stop-container" class="md-nav__link">
-    Stop container
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-methods" class="md-nav__link">
+    POST methods
   </a>
   
-    <nav class="md-nav" aria-label="Stop container">
+    <nav class="md-nav" aria-label="POST methods">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#request-body_3" class="md-nav__link">
+  <a href="#filter-framework-properties" class="md-nav__link">
+    Filter framework properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter framework properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body" class="md-nav__link">
     Request Body
   </a>
   
@@ -3537,49 +3206,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#images" class="md-nav__link">
-    Images
+          <li class="md-nav__item">
+  <a href="#filter-extended-properties" class="md-nav__link">
+    Filter extended properties
   </a>
   
-    <nav class="md-nav" aria-label="Images">
+    <nav class="md-nav" aria-label="Filter extended properties">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#images-images" class="md-nav__link">
-    Images Images
-  </a>
-  
-    <nav class="md-nav" aria-label="Images Images">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#response_5" class="md-nav__link">
-    Response
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete-image" class="md-nav__link">
-    Delete Image
-  </a>
-  
-    <nav class="md-nav" aria-label="Delete Image">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request-body_4" class="md-nav__link">
+  <a href="#request-body_1" class="md-nav__link">
     Request Body
   </a>
   
@@ -3597,30 +3233,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#states" class="md-nav__link">
-    States
+          <li class="md-nav__item">
+  <a href="#filter-kura-properties" class="md-nav__link">
+    Filter kura properties
   </a>
   
-    <nav class="md-nav" aria-label="States">
+    <nav class="md-nav" aria-label="Filter kura properties">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bundle-states" class="md-nav__link">
-    Bundle States
+  <a href="#request-body_2" class="md-nav__link">
+    Request Body
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#container-states" class="md-nav__link">
-    Container States
+  <a href="#responses_5" class="md-nav__link">
+    Responses
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -3643,305 +3279,688 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
 
 
-<h1 id="rest-inventory-v1-api">Rest Inventory v1 API</h1>
-<h2 id="global">Global</h2>
-<h4 id="get-inventory-summary">GET Inventory Summary</h4>
+  <h1>REST System API</h1>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This API can also be accessed via the RequestHandler with app-id: <code>SYS-V1</code>.</p>
+</div>
+<p>The <code>SystemService</code> APIs return properties that are divided into 3 categories:</p>
+<ul>
+<li><a href="#framework-properties"><strong>framework</strong> properties</a>,</li>
+<li><strong>extended</strong> properties, and</li>
+<li><a href="#kura-properties"><strong>kura</strong> properties</a>.</li>
+</ul>
+<p>Identities with <code>rest.system</code> permissions can access these APIs.</p>
+<h4 id="framework-properties">Framework properties</h4>
+<table>
+<thead>
+<tr>
+<th>Property name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>biosVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>cpuVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>deviceName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>modelId</td>
+<td>String</td>
+</tr>
+<tr>
+<td>modelName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>partNumber</td>
+<td>String</td>
+</tr>
+<tr>
+<td>platform</td>
+<td>String</td>
+</tr>
+<tr>
+<td>numberOfProcessors</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>totalMemory</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>freeMemory</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>serialNumber</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaHome</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaVendor</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaVmInfo</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaVmName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>javaVmVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osArch</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osDistro</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osDistroVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>isLegacyBluetoothBeaconScan</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td>isLegacyPPPLoggingEnabled</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td>primaryMacAddress</td>
+<td>String</td>
+</tr>
+<tr>
+<td>primaryNetworkInterfaceName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>fileSeparator</td>
+<td>String</td>
+</tr>
+<tr>
+<td>firmwareVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraDataDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraFrameworkConfigDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraHomeDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraMarketplaceCompatibilityVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraSnapshotsCount</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>kuraSnapshotsDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraStyleDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraTemporaryConfigDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraUserConfigDirectory</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kuraHaveWebInterface</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td>kuraHaveNetAdmin</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td>kuraWifiTopChannel</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>kuraDefaultNetVirtualDevicesConfig</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osgiFirmwareName</td>
+<td>String</td>
+</tr>
+<tr>
+<td>osgiFirmwareVersion</td>
+<td>String</td>
+</tr>
+<tr>
+<td>commandUser</td>
+<td>String</td>
+</tr>
+<tr>
+<td>commandZipMaxUploadNumber</td>
+<td>Integer</td>
+</tr>
+<tr>
+<td>commandZipMaxUploadSize</td>
+<td>Integer</td>
+</tr>
+</tbody>
+</table>
+<h4 id="kura-properties">Kura properties</h4>
+<table>
+<thead>
+<tr>
+<th>Property name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kura.platform</td>
+<td>String</td>
+</tr>
+<tr>
+<td>org.osgi.framework.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.user.config</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>file.command.zip.max.number</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.legacy.ppp.logging.enabled</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.tmp</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.packages</td>
+<td>String</td>
+</tr>
+<tr>
+<td>build.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.log.download.journal.fields</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.data</td>
+<td>String</td>
+</tr>
+<tr>
+<td>os.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>dpa.read.timeout</td>
+<td>String</td>
+</tr>
+<tr>
+<td>file.upload.size.max</td>
+<td>String</td>
+</tr>
+<tr>
+<td>console.device.management.service.ignore</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.command.user</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.device.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.partNumber</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.project</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.company</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.home</td>
+<td>String</td>
+</tr>
+<tr>
+<td>version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.style.dir</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.model.id</td>
+<td>String</td>
+</tr>
+<tr>
+<td>file.separator</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.model.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.serialNumber.provider</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.have.web.inter</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.legacy.bluetooth.beacon.scan</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.runtime.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.bios.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.marketplace.compatibility.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.framework.config</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.firmware.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.plugins</td>
+<td>String</td>
+</tr>
+<tr>
+<td>os.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>org.osgi.framework.vendor</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.runtime.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.log.download.sources</td>
+<td>String</td>
+</tr>
+<tr>
+<td>os.distribution</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.vm.name</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.primary.network.interface</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.home</td>
+<td>String</td>
+</tr>
+<tr>
+<td>file.command.zip.max.size</td>
+<td>String</td>
+</tr>
+<tr>
+<td>os.arch</td>
+<td>String</td>
+</tr>
+<tr>
+<td>os.distribution.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>file.upload.in.memory.size.threshold</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.net.virtual.devices.config</td>
+<td>String</td>
+</tr>
+<tr>
+<td>kura.snapshots</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.vm.info</td>
+<td>String</td>
+</tr>
+<tr>
+<td>java.vm.version</td>
+<td>String</td>
+</tr>
+<tr>
+<td>dpa.connection.timeout</td>
+<td>String</td>
+</tr>
+<tr>
+<td>build.number</td>
+<td>String</td>
+</tr>
+<tr>
+<td>ccs.status.notification.url</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h2 id="get-methods">GET methods</h2>
+<h4 id="get-framework-properties">Get framework properties</h4>
 <ul>
 <li>Method: GET</li>
-<li>Description: returns a list of All Inventory Items</li>
-<li>API PATH: <code>/services/inventory/v1/inventory</code></li>
+<li>API PATH: <code>/services/system/v1/properties/framework</code></li>
 </ul>
-<h5 id="response">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&quot;inventory&quot;</span><span class="p">:[</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;adduser&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;3.118&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;com.eclipsesource.jaxrs.provider.gson&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;2.3.0.201602281253&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;BUNDLE&quot;</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">              </span><span class="p">{</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.kura.example.beacon&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.0.500&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DP&quot;</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<hr />
-<h2 id="bundles">Bundles</h2>
-<h4 id="get-bundles">GET bundles</h4>
-<ul>
-<li>Method: GET</li>
-<li>Description: returns a list of bundles.</li>
-<li>API PATH: <code>/services/inventory/v1/bundles</code></li>
-</ul>
-<h5 id="response_1">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;bundles&quot;</span><span class="p">:[</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.osgi&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;3.16.0.v20200828-0759&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="s2">&quot;ACTIVE&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">            </span><span class="nt">&quot;signed&quot;</span><span class="p">:</span><span class="kc">true</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.equinox.cm&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.4.400.v20200422-1833&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="s2">&quot;ACTIVE&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">            </span><span class="nt">&quot;signed&quot;</span><span class="p">:</span><span class="kc">false</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<h4 id="start-bundle">Start bundle</h4>
-<ul>
-<li>Method: POST</li>
-<li>API PATH: <code>/services/inventory/v1/bundles/_start</code></li>
-</ul>
-<h5 id="request-body">Request Body</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="w"> </span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.osgi&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
-</code></pre></div>
 <h5 id="responses">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Malformed Client JSON)</li>
-<li>404 Resource Not Found</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&quot;biosVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;cpuVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&quot;deviceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;modelId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&quot;modelName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">&quot;partNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aarch64&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;numberOfProcessors&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&quot;totalMemory&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">506816</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">&quot;freeMemory&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">380379</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="nt">&quot;serialNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10000000ba7c7bfd&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="nt">&quot;javaHome&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/lib/jvm/java-8-openjdk-armhf/jre&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nt">&quot;javaVendor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenJDK Runtime Environment&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;javaVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.8.0_312-8u312-b07-1+rpi1-b07&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="nt">&quot;javaVmInfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixed mode&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="nt">&quot;javaVmName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenJDK Client VM&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="nt">&quot;javaVmVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;25.312-b07&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nt">&quot;osArch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arm&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nt">&quot;osDistro&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="nt">&quot;osDistroVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="nt">&quot;osName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="nt">&quot;osVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6.1.21-v8+ #1642 SMP PREEMPT Mon Apr  3 17:24:16 BST 2023&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="nt">&quot;isLegacyBluetoothBeaconScan&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="nt">&quot;isLegacyPPPLoggingEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="nt">&quot;primaryMacAddress&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;E4:5F:01:35:7F:F4&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="nt">&quot;primaryNetworkInterfaceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="nt">&quot;fileSeparator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="nt">&quot;firmwareVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="nt">&quot;kuraDataDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/data&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="nt">&quot;kuraFrameworkConfigDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/framework&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span><span class="nt">&quot;kuraHomeDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="nt">&quot;kuraMarketplaceCompatibilityVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5.4.0.SNAPSHOT&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="nt">&quot;kuraSnapshotsCount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">    </span><span class="nt">&quot;kuraSnapshotsDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/user/snapshots&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="nt">&quot;kuraStyleDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/console/skin&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">    </span><span class="nt">&quot;kuraTemporaryConfigDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/.kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">    </span><span class="nt">&quot;kuraUserConfigDirectory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/user&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">    </span><span class="nt">&quot;kuraVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KURA_5.4.0-SNAPSHOT&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span><span class="nt">&quot;kuraHaveWebInterface&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span><span class="nt">&quot;kuraHaveNetAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="nt">&quot;kuraWifiTopChannel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483647</span><span class="p">,</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="nt">&quot;kuraDefaultNetVirtualDevicesConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netIPv4StatusUnmanaged&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">    </span><span class="nt">&quot;osgiFirmwareName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Eclipse&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">    </span><span class="nt">&quot;osgiFirmwareVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.10.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">    </span><span class="nt">&quot;commandUser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">    </span><span class="nt">&quot;commandZipMaxUploadNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">    </span><span class="nt">&quot;commandZipMaxUploadSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
 <li>500 Internal Server Error</li>
 </ul>
-<h4 id="stop-bundle">Stop bundle</h4>
+<h4 id="get-extended-properties">Get extended properties</h4>
 <ul>
-<li>Method: POST</li>
-<li>API PATH: <code>/services/inventory/v1/bundles/_stop</code></li>
+<li>Method: GET</li>
+<li>API PATH: <code>/services/system/v1/properties/extended</code></li>
 </ul>
-<h5 id="request-body_1">Request Body</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="w"> </span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.osgi&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
-</code></pre></div>
 <h5 id="responses_1">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Malformed Client JSON)</li>
-<li>404 Resource Not Found</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;extendedProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="nt">&quot;Device Info 1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">            </span><span class="nt">&quot;exampleKey1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">            </span><span class="nt">&quot;exampleKey2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value2&quot;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">&quot;Device Info 2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">            </span><span class="nt">&quot;key1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;val1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">            </span><span class="nt">&quot;key2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;val2&quot;</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
 <li>500 Internal Server Error</li>
 </ul>
-<hr />
-<h2 id="deployment-packages">Deployment Packages</h2>
-<h4 id="get-packages">GET packages</h4>
+<h4 id="get-kura-properties">Get Kura properties</h4>
 <ul>
 <li>Method: GET</li>
-<li>Description: returns a list of deployment packages.</li>
-<li>API PATH: <code>/services/inventory/v1/deploymentPackages</code></li>
+<li>API PATH: <code>/services/system/v1/properties/kura</code></li>
 </ul>
-<h5 id="response_2">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;deploymentPackages&quot;</span><span class="p">:[</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.kura.example.beacon&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.0.500&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">            </span><span class="nt">&quot;signed&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">            </span><span class="nt">&quot;bundles&quot;</span><span class="p">:[</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">                </span><span class="p">{</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;org.eclipse.kura.example.beacon&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">                    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.0.500&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">                    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">171</span><span class="p">,</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">                    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ACTIVE&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">                    </span><span class="nt">&quot;signed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">                </span><span class="p">}</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">            </span><span class="p">]</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<h2 id="system-packages-debrpmapk">System Packages (DEB/RPM/APK)</h2>
-<h4 id="get-system-packages">GET System Packages</h4>
-<ul>
-<li>Method: GET</li>
-<li>Description: returns a list of system packages.</li>
-<li>API PATH: <code>/services/inventory/v1/systemPackages</code></li>
-</ul>
-<h5 id="response_3">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">&quot;systemPackages&quot;</span><span class="p">:[</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;adduser&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;3.118&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;alsa-utils&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.1.8-2&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;ansible&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;2.7.7+dfsg-1&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;apparmor&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;2.13.2-10&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;apt&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.8.2.1&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;apt-listchanges&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;3.19&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;apt-transport-https&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.8.2.2&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;apt-utils&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a><span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;1.8.2.1&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DEB&quot;</span>
-<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<hr />
-<h2 id="containers">Containers</h2>
-<h4 id="get-containers">GET Containers</h4>
-<ul>
-<li>Method: Get</li>
-<li>Description: returns a list of Containers.</li>
-<li>API PATH: <code>/services/inventory/v1/containers</code></li>
-</ul>
-<h5 id="response_4">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;containers&quot;</span><span class="p">:</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="p">[</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;container_1&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;nginx:latest&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;DOCKER&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">      </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="s2">&quot;active&quot;</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="p">]</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<h4 id="start-container">Start container</h4>
-<ul>
-<li>Method: POST</li>
-<li>API PATH: <code>/services/inventory/v1/containers/_start</code></li>
-</ul>
-<h5 id="request-body_2">Request Body</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;container_1&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx:latest&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">}</span>
-</code></pre></div>
 <h5 id="responses_2">Responses</h5>
 <ul>
-<li>200 OK</li>
-<li>400 Bad Request (Malformed Client JSON)</li>
-<li>404 Resource Not Found</li>
+<li>200 OK status</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;kuraProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="nt">&quot;kura.platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aarch64&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="nt">&quot;org.osgi.framework.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.10.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="nt">&quot;kura.user.config&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/user&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="nt">&quot;kura.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Eclipse Kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="nt">&quot;file.command.zip.max.number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1024&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="nt">&quot;kura.legacy.ppp.logging.enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="nt">&quot;kura.tmp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/tmp/.kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="nt">&quot;kura.packages&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/packages&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="nt">&quot;build.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;buildNumber&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">        </span><span class="nt">&quot;kura.log.download.journal.fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="nt">&quot;kura.data&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/data&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="nt">&quot;os.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">        </span><span class="nt">&quot;dpa.read.timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60000&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="nt">&quot;file.upload.size.max&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-1&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="nt">&quot;console.device.management.service.ignore&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService,org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="nt">&quot;kura.command.user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">        </span><span class="nt">&quot;kura.device.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="nt">&quot;kura.partNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="nt">&quot;kura.project&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;generic-arm32&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="nt">&quot;kura.company&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EUROTECH&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">        </span><span class="nt">&quot;java.home&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/lib/jvm/java-8-openjdk-armhf/jre&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">        </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5.4.0-SNAPSHOT&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">        </span><span class="nt">&quot;kura.style.dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/console/skin&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">        </span><span class="nt">&quot;kura.model.id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">        </span><span class="nt">&quot;file.separator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">        </span><span class="nt">&quot;kura.model.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;raspberry&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">        </span><span class="nt">&quot;kura.serialNumber.provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cat /proc/cpuinfo | grep Serial | cut -d &#39; &#39; -f 2&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">        </span><span class="nt">&quot;kura.have.web.inter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">        </span><span class="nt">&quot;kura.legacy.bluetooth.beacon.scan&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="nt">&quot;java.runtime.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.8.0_312-8u312-b07-1+rpi1-b07&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="nt">&quot;kura.bios.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">        </span><span class="nt">&quot;kura.marketplace.compatibility.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KURA_5.4.0-SNAPSHOT&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">        </span><span class="nt">&quot;kura.framework.config&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/framework&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">        </span><span class="nt">&quot;kura.firmware.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">        </span><span class="nt">&quot;kura.plugins&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/plugins&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">        </span><span class="nt">&quot;os.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6.1.21-v8+ #1642 SMP PREEMPT Mon Apr  3 17:24:16 BST 2023&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">        </span><span class="nt">&quot;kura.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;KURA_5.4.0-SNAPSHOT&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">        </span><span class="nt">&quot;org.osgi.framework.vendor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Eclipse&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">        </span><span class="nt">&quot;java.runtime.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenJDK Runtime Environment&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">        </span><span class="nt">&quot;kura.log.download.sources&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/log&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">        </span><span class="nt">&quot;os.distribution&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">        </span><span class="nt">&quot;java.vm.name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;OpenJDK Client VM&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">        </span><span class="nt">&quot;kura.primary.network.interface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">        </span><span class="nt">&quot;kura.home&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">        </span><span class="nt">&quot;file.command.zip.max.size&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">        </span><span class="nt">&quot;os.arch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arm&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="w">        </span><span class="nt">&quot;os.distribution.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">        </span><span class="nt">&quot;file.upload.in.memory.size.threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10240&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">        </span><span class="nt">&quot;kura.net.virtual.devices.config&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unmanaged&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="w">        </span><span class="nt">&quot;kura.snapshots&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/opt/eclipse/kura/user/snapshots&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="w">        </span><span class="nt">&quot;java.vm.info&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixed mode&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="w">        </span><span class="nt">&quot;java.vm.version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;25.312-b07&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="w">        </span><span class="nt">&quot;dpa.connection.timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60000&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a><span class="w">        </span><span class="nt">&quot;build.number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;generic-arm32-buildNumber&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="w">        </span><span class="nt">&quot;ccs.status.notification.url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ccs:log&quot;</span>
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
 <li>500 Internal Server Error</li>
 </ul>
-<h4 id="stop-container">Stop container</h4>
+<h2 id="post-methods">POST methods</h2>
+<h4 id="filter-framework-properties">Filter framework properties</h4>
+<p>This method allows to retrieve framework-related properties by their name. Available properties are in <a href="#framework-properties">table Framework properties</a>.</p>
 <ul>
 <li>Method: POST</li>
-<li>API PATH: <code>/services/inventory/v1/containers/_stop</code></li>
+<li>API PATH: <code>/services/system/v1/properties/framework/filter</code></li>
 </ul>
-<h5 id="request-body_3">Request Body</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;container_1&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx:latest&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">}</span>
+<h5 id="request-body">Request Body</h5>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;deviceName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;numberOfProcessors&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;kuraHaveNetAdmin&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
 </code></pre></div>
 <h5 id="responses_3">Responses</h5>
 <ul>
-<li>200 OK</li>
-<li>400 Bad Request (Malformed Client JSON)</li>
-<li>404 Resource Not Found</li>
+<li>200 OK status</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;deviceName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RASBPERRY PI 4&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;numberOfProcessors&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;kuraHaveNetAdmin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
 <li>500 Internal Server Error</li>
 </ul>
-<hr />
-<h2 id="images">Images</h2>
-<h4 id="images-images">Images Images</h4>
-<ul>
-<li>Method: Get</li>
-<li>Description: returns a list of Images.</li>
-<li>API PATH: <code>/services/inventory/v1/images</code></li>
-</ul>
-<h5 id="response_5">Response</h5>
-<ul>
-<li>200 OK
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;containers&quot;</span><span class="p">:</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">[</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;ContainerImage&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="p">]</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">}</span>
-</code></pre></div></li>
-</ul>
-<h4 id="delete-image">Delete Image</h4>
+<h4 id="filter-extended-properties">Filter extended properties</h4>
+<p>This method allows to retrieve the extended properties and to filter them by group name.</p>
 <ul>
 <li>Method: POST</li>
-<li>API PATH: <code>/services/inventory/v1/images/_delete</code></li>
+<li>API PATH: <code>/services/system/v1/properties/extended/filter</code></li>
 </ul>
-<h5 id="request-body_4">Request Body</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">      </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">}</span>
+<h5 id="request-body_1">Request Body</h5>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">&quot;groupNames&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Device Info 1&quot;</span><span class="p">]</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
 </code></pre></div>
 <h5 id="responses_4">Responses</h5>
 <ul>
-<li>200 OK</li>
-<li>400 Bad Request (Malformed Client JSON)</li>
-<li>404 Resource Not Found</li>
+<li>200 OK status</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nt">&quot;extendedProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="nt">&quot;Device Info 1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">            </span><span class="nt">&quot;exampleKey1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">            </span><span class="nt">&quot;exampleKey2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value2&quot;</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
 <li>500 Internal Server Error</li>
 </ul>
-<hr />
-<h2 id="states">States</h2>
-<h3 id="bundle-states">Bundle States</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>-   `ACTIVE`: Container is running
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>-   `INSTALLED`: Container is starting
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>-   `UNINSTALLED`: Container has failed, or is stopped
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>-   `UNKNOWN`: Container state can not be determined
+<h4 id="filter-kura-properties">Filter kura properties</h4>
+<p>This method allows to retrieve Kura-related properties (derived from the <code>kura.properties</code> file) and filter by their name. Available properties are listed in the <a href="#kura-properties">table Kura properties</a>.</p>
+<ul>
+<li>Method: POST</li>
+<li>API PATH: <code>/services/system/v1/properties/kura/filter</code></li>
+</ul>
+<h5 id="request-body_2">Request Body</h5>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;kura.platform&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;file.upload.size.max&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;kura.have.net.admin&quot;</span><span class="p">]</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="container-states">Container States</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>-   `active`: Container is running
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>-   `installed`: Container is starting
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>-   `uninstalled`: Container has failed, or is stopped
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>-   `unknown`: Container state can not be determined
+<h5 id="responses_5">Responses</h5>
+<ul>
+<li>200 OK status</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;kuraProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">        </span><span class="nt">&quot;kura.platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aarch64&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">        </span><span class="nt">&quot;kura.have.net.admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">        </span><span class="nt">&quot;file.upload.size.max&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-1&quot;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="p">}</span>
 </code></pre></div>
+<ul>
+<li>500 Internal Server Error</li>
+</ul>
 
               
             </article>
@@ -3962,7 +3981,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../../javadoc/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Javadoc" rel="prev">
+        <a href="../rest-position-api/" class="md-footer__link md-footer__link--prev" aria-label="Previous: REST Position API" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -3971,20 +3990,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
               <span class="md-footer__direction">
                 Previous
               </span>
-              Javadoc
+              REST Position API
             </div>
           </div>
         </a>
       
       
         
-        <a href="../rest-command-api/" class="md-footer__link md-footer__link--next" aria-label="Next: REST Command API" rel="next">
+        <a href="../../../tutorials/AD-EdgeAI/" class="md-footer__link md-footer__link--next" aria-label="Next: Edge AI Anomaly Detection" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              REST Command API
+              Edge AI Anomaly Detection
             </div>
           </div>
           <div class="md-footer__button md-icon">

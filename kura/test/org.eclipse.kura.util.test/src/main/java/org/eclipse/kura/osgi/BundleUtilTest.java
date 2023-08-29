@@ -35,12 +35,12 @@ public class BundleUtilTest {
     @Test
     public void shouldReturnGPIOBundle() {
 
-        givenServicesPropertiesFilter("service.pid", "org.eclipse.kura.driver.gpio");
-        givenServiceClasses(new Class<?>[] { org.eclipse.kura.driver.Driver.class });
+        givenServicesPropertiesFilter("service.pid", "org.eclipse.kura.gpio.GPIOService");
+        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class });
 
         whenBundleListIsRequested();
 
-        thenBundleNameIs("org.eclipse.kura.driver.gpio.provider");
+        thenBundleNameIs("org.eclipse.kura.emulator.gpio");
     }
 
     private void givenServicesPropertiesFilter(String... properties) {

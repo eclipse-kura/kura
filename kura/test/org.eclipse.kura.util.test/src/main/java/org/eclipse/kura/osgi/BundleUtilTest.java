@@ -57,6 +57,29 @@ public class BundleUtilTest {
         thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio", "org.eclipse.kura.watchdog");
     }
 
+    @Test
+    public void shouldReturnNoBundleWithWrongProperty() {
+        givenServicesPropertiesFilter("service.pid", "wrongServicePid");
+        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class });
+
+        whenBundleListIsRequested();
+
+        thenBundlesAre(0);
+    }
+
+    @Test
+    public void shouldReturnOnlyBundleWithRightProperty() {
+        givenServicesPropertiesFilter("service.pid", "org.eclipse.kura.gpio.GPIOService");
+        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class,
+                org.eclipse.kura.watchdog.WatchdogService.class });
+
+        whenBundleListIsRequested();
+
+        thenBundlesAre(1);
+
+        thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio");
+    }
+
     private void givenServicesPropertiesFilter(String... properties) {
         for (int i = 0; i < properties.length; i = i + 2) {
             this.serviceProperties.put(properties[i], properties[i + 1]);

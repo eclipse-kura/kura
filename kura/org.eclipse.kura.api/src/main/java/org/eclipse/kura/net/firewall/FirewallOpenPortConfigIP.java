@@ -165,7 +165,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setPortRange(String portRange) {
@@ -178,7 +178,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setProtocol(NetProtocol protocol) {
@@ -199,7 +199,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setPermittedNetwork(NetworkPair<T> permittedNetwork) {
@@ -211,7 +211,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setPermittedInterfaceName(String permittedInterfaceName) {
@@ -223,7 +223,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setUnpermittedInterfaceName(String unpermittedInterfaceName) {
@@ -236,7 +236,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setPermittedMac(String permittedMac) {
@@ -249,7 +249,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
     }
 
     /**
-     * @deprecated since 2.6. se the FirewallOpenPortConfigIP builder
+     * @deprecated since 2.6. Use the FirewallOpenPortConfigIP builder
      */
     @Deprecated
     public void setSourcePortRange(String sourcePortRange) {

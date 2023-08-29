@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,34 +27,34 @@ import org.slf4j.LoggerFactory;
  *
  * @author eurotech
  */
-public class LinuxFirewall extends AbstractLinuxFirewall {
+public class LinuxFirewallIPv6 extends AbstractLinuxFirewall {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinuxFirewall.class);
+    private static final Logger logger = LoggerFactory.getLogger(LinuxFirewallIPv6.class);
 
-    private static LinuxFirewall linuxFirewall;
-    private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
+    private static LinuxFirewallIPv6 linuxFirewall;
+    private static final String IPV6_FORWARD_FILE_NAME = "/proc/sys/net/ipv6/conf/all/forwarding";
 
     // The LinuxFirewall is a singleton, since at the creation of the object
     // it reads the iptables configuration from the filesystem once, instead of
     // reading it at every call of the constructor.
     // However, it is dangerous in a multi-thread system because the CommandExecutorService
     // is passed as an argument.
-    public static LinuxFirewall getInstance(CommandExecutorService executorService) {
+    public static LinuxFirewallIPv6 getInstance(CommandExecutorService executorService) {
         if (linuxFirewall == null) {
-            linuxFirewall = new LinuxFirewall(executorService);
+            linuxFirewall = new LinuxFirewallIPv6(executorService);
         } else {
             linuxFirewall.setExecutorService(executorService);
         }
         return linuxFirewall;
     }
 
-    private LinuxFirewall(CommandExecutorService executorService) {
+    private LinuxFirewallIPv6(CommandExecutorService executorService) {
         this.executorService = executorService;
-        this.iptables = new IptablesConfig(this.executorService);
+        this.iptables = new IptablesConfigIPv6(this.executorService);
         try {
             File cfgFile = new File(this.iptables.getFirewallConfigFileName());
             if (!cfgFile.exists()) {
-                IptablesConfig minimalConfig = new IptablesConfig(executorService);
+                IptablesConfig minimalConfig = new IptablesConfigIPv6(executorService);
                 minimalConfig.applyRules();
             }
             initialize();
@@ -65,11 +65,11 @@ public class LinuxFirewall extends AbstractLinuxFirewall {
 
     @Override
     protected IPAddress getDefaultAddress() throws UnknownHostException {
-        return IP4Address.getDefaultAddress();
+        return IP6Address.getDefaultAddress();
     }
 
     @Override
     protected String getIpForwardFileName() {
-        return IP_FORWARD_FILE_NAME;
+        return IPV6_FORWARD_FILE_NAME;
     }
 }

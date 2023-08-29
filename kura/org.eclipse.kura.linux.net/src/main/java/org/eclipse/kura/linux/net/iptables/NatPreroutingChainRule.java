@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,10 @@
 
 package org.eclipse.kura.linux.net.iptables;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -112,9 +116,7 @@ public class NatPreroutingChainRule {
                 } else if ("--sport".equals(aRuleToken)) {
                     parsePorts(ruleIterator);
                 } else if ("--to-destination".equals(aRuleToken)) {
-                    String[] port = ruleIterator.next().split(":");
-                    this.dstIpAddress = port[0];
-                    this.internalPort = Integer.parseInt(port[1]);
+                    getDestinationAddress(ruleIterator);
                 } else if ("-s".equals(aRuleToken)) {
                     String[] network = ruleIterator.next().split("/");
                     this.permittedNetwork = network[0];
@@ -127,10 +129,39 @@ public class NatPreroutingChainRule {
                     this.type = RuleType.IP_FORWARDING;
                 }
             }
-            this.rule = new StringBuilder("iptables -t nat ").append(rule).toString();
+            this.rule = new StringBuilder("-t nat ").append(rule).toString();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
+    }
+
+    private void getDestinationAddress(Iterator<String> ruleIterator) {
+        String destinationAddress = ruleIterator.next();
+        if (destinationAddress.startsWith("[")) {
+            parseIPv6Address(destinationAddress);
+        } else {
+            parseIPv4Address(destinationAddress);
+        }
+    }
+
+    /*
+     * Parse the IPv4 address in the form <IPv4 address>:<port>.
+     * i.e. 192.168.0.1:8080
+     */
+    private void parseIPv4Address(String destinationAddress) {
+        String[] element = destinationAddress.split(":");
+        this.dstIpAddress = element[0];
+        this.internalPort = Integer.parseInt(element[1]);
+    }
+
+    /*
+     * Parse the IPv6 address in the form [<IPv6 address>]:<port>
+     * i.e. [fc00:e968:6179::de5]:8080
+     */
+    private void parseIPv6Address(String destinationAddress) {
+        String[] element = destinationAddress.substring(1).split("]:");
+        this.dstIpAddress = element[0];
+        this.internalPort = Integer.parseInt(element[1]);
     }
 
     private void parsePorts(Iterator<String> ruleIterator) {
@@ -156,7 +187,8 @@ public class NatPreroutingChainRule {
             chain = "prerouting-kura";
         }
         StringBuilder sb = new StringBuilder("-A " + chain);
-        if (this.permittedNetwork != null && !this.permittedNetwork.equals("0.0.0.0")) {
+        if (this.permittedNetwork != null && !this.permittedNetwork.equals("0.0.0.0")
+                && !this.permittedNetwork.equals("::") && !this.permittedNetwork.equals("0:0:0:0:0:0:0:0:0")) {
             sb.append(" -s ").append(this.permittedNetwork).append('/').append(this.permittedNetworkMask);
         }
         sb.append(" -i ").append(this.inputInterface).append(" -p ").append(this.protocol);
@@ -168,8 +200,27 @@ public class NatPreroutingChainRule {
             sb.append(" --sport ").append(this.srcPortFirst).append(':').append(this.srcPortLast);
         }
         sb.append(" --dport ").append(this.externalPort);
-        sb.append(" -j DNAT --to-destination ").append(this.dstIpAddress).append(':').append(this.internalPort);
+        sb.append(" -j DNAT --to-destination ").append(getIPAddress(this.dstIpAddress)).append(':')
+                .append(this.internalPort);
         return sb.toString();
+    }
+
+    String getIPAddress(String ipAddress) {
+        String ipAddressString = "";
+        try {
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+
+            if (inetAddress instanceof Inet4Address && inetAddress.getHostAddress().equals(ipAddress)) {
+                ipAddressString = ipAddress;
+            } else if (inetAddress instanceof Inet6Address && inetAddress.getHostAddress().equals(ipAddress)) {
+                ipAddressString = "[" + ipAddress + "]";
+            }
+        } catch (UnknownHostException e) {
+            logger.debug("Failed to validate IP address ", e);
+            ipAddressString = ipAddress;
+        }
+
+        return ipAddressString;
     }
 
     @Override

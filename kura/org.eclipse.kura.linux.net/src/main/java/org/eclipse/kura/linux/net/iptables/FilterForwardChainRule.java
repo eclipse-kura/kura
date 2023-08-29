@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -129,7 +129,7 @@ public class FilterForwardChainRule {
                     this.type = RuleType.IP_FORWARDING;
                 }
             }
-            this.rule = new StringBuilder("iptables ").append(rule).toString();
+            this.rule = new StringBuilder(rule).toString();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }

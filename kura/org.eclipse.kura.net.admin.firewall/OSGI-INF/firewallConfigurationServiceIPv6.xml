@@ -14,18 +14,18 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-    name="org.eclipse.kura.net.admin.FirewallConfigurationService"
+    name="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"
     activate="activate"
     deactivate="deactivate"
     configuration-policy="optional"
     immediate="true"
     modified="updated">
-   <implementation class="org.eclipse.kura.net.admin.FirewallConfigurationServiceImpl"/>
-   <property name="service.pid" value="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
-   <property name="kura.service.pid" value="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
+   <implementation class="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6Impl"/>
+   <property name="service.pid" value="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
-      <provide interface="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
+      <provide interface="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>

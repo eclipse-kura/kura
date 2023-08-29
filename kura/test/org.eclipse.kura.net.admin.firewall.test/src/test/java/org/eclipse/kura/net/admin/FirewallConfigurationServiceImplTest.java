@@ -35,6 +35,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.net.FirewallConfiguration;
+import org.eclipse.kura.linux.net.iptables.AbstractLinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.LocalRule;
 import org.eclipse.kura.linux.net.iptables.NATRule;
@@ -124,6 +125,7 @@ public class FirewallConfigurationServiceImplTest {
     public void testGetConfiguration() throws KuraException {
         // test rules conversion into configuration properties
 
+        LinuxFirewall linuxFirewall = mock(LinuxFirewall.class);
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override
@@ -177,6 +179,11 @@ public class FirewallConfigurationServiceImplTest {
 
                 return result;
             }
+
+            @Override
+            protected AbstractLinuxFirewall getLinuxFirewall() {
+                return linuxFirewall;
+            }
         };
 
         ComponentConfiguration configuration = svc.getConfiguration();
@@ -207,6 +214,7 @@ public class FirewallConfigurationServiceImplTest {
     public void testGetFirewallConfiguration() throws KuraException {
         // test 'raw' configuration retrieval
 
+        LinuxFirewall linuxFirewall = mock(LinuxFirewall.class);
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override
@@ -264,6 +272,11 @@ public class FirewallConfigurationServiceImplTest {
 
                 return result;
             }
+
+            @Override
+            protected AbstractLinuxFirewall getLinuxFirewall() {
+                return linuxFirewall;
+            }
         };
 
         FirewallConfiguration configuration = svc.getFirewallConfiguration();
@@ -287,7 +300,7 @@ public class FirewallConfigurationServiceImplTest {
         List<FirewallOpenPortConfigIP<? extends IPAddress>> portConfigs = configuration.getOpenPortConfigs();
         assertEquals(2, portConfigs.size());
 
-        FirewallOpenPortConfigIP<? extends IPAddress> port = portConfigs.get(0);
+        FirewallOpenPortConfigIP<? extends IPAddress> port = portConfigs.get(1);
         assertEquals("eth0", port.getPermittedInterfaceName());
         assertNull(port.getPermittedMac());
         assertEquals("10.10.1.0", port.getPermittedNetwork().getIpAddress().getHostAddress());
@@ -298,7 +311,7 @@ public class FirewallConfigurationServiceImplTest {
         assertNull(port.getSourcePortRange());
         assertEquals("wlan0", port.getUnpermittedInterfaceName());
 
-        port = portConfigs.get(1);
+        port = portConfigs.get(0);
         assertEquals("eth0", port.getPermittedInterfaceName());
         assertNull(port.getPermittedMac());
         assertEquals("10.10.1.0", port.getPermittedNetwork().getIpAddress().getHostAddress());
@@ -485,6 +498,7 @@ public class FirewallConfigurationServiceImplTest {
 
     @Test
     public void testSetFirewallOpenPortConfiguration() throws KuraException, UnknownHostException {
+        LinuxFirewall linuxFirewall = mock(LinuxFirewall.class);
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override
@@ -499,6 +513,11 @@ public class FirewallConfigurationServiceImplTest {
                 LocalRule rule = localRules.get(0);
                 assertEquals("0.0.0.0", rule.getPermittedNetwork().getIpAddress().getHostAddress());
                 assertEquals(0, rule.getPermittedNetwork().getPrefix());
+            }
+
+            @Override
+            protected AbstractLinuxFirewall getLinuxFirewall() {
+                return linuxFirewall;
             }
         };
 

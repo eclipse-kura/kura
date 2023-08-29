@@ -341,7 +341,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     Text unavailableChannelErrorText;
 
-    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs) {
+    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, TabWireless8021xUi wireless8021x, NetworkTabsUi tabs) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;

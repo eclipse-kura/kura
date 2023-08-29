@@ -1,9 +1,9 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum Gwt8021xEap {
-    leap, 
+    leap,
     md5,
-    tls, 
+    tls,
     peap,
     ttls,
     pwd,

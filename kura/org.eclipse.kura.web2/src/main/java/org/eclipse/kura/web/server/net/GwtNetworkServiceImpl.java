@@ -366,9 +366,6 @@ public class GwtNetworkServiceImpl {
                                     case SECURITY_WEP:
                                         gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
                                         break;
-                                    case SECURITY_WPA2_ENTERPRISE:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2Enterprise.name());
-                                        break;
                                     case SECURITY_NONE:
                                     default:
                                         gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
@@ -1800,8 +1797,6 @@ public class GwtNetworkServiceImpl {
             wifiSecurity = WifiSecurity.SECURITY_WPA_WPA2;
         } else if (GwtWifiSecurity.netWifiSecurityWEP.name().equals(security)) {
             wifiSecurity = WifiSecurity.SECURITY_WEP;
-        } else if (GwtWifiSecurity.netWifiSecurityWPA2Enterprise.name().equals(security)){
-            wifiSecurity = WifiSecurity.SECURITY_WPA2_ENTERPRISE;
         } else {
             wifiSecurity = WifiSecurity.SECURITY_NONE;
         }

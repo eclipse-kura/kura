@@ -16,9 +16,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -75,6 +79,34 @@ public class BundleUtil {
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * Returns the set of OSGi bundles containing the list of required headers key/value in the MANIFEST.MF file.
+     * 
+     * @param bundleContext
+     *            the context of the bundle.
+     * @param headers
+     *            the list of key/value required headers
+     * @return the set of bundles
+     */
+
+    public static Set<Bundle> getBundles(final BundleContext bundleContext, final Map<String, String> headers) {
+        requireNonNull(bundleContext, "Bundle context cannot be null.");
+        requireNonNull(headers, "Properties cannot be null.");
+
+        return Stream.of(bundleContext.getBundles()).filter(contains(headers)).collect(Collectors.toSet());
+    }
+
+    private static Predicate<? super Bundle> contains(Map<String, String> properties) {
+        return b -> {
+            Dictionary<String, String> headers = b.getHeaders();
+
+            Map<String, String> headersMap = Collections.list(headers.keys()).stream()
+                    .collect(Collectors.toMap(Function.identity(), headers::get));
+
+            return headersMap.entrySet().containsAll(properties.entrySet());
+        };
     }
 
 }

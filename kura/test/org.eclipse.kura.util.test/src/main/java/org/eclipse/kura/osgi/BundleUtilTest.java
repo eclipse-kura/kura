@@ -29,9 +29,10 @@ import org.osgi.framework.FrameworkUtil;
 
 public class BundleUtilTest {
 
-    private Map<String, String> serviceProperties = new HashMap<>();
+    private Map<String, String> keyValueMap = new HashMap<>();
     private Class<?>[] servicesClasses;
     private Set<Bundle> bundles;
+    private BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
     @Test
     public void shouldReturnGPIOBundle() {
@@ -76,13 +77,47 @@ public class BundleUtilTest {
         whenBundleListIsRequested();
 
         thenBundlesAre(1);
-
         thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio");
+    }
+
+    @Test
+    public void shouldReturnGPIOBundleBySingleHeader() {
+        givenBundleHeaders("Bundle-Name", "org.eclipse.kura.emulator.gpio");
+
+        whenBundleListIsRequestByHeaders();
+
+        thenBundlesAre(1);
+        thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio");
+    }
+
+    @Test
+    public void shouldReturnGPIOBundleByMultipleHeaders() {
+        givenBundleHeaders("Bundle-Name", "org.eclipse.kura.emulator.gpio", "Bundle-Vendor", "Eclipse Kura");
+
+        whenBundleListIsRequestByHeaders();
+
+        thenBundlesAre(1);
+        thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio");
+    }
+
+    @Test
+    public void shouldReturnManyBundlesByHeader() {
+        givenBundleHeaders("Bundle-Vendor", "Eclipse Kura");
+
+        whenBundleListIsRequestByHeaders();
+
+        thenBundlesAreMany();
+    }
+
+    private void givenBundleHeaders(String... headers) {
+        for (int i = 0; i < headers.length; i = i + 2) {
+            this.keyValueMap.put(headers[i], headers[i + 1]);
+        }
     }
 
     private void givenServicesPropertiesFilter(String... properties) {
         for (int i = 0; i < properties.length; i = i + 2) {
-            this.serviceProperties.put(properties[i], properties[i + 1]);
+            this.keyValueMap.put(properties[i], properties[i + 1]);
         }
     }
 
@@ -92,12 +127,24 @@ public class BundleUtilTest {
     }
 
     private void whenBundleListIsRequested() {
-        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        this.bundles = BundleUtil.getBundles(bundleContext, this.servicesClasses, this.serviceProperties);
+        this.bundles = BundleUtil.getBundles(this.bundleContext, this.servicesClasses, this.keyValueMap);
+
+        printBundlesSymbolicName(this.bundles);
+    }
+
+    private void whenBundleListIsRequestByHeaders() {
+        this.bundles = BundleUtil.getBundles(this.bundleContext, this.keyValueMap);
+
+        printBundlesSymbolicName(this.bundles);
     }
 
     private void thenBundlesAre(int expectedNumberOfBundles) {
         assertEquals(expectedNumberOfBundles, this.bundles.size());
+
+    }
+
+    private void thenBundlesAreMany() {
+        assertTrue("Too few Bundles", this.bundles.size() > 1);
 
     }
 
@@ -106,5 +153,12 @@ public class BundleUtilTest {
                 .collect(Collectors.toList());
 
         assertTrue("Not found all bundles", bundleSymbolicNames.containsAll(bundleSymbolicNames));
+    }
+
+    private void printBundlesSymbolicName(Set<Bundle> bundle) {
+        String bundlesSymbolicName = bundles.stream().map(Bundle::getSymbolicName)
+                .collect(Collectors.joining("", ",", ""));
+
+        System.out.println("Bundles Found: " + bundlesSymbolicName);
     }
 }

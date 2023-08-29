@@ -110,39 +110,52 @@ public class NMSettingsConverter {
 
     public static Map<String, Variant<?>> build8021xSettings(NetworkProperties props, String deviceId) {
 
-        String propMode = props.get(String.class, KURA_PROPS_KEY_WIFI_MODE, deviceId);
-
-        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId, propMode.toLowerCase());
-        String phase2 = props.get(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId,
-                propMode.toLowerCase());
+        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId);
+        Optional<String> phase2 = props.getOpt(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId);
 
         Map<String, Variant<?>> settings = new HashMap<>();
-
-        NM8021xEapAndPhase2Configurator eapConf;
-        NM8021xEapAndPhase2Configurator phase2Conf;
 
         // Configure Eap Method
         switch (NM8021xEAP.valueOf(eap)) {
         case ttls:
-            eapConf = new NM8021xEapTtls(props, deviceId, propMode);
+            build8021xEapTtls(props, deviceId, settings);
             break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
         }
 
+        if (!phase2.isPresent()) {
+            return settings;
+        }
+
         // Configure Phase2 (innerAuth) Method
-        switch (NM8021xPhase2Auth.valueOf(phase2)) {
+        switch (NM8021xPhase2Auth.valueOf(phase2.get())) {
         case mschapv2:
-            phase2Conf = new NM8021xPhase2MschapV2(props, deviceId, propMode);
+            build8021xMschapV2(props, deviceId, settings);
             break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + phase2 + "\" is not supported.");
         }
 
-        eapConf.writeConfigurationsToMap(settings);
-        phase2Conf.writeConfigurationsToMap(settings);
-
         return settings;
+    }
+
+    private static void build8021xEapTtls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId);
+        settings.put("eap", new Variant<>(new String[] { eap }));
+    }
+
+    private static void build8021xMschapV2(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+
+        String innerAuth = props.get(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId);
+        settings.put("phase2-auth", new Variant<>(innerAuth));
+
+        String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
+        settings.put("identity", new Variant<>(identity));
+
+        String password = props.get(Password.class, "net.interface.%s.config.802-1x.password", deviceId).toString();
+        settings.put("password", new Variant<>(password));
+
     }
 
     public static Map<String, Variant<?>> buildIpv4Settings(NetworkProperties props, String deviceId) {

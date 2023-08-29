@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.osgi;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -40,7 +41,20 @@ public class BundleUtilTest {
 
         whenBundleListIsRequested();
 
-        thenBundleNameIs("org.eclipse.kura.emulator.gpio");
+        thenBundlesAre(1);
+        thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio");
+    }
+
+    @Test
+    public void shouldReturnWatchdogAndGPIOBundles() {
+        givenServiceClasses(new Class<?>[] { org.eclipse.kura.gpio.GPIOService.class,
+                org.eclipse.kura.watchdog.WatchdogService.class });
+
+        whenBundleListIsRequested();
+
+        thenBundlesAre(2);
+
+        thenBundleSymbolicNamesAre("org.eclipse.kura.emulator.gpio", "org.eclipse.kura.watchdog");
     }
 
     private void givenServicesPropertiesFilter(String... properties) {
@@ -59,11 +73,15 @@ public class BundleUtilTest {
         this.bundles = BundleUtil.getBundles(bundleContext, this.servicesClasses, this.serviceProperties);
     }
 
-    private void thenBundleNameIs(String symbolicName) {
+    private void thenBundlesAre(int expectedNumberOfBundles) {
+        assertEquals(expectedNumberOfBundles, this.bundles.size());
+
+    }
+
+    private void thenBundleSymbolicNamesAre(String... symbolicNames) {
         List<String> bundleSymbolicNames = this.bundles.stream().map(Bundle::getSymbolicName)
                 .collect(Collectors.toList());
 
-        assertTrue("Wrong bundle found",
-                bundleSymbolicNames.size() == 1 && bundleSymbolicNames.get(0).equals(symbolicName));
+        assertTrue("Not found all bundles", bundleSymbolicNames.containsAll(bundleSymbolicNames));
     }
 }

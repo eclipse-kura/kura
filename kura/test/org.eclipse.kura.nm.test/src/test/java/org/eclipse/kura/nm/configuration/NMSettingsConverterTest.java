@@ -505,7 +505,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", "secure-password");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -550,7 +550,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "peap");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", "secure-password");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
@@ -567,6 +567,39 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
+    }
+
+    @Test
+    public void build8021xTlsSettingsShouldThrowIfIsEmpty() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoSuchElementExceptionThrown();
+    }
+
+    @Test
+    public void build8021xTls() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "tls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "eap");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert", "binary client cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key", "binary private key");
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
+        thenResultingMapContains("phase2-auth", "eap");
+        thenResultingMapContains("identity", "username@email.com");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContainsBytes("client-cert", "binary client cert");
+        thenResultingMapContainsBytes("private-key", "binary private key");
+        thenResultingMapContains("private-key-password", "secure-password");
 
     }
 

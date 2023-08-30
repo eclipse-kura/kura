@@ -115,10 +115,13 @@ public class NMSettingsConverter {
         // Configure Eap Method
         switch (NM8021xEAP.valueOf(eap)) {
         case ttls:
-            build8021xEapTtls(props, deviceId, settings);
+            build8021xTunneledTls(props, deviceId, settings);
             break;
         case peap:
-            build8021xEapPeap(props, deviceId, settings);
+            build8021xProtectedEap(props, deviceId, settings);
+            break;
+        case tls:
+            build8021xTls(props, deviceId, settings);
             break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
@@ -130,6 +133,9 @@ public class NMSettingsConverter {
 
         // Configure Phase2 (innerAuth) Method
         switch (NM8021xPhase2Auth.valueOf(phase2.get())) {
+        case eap:
+            settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.eap.name()));
+            break;
         case mschapv2:
             build8021xMschapV2(props, deviceId, settings);
             break;
@@ -140,40 +146,59 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static void build8021xEapTtls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+    private static void build8021xTunneledTls(NetworkProperties props, String deviceId,
+            Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.ttls.name() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
-    private static void build8021xEapPeap(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+    private static void build8021xProtectedEap(NetworkProperties props, String deviceId,
+            Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.peap.name() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
+    private static void build8021xTls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.tls.name() }));
+        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+
+        String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
+        settings.put("identity", new Variant<>(identity));
+
+        String clientCert = props.get(String.class, "net.interface.%s.config.802-1x.client-cert", deviceId);
+        settings.put("client-cert", new Variant<>(clientCert.getBytes(StandardCharsets.UTF_8)));
+
+        String privateKey = props.get(String.class, "net.interface.%s.config.802-1x.private-key", deviceId);
+        settings.put("private-key", new Variant<>(privateKey.getBytes(StandardCharsets.UTF_8)));
+
+        String privateKeyPassword = props
+                .get(Password.class, "net.interface.%s.config.802-1x.private-key-password", deviceId).toString();
+        settings.put("private-key-password", new Variant<>(privateKeyPassword));
+
+    }
+
     private static void build8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
-        Optional<String> anonymous_identity = props.getOpt(String.class,
+        Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
-        if (anonymous_identity.isPresent()) {
-            settings.put("anonymous-identity", new Variant<>(anonymous_identity.get()));
+        if (anonymousIdentity.isPresent()) {
+            settings.put("anonymous-identity", new Variant<>(anonymousIdentity.get()));
         }
 
-        Optional<String> ca_cert = props.getOpt(String.class, "net.interface.%s.config.802-1x.ca-cert", deviceId);
-        if (ca_cert.isPresent()) {
-            settings.put("ca-cert", new Variant<>(ca_cert.get().getBytes(StandardCharsets.UTF_8)));
+        Optional<String> caCert = props.getOpt(String.class, "net.interface.%s.config.802-1x.ca-cert", deviceId);
+        if (caCert.isPresent()) {
+            settings.put("ca-cert", new Variant<>(caCert.get().getBytes(StandardCharsets.UTF_8)));
         }
 
-        Optional<String> ca_cert_password = props.getOpt(String.class,
+        Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
-        if (ca_cert_password.isPresent()) {
-            settings.put("ca-cert-password", new Variant<>(ca_cert_password.get()));
+        if (caCertPassword.isPresent()) {
+            settings.put("ca-cert-password", new Variant<>(caCertPassword.get().toString()));
         }
     }
 
     private static void build8021xMschapV2(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
-
-        String innerAuth = props.get(String.class, "net.interface.%s.config.802-1x.innerAuth", deviceId);
-        settings.put("phase2-auth", new Variant<>(innerAuth));
+        settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.mschapv2.name()));
 
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));

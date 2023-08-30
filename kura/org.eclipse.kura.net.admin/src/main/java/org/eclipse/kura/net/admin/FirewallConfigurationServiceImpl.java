@@ -71,20 +71,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         this.eventAdmin = eventAdmin;
     }
 
-    public void unsetEventAdmin(EventAdmin eventAdmin) {
-        if (this.eventAdmin == eventAdmin) {
-            this.eventAdmin = null;
-        }
-    }
-
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
-    }
-
-    public void unsetExecutorService(CommandExecutorService executorService) {
-        if (this.executorService == executorService) {
-            this.executorService = null;
-        }
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -143,7 +131,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
                     logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPortRange());
                     builder.withPortRange(localRule.getPortRange())
                             .withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
-                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedNetwork((NetworkPair<IP4Address>) localRule.getPermittedNetwork())
                             .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
                             .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
                             .withPermittedMac(localRule.getPermittedMAC())
@@ -152,7 +140,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
                 } else {
                     logger.debug("getFirewallConfiguration() :: Adding local rule for {}", localRule.getPort());
                     builder.withPort(localRule.getPort()).withProtocol(NetProtocol.valueOf(localRule.getProtocol()))
-                            .withPermittedNetwork(localRule.getPermittedNetwork())
+                            .withPermittedNetwork((NetworkPair<IP4Address>) localRule.getPermittedNetwork())
                             .withPermittedInterfaceName(localRule.getPermittedInterfaceName())
                             .withUnpermittedInterfaceName(localRule.getUnpermittedInterfaceName())
                             .withPermittedMac(localRule.getPermittedMAC())
@@ -160,7 +148,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
                     firewallConfiguration.addConfig(builder.build());
                 }
             } catch (UnknownHostException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
             }
         }
         Iterator<PortForwardRule> portForwardRules = getPortForwardRules().iterator();
@@ -183,7 +171,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
                         .withSourcePortRange(portForwardRule.getSourcePortRange());
                 firewallConfiguration.addConfig(builder.build());
             } catch (UnknownHostException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, e);
             }
         }
         Iterator<NATRule> autoNatRules = getAutoNatRules().iterator();
@@ -229,35 +217,20 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
         ArrayList<LocalRule> localRules = new ArrayList<>();
         for (FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry : firewallConfiguration) {
-            if (openPortEntry.getPermittedNetwork() == null
-                    || openPortEntry.getPermittedNetwork().getIpAddress() == null) {
-                try {
-                    openPortEntry.setPermittedNetwork(getDefaultNetworkPair());
-                } catch (UnknownHostException e) {
-                    logger.info(e.getMessage(), e);
-                }
-            }
-
             try {
                 LocalRule localRule;
                 if (openPortEntry.getPortRange() != null) {
                     logger.debug("setFirewallOpenPortConfiguration() :: Adding local rule for: {}",
                             openPortEntry.getPortRange());
                     localRule = new LocalRule(openPortEntry.getPortRange(), openPortEntry.getProtocol().name(),
-                            new NetworkPair(
-                                    IPAddress.parseHostAddress(
-                                            openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()),
-                                    openPortEntry.getPermittedNetwork().getPrefix()),
+                            convertNetworkPair(openPortEntry.getPermittedNetworkString()),
                             openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
                             openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
                 } else {
                     logger.debug("setFirewallOpenPortConfiguration() :: Adding local rule for: {}",
                             openPortEntry.getPort());
                     localRule = new LocalRule(openPortEntry.getPort(), openPortEntry.getProtocol().name(),
-                            new NetworkPair(
-                                    IPAddress.parseHostAddress(
-                                            openPortEntry.getPermittedNetwork().getIpAddress().getHostAddress()),
-                                    openPortEntry.getPermittedNetwork().getPrefix()),
+                            convertNetworkPair(openPortEntry.getPermittedNetworkString()),
                             openPortEntry.getPermittedInterfaceName(), openPortEntry.getUnpermittedInterfaceName(),
                             openPortEntry.getPermittedMac(), openPortEntry.getSourcePortRange());
                 }
@@ -271,7 +244,15 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         addLocalRules(localRules);
     }
 
-    @Override
+    private NetworkPair<IP4Address> convertNetworkPair(String permittedNetwork) throws UnknownHostException {
+        if (permittedNetwork == null || permittedNetwork.isEmpty()) {
+            return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
+        } else {
+            String[] split = permittedNetwork.split("/");
+            return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
+        }
+    }
+
     public void setFirewallPortForwardingConfiguration(
             List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException {
 
@@ -283,28 +264,36 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
             logger.debug("setFirewallPortForwardingConfiguration() :: Adding port forward rule for: {}",
                     portForwardEntry.getInPort());
 
-            if (portForwardEntry.getPermittedNetwork() == null
-                    || portForwardEntry.getPermittedNetwork().getIpAddress() == null) {
-                try {
-                    portForwardEntry.setPermittedNetwork(getDefaultNetworkPair());
-                } catch (UnknownHostException e) {
-                    logger.info(e.getMessage(), e);
-                }
+            try {
+                PortForwardRule portForwardRule = new PortForwardRule()
+                        .inboundIface(portForwardEntry.getInboundInterface())
+                        .outboundIface(portForwardEntry.getOutboundInterface())
+                        .address(portForwardEntry.getIPAddress().getHostAddress())
+                        .protocol(portForwardEntry.getProtocol().name()).inPort(portForwardEntry.getInPort())
+                        .outPort(portForwardEntry.getOutPort()).masquerade(portForwardEntry.isMasquerade())
+                        .permittedNetwork(convertNetworkPairToString(portForwardEntry.getPermittedNetwork()))
+                        .permittedNetworkMask(portForwardEntry.getPermittedNetwork().getPrefix())
+                        .permittedMAC(portForwardEntry.getPermittedMac())
+                        .sourcePortRange(portForwardEntry.getSourcePortRange());
+                portForwardRules.add(portForwardRule);
+            } catch (Exception e) {
+                logger.error("setFirewallPortForwardingConfiguration() :: Failed to add port forward rule for: {}",
+                        portForwardEntry.getInPort(), e);
             }
-
-            PortForwardRule portForwardRule = new PortForwardRule().inboundIface(portForwardEntry.getInboundInterface())
-                    .outboundIface(portForwardEntry.getOutboundInterface())
-                    .address(portForwardEntry.getAddress().getHostAddress())
-                    .protocol(portForwardEntry.getProtocol().name()).inPort(portForwardEntry.getInPort())
-                    .outPort(portForwardEntry.getOutPort()).masquerade(portForwardEntry.isMasquerade())
-                    .permittedNetwork(portForwardEntry.getPermittedNetwork().getIpAddress().getHostAddress())
-                    .permittedNetworkMask(portForwardEntry.getPermittedNetwork().getPrefix())
-                    .permittedMAC(portForwardEntry.getPermittedMac())
-                    .sourcePortRange(portForwardEntry.getSourcePortRange());
-            portForwardRules.add(portForwardRule);
         }
 
         addPortForwardRules(portForwardRules);
+    }
+
+    private String convertNetworkPairToString(NetworkPair<? extends IPAddress> permittedNetwork)
+            throws UnknownHostException {
+        if (permittedNetwork == null || permittedNetwork.getIpAddress() == null) {
+            return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0).getIpAddress()
+                    .getHostAddress();
+        } else {
+            return new NetworkPair<>(IPAddress.parseHostAddress(permittedNetwork.getIpAddress().getHostAddress()),
+                    permittedNetwork.getPrefix()).getIpAddress().getHostAddress();
+        }
     }
 
     @Override
@@ -388,7 +377,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_OPEN_PORTS_VALUE);
         tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.FIREWALL_OPEN_PORTS));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -399,7 +388,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_PORT_FORWARDING_VALUE);
         tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
+                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.FIREWALL_PORT_FORWARDING));
         tocd.addAD(tad);
 
         tad = objectFactory.createTad();
@@ -409,15 +398,10 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_NAT_VALUE);
-        tad.setDescription(
-                NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.PLATFORM_INTERFACES));
+        tad.setDescription(NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.FIREWALL_NAT));
         tocd.addAD(tad);
 
         return tocd;
-    }
-
-    private NetworkPair getDefaultNetworkPair() throws UnknownHostException {
-        return new NetworkPair(IP4Address.getDefaultAddress(), (short) 0);
     }
 
     @Override

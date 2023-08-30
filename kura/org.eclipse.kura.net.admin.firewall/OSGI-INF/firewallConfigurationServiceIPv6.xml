@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2023 Eurotech and/or its affiliates and others
+
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+    name="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"
+    activate="activate"
+    deactivate="deactivate"
+    configuration-policy="optional"
+    immediate="true"
+    modified="updated">
+   <implementation class="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6Impl"/>
+   <property name="service.pid" value="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <service>
+      <provide interface="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6"/>
+      <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
+   </service>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static"/>
+</scr:component>

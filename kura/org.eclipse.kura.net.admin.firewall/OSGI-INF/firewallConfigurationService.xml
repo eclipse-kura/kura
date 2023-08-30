@@ -22,10 +22,12 @@
     modified="updated">
    <implementation class="org.eclipse.kura.net.admin.FirewallConfigurationServiceImpl"/>
    <property name="service.pid" value="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
+   <property name="kura.service.pid" value="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
       <provide interface="org.eclipse.kura.net.admin.FirewallConfigurationService"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
-   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
-   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
+   <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static"/>
 </scr:component>

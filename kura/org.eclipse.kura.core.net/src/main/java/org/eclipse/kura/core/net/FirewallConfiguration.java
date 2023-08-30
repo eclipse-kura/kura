@@ -28,11 +28,13 @@ import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP6;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.eclipse.kura.net.firewall.RuleType;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4.FirewallOpenPortConfigIP4Builder;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4.FirewallPortForwardConfigIP4Builder;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP6;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +45,14 @@ public class FirewallConfiguration {
     public static final String OPEN_PORTS_PROP_NAME = "firewall.open.ports";
     public static final String PORT_FORWARDING_PROP_NAME = "firewall.port.forwarding";
     public static final String NAT_PROP_NAME = "firewall.nat";
-
     public static final String DFLT_OPEN_PORTS_VALUE = "";
     public static final String DFLT_PORT_FORWARDING_VALUE = "";
     public static final String DFLT_NAT_VALUE = "";
 
-    private final List<FirewallOpenPortConfigIP<? extends IPAddress>> openPortConfigs;
-    private final List<FirewallPortForwardConfigIP<? extends IPAddress>> portForwardConfigs;
-    private final List<FirewallNatConfig> natConfigs;
-    private final List<FirewallAutoNatConfig> autoNatConfigs;
+    private List<FirewallOpenPortConfigIP<? extends IPAddress>> openPortConfigs;
+    private List<FirewallPortForwardConfigIP<? extends IPAddress>> portForwardConfigs;
+    private List<FirewallNatConfig> natConfigs;
+    private List<FirewallAutoNatConfig> autoNatConfigs;
 
     public FirewallConfiguration() {
         this.openPortConfigs = new ArrayList<>();
@@ -68,41 +69,41 @@ public class FirewallConfiguration {
     }
 
     private void parseNatRules(Map<String, Object> properties) {
-        String str;
-        String[] astr;
-        if (properties.containsKey(NAT_PROP_NAME)) {
-            str = (String) properties.get(NAT_PROP_NAME);
-            if (!str.isEmpty()) {
-                astr = str.split(";");
-                Arrays.asList(astr).forEach(this::parseNatRule);
+        String propertyValue;
+        String[] natRules;
+        if (properties.containsKey(getNatPropertyName())) {
+            propertyValue = (String) properties.get(getNatPropertyName());
+            if (!propertyValue.isEmpty()) {
+                natRules = propertyValue.split(";");
+                Arrays.asList(natRules).forEach(this::parseNatRule);
             }
         }
     }
 
-    private void parseNatRule(String sop) {
-        String[] sa = sop.split(",");
-        if (sa.length == 7 && "#".equals(sa[6])) {
+    private void parseNatRule(String rule) {
+        String[] rulesItems = rule.split(",");
+        if (rulesItems.length == 7 && "#".equals(rulesItems[6])) {
             String srcIface = null;
-            if (!sa[0].isEmpty()) {
-                srcIface = sa[0];
+            if (!rulesItems[0].isEmpty()) {
+                srcIface = rulesItems[0];
             }
             String dstIface = null;
-            if (!sa[1].isEmpty()) {
-                dstIface = sa[1];
+            if (!rulesItems[1].isEmpty()) {
+                dstIface = rulesItems[1];
             }
             String protocol = null;
-            if (!sa[2].isEmpty()) {
-                protocol = sa[2];
+            if (!rulesItems[2].isEmpty()) {
+                protocol = rulesItems[2];
             }
             String src = null;
-            if (!sa[3].isEmpty()) {
-                src = sa[3];
+            if (!rulesItems[3].isEmpty()) {
+                src = rulesItems[3];
             }
             String dst = null;
-            if (!sa[4].isEmpty()) {
-                dst = sa[4];
+            if (!rulesItems[4].isEmpty()) {
+                dst = rulesItems[4];
             }
-            boolean masquerade = Boolean.parseBoolean(sa[5]);
+            boolean masquerade = Boolean.parseBoolean(rulesItems[5]);
             FirewallNatConfig natEntry = new FirewallNatConfig(srcIface, dstIface, protocol, src, dst, masquerade,
                     RuleType.IP_FORWARDING);
             this.natConfigs.add(natEntry);
@@ -110,129 +111,133 @@ public class FirewallConfiguration {
     }
 
     private void parsePortForwardingRules(Map<String, Object> properties) {
-        String str;
-        String[] astr;
-        if (properties.containsKey(PORT_FORWARDING_PROP_NAME)) {
-            str = (String) properties.get(PORT_FORWARDING_PROP_NAME);
-            if (!str.isEmpty()) {
-                astr = str.split(";");
-                Arrays.asList(astr).forEach(this::parsePortForwardingRule);
+        String propertyValue;
+        String[] portForwardingRules;
+        if (properties.containsKey(getPortForwardingPropertyName())) {
+            propertyValue = (String) properties.get(getPortForwardingPropertyName());
+            if (!propertyValue.isEmpty()) {
+                portForwardingRules = propertyValue.split(";");
+                Arrays.asList(portForwardingRules).forEach(this::parsePortForwardingRule);
             }
         }
     }
 
-    private void parsePortForwardingRule(String sop) {
+    private void parsePortForwardingRule(String rule) {
         try {
-            String[] sa = sop.split(",");
-            if (sa.length == 11 && "#".equals(sa[10])) {
-                String inboundIface = null;
-                if (!sa[0].isEmpty()) {
-                    inboundIface = sa[0];
-                }
-                String outboundIface = null;
-                if (!sa[1].isEmpty()) {
-                    outboundIface = sa[1];
-                }
-                IP4Address address = (IP4Address) IPAddress.parseHostAddress(sa[2]);
-                NetProtocol protocol = NetProtocol.valueOf(sa[3]);
-                int inPort = Integer.parseInt(sa[4]);
-                int outPort = Integer.parseInt(sa[5]);
-                boolean masquerade = Boolean.parseBoolean(sa[6]);
-                String permittedNetwork = null;
-                short permittedNetworkMask = 0;
-                if (!sa[7].isEmpty()) {
-                    permittedNetwork = sa[7].split("/")[0];
-                    permittedNetworkMask = Short.parseShort(sa[7].split("/")[1]);
-                } else {
-                    permittedNetwork = "0.0.0.0";
-                }
-                String permittedMAC = null;
-                if (!sa[8].isEmpty()) {
-                    permittedMAC = sa[8];
-                }
-                String sourcePortRange = null;
-                if (!sa[9].isEmpty()) {
-                    sourcePortRange = sa[9];
-                }
-                FirewallPortForwardConfigIP4Builder builder = FirewallPortForwardConfigIP4.builder();
-                builder.withInboundIface(inboundIface).withOutboundIface(outboundIface).withAddress(address)
-                        .withProtocol(protocol).withInPort(inPort).withOutPort(outPort).withMasquerade(masquerade)
-                        .withPermittedNetwork(new NetworkPair<>(
-                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask))
-                        .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
-
-                this.portForwardConfigs.add(builder.build());
+            String[] rulesItems = rule.split(",");
+            if (rulesItems.length == 11 && "#".equals(rulesItems[10])) {
+                this.portForwardConfigs.add(buildPortForwardConfigIP(rulesItems));
             }
         } catch (Exception e) {
             logger.error("Failed to parse Port Forward Entry", e);
         }
     }
 
+    protected FirewallPortForwardConfigIP<? extends IPAddress> buildPortForwardConfigIP(String[] rulesItems)
+            throws UnknownHostException {
+        String inboundIface = null;
+        if (!rulesItems[0].isEmpty()) {
+            inboundIface = rulesItems[0];
+        }
+        String outboundIface = null;
+        if (!rulesItems[1].isEmpty()) {
+            outboundIface = rulesItems[1];
+        }
+        IPAddress address = IPAddress.parseHostAddress(rulesItems[2]);
+        NetProtocol protocol = NetProtocol.valueOf(rulesItems[3]);
+        int inPort = Integer.parseInt(rulesItems[4]);
+        int outPort = Integer.parseInt(rulesItems[5]);
+        boolean masquerade = Boolean.parseBoolean(rulesItems[6]);
+        String permittedNetwork = null;
+        short permittedNetworkMask = 0;
+        if (!rulesItems[7].isEmpty()) {
+            permittedNetwork = rulesItems[7].split("/")[0];
+            permittedNetworkMask = Short.parseShort(rulesItems[7].split("/")[1]);
+        } else {
+            permittedNetwork = IP4Address.getDefaultAddress().getHostAddress();
+        }
+        String permittedMAC = null;
+        if (!rulesItems[8].isEmpty()) {
+            permittedMAC = rulesItems[8];
+        }
+        String sourcePortRange = null;
+        if (!rulesItems[9].isEmpty()) {
+            sourcePortRange = rulesItems[9];
+        }
+        FirewallPortForwardConfigIP4Builder builder = FirewallPortForwardConfigIP4.builder();
+        builder.withInboundIface(inboundIface).withOutboundIface(outboundIface).withAddress((IP4Address) address)
+                .withProtocol(protocol).withInPort(inPort).withOutPort(outPort).withMasquerade(masquerade)
+                .withPermittedNetwork(convertNetworkPairIPv4(permittedNetwork + "/" + permittedNetworkMask))
+                .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
+
+        return builder.build();
+    }
+
     private void parseOpenPortRules(Map<String, Object> properties) {
-        String str;
-        String[] astr;
-        if (properties.containsKey(OPEN_PORTS_PROP_NAME)) {
-            str = (String) properties.get(OPEN_PORTS_PROP_NAME);
-            if (!str.isEmpty()) {
-                astr = str.split(";");
-                Arrays.asList(astr).forEach(this::parseOpenPortRule);
+        String propertyValue;
+        String[] openPortRules;
+        if (properties.containsKey(getOpenPortsPropertyName())) {
+            propertyValue = (String) properties.get(getOpenPortsPropertyName());
+            if (!propertyValue.isEmpty()) {
+                openPortRules = propertyValue.split(";");
+                Arrays.asList(openPortRules).forEach(this::parseOpenPortRule);
             }
         }
     }
 
-    private void parseOpenPortRule(String sop) {
+    private void parseOpenPortRule(String rule) {
         try {
-            String[] sa = sop.split(",");
-            if (sa.length == 8 && "#".equals(sa[7])) {
-                this.openPortConfigs.add(buildOpenPortConfigIP(sa));
+            String[] ruleItems = rule.split(",");
+            if (ruleItems.length == 8 && "#".equals(ruleItems[7])) {
+                this.openPortConfigs.add(buildOpenPortConfigIP(ruleItems));
             }
         } catch (Exception e) {
             logger.error("Failed to parse Open Port Entry", e);
         }
     }
 
-    private FirewallOpenPortConfigIP<? extends IPAddress> buildOpenPortConfigIP(String[] sa)
+    protected FirewallOpenPortConfigIP<? extends IPAddress> buildOpenPortConfigIP(String[] openPortRuleItems)
             throws UnknownHostException {
-        FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry = null;
+        FirewallOpenPortConfigIP<IP4Address> openPortEntry = null;
         FirewallOpenPortConfigIP4Builder builder = FirewallOpenPortConfigIP4.builder();
-        NetProtocol protocol = NetProtocol.valueOf(sa[1]);
-        String permittedNetwork = "0.0.0.0";
+        NetProtocol protocol = NetProtocol.valueOf(openPortRuleItems[1]);
+        String permittedNetwork = null;
         short permittedNetworkMask = 0;
-        if (!sa[2].isEmpty()) {
-            permittedNetwork = sa[2].split("/")[0];
-            permittedNetworkMask = Short.parseShort(sa[2].split("/")[1]);
+        if (!openPortRuleItems[2].isEmpty()) {
+            permittedNetwork = openPortRuleItems[2].split("/")[0];
+            permittedNetworkMask = Short.parseShort(openPortRuleItems[2].split("/")[1]);
+        } else {
+            permittedNetwork = IP4Address.getDefaultAddress().getHostAddress();
         }
         String permittedIface = null;
-        if (!sa[3].isEmpty()) {
-            permittedIface = sa[3];
+        if (!openPortRuleItems[3].isEmpty()) {
+            permittedIface = openPortRuleItems[3];
         }
         String unpermittedIface = null;
-        if (!sa[4].isEmpty()) {
-            unpermittedIface = sa[4];
+        if (!openPortRuleItems[4].isEmpty()) {
+            unpermittedIface = openPortRuleItems[4];
         }
         String permittedMAC = null;
-        if (!sa[5].isEmpty()) {
-            permittedMAC = sa[5];
+        if (!openPortRuleItems[5].isEmpty()) {
+            permittedMAC = openPortRuleItems[5];
         }
         String sourcePortRange = null;
-        if (!sa[6].isEmpty()) {
-            sourcePortRange = sa[6];
+        if (!openPortRuleItems[6].isEmpty()) {
+            sourcePortRange = openPortRuleItems[6];
         }
         int port = 0;
         String portRange = null;
-        if (sa[0].contains(":")) {
-            portRange = sa[0];
+        if (openPortRuleItems[0].contains(":")) {
+            portRange = openPortRuleItems[0];
             builder.withPortRange(portRange).withProtocol(protocol)
-                    .withPermittedNetwork(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
-                            permittedNetworkMask))
+                    .withPermittedNetwork(convertNetworkPairIPv4(permittedNetwork + "/" + permittedNetworkMask))
                     .withPermittedInterfaceName(permittedIface).withUnpermittedInterfaceName(unpermittedIface)
                     .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
             openPortEntry = builder.build();
         } else {
-            port = Integer.parseInt(sa[0]);
+            port = Integer.parseInt(openPortRuleItems[0]);
             builder.withPort(port).withProtocol(protocol)
-                    .withPermittedNetwork(new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
-                            permittedNetworkMask))
+                    .withPermittedNetwork(convertNetworkPairIPv4(permittedNetwork + "/" + permittedNetworkMask))
                     .withPermittedInterfaceName(permittedIface).withUnpermittedInterfaceName(unpermittedIface)
                     .withPermittedMac(permittedMAC).withSourcePortRange(sourcePortRange);
             openPortEntry = builder.build();
@@ -240,11 +245,36 @@ public class FirewallConfiguration {
         return openPortEntry;
     }
 
+    public String getOpenPortsPropertyName() {
+        return OPEN_PORTS_PROP_NAME;
+    }
+
+    public String getPortForwardingPropertyName() {
+        return PORT_FORWARDING_PROP_NAME;
+    }
+
+    public String getNatPropertyName() {
+        return NAT_PROP_NAME;
+    }
+
+    private NetworkPair<IP4Address> convertNetworkPairIPv4(String permittedNetwork) throws UnknownHostException {
+        if (permittedNetwork == null || permittedNetwork.isEmpty()) {
+            return new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0);
+        } else {
+            String[] split = permittedNetwork.split("/");
+            return new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(split[0]), Short.parseShort(split[1]));
+        }
+    }
+
     public void addConfig(NetConfig netConfig) {
         if (netConfig instanceof FirewallOpenPortConfigIP4) {
             this.openPortConfigs.add((FirewallOpenPortConfigIP4) netConfig);
         } else if (netConfig instanceof FirewallPortForwardConfigIP4) {
             this.portForwardConfigs.add((FirewallPortForwardConfigIP4) netConfig);
+        } else if (netConfig instanceof FirewallOpenPortConfigIP6) {
+            this.openPortConfigs.add((FirewallOpenPortConfigIP6) netConfig);
+        } else if (netConfig instanceof FirewallPortForwardConfigIP6) {
+            this.portForwardConfigs.add((FirewallPortForwardConfigIP6) netConfig);
         } else if (netConfig instanceof FirewallNatConfig) {
             this.natConfigs.add((FirewallNatConfig) netConfig);
         } else if (netConfig instanceof FirewallAutoNatConfig) {
@@ -289,9 +319,9 @@ public class FirewallConfiguration {
 
     public Map<String, Object> getConfigurationProperties() {
         Map<String, Object> props = new HashMap<>();
-        props.put(OPEN_PORTS_PROP_NAME, formOpenPortConfigPropValue());
-        props.put(PORT_FORWARDING_PROP_NAME, formPortForwardConfigPropValue());
-        props.put(NAT_PROP_NAME, formNatConfigPropValue());
+        props.put(getOpenPortsPropertyName(), formOpenPortConfigPropValue());
+        props.put(getPortForwardingPropertyName(), formPortForwardConfigPropValue());
+        props.put(getNatPropertyName(), formNatConfigPropValue());
         return props;
     }
 

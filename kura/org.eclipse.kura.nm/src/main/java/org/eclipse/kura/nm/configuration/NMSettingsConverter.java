@@ -24,14 +24,11 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.KuraIp6AddressGenerationMode;
+import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
-import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
-import org.eclipse.kura.nm.configuration.enterprise.NM8021xEapAndPhase2Configurator;
-import org.eclipse.kura.nm.configuration.enterprise.NM8021xEapTtls;
-import org.eclipse.kura.nm.configuration.enterprise.NM8021xPhase2MschapV2;
 import org.eclipse.kura.nm.enums.NM8021xEAP;
 import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -120,6 +117,9 @@ public class NMSettingsConverter {
         case ttls:
             build8021xEapTtls(props, deviceId, settings);
             break;
+        case peap:
+            build8021xEapPeap(props, deviceId, settings);
+            break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
         }
@@ -141,8 +141,33 @@ public class NMSettingsConverter {
     }
 
     private static void build8021xEapTtls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
-        String eap = props.get(String.class, "net.interface.%s.config.802-1x.eap", deviceId);
-        settings.put("eap", new Variant<>(new String[] { eap }));
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.ttls.name() }));
+        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+    }
+
+    private static void build8021xEapPeap(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.peap.name() }));
+        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+    }
+
+    private static void build8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
+            Map<String, Variant<?>> settings) {
+        Optional<String> anonymous_identity = props.getOpt(String.class,
+                "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
+        if (anonymous_identity.isPresent()) {
+            settings.put("anonymous-identity", new Variant<>(anonymous_identity.get()));
+        }
+
+        Optional<String> ca_cert = props.getOpt(String.class, "net.interface.%s.config.802-1x.ca-cert", deviceId);
+        if (ca_cert.isPresent()) {
+            settings.put("ca-cert", new Variant<>(ca_cert.get().getBytes(StandardCharsets.UTF_8)));
+        }
+
+        Optional<String> ca_cert_password = props.getOpt(String.class,
+                "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
+        if (ca_cert_password.isPresent()) {
+            settings.put("ca-cert-password", new Variant<>(ca_cert_password.get()));
+        }
     }
 
     private static void build8021xMschapV2(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {

@@ -493,6 +493,80 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
+        thenResultingMapNotContains("anonymous-identity");
+        thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("ca-cert-password");
+
+    }
+
+    @Test
+    public void build8021xSettingsTtlsAndMschapV2WithOptionalParams() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "ttls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", "secure-password");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+
+    }
+
+    @Test
+    public void build8021xSettingsPeapAndMschapV2() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "peap");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
+        thenResultingMapNotContains("anonymous-identity");
+        thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+    }
+
+    @Test
+    public void build8021xSettingsPeapAndMschapV2WithCaAndAnonIdentity() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "peap");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", "secure-password");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
+        thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
 
     }
 

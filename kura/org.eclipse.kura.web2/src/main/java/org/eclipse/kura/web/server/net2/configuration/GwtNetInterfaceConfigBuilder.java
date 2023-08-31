@@ -31,6 +31,7 @@ import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 public class GwtNetInterfaceConfigBuilder {
 
     private static final String NA = "N/A";
+    private static final Integer DEFAULT_WAN_PRIORITY = -1;
 
     private final NetworkConfigurationServiceProperties properties;
     private GwtNetInterfaceConfig gwtConfig;
@@ -111,6 +112,8 @@ public class GwtNetInterfaceConfigBuilder {
         Optional<Integer> wanPriority = this.properties.getIp4WanPriority(ifName);
         if (wanPriority.isPresent()) {
             this.gwtConfig.setWanPriority(wanPriority.get());
+        } else {
+            this.gwtConfig.setWanPriority(DEFAULT_WAN_PRIORITY);
         }
 
         this.gwtConfig.setIpAddress(this.properties.getIp4Address(this.ifName));
@@ -128,6 +131,8 @@ public class GwtNetInterfaceConfigBuilder {
         Optional<Integer> priority = this.properties.getIp6WanPriority(this.ifName);
         if (priority.isPresent()) {
             this.gwtConfig.setIpv6WanPriority(priority.get());
+        } else {
+            this.gwtConfig.setIpv6WanPriority(DEFAULT_WAN_PRIORITY);
         }
 
         Optional<String> configure = this.properties.getIp6AddressMethod(this.ifName);

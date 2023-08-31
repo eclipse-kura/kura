@@ -67,9 +67,32 @@ public interface FirewallConfigurationService {
      * Adds flooding protection rules to the firewall configuration.
      * 
      * @param floodingRules
-     *            the set of rules specified as Strings to protect against
+     *            Set of rules specified as Strings to protect against
      *            flooding attacks
+     * 
+     * @deprecated since 2.6. Use {@link addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String>
+     *             natFloodingRules, Set<String> mangleFloodingRules)} instead.
      */
+    @Deprecated
     public void addFloodingProtectionRules(Set<String> floodingRules);
+
+    /**
+     * Adds flooding protection rules to the firewall configuration
+     * in the FILTER, NAT and MANGLE tables.
+     * 
+     * @param filterFloodingRules
+     *            Set of FILTER rules specified as Strings to protect against
+     *            flooding attacks
+     * @param natFloodingRules
+     *            Set of NAT rules specified as Strings to protect against
+     *            flooding attacks
+     * @param mangleFloodingRules
+     *            Set of MANGLE rules specified as Strings to protect against
+     *            flooding attacks
+     * 
+     * @since 2.6
+     */
+    public void addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String> natFloodingRules,
+            Set<String> mangleFloodingRules);
 
 }

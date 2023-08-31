@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -67,8 +67,32 @@ public interface FirewallConfigurationService {
      * Adds flooding protection rules to the firewall configuration.
      * 
      * @param floodingRules
-     *            Set of rules specified as Strings to protect against flooding attacks
+     *            Set of rules specified as Strings to protect against
+     *            flooding attacks
+     * 
+     * @deprecated since 2.6. Use {@link addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String>
+     *             natFloodingRules, Set<String> mangleFloodingRules)} instead.
      */
+    @Deprecated
     public void addFloodingProtectionRules(Set<String> floodingRules);
+
+    /**
+     * Adds flooding protection rules to the firewall configuration
+     * in the FILTER, NAT and MANGLE tables.
+     * 
+     * @param filterFloodingRules
+     *            Set of FILTER rules specified as Strings to protect against
+     *            flooding attacks
+     * @param natFloodingRules
+     *            Set of NAT rules specified as Strings to protect against
+     *            flooding attacks
+     * @param mangleFloodingRules
+     *            Set of MANGLE rules specified as Strings to protect against
+     *            flooding attacks
+     * 
+     * @since 2.6
+     */
+    public void addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String> natFloodingRules,
+            Set<String> mangleFloodingRules);
 
 }

@@ -14,7 +14,6 @@ package org.eclipse.kura.net.admin;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -355,11 +354,4 @@ public abstract class AbstractFirewallConfigurationServiceImpl<U extends IPAddre
         return this.firewall.getPortForwardRules();
     }
 
-    public void addFloodingProtectionRules(Set<String> floodingRules) {
-        try {
-            this.firewall.setAdditionalRules(new HashSet<>(), new HashSet<>(), floodingRules);
-        } catch (KuraException e) {
-            logger.error("Failed to set Firewall Flooding Protection Configuration", e);
-        }
-    }
 }

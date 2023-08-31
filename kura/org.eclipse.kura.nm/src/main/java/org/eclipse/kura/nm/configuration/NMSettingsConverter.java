@@ -134,7 +134,7 @@ public class NMSettingsConverter {
         // Configure Phase2 (innerAuth) Method
         switch (NM8021xPhase2Auth.valueOf(phase2.get())) {
         case eap:
-            settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.eap.name()));
+            // Nothing to do
             break;
         case mschapv2:
             build8021xMschapV2(props, deviceId, settings);

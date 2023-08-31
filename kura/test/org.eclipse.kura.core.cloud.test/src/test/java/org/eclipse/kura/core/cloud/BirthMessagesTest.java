@@ -172,6 +172,7 @@ public class BirthMessagesTest {
         thenBirthIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicBirthSuffix());
     }
 
+    @Test
     public void shouldPublishImmediatelyOnDisconnecting() throws KuraException {
         givenConfiguredCloudService();
         givenConnected();
@@ -182,6 +183,7 @@ public class BirthMessagesTest {
         thenBirthIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicDisconnectSuffix());
     }
 
+    @Test
     public void shouldPublishWithDelayWhenRegisterRequestHandler() throws KuraException {
         givenConfiguredCloudService();
         givenConnected();
@@ -192,6 +194,7 @@ public class BirthMessagesTest {
         thenBirthIsPublishedAfter(SEND_DELAY, BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicAppsSuffix());
     }
 
+    @Test
     public void shouldPublishWithDelayWhenUnregisterRequestHandler() throws KuraException {
         givenConfiguredCloudService();
         givenConnected();
@@ -240,6 +243,7 @@ public class BirthMessagesTest {
     private void givenTamperEvent() {
         this.event = new Event(TamperEvent.TAMPER_EVENT_TOPIC, new HashMap<String, Object>());
     }
+
 
     /*
      * When

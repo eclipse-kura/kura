@@ -18,7 +18,7 @@ public enum KuraWifiSecurityType {
     SECURITY_WEP,
     SECURITY_WPA,
     SECURITY_WPA2,
-    SECURITY_WPA2_ENTERPRISE,
+    SECURITY_WPA2_WPA3_ENTERPRISE,
     SECURITY_WPA_WPA2;
 
     public static KuraWifiSecurityType fromString(String securityType) {
@@ -35,8 +35,8 @@ public enum KuraWifiSecurityType {
             return KuraWifiSecurityType.SECURITY_WPA;
         case "SECURITY_WPA2":
             return KuraWifiSecurityType.SECURITY_WPA2;
-        case "SECURITY_WPA2_ENTERPRISE":
-            return KuraWifiSecurityType.SECURITY_WPA2_ENTERPRISE;
+        case "SECURITY_WPA2_WPA3_ENTERPRISE":
+            return KuraWifiSecurityType.SECURITY_WPA2_WPA3_ENTERPRISE;
         case "SECURITY_WPA_WPA2":
             return KuraWifiSecurityType.SECURITY_WPA_WPA2;
         default:

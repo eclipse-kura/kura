@@ -90,7 +90,7 @@ public class NMSettingsConverter {
                         .build80211WirelessSecuritySettings(properties, deviceId);
                 newConnectionSettings.put("802-11-wireless-security", wifiSecuritySettingsMap);
 
-                if (securityType == KuraWifiSecurityType.SECURITY_WPA2_ENTERPRISE) {
+                if (securityType == KuraWifiSecurityType.SECURITY_WPA2_WPA3_ENTERPRISE) {
                     newConnectionSettings.put("802-1x", NMSettingsConverter.build8021xSettings(properties, deviceId));
                 }
 
@@ -409,7 +409,7 @@ public class NMSettingsConverter {
         case SECURITY_WPA2:
         case SECURITY_WPA_WPA2:
             return createWPAWPA2Settings(props, deviceId, propMode);
-        case SECURITY_WPA2_ENTERPRISE:
+        case SECURITY_WPA2_WPA3_ENTERPRISE:
             return createWPA2EnterpriseSettings(props, deviceId, propMode);
         default:
             throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");

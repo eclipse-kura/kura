@@ -49,8 +49,8 @@ public enum WifiSecurity {
     SECURITY_WPA2(0x2000),
     /** Supports WPA and WPA2 encryption. */
     SECURITY_WPA_WPA2(0x4000),
-    /** Supports WPA2 enterprise. */
-    SECURITY_WPA2_ENTERPRISE(0x5000);
+    /** Supports WPA2 WPA3 enterprise. */
+    SECURITY_WPA2_WPA3_ENTERPRISE(0x8000);
 
     private int code;
 

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.Kura8021xEAP;
+import org.eclipse.kura.nm.Kura8021xInnerAuth;
 import org.eclipse.kura.nm.KuraIp6AddressGenerationMode;
 import org.eclipse.kura.nm.KuraIp6ConfigurationMethod;
 import org.eclipse.kura.nm.KuraIp6Privacy;
@@ -113,7 +115,7 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         // Configure Eap Method
-        switch (NM8021xEAP.valueOf(eap)) {
+        switch (Kura8021xEAP.valueOf(eap)) {
         case ttls:
             build8021xTunneledTls(props, deviceId, settings);
             break;
@@ -132,9 +134,8 @@ public class NMSettingsConverter {
         }
 
         // Configure Phase2 (innerAuth) Method
-        switch (NM8021xPhase2Auth.valueOf(phase2.get())) {
-        case eap:
-            // Nothing to do
+        switch (Kura8021xInnerAuth.valueOf(phase2.get())) {
+        case none:
             break;
         case mschapv2:
             build8021xMschapV2(props, deviceId, settings);
@@ -410,7 +411,7 @@ public class NMSettingsConverter {
         case SECURITY_WPA_WPA2:
             return createWPAWPA2Settings(props, deviceId, propMode);
         case SECURITY_WPA2_WPA3_ENTERPRISE:
-            return createWPA2EnterpriseSettings(props, deviceId, propMode);
+            return createWPA2WPA3EnterpriseSettings(props, deviceId, propMode);
         default:
             throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
         }
@@ -431,7 +432,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> createWPA2EnterpriseSettings(NetworkProperties props, String deviceId,
+    private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings(NetworkProperties props, String deviceId,
             String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 

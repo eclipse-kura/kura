@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.floodingprotection;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,30 +44,31 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
 
     private static final String[] FLOODING_PROTECTION_MANGLE_RULES_IPV6 = {
-            "-A prerouting-kura 1 -m ipv6header --header dst --soft -j DROP",
-            "-A prerouting-kura 2 -m ipv6header --header hop --soft -j DROP",
-            "-A prerouting-kura 3 -m ipv6header --header route --soft -j DROP",
-            "-A prerouting-kura 4 -m ipv6header --header frag --soft -j DROP",
-            "-A prerouting-kura 5 -m ipv6header --header auth --soft -j DROP",
-            "-A prerouting-kura 6 -m ipv6header --header esp --soft -j DROP",
-            "-A prerouting-kura 7 -m ipv6header --header none --soft -j DROP",
             "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
             "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
-            "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+            -"-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
-            "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+            -"-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
             "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j DROP",
-            "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j DROP" };
+            "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j DROP",
+            "-A prerouting-kura -m ipv6header --header dst --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header hop --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header route --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header frag --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header auth --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header esp --soft -j DROP",
+            "-A prerouting-kura -m ipv6header --header none --soft -j DROP",
+            "-A prerouting-kura -m rt --rt-type 0 -j DROP", "-A output-kura -m rt --rt-type 0 -j DROP" };
     // fragment filtering missing
 
     private static final String PID = "org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator";
@@ -106,34 +107,34 @@ public class FloodingProtectionOptions {
     }
 
     public Set<String> getFloodingProtectionFilterRules() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 
     public Set<String> getFloodingProtectionNatRules() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 
     public Set<String> getFloodingProtectionMangleRules() {
         if ((boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV4)) {
-            return new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV4));
+            return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV4));
         } else {
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
     }
 
     public Set<String> getFloodingProtectionFilterRulesIPv6() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 
     public Set<String> getFloodingProtectionNatRulesIPv6() {
-        return new HashSet<>();
+        return new LinkedHashSet<>();
     }
 
     public Set<String> getFloodingProtectionMangleRulesIPv6() {
         if ((boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV6)) {
-            return new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6));
+            return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6));
         } else {
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
     }
 

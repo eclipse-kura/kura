@@ -405,7 +405,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(KEY_JAVA_VM_INFO, System.getProperty(KEY_JAVA_VM_INFO));
             }
             if (System.getProperty(KEY_JAVA_VM_VENDOR) != null) {
-                this.kuraProperties.put(KEY_JAVA_VM_VENDOR, System.getProperty(KEY_JAVA_VM_INFO));
+                this.kuraProperties.put(KEY_JAVA_VM_VENDOR, System.getProperty(KEY_JAVA_VM_VENDOR));
             }
             if (System.getProperty(KEY_OSGI_FW_NAME) != null) {
                 this.kuraProperties.put(KEY_OSGI_FW_NAME, System.getProperty(KEY_OSGI_FW_NAME));

@@ -117,13 +117,13 @@ public class NMSettingsConverter {
         // Configure Eap Method
         switch (Kura8021xEAP.fromString(eap)) {
         case KURA_8021X_EAP_TTLS:
-            build8021xTunneledTls(props, deviceId, settings);
+            create8021xTunneledTls(props, deviceId, settings);
             break;
         case KURA_8021X_EAP_PEAP:
-            build8021xProtectedEap(props, deviceId, settings);
+            create8021xProtectedEap(props, deviceId, settings);
             break;
         case KURA_8021X_EAP_TLS:
-            build8021xTls(props, deviceId, settings);
+            create8021xTls(props, deviceId, settings);
             break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
@@ -138,7 +138,7 @@ public class NMSettingsConverter {
         case KURA_8021X_INNER_AUTH_NONE:
             break;
         case KURA_8021X_INNER_AUTH_MSCHAPV2:
-            build8021xMschapV2(props, deviceId, settings);
+            create8021xMschapV2(props, deviceId, settings);
             break;
         default:
             throw new IllegalArgumentException("Security type 802-1x \"" + phase2 + "\" is not supported.");
@@ -147,19 +147,19 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static void build8021xTunneledTls(NetworkProperties props, String deviceId,
+    private static void create8021xTunneledTls(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TTLS.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
-    private static void build8021xProtectedEap(NetworkProperties props, String deviceId,
+    private static void create8021xProtectedEap(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.PEAP.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
-    private static void build8021xTls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+    private static void create8021xTls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TLS.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
 
@@ -198,7 +198,8 @@ public class NMSettingsConverter {
         }
     }
 
-    private static void build8021xMschapV2(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+    private static void create8021xMschapV2(NetworkProperties props, String deviceId,
+            Map<String, Variant<?>> settings) {
         settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.MSCHAPV2.getValue()));
 
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);

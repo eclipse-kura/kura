@@ -1205,6 +1205,54 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void buildSettingsShouldWorkWith8021x() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
+        givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA2_WPA3_ENTERPRISE");
+
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+        thenResultingBuildAllMapContains("ipv4", "method", "manual");
+        thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapNotContains("ipv4", "gateway");
+        thenResultingBuildAllMapNotContains("ipv4", "dns");
+        thenResultingBuildAllMapContains("ipv4", "ignore-auto-dns", true);
+        thenResultingBuildAllMapContains("ipv4", "ignore-auto-routes", true);
+        thenResultingBuildAllMapContains("connection", "id", "kura-wlan0-connection");
+        thenResultingBuildAllMapContains("connection", "interface-name", "wlan0");
+        thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+        thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-eap");
+
+        thenResultingBuildAllMapContainsArray("802-1x", "eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingBuildAllMapContains("802-1x", "phase2-auth", "mschapv2");
+        thenResultingBuildAllMapContains("802-1x", "anonymous-identity", "anonymous-identity-test-var");
+        thenResultingBuildAllMapContainsBytes("802-1x", "ca-cert", "binary ca cert");
+        thenResultingBuildAllMapContains("802-1x", "ca-cert-password", "secure-password");
+        thenResultingBuildAllMapContains("802-1x", "identity", "example-user-name");
+        thenResultingBuildAllMapContains("802-1x", "password", "secure-test-password-123!@#");
+    }
+
+    @Test
     public void buildSettingsShouldWorkWithExpectedConfiguredForInputsWiFiWanIp4() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
@@ -2828,6 +2876,10 @@ public class NMSettingsConverterTest {
 
     public void thenResultingBuildAllMapContains(String key, String subKey, Object value) {
         assertEquals(value, this.resultAllSettingsMap.get(key).get(subKey).getValue());
+    }
+
+    public void thenResultingBuildAllMapContainsArray(String key, String subKey, Object[] value) {
+        assertArrayEquals(value, (Object[]) this.resultAllSettingsMap.get(key).get(subKey).getValue());
     }
 
     public void thenResultingBuildAllMapNotContains(String key) {

@@ -149,18 +149,18 @@ public class NMSettingsConverter {
 
     private static void build8021xTunneledTls(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
-        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.ttls.name() }));
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TTLS.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
     private static void build8021xProtectedEap(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
-        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.peap.name() }));
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.PEAP.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
     private static void build8021xTls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
-        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.tls.name() }));
+        settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TLS.getValue() }));
         build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
 
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
@@ -199,7 +199,7 @@ public class NMSettingsConverter {
     }
 
     private static void build8021xMschapV2(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
-        settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.mschapv2.name()));
+        settings.put("phase2-auth", new Variant<>(NM8021xPhase2Auth.MSCHAPV2.getValue()));
 
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));

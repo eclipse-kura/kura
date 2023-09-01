@@ -581,7 +581,7 @@ public class NMSettingsConverterTest {
     @Test
     public void build8021xTls() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "tls");
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "eap");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "none");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert", "binary client cert");
@@ -594,7 +594,7 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
 
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
-        thenResultingMapContains("phase2-auth", "eap");
+        thenResultingMapNotContains("phase2-auth");
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");

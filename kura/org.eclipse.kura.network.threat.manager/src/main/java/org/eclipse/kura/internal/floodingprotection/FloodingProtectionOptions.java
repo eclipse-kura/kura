@@ -46,14 +46,14 @@ public class FloodingProtectionOptions {
     private static final String[] FLOODING_PROTECTION_MANGLE_RULES_IPV6 = {
             "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
             "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
-            -"-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+            "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
-            -"-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+            "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
@@ -76,7 +76,8 @@ public class FloodingProtectionOptions {
     private static final String FP_ENABLED_PROP_NAME_IPV4 = "flooding.protection.enabled";
     private static final String FP_ENABLED_DESCRIPTION_IPV4 = "Enable the flooding protection feature for IPv4.";
     private static final String FP_ENABLED_PROP_NAME_IPV6 = "flooding.protection.enabled.ipv6";
-    private static final String FP_ENABLED_DESCRIPTION_IPV6 = "Enable the flooding protection feature for IPv6.";
+    private static final String FP_ENABLED_DESCRIPTION_IPV6 = "Enable the flooding protection feature for IPv6. "
+            + "If the device does not support IPv6, this property will be ignored.";
     private static final boolean FP_ENABLED_DEFAULT_IPV4 = false;
     private static final boolean FP_ENABLED_DEFAULT_IPV6 = false;
 

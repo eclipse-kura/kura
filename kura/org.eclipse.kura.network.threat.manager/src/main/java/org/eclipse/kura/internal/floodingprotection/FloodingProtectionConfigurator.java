@@ -34,7 +34,7 @@ public class FloodingProtectionConfigurator
     private FloodingProtectionOptions floodingProtectionOptions;
 
     private FirewallConfigurationService firewallService;
-    private Optional<FirewallConfigurationServiceIPv6> optionalFirewallServiceIPv6;
+    private Optional<FirewallConfigurationServiceIPv6> optionalFirewallServiceIPv6 = Optional.empty();
 
     public synchronized void setFirewallConfigurationService(FirewallConfigurationService firewallService) {
         this.firewallService = firewallService;
@@ -65,7 +65,7 @@ public class FloodingProtectionConfigurator
         logger.info("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
         updateFirewallService();
-        this.optionalFirewallServiceIPv6.ifPresent(this::updateFirewallServiceIPv6);
+        updateFirewallServiceIPv6();
         logger.info("Updating firewall configuration... Done.");
     }
 
@@ -76,11 +76,15 @@ public class FloodingProtectionConfigurator
         this.firewallService.addFloodingProtectionRules(filterRules, natRules, mangleRules);
     }
 
-    private void updateFirewallServiceIPv6(FirewallConfigurationServiceIPv6 firewallServiceIPv6) {
-        Set<String> filterRules = this.floodingProtectionOptions.getFloodingProtectionFilterRulesIPv6();
-        Set<String> natRules = this.floodingProtectionOptions.getFloodingProtectionNatRulesIPv6();
-        Set<String> mangleRules = this.floodingProtectionOptions.getFloodingProtectionMangleRulesIPv6();
-        firewallServiceIPv6.addFloodingProtectionRules(filterRules, natRules, mangleRules);
+    private void updateFirewallServiceIPv6() {
+        if (this.optionalFirewallServiceIPv6.isPresent()) {
+            Set<String> filterRules = this.floodingProtectionOptions.getFloodingProtectionFilterRulesIPv6();
+            Set<String> natRules = this.floodingProtectionOptions.getFloodingProtectionNatRulesIPv6();
+            Set<String> mangleRules = this.floodingProtectionOptions.getFloodingProtectionMangleRulesIPv6();
+            this.optionalFirewallServiceIPv6.get().addFloodingProtectionRules(filterRules, natRules, mangleRules);
+        } else {
+            logger.warn("This device does not support IPv6.");
+        }
     }
 
     @Override

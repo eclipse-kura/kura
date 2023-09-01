@@ -40,6 +40,7 @@ public class FrameworkPropertiesDTO {
     private String javaVmInfo;
     private String javaVmName;
     private String javaVmVersion;
+    private String javaVmVendor;
 
     // os
     private String osArch;
@@ -167,6 +168,10 @@ public class FrameworkPropertiesDTO {
 
         if (filter.test("javaVmVersion")) {
             this.javaVmVersion = systemService.getJavaVmVersion();
+        }
+
+        if (filter.test("javaVmVendor")) {
+            this.javaVmVendor = systemService.getJavaVmVendor();
         }
     }
 

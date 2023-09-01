@@ -16,6 +16,7 @@
     "javaVmInfo":"test",
     "javaVmName":"test",
     "javaVmVersion":"test",
+    "javaVmVendor": "test",
     "osArch":"test",
     "osDistro":"test",
     "osDistroVersion":"test",

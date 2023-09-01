@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.eclipse.kura.nm.KuraIp6AddressGenerationMode;
 import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
@@ -431,19 +429,6 @@ public class NMSettingsConverter {
         return connectionMap;
     }
     
-    public static List<String> getConfiguredVlansFromProperties(NetworkProperties properties) {
-        List<String> vlanNames = new ArrayList<>();
-        NetworkConfigurationServiceCommon.getNetworkInterfaceNamesInConfig(properties.getProperties())
-            .forEach(name -> {
-                Optional<NetInterfaceType> type = NetworkConfigurationServiceCommon.
-                        getNetworkTypeFromProperties(name, properties.getProperties());
-                if (type.isPresent() && NetInterfaceType.VLAN.equals(type.get())) {
-                    vlanNames.add(name);
-                }
-            });
-        return vlanNames;
-    }
-
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 

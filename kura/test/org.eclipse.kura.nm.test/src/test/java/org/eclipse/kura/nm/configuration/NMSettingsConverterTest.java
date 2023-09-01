@@ -478,7 +478,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xSettingsTtlsAndMschapV2() {
+    public void build8021xSettingsShouldWorkWithTtlsAndMschapV2() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
@@ -500,7 +500,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xSettingsTtlsAndMschapV2WithOptionalParams() {
+    public void build8021xSettingsShouldWorkWithTtlsAndMschapV2AndOptionalParams() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
@@ -525,7 +525,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xSettingsPeapAndMschapV2() {
+    public void build8021xSettingsShouldWorkWithPeapAndMschapV2() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
@@ -546,7 +546,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xSettingsPeapAndMschapV2WithCaAndAnonIdentity() {
+    public void build8021xSettingsShouldWorkWithPeapAndMschapV2AndCertificates() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
@@ -570,7 +570,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xTlsSettingsShouldThrowIfIsEmpty() {
+    public void build8021xSettingsShouldThrowIfTlsIsEmpty() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -579,7 +579,7 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void build8021xTls() {
+    public void build8021xSettingsShouldWorkWithTls() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");

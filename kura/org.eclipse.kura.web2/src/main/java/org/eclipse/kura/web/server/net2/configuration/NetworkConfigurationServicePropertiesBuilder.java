@@ -31,6 +31,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 
 public class NetworkConfigurationServicePropertiesBuilder {
 
+    private static final Integer DEFAULT_WAN_PRIORITY = -1;
+
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
@@ -90,6 +92,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isWan) {
             if (Objects.nonNull(this.gwtConfig.getWanPriority())) {
                 this.properties.setIp4WanPriority(ifname, this.gwtConfig.getWanPriority());
+            } else {
+                this.properties.setIp4WanPriority(ifname, DEFAULT_WAN_PRIORITY);
             }
 
             this.properties.setIp4DnsServers(this.ifname, this.gwtConfig.getDnsServers());
@@ -122,6 +126,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isWan) {
             if (Objects.nonNull(this.gwtConfig.getIpv6WanPriority())) {
                 this.properties.setIp6WanPriority(this.ifname, this.gwtConfig.getIpv6WanPriority());
+            } else {
+                this.properties.setIp6WanPriority(ifname, DEFAULT_WAN_PRIORITY);
             }
 
             this.properties.setIp6DnsServers(this.ifname, this.gwtConfig.getIpv6DnsServers());

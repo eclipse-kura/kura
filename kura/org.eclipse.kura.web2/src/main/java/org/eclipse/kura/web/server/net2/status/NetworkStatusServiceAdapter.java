@@ -59,6 +59,8 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkStatusServiceAdapter {
 
+    private final static String EMPTY_STRING = "";
+
     private final Logger logger = LoggerFactory.getLogger(NetworkStatusServiceAdapter.class);
     private final NetworkStatusService networkStatusService;
 
@@ -210,9 +212,11 @@ public class NetworkStatusServiceAdapter {
                     gwtConfig.setIpAddress(firstAddress.getAddress().getHostAddress());
                     gwtConfig.setSubnetMask(NetworkUtil.getNetmaskStringForm(firstAddress.getPrefix()));
                 }
-                if (address.getGateway().isPresent()) {
-                    gwtConfig.setGateway(address.getGateway().get().getHostAddress());
-                }
+
+                String gatewayAddress = address.getGateway().isPresent() ? address.getGateway().get().getHostAddress()
+                        : EMPTY_STRING;
+                gwtConfig.setGateway(gatewayAddress);
+
                 gwtConfig.setReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
             });
         }
@@ -236,9 +240,11 @@ public class NetworkStatusServiceAdapter {
                     gwtConfig.setIpv6Address(firstAddress.getAddress().getHostAddress());
                     gwtConfig.setIpv6SubnetMask((int) firstAddress.getPrefix());
                 }
-                if (address.getGateway().isPresent()) {
-                    gwtConfig.setIpv6Gateway(address.getGateway().get().getHostAddress());
-                }
+
+                String gatewayAddress = address.getGateway().isPresent() ? address.getGateway().get().getHostAddress()
+                        : EMPTY_STRING;
+                gwtConfig.setIpv6Gateway(gatewayAddress);
+
                 gwtConfig.setIpv6ReadOnlyDnsServers(prettyPrintDnsServers(address.getDnsServerAddresses()));
             });
         }

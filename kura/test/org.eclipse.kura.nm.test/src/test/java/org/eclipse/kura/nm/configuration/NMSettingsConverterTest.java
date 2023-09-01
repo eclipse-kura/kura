@@ -479,8 +479,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void build8021xSettingsTtlsAndMschapV2() {
-        givenMapWith("net.interface.wlan0.config.802-1x.eap", "ttls");
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -501,8 +501,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void build8021xSettingsTtlsAndMschapV2WithOptionalParams() {
-        givenMapWith("net.interface.wlan0.config.802-1x.eap", "ttls");
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
@@ -526,8 +526,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void build8021xSettingsPeapAndMschapV2() {
-        givenMapWith("net.interface.wlan0.config.802-1x.eap", "peap");
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -547,11 +547,11 @@ public class NMSettingsConverterTest {
 
     @Test
     public void build8021xSettingsPeapAndMschapV2WithCaAndAnonIdentity() {
-        givenMapWith("net.interface.wlan0.config.802-1x.eap", "peap");
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "mschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -580,8 +580,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void build8021xTls() {
-        givenMapWith("net.interface.wlan0.config.802-1x.eap", "tls");
-        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "none");
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert", "binary client cert");

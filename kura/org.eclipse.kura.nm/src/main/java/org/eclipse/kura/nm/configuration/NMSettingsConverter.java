@@ -115,14 +115,14 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         // Configure Eap Method
-        switch (Kura8021xEAP.valueOf(eap)) {
-        case ttls:
+        switch (Kura8021xEAP.fromString(eap)) {
+        case KURA_8021X_EAP_TTLS:
             build8021xTunneledTls(props, deviceId, settings);
             break;
-        case peap:
+        case KURA_8021X_EAP_PEAP:
             build8021xProtectedEap(props, deviceId, settings);
             break;
-        case tls:
+        case KURA_8021X_EAP_TLS:
             build8021xTls(props, deviceId, settings);
             break;
         default:
@@ -134,10 +134,10 @@ public class NMSettingsConverter {
         }
 
         // Configure Phase2 (innerAuth) Method
-        switch (Kura8021xInnerAuth.valueOf(phase2.get())) {
-        case none:
+        switch (Kura8021xInnerAuth.fromString(phase2.get())) {
+        case KURA_8021X_INNER_AUTH_NONE:
             break;
-        case mschapv2:
+        case KURA_8021X_INNER_AUTH_MSCHAPV2:
             build8021xMschapV2(props, deviceId, settings);
             break;
         default:

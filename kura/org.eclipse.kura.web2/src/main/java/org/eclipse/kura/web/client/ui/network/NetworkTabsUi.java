@@ -164,7 +164,8 @@ public class NetworkTabsUi extends Composite {
 
     private void initWirelessTab() {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
-        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.wireless8021xTab, this);
+        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.wireless8021xTab,
+                this.wireless8021xTabAnchorItem, this);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTabAnchorItem);
@@ -345,6 +346,7 @@ public class NetworkTabsUi extends Composite {
         this.wirelessTabAnchorItem.setEnabled(true);
 
         insertTab(this.wirelessTabAnchorItem);
+        insertTab(this.wireless8021xTabAnchorItem);
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
@@ -617,6 +619,7 @@ public class NetworkTabsUi extends Composite {
     }
 
     class InterfaceConfigWrapper {
+
         private GwtNetInterfaceConfig config;
 
         public InterfaceConfigWrapper(GwtNetInterfaceConfig config) {
@@ -640,8 +643,7 @@ public class NetworkTabsUi extends Composite {
         }
 
         public boolean isLoopback() {
-            return this.config.getHwTypeEnum() == GwtNetIfType.LOOPBACK
-                    || this.config.getName().startsWith("mon.wlan");
+            return this.config.getHwTypeEnum() == GwtNetIfType.LOOPBACK || this.config.getName().startsWith("mon.wlan");
         }
     }
 }

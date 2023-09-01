@@ -433,15 +433,6 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings(NetworkProperties props, String deviceId,
-            String propMode) {
-        Map<String, Variant<?>> settings = new HashMap<>();
-
-        settings.put("key-mgmt", new Variant<>("wpa-eap"));
-
-        return settings;
-    }
-
     private static Map<String, Variant<?>> createWPAWPA2Settings(NetworkProperties props, String deviceId,
             String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
@@ -471,6 +462,15 @@ public class NMSettingsConverter {
             List<String> nmPairwise = wifiCipherConvert(pairwise.get());
             settings.put("pairwise", new Variant<>(nmPairwise, "as"));
         }
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+
+        settings.put("key-mgmt", new Variant<>("wpa-eap"));
 
         return settings;
     }

@@ -241,6 +241,11 @@ public class SystemServiceTest {
         assertEquals("getJavaVmVersion() value", expected, actual);
     }
 
+    @Test
+    public void shouldReturnJavaVmVendor() {
+        assertNotNull(systemService.getJavaVmVendor());
+    }
+
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetFileSeparator() {
@@ -356,4 +361,5 @@ public class SystemServiceTest {
             assertEquals(UNKNOWN, serialNumber);
         }
     }
+
 }

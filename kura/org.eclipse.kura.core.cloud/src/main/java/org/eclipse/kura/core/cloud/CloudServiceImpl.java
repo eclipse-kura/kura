@@ -891,10 +891,10 @@ public class CloudServiceImpl
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int messageId = this.dataService.publish(message.getTopic(), encodedPayload,
+            int id = this.dataService.publish(message.getTopic(), encodedPayload,
                     CloudServiceOptions.getLifeCycleMessageQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
                     CloudServiceOptions.getLifeCycleMessagePriority());
-            this.messageId.set(messageId);
+            this.messageId.set(id);
             try {
                 this.messageId.wait(1000);
             } catch (InterruptedException e) {

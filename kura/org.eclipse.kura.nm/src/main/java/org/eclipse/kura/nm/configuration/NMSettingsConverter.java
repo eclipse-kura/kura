@@ -126,7 +126,7 @@ public class NMSettingsConverter {
             create8021xTls(props, deviceId, settings);
             break;
         default:
-            throw new IllegalArgumentException("Security type 802-1x \"" + eap + "\" is not supported.");
+            throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
         }
 
         if (!phase2.isPresent()) {
@@ -141,7 +141,8 @@ public class NMSettingsConverter {
             create8021xMschapV2(props, deviceId, settings);
             break;
         default:
-            throw new IllegalArgumentException("Security type 802-1x \"" + phase2 + "\" is not supported.");
+            throw new IllegalArgumentException(
+                    String.format("Security type 802-1x InnerAuth (Phase2) \"%s\" is not supported.", phase2));
         }
 
         return settings;
@@ -414,7 +415,7 @@ public class NMSettingsConverter {
         case SECURITY_WPA2_WPA3_ENTERPRISE:
             return createWPA2WPA3EnterpriseSettings(props, deviceId, propMode);
         default:
-            throw new IllegalArgumentException("Security type \"" + securityType + "\" is not supported.");
+            throw new IllegalArgumentException(String.format("Security type \"%s\" is not supported.", securityType));
         }
     }
 

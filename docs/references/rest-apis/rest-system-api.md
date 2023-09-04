@@ -30,6 +30,8 @@ Identities with `rest.system` permissions can access these APIs.
 | javaVmInfo | String |
 | javaVmName | String |
 | javaVmVersion | String |
+| javaVmVendor | String |
+| jdkVendorVersion | String |
 | osArch | String |
 | osDistro | String |
 | osDistroVersion | String |
@@ -68,6 +70,7 @@ Identities with `rest.system` permissions can access these APIs.
 | kura.platform | String |
 | org.osgi.framework.version | String |
 | kura.user.config | String |
+| java.vm.vendor | String |
 | kura.name | String |
 | file.command.zip.max.number | String |
 | kura.legacy.ppp.logging.enabled | String |
@@ -90,6 +93,7 @@ Identities with `rest.system` permissions can access these APIs.
 | kura.style.dir | String |
 | kura.model.id | String |
 | file.separator | String |
+| jdk.vendor.version | String |
 | kura.model.name | String |
 | kura.serialNumber.provider | String |
 | kura.have.web.inter | String |
@@ -115,11 +119,15 @@ Identities with `rest.system` permissions can access these APIs.
 | file.upload.in.memory.size.threshold | String |
 | kura.net.virtual.devices.config | String |
 | kura.snapshots | String |
+| kura.have.net.admin | String |
 | java.vm.info | String |
 | java.vm.version | String |
 | dpa.connection.timeout | String |
 | build.number | String |
 | ccs.status.notification.url | String |
+
+!!! note
+    Some of the listed properties, depending on the device, might not be available.
 
 
 
@@ -153,6 +161,8 @@ Identities with `rest.system` permissions can access these APIs.
     "javaVmInfo": "mixed mode",
     "javaVmName": "OpenJDK Client VM",
     "javaVmVersion": "25.312-b07",
+    "javaVmVendor": "Temurin",
+    "jdkVendorVersion": "Zulu 8.70.0.24-SA-linux64",
     "osArch": "arm",
     "osDistro": "Linux",
     "osDistroVersion": "N/A",
@@ -234,6 +244,7 @@ Identities with `rest.system` permissions can access these APIs.
         "kura.platform": "aarch64",
         "org.osgi.framework.version": "1.10.0",
         "kura.user.config": "/opt/eclipse/kura/user",
+        "java.vm.vendor": "Temurin",
         "kura.name": "Eclipse Kura",
         "file.command.zip.max.number": "1024",
         "kura.legacy.ppp.logging.enabled": "true",
@@ -256,6 +267,7 @@ Identities with `rest.system` permissions can access these APIs.
         "kura.style.dir": "/opt/eclipse/kura/console/skin",
         "kura.model.id": "raspberry",
         "file.separator": "/",
+        "jdk.vendor.version": "Zulu 8.70.0.24-SA-linux64",
         "kura.model.name": "raspberry",
         "kura.serialNumber.provider": "cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2",
         "kura.have.web.inter": "true",
@@ -281,6 +293,7 @@ Identities with `rest.system` permissions can access these APIs.
         "file.upload.in.memory.size.threshold": "10240",
         "kura.net.virtual.devices.config": "unmanaged",
         "kura.snapshots": "/opt/eclipse/kura/user/snapshots",
+        "kura.have.net.admin": "true",
         "java.vm.info": "mixed mode",
         "java.vm.version": "25.312-b07",
         "dpa.connection.timeout": "60000",

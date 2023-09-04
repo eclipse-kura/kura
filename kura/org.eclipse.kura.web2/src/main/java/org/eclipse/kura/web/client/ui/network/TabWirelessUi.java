@@ -101,8 +101,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String WIFI_SECURITY_WPA_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name());
     private static final String WIFI_SECURITY_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA2.name());
-    private static final String WIFI_SECURITY_WPA2_ENTERPRISE_MESSAGE = MessageUtils
-            .get(GwtWifiSecurity.netWifiSecurityWPA2Enterprise.name());
+    private static final String WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE = MessageUtils
+            .get(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name());
     private static final String WIFI_SECURITY_WPA_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
     private static final String WIFI_BGSCAN_NONE_MESSAGE = MessageUtils
@@ -146,7 +146,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private final GwtSession session;
     private final TabIp4Ui tcpTab;
     private final NetworkTabsUi netTabs;
-    private final TabWireless8021xUi wireless8021x;
+    private final Tab8021xUi wireless8021x;
     private final ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<>();
 
@@ -344,7 +344,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     Text unavailableChannelErrorText;
 
-    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, TabWireless8021xUi wireless8021x,
+    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, Tab8021xUi wireless8021x,
             AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
@@ -699,13 +699,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             // disable Password if security is none, or if Wifi-Enterprise is enabled
             if (this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)
-                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_ENTERPRISE_MESSAGE)) {
+                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.password.setEnabled(false);
                 this.verify.setEnabled(false);
                 this.buttonPassword.setEnabled(false);
             }
 
-            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_ENTERPRISE_MESSAGE)) {
+            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.password.setEnabled(false);
                 this.verify.setEnabled(false);
                 this.buttonPassword.setEnabled(false);
@@ -775,7 +775,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 this.group.setEnabled(false);
             }
 
-            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_ENTERPRISE_MESSAGE)) {
+            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.password.setEnabled(false);
             }
         }

@@ -20,39 +20,48 @@ import java.util.logging.Logger;
 
 public class Gwt8021xConfig extends KuraBaseModel implements Serializable {
 
-    private static final String ROUTER_DNS_PASS = "routerDnsPass";
+    private static final String KEY_EAP = "eap";
+    private static final String KEY_INNER_AUTH = "innerAuth";
     private static final Logger logger = Logger.getLogger(Gwt8021xConfig.class.getSimpleName());
     private static final long serialVersionUID = 7079533925979145804L;
 
     public Gwt8021xEap getEapEnum() {
-        return Gwt8021xEap.valueOf(getEap());
+        return Gwt8021xEap.fromMetatypeString(getEap());
     }
 
     public String getEap() {
-        return get("eap");
+        return get(KEY_EAP);
     }
 
     public void setEap(String eap) {
-        set("eap", eap);
+        set(KEY_EAP, eap);
+    }
+
+    public void setEap(Gwt8021xEap eap) {
+        set(KEY_EAP, eap.getLabel());
     }
 
     public Gwt8021xInnerAuth getInnerAuthEnum() {
-        return Gwt8021xInnerAuth.valueOf(getInnerAuth());
+        return Gwt8021xInnerAuth.fromMetatypeString(getInnerAuth());
     }
 
     public String getInnerAuth() {
-        return get("innerAuth");
+        return get(KEY_INNER_AUTH);
     }
 
     public void setInnerAuth(String innerAuth) {
-        set("innerAuth", innerAuth);
+        set(KEY_INNER_AUTH, innerAuth);
+    }
+
+    public void setInnerAuthEnum(Gwt8021xInnerAuth innerAuth) {
+        set(KEY_INNER_AUTH, innerAuth.getLabel());
     }
 
     public String getUsername() {
         return get("username");
     }
 
-    public void setUsername(String username) {
+    public void setIdentity(String username) {
         set("username", username);
     }
 

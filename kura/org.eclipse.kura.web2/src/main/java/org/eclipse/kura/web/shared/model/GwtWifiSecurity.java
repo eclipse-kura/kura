@@ -17,6 +17,6 @@ public enum GwtWifiSecurity {
     netWifiSecurityWEP,
     netWifiSecurityWPA,
     netWifiSecurityWPA2,
-    netWifiSecurityWPA2Enterprise,
+    netWifiSecurityWPA2WPA3Enterprise,
     netWifiSecurityWPA_WPA2
 }

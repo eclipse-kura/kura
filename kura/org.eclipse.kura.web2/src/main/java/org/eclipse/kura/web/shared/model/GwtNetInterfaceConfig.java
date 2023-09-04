@@ -30,7 +30,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         this.enterpriseConfig = enterpriseConfig;
     }
 
-    public Gwt8021xConfig getEnterpriseConfig() {
+    public Gwt8021xConfig get8021xConfig() {
         return this.enterpriseConfig;
     }
 
@@ -306,7 +306,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setIpv6Status(String status) {
         set("ipv6.status", status);
     }
-    
+
     public Integer getIpv6WanPriority() {
         return get("ipv6.priority");
     }

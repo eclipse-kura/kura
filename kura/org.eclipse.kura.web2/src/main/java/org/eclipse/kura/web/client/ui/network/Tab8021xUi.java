@@ -129,7 +129,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void initLabels() {
-
         labelEap.setText(MSGS.net8021xEap());
         labelInnerAuth.setText(MSGS.net8021xInnerAuth());
         labelUsername.setText(MSGS.net8021xUsername());
@@ -159,13 +158,19 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         }
 
         this.eap.addMouseOverHandler(event -> {
-            Tab8021xUi.this.logger.info("hover detected."); // TODO: replace with real help text
+            if (this.eap.isEnabled()) {
+                setHelpText(MSGS.net8021xEapHelp());
+            }
         });
 
+        this.eap.addMouseOutHandler(event -> resetHelpText());
+
         this.eap.addChangeHandler(event -> {
-            Tab8021xUi.this.logger.info("change detected.");
             setDirty(true);
-            update();
+            this.netTabs.updateTabs();
+
+            // refresh();
+            // resetValidations();
         });
     }
 
@@ -175,13 +180,18 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         }
 
         this.innerAuth.addMouseOverHandler(event -> {
-            Tab8021xUi.this.logger.info("hover detected.");
+            if (this.innerAuth.isEnabled()) {
+                setHelpText(MSGS.net8021xInnerAuthHelp());
+            }
         });
 
+        this.innerAuth.addMouseOutHandler(event -> resetHelpText());
+
         this.innerAuth.addChangeHandler(event -> {
-            Tab8021xUi.this.logger.info("change detected.");
             setDirty(true);
-            update();
+            this.netTabs.updateTabs();
+
+            // supdate();
         });
     }
 
@@ -191,7 +201,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
         this.username.addBlurHandler(e -> this.username.validate());
         this.username.setAllowBlank(true);
-        this.username.addMouseOutHandler(event -> resetHelp());
+        this.username.addMouseOutHandler(event -> resetHelpText());
 
         this.username.addChangeHandler(event -> {
             setDirty(true);
@@ -205,7 +215,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(true);
-        this.password.addMouseOutHandler(event -> resetHelp());
+        this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {
             setDirty(true);
@@ -329,7 +339,12 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.password.setValue(config.get8021xConfig().getPassword());
     }
 
-    private void resetHelp() {
+    private void setHelpText(String message) {
+        this.helpText.clear();
+        this.helpText.add(new Span(message));
+    }
+
+    private void resetHelpText() {
         this.helpText.clear();
         this.helpText.add(new Span(MSGS.netHelpDefaultHint()));
     }

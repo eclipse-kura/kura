@@ -125,6 +125,10 @@ public interface SystemService {
      * @since 2.6
      */
     public static final String KEY_JAVA_VM_VENDOR = "java.vm.vendor";
+
+    /**
+     * @since 2.6
+     */
     public static final String KEY_JDK_VENDOR_VERSION = "jdk.vendor.version";
 
     /**

@@ -122,7 +122,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.currentSession = currentSession;
         this.netTabs = tabs;
 
-        initForm();
         initLabels();
         initHelpButtons();
         initListBoxes();
@@ -131,14 +130,17 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     private void initLabels() {
 
-        labelEap.setText("Enterprise EAP (Extensible Authentication Protocol)");
-        labelInnerAuth.setText("Inner Authentication (Phase2 Auth)");
-        labelUsername.setText("Identity (Username)");
-        labelPassword.setText("Password");
+        labelEap.setText(MSGS.net8021xEap());
+        labelInnerAuth.setText(MSGS.net8021xInnerAuth());
+        labelUsername.setText(MSGS.net8021xUsername());
+        labelPassword.setText(MSGS.net8021xPassword());
     }
 
     private void initHelpButtons() {
-
+        this.helpEap.setHelpText(MSGS.net8021xEapHelp());
+        this.helpInnerAuth.setHelpText(MSGS.net8021xInnerAuthHelp());
+        this.helpUsername.setHelpText(MSGS.net8021xUsernameHelp());
+        this.helpPassword.setHelpText(MSGS.net8021xPasswordHelp());
     }
 
     private void initListBoxes() {

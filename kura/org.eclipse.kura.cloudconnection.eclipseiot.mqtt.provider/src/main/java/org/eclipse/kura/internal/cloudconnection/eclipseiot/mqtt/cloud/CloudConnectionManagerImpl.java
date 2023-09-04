@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,10 +27,14 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.KuraConnectException;
@@ -125,6 +129,9 @@ public class CloudConnectionManagerImpl
     private final Set<CloudConnectionListener> registeredCloudConnectionListeners;
     private final Set<CloudPublisherDeliveryListener> registeredCloudPublisherDeliveryListeners;
     private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
+
+    private ScheduledFuture<?> scheduledBirthPublisherFuture;
+    private ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
 
     public CloudConnectionManagerImpl() {
         this.messageId = new AtomicInteger();
@@ -259,7 +266,7 @@ public class CloudConnectionManagerImpl
         if (isConnected()) {
             logger.warn("DataService is already connected. Publish BIRTH certificate");
             try {
-                setupCloudConnection();
+                setupCloudConnection(false);
             } catch (KuraException e) {
                 logger.warn("Cannot setup cloud service connection", e);
             }
@@ -273,7 +280,7 @@ public class CloudConnectionManagerImpl
         this.options = new CloudConnectionManagerOptions(properties, this.systemService);
         if (isConnected()) {
             try {
-                setupCloudConnection();
+                setupCloudConnection(false);
             } catch (KuraException e) {
                 logger.warn("Cannot setup cloud service connection");
             }
@@ -311,7 +318,7 @@ public class CloudConnectionManagerImpl
             logger.info("Handling PositionLockedEvent");
             if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
                 try {
-                    publishBirthCertificate();
+                    publishBirthCertificate(false);
                 } catch (KuraException e) {
                     logger.warn("Cannot publish birth certificate", e);
                 }
@@ -337,7 +344,7 @@ public class CloudConnectionManagerImpl
                             && (this.iccid == null || this.iccid.length() == 0 || ERROR.equals(this.iccid)))) {
                 logger.debug("handleEvent() :: publishing BIRTH certificate ...");
                 try {
-                    publishBirthCertificate();
+                    publishBirthCertificate(false);
                 } catch (KuraException e) {
                     logger.warn("Cannot publish birth certificate", e);
                 }
@@ -390,7 +397,7 @@ public class CloudConnectionManagerImpl
     @Override
     public void onConnectionEstablished() {
         try {
-            setupCloudConnection();
+            setupCloudConnection(true);
         } catch (KuraException e) {
             logger.warn("Cannot setup cloud service connection");
         }
@@ -566,7 +573,7 @@ public class CloudConnectionManagerImpl
     //
     // ----------------------------------------------------------------
 
-    private void setupCloudConnection() throws KuraException {
+    private void setupCloudConnection(boolean isNewConnection) throws KuraException {
         // publish birth certificate unless it has already been published
         // and republish is disabled
         boolean publishBirth = true;
@@ -577,7 +584,7 @@ public class CloudConnectionManagerImpl
 
         // publish birth certificate
         if (publishBirth) {
-            publishBirthCertificate();
+            publishBirthCertificate(isNewConnection);
             this.birthPublished = true;
         }
 
@@ -594,19 +601,18 @@ public class CloudConnectionManagerImpl
         this.dataService.subscribe(sbDeviceSubscription.toString(), 0);
     }
 
-    private void publishBirthCertificate() throws KuraException {
+    private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
         if (this.options.isLifecycleCertsDisabled()) {
             return;
         }
 
-        StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicBirthSuffix());
+        LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
-        String topic = sbTopic.toString();
-        KuraPayload payload = createBirthPayload();
-        publishLifeCycleMessage(topic, payload);
+        if (isNewConnection) {
+            publishLifeCycleMessage(birthToPublish);
+        } else {
+            publishWithDelay(birthToPublish);
+        }
     }
 
     private void publishDisconnectCertificate() throws KuraException {
@@ -614,36 +620,39 @@ public class CloudConnectionManagerImpl
             return;
         }
 
-        StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(MessageType.EVENT.getTopicPrefix()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicSeparator()).append(this.options.getTopicSeparator())
-                .append(this.options.getTopicDisconnectSuffix());
-
-        String topic = sbTopic.toString();
-        KuraPayload payload = createDisconnectPayload();
-        publishLifeCycleMessage(topic, payload);
+        publishLifeCycleMessage(new LifecycleMessage(this.options, this).asDisconnectCertificateMessage());
     }
 
-    private KuraPayload createBirthPayload() {
-        LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-        return payloadBuilder.buildBirthPayload();
+    private void publishWithDelay(LifecycleMessage message) {
+        if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
+            this.scheduledBirthPublisherFuture.cancel(false);
+            logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
+        }
+
+        logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
+        
+        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
+            try {
+                logger.debug("CloudServiceImpl: publishing cached BIRTH message.");
+                publishLifeCycleMessage(message);
+            } catch (KuraException e) {
+                logger.error("Error sending cached BIRTH/APP certificate.", e);
+            }
+        }, 30L, TimeUnit.SECONDS);
     }
 
-    private KuraPayload createDisconnectPayload() {
-        LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-        return payloadBuilder.buildDisconnectPayload();
-    }
-
-    private void publishLifeCycleMessage(String topic, KuraPayload payload) throws KuraException {
+    private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {
         // track the message ID and block until the message
         // has been published (i.e. written to the socket).
         synchronized (this.messageId) {
             this.messageId.set(-1);
             // add a timestamp to the message
+            KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int localMessageId = this.dataService.publish(topic, encodedPayload, this.options.getLifeCycleMessageQos(),
-                    this.options.getLifeCycleMessageRetain(), this.options.getLifeCycleMessagePriority());
+            int localMessageId = this.dataService.publish(message.getTopic(), encodedPayload,
+                    this.options.getLifeCycleMessageQos(), this.options.getLifeCycleMessageRetain(),
+                    this.options.getLifeCycleMessagePriority());
             this.messageId.set(localMessageId);
             try {
                 this.messageId.wait(1000);

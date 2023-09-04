@@ -18,6 +18,7 @@
         "javaVmName",
         "javaVmVersion",
         "javaVmVendor",
+        "jdkVendorVersion",
         "osArch",
         "osDistro",
         "osDistroVersion",

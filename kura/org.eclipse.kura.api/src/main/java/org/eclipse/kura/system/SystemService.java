@@ -125,6 +125,7 @@ public interface SystemService {
      * @since 2.6
      */
     public static final String KEY_JAVA_VM_VENDOR = "java.vm.vendor";
+    public static final String KEY_JDK_VENDOR_VERSION = "jdk.vendor.version";
 
     /**
      * @deprecated
@@ -587,12 +588,18 @@ public interface SystemService {
      * Gets the Java Virtual Machine implementation vendor that is currently being
      * used.
      *
-     * @return The Java Virtual Machine version as defined by the Java System
-     *         property java.vm.vendor.
-     *
      * @since 2.6
-     * @return
+     * @return the Java Virtual Machine version as defined by the Java System
+     *         property java.vm.vendor.
      */
     public String getJavaVmVendor();
+
+    /**
+     * 
+     * 
+     * @since 2.6
+     * @return the String representing the Java System property jdk.vendor.version.
+     */
+    public String getJdkVendorVersion();
 
 }

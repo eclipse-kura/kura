@@ -45,6 +45,7 @@ public class NMSettingsConverter {
     private static final Logger logger = LoggerFactory.getLogger(NMSettingsConverter.class);
 
     private static final String NM_SETTINGS_CONNECTION = "connection";
+    private static final String NM_SETTINGS_80211_KEY_MANAGEMENT = "key-mgmt";
     private static final String NM_SETTINGS_IPV4_METHOD = "method";
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
     private static final String NM_SETTINGS_IPV4_IGNORE_AUTO_DNS = "ignore-auto-dns";
@@ -421,7 +422,7 @@ public class NMSettingsConverter {
             String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        settings.put("key-mgmt", new Variant<>("none"));
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("none"));
         settings.put("wep-key-type", new Variant<>(NM_WEP_KEY_TYPE_KEY));
 
         String wepKey = props
@@ -436,7 +437,7 @@ public class NMSettingsConverter {
             String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        settings.put("key-mgmt", new Variant<>("wpa-psk"));
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("wpa-psk"));
 
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
@@ -468,7 +469,7 @@ public class NMSettingsConverter {
     private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings() {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        settings.put("key-mgmt", new Variant<>("wpa-eap"));
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("wpa-eap"));
 
         return settings;
     }

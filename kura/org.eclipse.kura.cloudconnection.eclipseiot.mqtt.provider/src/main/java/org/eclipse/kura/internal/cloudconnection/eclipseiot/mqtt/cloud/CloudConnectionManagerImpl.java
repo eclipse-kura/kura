@@ -328,7 +328,7 @@ public class CloudConnectionManagerImpl
 
         if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
                 || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
-            logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
+            logger.debug("CloudConnectionManagerImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
     }
@@ -652,14 +652,14 @@ public class CloudConnectionManagerImpl
     private void publishWithDelay(LifecycleMessage message) {
         if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
             this.scheduledBirthPublisherFuture.cancel(false);
-            logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
+            logger.debug("CloudConnectionManagerImpl: BIRTH message cache timer restarted.");
         }
 
-        logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
+        logger.debug("CloudConnectionManagerImpl: BIRTH message cached for 30s.");
         
         this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
             try {
-                logger.debug("CloudServiceImpl: publishing cached BIRTH message.");
+                logger.debug("CloudConnectionManagerImpl: publishing cached BIRTH message.");
                 publishLifeCycleMessage(message);
             } catch (KuraException e) {
                 logger.error("Error sending cached BIRTH/APP certificate.", e);

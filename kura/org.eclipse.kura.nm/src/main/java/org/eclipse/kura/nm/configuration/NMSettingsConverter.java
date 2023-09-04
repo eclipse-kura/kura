@@ -114,7 +114,6 @@ public class NMSettingsConverter {
 
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        // Configure Eap Method
         switch (Kura8021xEAP.fromString(eap)) {
         case KURA_8021X_EAP_TTLS:
             create8021xTunneledTls(props, deviceId, settings);
@@ -133,7 +132,6 @@ public class NMSettingsConverter {
             return settings;
         }
 
-        // Configure Phase2 (innerAuth) Method
         switch (Kura8021xInnerAuth.fromString(phase2.get())) {
         case KURA_8021X_INNER_AUTH_NONE:
             break;
@@ -151,18 +149,18 @@ public class NMSettingsConverter {
     private static void create8021xTunneledTls(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TTLS.getValue() }));
-        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+        create8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
     private static void create8021xProtectedEap(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.PEAP.getValue() }));
-        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+        create8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
     }
 
     private static void create8021xTls(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
         settings.put("eap", new Variant<>(new String[] { NM8021xEAP.TLS.getValue() }));
-        build8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
+        create8021xOptionalCaCertAndAnonIdentity(props, deviceId, settings);
 
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
@@ -179,7 +177,7 @@ public class NMSettingsConverter {
 
     }
 
-    private static void build8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
+    private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
@@ -413,7 +411,7 @@ public class NMSettingsConverter {
         case SECURITY_WPA_WPA2:
             return createWPAWPA2Settings(props, deviceId, propMode);
         case SECURITY_WPA2_WPA3_ENTERPRISE:
-            return createWPA2WPA3EnterpriseSettings(props, deviceId, propMode);
+            return createWPA2WPA3EnterpriseSettings();
         default:
             throw new IllegalArgumentException(String.format("Security type \"%s\" is not supported.", securityType));
         }
@@ -467,8 +465,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings(NetworkProperties props, String deviceId,
-            String propMode) {
+    private static Map<String, Variant<?>> createWPA2WPA3EnterpriseSettings() {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         settings.put("key-mgmt", new Variant<>("wpa-eap"));

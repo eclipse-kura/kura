@@ -404,6 +404,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty(KEY_JAVA_VM_INFO) != null) {
                 this.kuraProperties.put(KEY_JAVA_VM_INFO, System.getProperty(KEY_JAVA_VM_INFO));
             }
+            if (System.getProperty(KEY_JAVA_VM_VENDOR) != null) {
+                this.kuraProperties.put(KEY_JAVA_VM_VENDOR, System.getProperty(KEY_JAVA_VM_VENDOR));
+            }
+            if (System.getProperty(KEY_JDK_VENDOR_VERSION) != null) {
+                this.kuraProperties.put(KEY_JDK_VENDOR_VERSION, System.getProperty(KEY_JDK_VENDOR_VERSION));
+            }
             if (System.getProperty(KEY_OSGI_FW_NAME) != null) {
                 this.kuraProperties.put(KEY_OSGI_FW_NAME, System.getProperty(KEY_OSGI_FW_NAME));
             }
@@ -1501,6 +1507,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
 
         return false;
+    }
+
+    @Override
+    public String getJavaVmVendor() {
+        final Optional<String> override = getProperty(KEY_JAVA_VM_VENDOR);
+        if (override.isPresent()) {
+            return override.get();
+        }
+
+        return System.getProperty(KEY_JAVA_VM_VENDOR);
+    }
+
+    @Override
+    public String getJdkVendorVersion() {
+        final Optional<String> override = getProperty(KEY_JDK_VENDOR_VERSION);
+        if (override.isPresent()) {
+            return override.get();
+        }
+
+        return System.getProperty(KEY_JDK_VENDOR_VERSION);
     }
 
 }

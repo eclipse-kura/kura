@@ -15,6 +15,7 @@ package org.eclipse.kura.core.system.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -241,6 +242,16 @@ public class SystemServiceTest {
         assertEquals("getJavaVmVersion() value", expected, actual);
     }
 
+    @Test
+    public void shouldReturnJavaVmVendor() {
+        assertNotNull(systemService.getJavaVmVendor());
+    }
+
+    @Test
+    public void shouldReturnJdkVendorVersion() {
+        assertNull(systemService.getJdkVendorVersion());
+    }
+
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetFileSeparator() {
@@ -356,4 +367,5 @@ public class SystemServiceTest {
             assertEquals(UNKNOWN, serialNumber);
         }
     }
+
 }

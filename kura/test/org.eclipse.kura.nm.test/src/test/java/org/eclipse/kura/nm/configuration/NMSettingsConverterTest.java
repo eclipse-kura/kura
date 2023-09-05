@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.nm.configuration;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -444,6 +445,162 @@ public class NMSettingsConverterTest {
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfIsEmpty() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoSuchElementExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfEapIsInvalid() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "invalid eap value");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfInnerAuthIsInvalid() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "invalid eap value");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "invalid Inner Auth value");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenIllegalArgumentExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithTtlsAndMschapV2() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+        thenResultingMapNotContains("anonymous-identity");
+        thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("ca-cert-password");
+
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithTtlsAndMschapV2AndOptionalParams() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithPeapAndMschapV2() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
+        thenResultingMapNotContains("anonymous-identity");
+        thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithPeapAndMschapV2AndCertificates() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
+        thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
+        thenResultingMapContains("phase2-auth", "mschapv2");
+        thenResultingMapContains("identity", "example-user-name");
+        thenResultingMapContains("password", "secure-test-password-123!@#");
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowIfTlsIsEmpty() {
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoSuchElementExceptionThrown();
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithTls() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert", "binary client cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key", "binary private key");
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
+        thenResultingMapNotContains("phase2-auth");
+        thenResultingMapContains("identity", "username@email.com");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContainsBytes("client-cert", "binary client cert");
+        thenResultingMapContainsBytes("private-key", "binary private key");
+        thenResultingMapContains("private-key-password", "secure-password");
+
     }
 
     @Test
@@ -1045,6 +1202,54 @@ public class NMSettingsConverterTest {
                 new Variant<>(Arrays.asList("ccmp"), "as").getValue());
         thenResultingBuildAllMapContains("802-11-wireless-security", "pairwise",
                 new Variant<>(Arrays.asList("ccmp"), "as").getValue());
+    }
+
+    @Test
+    public void buildSettingsShouldWorkWith8021x() {
+        givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
+        givenMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.ssid", "ssidtest");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.radioMode", "RADIO_MODE_80211a");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.channel", "10");
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA2_WPA3_ENTERPRISE");
+
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
+        givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
+                NMDeviceType.NM_DEVICE_TYPE_WIFI);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+        thenResultingBuildAllMapContains("ipv4", "method", "manual");
+        thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapNotContains("ipv4", "gateway");
+        thenResultingBuildAllMapNotContains("ipv4", "dns");
+        thenResultingBuildAllMapContains("ipv4", "ignore-auto-dns", true);
+        thenResultingBuildAllMapContains("ipv4", "ignore-auto-routes", true);
+        thenResultingBuildAllMapContains("connection", "id", "kura-wlan0-connection");
+        thenResultingBuildAllMapContains("connection", "interface-name", "wlan0");
+        thenResultingBuildAllMapContains("connection", "type", "802-11-wireless");
+        thenResultingBuildAllMapContains("802-11-wireless-security", "key-mgmt", "wpa-eap");
+
+        thenResultingBuildAllMapContainsArray("802-1x", "eap", new Variant<>(new String[] { "ttls" }).getValue());
+        thenResultingBuildAllMapContains("802-1x", "phase2-auth", "mschapv2");
+        thenResultingBuildAllMapContains("802-1x", "anonymous-identity", "anonymous-identity-test-var");
+        thenResultingBuildAllMapContainsBytes("802-1x", "ca-cert", "binary ca cert");
+        thenResultingBuildAllMapContains("802-1x", "ca-cert-password", "secure-password");
+        thenResultingBuildAllMapContains("802-1x", "identity", "example-user-name");
+        thenResultingBuildAllMapContains("802-1x", "password", "secure-test-password-123!@#");
     }
 
     @Test
@@ -2577,6 +2782,18 @@ public class NMSettingsConverterTest {
         }
     }
 
+    public void whenBuild8021xSettingsIsRunWith(NetworkProperties props, String iface) {
+        try {
+            this.resultMap = NMSettingsConverter.build8021xSettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+
     public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
@@ -2645,6 +2862,10 @@ public class NMSettingsConverterTest {
         assertEquals(value, this.resultMap.get(key).getValue());
     }
 
+    public void thenResultingMapContainsArray(String key, Object[] value) {
+        assertArrayEquals(value, (Object[]) this.resultMap.get(key).getValue());
+    }
+
     public void thenResultingMapNotContains(String key) {
         assertFalse(this.resultMap.containsKey(key));
     }
@@ -2655,6 +2876,10 @@ public class NMSettingsConverterTest {
 
     public void thenResultingBuildAllMapContains(String key, String subKey, Object value) {
         assertEquals(value, this.resultAllSettingsMap.get(key).get(subKey).getValue());
+    }
+
+    public void thenResultingBuildAllMapContainsArray(String key, String subKey, Object[] value) {
+        assertArrayEquals(value, (Object[]) this.resultAllSettingsMap.get(key).get(subKey).getValue());
     }
 
     public void thenResultingBuildAllMapNotContains(String key) {

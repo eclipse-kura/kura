@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.floodingprotection;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -61,11 +65,17 @@ public class FloodingProtectionConfigurator
         logger.info("Deactivating FloodingConfigurator... Done.");
     }
 
+    public void setOptions(FloodingProtectionOptions options) {
+        this.floodingProtectionOptions = options;
+    }
+
     private void doUpdate(Map<String, Object> properties) {
         logger.info("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
         updateFirewallService();
         updateFirewallServiceIPv6();
+        updateFragmentFiltering();
+        updateFragmentFilteringIPv6();
         logger.info("Updating firewall configuration... Done.");
     }
 
@@ -84,6 +94,41 @@ public class FloodingProtectionConfigurator
             this.optionalFirewallServiceIPv6.get().addFloodingProtectionRules(filterRules, natRules, mangleRules);
         } else {
             logger.warn("This device does not support IPv6.");
+        }
+    }
+
+    private void updateFragmentFiltering() {
+        if (this.floodingProtectionOptions.isIPv4Enabled()) {
+            configureThreshold(this.floodingProtectionOptions.getFragmentLowThresholdIPv4FileName(), 0);
+            configureThreshold(this.floodingProtectionOptions.getFragmentHighThresholdIPv4FileName(), 0);
+        } else {
+            configureThreshold(this.floodingProtectionOptions.getFragmentHighThresholdIPv4FileName(),
+                    this.floodingProtectionOptions.getFragmentHighThresholdDefault());
+            configureThreshold(this.floodingProtectionOptions.getFragmentLowThresholdIPv4FileName(),
+                    this.floodingProtectionOptions.getFragmentLowThresholdDefault());
+        }
+    }
+
+    private void updateFragmentFilteringIPv6() {
+        if (this.optionalFirewallServiceIPv6.isPresent()) {
+            if (this.floodingProtectionOptions.isIPv6Enabled()) {
+                configureThreshold(this.floodingProtectionOptions.getFragmentLowThresholdIPv6FileName(), 0);
+                configureThreshold(this.floodingProtectionOptions.getFragmentHighThresholdIPv6FileName(), 0);
+            } else {
+                configureThreshold(this.floodingProtectionOptions.getFragmentHighThresholdIPv6FileName(),
+                        this.floodingProtectionOptions.getFragmentHighThresholdDefault());
+                configureThreshold(this.floodingProtectionOptions.getFragmentLowThresholdIPv6FileName(),
+                        this.floodingProtectionOptions.getFragmentLowThresholdDefault());
+            }
+        }
+    }
+
+    private void configureThreshold(String fileName, int value) {
+        Path sourceFile = Paths.get(fileName);
+        try {
+            Files.write(sourceFile, Integer.toString(value).getBytes());
+        } catch (IOException e) {
+            logger.error("Cannot write to " + sourceFile, e);
         }
     }
 

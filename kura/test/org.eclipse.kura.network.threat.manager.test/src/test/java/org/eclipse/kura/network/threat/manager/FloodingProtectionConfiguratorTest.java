@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.network.threat.manager;
 
+import static org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions.FRAG_LOW_THR_IPV6_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +29,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator;
+import org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6;
 import org.junit.Before;
@@ -212,5 +214,20 @@ public class FloodingProtectionConfiguratorTest {
 
         verify(this.mockFirewallServiceIPv6, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
                 new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6)));
+    }
+
+    @Test
+    public void shouldFilterFragmentIPv4() {
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
+        this.properties.put("flooding.protection.enabled", false);
+        this.properties.put("flooding.protection.enabled.ipv6", false);
+        this.floodingProtectionConfigurator.activate(this.properties);
+        this.floodingProtectionConfigurator.setOptions(new FloodingProtectionOptions(this.properties) {
+
+            @Override
+            public String getFragmentLowThresholdIPv6FileName() {
+                return "pippo";
+            }
+        });
     }
 }

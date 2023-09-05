@@ -69,7 +69,13 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -m ipv6header --header esp --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header none --soft -j DROP",
             "-A prerouting-kura -m rt --rt-type 0 -j DROP", "-A output-kura -m rt --rt-type 0 -j DROP" };
-    // fragment filtering missing
+
+    private static final String FRAG_LOW_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_low_thresh";
+    private static final String FRAG_HIGH_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_high_thresh";
+    private static final String FRAG_LOW_THR_IPV6_NAME = "/proc/sys/net/netfilter/nf_conntrack_frag6_low_thresh";
+    private static final String FRAG_HIGH_THR_IPV6_NAME = "/proc/sys/net/netfilter/nf_conntrack_frag6_high_thresh";
+    private static final int FRAG_LOW_THR_DEFAULT = 3 * 1024 * 1024;
+    private static final int FRAG_HIGH_THR_DEFAULT = 4 * 1024 * 1024;
 
     private static final String PID = "org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator";
     private static final String FP_DESCRIPTION = "The service enables flooding protection mechanisms via iptables.";
@@ -116,7 +122,7 @@ public class FloodingProtectionOptions {
     }
 
     public Set<String> getFloodingProtectionMangleRules() {
-        if ((boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV4)) {
+        if ((isIPv4Enabled())) {
             return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV4));
         } else {
             return new LinkedHashSet<>();
@@ -132,11 +138,43 @@ public class FloodingProtectionOptions {
     }
 
     public Set<String> getFloodingProtectionMangleRulesIPv6() {
-        if ((boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV6)) {
+        if (isIPv6Enabled()) {
             return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6));
         } else {
             return new LinkedHashSet<>();
         }
+    }
+
+    public boolean isIPv4Enabled() {
+        return (boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV4);
+    }
+
+    public boolean isIPv6Enabled() {
+        return (boolean) this.properties.get(FP_ENABLED_PROP_NAME_IPV6);
+    }
+
+    public String getFragmentLowThresholdIPv4FileName() {
+        return FRAG_LOW_THR_IPV4_NAME;
+    }
+
+    public String getFragmentHighThresholdIPv4FileName() {
+        return FRAG_HIGH_THR_IPV4_NAME;
+    }
+
+    public String getFragmentLowThresholdIPv6FileName() {
+        return FRAG_LOW_THR_IPV6_NAME;
+    }
+
+    public String getFragmentHighThresholdIPv6FileName() {
+        return FRAG_HIGH_THR_IPV6_NAME;
+    }
+
+    public int getFragmentLowThresholdDefault() {
+        return FRAG_LOW_THR_DEFAULT;
+    }
+
+    public int getFragmentHighThresholdDefault() {
+        return FRAG_HIGH_THR_DEFAULT;
     }
 
     public Tocd getDefinition() {

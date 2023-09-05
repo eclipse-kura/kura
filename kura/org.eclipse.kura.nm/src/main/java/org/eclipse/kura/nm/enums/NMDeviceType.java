@@ -193,4 +193,40 @@ public enum NMDeviceType {
             return new UInt32(0);
         }
     }
+    
+    public static NMDeviceType fromPropertiesString(String typeProperty) {
+        switch (typeProperty) {
+        case "UNKNOWN": 
+            return NM_DEVICE_TYPE_UNKNOWN;
+        case "ETHERNET": 
+            return NM_DEVICE_TYPE_ETHERNET;
+        case "WIFI": 
+            return NM_DEVICE_TYPE_WIFI;
+        case "UNUSED1": 
+            return NM_DEVICE_TYPE_UNUSED1;
+        case "UNUSED2": 
+            return NM_DEVICE_TYPE_UNUSED2;
+        case "BT": 
+            return NM_DEVICE_TYPE_BT;
+        case "OLPC_MESH": 
+            return NM_DEVICE_TYPE_OLPC_MESH;
+        case "WIMAX": 
+            return NM_DEVICE_TYPE_WIMAX;
+        case "MODEM": 
+            return NM_DEVICE_TYPE_MODEM;
+        case "INFINIBAND": 
+            return NM_DEVICE_TYPE_INFINIBAND;
+        case "BOND": 
+            return NM_DEVICE_TYPE_BOND;
+        case "VLAN": 
+            return NM_DEVICE_TYPE_VLAN;
+        case "ADSL": 
+            return NM_DEVICE_TYPE_ADSL;
+        case "LOOPBACK": 
+            return NM_DEVICE_TYPE_LOOPBACK;
+        //Todo: add types not in NetInterfaceType as needed
+        default:
+            return NM_DEVICE_TYPE_UNKNOWN;
+        }
+    }
 }

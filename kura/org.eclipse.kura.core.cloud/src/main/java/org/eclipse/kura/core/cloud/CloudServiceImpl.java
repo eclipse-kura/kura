@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,12 +37,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -161,6 +165,11 @@ public class CloudServiceImpl
     private Set<TamperDetectionService> tamperDetectionServices = new HashSet<>();
 
     private String ownPid;
+
+    private ScheduledFuture<?> scheduledBirthPublisherFuture;
+    private ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
+    private LifecycleMessage lastBirthMessage;
+    private LifecycleMessage lastAppMessage;
 
     public CloudServiceImpl() {
         this.cloudClients = new CopyOnWriteArrayList<>();
@@ -374,13 +383,13 @@ public class CloudServiceImpl
             handleModemReadyEvent(event);
         } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
-            tryPublishBirthCertificate();
+            tryPublishBirthCertificate(false);
         }
     }
 
-    private void tryPublishBirthCertificate() {
+    private void tryPublishBirthCertificate(boolean isNewConnection) {
         try {
-            publishBirthCertificate();
+            publishBirthCertificate(isNewConnection);
         } catch (KuraException e) {
             logger.warn("Cannot publish birth certificate", e);
         }
@@ -403,7 +412,7 @@ public class CloudServiceImpl
 
         if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection() && isModemInfoValid()) {
             logger.debug("handleEvent() :: publishing BIRTH certificate ...");
-            tryPublishBirthCertificate();
+            tryPublishBirthCertificate(false);
         }
     }
 
@@ -420,7 +429,7 @@ public class CloudServiceImpl
         // republish the birth certificate only if we are configured to
         logger.info("Handling PositionLockedEvent");
         if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
-            tryPublishBirthCertificate();
+            tryPublishBirthCertificate(false);
         }
     }
 
@@ -479,11 +488,7 @@ public class CloudServiceImpl
 
         // publish updated birth certificate with updated list of active apps
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Cannot publish app certificate");
-            }
+            publishAppCertificate();
         }
     }
 
@@ -777,9 +782,9 @@ public class CloudServiceImpl
     //
     // ----------------------------------------------------------------
 
-    private void setupCloudConnection(boolean onConnect) throws KuraException {
+    private void setupCloudConnection(boolean isNewConnection) throws KuraException {
         // assume we are not yet subscribed
-        if (onConnect) {
+        if (isNewConnection) {
             this.subscribed = false;
         }
 
@@ -793,7 +798,7 @@ public class CloudServiceImpl
 
         // publish birth certificate
         if (publishBirth) {
-            publishBirthCertificate();
+            publishBirthCertificate(isNewConnection);
             this.birthPublished = true;
         }
 
@@ -812,20 +817,18 @@ public class CloudServiceImpl
         }
     }
 
-    private void publishBirthCertificate() throws KuraException {
+    private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
         if (this.options.isLifecycleCertsDisabled()) {
             return;
         }
 
-        StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicBirthSuffix());
+        LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
-        String topic = sbTopic.toString();
-        KuraPayload payload = createBirthPayload();
-        publishLifeCycleMessage(topic, payload);
+        if (isNewConnection) {
+            publishLifeCycleMessage(birthToPublish);
+        } else {
+            publishWithDelay(birthToPublish);
+        }
     }
 
     private void publishDisconnectCertificate() throws KuraException {
@@ -833,55 +836,65 @@ public class CloudServiceImpl
             return;
         }
 
-        StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicDisconnectSuffix());
-
-        String topic = sbTopic.toString();
-        KuraPayload payload = createDisconnectPayload();
-        publishLifeCycleMessage(topic, payload);
+        publishLifeCycleMessage(new LifecycleMessage(this.options, this).asDisconnectCertificateMessage());
     }
 
-    private void publishAppCertificate() throws KuraException {
+    private void publishAppCertificate() {
         if (this.options.isLifecycleCertsDisabled()) {
             return;
         }
 
-        StringBuilder sbTopic = new StringBuilder();
-        sbTopic.append(this.options.getTopicControlPrefix()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicAccountToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicClientIdToken()).append(CloudServiceOptions.getTopicSeparator())
-                .append(CloudServiceOptions.getTopicAppsSuffix());
-
-        String topic = sbTopic.toString();
-        KuraPayload payload = createBirthPayload();
-        publishLifeCycleMessage(topic, payload);
+        publishWithDelay(new LifecycleMessage(this.options, this).asAppCertificateMessage());
     }
 
-    private KuraPayload createBirthPayload() {
-        LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-        return payloadBuilder.buildBirthPayload();
+    private void publishWithDelay(LifecycleMessage message) {
+        if (Objects.nonNull(this.scheduledBirthPublisherFuture)) {
+            this.scheduledBirthPublisherFuture.cancel(false);
+            logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
+        }
+
+        logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
+
+        if (message.isBirthCertificateMessage()) {
+            this.lastBirthMessage = message;
+        }
+
+        if (message.isAppCertificateMessage()) {
+            this.lastAppMessage = message;
+        }
+
+        this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
+            try {
+
+                if (Objects.nonNull(this.lastBirthMessage)) {
+                    logger.debug("CloudServiceImpl: publishing cached BIRTH message.");
+                    publishLifeCycleMessage(lastBirthMessage);
+                }
+
+                if (Objects.nonNull(this.lastAppMessage)) {
+                    logger.debug("CloudServiceImpl: publishing cached APP message.");
+                    publishLifeCycleMessage(lastAppMessage);
+                }
+
+            } catch (KuraException e) {
+                logger.error("Error sending cached BIRTH/APP certificate.", e);
+            }
+        }, 30L, TimeUnit.SECONDS);
     }
 
-    private KuraPayload createDisconnectPayload() {
-        LifeCyclePayloadBuilder payloadBuilder = new LifeCyclePayloadBuilder(this);
-        return payloadBuilder.buildDisconnectPayload();
-    }
-
-    private void publishLifeCycleMessage(String topic, KuraPayload payload) throws KuraException {
+    private void publishLifeCycleMessage(LifecycleMessage message) throws KuraException {
         // track the message ID and block until the message
         // has been published (i.e. written to the socket).
         synchronized (this.messageId) {
             this.messageId.set(-1);
             // add a timestamp to the message
+            KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int messageId = this.dataService.publish(topic, encodedPayload,
+            int id = this.dataService.publish(message.getTopic(), encodedPayload,
                     CloudServiceOptions.getLifeCycleMessageQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
                     CloudServiceOptions.getLifeCycleMessagePriority());
-            this.messageId.set(messageId);
+            this.messageId.set(id);
             try {
                 this.messageId.wait(1000);
             } catch (InterruptedException e) {
@@ -953,11 +966,7 @@ public class CloudServiceImpl
         }
 
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Unable to publish updated App Certificate");
-            }
+            publishAppCertificate();
         }
     }
 
@@ -971,11 +980,7 @@ public class CloudServiceImpl
         }
 
         if (isConnected()) {
-            try {
-                publishAppCertificate();
-            } catch (KuraException e) {
-                logger.warn("Unable to publish updated App Certificate");
-            }
+            publishAppCertificate();
         }
     }
 

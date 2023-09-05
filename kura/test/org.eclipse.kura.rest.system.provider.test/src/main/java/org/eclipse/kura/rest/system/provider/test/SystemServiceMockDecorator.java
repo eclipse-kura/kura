@@ -86,6 +86,8 @@ public class SystemServiceMockDecorator {
         when(service.getJavaVmInfo()).thenReturn(PROPERTIES_VALUE);
         when(service.getJavaVmName()).thenReturn(PROPERTIES_VALUE);
         when(service.getJavaVmVersion()).thenReturn(PROPERTIES_VALUE);
+        when(service.getJavaVmVendor()).thenReturn(PROPERTIES_VALUE);
+        when(service.getJdkVendorVersion()).thenReturn(PROPERTIES_VALUE);
         when(service.getKuraDataDirectory()).thenReturn(PROPERTIES_VALUE);
         when(service.getKuraFrameworkConfigDirectory()).thenReturn(PROPERTIES_VALUE);
         when(service.getKuraHome()).thenReturn(PROPERTIES_VALUE);
@@ -178,6 +180,8 @@ public class SystemServiceMockDecorator {
         when(service.getJavaVmInfo()).thenThrow(RuntimeException.class);
         when(service.getJavaVmName()).thenThrow(RuntimeException.class);
         when(service.getJavaVmVersion()).thenThrow(RuntimeException.class);
+        when(service.getJavaVmVendor()).thenThrow(RuntimeException.class);
+        when(service.getJdkVendorVersion()).thenThrow(RuntimeException.class);
         when(service.getKuraDataDirectory()).thenThrow(RuntimeException.class);
         when(service.getKuraFrameworkConfigDirectory()).thenThrow(RuntimeException.class);
         when(service.getKuraHome()).thenThrow(RuntimeException.class);

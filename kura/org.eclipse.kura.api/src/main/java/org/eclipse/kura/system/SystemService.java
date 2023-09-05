@@ -122,6 +122,16 @@ public interface SystemService {
     public static final String KEY_LEGACY_PPP_LOGGING = "kura.legacy.ppp.logging.enabled";
 
     /**
+     * @since 2.6
+     */
+    public static final String KEY_JAVA_VM_VENDOR = "java.vm.vendor";
+
+    /**
+     * @since 2.6
+     */
+    public static final String KEY_JDK_VENDOR_VERSION = "jdk.vendor.version";
+
+    /**
      * @deprecated
      */
     @Deprecated
@@ -304,8 +314,11 @@ public interface SystemService {
 
     /**
      * Gets the Java Virtual Machine information that is currently being used.
+     * Indicates if virtual machine was built with just-in-time-compiler support.
+     * Values are "mixed mode" or "interpreter loop".
      *
-     * @return The Java Virtual Machine version as defined by the Java System property java.vm.version.
+     * @return The Java Virtual Machine version as defined by the Java System
+     *         property java.vm.info.
      */
     public String getJavaVmInfo();
 
@@ -574,5 +587,23 @@ public interface SystemService {
      * @return true if separate log file in /var/log is required
      */
     public boolean isLegacyPPPLoggingEnabled();
+
+    /**
+     * Gets the Java Virtual Machine implementation vendor that is currently being
+     * used.
+     *
+     * @since 2.6
+     * @return the Java Virtual Machine version as defined by the Java System
+     *         property java.vm.vendor.
+     */
+    public String getJavaVmVendor();
+
+    /**
+     * 
+     * 
+     * @since 2.6
+     * @return the String representing the Java System property jdk.vendor.version.
+     */
+    public String getJdkVendorVersion();
 
 }

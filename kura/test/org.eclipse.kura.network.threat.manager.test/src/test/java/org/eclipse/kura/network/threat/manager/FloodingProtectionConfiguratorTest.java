@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -35,7 +36,7 @@ import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurat
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
 public class FloodingProtectionConfiguratorTest {
@@ -89,230 +90,283 @@ public class FloodingProtectionConfiguratorTest {
     private static final String FRAG_HIGH_THR_IPV4_NAME = "/tmp/ipfrag_high_thresh";
     private static final String FRAG_LOW_THR_IPV6_NAME = "/tmp/nf_conntrack_frag6_low_thresh";
     private static final String FRAG_HIGH_THR_IPV6_NAME = "/tmp/nf_conntrack_frag6_high_thresh";
+    private static final int FRAG_LOW_THR_DEFAULT = 3 * 1024 * 1024;
+    private static final int FRAG_HIGH_THR_DEFAULT = 4 * 1024 * 1024;
 
     private FloodingProtectionConfigurator floodingProtectionConfigurator;
     private FirewallConfigurationService mockFirewallService;
     private FirewallConfigurationServiceIPv6 mockFirewallServiceIPv6;
     private final Map<String, Object> properties = new HashMap<>();
+    private ComponentConfiguration config;
+    private Set<String> rules;
 
-    @Before
-    public void setupTests() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.mockFirewallService = mock(FirewallConfigurationService.class);
-        this.mockFirewallServiceIPv6 = mock(FirewallConfigurationServiceIPv6.class);
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
-        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
-        this.properties.put("flooding.protection.enabled", true);
-        this.properties.put("flooding.protection.enabled.ipv6", true);
+    @Test
+    public void shouldGetConfiguration() throws KuraException {
+        givenFloodingProtectionConfigurator();
+
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFloodingProtectionConfigurationIsRetrieved();
+
+        thenConfigurationIsCorrect(true, true);
     }
 
     @Test
-    public void getConfigurationTest() throws KuraException, NoSuchFieldException {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        ComponentConfiguration config = this.floodingProtectionConfigurator.getConfiguration();
+    public void shouldGetFloodingProtectionFilterRules() {
+        givenFloodingProtectionConfigurator();
 
-        assertNotNull(config);
-        assertEquals("org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator", config.getPid());
-        assertTrue((boolean) config.getConfigurationProperties().get("flooding.protection.enabled"));
-        assertTrue((boolean) config.getConfigurationProperties().get("flooding.protection.enabled.ipv6"));
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallFilterRulesAreRetrieved();
+
+        thenFirewallRulesAre(new HashSet<String>());
     }
 
     @Test
-    public void getFloodingProtectionFilterRulesTest() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionFilterRules());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionFilterRules().isEmpty());
+    public void shouldGetFloodingProtectionFilterRulesIPv6() {
+        givenFloodingProtectionConfigurator();
+
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallFilterRulesIPv6AreRetrieved();
+
+        thenFirewallRulesAre(new HashSet<String>());
     }
 
     @Test
-    public void getFloodingProtectionFilterRulesIPv6Test() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionFilterRulesIPv6());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionFilterRulesIPv6().isEmpty());
+    public void shouldGetFloodingProtectionNatRules() {
+        givenFloodingProtectionConfigurator();
+
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallNatRulesAreRetrieved();
+
+        thenFirewallRulesAre(new HashSet<String>());
     }
 
     @Test
-    public void getFloodingProtectionNatRulesTest() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionNatRules());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionNatRules().isEmpty());
+    public void shouldGetFloodingProtectionNatRulesIPv6() {
+        givenFloodingProtectionConfigurator();
+
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallNatRulesIPv6AreRetrieved();
+
+        thenFirewallRulesAre(new HashSet<String>());
     }
 
     @Test
-    public void getFloodingProtectionNatRulesIPv6Test() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionNatRulesIPv6());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionNatRulesIPv6().isEmpty());
+    public void shouldGetFloodingProtectionMangleRules() {
+        givenFloodingProtectionConfigurator();
+
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallMangleRulesAreRetrieved();
+
+        thenFirewallRulesAre(new HashSet<String>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
 
     @Test
-    public void getFloodingProtectionMangleRulesTest() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionMangleRules());
-        assertFalse(this.floodingProtectionConfigurator.getFloodingProtectionMangleRules().isEmpty());
-        assertEquals(17, this.floodingProtectionConfigurator.getFloodingProtectionMangleRules().size());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionMangleRules()
-                .containsAll(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
-    }
+    public void shouldGetFloodingProtectionMangleRulesIPv6() {
+        givenFloodingProtectionConfigurator();
 
-    @Test
-    public void getFloodingProtectionMangleRulesIPv6Test() {
-        this.floodingProtectionConfigurator.updated(this.properties);
-        assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionMangleRulesIPv6());
-        assertFalse(this.floodingProtectionConfigurator.getFloodingProtectionMangleRulesIPv6().isEmpty());
-        assertEquals(26, this.floodingProtectionConfigurator.getFloodingProtectionMangleRulesIPv6().size());
-        assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionMangleRulesIPv6()
-                .containsAll(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6)));
-    }
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
+        whenFirewallMangleRulesIPv6AreRetrieved();
 
-    @Test(expected = NullPointerException.class)
-    public void shouldThrowNPEWithoutFirewallConfigurationService() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.properties.put("flooding.protection.enabled", false);
-        this.floodingProtectionConfigurator.activate(this.properties);
+        thenFirewallRulesAre(new HashSet<String>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6)));
     }
 
     @Test
     public void shouldDeleteAllRules() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+        givenFloodingProtectionConfigurator();
 
-        this.properties.put("flooding.protection.enabled", false);
-        this.floodingProtectionConfigurator.activate(this.properties);
+        whenFloodingProtectionConfiguratorIsActivated(false, true);
 
-        verify(this.mockFirewallService, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
-                new HashSet<>());
+        thenFirewallRulesAreApplied(new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
     @Test
     public void shouldApplyMangleRules() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+        givenFloodingProtectionConfigurator();
 
-        this.properties.put("flooding.protection.enabled", true);
-        this.floodingProtectionConfigurator.activate(this.properties);
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
 
-        verify(this.mockFirewallService, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
+        thenFirewallRulesAreApplied(new HashSet<>(), new HashSet<>(),
                 new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
 
     @Test
     public void shouldDeleteAllIPv6Rules() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
-        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
+        givenFloodingProtectionConfigurator();
 
-        this.properties.put("flooding.protection.enabled", false);
-        this.properties.put("flooding.protection.enabled.ipv6", false);
-        this.floodingProtectionConfigurator.activate(this.properties);
+        whenFloodingProtectionConfiguratorIsActivated(true, false);
 
-        verify(this.mockFirewallServiceIPv6, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
-                new HashSet<>());
+        thenFirewallRulesIPv6AreApplied(new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
     @Test
     public void shouldApplyMangleIpv6Rules() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
-        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
+        givenFloodingProtectionConfigurator();
 
-        this.properties.put("flooding.protection.enabled", false);
-        this.properties.put("flooding.protection.enabled.ipv6", true);
-        this.floodingProtectionConfigurator.activate(this.properties);
+        whenFloodingProtectionConfiguratorIsActivated(true, true);
 
-        verify(this.mockFirewallServiceIPv6, times(1)).addFloodingProtectionRules(new HashSet<>(), new HashSet<>(),
+        thenFirewallRulesIPv6AreApplied(new HashSet<>(), new HashSet<>(),
                 new HashSet<>(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES_IPV6)));
     }
 
     @Test
-    public void shouldEnableFragmentFilteringIPv4() throws IOException {
-        createFiles();
-        this.properties.put("flooding.protection.enabled", true);
-        this.properties.put("flooding.protection.enabled.ipv6", false);
-        FloodingProtectionOptions options = new FloodingProtectionOptions(this.properties) {
+    public void shouldEnableFragmentFiltering() throws IOException {
+        givenFragmentFilteringFiles();
+        givenFloodingProtectionConfiguratorWithFragmentFiltering();
 
-            @Override
-            public String getFragmentLowThresholdIPv4FileName() {
-                return FRAG_LOW_THR_IPV4_NAME;
-            }
+        whenFloodingProtectionConfiguratorIsActivated(true, false);
 
-            @Override
-            public String getFragmentHighThresholdIPv4FileName() {
-                return FRAG_HIGH_THR_IPV4_NAME;
-            }
-
-            @Override
-            public String getFragmentLowThresholdIPv6FileName() {
-                return FRAG_LOW_THR_IPV6_NAME;
-            }
-
-            @Override
-            public String getFragmentHighThresholdIPv6FileName() {
-                return FRAG_HIGH_THR_IPV6_NAME;
-            }
-        };
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator() {
-
-            @Override
-            public FloodingProtectionOptions buildFloodingProtectionOptions(Map<String, Object> properties) {
-                return options;
-            }
-        };
-        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
-        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
-        this.floodingProtectionConfigurator.activate(this.properties);
-        assertTrue(fileContains(FRAG_LOW_THR_IPV4_NAME, "0"));
-        assertTrue(fileContains(FRAG_HIGH_THR_IPV4_NAME, "0"));
+        thenFragmentFilteringFilesContain(FRAG_LOW_THR_IPV4_NAME, "0", FRAG_HIGH_THR_IPV4_NAME, "0");
     }
 
     @Test
-    public void shouldDisableFragmentFilteringIPv4() throws IOException {
-        createFiles();
-        this.properties.put("flooding.protection.enabled", false);
-        this.properties.put("flooding.protection.enabled.ipv6", false);
-        FloodingProtectionOptions options = new FloodingProtectionOptions(this.properties) {
+    public void shouldDisableFragmentFiltering() throws IOException {
+        givenFragmentFilteringFiles();
+        givenFloodingProtectionConfiguratorWithFragmentFiltering();
 
-            @Override
-            public String getFragmentLowThresholdIPv4FileName() {
-                return FRAG_LOW_THR_IPV4_NAME;
-            }
+        whenFloodingProtectionConfiguratorIsActivated(false, false);
 
-            @Override
-            public String getFragmentHighThresholdIPv4FileName() {
-                return FRAG_HIGH_THR_IPV4_NAME;
-            }
+        thenFragmentFilteringFilesContain(FRAG_LOW_THR_IPV4_NAME, Integer.toString(FRAG_LOW_THR_DEFAULT),
+                FRAG_HIGH_THR_IPV4_NAME, Integer.toString(FRAG_HIGH_THR_DEFAULT));
+    }
 
-            @Override
-            public String getFragmentLowThresholdIPv6FileName() {
-                return FRAG_LOW_THR_IPV6_NAME;
-            }
+    @Test
+    public void shouldEnableFragmentFilteringIPv6() throws IOException {
+        givenFragmentFilteringFiles();
+        givenFloodingProtectionConfiguratorWithFragmentFiltering();
 
-            @Override
-            public String getFragmentHighThresholdIPv6FileName() {
-                return FRAG_HIGH_THR_IPV6_NAME;
-            }
-        };
+        whenFloodingProtectionConfiguratorIsActivated(false, true);
 
+        thenFragmentFilteringFilesContain(FRAG_LOW_THR_IPV6_NAME, "0", FRAG_HIGH_THR_IPV6_NAME, "0");
+    }
+
+    @Test
+    public void shouldDisableFragmentFilteringIPv6() throws IOException {
+        givenFragmentFilteringFiles();
+        givenFloodingProtectionConfiguratorWithFragmentFiltering();
+
+        whenFloodingProtectionConfiguratorIsActivated(false, false);
+
+        thenFragmentFilteringFilesContain(FRAG_LOW_THR_IPV6_NAME, Integer.toString(FRAG_LOW_THR_DEFAULT),
+                FRAG_HIGH_THR_IPV6_NAME, Integer.toString(FRAG_HIGH_THR_DEFAULT));
+    }
+
+    private void givenFloodingProtectionConfigurator() {
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
+        this.mockFirewallService = mock(FirewallConfigurationService.class);
+        this.mockFirewallServiceIPv6 = mock(FirewallConfigurationServiceIPv6.class);
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
+    }
+
+    private void givenFloodingProtectionConfiguratorWithFragmentFiltering() {
         this.floodingProtectionConfigurator = new FloodingProtectionConfigurator() {
 
             @Override
             public FloodingProtectionOptions buildFloodingProtectionOptions(Map<String, Object> properties) {
-                return options;
+                return new FloodingProtectionOptions(properties) {
+
+                    @Override
+                    public String getFragmentLowThresholdIPv4FileName() {
+                        return FRAG_LOW_THR_IPV4_NAME;
+                    }
+
+                    @Override
+                    public String getFragmentHighThresholdIPv4FileName() {
+                        return FRAG_HIGH_THR_IPV4_NAME;
+                    }
+
+                    @Override
+                    public String getFragmentLowThresholdIPv6FileName() {
+                        return FRAG_LOW_THR_IPV6_NAME;
+                    }
+
+                    @Override
+                    public String getFragmentHighThresholdIPv6FileName() {
+                        return FRAG_HIGH_THR_IPV6_NAME;
+                    }
+                };
             }
         };
+        this.mockFirewallService = mock(FirewallConfigurationService.class);
+        this.mockFirewallServiceIPv6 = mock(FirewallConfigurationServiceIPv6.class);
         this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
         this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
-        this.floodingProtectionConfigurator.activate(this.properties);
-        assertTrue(fileContains(FRAG_LOW_THR_IPV4_NAME, Integer.toString(options.getFragmentLowThresholdDefault())));
-        assertTrue(fileContains(FRAG_HIGH_THR_IPV4_NAME, Integer.toString(options.getFragmentHighThresholdDefault())));
-        deleteFiles();
     }
 
-    private void createFiles() throws IOException {
+    private void givenFragmentFilteringFiles() throws IOException {
         createEmptyFilesIfNeeded(FRAG_LOW_THR_IPV4_NAME);
         createEmptyFilesIfNeeded(FRAG_HIGH_THR_IPV4_NAME);
         createEmptyFilesIfNeeded(FRAG_LOW_THR_IPV6_NAME);
         createEmptyFilesIfNeeded(FRAG_HIGH_THR_IPV6_NAME);
+    }
+
+    private void whenFloodingProtectionConfiguratorIsActivated(boolean enableIPv4, boolean enableIPv6) {
+        this.properties.put("flooding.protection.enabled", enableIPv4);
+        this.properties.put("flooding.protection.enabled.ipv6", enableIPv6);
+        this.floodingProtectionConfigurator.activate(this.properties);
+    }
+
+    private void whenFloodingProtectionConfigurationIsRetrieved() throws KuraException {
+        this.config = this.floodingProtectionConfigurator.getConfiguration();
+    }
+
+    private void whenFirewallFilterRulesAreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionFilterRules();
+    }
+
+    private void whenFirewallFilterRulesIPv6AreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionFilterRulesIPv6();
+    }
+
+    private void whenFirewallNatRulesAreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionNatRules();
+    }
+
+    private void whenFirewallNatRulesIPv6AreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionNatRulesIPv6();
+    }
+
+    private void whenFirewallMangleRulesAreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionMangleRules();
+    }
+
+    private void whenFirewallMangleRulesIPv6AreRetrieved() {
+        this.rules = this.floodingProtectionConfigurator.getFloodingProtectionMangleRulesIPv6();
+    }
+
+    private void thenConfigurationIsCorrect(boolean enableIPv4, boolean enableIPv6) {
+        assertNotNull(config);
+        assertEquals("org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator", config.getPid());
+        if (enableIPv4) {
+            assertTrue((boolean) config.getConfigurationProperties().get("flooding.protection.enabled"));
+        } else {
+            assertFalse((boolean) config.getConfigurationProperties().get("flooding.protection.enabled"));
+        }
+        if (enableIPv6) {
+            assertTrue((boolean) config.getConfigurationProperties().get("flooding.protection.enabled.ipv6"));
+        } else {
+            assertFalse((boolean) config.getConfigurationProperties().get("flooding.protection.enabled.ipv6"));
+        }
+    }
+
+    private void thenFirewallRulesAre(Set<String> expectedRules) {
+        assertNotNull(this.rules);
+        assertEquals(expectedRules, this.rules);
+    }
+
+    private void thenFirewallRulesAreApplied(Set<String> filterRules, Set<String> natRules, Set<String> mangleRules) {
+        verify(this.mockFirewallService, times(1)).addFloodingProtectionRules(filterRules, natRules, mangleRules);
+    }
+
+    private void thenFirewallRulesIPv6AreApplied(Set<String> filterRules, Set<String> natRules,
+            Set<String> mangleRules) {
+        verify(this.mockFirewallServiceIPv6, times(1)).addFloodingProtectionRules(filterRules, natRules, mangleRules);
+    }
+
+    private void thenFragmentFilteringFilesContain(String lowThresholdFilenane, String lowThreshold,
+            String highThresholdFilenane, String highThreshold) throws IOException {
+        assertTrue(fileContains(lowThresholdFilenane, lowThreshold));
+        assertTrue(fileContains(highThresholdFilenane, highThreshold));
     }
 
     private void createEmptyFilesIfNeeded(String path) throws IOException {
@@ -326,7 +380,8 @@ public class FloodingProtectionConfiguratorTest {
         return lines.size() == 1 && lines.get(0).equals(value);
     }
 
-    private void deleteFiles() throws IOException {
+    @After
+    public void deleteFiles() throws IOException {
         deleteFile(FRAG_LOW_THR_IPV4_NAME);
         deleteFile(FRAG_HIGH_THR_IPV4_NAME);
         deleteFile(FRAG_LOW_THR_IPV6_NAME);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,161 +13,284 @@
 package org.eclipse.kura.core.message;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
+import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
+import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.message.KuraPosition;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+@RunWith(Enclosed.class)
 public class KuraBirthPayloadTest {
 
-    @Test
-    public void testBuild() {
-        // tests build and toString
+    public static class BirthPayloadTest extends StepsCollection {
 
-        String encoding = "UTF-8";
-        String pEncoding = "pUTF-8";
-        String framework = "Kura";
-        String frameworkVersion = "3.1.0";
-        String identifiers = "kura-3.1.0";
-        String processors = "4";
-        String biosVersion = "1.1";
-        String cpuVersion = "cpuver";
-        String connectionInterface = "eth0";
-        String connectionIp = "10.10.10.15";
-        String displayName = "displayname";
-        String firmwareVersion = "0.99";
-        String jvmName = "Java HotSpot(TM) Client VM";
-        String jvmProfile = "C2";
-        String jvmVersion = "25.65-b01";
-        String modelId = "Raspberry-Pi";
-        String modelName = "Raspberry-Pi";
-        String modemIccid = "iccid";
-        String imei = "imei";
-        String imsi = "imsi";
-        String rssi = "rssi";
-        String modemFwVer = "modemFwVer";
-        String os = "Linux";
-        String arch = "arm";
-        String osgiFramework = "Eclipse";
-        String osgiFrameworkVersion = "1.8.0";
-        String osVersion = "4.1.8";
-        String partNumber = "pn";
-        double lat = 46.0;
-        double lon = 14.0;
-        String sn = "SN:123456";
-        String memory = "506880 kB";
-        String uptime = "0 days 1:2:34 hms";
+        @Test
+        public void shouldReturnBirthPayloadWithDefaults() {
+            givenBuilderWithDefaultRequiredValues();
 
-        KuraBirthPayloadBuilder builder = new KuraBirthPayloadBuilder();
-        builder.withAcceptEncoding(encoding);
-        builder.withApplicationFramework(framework);
-        builder.withApplicationFrameworkVersion(frameworkVersion);
-        builder.withApplicationIdentifiers(identifiers);
-        builder.withAvailableProcessors(processors);
-        builder.withBiosVersion(biosVersion);
-        builder.withCpuVersion(cpuVersion);
-        builder.withConnectionInterface(connectionInterface);
-        builder.withConnectionIp(connectionIp);
-        builder.withDisplayName(displayName);
-        builder.withFirmwareVersion(firmwareVersion);
-        builder.withJvmName(jvmName);
-        builder.withJvmProfile(jvmProfile);
-        builder.withJvmVersion(jvmVersion);
-        builder.withModelId(modelId);
-        builder.withModelName(modelName);
-        builder.withModemIccid(modemIccid);
-        builder.withModemImei(imei);
-        builder.withModemImsi(imsi);
-        builder.withModemRssi(rssi);
-        builder.withModemFirmwareVersion(modemFwVer);
-        builder.withOs(os);
-        builder.withOsArch(arch);
-        builder.withOsgiFramework(osgiFramework);
-        builder.withOsgiFrameworkVersion(osgiFrameworkVersion);
-        builder.withOsVersion(osVersion);
-        builder.withPartNumber(partNumber);
-        builder.withPayloadEncoding(pEncoding);
-        KuraPosition position = new KuraPosition();
-        position.setLatitude(lat);
-        position.setLongitude(lon);
-        builder.withPosition(position);
-        builder.withSerialNumber(sn);
-        builder.withTotalMemory(memory);
-        builder.withUptime(uptime);
+            whenKuraPayloadBuilderBuild();
 
-        KuraBirthPayload payload = builder.build();
+            thenBirthPayloadContainsAllDefaultRequiredValues();
+            thenBirthPayloadContainsApplicationFramework(KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK);
+            thenBirthPayloadContainsTamperStatus(TamperStatus.UNSUPPORTED);
+            thenBirthPayloadNotContainsKuraPosition();
+            thenBirthPayloadNotContainsJdkVendorVersion();
+        }
 
-        double eps = 0.000001;
-        assertEquals(encoding, payload.getAcceptEncoding());
-        assertEquals(framework, payload.getApplicationFramework());
-        assertEquals(frameworkVersion, payload.getApplicationFrameworkVersion());
-        assertEquals(identifiers, payload.getApplicationIdentifiers());
-        assertEquals(processors, payload.getAvailableProcessors());
-        assertEquals(biosVersion, payload.getBiosVersion());
-        assertEquals(cpuVersion, payload.getCpuVersion());
-        assertEquals(connectionInterface, payload.getConnectionInterface());
-        assertEquals(connectionIp, payload.getConnectionIp());
-        assertEquals(displayName, payload.getDisplayName());
-        assertEquals(firmwareVersion, payload.getFirmwareVersion());
-        assertEquals(jvmName, payload.getJvmName());
-        assertEquals(jvmProfile, payload.getJvmProfile());
-        assertEquals(jvmVersion, payload.getJvmVersion());
-        assertEquals(modelId, payload.getModelId());
-        assertEquals(modelName, payload.getModelName());
-        assertEquals(modemIccid, payload.getModemIccid());
-        assertEquals(imei, payload.getModemImei());
-        assertEquals(imsi, payload.getModemImsi());
-        assertEquals(rssi, payload.getModemRssi());
-        assertEquals(modemFwVer, payload.getModemFirmwareVersion());
-        assertEquals(os, payload.getOs());
-        assertEquals(arch, payload.getOsArch());
-        assertEquals(osgiFramework, payload.getOsgiFramework());
-        assertEquals(osgiFrameworkVersion, payload.getOsgiFrameworkVersion());
-        assertEquals(osVersion, payload.getOsVersion());
-        assertEquals(partNumber, payload.getPartNumber());
-        assertEquals(pEncoding, payload.getPayloadEncoding());
-        assertEquals(lat, payload.getPosition().getLatitude(), eps);
-        assertEquals(lon, payload.getPosition().getLongitude(), eps);
-        assertEquals(sn, payload.getSerialNumber());
-        assertEquals(memory, payload.getTotalMemory());
-        assertEquals(uptime, payload.getUptime());
+        @Test
+        public void shouldReturnBirthPayloadWithCorrectPosition() {
+            givenBuilderWithDefaultRequiredValues();
+            givenBuilderWithPosition(new Double(200), new Double(300));
 
-        String str = payload.toString();
+            whenKuraPayloadBuilderBuild();
 
-        assertTrue(str.contains("=" + encoding));
-        assertTrue(str.contains("=" + pEncoding));
-        assertTrue(str.contains("=" + framework));
-        assertTrue(str.contains("=" + frameworkVersion));
-        assertTrue(str.contains("=" + identifiers));
-        assertTrue(str.contains("=" + processors));
-        assertTrue(str.contains("=" + biosVersion));
-        assertTrue(str.contains("=" + cpuVersion));
-        assertTrue(str.contains("=" + connectionInterface));
-        assertTrue(str.contains("=" + connectionIp));
-        assertTrue(str.contains("=" + displayName));
-        assertTrue(str.contains("=" + firmwareVersion));
-        assertTrue(str.contains("=" + jvmName));
-        assertTrue(str.contains("=" + jvmProfile));
-        assertTrue(str.contains("=" + jvmVersion));
-        assertTrue(str.contains("=" + modelId));
-        assertTrue(str.contains("=" + modelName));
-        assertFalse(str.contains(modemIccid));
-        assertFalse(str.contains(imei));
-        assertFalse(str.contains(imsi));
-        assertFalse(str.contains(rssi));
-        assertFalse(str.contains(modemFwVer));
-        assertTrue(str.contains("=" + os));
-        assertTrue(str.contains("=" + arch));
-        assertTrue(str.contains("=" + osgiFramework));
-        assertTrue(str.contains("=" + osgiFrameworkVersion));
-        assertTrue(str.contains("=" + osVersion));
-        assertTrue(str.contains("=" + partNumber));
-        assertTrue(str.contains("=" + sn));
-        assertTrue(str.contains("=" + memory));
-        assertTrue(str.contains("=" + uptime));
+            thenBirthPayloadContainsPosition(new Double(200), new Double(300));
+        }
+
+        @Test
+        public void shouldReturnBirthPayloadWithCorrectApplicationFramework() {
+            givenBuilderWithDefaultRequiredValues();
+            givenBuilderWithApplicationFramework("test123");
+
+            whenKuraPayloadBuilderBuild();
+
+            thenBirthPayloadContainsApplicationFramework("test123");
+        }
+
+        @Test
+        public void shouldReturnBirthPayloadWithJdkVendorVersion() {
+            givenBuilderWithDefaultRequiredValues();
+            givenBuilderWithJdkVendorVersion("JDK 123");
+
+            whenKuraPayloadBuilderBuild();
+
+            thenBirthPayloadContainsJdkVendorVersion("JDK 123");
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    public static class TamperStatusParametricTest extends StepsCollection {
+
+        @Parameters
+        public static Collection<TamperStatus> TamperStatusParams() {
+            List<TamperStatus> params = new ArrayList<>();
+            params.add(TamperStatus.UNSUPPORTED);
+            params.add(TamperStatus.TAMPERED);
+            params.add(TamperStatus.UNSUPPORTED);
+            return params;
+        }
+
+        private TamperStatus testedTamperStatus;
+
+        public TamperStatusParametricTest(TamperStatus status) {
+            this.testedTamperStatus = status;
+        }
+
+        @Test
+        public void shouldReturnBirthPayloadWithCorrectTamperStatus() {
+            givenBuilderWithDefaultRequiredValues();
+            givenBuilderWithTamperStatus(this.testedTamperStatus);
+
+            whenKuraPayloadBuilderBuild();
+
+            thenBirthPayloadContainsTamperStatus(this.testedTamperStatus);
+        }
+
+        @Test
+        public void shouldReturnCorrectToStringRepresentation() {
+            givenBuilderWithDefaultRequiredValues();
+            givenBuilderWithTamperStatus(this.testedTamperStatus);
+            givenBuilderWithJdkVendorVersion("JDK 123");
+            givenBuilderWithApplicationFramework("test123");
+            givenBuilderWithPosition(new Double(200), new Double(300));
+
+            whenToString();
+
+            thenToStringRepresentationIsCorrect();
+        }
+
+    }
+
+    static class StepsCollection {
+
+        private static final String DEFAULT_TEST_VALUE = "value";
+
+        private KuraBirthPayloadBuilder builder;
+        private KuraBirthPayload birthPayload;
+        private String toStringRepresentation;
+
+        /*
+         * Given
+         */
+
+        void givenBuilderWithDefaultRequiredValues() {
+            this.builder = new KuraBirthPayloadBuilder();
+            this.builder.withUptime(DEFAULT_TEST_VALUE);
+            this.builder.withDisplayName(DEFAULT_TEST_VALUE);
+            this.builder.withAvailableProcessors(DEFAULT_TEST_VALUE);
+            this.builder.withTotalMemory(DEFAULT_TEST_VALUE);
+            this.builder.withOsArch(DEFAULT_TEST_VALUE);
+            this.builder.withOsgiFramework(DEFAULT_TEST_VALUE);
+            this.builder.withOsgiFrameworkVersion(DEFAULT_TEST_VALUE);
+            this.builder.withModelName(DEFAULT_TEST_VALUE);
+            this.builder.withModelId(DEFAULT_TEST_VALUE);
+            this.builder.withPartNumber(DEFAULT_TEST_VALUE);
+            this.builder.withSerialNumber(DEFAULT_TEST_VALUE);
+            this.builder.withFirmwareVersion(DEFAULT_TEST_VALUE);
+            this.builder.withBiosVersion(DEFAULT_TEST_VALUE);
+            this.builder.withCpuVersion(DEFAULT_TEST_VALUE);
+            this.builder.withOs(DEFAULT_TEST_VALUE);
+            this.builder.withOsVersion(DEFAULT_TEST_VALUE);
+            this.builder.withJvmName(DEFAULT_TEST_VALUE);
+            this.builder.withJvmVersion(DEFAULT_TEST_VALUE);
+            this.builder.withJvmProfile(DEFAULT_TEST_VALUE);
+            this.builder.withKuraVersion(DEFAULT_TEST_VALUE);
+            // this.builder.withApplicationFramework(DEFAULT_TEST_VALUE);
+            this.builder.withApplicationFrameworkVersion(DEFAULT_TEST_VALUE);
+            this.builder.withConnectionInterface(DEFAULT_TEST_VALUE);
+            this.builder.withConnectionIp(DEFAULT_TEST_VALUE);
+            this.builder.withAcceptEncoding(DEFAULT_TEST_VALUE);
+            this.builder.withApplicationIdentifiers(DEFAULT_TEST_VALUE);
+            this.builder.withModemImei(DEFAULT_TEST_VALUE);
+            this.builder.withModemIccid(DEFAULT_TEST_VALUE);
+            this.builder.withModemImsi(DEFAULT_TEST_VALUE);
+            this.builder.withModemRssi(DEFAULT_TEST_VALUE);
+            this.builder.withModemFirmwareVersion(DEFAULT_TEST_VALUE);
+            // this.builder.withPosition(position);
+            this.builder.withPayloadEncoding(DEFAULT_TEST_VALUE);
+            // this.builder.withTamperStatus(status);
+            this.builder.withJvmVendor(DEFAULT_TEST_VALUE);
+            this.builder.withJdkVendorVersion(null);
+        }
+
+        void givenBuilderWithApplicationFramework(String applicationFramework) {
+            this.builder.withApplicationFramework(applicationFramework);
+        }
+
+        void givenBuilderWithTamperStatus(TamperStatus status) {
+            this.builder.withTamperStatus(status);
+        }
+
+        void givenBuilderWithPosition(double latitude, double longitude) {
+            KuraPosition position = new KuraPosition();
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
+            this.builder.withPosition(position);
+        }
+
+        void givenBuilderWithJdkVendorVersion(String jdkVendorVersion) {
+            this.builder.withJdkVendorVersion(jdkVendorVersion);
+        }
+
+        /*
+         * When
+         */
+
+        void whenKuraPayloadBuilderBuild() {
+            this.birthPayload = this.builder.build();
+        }
+
+        void whenToString() {
+            whenKuraPayloadBuilderBuild();
+            this.toStringRepresentation = this.birthPayload.toString();
+        }
+
+        /*
+         * Then
+         */
+
+        void thenBirthPayloadContainsAllDefaultRequiredValues() {
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getUptime());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getDisplayName());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getAvailableProcessors());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getTotalMemory());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getOsArch());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getOsgiFramework());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getOsgiFrameworkVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModelName());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModelId());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getPartNumber());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getSerialNumber());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getFirmwareVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getBiosVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getCpuVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getOs());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getOsVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmName());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmProfile());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getKuraVersion());
+            // this.birthPayload.getApplicationFramework();
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getApplicationFrameworkVersion());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getConnectionInterface());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getConnectionIp());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getAcceptEncoding());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getApplicationIdentifiers());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModemImei());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModemIccid());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModemImsi());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModemRssi());
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getModemFirmwareVersion());
+            // this.birthPayload.getPosition();
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getPayloadEncoding());
+            // this.birthPayload.getTamperStatus();
+            assertEquals(DEFAULT_TEST_VALUE, this.birthPayload.getJvmVendor());
+            // this.birthPayload.getJdkVendorVersion();
+        }
+
+        void thenBirthPayloadContainsApplicationFramework(String expectedApplicationFramework) {
+            assertEquals(expectedApplicationFramework, this.birthPayload.getApplicationFramework());
+        }
+
+        void thenBirthPayloadContainsTamperStatus(TamperStatus expectedTamperStatus) {
+            assertEquals(expectedTamperStatus, this.birthPayload.getTamperStatus());
+        }
+
+        void thenBirthPayloadNotContainsKuraPosition() {
+            assertNull(this.birthPayload.getPosition());
+        }
+
+        void thenBirthPayloadNotContainsJdkVendorVersion() {
+            assertNull(this.birthPayload.getJdkVendorVersion());
+        }
+
+        void thenBirthPayloadContainsPosition(Double expectedLatitude, Double expectedLongitude) {
+            KuraPosition position = this.birthPayload.getPosition();
+            assertNotNull(position);
+            assertEquals(expectedLatitude, position.getLatitude());
+            assertEquals(expectedLongitude, position.getLongitude());
+        }
+
+        void thenBirthPayloadContainsJdkVendorVersion(String expectedJdkVendorVersion) {
+            assertEquals(expectedJdkVendorVersion, this.birthPayload.getJdkVendorVersion());
+        }
+
+        void thenToStringRepresentationIsCorrect() {
+            assertTrue(this.toStringRepresentation.startsWith("KuraBirthPayload ["));
+            assertTrue(this.toStringRepresentation.endsWith("]"));
+
+            assertEquals("Some properties are missing in the toString method.", 30,
+                    this.toStringRepresentation.split(",").length);
+
+            for (String keyValueField : this.toStringRepresentation.split(",")) {
+                assertTrue(keyValueField.contains("="));
+            }
+        }
+
     }
 
 }

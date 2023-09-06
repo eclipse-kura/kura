@@ -185,9 +185,7 @@ public class NMStatusConverter {
         setVlanStatus(builder, vlanProperties, parentProperties);
         setIP4Status(builder, ip4configProperties);
         setIP6Status(builder, ip6configProperties);
-        NetworkInterfaceStatus obj = builder.build();
-        return obj;
-
+        return builder.build();
     }
     
     private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Properties> vlanProperties, Properties parentProperties) {

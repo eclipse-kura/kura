@@ -84,34 +84,30 @@ public class NetworkConfigurationServiceCommon {
                     getLoopbackDefinition(tocd, ifaceName);
                     break;
                 case ETHERNET:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getDhcpServerDefinition(tocd, ifaceName);
                     break;
                 case WIFI:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getDhcpServerDefinition(tocd, ifaceName);
                     getWifiDefinition(tocd, ifaceName);
                     break;
                 case MODEM:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getModemDefinition(tocd, ifaceName);
                     break;
                 case VLAN:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getDhcpServerDefinition(tocd, ifaceName);

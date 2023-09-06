@@ -85,6 +85,7 @@ import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.GetAppliedConnectionTuple;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Generic;
+import org.freedesktop.networkmanager.device.Vlan;
 import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -286,12 +287,14 @@ public class NMDbusConnectorTest {
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
         givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI,
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
+        givenMockedDevice("eth0.10", "eth0.10", NMDeviceType.NM_DEVICE_TYPE_VLAN,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, true, false, false);
         givenMockedDeviceList();
 
         whenGetInterfaceIdsIsCalled();
 
         thenNoExceptionIsThrown();
-        thenGetInterfacesReturn(Arrays.asList("wlan0", "eth0"));
+        thenGetInterfacesReturn(Arrays.asList("wlan0", "eth0.10", "eth0"));
     }
 
     @Test
@@ -457,6 +460,62 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("eth0");
+    }
+    
+    @Test
+    public void applyShouldWorkWithVlanCreation() throws DBusException, IOException {
+    	givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
+        givenMockedDevice("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
+        givenMockedDeviceList();
+        givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection();
+        
+        givenNetworkConfigMapWith("net.interfaces", "eth0,myVlan");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.dnsServers", "1.1.1.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.gateway", "192.168.0.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.parent", "eth0");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.id", 55);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.flags", 2);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.egress", "2:3");
+        
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        
+        thenAddAndActivateConnectionIsCalledFor("myVlan");
+    }
+    
+    @Test
+    public void applyShouldWorkWithExistingVlan() throws DBusException, IOException{
+    	givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
+        givenMockedDevice("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_VLAN,
+                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
+        givenMockedDeviceList();
+        
+        givenNetworkConfigMapWith("net.interfaces", "eth0,myVlan");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.dnsServers", "1.1.1.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.gateway", "192.168.0.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.parent", "eth0");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.id", 55);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.flags", 2);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.egress", "2:3");
+        
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("myVlan");
     }
 
     @Test
@@ -1028,6 +1087,14 @@ public class NMDbusConnectorTest {
             doReturn(wiredDevice).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
                     "/mock/device/" + interfaceId, Wired.class);
         }
+        
+        if (type == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
+        	Vlan vlanDevice = mock(Vlan.class);
+        	when(vlanDevice.getObjectPath()).thenReturn("/mock/device/" + interfaceId);
+        	
+        	doReturn(vlanDevice).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
+                    "/mock/device/" + interfaceId, Vlan.class);
+        }
 
         when(mockedProperties1.Get("org.freedesktop.NetworkManager.Device", "DeviceType"))
                 .thenReturn(NMDeviceType.toUInt32(type));
@@ -1477,6 +1544,10 @@ public class NMDbusConnectorTest {
     private void thenAddAndActivateConnectionIsCalledFor(String netInterface) throws DBusException {
         verify(this.mockedNetworkManagerSettings).AddConnection(any());
         verify(this.mockedNetworkManager).ActivateConnection(any(), any(), any());
+    }
+    
+    private void thenAddConnectionIsCalledFor(String netInterface) throws DBusException {
+        verify(this.mockedNetworkManagerSettings).AddConnection(any());
     }
 
     private void thenNetworkSettingsDidNotChangeForDevice(String netInterface) throws DBusException {

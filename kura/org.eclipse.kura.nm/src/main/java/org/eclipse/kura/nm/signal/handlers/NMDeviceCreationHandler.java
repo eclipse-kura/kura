@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class NMDeviceCreationHandler implements DBusSigHandler<NetworkManager.DeviceAdded> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NMDeviceAddedHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NMDeviceCreationHandler.class);
     
     private final NMDbusConnector nm;
     private final String deviceToCreate;

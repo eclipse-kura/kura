@@ -545,7 +545,7 @@ public class NMDbusConnector {
         Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                 createdConnectionPath.getPath(), Connection.class);
         try {
-            Optional<Device> returnedDevice = dcLock.waitForDeviceCreation();
+            Optional<Device> returnedDevice = dcLock.waitForDeviceCreation(1L);
             if (!returnedDevice.isPresent()) {
                 logger.warn("Could not obtain device for {}", deviceId);
                 return;
@@ -558,7 +558,7 @@ public class NMDbusConnector {
                     NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
             this.networkManager.activateConnection(createdConnection, createdDevice);
             dsLock.waitForSignal();
-        } catch (DBusException | TimeoutException e) {
+        } catch (DBusExecutionException | DBusException | TimeoutException e) {
             logger.warn("Couldn't complete creation of device {}, caused by:", deviceId, e);
         }
     }

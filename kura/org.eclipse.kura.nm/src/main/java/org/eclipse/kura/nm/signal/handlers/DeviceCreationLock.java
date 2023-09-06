@@ -36,16 +36,20 @@ public class DeviceCreationLock {
     private final DBusConnection dbusConnection;
     
     public DeviceCreationLock(NMDbusConnector nm, String deviceId) throws DBusException {
-        this.deviceQueue = new ArrayBlockingQueue<Device>(1);
+        this.deviceQueue = new ArrayBlockingQueue<>(1);
         this.dbusConnection = nm.getDbusConnection();
         this.handler = new NMDeviceCreationHandler(nm, deviceId, this.deviceQueue);
 
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, this.handler);
     }
-
+    
     public Optional<Device> waitForDeviceCreation() throws DBusException, TimeoutException {
+        return waitForDeviceCreation(5L);
+    }
+
+    public Optional<Device> waitForDeviceCreation(long timeoutSeconds) throws DBusException, TimeoutException {
         try {
-            return Optional.ofNullable(deviceQueue.poll(5L, TimeUnit.SECONDS));
+            return Optional.ofNullable(deviceQueue.poll(timeoutSeconds, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();

@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.security.dto;
+package org.eclipse.kura.internal.rest.security.provider.dto;
 
 public class DebugEnabledDTO {
 

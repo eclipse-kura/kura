@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.internal.rest.security;
+package org.eclipse.kura.internal.rest.security.provider;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.internal.rest.security.dto.DebugEnabledDTO;
+import org.eclipse.kura.internal.rest.security.provider.dto.DebugEnabledDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.security.SecurityService;

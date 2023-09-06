@@ -65,13 +65,13 @@ public class FloodingProtectionConfigurator
         logger.info("Deactivating FloodingConfigurator... Done.");
     }
 
-    public void setOptions(FloodingProtectionOptions options) {
-        this.floodingProtectionOptions = options;
+    public FloodingProtectionOptions buildFloodingProtectionOptions(Map<String, Object> properties) {
+        return new FloodingProtectionOptions(properties);
     }
 
     private void doUpdate(Map<String, Object> properties) {
         logger.info("Updating firewall configuration...");
-        this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
+        this.floodingProtectionOptions = buildFloodingProtectionOptions(properties);
         updateFirewallService();
         updateFirewallServiceIPv6();
         updateFragmentFiltering();
@@ -125,10 +125,14 @@ public class FloodingProtectionConfigurator
 
     private void configureThreshold(String fileName, int value) {
         Path sourceFile = Paths.get(fileName);
-        try {
-            Files.write(sourceFile, Integer.toString(value).getBytes());
-        } catch (IOException e) {
-            logger.error("Cannot write to " + sourceFile, e);
+        if (Files.exists(sourceFile)) {
+            try {
+                Files.write(sourceFile, Integer.toString(value).getBytes());
+            } catch (IOException e) {
+                logger.error("Cannot write to " + sourceFile, e);
+            }
+        } else {
+            logger.warn("File {} does not exists.", fileName);
         }
     }
 

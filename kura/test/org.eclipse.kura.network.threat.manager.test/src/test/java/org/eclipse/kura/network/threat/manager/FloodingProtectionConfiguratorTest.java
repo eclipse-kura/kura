@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.network.threat.manager;
 
-import static org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions.FRAG_LOW_THR_IPV6_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -21,9 +20,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
@@ -81,6 +84,11 @@ public class FloodingProtectionConfiguratorTest {
             "-A prerouting-kura -m ipv6header --header esp --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header none --soft -j DROP",
             "-A prerouting-kura -m rt --rt-type 0 -j DROP", "-A output-kura -m rt --rt-type 0 -j DROP" };
+
+    private static final String FRAG_LOW_THR_IPV4_NAME = "/tmp/ipfrag_low_thresh";
+    private static final String FRAG_HIGH_THR_IPV4_NAME = "/tmp/ipfrag_high_thresh";
+    private static final String FRAG_LOW_THR_IPV6_NAME = "/tmp/nf_conntrack_frag6_low_thresh";
+    private static final String FRAG_HIGH_THR_IPV6_NAME = "/tmp/nf_conntrack_frag6_high_thresh";
 
     private FloodingProtectionConfigurator floodingProtectionConfigurator;
     private FirewallConfigurationService mockFirewallService;
@@ -217,17 +225,117 @@ public class FloodingProtectionConfiguratorTest {
     }
 
     @Test
-    public void shouldFilterFragmentIPv4() {
-        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.properties.put("flooding.protection.enabled", false);
+    public void shouldEnableFragmentFilteringIPv4() throws IOException {
+        createFiles();
+        this.properties.put("flooding.protection.enabled", true);
         this.properties.put("flooding.protection.enabled.ipv6", false);
-        this.floodingProtectionConfigurator.activate(this.properties);
-        this.floodingProtectionConfigurator.setOptions(new FloodingProtectionOptions(this.properties) {
+        FloodingProtectionOptions options = new FloodingProtectionOptions(this.properties) {
+
+            @Override
+            public String getFragmentLowThresholdIPv4FileName() {
+                return FRAG_LOW_THR_IPV4_NAME;
+            }
+
+            @Override
+            public String getFragmentHighThresholdIPv4FileName() {
+                return FRAG_HIGH_THR_IPV4_NAME;
+            }
 
             @Override
             public String getFragmentLowThresholdIPv6FileName() {
-                return "pippo";
+                return FRAG_LOW_THR_IPV6_NAME;
             }
-        });
+
+            @Override
+            public String getFragmentHighThresholdIPv6FileName() {
+                return FRAG_HIGH_THR_IPV6_NAME;
+            }
+        };
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator() {
+
+            @Override
+            public FloodingProtectionOptions buildFloodingProtectionOptions(Map<String, Object> properties) {
+                return options;
+            }
+        };
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
+        this.floodingProtectionConfigurator.activate(this.properties);
+        assertTrue(fileContains(FRAG_LOW_THR_IPV4_NAME, "0"));
+        assertTrue(fileContains(FRAG_HIGH_THR_IPV4_NAME, "0"));
+    }
+
+    @Test
+    public void shouldDisableFragmentFilteringIPv4() throws IOException {
+        createFiles();
+        this.properties.put("flooding.protection.enabled", false);
+        this.properties.put("flooding.protection.enabled.ipv6", false);
+        FloodingProtectionOptions options = new FloodingProtectionOptions(this.properties) {
+
+            @Override
+            public String getFragmentLowThresholdIPv4FileName() {
+                return FRAG_LOW_THR_IPV4_NAME;
+            }
+
+            @Override
+            public String getFragmentHighThresholdIPv4FileName() {
+                return FRAG_HIGH_THR_IPV4_NAME;
+            }
+
+            @Override
+            public String getFragmentLowThresholdIPv6FileName() {
+                return FRAG_LOW_THR_IPV6_NAME;
+            }
+
+            @Override
+            public String getFragmentHighThresholdIPv6FileName() {
+                return FRAG_HIGH_THR_IPV6_NAME;
+            }
+        };
+
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator() {
+
+            @Override
+            public FloodingProtectionOptions buildFloodingProtectionOptions(Map<String, Object> properties) {
+                return options;
+            }
+        };
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
+        this.floodingProtectionConfigurator.setFirewallConfigurationServiceIPv6(this.mockFirewallServiceIPv6);
+        this.floodingProtectionConfigurator.activate(this.properties);
+        assertTrue(fileContains(FRAG_LOW_THR_IPV4_NAME, Integer.toString(options.getFragmentLowThresholdDefault())));
+        assertTrue(fileContains(FRAG_HIGH_THR_IPV4_NAME, Integer.toString(options.getFragmentHighThresholdDefault())));
+        deleteFiles();
+    }
+
+    private void createFiles() throws IOException {
+        createEmptyFilesIfNeeded(FRAG_LOW_THR_IPV4_NAME);
+        createEmptyFilesIfNeeded(FRAG_HIGH_THR_IPV4_NAME);
+        createEmptyFilesIfNeeded(FRAG_LOW_THR_IPV6_NAME);
+        createEmptyFilesIfNeeded(FRAG_HIGH_THR_IPV6_NAME);
+    }
+
+    private void createEmptyFilesIfNeeded(String path) throws IOException {
+        if (!Files.exists(Paths.get(path))) {
+            Files.createFile(Paths.get(path));
+        }
+    }
+
+    private boolean fileContains(String path, String value) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(path));
+        return lines.size() == 1 && lines.get(0).equals(value);
+    }
+
+    private void deleteFiles() throws IOException {
+        deleteFile(FRAG_LOW_THR_IPV4_NAME);
+        deleteFile(FRAG_HIGH_THR_IPV4_NAME);
+        deleteFile(FRAG_LOW_THR_IPV6_NAME);
+        deleteFile(FRAG_HIGH_THR_IPV6_NAME);
+    }
+
+    private void deleteFile(String path) throws IOException {
+        if (Files.exists(Paths.get(path))) {
+            Files.delete(Paths.get(path));
+        }
     }
 }

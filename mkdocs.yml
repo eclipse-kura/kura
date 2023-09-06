@@ -109,7 +109,6 @@ nav:
         - GraalVM&trade; Filter Component: kura-wires/script-components/graalvm-filter-component.md
         - GraalVM&trade; Conditional Component: kura-wires/script-components/graalvm-conditional-component.md
       - Usage Examples:
-        - Modbus Application: kura-wires/usage-examples/modbus-application.md
         - OPC-UA Application: kura-wires/usage-examples/opcua-application.md
         - TI SensorTag Application: kura-wires/usage-examples/ti-sensortag-application.md
         - GPIO Driver Application: kura-wires/usage-examples/gpio-driver-application.md

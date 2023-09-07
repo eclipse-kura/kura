@@ -89,8 +89,8 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnExpectedDebugStatus() {
-        givenSecurityService();
         givenDebugEnabledStatus(true);
+        givenSecurityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
 

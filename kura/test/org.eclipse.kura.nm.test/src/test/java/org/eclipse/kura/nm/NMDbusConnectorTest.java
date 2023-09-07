@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.atLeastOnce;
@@ -41,7 +42,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
@@ -68,6 +71,7 @@ import org.eclipse.kura.net.status.modem.SimType;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
 import org.freedesktop.ModemManager1;
 import org.freedesktop.NetworkManager;
@@ -463,16 +467,20 @@ public class NMDbusConnectorTest {
     }
     
     @Test
-    public void applyShouldWorkWithVlanCreation() throws DBusException, IOException {
+    public void applyShouldWorkWithVlanCreation() throws DBusException, IOException, TimeoutException {
     	givenBasicMockedDbusConnector();
         givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
-        givenMockedDevice("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
-                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
+        /*givenMockedDevice("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);*/
         givenMockedDeviceList();
+        
+        givenMockedDeviceOnDeviceCreationLock("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_VLAN,
+                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
         givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection();
         
         givenNetworkConfigMapWith("net.interfaces", "eth0,myVlan");
+        givenNetworkConfigMapWith("net.interface.myVlan.type", "VLAN");
         givenNetworkConfigMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
@@ -488,7 +496,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         
-        thenAddAndActivateConnectionIsCalledFor("myVlan");
+        thenAddConnectionIsCalledFor("myVlan");
     }
     
     @Test
@@ -497,10 +505,12 @@ public class NMDbusConnectorTest {
         givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
                 NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
         givenMockedDevice("myVlan", "myVlan", NMDeviceType.NM_DEVICE_TYPE_VLAN,
-                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
+                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);//
         givenMockedDeviceList();
         
+        
         givenNetworkConfigMapWith("net.interfaces", "eth0,myVlan");
+        givenNetworkConfigMapWith("net.interface.myVlan.type", "VLAN");
         givenNetworkConfigMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
         givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
         givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
@@ -1130,6 +1140,7 @@ public class NMDbusConnectorTest {
         }
 
     }
+    
 
     public void givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection() throws DBusException {
         DBusPath newConnectionPath = mock(DBusPath.class);
@@ -1139,6 +1150,21 @@ public class NMDbusConnectorTest {
 
         doReturn(mock(Connection.class)).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
                 "/mock/Connection/path/newly/created", Connection.class);
+    }
+    
+    public void givenMockedDeviceOnDeviceCreationLock(String deviceId, String interfaceId, NMDeviceType type, NMDeviceState state,
+            Boolean hasAssociatedConnection, boolean hasBearers, boolean hasSims) throws DBusException, TimeoutException {
+        DeviceCreationLock dcLock = mock(DeviceCreationLock.class);
+        when(dcLock.waitForDeviceCreation(anyLong())).then(invocation -> {
+        	givenMockedDevice(deviceId, interfaceId, type, state, hasAssociatedConnection, hasBearers, hasSims);
+        	givenMockedDeviceList();
+        	return Optional.ofNullable(mockDevices.get(deviceId));
+        });
+        when(dcLock.waitForDeviceCreation()).then(invocation -> {
+        	givenMockedDevice(deviceId, interfaceId, type, state, hasAssociatedConnection, hasBearers, hasSims);
+        	givenMockedDeviceList();
+        	return Optional.ofNullable(mockDevices.get(deviceId));
+        });
     }
 
     public void givenMockedConnection(String connectionId, String connectionUuid, String interfaceName,
@@ -1658,6 +1684,10 @@ public class NMDbusConnectorTest {
         } else {
             assertTrue(modemStatus.getBearers().isEmpty());
         }
+    }
+    
+    private void thenDeviceExists(String interfaceName) {
+        assertTrue(this.mockDevices.containsKey(interfaceName));
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

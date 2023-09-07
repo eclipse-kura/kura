@@ -71,6 +71,13 @@ public class NetworkConfigurationServiceCommonTest {
         whenTocdIsRetrieved();
         thenComponentDefinitionHasModemProperties();
     }
+    
+    @Test
+    public void componentDefinitionShouldHaveVlanPropertiesTest() throws KuraException {
+        givenFullProperties();
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasVlanProperties();
+    }
 
     @Test
     public void pppNumberShouldBeAnInteger() throws KuraException {
@@ -134,7 +141,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void givenFullProperties() {
         this.properties.clear();
-        this.properties.put("net.interfaces", "enp5s0,lo,eno1,wlp1s0,1-4");
+        this.properties.put("net.interfaces", "enp5s0,lo,eno1,wlp1s0,1-4,ens5s0.101");
         this.properties.put("net.interface.lo.config.ip4.status", "netIPv4StatusEnabledLAN");
         this.properties.put("net.interface.lo.config.ip6.status", "netIPv6StatusDisabled");
         this.properties.put("net.interface.1-4.config.resetTimeout", 5);
@@ -238,6 +245,18 @@ public class NetworkConfigurationServiceCommonTest {
         this.properties.put("net.interface.wlp1s0.config.wifi.infra.pairwiseCiphers", "CCMP_TKIP");
         this.properties.put("net.interface.wlp1s0.config.ip4.prefix", 24);
         this.properties.put("net.interface.1-4.config.pdpType", "IP");
+        this.properties.put("net.interface.ens5s0.101.type", "VLAN");
+        this.properties.put("net.interface.ens5s0.101.config.dhcpClient4.enabled", false);
+        this.properties.put("net.interface.ens5s0.101.config.ip4.status", "netIPv4StatusEnabledWAN");
+        this.properties.put("net.interface.ens5s0.101.config.ip4.address", "192.168.0.12");
+        this.properties.put("net.interface.ens5s0.101.config.ip4.prefix", (short) 25);
+        this.properties.put("net.interface.ens5s0.101.config.ip4.dnsServers", "1.1.1.1");
+        this.properties.put("net.interface.ens5s0.101.config.ip4.gateway", "192.168.0.1");
+        this.properties.put("net.interface.ens5s0.101.config.vlan.parent", "ens5s0");
+        this.properties.put("net.interface.ens5s0.101.config.vlan.id", 101);
+        this.properties.put("net.interface.ens5s0.101.config.vlan.flags", 2);
+        this.properties.put("net.interface.ens5s0.101.config.vlan.egress", "1:2");
+        this.properties.put("net.interface.ens5s0.101.config.vlan.egress", "2:3");
     }
 
     private void givenConfigurationProperty(final String key, final Object value) {
@@ -265,7 +284,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(145, this.ads.size());
+        assertEquals(176, this.ads.size());
     }
 
     private void thenReturnedPropertyEquals(final String key, final Object value) {
@@ -570,6 +589,10 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasModemProperties() {
         assertEquals(36, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
+    }
+    
+    private void thenComponentDefinitionHasVlanProperties() {
+        assertEquals(31, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0")).count());
     }
 
     private void thenPppNumIsInteger() {

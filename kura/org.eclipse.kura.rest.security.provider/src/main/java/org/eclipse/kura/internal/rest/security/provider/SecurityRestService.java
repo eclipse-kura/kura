@@ -31,7 +31,7 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/security/v1")
+@Path("security/v1")
 public class SecurityRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityRestService.class);

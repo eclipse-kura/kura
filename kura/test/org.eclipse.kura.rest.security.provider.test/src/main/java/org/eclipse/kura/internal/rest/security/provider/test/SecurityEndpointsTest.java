@@ -52,7 +52,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
-    private static final String REST_APP_ID = "/security/v1";
+    private static final String REST_APP_ID = "security/v1";
 
     private static SecurityService securityServiceMock = mock(SecurityService.class);
 

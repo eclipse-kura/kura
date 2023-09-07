@@ -535,7 +535,7 @@ public class NMStatusConverterTest {
         givenDevicePropertiesWith("Mtu", new UInt32(420));
         givenDevicePropertiesWith("HwAddress", "F5:5B:66:7C:40:EA");
         
-        givenVlanConfigPropertiesWith("VlanId", 101);
+        givenVlanConfigPropertiesWith("VlanId", new UInt32(101));
         givenParentDevicePropertiesWith("Interface", "eth0");
 
         givenIpv4ConfigPropertiesWith("Gateway", "192.168.3.241");

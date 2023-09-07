@@ -192,8 +192,8 @@ public class NMStatusConverter {
         String parentInterfaceName = parentProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
         builder.withParentInterface(parentInterfaceName);
         vlanProperties.ifPresent(properties -> {
-        Integer vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
-            builder.withVlanId(vlanId);
+        UInt32 vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
+            builder.withVlanId(vlanId.intValue());
         });
     }
 

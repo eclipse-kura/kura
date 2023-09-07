@@ -929,6 +929,7 @@
         <module>org.eclipse.kura.rest.command.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
         <module>org.eclipse.kura.rest.position.provider.test</module>
+        <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.wire.provider.test</module>
         <module>org.eclipse.kura.util.test.driver</module>

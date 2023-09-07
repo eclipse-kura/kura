@@ -100,7 +100,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnReloadSecurityPolicyFingerprint() throws KuraException {
         givenFailingSecurityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/security-policy-fingerprint/reload");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/security-policy-fingerprint/reload");
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
@@ -109,7 +109,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldRethrowWebApplicationExceptionOnReloadCommandLineFingerprint() throws KuraException {
         givenFailingSecurityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/command-line-fingerprint/reload");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/command-line-fingerprint/reload");
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }

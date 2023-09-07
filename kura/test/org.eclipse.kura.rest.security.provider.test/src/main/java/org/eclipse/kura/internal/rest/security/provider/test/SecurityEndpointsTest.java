@@ -131,10 +131,13 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static void givenSecurityService() {
         reset(securityServiceMock);
+
         when(securityServiceMock.isDebugEnabled()).thenReturn(debugEnabled);
     }
 
     private static void givenFailingSecurityService() throws KuraException {
+        reset(securityServiceMock);
+
         when(securityServiceMock.isDebugEnabled()).thenThrow(RuntimeException.class);
         doThrow(RuntimeException.class).when(securityServiceMock).reloadCommandLineFingerprint();
         doThrow(RuntimeException.class).when(securityServiceMock).reloadSecurityPolicyFingerprint();

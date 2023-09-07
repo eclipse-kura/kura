@@ -13,7 +13,7 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.internal.rest.security.SecurityRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.security.SecurityRestService">
     <implementation class="org.eclipse.kura.internal.rest.security.SecurityRestService"/>
 
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.security.SecurityRestService"/>

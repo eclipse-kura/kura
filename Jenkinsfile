@@ -47,6 +47,7 @@ node {
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
                                 -Dsonar.login=${SONARCLOUD_TOKEN} \
                                 -Dsonar.branch.name=${BRANCH_NAME} \
+                                -Dsonar.branch.target=${CHANGE_TARGET} \
                                 -Dsonar.junit.reportPaths='target/surefire-reports' \
                                 -Dsonar.jacoco.reportPaths='target/jacoco/' \
                                 -Dsonar.java.binaries='target/' \

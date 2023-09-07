@@ -74,6 +74,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/security-policy-fingerprint/reload");
 
         thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
     }
 
     @Test
@@ -83,6 +84,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/command-line-fingerprint/reload");
 
         thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
     }
 
     @Test

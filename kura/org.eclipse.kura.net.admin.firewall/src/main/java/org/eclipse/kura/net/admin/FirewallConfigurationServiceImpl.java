@@ -16,9 +16,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.net.UnknownHostException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -144,21 +142,5 @@ public class FirewallConfigurationServiceImpl extends
             this.firewall = LinuxFirewall.getInstance(this.executorService);
         }
         return this.firewall;
-    }
-
-    @Override
-    public void addFloodingProtectionRules(Set<String> floodingRules) {
-        // The flooding protection rules are applied only to the mangle table.
-        addFloodingProtectionRules(new HashSet<>(), new HashSet<>(), floodingRules);
-    }
-
-    @Override
-    public void addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String> natFloodingRules,
-            Set<String> mangleFloodingRules) {
-        try {
-            this.firewall.setAdditionalRules(filterFloodingRules, natFloodingRules, mangleFloodingRules);
-        } catch (KuraException e) {
-            logger.error("Failed to set Firewall Flooding Protection Configuration", e);
-        }
     }
 }

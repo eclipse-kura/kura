@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.net.admin;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,10 +42,9 @@ public class FirewallFloodingProtectionTest {
     private AbstractLinuxFirewall mockFirewall;
     private FirewallConfigurationServiceImpl firewallService;
     private FirewallConfigurationServiceIPv6Impl firewallServiceIPv6;
-    private Exception occurredException;
 
     @Test
-    public void shouldAddFloodingProtectionRulesOnlyToMangleTableTest() {
+    public void shouldAddFloodingProtectionRulesOnlyToMangleTable() {
         givenFirewallConfigurationServiceImpl();
 
         whenFirewallConfigurationServiceImplIsActivated();
@@ -57,7 +54,7 @@ public class FirewallFloodingProtectionTest {
     }
 
     @Test
-    public void shouldAddFloodingProtectionRulesToAllTablesTest() {
+    public void shouldAddFloodingProtectionRulesToAllTables() {
         givenFirewallConfigurationServiceImpl();
 
         whenFirewallConfigurationServiceImplIsActivated();
@@ -67,24 +64,44 @@ public class FirewallFloodingProtectionTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenAddRulesToMangleIPv6() {
+    public void shouldAddFloodingProtectionRulesOnlyToMangleTableIPv6() {
         givenFirewallConfigurationServiceIPv6Impl();
 
         whenFirewallConfigurationServiceIPv6ImplIsActivated();
         whenFloodingProtectionRulesAreAddedToMangleTableIpv6();
 
-        thenExceptionIsThrown(UnsupportedOperationException.class);
+        thenSetAdditionalRulesToMangleOnlyIsCalled();
     }
 
     @Test
-    public void shouldThrowExceptionWhenAddRulesIPv6() {
+    public void shouldAddFloodingProtectionRulesToAllTablesIPv6() {
         givenFirewallConfigurationServiceIPv6Impl();
 
         whenFirewallConfigurationServiceIPv6ImplIsActivated();
         whenFloodingProtectionRulesAreAddedIPv6();
 
-        thenExceptionIsThrown(UnsupportedOperationException.class);
+        thenSetAdditionalRulesIsCalled();
     }
+
+    // @Test
+    // public void shouldThrowExceptionWhenAddRulesToMangleIPv6() {
+    // givenFirewallConfigurationServiceIPv6Impl();
+
+    // whenFirewallConfigurationServiceIPv6ImplIsActivated();
+    // whenFloodingProtectionRulesAreAddedToMangleTableIpv6();
+
+    // thenExceptionIsThrown(UnsupportedOperationException.class);
+    // }
+
+    // @Test
+    // public void shouldThrowExceptionWhenAddRulesIPv6() {
+    // givenFirewallConfigurationServiceIPv6Impl();
+
+    // whenFirewallConfigurationServiceIPv6ImplIsActivated();
+    // whenFloodingProtectionRulesAreAddedIPv6();
+
+    // thenExceptionIsThrown(UnsupportedOperationException.class);
+    // }
 
     private void givenFirewallConfigurationServiceImpl() {
         this.mockFirewall = mock(LinuxFirewall.class);
@@ -131,11 +148,7 @@ public class FirewallFloodingProtectionTest {
     }
 
     private void whenFloodingProtectionRulesAreAddedToMangleTableIpv6() {
-        try {
-            firewallServiceIPv6.addFloodingProtectionRules(this.mangleRules);
-        } catch (Exception e) {
-            this.occurredException = e;
-        }
+        firewallServiceIPv6.addFloodingProtectionRules(this.mangleRules);
     }
 
     private void whenFloodingProtectionRulesAreAdded() {
@@ -143,11 +156,7 @@ public class FirewallFloodingProtectionTest {
     }
 
     private void whenFloodingProtectionRulesAreAddedIPv6() {
-        try {
-            firewallServiceIPv6.addFloodingProtectionRules(this.filterRules, this.natRules, this.mangleRules);
-        } catch (Exception e) {
-            this.occurredException = e;
-        }
+        firewallServiceIPv6.addFloodingProtectionRules(this.filterRules, this.natRules, this.mangleRules);
     }
 
     private void thenSetAdditionalRulesToMangleOnlyIsCalled() {
@@ -167,8 +176,4 @@ public class FirewallFloodingProtectionTest {
         }
     }
 
-    private <E extends Exception> void thenExceptionIsThrown(Class<E> expectedException) {
-        assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
-    }
 }

@@ -17,7 +17,6 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -139,16 +138,5 @@ public class FirewallConfigurationServiceIPv6Impl extends
         tocd.addAD(tad);
 
         return tocd;
-    }
-
-    @Override
-    public void addFloodingProtectionRules(Set<String> floodingRules) {
-        throw new UnsupportedOperationException("Unimplemented method 'addFloodingProtectionRules'");
-    }
-
-    @Override
-    public void addFloodingProtectionRules(Set<String> filterFloodingRules, Set<String> natFloodingRules,
-            Set<String> mangleFloodingRules) {
-        throw new UnsupportedOperationException("Unimplemented method 'addFloodingProtectionRules'");
     }
 }

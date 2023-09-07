@@ -41,11 +41,11 @@ public class SecurityRestService {
     private static final String REST_ROLE_NAME = "security";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
-    private SecurityService systemService;
+    private SecurityService security;
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    public void bindSecurityService(SecurityService systemService) {
-        this.systemService = systemService;
+    public void bindSecurityService(SecurityService securityService) {
+        this.security = securityService;
     }
 
     public void bindUserAdmin(UserAdmin userAdmin) {
@@ -82,7 +82,7 @@ public class SecurityRestService {
     public Response reloadSecurityPolicyFingerprint() {
         try {
             logger.debug(DEBUG_MESSSAGE, "reloadSecurityPolicyFingerprint");
-            this.systemService.reloadSecurityPolicyFingerprint();
+            this.security.reloadSecurityPolicyFingerprint();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -104,7 +104,7 @@ public class SecurityRestService {
     public Response reloadCommandLineFingerprint() {
         try {
             logger.debug(DEBUG_MESSSAGE, "reloadCommandLineFingerprint");
-            this.systemService.reloadCommandLineFingerprint();
+            this.security.reloadCommandLineFingerprint();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -124,7 +124,7 @@ public class SecurityRestService {
     public DebugEnabledDTO isDebugEnabled() {
         try {
             logger.debug(DEBUG_MESSSAGE, "isDebugEnabled");
-            return new DebugEnabledDTO(this.systemService.isDebugEnabled());
+            return new DebugEnabledDTO(this.security.isDebugEnabled());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

@@ -48,7 +48,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String MQTT_APP_ID = "SEC-V1";
 
-    private static final String EXPECTED_DEBUG_ENABLE_TRUE_RESPONSE = "{enabled: true}";
+    private static final String EXPECTED_DEBUG_ENABLE_TRUE_RESPONSE = "{enabled:true}";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";

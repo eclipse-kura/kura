@@ -28,6 +28,8 @@
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+        <tycho-version>1.7.0</tycho-version>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>

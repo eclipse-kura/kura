@@ -48,7 +48,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String MQTT_APP_ID = "SEC-V1";
 
-    private static final String EXPECTED_DEBUG_ENABLE_RESPONSE = "";
+    private static final String EXPECTED_DEBUG_ENABLE_TRUE_RESPONSE = "";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
@@ -60,6 +60,8 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     public static Collection<Transport> transports() {
         return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
     }
+
+    private static boolean debugEnabled;
 
     public SecurityEndpointsTest(Transport transport) {
         super(transport);
@@ -86,11 +88,12 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnExpectedDebugStatus() {
         givenSecurityService();
+        givenDebugEnabledStatus(true);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_DEBUG_ENABLE_RESPONSE);
+        thenResponseBodyEqualsJson(EXPECTED_DEBUG_ENABLE_TRUE_RESPONSE);
     }
 
     @Test
@@ -120,8 +123,13 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
+    private void givenDebugEnabledStatus(boolean debugStatus) {
+        debugEnabled = debugStatus;
+    }
+
     private static void givenSecurityService() {
         reset(securityServiceMock);
+        when(securityServiceMock.isDebugEnabled()).thenReturn(debugEnabled);
     }
 
     private static void givenFailingSecurityService() throws KuraException {

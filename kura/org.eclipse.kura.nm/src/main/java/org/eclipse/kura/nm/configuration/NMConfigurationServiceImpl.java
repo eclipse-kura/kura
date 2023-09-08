@@ -390,7 +390,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
 
         if (type.isPresent() && isNatEnabled.isPresent() && status.isPresent()) {
-            boolean isSupportedType = SUPPORTED_NAT_INTERFACE_TYPES.contains(status);
+            boolean isSupportedType = SUPPORTED_NAT_INTERFACE_TYPES.contains(type.get());
             boolean isNat = isNatEnabled.get();
             boolean isLan = status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
 

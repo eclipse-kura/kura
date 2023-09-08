@@ -13,6 +13,7 @@
 package org.eclipse.kura.nm.configuration;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -60,6 +61,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final String MODIFIED_INTERFACE_NAMES = "modified.interface.names";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
+    
+    private static final List<NetInterfaceType> SUPPORTED_NAT_INTERFACE_TYPES = Arrays.asList(
+            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.MODEM,
+            NetInterfaceType.VLAN);
+    private static final List<NetInterfaceType> SUPPORTED_DHCP_SERVER_INTERFACE_TYPES = Arrays.asList(
+            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.VLAN);
 
     private NetworkService networkService;
     private DnsServerService dnsServer;
@@ -383,8 +390,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
 
         if (type.isPresent() && isNatEnabled.isPresent() && status.isPresent()) {
-            boolean isSupportedType = type.get() == NetInterfaceType.ETHERNET || type.get() == NetInterfaceType.WIFI
-                    || type.get() == NetInterfaceType.MODEM;
+            boolean isSupportedType = SUPPORTED_NAT_INTERFACE_TYPES.contains(status);
             boolean isNat = isNatEnabled.get();
             boolean isLan = status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
 
@@ -427,7 +433,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         final NetInterfaceStatus status = getNetInterfaceStatus(interfaceName)
                 .orElse(NetInterfaceStatus.netIPv4StatusUnknown);
 
-        if ((type != NetInterfaceType.ETHERNET && type != NetInterfaceType.WIFI) || !isDhcpServerEnabled) {
+        if (!SUPPORTED_DHCP_SERVER_INTERFACE_TYPES.contains(type) || !isDhcpServerEnabled) {
             return false;
         }
 

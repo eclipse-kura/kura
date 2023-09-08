@@ -404,7 +404,6 @@ public class CloudServiceImpl
                 || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
             logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
-            return;
         }
     }
 

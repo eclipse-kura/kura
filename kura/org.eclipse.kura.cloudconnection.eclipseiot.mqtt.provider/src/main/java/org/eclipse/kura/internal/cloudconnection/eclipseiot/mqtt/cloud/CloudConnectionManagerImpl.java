@@ -332,7 +332,6 @@ public class CloudConnectionManagerImpl
                 || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
             logger.debug("CloudConnectionManagerImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
-            return;
         }
     }
     

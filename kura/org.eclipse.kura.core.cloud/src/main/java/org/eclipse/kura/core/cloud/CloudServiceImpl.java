@@ -118,6 +118,9 @@ public class CloudServiceImpl
 
     private static final String CONNECTION_EVENT_PID_PROPERTY_KEY = "cloud.service.pid";
 
+    static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL = "org/osgi/service/deployment/INSTALL";
+    static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL = "org/osgi/service/deployment/UNINSTALL";
+
     private static final int NUM_CONCURRENT_CALLBACKS = 2;
 
     private static ExecutorService callbackExecutor = Executors.newFixedThreadPool(NUM_CONCURRENT_CALLBACKS);
@@ -302,7 +305,8 @@ public class CloudServiceImpl
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
-                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC };
+                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC,
+                EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL, EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
                 props);
@@ -377,12 +381,28 @@ public class CloudServiceImpl
 
     @Override
     public void handleEvent(Event event) {
-        if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
+        String topic = event.getTopic();
+
+        if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(topic)) {
             handlePositionLockedEvent();
-        } else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
+            return;
+        }
+
+        if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(topic)) {
             handleModemReadyEvent(event);
-        } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
+            return;
+        }
+
+        if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
+            logger.debug("CloudServiceImpl: received tamper event, publishing BIRTH.");
+            tryPublishBirthCertificate(false);
+            return;
+        }
+
+        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
+                || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
+            logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
     }

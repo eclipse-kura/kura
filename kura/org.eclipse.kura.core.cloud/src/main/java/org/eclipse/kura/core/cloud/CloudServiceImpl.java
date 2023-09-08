@@ -385,22 +385,26 @@ public class CloudServiceImpl
 
         if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(topic)) {
             handlePositionLockedEvent();
+            return;
         }
 
         if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(topic)) {
             handleModemReadyEvent(event);
+            return;
         }
 
         if (TamperEvent.TAMPER_EVENT_TOPIC.equals(topic) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
             logger.debug("CloudServiceImpl: received tamper event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
+            return;
         }
 
         if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
                 || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
             logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
+            return;
         }
     }
 

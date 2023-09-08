@@ -320,16 +320,19 @@ public class CloudConnectionManagerImpl
 
         if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(topic)) {
             handlePositionLockedEvent();
+            return;
         }
 
         if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(topic)) {
             handleModemReadyEvent(event);
+            return;
         }
 
         if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
                 || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
             logger.debug("CloudConnectionManagerImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
+            return;
         }
     }
     

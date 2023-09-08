@@ -13,7 +13,7 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" configuration-policy="optional" immediate="true" modified="updated" name="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0" activate="activate" deactivate="deactivate" configuration-policy="optional" immediate="true" modified="updated" name="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator">
    <implementation class="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator"/>
    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator"/>
@@ -23,5 +23,6 @@
       <provide interface="org.eclipse.kura.security.FloodingProtectionConfigurationService"/>
    </service>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <reference bind="setFirewallConfigurationService" unbind="unsetFirewallConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.FirewallConfigurationService" name="FirewallConfigurationService" policy="static"/>
+   <reference bind="setFirewallConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.FirewallConfigurationService" name="FirewallConfigurationService" policy="static"/>
+   <reference bind="setFirewallConfigurationServiceIPv6" cardinality="0..1" interface="org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6" name="FirewallConfigurationServiceIPv6" policy="static" policy-option="greedy"/>
 </scr:component>

@@ -19,6 +19,7 @@ nav:
         - Wi-Fi Configuration: gateway-configuration/wifi-configuration.md
         - Cellular Configuration: gateway-configuration/cellular-configuration.md
       - Firewall Configuration: gateway-configuration/firewall-configuration.md
+      - Network Threat Manager: gateway-configuration/network-threat-manager.md
       - Cloud Connections:
         - Cloud Connections: gateway-configuration/cloud-connections.md
         - Cloud Service Configuration: gateway-configuration/cloud-service-configuration.md

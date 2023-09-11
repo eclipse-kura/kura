@@ -147,10 +147,11 @@ nav:
       - MQTT Namespace: references/mqtt-namespace.md
       - Javadoc: references/javadoc.md
       - REST-APIs:
-        - REST Inventory API: references/rest-apis/rest-inventory-api.md
-        - REST Command API: references/rest-apis/rest-command-api.md
-        - REST Position API: references/rest-apis/rest-position-api.md
-        - REST System API: references/rest-apis/rest-system-api.md
+        - Command: references/rest-apis/rest-command-api.md
+        - Inventory: references/rest-apis/rest-inventory-api.md
+        - Position: references/rest-apis/rest-position-api.md
+        - Security: references/rest-apis/rest-security-api.md
+        - System: references/rest-apis/rest-system-api.md
     - Tutorials:
       - Anomaly Detection: tutorials/AD-EdgeAI.ipynb
 

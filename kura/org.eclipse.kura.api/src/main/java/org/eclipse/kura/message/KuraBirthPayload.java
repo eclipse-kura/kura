@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,10 @@ import static org.eclipse.kura.message.KuraDeviceProfile.CPU_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK;
 import static org.eclipse.kura.message.KuraDeviceProfile.DISPLAY_NAME_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.FIRMWARE_VERSION_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.JDK_VENDOR_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.JVM_NAME_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.JVM_PROFILE_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.JVM_VENDOR_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.JVM_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.KURA_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.MODEL_ID_KEY;
@@ -37,6 +39,8 @@ import static org.eclipse.kura.message.KuraDeviceProfile.PART_NUMBER_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.SERIAL_NUMBER_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.TOTAL_MEMORY_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.UPTIME_KEY;
+
+import java.util.Optional;
 
 /**
  * The KuraBirthPayload is an extension of {@link KuraPayload} that contains the parameters that allow to define the
@@ -241,6 +245,20 @@ public class KuraBirthPayload extends KuraPayload {
         return (String) getMetric(PAYLOAD_ENCODING_KEY);
     }
 
+    /**
+     * @since 2.6
+     */
+    public String getJvmVendor() {
+        return (String) getMetric(JVM_VENDOR_KEY);
+    }
+
+    /**
+     * @since 2.6
+     */
+    public String getJdkVendorVersion() {
+        return (String) getMetric(JDK_VENDOR_VERSION_KEY);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("KuraBirthPayload [");
@@ -271,8 +289,10 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getConnectionIp()=").append(getConnectionIp()).append(", ");
         sb.append("getAcceptEncoding()=").append(getAcceptEncoding()).append(", ");
         sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers()).append(", ");
-        sb.append("getPayloadEncoding()=").append(getPayloadEncoding());
-        sb.append("getTamperStatus()=").append(getTamperStatus());
+        sb.append("getPayloadEncoding()=").append(getPayloadEncoding()).append(", ");
+        sb.append("getTamperStatus()=").append(getTamperStatus()).append(", ");
+        sb.append("getJvmVendor()=").append(getJvmVendor()).append(", ");
+        sb.append("getJdkVendorVersion()=").append(getJdkVendorVersion());
 
         sb.append("]");
 
@@ -305,6 +325,8 @@ public class KuraBirthPayload extends KuraPayload {
         private String jvmName;
         private String jvmVersion;
         private String jvmProfile;
+        private String jvmVendor;
+        private Optional<String> jdkVendorVersion;
         private String kuraVersion;
         private String applicationFramework;
         private String applicationFrameworkVersion;
@@ -504,6 +526,28 @@ public class KuraBirthPayload extends KuraPayload {
             return this;
         }
 
+        /**
+         * 
+         * @since 2.6
+         * @param jvmVendor
+         * @return
+         */
+        public KuraBirthPayloadBuilder withJvmVendor(String jvmVendor) {
+            this.jvmVendor = jvmVendor;
+            return this;
+        }
+
+        /**
+         * 
+         * @since 2.6
+         * @param jdkVendorVersion
+         * @return
+         */
+        public KuraBirthPayloadBuilder withJdkVendorVersion(String jdkVendorVersion) {
+            this.jdkVendorVersion = Optional.ofNullable(jdkVendorVersion);
+            return this;
+        }
+
         public KuraBirthPayload build() {
             KuraBirthPayload birthPayload = new KuraBirthPayload();
 
@@ -549,6 +593,11 @@ public class KuraBirthPayload extends KuraPayload {
                 birthPayload.addMetric(TAMPER_STATUS, tamperStatus.name());
             }
             birthPayload.setPosition(this.position);
+
+            birthPayload.addMetric(JVM_VENDOR_KEY, this.jvmVendor);
+            if (this.jdkVendorVersion.isPresent()) {
+                birthPayload.addMetric(JDK_VENDOR_VERSION_KEY, this.jdkVendorVersion.get());
+            }
 
             return birthPayload;
         }

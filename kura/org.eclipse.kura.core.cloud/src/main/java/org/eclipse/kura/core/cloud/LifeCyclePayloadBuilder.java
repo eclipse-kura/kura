@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -91,7 +91,9 @@ public class LifeCyclePayloadBuilder {
                 .withApplicationIdentifiers(appIds).withAvailableProcessors(deviceProfile.getAvailableProcessors())
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
-                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
+                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding)
+                .withJvmVendor(deviceProfile.getJvmVendor())
+                .withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
 
         tryAddTamperStatus(birthPayloadBuilder);
 
@@ -263,6 +265,8 @@ public class LifeCyclePayloadBuilder {
         kuraDeviceProfile.setOsArch(systemService.getOsArch());
         kuraDeviceProfile.setOsgiFramework(systemService.getOsgiFwName());
         kuraDeviceProfile.setOsgiFrameworkVersion(systemService.getOsgiFwVersion());
+        kuraDeviceProfile.setJvmVendor(systemService.getJavaVmVendor());
+        kuraDeviceProfile.setJdkVendorVersion(systemService.getJdkVendorVersion());
         return kuraDeviceProfile;
     }
 

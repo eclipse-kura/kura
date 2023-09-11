@@ -302,6 +302,9 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     @Override
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
+        if (this.netTabs.getButtons() != null) {
+            this.netTabs.getButtons().setButtonsDirty(dirty);
+        }
     }
 
     @Override

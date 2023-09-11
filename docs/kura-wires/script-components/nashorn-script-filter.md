@@ -20,18 +20,19 @@ The following global variables are available to the script:
 
 * [`input`](#received-envelope): an object that represents the received wire envelope.
 * [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
-* logger: a slf4j logger.
+* [logger](#logging): A slf4j logger
 
 The following utility functions are available:
 
-* `newWireRecord(void) -> WireRecordWrapper`
-* `newByteArray(void) -> byte[]`
-* `newBooleanValue(boolean) -> TypedValue`
-* `newByteArrayValue(byte[]) -> TypedValue`
-* `newDoubleValue(number) -> TypedValue`
-* `newIntegerValue(number) -> TypedValue`
-* `newLongValue(number) -> TypedValue`
-* `newStringValue(object) -> TypedValue`
+* [`newWireRecord(void) -> WireRecordWrapper`](#utility-functions)
+* [`newByteArray(void) -> byte\[\`]](#utility-functions)
+* [`newBooleanValue(boolean) -> TypedValue`](#utility-functions)
+* [`newByteArrayValue(byte\[\`]) -> TypedValue](#utility-functions)
+* [`newDoubleValue(number) -> TypedValue`](#utility-functions)
+* [`newFloatValue(number) -> TypedValue`](#utility-functions)
+* [`newIntegerValue(number) -> TypedValue`](#utility-functions)
+* [`newLongValue(number) -> TypedValue`](#utility-functions)
+* [`newStringValue(object) -> TypedValue`](#utility-functions)
 
 The following global constants expose the `org.eclipse.kura.type.DataType` enum variants:
 
@@ -96,3 +97,48 @@ record['myprop'] = newDoubleValue(123.456)
 // add the wire record to the output envelope
 output.add(record)
 ```
+
+#### Utility functions
+
+* `newWireRecord(void) -> WireRecordWrapper`: Creates a new mutable wire record. New properties can be added to the record as shown above. In order to emit the new record use the `output.add(WireRecordWrapper)` function.
+
+* `newByteArray(number) -> byte[]`: Creates a new mutable byte array of given length. The resulting array can be modified and the converted to a TypedValue using the `newByteArray(byte[]) -> TypedValue`.
+
+The following functions can be used for creating TypedValues. The resulting objects can be used for WireRecord property values. Some of these functions perform numeric conversions that could cause precision losses.
+
+* `newBooleanValue(boolean) -> TypedValue`: Creates a new TypedValue representing a boolean.
+
+* `newByteArrayValue(byte[]) -> TypedValue`: Creates a new TypedValue representing a byte array.
+
+* `newDoubleValue(number) -> TypedValue`: Creates a new TypedValue representing a double. The number provided as argument value will be coerced into a double.
+
+* `newFloatValue(number) -> TypedValue`: Creates a new TypedValue representing a float. The number provided as argument value will be coerced into a float.
+
+* `newIntegerValue(number) -> TypedValue`: Creates a new TypedValue representing an integer. The number provided as argument value will be coerced into an integer.
+
+* `newLongValue(number) -> TypedValue`: Creates a new TypedValue representing a long. The number provided as argument value will be coerced into a long.
+
+* `newStringValue(object) -> TypedValue`: Creates a new TypedValue representing a String. The object provided as argument value will be converted into a String using the `toString()` method.
+
+
+#### Logging
+
+An slf4j logger is available to the script as the `logger` global variable, it can be used for debug purposes more or less like in Java code.
+
+#### Script context
+
+As said above the script context is persisted across different script executions, this allow to define persistent variables, for example in this way:
+
+```javascript
+counter = typeof(counter) === 'undefined' // check if the counter variable is not defined
+ ? 0 // counter is undefined, initialise it to zero
+ : counter; // counter is already defined, keep the previous value
+```
+
+It is possible to reset the script context using the **script.context.drop** configuration property.
+If this property is set to `true`, the script context will be dropped every time the component configuration is updated, resetting the value of any
+persisted variable.
+
+#### Example script
+
+The Script Filter configuration contains an example script describing the component usage, it can be executed connecting a Timer component to a Script Filter.

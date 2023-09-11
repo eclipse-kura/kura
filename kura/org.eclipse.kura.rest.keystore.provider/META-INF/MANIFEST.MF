@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Keystore REST Service
+Bundle-SymbolicName: org.eclipse.kura.rest.keystore.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
+Import-Package: org.slf4j;version="1.7.25",
+ javax.ws.rs;version="2.0.1",
+ javax.ws.rs.core;version="2.0.1",
+ javax.annotation.security;version="1.2.0",
+ org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
+ org.eclipse.kura.request.handler.jaxrs;version="[1.0,2.0)",
+ org.eclipse.kura.request.handler.jaxrs.annotation;version="[1.0,2.0)",
+ org.osgi.service.useradmin;version="1.1.0";resolution:=optional,
+ org.eclipse.kura.security.keystore;version="[1.1,2.0)"

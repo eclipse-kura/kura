@@ -280,6 +280,7 @@ public class NetworkTabsUi extends Composite {
         removeAllTabs();
 
         insertTab(this.ip4TabAnchorItem);
+
         if (this.isNet2) {
             insertTab(this.ip6TabAnchorItem);
         }
@@ -346,7 +347,10 @@ public class NetworkTabsUi extends Composite {
         this.wirelessTabAnchorItem.setEnabled(true);
 
         insertTab(this.wirelessTabAnchorItem);
-        insertTab(this.net8021xTabAnchorItem);
+        if (this.isNet2) {
+            insertTab(this.net8021xTabAnchorItem);
+        }
+
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 

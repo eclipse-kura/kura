@@ -674,6 +674,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             // Station mode
             if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
 
+                add8021xFromSecurityDropdown();
+
                 if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     this.wireless.setEnabled(false);
                 }
@@ -681,6 +683,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             } else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 // access point mode
+
+                remove8021xFromSecurityDropdown();
+
                 // disable access point when TCP/IP is set to WAN
                 if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     setForm(false);
@@ -974,13 +979,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
         this.security.addMouseOutHandler(event -> resetHelp());
         for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
-
-            if (GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise == mode && this.isNet2) {
-                continue;
-            }
-
             this.security.addItem(MessageUtils.get(mode.name()));
-
         }
         this.security.addChangeHandler(event -> {
             setDirty(true);
@@ -1254,6 +1253,29 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
 
         return Collections.singletonList(frequencyEntry);
+    }
+
+    private void remove8021xFromSecurityDropdown() {
+        for (int i = 0; i < this.security.getItemCount(); i++) {
+            if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                this.security.removeItem(i);
+            }
+        }
+    }
+
+    private void add8021xFromSecurityDropdown() {
+
+        if (!this.isNet2) {
+            remove8021xFromSecurityDropdown();
+            return;
+        }
+
+        for (int i = 0; i < this.security.getItemCount(); i++) {
+            if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                return;
+            }
+        }
+        this.security.addItem(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE);
     }
 
     private Validator<String> newBgScanValidator(TextBox field) {

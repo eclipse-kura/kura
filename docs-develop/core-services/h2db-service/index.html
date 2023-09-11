@@ -3187,8 +3187,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>To create a new H2 database instance, use the following procedure:</p>
 <ol>
 <li>Open the Administrative UI and press the <strong>+</strong> button in the side menu, under the Services section. A pop-up dialog should appear.</li>
-<li>Select <code>org.eclipse.kura.core.db.H2DbService</code> from the <strong>Factory</strong> drop-down list, enter an arbitrary name for the new instance and click <strong>Apply</strong>.</li>
-<li>An entry for the newly created instance should appear in the side menu under <strong>Services</strong>, click on it to review its configuration. It is not possible to create different DB instances that manage the same DB URL. When creating a new instance please make sure that the URL specified in the field <strong>db.connector.url</strong> is not managed by another instance.</li>
+<li>Select <code>org.eclipse.kura.core.db.H2DbService</code> from the <strong>Factory</strong> drop-down list, enter an arbitrary name for the new instance and click <strong>Apply</strong>. <img alt="New instance" src="../images/h2db-new-instance.png" /></li>
+<li>An entry for the newly created instance should appear in the side menu under <strong>Services</strong>, click on it to review its configuration. It is not possible to create different DB instances that manage the same DB URL. When creating a new instance please make sure that the URL specified in the field <strong>db.connector.url</strong> is not managed by another instance.<img alt="Instance configuration" src="../images/h2db-instance-config.png" /></li>
 </ol>
 <h3 id="configuration-parameters">Configuration Parameters</h3>
 <p>The <strong>H2DbService</strong> provides the following configuration parameters:</p>
@@ -3248,8 +3248,8 @@ The purpose of this is to allow changing the type of a column with a Wire Graph 
 <p>The TCP server can be used by creating a <strong>H2DbServer</strong> instance:</p>
 <ol>
 <li>Open the Web UI and press the <strong>+</strong> button in the side menu, under the <strong>Services</strong> section. A pop-up dialog should appear.</li>
-<li>Select <code>org.eclipse.kura.core.db.H2DbServer</code> from the <strong>Factory</strong> drop-down​ list, enter an arbitrary name for the new instance and click Apply.</li>
-<li>Clicking on the name of the new server instance on the left side of the Web UI​. The configuration of the server component will appear.</li>
+<li>Select <code>org.eclipse.kura.core.db.H2DbServer</code> from the <strong>Factory</strong> drop-down​ list, enter an arbitrary name for the new instance and click Apply.<img alt="New instance" src="../images/h2db-new-tcp-server.png" /></li>
+<li>Clicking on the name of the new server instance on the left side of the Web UI​. The configuration of the server component will appear.<img alt="Server" src="../images/h2db-tcp-server-config.png" /></li>
 <li>Set the <strong>db.server.type</strong> field to <strong>TCP</strong>.</li>
 <li>Review the server options under <strong>db.server.commandline</strong>, check <a href="http://www.h2database.com/javadoc/org/h2/tools/Server.html">the official documentation</a> for more information about the available options.</li>
 <li>Set the <strong>db.server.enabled</strong> to <strong>true</strong>.</li>

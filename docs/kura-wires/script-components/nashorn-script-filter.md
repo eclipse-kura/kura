@@ -25,9 +25,9 @@ The following global variables are available to the script:
 The following utility functions are available:
 
 * [`newWireRecord(void) -> WireRecordWrapper`](#utility-functions)
-* [`newByteArray(void) -> byte\[\`]](#utility-functions)
+* [`newByteArray(void) -> byte[]`](#utility-functions)
 * [`newBooleanValue(boolean) -> TypedValue`](#utility-functions)
-* [`newByteArrayValue(byte\[\`]) -> TypedValue](#utility-functions)
+* [`newByteArrayValue(byte[]`) -> TypedValue](#utility-functions)
 * [`newDoubleValue(number) -> TypedValue`](#utility-functions)
 * [`newFloatValue(number) -> TypedValue`](#utility-functions)
 * [`newIntegerValue(number) -> TypedValue`](#utility-functions)

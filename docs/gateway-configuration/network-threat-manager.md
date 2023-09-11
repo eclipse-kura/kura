@@ -3,7 +3,7 @@
 Eclipse Kura provides a set of features to detect and prevent network attacks. The Security section in the Gateway Administration Console shows the Network Threat Manager tab where is it possible to activate these functions.
 
 !!! Warning
-    The Network Threat Manager tab is not available for the No Network version of Eclipse Kura.
+    The Network Threat Manager tab is not available for the [No Network version of Eclipse Kura](../getting-started/install-kura/#installer-types).
 
 ![Network Threat Manager](./images/network-threat-manager.png)
 
@@ -36,7 +36,7 @@ iptables -A prerouting-kura -f -j DROP
 ```
 
 To further filter the incoming TCP fragmented packets, specific system configuration files are configured.
-The _flooding.protection.enabled_ property is used to enable the feature.
+The **flooding.protection.enabled** property is used to enable the feature.
 
 ### Flooding protection for IPv6
 
@@ -73,4 +73,4 @@ ip6tables -A prerouting-kura -m rt --rt-type 0 -j DROP
 ip6tables -A output-kura -m rt --rt-type 0 -j DROP
 ```
 
-Also in this case, to enable the feature and add the rules to the firewall, the _flooding.protection.enabled.ipv6_ property has to be set to true. If the device doesn't support IPv6, this property is ignored.
+Also in this case, to enable the feature and add the rules to the firewall, the **flooding.protection.enabled.ipv6** property has to be set to true. If the device doesn't support IPv6, this property is ignored.

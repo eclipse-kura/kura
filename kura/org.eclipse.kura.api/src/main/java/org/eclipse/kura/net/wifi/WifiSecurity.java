@@ -16,7 +16,6 @@ package org.eclipse.kura.net.wifi;
  * Flags describing the security capabilities of an access point.
  */
 public enum WifiSecurity {
-
     /** None */
     NONE(0x0),
     /** Supports pairwise 40-bit WEP encryption. */
@@ -48,9 +47,7 @@ public enum WifiSecurity {
     /** Supports WPA2 encryption. */
     SECURITY_WPA2(0x2000),
     /** Supports WPA and WPA2 encryption. */
-    SECURITY_WPA_WPA2(0x4000),
-    /** Supports WPA2 WPA3 enterprise. */
-    SECURITY_WPA2_WPA3_ENTERPRISE(0x8000);
+    SECURITY_WPA_WPA2(0x4000);
 
     private int code;
 

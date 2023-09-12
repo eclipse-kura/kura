@@ -14,7 +14,7 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider">
-    <implementation class="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService"/>
+    <implementation class="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
 
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
 

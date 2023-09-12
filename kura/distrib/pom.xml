@@ -621,7 +621,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.security.services.provider</artifactId>
-                                    <version>${org.eclipse.kura.rest.security.services.provider}</version>
+                                    <version>${org.eclipse.kura.rest.security.services.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

@@ -17,13 +17,10 @@ import java.util.List;
 
 public class SercurityServicesDTO {
 
-    List<String> keystoreEntries;
-    
+    List<String> keystoreServices;
+
     public SercurityServicesDTO(List<String> entries) {
-        this.keystoreEntries = entries;
+        this.keystoreServices = entries;
     }
-    
-    public List<String> getKeystoreEntries() {
-        return this.keystoreEntries;
-    }
+
 }

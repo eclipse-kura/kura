@@ -16,7 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,9 +41,9 @@ public abstract class AbstractLinuxFirewall {
     protected Set<NATRule> autoNatRules = new LinkedHashSet<>();
     protected Set<NATRule> natRules = new LinkedHashSet<>();
     protected boolean allowIcmp = false;
-    protected final Set<String> additionalFilterRules = new HashSet<>();
-    protected final Set<String> additionalNatRules = new HashSet<>();
-    protected final Set<String> additionalMangleRules = new HashSet<>();
+    protected final Set<String> additionalFilterRules = new LinkedHashSet<>();
+    protected final Set<String> additionalNatRules = new LinkedHashSet<>();
+    protected final Set<String> additionalMangleRules = new LinkedHashSet<>();
     protected IptablesConfig iptables;
     protected CommandExecutorService executorService;
 

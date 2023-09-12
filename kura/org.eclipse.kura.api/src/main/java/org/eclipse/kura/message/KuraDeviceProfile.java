@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,15 @@ public class KuraDeviceProfile {
 
     public static final String DEFAULT_APPLICATION_FRAMEWORK = "Kura";
 
+    /**
+     * @since 2.6
+     */
+    public static final String JVM_VENDOR_KEY = "jvm_vendor";
+    /**
+     * @since 2.6
+     */
+    public static final String JDK_VENDOR_VERSION_KEY = "jdk_vendor_version";
+
     private String uptime;
     private String displayName;
     private String modelName;
@@ -79,6 +88,8 @@ public class KuraDeviceProfile {
     private Double latitude;
     private Double longitude;
     private Double altitude;
+    private String jvmVendor;
+    private String jdkVendorVersion;
 
     /**
      * Empty constructor for a KuraDeviceProfile.
@@ -289,6 +300,24 @@ public class KuraDeviceProfile {
     }
 
     /**
+     * 
+     * @since 2.6
+     * @return a String representing the JVM vendor name.
+     */
+    public String getJvmVendor() {
+        return this.jvmVendor;
+    }
+
+    /**
+     * 
+     * @since 2.6
+     * @return a String representing the JDK vendor version.
+     */
+    public String getJdkVendorVersion() {
+        return this.jdkVendorVersion;
+    }
+
+    /**
      * Sets the length of time the unit has been powered on.
      *
      * @param uptime
@@ -477,6 +506,24 @@ public class KuraDeviceProfile {
      */
     public void setAltitude(Double altitude) {
         this.altitude = altitude;
+    }
+
+    /**
+     * 
+     * @since 2.6
+     * @param jvmVendor a String representing the JVM vendor name.
+     */
+    public void setJvmVendor(String jvmVendor) {
+        this.jvmVendor = jvmVendor;
+    }
+
+    /**
+     * 
+     * @since 2.6
+     * @param jdkVendorVersion a String representing the JDK vendor version.
+     */
+    public void setJdkVendorVersion(String jdkVendorVersion) {
+        this.jdkVendorVersion = jdkVendorVersion;
     }
 
     public String getAvailableProcessors() {

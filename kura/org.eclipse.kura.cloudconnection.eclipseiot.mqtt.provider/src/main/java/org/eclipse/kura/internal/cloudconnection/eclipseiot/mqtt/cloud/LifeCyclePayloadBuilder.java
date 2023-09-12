@@ -79,7 +79,9 @@ public class LifeCyclePayloadBuilder {
                 .withAvailableProcessors(deviceProfile.getAvailableProcessors())
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
-                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
+                .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding)
+                .withJvmVendor(deviceProfile.getJvmVendor())
+                .withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
 
         if (this.cloudConnectionManagerImpl.imei != null && this.cloudConnectionManagerImpl.imei.length() > 0
                 && !this.cloudConnectionManagerImpl.imei.equals(ERROR)) {
@@ -214,6 +216,8 @@ public class LifeCyclePayloadBuilder {
         kuraDeviceProfile.setOsArch(systemService.getOsArch());
         kuraDeviceProfile.setOsgiFramework(systemService.getOsgiFwName());
         kuraDeviceProfile.setOsgiFrameworkVersion(systemService.getOsgiFwVersion());
+        kuraDeviceProfile.setJvmVendor(systemService.getJavaVmVendor());
+        kuraDeviceProfile.setJdkVendorVersion(systemService.getJdkVendorVersion());
         return kuraDeviceProfile;
     }
 

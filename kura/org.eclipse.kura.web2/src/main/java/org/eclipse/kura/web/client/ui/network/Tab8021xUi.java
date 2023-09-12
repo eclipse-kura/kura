@@ -186,7 +186,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.innerAuth.addChangeHandler(event -> {
             setDirty(true);
-            this.netTabs.updateTabs();ß
+            this.netTabs.updateTabs();
         });
     }
 

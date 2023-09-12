@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.provider;
+package org.eclipse.kura.internal.rest.auth;
 
 import static java.util.Objects.isNull;
 
@@ -31,41 +31,32 @@ import javax.ws.rs.ext.Provider;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
+import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.User;
-import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("restriction")
 @Priority(200)
-public class PasswordAuthenticationProvider implements AuthenticationProvider {
+public class BasicAuthenticationProvider implements AuthenticationProvider {
 
     private static final String PASSWORD_AUTH_FAILED_MSG = "{} Rest - Failure - Authentication failed as username or password not matching";
 
-    private static final Logger logger = LoggerFactory.getLogger(PasswordAuthenticationProvider.class);
-
-    private static final String KURA_USER_PREFIX = "kura.user.";
-    private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
-    private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
+    private static final Logger logger = LoggerFactory.getLogger(BasicAuthenticationProvider.class);
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
 
-    private final UserAdmin userAdmin;
-    private final CryptoService cryptoService;
+    private final UserAdminHelper userAdminHelper;
     private final BundleContext bundleContext;
 
     private Optional<ServiceRegistration<ContainerResponseFilter>> registration = Optional.empty();
 
-    public PasswordAuthenticationProvider(final BundleContext bundleContext, final UserAdmin userAdmin,
-            final CryptoService cryptoService) {
-        this.userAdmin = userAdmin;
-        this.cryptoService = cryptoService;
+    public BasicAuthenticationProvider(final BundleContext bundleContext, final UserAdminHelper userAdminHelper) {
+        this.userAdminHelper = userAdminHelper;
         this.bundleContext = bundleContext;
     }
 
@@ -95,39 +86,21 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
             return Optional.empty();
         }
 
-        auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), credentials.username);
-
-        final Role userRole = userAdmin.getRole(KURA_USER_PREFIX + credentials.username);
-
-        if (!(userRole instanceof User)) {
-            auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
-            return Optional.empty();
-        }
-
-        final User user = (User) userRole;
-
-        if ("true".equals(user.getProperties().get(KURA_NEED_PASSWORD_CHANGE))) {
-            return Optional.empty();
-        }
-
-        final String storedPasswordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
-
-        if (isNull(storedPasswordHash)) {
-            auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
-            return Optional.empty();
-        }
-
         try {
-            if (cryptoService.sha256Hash(credentials.password).equals(storedPasswordHash)) {
-                auditLogger.info("{} Rest - Success - Authentication succeeded via password provider", auditContext);
-                return Optional.of(() -> credentials.username);
-            } else {
+            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), credentials.username);
+
+            if (this.userAdminHelper.isPasswordChangeRequired(credentials.username)) {
                 auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
                 return Optional.empty();
             }
+
+            this.userAdminHelper.verifyUsernamePassword(credentials.username, credentials.password);
+
+            auditLogger.info("{} Rest - Success - Authentication succeeded via password provider", auditContext);
+
+            return Optional.of(() -> credentials.username);
         } catch (final Exception e) {
             auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
-            logger.warn("Failed to compute password hash", e);
             return Optional.empty();
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,17 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
+import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.BASE_PATH;
+import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.CHANGE_PASSWORD_PATH;
+import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.XSRF_TOKEN_PATH;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,35 +45,36 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
-import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
-
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
+import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
+import org.eclipse.kura.internal.rest.auth.SessionRestService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
+import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.useradmin.Group;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
+import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
+
+@SuppressWarnings("restriction")
 @Provider
 public class RestService
         implements AuthenticationHandler, AuthorizationHandler, ConfigurableComponent, ContainerResponseFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
-
-    private static final String KURA_PERMISSION_PREFIX = "kura.permission.";
-    private static final String KURA_PERMISSION_REST_PREFIX = KURA_PERMISSION_PREFIX + "rest.";
-    private static final String KURA_USER_PREFIX = "kura.user.";
-
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final Response NOT_FOUND_RESPONSE = Response.status(Response.Status.NOT_FOUND).build();
@@ -79,8 +87,13 @@ public class RestService
     private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
     private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
 
-    private AuthenticationProvider passwordAuthProvider;
+    private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
+    private SessionAuthProvider sessionAuthenticationProvider;
+    private SessionRestService authRestService;
+    private UserAdminHelper userAdminHelper;
+
+    private ServiceTracker<Object, Thread> tracker;
 
     @Context
     private HttpServletRequest request;
@@ -117,11 +130,30 @@ public class RestService
 
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestService.class).getBundleContext();
 
+        try {
+            this.tracker = new ServiceTracker<>(bundleContext, FrameworkUtil.createFilter(
+                    "(osgi.http.whiteboard.servlet.name=com.eclipsesource.jaxrs.publisher.internal.ServletContainerBridge)"),
+                    new ServletContainerBridgeFix(bundleContext));
+            this.tracker.open();
+        } catch (InvalidSyntaxException e) {
+            // no need
+        }
+
+        this.userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
+        final RestSessionHelper restSessionHelper = new RestSessionHelper(this.userAdminHelper);
+
         registeredServices
                 .add(bundleContext.registerService(ContainerRequestFilter.class, new IncomingPortCheckFilter(), null));
 
-        this.passwordAuthProvider = new PasswordAuthenticationProvider(bundleContext, userAdmin, cryptoService);
-        this.certificateAuthProvider = new CertificateAuthenticationProvider(userAdmin);
+        this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, this.userAdminHelper);
+        this.certificateAuthProvider = new CertificateAuthenticationProvider(this.userAdminHelper);
+        this.sessionAuthenticationProvider = new SessionAuthProvider(restSessionHelper,
+                new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
+                Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
+        this.authRestService = new SessionRestService(this.userAdminHelper, restSessionHelper);
+
+        this.registeredServices
+                .add(bundleContext.registerService(SessionRestService.class, this.authRestService, null));
 
         update(properties);
 
@@ -136,6 +168,8 @@ public class RestService
         if (!Objects.equals(this.options, newOptions)) {
             this.options = newOptions;
             updateBuiltinAuthenticationProviders(newOptions);
+            this.authRestService.setOptions(newOptions);
+            this.sessionAuthenticationProvider.setOptions(newOptions);
         }
 
         logger.info("updating...done");
@@ -143,6 +177,8 @@ public class RestService
 
     public void deactivate() {
         logger.info("deactivating...");
+
+        this.tracker.close();
 
         for (final ServiceRegistration<?> reg : registeredServices) {
             reg.unregister();
@@ -163,10 +199,8 @@ public class RestService
     public boolean isUserInRole(Principal requestUser, String role) {
 
         try {
-            final User user = (User) this.userAdmin.getRole(KURA_USER_PREFIX + requestUser.getName());
-
-            return containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_REST_PREFIX + role), user)
-                    || containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_PREFIX + "kura.admin"), user);
+            this.userAdminHelper.requirePermissions(requestUser.getName(), "rest." + role);
+            return true;
 
         } catch (final Exception e) {
             return false;
@@ -195,28 +229,6 @@ public class RestService
     @Override
     public String getAuthenticationScheme() {
         return null;
-    }
-
-    private static boolean containsBasicMember(final Role group, final User user) {
-        if (!(group instanceof Group)) {
-            return false;
-        }
-
-        final Group asGroup = (Group) group;
-
-        final Role[] members = asGroup.getMembers();
-
-        if (members == null) {
-            return false;
-        }
-
-        for (final Role member : members) {
-            if (member.getName().equals(user.getName())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -341,17 +353,23 @@ public class RestService
     }
 
     private void updateBuiltinAuthenticationProviders(final RestServiceOptions options) {
-        if (options.isPasswordAuthEnabled()) {
-            bindAuthenticationProvider(this.passwordAuthProvider);
+        if (options.isPasswordAuthEnabled() && options.isBasicAuthEnabled()) {
+            bindAuthenticationProvider(this.basicAuthProvider);
         } else {
-            unbindAuthenticationProvider(this.passwordAuthProvider);
+            unbindAuthenticationProvider(this.basicAuthProvider);
         }
 
-        if (options.isCertificateAuthEnabled()) {
+        if (options.isCertificateAuthEnabled() && options.isStatelessCertificateAuthEnabled()) {
             bindAuthenticationProvider(this.certificateAuthProvider);
         } else {
             unbindAuthenticationProvider(this.certificateAuthProvider);
         }
+
+        if (options.isSessionManagementEnabled()) {
+            bindAuthenticationProvider(this.sessionAuthenticationProvider);
+
+        }
+
     }
 
 }

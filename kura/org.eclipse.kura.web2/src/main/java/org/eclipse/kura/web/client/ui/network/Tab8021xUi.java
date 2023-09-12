@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -168,9 +168,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.eap.addChangeHandler(event -> {
             setDirty(true);
             this.netTabs.updateTabs();
-
-            // refresh();
-            // resetValidations();
         });
     }
 
@@ -189,9 +186,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.innerAuth.addChangeHandler(event -> {
             setDirty(true);
-            this.netTabs.updateTabs();
-
-            // supdate();
+            this.netTabs.updateTabs();ß
         });
     }
 

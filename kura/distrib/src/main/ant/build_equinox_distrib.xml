@@ -1320,7 +1320,7 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.security.provider_${org.eclipse.kura.rest.security.provider.version}.jar@4:start" />        	
        	    <entry key="osgi.bundles" operation="+"
-        	value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.keystore.provider_${org.eclipse.kura.rest.keystore.provider.version}.jar@4:start" />        	
+        	value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.security.services.provider_${org.eclipse.kura.rest.security.services.provider.version}.jar@4:start" />        	
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.system.provider_${org.eclipse.kura.rest.system.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
@@ -1422,7 +1422,7 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.security.provider_${org.eclipse.kura.rest.security.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />	
             <zipfileset
-        	file="${project.build.directory}/plugins/org.eclipse.kura.rest.keystore.provider_${org.eclipse.kura.rest.keystore.provider.version}.jar"
+        	file="${project.build.directory}/plugins/org.eclipse.kura.rest.security.services.provider_${org.eclipse.kura.rest.security.services.provider.version}.jar"
         	prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.system.provider_${org.eclipse.kura.rest.system.provider.version}.jar"

@@ -11,15 +11,15 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.internal.rest.keystore.provider.dto;
+package org.eclipse.kura.internal.rest.security.services.provider.dto;
 
 import java.util.List;
 
-public class KeyStoreDTO {
+public class SercurityServicesDTO {
 
     List<String> keystoreEntries;
     
-    public KeyStoreDTO(List<String> entries) {
+    public SercurityServicesDTO(List<String> entries) {
         this.keystoreEntries = entries;
     }
     

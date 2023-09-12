@@ -13,10 +13,10 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider">
     <implementation class="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService"/>
 
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService"/>
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
@@ -25,10 +25,10 @@
                name="RequestHandlerRegistry"
                policy="dynamic"/>
 
-    <reference interface="org.eclipse.kura.security.SecurityService"
-               bind="bindSecurityService"
+    <reference interface="org.eclipse.kura.security.keystore.KeystoreService"
+               bind="bindKeystoreService"
                cardinality="0..1"
-               name="SecurityService"
+               name="KeystoreService"
                policy="static"/>
 
     <reference interface="org.osgi.service.useradmin.UserAdmin"
@@ -38,11 +38,11 @@
                policy="static"/>
 
     <service>
-        <provide interface="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService"/>
+        <provide interface="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
     </service>
 
     <property name="service.pid"
               type="String"
-              value="org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService"/>
+              value="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
 
 </scr:component>

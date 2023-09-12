@@ -29,7 +29,7 @@
             ${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
-    <artifactId>org.eclipse.kura.rest.keystore.provider</artifactId>
+    <artifactId>org.eclipse.kura.rest.security.services.provider</artifactId>
     <packaging>eclipse-plugin</packaging>
     <version>1.0.0-SNAPSHOT</version>
     

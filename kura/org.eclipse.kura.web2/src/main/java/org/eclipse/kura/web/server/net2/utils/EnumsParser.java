@@ -166,6 +166,10 @@ public class EnumsParser {
             if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA_WPA2.name())) {
                 return GwtWifiSecurity.netWifiSecurityWPA_WPA2.name();
             }
+
+            if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA2_WPA3_ENTERPRISE.name())) {
+                return GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name();
+            }
         }
 
         return GwtWifiSecurity.netWifiSecurityWPA2.name();
@@ -192,6 +196,11 @@ public class EnumsParser {
             if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())) {
                 return WifiSecurity.SECURITY_WPA_WPA2.name();
             }
+
+            if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name())) {
+                return WifiSecurity.SECURITY_WPA2_WPA3_ENTERPRISE.name();
+            }
+
         }
 
         return WifiSecurity.NONE.name();
@@ -263,9 +272,9 @@ public class EnumsParser {
                 return Optional.of(GwtWifiRadioMode.netWifiRadioModeBG.name());
             }
 
-            if (wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT20.name()) ||
-                    wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT40above.name()) ||
-                    wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT40below.name())) {
+            if (wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT20.name())
+                    || wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT40above.name())
+                    || wifiRadioMode.get().equals(WifiRadioMode.RADIO_MODE_80211nHT40below.name())) {
                 return Optional.of(GwtWifiRadioMode.netWifiRadioModeBGN.name());
             }
         }
@@ -333,16 +342,16 @@ public class EnumsParser {
     public static String getAuthType(Optional<GwtModemAuthType> gwtModemAuthType) {
         if (gwtModemAuthType.isPresent()) {
             switch (gwtModemAuthType.get()) {
-                case netModemAuthAUTO:
-                    return AuthType.AUTO.name();
-                case netModemAuthCHAP:
-                    return AuthType.CHAP.name();
+            case netModemAuthAUTO:
+                return AuthType.AUTO.name();
+            case netModemAuthCHAP:
+                return AuthType.CHAP.name();
 
-                case netModemAuthPAP:
-                    return AuthType.PAP.name();
-                case netModemAuthNONE:
-                default:
-                    break;
+            case netModemAuthPAP:
+                return AuthType.PAP.name();
+            case netModemAuthNONE:
+            default:
+                break;
             }
         }
 
@@ -378,15 +387,15 @@ public class EnumsParser {
     public static String getPdpType(Optional<GwtModemPdpType> gwtModemPdpType) {
         if (gwtModemPdpType.isPresent()) {
             switch (gwtModemPdpType.get()) {
-                case netModemPdpIP:
-                    return PdpType.IP.name();
-                case netModemPdpIPv6:
-                    return PdpType.IPv6.name();
-                case netModemPdpPPP:
-                    return PdpType.PPP.name();
-                case netModemPdpUnknown:
-                default:
-                    break;
+            case netModemPdpIP:
+                return PdpType.IP.name();
+            case netModemPdpIPv6:
+                return PdpType.IPv6.name();
+            case netModemPdpPPP:
+                return PdpType.PPP.name();
+            case netModemPdpUnknown:
+            default:
+                break;
             }
         }
 

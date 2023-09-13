@@ -1,6 +1,7 @@
 package org.eclipse.kura.internal.rest.security.services.provider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,6 +40,9 @@ public class SecurityServicesProvider {
     private static final String REST_ROLE_NAME = "security.services";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
+    private static final String KURA_SERVICE_PID_FILTER = "kura.service.pid";
+    private static final String OBJECT_CLASS_FILTER = "objectClass";
+
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
     public void bindUserAdmin(UserAdmin userAdmin) {
@@ -75,7 +79,7 @@ public class SecurityServicesProvider {
             logger.debug(DEBUG_MESSSAGE, "securityServices/v1/services");
 
             BundleContext context = FrameworkUtil.getBundle(SecurityServicesProvider.class).getBundleContext();
-            List<String> resultDTO = getServices(context);
+            List<String> resultDTO = getAllServices(context);
 
             return new SercurityServicesDTO(resultDTO);
         } catch (Exception e) {
@@ -101,46 +105,58 @@ public class SecurityServicesProvider {
         }
     }
 
-    private List<String> getServices(BundleContext context) throws InvalidSyntaxException {
+    private List<String> getAllServices(BundleContext context) throws InvalidSyntaxException {
 
         List<String> servicesList = new ArrayList<>();
 
         Collection<ServiceReference<KeystoreService>> keystoreServices = context
                 .getServiceReferences(KeystoreService.class, (String) null);
-        // Iterator<ServiceReference<KeystoreService>> keystoreIterator = keystoreServices.iterator();
 
         keystoreServices.stream().forEach(entry -> {
-            servicesList.add(entry.getProperty("kura.service.pid").toString());
+            servicesList.add(entry.getProperty(KURA_SERVICE_PID_FILTER).toString());
         });
-
-        // if (keystoreIterator.hasNext()) {
-        // servicesList.add("Keystore Configuration");
-        // }
-        // while (keystoreIterator.hasNext()) {
-        // servicesList.add(keystoreIterator.next().getProperties().get("kura.service.pid").toString());
-        // }
 
         Collection<ServiceReference<SslManagerService>> sslServices = context
                 .getServiceReferences(SslManagerService.class, (String) null);
-        // Iterator<ServiceReference<SslManagerService>> sslIterator = sslServices.iterator();
 
         sslServices.stream().forEach(entry -> {
-            servicesList.add(entry.getProperty("kura.service.pid").toString());
+            servicesList.add(entry.getProperty(KURA_SERVICE_PID_FILTER).toString());
         });
 
-        // if (sslIterator.)) {
-        // servicesList.add("SSL Configuration");
-        // }
-        // while (sslIterator.hasNext()) {
-        // servicesList.add(sslIterator.next().getProperties().get("kura.service.pid").toString());
-        // }
-        //
         return servicesList;
     }
 
-    private List<String> getFilteredInterfaces(BundleContext context, List<String> interfacesIds) {
+    private List<String> getFilteredInterfaces(BundleContext context, List<String> interfacesIds)
+            throws InvalidSyntaxException {
 
         List<String> servicesList = new ArrayList<>();
+
+        Collection<ServiceReference<KeystoreService>> keystoreServices = context
+                .getServiceReferences(KeystoreService.class, (String) null);
+
+        keystoreServices.stream().forEach(entry -> {
+            List<String> objectClassesList = Arrays.asList((String[]) entry.getProperty(OBJECT_CLASS_FILTER));
+
+            interfacesIds.forEach(filtering -> {
+                if (objectClassesList.contains(filtering)) {
+                    servicesList.add(entry.getProperty(KURA_SERVICE_PID_FILTER).toString());
+                }
+            });
+
+        });
+
+        Collection<ServiceReference<SslManagerService>> sslServices = context
+                .getServiceReferences(SslManagerService.class, (String) null);
+
+        sslServices.stream().forEach(entry -> {
+            List<String> objectClassesList = Arrays.asList((String[]) entry.getProperty(OBJECT_CLASS_FILTER));
+
+            interfacesIds.forEach(filtering -> {
+                if (objectClassesList.contains(filtering)) {
+                    servicesList.add(entry.getProperty(KURA_SERVICE_PID_FILTER).toString());
+                }
+            });
+        });
 
         return servicesList;
 

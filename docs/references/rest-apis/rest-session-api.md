@@ -133,7 +133,7 @@ Represents the response for a successful password authentication request.
 <br>**Properties**:
 
   * **passwordChangeNeeded**: `bool` 
-      Determines whether the user needs to change its current password before bein able to access REST APIs.
+      Determines whether the user needs to change its current password before being able to access REST APIs.
 
   
 

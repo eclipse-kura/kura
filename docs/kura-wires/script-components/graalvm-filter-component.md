@@ -8,6 +8,7 @@ The *Filter Component* provides scripting functionalities in Kura Wires using th
 * The script context is persisted across multiple executions, allowing to perform stateful computations like running a counter, performing time averages etc.
 * A slf4j Logger is available to the script for debugging purposes.
 * The script context is restricted to allow only Wires-related processing. Any attempt to load additional Java classes will fail.
+* The default configuration contains an example script describing the component usage, it can be executed connecting a Timer and a Logger component.
 
 
 
@@ -17,7 +18,7 @@ The following global variables are available to the script:
 
 * [`input`](#received-envelope): an object that represents the received wire envelope.
 * [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
-* logger: a slf4j logger.
+* `logger`: a slf4j logger.
 
 The following utility functions are available:
 
@@ -71,7 +72,7 @@ As in the example above, `wireRecord.getProperties` returns a map of `String, Ty
 
 ## Creating and emitting wire records
 
-New mutable `WireRecord` instances can be created using the `newWireRecord(Map<String, TypedValue<?>)` function. The properties of a mutable WireRecord can be modified by setting Javascript object properties. The properties of a WireRecord object must be instances of the [`TypedValue`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java) class created using the `new<type>Value()` family of functions.
+New mutable `WireRecord` instances can be created using the `newWireRecord(Map<String, TypedValue<?>)` function. The properties of a mutable `WireRecord` can be modified by setting Javascript object properties. The properties of a `WireRecord` object must be instances of the [`TypedValue`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java) class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a WireRecord will result in an exception.
 
 The **output** global variable is an object that can be used for emitting `WireRecord`s. This object contains a list of `WireRecord`s that will be emitted when the script execution finishes if no exceptions are thrown. The following code is an example of how to emit a list containing a single `WireRecord`:
 
@@ -94,4 +95,18 @@ outputMap['example.string'] = newStringValue('Hello World!')
 outputMap['example.byte.array'] = newByteArrayValue(byteArray)
 
 output[0] = newWireRecord(outputMap)
+```
+
+
+
+## Script context
+
+The **script.context.drop** option allows to rest the script context. If set to `true` the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.
+
+In the example below, with **script.context.drop=false** the following script will preserve the value of `counter` across executions. Setting **script.context.drop=true** will cause `counter` to be `undefined` every time the component is triggered.
+
+```javascript
+counter = typeof(counter) === 'undefined'
+ ? 0 // counter is undefined, initialise it to zero
+ : counter; // counter is already defined, keep the previous value
 ```

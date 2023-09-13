@@ -101,7 +101,7 @@ output[0] = newWireRecord(outputMap)
 
 ## Script context
 
-The **script.context.drop** option allows to rest the script context. If set to `true` the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.
+The **script.context.drop** option allows to reset the script context. If set to `true` the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.
 
 In the example below, with **script.context.drop=false** the following script will preserve the value of `counter` across executions. Setting **script.context.drop=true** will cause `counter` to be `undefined` every time the component is triggered.
 

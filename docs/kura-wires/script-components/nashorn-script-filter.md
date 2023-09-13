@@ -11,6 +11,7 @@ The **Script Filter Component** provides scripting functionalities in Kura Wires
 * The script context is persisted across multiple executions, allowing to perform stateful computations like running a counter, performing time averages etc.
 * A slf4j Logger is available to the script for debug purposes.
 * The script context is restricted in order to allow only Wires related processing. Any attempt to load additional Java classes will fail.
+* The default configuration contains an example script describing the component usage, it can be executed connecting a Timer and a Logger component.
 
 
 
@@ -20,15 +21,16 @@ The following global variables are available to the script:
 
 * [`input`](#received-envelope): an object that represents the received wire envelope.
 * [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
-* logger: a slf4j logger.
+* `logger`: a slf4j logger
 
-The following utility functions are available:
+The following utility functions are available (see [Creating and emitting wire records](#creating-and-emitting-wire-records) for usage):
 
 * `newWireRecord(void) -> WireRecordWrapper`
 * `newByteArray(void) -> byte[]`
 * `newBooleanValue(boolean) -> TypedValue`
-* `newByteArrayValue(byte[]) -> TypedValue`
+* `newByteArrayValue(byte[])` -> `TypedValue`
 * `newDoubleValue(number) -> TypedValue`
+* `newFloatValue(number) -> TypedValue`
 * `newIntegerValue(number) -> TypedValue`
 * `newLongValue(number) -> TypedValue`
 * `newStringValue(object) -> TypedValue`
@@ -77,7 +79,7 @@ if (record.TEMPERATURE.getValue() > 50) {
 
 ## Creating and emitting wire records
 
-New mutable Wire Record instances can be created using the `newWireRecord(void) -> WireRecordWrapper` function. The properties of a mutable WireRecord can be modified by setting Javascript object properties. The properties of a WireRecord object must be instances of the TypedValue class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a WireRecord will result in an exception.
+New mutable `WireRecord` instances can be created using the `newWireRecord(void) -> WireRecordWrapper` function. The properties of a mutable `WireRecord` can be modified by setting Javascript object properties. The properties of a `WireRecord` object must be instances of the [`TypedValue`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java) class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a `WireRecord` will result in an exception.
 
 The **output** global variable is an object that can be used for emitting WireRecords.
 This object contains a list of WireRecords that will be emitted when the script execution finishes, if no exceptions are thrown. New records can be added to the list using the `add(WireRecordWrapper)` function. It is also possible to emit records contained in the received WireEnvelope.
@@ -85,14 +87,31 @@ This object contains a list of WireRecords that will be emitted when the script 
 The script filter will emit a wire envelope only if the WireRecord list is not empty when the script execution completes. The following code is an example about how to emit a value:
 
 ```javascript
-// create a new record
 var record = newWireRecord()
 
-// set some properties on it
+var byteArray = newByteArray()
+byteArray[0] = 1
+byteArray[1] = 2
+byteArray[2] = 0xaa
+byteArray[3] = 0xbb
+
 record.LED1 = newBooleanValue(true)
 record.foo = newStringValue('bar')
 record['myprop'] = newDoubleValue(123.456)
+record['example.long'] = newLongValue(100)
+record['example.float'] = newFloatValue(1.014)
+record['example.byte.array'] = newByteArrayValue(byteArray)
 
-// add the wire record to the output envelope
 output.add(record)
+```
+## Script context
+
+The **script.context.drop** option allows to reset the script context. If set to `true` the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.
+
+In the example below, with **script.context.drop=false** the following script will preserve the value of `counter` across executions. Setting **script.context.drop=true** will cause `counter` to be `undefined` every time the component is triggered.
+
+```javascript
+counter = typeof(counter) === 'undefined'
+ ? 0 // counter is undefined, initialise it to zero
+ : counter; // counter is already defined, keep the previous value
 ```

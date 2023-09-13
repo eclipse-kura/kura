@@ -8,7 +8,7 @@ With the addition of this new functionality, a compatible component instance can
 
 In the example provided, we have two components in the Wire Composer:
 
-- the **[Conditional](./conditional-component.md)** component that implements the if-then-else logic
+- the **[Conditional](../script-components/nashorn-conditional-component.md)** component that implements the if-then-else logic
 - the **[Join](./join-component.md)** component that joins into a single Wire the data processed by two separate branches of a graph
 
 Those components are available in every default installation of Kura.

@@ -2073,6 +2073,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#script-context" class="md-nav__link">
+    Script context
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2965,6 +2972,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#script-context" class="md-nav__link">
+    Script context
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2992,21 +3006,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>The script context is persisted across multiple executions, allowing to perform stateful computations like running a counter, performing time averages etc.</li>
 <li>A slf4j Logger is available to the script for debug purposes.</li>
 <li>The script context is restricted in order to allow only Wires related processing. Any attempt to load additional Java classes will fail.</li>
+<li>The default configuration contains an example script describing the component usage, it can be executed connecting a Timer and a Logger component.</li>
 </ul>
 <h2 id="usage">Usage</h2>
 <p>The following global variables are available to the script:</p>
 <ul>
 <li><a href="#received-envelope"><code>input</code></a>: an object that represents the received wire envelope.</li>
 <li><a href="#creating-and-emitting-wire-records"><code>output</code></a>: an object that allows to emit wire records.</li>
-<li>logger: a slf4j logger.</li>
+<li><code>logger</code>: a slf4j logger</li>
 </ul>
-<p>The following utility functions are available:</p>
+<p>The following utility functions are available (see <a href="#creating-and-emitting-wire-records">Creating and emitting wire records</a> for usage):</p>
 <ul>
 <li><code>newWireRecord(void) -&gt; WireRecordWrapper</code></li>
 <li><code>newByteArray(void) -&gt; byte[]</code></li>
 <li><code>newBooleanValue(boolean) -&gt; TypedValue</code></li>
-<li><code>newByteArrayValue(byte[]) -&gt; TypedValue</code></li>
+<li><code>newByteArrayValue(byte[])</code> -&gt; <code>TypedValue</code></li>
 <li><code>newDoubleValue(number) -&gt; TypedValue</code></li>
+<li><code>newFloatValue(number) -&gt; TypedValue</code></li>
 <li><code>newIntegerValue(number) -&gt; TypedValue</code></li>
 <li><code>newLongValue(number) -&gt; TypedValue</code></li>
 <li><code>newStringValue(object) -&gt; TypedValue</code></li>
@@ -3046,20 +3062,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="creating-and-emitting-wire-records">Creating and emitting wire records</h2>
-<p>New mutable Wire Record instances can be created using the <code>newWireRecord(void) -&gt; WireRecordWrapper</code> function. The properties of a mutable WireRecord can be modified by setting Javascript object properties. The properties of a WireRecord object must be instances of the TypedValue class created using the <code>new&lt;type&gt;Value()</code> family of functions. Setting different kind of objects as properties of a WireRecord will result in an exception.</p>
+<p>New mutable <code>WireRecord</code> instances can be created using the <code>newWireRecord(void) -&gt; WireRecordWrapper</code> function. The properties of a mutable <code>WireRecord</code> can be modified by setting Javascript object properties. The properties of a <code>WireRecord</code> object must be instances of the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java"><code>TypedValue</code></a> class created using the <code>new&lt;type&gt;Value()</code> family of functions. Setting different kind of objects as properties of a <code>WireRecord</code> will result in an exception.</p>
 <p>The <strong>output</strong> global variable is an object that can be used for emitting WireRecords.
 This object contains a list of WireRecords that will be emitted when the script execution finishes, if no exceptions are thrown. New records can be added to the list using the <code>add(WireRecordWrapper)</code> function. It is also possible to emit records contained in the received WireEnvelope.</p>
 <p>The script filter will emit a wire envelope only if the WireRecord list is not empty when the script execution completes. The following code is an example about how to emit a value:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// create a new record</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">var</span><span class="w"> </span><span class="nx">record</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newWireRecord</span><span class="p">()</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// set some properties on it</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nx">record</span><span class="p">.</span><span class="nx">LED1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newBooleanValue</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nx">record</span><span class="p">.</span><span class="nx">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newStringValue</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nx">record</span><span class="p">[</span><span class="s1">&#39;myprop&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newDoubleValue</span><span class="p">(</span><span class="mf">123.456</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">record</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newWireRecord</span><span class="p">()</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">var</span><span class="w"> </span><span class="nx">byteArray</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newByteArray</span><span class="p">()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nx">byteArray</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nx">byteArray</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nx">byteArray</span><span class="p">[</span><span class="mf">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xaa</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nx">byteArray</span><span class="p">[</span><span class="mf">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xbb</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">// add the wire record to the output envelope</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nx">output</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">record</span><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="nx">record</span><span class="p">.</span><span class="nx">LED1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newBooleanValue</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nx">record</span><span class="p">.</span><span class="nx">foo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newStringValue</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nx">record</span><span class="p">[</span><span class="s1">&#39;myprop&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newDoubleValue</span><span class="p">(</span><span class="mf">123.456</span><span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nx">record</span><span class="p">[</span><span class="s1">&#39;example.long&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newLongValue</span><span class="p">(</span><span class="mf">100</span><span class="p">)</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="nx">record</span><span class="p">[</span><span class="s1">&#39;example.float&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newFloatValue</span><span class="p">(</span><span class="mf">1.014</span><span class="p">)</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="nx">record</span><span class="p">[</span><span class="s1">&#39;example.byte.array&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newByteArrayValue</span><span class="p">(</span><span class="nx">byteArray</span><span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="nx">output</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">record</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="script-context">Script context</h2>
+<p>The <strong>script.context.drop</strong> option allows to reset the script context. If set to <code>true</code> the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.</p>
+<p>In the example below, with <strong>script.context.drop=false</strong> the following script will preserve the value of <code>counter</code> across executions. Setting <strong>script.context.drop=true</strong> will cause <code>counter</code> to be <code>undefined</code> every time the component is triggered.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">typeof</span><span class="p">(</span><span class="nx">counter</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;undefined&#39;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="c1">// counter is undefined, initialise it to zero</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">counter</span><span class="p">;</span><span class="w"> </span><span class="c1">// counter is already defined, keep the previous value</span>
 </code></pre></div>
 
               

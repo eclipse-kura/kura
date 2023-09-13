@@ -2101,6 +2101,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#script-context" class="md-nav__link">
+    Script context
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2965,6 +2972,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#script-context" class="md-nav__link">
+    Script context
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2988,18 +3002,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>The script context is persisted across multiple executions, allowing to perform stateful computations like running a counter, performing time averages etc.</li>
 <li>A slf4j Logger is available to the script for debugging purposes.</li>
 <li>The script context is restricted to allow only Wires-related processing. Any attempt to load additional Java classes will fail.</li>
+<li>The default configuration contains an example script describing the component usage, it can be executed connecting a Timer and a Logger component.</li>
 </ul>
 <h2 id="usage">Usage</h2>
 <p>The following global variables are available to the script:</p>
 <ul>
 <li><a href="#received-envelope"><code>input</code></a>: an object that represents the received wire envelope.</li>
 <li><a href="#creating-and-emitting-wire-records"><code>output</code></a>: an object that allows to emit wire records.</li>
-<li>logger: a slf4j logger.</li>
+<li><code>logger</code>: a slf4j logger.</li>
 </ul>
-<p>The following utility functions are available:</p>
+<p>The following utility functions are available (see <a href="#creating-and-emitting-wire-records">Creating and emitting wire records</a> for usage):</p>
 <ul>
 <li><code>newWireRecord(Map&lt;String, TypedValue&lt;?&gt;) -&gt; WireRecord</code></li>
-<li><code>newByteArray(void) -&gt; byte[]</code></li>
+<li><code>newByteArray(int) -&gt; byte[]</code></li>
 <li><code>newBooleanValue(boolean) -&gt; TypedValue</code></li>
 <li><code>newByteArrayValue(byte[]) -&gt; TypedValue</code></li>
 <li><code>newDoubleValue(number) -&gt; TypedValue</code></li>
@@ -3034,7 +3049,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </code></pre></div>
 <p>As in the example above, <code>wireRecord.getProperties</code> returns a map of <code>String, TypedValue</code>. Refer to the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java"><code>TypedValue</code> Kura API</a> for the accessible public methods list.</p>
 <h2 id="creating-and-emitting-wire-records">Creating and emitting wire records</h2>
-<p>New mutable <code>WireRecord</code> instances can be created using the <code>newWireRecord(Map&lt;String, TypedValue&lt;?&gt;)</code> function. The properties of a mutable WireRecord can be modified by setting Javascript object properties. The properties of a WireRecord object must be instances of the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java"><code>TypedValue</code></a> class created using the <code>new&lt;type&gt;Value()</code> family of functions.</p>
+<p>New mutable <code>WireRecord</code> instances can be created using the <code>newWireRecord(Map&lt;String, TypedValue&lt;?&gt;)</code> function. The properties of a mutable <code>WireRecord</code> can be modified by setting Javascript object properties. The properties of a <code>WireRecord</code> object must be instances of the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java"><code>TypedValue</code></a> class created using the <code>new&lt;type&gt;Value()</code> family of functions. Setting different kind of objects as properties of a <code>WireRecord</code> will result in an exception.</p>
 <p>The <strong>output</strong> global variable is an object that can be used for emitting <code>WireRecord</code>s. This object contains a list of <code>WireRecord</code>s that will be emitted when the script execution finishes if no exceptions are thrown. The following code is an example of how to emit a list containing a single <code>WireRecord</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Array</span><span class="p">()</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">var</span><span class="w"> </span><span class="nx">outputMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Object</span><span class="p">()</span>
@@ -3054,6 +3069,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="nx">outputMap</span><span class="p">[</span><span class="s1">&#39;example.byte.array&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newByteArrayValue</span><span class="p">(</span><span class="nx">byteArray</span><span class="p">)</span>
 <a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
 <a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="nx">output</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newWireRecord</span><span class="p">(</span><span class="nx">outputMap</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="script-context">Script context</h2>
+<p>The <strong>script.context.drop</strong> option allows to reset the script context. If set to <code>true</code> the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.</p>
+<p>In the example below, with <strong>script.context.drop=false</strong> the following script will preserve the value of <code>counter</code> across executions. Setting <strong>script.context.drop=true</strong> will cause <code>counter</code> to be <code>undefined</code> every time the component is triggered.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">typeof</span><span class="p">(</span><span class="nx">counter</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;undefined&#39;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="c1">// counter is undefined, initialise it to zero</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">counter</span><span class="p">;</span><span class="w"> </span><span class="c1">// counter is already defined, keep the previous value</span>
 </code></pre></div>
 
               

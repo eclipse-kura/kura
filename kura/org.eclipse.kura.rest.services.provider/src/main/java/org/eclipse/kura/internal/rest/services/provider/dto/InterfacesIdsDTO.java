@@ -1,4 +1,4 @@
-package org.eclipse.kura.internal.rest.security.services.provider.dto;
+package org.eclipse.kura.internal.rest.services.provider.dto;
 
 import java.util.List;
 import java.util.Objects;

@@ -13,10 +13,10 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider">
-    <implementation class="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider">
+    <implementation class="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
 
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
@@ -25,12 +25,6 @@
                name="RequestHandlerRegistry"
                policy="dynamic"/>
 
-    <reference interface="org.eclipse.kura.security.keystore.KeystoreService"
-               bind="bindKeystoreService"
-               cardinality="0..1"
-               name="KeystoreService"
-               policy="static"/>
-
     <reference interface="org.osgi.service.useradmin.UserAdmin"
                bind="bindUserAdmin"
                cardinality="0..1"
@@ -38,11 +32,11 @@
                policy="static"/>
 
     <service>
-        <provide interface="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
+        <provide interface="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
     </service>
 
     <property name="service.pid"
               type="String"
-              value="org.eclipse.kura.internal.rest.security.services.provider.SecurityServicesProvider"/>
+              value="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
 
 </scr:component>

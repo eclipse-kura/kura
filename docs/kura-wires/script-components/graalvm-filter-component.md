@@ -20,10 +20,10 @@ The following global variables are available to the script:
 * [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
 * `logger`: a slf4j logger.
 
-The following utility functions are available:
+The following utility functions are available (see [Creating and emitting wire records](#creating-and-emitting-wire-records) for usage):
 
 * `newWireRecord(Map<String, TypedValue<?>) -> WireRecord`
-* `newByteArray(void) -> byte[]`
+* `newByteArray(int) -> byte[]`
 * `newBooleanValue(boolean) -> TypedValue`
 * `newByteArrayValue(byte[]) -> TypedValue`
 * `newDoubleValue(number) -> TypedValue`

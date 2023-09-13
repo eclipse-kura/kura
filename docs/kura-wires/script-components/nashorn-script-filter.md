@@ -23,7 +23,7 @@ The following global variables are available to the script:
 * [`output`](#creating-and-emitting-wire-records): an object that allows to emit wire records.
 * `logger`: a slf4j logger
 
-The following utility functions are available:
+The following utility functions are available (see [Creating and emitting wire records](#creating-and-emitting-wire-records) for usage):
 
 * `newWireRecord(void) -> WireRecordWrapper`
 * `newByteArray(void) -> byte[]`
@@ -87,15 +87,21 @@ This object contains a list of WireRecords that will be emitted when the script 
 The script filter will emit a wire envelope only if the WireRecord list is not empty when the script execution completes. The following code is an example about how to emit a value:
 
 ```javascript
-// create a new record
 var record = newWireRecord()
 
-// set some properties on it
+var byteArray = newByteArray()
+byteArray[0] = 1
+byteArray[1] = 2
+byteArray[2] = 0xaa
+byteArray[3] = 0xbb
+
 record.LED1 = newBooleanValue(true)
 record.foo = newStringValue('bar')
 record['myprop'] = newDoubleValue(123.456)
+record['example.long'] = newLongValue(100)
+record['example.float'] = newFloatValue(1.014)
+record['example.byte.array'] = newByteArrayValue(byteArray)
 
-// add the wire record to the output envelope
 output.add(record)
 ```
 

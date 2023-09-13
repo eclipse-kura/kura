@@ -72,7 +72,7 @@ As in the example above, `wireRecord.getProperties` returns a map of `String, Ty
 
 ## Creating and emitting wire records
 
-New mutable `WireRecord` instances can be created using the `newWireRecord(Map<String, TypedValue<?>)` function. The properties of a mutable `WireRecord` can be modified by setting Javascript object properties. The properties of a `WireRecord` object must be instances of the [`TypedValue`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java) class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a WireRecord will result in an exception.
+New mutable `WireRecord` instances can be created using the `newWireRecord(Map<String, TypedValue<?>)` function. The properties of a mutable `WireRecord` can be modified by setting Javascript object properties. The properties of a `WireRecord` object must be instances of the [`TypedValue`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/type/TypedValue.java) class created using the `new<type>Value()` family of functions. Setting different kind of objects as properties of a `WireRecord` will result in an exception.
 
 The **output** global variable is an object that can be used for emitting `WireRecord`s. This object contains a list of `WireRecord`s that will be emitted when the script execution finishes if no exceptions are thrown. The following code is an example of how to emit a list containing a single `WireRecord`:
 
@@ -96,9 +96,6 @@ outputMap['example.byte.array'] = newByteArrayValue(byteArray)
 
 output[0] = newWireRecord(outputMap)
 ```
-
-
-
 ## Script context
 
 The **script.context.drop** option allows to reset the script context. If set to `true` the script context will be dropped every time the component configuration is updated, resetting the value of any persisted variable.

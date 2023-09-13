@@ -196,10 +196,9 @@ public class BlockAggregator<T extends Block> {
 
         @Override
         public boolean hasNext() {
-            if (this.last != null) {
-                return true;
+            if (this.last == null) {
+                getNext();
             }
-            getNext();
             return this.last != null;
         }
 

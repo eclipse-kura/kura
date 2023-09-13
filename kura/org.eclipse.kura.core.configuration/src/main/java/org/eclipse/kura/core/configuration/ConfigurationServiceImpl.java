@@ -1804,7 +1804,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private ComponentConfiguration getComponentDefinition(String pid) {
         final Tocd ocd = this.ocds.get(pid);
-        Map<String, Object> defaultProperties = null;
+        Map<String, Object> defaultProperties = new HashMap<>();
         if (ocd != null) {
             try {
                 defaultProperties = ComponentUtil.getDefaultProperties(ocd, this.ctx);
@@ -1812,8 +1812,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 logger.warn("Failed to get default properties for component: {}", pid, e);
             }
         }
-        return new ComponentConfigurationImpl(pid, ocd,
-                defaultProperties != null ? defaultProperties : new HashMap<>());
+        return new ComponentConfigurationImpl(pid, ocd, defaultProperties);
     }
 
     @Override

@@ -1183,11 +1183,7 @@ public class TiSensorTag {
     }
 
     public boolean isLuxometerNotifying() {
-        if (isCC2650()) {
-            return isNotifying(OPTO);
-        } else {
-            return false;
-        }
+        return isCC2650() && isNotifying(OPTO);
     }
 
     /*

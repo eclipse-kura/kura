@@ -33,9 +33,11 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 import org.gwtbootstrap3.client.ui.PanelHeader;
@@ -80,6 +82,9 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @UiField
     FormLabel labelPassword;
+
+    @UiField
+    Form form;
 
     // Fields
     @UiField
@@ -210,7 +215,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
 
         this.password.addBlurHandler(e -> this.password.validate());
-        this.password.setAllowBlank(true);
+        this.password.setAllowBlank(false);
         this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {
@@ -264,6 +269,15 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getPassword()));
     }
 
+    private boolean checkPassword() {
+
+        if (!this.password.isEnabled()) {
+            return true;
+        }
+
+        return !this.password.getText().isEmpty();
+    }
+
     private void update() {
         setValues();
     }
@@ -292,7 +306,11 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        return true;
+        boolean result = this.form.validate();
+
+        result &= checkPassword();
+
+        return result;
     }
 
     @Override

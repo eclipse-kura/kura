@@ -13,17 +13,15 @@
 
 package org.eclipse.kura.internal.rest.service.listing.provider.dto;
 
+import java.util.Collections;
 import java.util.List;
 
-public class ServiceListDTO {
+public class SortedServiceListDTO {
 
-    List<String> keystoreServices;
+    List<String> sortedServicesList;
 
-    public ServiceListDTO(List<String> entries) {
-        this.keystoreServices = entries;
-    }
-
-    public List<String> getInterfacesIds() {
-        return this.keystoreServices;
+    public SortedServiceListDTO(List<String> entries) {
+        Collections.sort(entries, String.CASE_INSENSITIVE_ORDER);
+        this.sortedServicesList = entries;
     }
 }

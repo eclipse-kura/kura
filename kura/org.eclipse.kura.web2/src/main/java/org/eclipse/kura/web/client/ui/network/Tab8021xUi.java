@@ -168,6 +168,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.eap.addChangeHandler(event -> {
             setDirty(true);
             this.netTabs.updateTabs();
+            updateFormEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
         });
     }
 
@@ -306,8 +307,14 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         Gwt8021xConfig updated8021xConfig = new Gwt8021xConfig();
 
-        updated8021xConfig.setIdentity(this.username.getText());
-        updated8021xConfig.setPassword(this.password.getText());
+        if (this.username.isEnabled()) {
+            updated8021xConfig.setIdentity(this.username.getText());
+        }
+
+        if (this.password.isEnabled()) {
+            updated8021xConfig.setPassword(this.password.getText());
+        }
+
         updated8021xConfig.setEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
         updated8021xConfig.setInnerAuthEnum(Gwt8021xInnerAuth.valueOf(this.innerAuth.getSelectedValue()));
 
@@ -335,6 +342,34 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.username.setValue(config.get8021xConfig().getUsername());
         this.password.setValue(config.get8021xConfig().getPassword());
+    }
+
+    private void updateFormEap(Gwt8021xEap eap) {
+        switch (eap) {
+        case PEAP:
+        case TTLS:
+            this.innerAuth.setEnabled(true);
+            this.username.setEnabled(true);
+            this.password.setEnabled(true);
+            break;
+        case TLS:
+            this.innerAuth.setEnabled(false);
+            setInnerAuthTo(Gwt8021xInnerAuth.NONE);
+            this.username.setEnabled(false);
+            this.password.setEnabled(false);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void setInnerAuthTo(Gwt8021xInnerAuth auth) {
+        for (int i = 0; i < this.innerAuth.getItemCount(); i++) {
+            if (this.innerAuth.getItemText(i).equals(auth.name())) {
+                this.innerAuth.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private void setHelpText(String message) {

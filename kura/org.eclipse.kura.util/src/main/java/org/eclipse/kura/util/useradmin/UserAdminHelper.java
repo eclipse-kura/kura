@@ -207,15 +207,6 @@ public class UserAdminHelper {
         }
     }
 
-    private static <T, E extends Exception> void forEach(final T[] items, final FallibleConsumer<T, E> consumer)
-            throws E {
-        if (items != null) {
-            for (final T item : items) {
-                consumer.accept(item);
-            }
-        }
-    }
-
     public Group getOrCreatePermission(final String name) {
         return getOrCreateRole(Group.class, getPermissionRoleName(name));
     }

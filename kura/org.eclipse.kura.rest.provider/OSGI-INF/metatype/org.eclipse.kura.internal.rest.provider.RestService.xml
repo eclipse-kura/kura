@@ -56,7 +56,8 @@
         	name="Session Inactivity Interval (Seconds)" 
         	type="Integer" 
         	required="true" 
-        	default="900" 
+        	default="900"
+			min="1"
         	description="The session inactivity interval, sessions will expire if no request is performed for the amount of time specified by this parameter in seconds. This parameter is ignored if Session Based Authentication Enabled is set to false.">
         </AD>
         

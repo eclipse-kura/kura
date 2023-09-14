@@ -13,6 +13,11 @@
 package org.eclipse.kura.nm.configuration;
 
 import java.net.UnknownHostException;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,6 +30,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
@@ -44,6 +50,7 @@ import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
@@ -66,6 +73,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+    private KeystoreService keystoreService;
 
     private DhcpServerMonitor dhcpServerMonitor;
     private DnsServerMonitor dnsServerMonitor;
@@ -117,6 +125,16 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     public void unsetCryptoService(CryptoService cryptoService) {
         if (this.cryptoService.equals(cryptoService)) {
             this.cryptoService = null;
+        }
+    }
+
+    public void setKeystoreService(KeystoreService keystoreService) {
+        this.keystoreService = keystoreService;
+    }
+
+    public void unsetKeystoreService(KeystoreService keystoreService) {
+        if (this.keystoreService.equals(keystoreService)) {
+            this.keystoreService = null;
         }
     }
 
@@ -288,6 +306,48 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
             }
         }
+    }
+
+    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps) throws KuraException {
+        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
+            if (prop.getKey().contains("cert") || prop.getKey().contains("certificate")) {
+
+                Object value = prop.getValue();
+
+                if (value instanceof String) {
+                    modifiedProps.put(prop.getKey(), decryptCertificate(value.toString()));
+                } else {
+                    modifiedProps.put(prop.getKey(), value);
+                }
+            } else if (prop.getKey().contains("pem") || prop.getKey().contains("privatekey")) {
+                Object value = prop.getValue();
+
+                if (value instanceof String) {
+                    modifiedProps.put(prop.getKey(), decryptPrivateKey(value.toString()));
+                } else {
+                    modifiedProps.put(prop.getKey(), value);
+                }
+            }
+        }
+    }
+
+    private Certificate decryptCertificate(String certificateName) throws KuraException {
+
+        if (keystoreService.getEntry(certificateName) instanceof TrustedCertificateEntry) {
+            TrustedCertificateEntry cert = (TrustedCertificateEntry) keystoreService.getEntry(certificateName);
+            return cert.getTrustedCertificate();
+        } else if (keystoreService.getEntry(certificateName) instanceof PrivateKeyEntry) {
+            PrivateKeyEntry cert = (PrivateKeyEntry) keystoreService.getEntry(certificateName);
+            return cert.getCertificate();
+        } else {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Certificate not found");
+        }
+    }
+
+    private PrivateKey decryptPrivateKey(String privateKeyName) throws KuraException {
+        PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
+
+        return key.getPrivateKey();
     }
 
     @Override

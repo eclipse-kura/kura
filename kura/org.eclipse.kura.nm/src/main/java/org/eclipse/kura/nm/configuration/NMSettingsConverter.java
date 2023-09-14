@@ -166,6 +166,7 @@ public class NMSettingsConverter {
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
 
+        // TODO: Figure out the client cert and private key
         String clientCert = props.get(String.class, "net.interface.%s.config.802-1x.client-cert", deviceId);
         settings.put("client-cert", new Variant<>(clientCert.getBytes(StandardCharsets.UTF_8)));
 

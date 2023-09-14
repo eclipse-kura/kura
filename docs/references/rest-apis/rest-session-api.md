@@ -177,6 +177,26 @@ An object containing an XSRF token
   "xsrfToken": "d2b68613-152f-41d5-8b5b-a19448ed0e4e"
 }
 ```
+### PasswordChangeRequest
+An object containing the current password and a new password
+
+<br>**Properties**:
+
+  * **currentPassword**: `string` 
+      The current password.
+
+  
+  * **newPassword**: `string` 
+      The new password.
+
+  
+
+```json
+{
+  "currentPassword": "foo",
+  "newPassword": "bar"
+}
+```
 ### GenericFailureReport
 An object reporting a failure message.
 

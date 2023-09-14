@@ -35,7 +35,6 @@ The CloudService provides the following configuration parameters:
 - `republish.mqtt.birth.cert.on.gps.lock` - when set to true, forces a republish of the MQTT Birth Certificate when a GPS correct position lock is received. The device is then registered with its real coordinates. (Required field.)
 - `republish.mqtt.birth.cert.on.modem.detect` - when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. (Required field.)
 - `enable.default.subscriptions` - when set to true, the gateway will not be remotely manageable.
-- `birth.cert.policy` - specify the birth certificate policy. The options are _Disable publishing_, _Publish birth on connect_ and _Publish birth on connect and reconnect_.
 - `payload.encoding` - Specify the message payload encoding. The possible options are _Kura Protobuf_ and _Simple JSON_.
 
 ## MqttDataTransport

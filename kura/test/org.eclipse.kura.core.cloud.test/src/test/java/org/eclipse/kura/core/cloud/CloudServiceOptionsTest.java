@@ -39,7 +39,6 @@ public class CloudServiceOptionsTest {
     private static final String REPUB_BIRTH_ON_GPS_LOCK = "republish.mqtt.birth.cert.on.gps.lock";
     private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
-    private static final String BIRTH_CERT_POLICY = "birth.cert.policy";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
     private static SystemService systemService;
@@ -56,7 +55,6 @@ public class CloudServiceOptionsTest {
         properties.put(REPUB_BIRTH_ON_MODEM_DETECT, true);
         properties.put(TOPIC_CONTROL_PREFIX, TEST_TOPIC_CONTROL_PREFIX);
         properties.put(ENABLE_DFLT_SUBSCRIPTIONS, false);
-        properties.put(BIRTH_CERT_POLICY, "disable");
         properties.put(PAYLOAD_ENCODING, "simple-json");
 
         options = new CloudServiceOptions(properties, systemService);

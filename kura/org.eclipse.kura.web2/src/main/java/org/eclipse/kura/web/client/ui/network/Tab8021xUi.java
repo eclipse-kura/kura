@@ -131,6 +131,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         initHelpButtons();
         initListBoxes();
         initTextBoxes();
+
+        this.buttonTestPassword.setVisible(false);
     }
 
     private void initLabels() {

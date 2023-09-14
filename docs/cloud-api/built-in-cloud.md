@@ -37,6 +37,11 @@ The CloudService provides the following configuration parameters:
 - `enable.default.subscriptions` - when set to true, the gateway will not be remotely manageable.
 - `payload.encoding` - Specify the message payload encoding. The possible options are _Kura Protobuf_ and _Simple JSON_.
 
+The default CloudService implementations publishes the following [lifecycle messages](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/java/org/eclipse/kura/core/cloud/LifecycleMessage.java):
+1. [BIRTH message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java): sent immediately when device is connected to the cloud platform;
+2. [DISCONNECT message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraDisconnectPayload.java): sent immediately before device is disconnected from the cloud platform;
+3. delayed [BIRTH message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java): sent when new cloud application handler becomes available, a DP is installed or removed, GPS position is locked (can be disabled), or when modem status changes (can be disabled). These messages are cached for 30 seconds before sending. If no other message of such type arrives the message is sent; otherwise the BIRTH is cached and the timeout restarts. This is to avoid sending multiple messages when the framework starts.
+
 ## MqttDataTransport
 
 The MqttDataTransport service provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. To use this service, select the **MqttDataTransport** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.

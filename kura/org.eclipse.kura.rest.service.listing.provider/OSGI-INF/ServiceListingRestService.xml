@@ -13,10 +13,10 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider">
-    <implementation class="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider">
+    <implementation class="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
 
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
@@ -32,7 +32,7 @@
                policy="static"/>
 
     <service>
-        <provide interface="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
+        <provide interface="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
     </service>
 
     <property name="service.pid"

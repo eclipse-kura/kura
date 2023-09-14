@@ -1,4 +1,4 @@
-package org.eclipse.kura.internal.rest.services.provider;
+package org.eclipse.kura.internal.rest.service.listing.provider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +16,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.internal.rest.services.provider.dto.InterfacesIdsDTO;
-import org.eclipse.kura.internal.rest.services.provider.dto.ServicesDTO;
+import org.eclipse.kura.internal.rest.service.listing.provider.dto.InterfacesIdsDTO;
+import org.eclipse.kura.internal.rest.service.listing.provider.dto.ServiceListDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.framework.BundleContext;
@@ -29,14 +29,14 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("services/v1")
-public class RestServicesProvider {
+@Path("serviceListing/v1")
+public class RestServiceListingProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestServicesProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestServiceListingProvider.class);
     private static final String DEBUG_MESSSAGE = "Processing request for method '{}'";
 
-    private static final String MQTT_APP_ID = "SER-V1";
-    private static final String REST_ROLE_NAME = "services";
+    private static final String MQTT_APP_ID = "SERLIST-V1";
+    private static final String REST_ROLE_NAME = "serviceListing";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
     private static final String KURA_SERVICE_PID_FILTER = "kura.service.pid";
@@ -73,14 +73,14 @@ public class RestServicesProvider {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public ServicesDTO getServicesList() {
+    public ServiceListDTO getServicesList() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "securityServices/v1/services");
+            logger.debug(DEBUG_MESSSAGE, "serviceListing/v1/list");
 
-            BundleContext context = FrameworkUtil.getBundle(RestServicesProvider.class).getBundleContext();
+            BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
             List<String> resultDTO = getAllServices(context);
 
-            return new ServicesDTO(resultDTO);
+            return new ServiceListDTO(resultDTO);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -88,12 +88,14 @@ public class RestServicesProvider {
     }
 
     @POST
-    @RolesAllowed("byAllInterfaces")
+    @RolesAllowed(REST_ROLE_NAME)
     @Path("/list/byAllInterfaces")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public ServicesDTO getServicesByInterface(final InterfacesIdsDTO interfaceIds) {
+    public ServiceListDTO getServicesByInterface(final InterfacesIdsDTO interfaceIds) {
         try {
+
+            logger.debug(DEBUG_MESSSAGE, "serviceListing/v1/list/byAllInterfaces");
 
             InterfacesIdsDTO returnInterfaceIds;
             if (interfaceIds == null) {
@@ -104,7 +106,7 @@ public class RestServicesProvider {
                 returnInterfaceIds = interfaceIds;
             }
 
-            BundleContext context = FrameworkUtil.getBundle(RestServicesProvider.class).getBundleContext();
+            BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
 
             return generateResponseDTO(context, returnInterfaceIds);
 
@@ -164,10 +166,10 @@ public class RestServicesProvider {
         return filterStringBuilder.toString();
     }
 
-    private ServicesDTO generateResponseDTO(BundleContext context, InterfacesIdsDTO returnInterfaceIds)
+    private ServiceListDTO generateResponseDTO(BundleContext context, InterfacesIdsDTO returnInterfaceIds)
             throws KuraException, InvalidSyntaxException {
         try {
-            return new ServicesDTO(getStrictFilteredInterfaces(context, returnInterfaceIds.getInterfacesIds()));
+            return new ServiceListDTO(getStrictFilteredInterfaces(context, returnInterfaceIds.getInterfacesIds()));
         } catch (NullPointerException ex) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "No result found for the passed interfaces");
         }

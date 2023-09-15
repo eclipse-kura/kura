@@ -2995,9 +2995,14 @@ See the <a href="../overview/">section</a> describing the Kura 4.0 cloud connect
 <li><code>republish.mqtt.birth.cert.on.gps.lock</code> - when set to true, forces a republish of the MQTT Birth Certificate when a GPS correct position lock is received. The device is then registered with its real coordinates. (Required field.)</li>
 <li><code>republish.mqtt.birth.cert.on.modem.detect</code> - when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. (Required field.)</li>
 <li><code>enable.default.subscriptions</code> - when set to true, the gateway will not be remotely manageable.</li>
-<li><code>birth.cert.policy</code> - specify the birth certificate policy. The options are <em>Disable publishing</em>, <em>Publish birth on connect</em> and <em>Publish birth on connect and reconnect</em>.</li>
 <li><code>payload.encoding</code> - Specify the message payload encoding. The possible options are <em>Kura Protobuf</em> and <em>Simple JSON</em>.</li>
 </ul>
+<p>The default CloudService implementations publishes the following <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/java/org/eclipse/kura/core/cloud/LifecycleMessage.java">lifecycle messages</a>:</p>
+<ol>
+<li><a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java">BIRTH message</a>: sent immediately when device is connected to the cloud platform;</li>
+<li><a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraDisconnectPayload.java">DISCONNECT message</a>: sent immediately before device is disconnected from the cloud platform;</li>
+<li>delayed <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java">BIRTH message</a>: sent when new cloud application handler becomes available, a DP is installed or removed, GPS position is locked (can be disabled), or when modem status changes (can be disabled). These messages are cached for 30 seconds before sending. If no other message of such type arrives the message is sent; otherwise the BIRTH is cached and the timeout restarts. This is to avoid sending multiple messages when the framework starts.</li>
+</ol>
 <h2 id="mqttdatatransport">MqttDataTransport</h2>
 <p>The MqttDataTransport service provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. To use this service, select the <strong>MqttDataTransport</strong> option located in the <strong>System</strong> area and select the <strong>CloudService</strong> tab as shown in the screen capture below.</p>
 <p><img alt="" src="../images/mqttDataTransport.png" style="border-radius: 7px;" /></p>

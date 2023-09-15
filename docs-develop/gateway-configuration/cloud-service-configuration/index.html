@@ -2946,14 +2946,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>enable.default.subscriptions</strong>: manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable.</p>
 </li>
 <li>
-<p><strong>birth.cert.policy</strong>: specifies the birth cert policy to be used. The possible selectable options are:</p>
-<ul>
-<li><strong>Disable publishing</strong>: No birth message will be sent</li>
-<li><strong>Publish birth on connect</strong>: Publishes a birth message at the first connection event</li>
-<li><strong>Publish birth on connect and reconnect</strong>: Publishes a birth message at connection and reconnection events.</li>
-</ul>
-</li>
-<li>
 <p><strong>payload.encoding</strong>: specifies the encoding for the messages sent by the specific CloudService instance. </p>
 <ul>
 <li><strong>Kura Protobuf</strong> - when this option is selected, the Kura Protobuf encoding will be used</li>
@@ -2986,6 +2978,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UGlwcG8sIHBsdXRvLCBwYXBlcmlubywgcXVpLCBxdW8gZSBxdWEu&quot;</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="p">}</span>
 </code></pre></div>
+<p>The default CloudService implementations publishes the following <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.core.cloud/src/main/java/org/eclipse/kura/core/cloud/LifecycleMessage.java">lifecycle messages</a>:</p>
+<ol>
+<li><a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java">BIRTH message</a>: sent immediately when device is connected to the cloud platform;</li>
+<li><a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraDisconnectPayload.java">DISCONNECT message</a>: sent immediately before device is disconnected from the cloud platform;</li>
+<li>delayed <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java">BIRTH message</a>: sent when new cloud application handler becomes available, a DP is installed or removed, GPS position is locked (can be disabled), or when modem status changes (can be disabled). These messages are cached for 30 seconds before sending. If no other message of such type arrives the message is sent; otherwise the BIRTH is cached and the timeout restarts. This is to avoid sending multiple messages when the framework starts.</li>
+</ol>
 
               
             </article>

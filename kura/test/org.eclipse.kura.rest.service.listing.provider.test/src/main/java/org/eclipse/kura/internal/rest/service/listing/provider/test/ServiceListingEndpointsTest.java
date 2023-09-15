@@ -23,10 +23,11 @@ import java.util.Hashtable;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
+import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
-import org.eclipse.kura.internal.rest.service.listing.provider.test.responses.ServiceListeningTestConstants;
+import org.eclipse.kura.internal.rest.service.listing.provider.test.constants.ServiceListeningTestConstants;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +51,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(REST_APP_ID));
+        return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
     }
 
     public ServiceListingEndpointsTest(Transport transport) {

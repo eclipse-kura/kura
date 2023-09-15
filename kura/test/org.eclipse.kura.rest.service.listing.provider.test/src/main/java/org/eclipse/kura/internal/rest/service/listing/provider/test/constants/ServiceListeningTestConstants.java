@@ -1,4 +1,4 @@
-package org.eclipse.kura.internal.rest.service.listing.provider.test.responses;
+package org.eclipse.kura.internal.rest.service.listing.provider.test.constants;
 
 public class ServiceListeningTestConstants {
 
@@ -7,7 +7,7 @@ public class ServiceListeningTestConstants {
      */
 
     public static final String COMPLETE_POST_BODY = "{\"interfacesIds\": [ \"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.security.keystore.KeystoreService\"]}";
-    public static final String NULL_POST_BODY = "";
+    public static final String NULL_POST_BODY = "{}";
     public static final String EMPTY_POST_BODY = "{\"interfacesIds\": []}";
     public static final String NULL_FIELD_POST_BODY = "{\"interfacesIds\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",]}";
     public static final String EMPTY_FIELD_POST_BODY = "{\"interfacesIds\": [\"org.eclipse.kura.configuration.ConfigurableComponent\",\"\"]}";

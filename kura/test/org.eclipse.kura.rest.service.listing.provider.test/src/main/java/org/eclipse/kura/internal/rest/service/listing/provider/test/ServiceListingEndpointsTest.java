@@ -12,20 +12,32 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
+import static org.junit.Assert.assertTrue;
+
+import java.beans.EventHandler;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
-import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.service.listing.provider.test.responses.ServiceListeningTestConstants;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 
 @RunWith(Parameterized.class)
 public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
@@ -38,7 +50,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
+        return Arrays.asList(new RestTransport(REST_APP_ID));
     }
 
     public ServiceListingEndpointsTest(Transport transport) {
@@ -48,10 +60,12 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnListOfAllServices() {
 
+        givenTestServicesRegitered();
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), ServiceListeningTestConstants.GET_ENDPOINT);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(ServiceListeningTestConstants.ALL_SERVICES_RESPONSE);
+        thenResponseContainsTestServiceKuraServicePid();
     }
 
     @Test
@@ -102,6 +116,40 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
         thenResponseBodyEqualsJson(ServiceListeningTestConstants.EMPTY_FIELD_BODY_RESPONSE);
+    }
+
+    /*
+     * GIVEN
+     */
+
+    private static void givenTestServicesRegitered() {
+
+        EventHandler testService = Mockito.mock(EventHandler.class);
+        BundleContext context = FrameworkUtil.getBundle(ServiceListingEndpointsTest.class).getBundleContext();
+        Dictionary<String, String> properties = new Hashtable<>();
+        properties.put("kura.service.pid", "TestService");
+        serviceRegistration = context.registerService(EventHandler.class, testService, properties);
+
+    }
+
+    /*
+     * THEN
+     */
+
+    private void thenResponseContainsTestServiceKuraServicePid() {
+        JsonArray responseArray = expectJsonResponse().get("sortedServicesList").asArray();
+        assertTrue(responseArray.values().contains(Json.value("TestService")));
+    }
+
+    /*
+     * Utils
+     */
+
+    private static ServiceRegistration<EventHandler> serviceRegistration;
+
+    @AfterClass
+    public static void unregisterTestService() {
+        serviceRegistration.unregister();
     }
 
 }

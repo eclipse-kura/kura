@@ -78,6 +78,7 @@ public class RestServiceListingProvider {
             logger.debug(DEBUG_MESSSAGE, "serviceListing/v1/sortedList");
 
             BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
+            
             List<String> resultDTO = getAllServices(context);
 
             return new SortedServiceListDTO(resultDTO);

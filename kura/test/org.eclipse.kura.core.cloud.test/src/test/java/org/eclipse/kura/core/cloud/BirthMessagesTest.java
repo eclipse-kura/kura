@@ -463,7 +463,6 @@ public class BirthMessagesTest {
         properties.put(ConfigurationService.KURA_SERVICE_PID, "test.pid");
         properties.put("payload.encoding", "simple-json");
         properties.put("topic.control-prefix", "$EDC");
-        properties.put("birth.cert.policy", "birth-connect-reconnect");
         properties.put("republish.mqtt.birth.cert.on.gps.lock", true);
         properties.put("republish.mqtt.birth.cert.on.modem.detect", true);
         properties.put("republish.mqtt.birth.cert.on.tamper.event", true);

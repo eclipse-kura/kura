@@ -381,9 +381,6 @@
             <esf:property array="false" encrypted="false" name="topic.control-prefix" type="String">
                 <esf:value>$EDC</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="birth.cert.policy" type="String">
-                <esf:value>birth-connect-reconnect</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="device.custom-name" type="String">
                 <esf:value>Raspberry Pi 3/4</esf:value>
             </esf:property>

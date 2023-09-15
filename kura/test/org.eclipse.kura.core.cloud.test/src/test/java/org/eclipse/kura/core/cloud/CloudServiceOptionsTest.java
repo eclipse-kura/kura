@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,7 +39,6 @@ public class CloudServiceOptionsTest {
     private static final String REPUB_BIRTH_ON_GPS_LOCK = "republish.mqtt.birth.cert.on.gps.lock";
     private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
-    private static final String BIRTH_CERT_POLICY = "birth.cert.policy";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
     private static SystemService systemService;
@@ -56,7 +55,6 @@ public class CloudServiceOptionsTest {
         properties.put(REPUB_BIRTH_ON_MODEM_DETECT, true);
         properties.put(TOPIC_CONTROL_PREFIX, TEST_TOPIC_CONTROL_PREFIX);
         properties.put(ENABLE_DFLT_SUBSCRIPTIONS, false);
-        properties.put(BIRTH_CERT_POLICY, "disable");
         properties.put(PAYLOAD_ENCODING, "simple-json");
 
         options = new CloudServiceOptions(properties, systemService);
@@ -370,102 +368,6 @@ public class CloudServiceOptionsTest {
     public void testEnableDefaultSubscriptions() {
 
         boolean enable = options.getEnableDefaultSubscriptions();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testGetLifecycleCertsDisabledNullProps() {
-        CloudServiceOptions options = new CloudServiceOptions(null, systemService);
-
-        boolean enable = options.isLifecycleCertsDisabled();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testGetLifecycleCertsDisabledPropNull() {
-        Map<String, Object> properties = new HashMap<>();
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.isLifecycleCertsDisabled();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testGetLifecycleCertsDisabledPropNotString() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(BIRTH_CERT_POLICY, true);
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.isLifecycleCertsDisabled();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testLifecycleCertsDisabled() {
-
-        boolean enable = options.isLifecycleCertsDisabled();
-
-        assertTrue(enable);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnReconnectNullProps() {
-        CloudServiceOptions options = new CloudServiceOptions(null, systemService);
-
-        boolean enable = options.getRepubBirthCertOnReconnect();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnReconnectPropNull() {
-        Map<String, Object> properties = new HashMap<>();
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.getRepubBirthCertOnReconnect();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnReconnectPropNotString() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(BIRTH_CERT_POLICY, true);
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.getRepubBirthCertOnReconnect();
-
-        assertFalse(enable);
-    }
-
-    @Test
-    public void testRepubBirthCertOnReconnectBirthConnectReconnect() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(BIRTH_CERT_POLICY, "birth-connect-reconnect");
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.getRepubBirthCertOnReconnect();
-
-        assertTrue(enable);
-    }
-
-    @Test
-    public void testRepubBirthCertOnReconnectBirthConnect() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(BIRTH_CERT_POLICY, "birth-connect");
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean enable = options.getRepubBirthCertOnReconnect();
 
         assertFalse(enable);
     }

@@ -35,7 +35,7 @@ The available configuration parameters are the following:
 
 * **Basic Authentication Enabled**: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the **Password Authentication Enabled parameter** is set to true. (Default: true)
 
-* **Enable Certificate Authentication Whitout Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: true)
+* **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: true)
 
 ## Custom authentication methods
 

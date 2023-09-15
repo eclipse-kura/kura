@@ -65,18 +65,6 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on modem detection event"/>
-            
-        <AD id="birth.cert.policy"
-            name="Birth Cert Policy"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="birth-connect-reconnect"
-            description="Specify the birth certificate policy.">
-            <Option label="Disable publishing" value="disable" />
-            <Option label="Publish birth on connect" value="birth-connect" />
-            <Option label="Publish birth on connect and reconnect" value="birth-connect-reconnect" />
-        </AD>
         
         <AD id="payload.encoding"
             name="Payload Encoding"

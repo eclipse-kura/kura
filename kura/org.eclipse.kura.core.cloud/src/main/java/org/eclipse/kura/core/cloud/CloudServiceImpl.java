@@ -154,7 +154,6 @@ public class CloudServiceImpl
     String modemFwVer;
 
     private boolean subscribed;
-    private boolean birthPublished;
 
     private final AtomicInteger messageId;
 
@@ -572,8 +571,6 @@ public class CloudServiceImpl
         } catch (KuraException e) {
             logger.warn("Cannot publish disconnect certificate");
         }
-
-        this.birthPublished = false;
     }
 
     @Override
@@ -808,19 +805,7 @@ public class CloudServiceImpl
             this.subscribed = false;
         }
 
-        // publish birth certificate unless it has already been published
-        // and republish is disabled
-        boolean publishBirth = true;
-        if (this.birthPublished && !this.options.getRepubBirthCertOnReconnect()) {
-            publishBirth = false;
-            logger.info("Birth certificate republish is disabled in configuration");
-        }
-
-        // publish birth certificate
-        if (publishBirth) {
-            publishBirthCertificate(isNewConnection);
-            this.birthPublished = true;
-        }
+        publishBirthCertificate(isNewConnection);
 
         // restore or remove default subscriptions
         if (this.options.getEnableDefaultSubscriptions()) {
@@ -838,10 +823,6 @@ public class CloudServiceImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
-        if (this.options.isLifecycleCertsDisabled()) {
-            return;
-        }
-
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
         if (isNewConnection) {
@@ -852,18 +833,10 @@ public class CloudServiceImpl
     }
 
     private void publishDisconnectCertificate() throws KuraException {
-        if (this.options.isLifecycleCertsDisabled()) {
-            return;
-        }
-
         publishLifeCycleMessage(new LifecycleMessage(this.options, this).asDisconnectCertificateMessage());
     }
 
     private void publishAppCertificate() {
-        if (this.options.isLifecycleCertsDisabled()) {
-            return;
-        }
-
         publishWithDelay(new LifecycleMessage(this.options, this).asAppCertificateMessage());
     }
 

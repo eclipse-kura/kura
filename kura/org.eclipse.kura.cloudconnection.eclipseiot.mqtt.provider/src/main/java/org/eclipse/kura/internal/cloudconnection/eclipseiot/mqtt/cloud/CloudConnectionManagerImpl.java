@@ -120,7 +120,6 @@ public class CloudConnectionManagerImpl
     String rssi;
     String modemFwVer;
 
-    private boolean birthPublished;
     private String ownPid;
 
     private final AtomicInteger messageId;
@@ -443,8 +442,6 @@ public class CloudConnectionManagerImpl
         } catch (KuraException e) {
             logger.warn("Cannot publish disconnect certificate");
         }
-
-        this.birthPublished = false;
     }
 
     @Override
@@ -602,20 +599,7 @@ public class CloudConnectionManagerImpl
     // ----------------------------------------------------------------
 
     private void setupCloudConnection(boolean isNewConnection) throws KuraException {
-        // publish birth certificate unless it has already been published
-        // and republish is disabled
-        boolean publishBirth = true;
-        if (this.birthPublished && !this.options.getRepubBirthCertOnReconnect()) {
-            publishBirth = false;
-            logger.info("Birth certificate republish is disabled in configuration");
-        }
-
-        // publish birth certificate
-        if (publishBirth) {
-            publishBirthCertificate(isNewConnection);
-            this.birthPublished = true;
-        }
-
+        publishBirthCertificate(isNewConnection);
         setupDeviceSubscriptions();
     }
 
@@ -630,10 +614,6 @@ public class CloudConnectionManagerImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
-        if (this.options.isLifecycleCertsDisabled()) {
-            return;
-        }
-
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
         if (isNewConnection) {
@@ -644,10 +624,6 @@ public class CloudConnectionManagerImpl
     }
 
     private void publishDisconnectCertificate() throws KuraException {
-        if (this.options.isLifecycleCertsDisabled()) {
-            return;
-        }
-
         publishLifeCycleMessage(new LifecycleMessage(this.options, this).asDisconnectCertificateMessage());
     }
 

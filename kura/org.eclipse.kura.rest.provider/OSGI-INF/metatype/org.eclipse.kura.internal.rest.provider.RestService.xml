@@ -72,7 +72,7 @@
         
         <AD 
         	id="auth.certificate.stateless.enabled" 
-        	name="Enable Certificate Authentication Whitout Session Management"
+        	name="Enable Certificate Authentication Without Session Management"
         	type="Boolean" 
         	required="true" 
         	default="true" 

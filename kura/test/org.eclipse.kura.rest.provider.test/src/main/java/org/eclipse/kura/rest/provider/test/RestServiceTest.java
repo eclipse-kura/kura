@@ -488,6 +488,23 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldNotAllowGettingXsrfTokenIfSessionIsExpired() {
+        givenRestServiceConfiguration(Collections.singletonMap("session.inactivity.interval", 1));
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+        givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
+        givenDelay(2, TimeUnit.SECONDS);
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
     public void shouldExtendSessionLifetimeOnActivity() {
         givenRestServiceConfiguration(Collections.singletonMap("session.inactivity.interval", 1));
         givenService(new RequiresAssetsRole());

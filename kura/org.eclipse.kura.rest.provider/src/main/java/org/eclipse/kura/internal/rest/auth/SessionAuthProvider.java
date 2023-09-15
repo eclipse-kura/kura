@@ -93,6 +93,7 @@ public class SessionAuthProvider implements AuthenticationProvider {
                 .isSessionExpired(session.get(), this.restServiceOptions.getSessionInactivityInterval())) {
             auditLogger.warn("{} Rest - Failure - Session authentication failed, session expired",
                     auditContext);
+            session.get().invalidate();
             return Optional.empty();
         }
 
@@ -105,6 +106,7 @@ public class SessionAuthProvider implements AuthenticationProvider {
         if (sessionHelper.credentialsChanged(session.get(), result.get().getName())) {
             auditLogger.warn("{} Rest - Failure - Session authentication failed, user credentials changed",
                     auditContext);
+            session.get().invalidate();
             return Optional.empty();
         }
 

@@ -128,7 +128,8 @@ public class SessionRestService {
 
     @GET
     @Path(SessionRestServiceConstants.XSRF_TOKEN_PATH)
-    public XsrfTokenDTO getXSRFToken(@Context final HttpServletRequest request) {
+    public XsrfTokenDTO getXSRFToken(@Context final HttpServletRequest request,
+            @Context final ContainerRequestContext requestContext) {
         if (!options.isSessionManagementEnabled()) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
@@ -136,6 +137,10 @@ public class SessionRestService {
         final Optional<HttpSession> session = this.restSessionHelper.getExistingSession(request);
 
         if (!session.isPresent()) {
+            throw new WebApplicationException(Status.UNAUTHORIZED);
+        }
+
+        if (!this.restSessionHelper.getCurrentPrincipal(requestContext).isPresent()) {
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 

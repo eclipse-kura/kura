@@ -115,7 +115,6 @@ The default settings for the CloudService should be modified as follow to allow 
 - **republish.mqtt.birth.cert.on.gps.lock** - should be set `false` to avoid sending additional messages on GPS position lock
 - **republish.mqtt.birth.cert.on.modem.detect** - should be set `false` to avoid sending additional messages on cellular modem update
 - **enable.default.subscriptions** - should be set `false` to avoid subscriptions on Kura control topics for cloud-to-device
-- **birth.cert.policy** - should be set `Disable publishing` to avoid sending additional device profile messages on MQTT connect
 - **payload.encoding** - should be set to `Simple JSON`
 
 The screen capture shown below displays the default settings for the CloudService.

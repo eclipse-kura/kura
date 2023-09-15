@@ -200,7 +200,6 @@ If the last command reports that the certificate already exist in the system-wid
     * **republish.mqtt.birth.cert.on.gps.lock** -> `false`
     * **republish.mqtt.birth.cert.on.modem.detect** -> `false`
     * **enable.default.subscriptions** -> `false`
-    * **birth.cert.policy** -> `Disable publishing`
 
 11. Click the **Apply** button to save the changes.
 

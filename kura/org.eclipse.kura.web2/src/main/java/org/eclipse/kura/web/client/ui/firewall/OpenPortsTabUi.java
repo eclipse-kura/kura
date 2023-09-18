@@ -672,7 +672,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                if (!OpenPortsTabUi.this.unpermittedI.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         && OpenPortsTabUi.this.unpermittedI.getText().trim().length() > 0
                         || OpenPortsTabUi.this.unpermittedI.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {
@@ -695,7 +695,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.ALPHANUMERIC.getRegex())
+                if (!OpenPortsTabUi.this.permittedI.getText().trim().matches(FieldType.NIC_NAME.getRegex())
                         && OpenPortsTabUi.this.permittedI.getText().trim().length() > 0
                         || OpenPortsTabUi.this.permittedI.getText().trim()
                                 .length() > FirewallPanelUtils.INTERFACE_NAME_MAX_LENGTH) {

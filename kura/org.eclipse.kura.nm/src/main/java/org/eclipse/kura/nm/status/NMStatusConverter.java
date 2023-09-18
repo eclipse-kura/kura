@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm.status;
 
@@ -45,6 +46,8 @@ import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus.VlanInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
 import org.eclipse.kura.net.status.modem.ModemPortType;
@@ -89,6 +92,7 @@ public class NMStatusConverter {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
     private static final String NM_DEVICE_WIRED_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wired";
+    private static final String NM_DEVICE_VLAN_BUS_NAME = "org.freedesktop.NetworkManager.Device.Vlan";
     private static final String NM_ACCESSPOINT_BUS_NAME = "org.freedesktop.NetworkManager.AccessPoint";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
     private static final String NM_IP6CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP6Config";
@@ -162,6 +166,35 @@ public class NMStatusConverter {
                 supportedChannelsProperties.getCountryCode(), supportedChannelsProperties.getSupportedChannels());
 
         return builder.build();
+    }
+    
+    public static NetworkInterfaceStatus buildVlanStatus(String interfaceId,
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties, 
+            Optional<Properties> ip6configProperties, Properties parentProperties) {
+
+        VlanInterfaceStatusBuilder builder = VlanInterfaceStatus.builder();
+        builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
+        
+        NMDeviceState deviceState = NMDeviceState
+                .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
+        builder.withState(deviceStateConvert(deviceState));
+
+        Optional<Properties> vlanProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
+        
+        setDeviceStatus(builder, devicePropertiesWrapper);
+        setVlanStatus(builder, vlanProperties, parentProperties);
+        setIP4Status(builder, ip4configProperties);
+        setIP6Status(builder, ip6configProperties);
+        return builder.build();
+    }
+    
+    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Properties> vlanProperties, Properties parentProperties) {
+        String parentInterfaceName = parentProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
+        builder.withParentInterface(parentInterfaceName);
+        vlanProperties.ifPresent(properties -> {
+        UInt32 vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
+            builder.withVlanId(vlanId.intValue());
+        });
     }
 
     private static void setDeviceStatus(NetworkInterfaceStatusBuilder<?> builder,
@@ -240,6 +273,8 @@ public class NMStatusConverter {
             return specificProperties.get().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         case NM_DEVICE_TYPE_WIFI:
             return specificProperties.get().Get(NM_DEVICE_WIRELESS_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
+        case NM_DEVICE_TYPE_VLAN:
+            return specificProperties.get().Get(NM_DEVICE_VLAN_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         case NM_DEVICE_TYPE_MODEM:
         case NM_DEVICE_TYPE_GENERIC:
         case NM_DEVICE_TYPE_LOOPBACK:

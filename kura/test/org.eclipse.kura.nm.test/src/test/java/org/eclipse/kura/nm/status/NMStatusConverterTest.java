@@ -40,6 +40,7 @@ import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceState;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.ethernet.EthernetInterfaceStatus;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.interfaces.Properties;
@@ -52,15 +53,19 @@ public class NMStatusConverterTest {
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_IP4CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP4Config";
     private static final String NM_IP6CONFIG_BUS_NAME = "org.freedesktop.NetworkManager.IP6Config";
+    private static final String NM_VLAN_BUS_NAME = "org.freedesktop.NetworkManager.Device.Vlan";
 
     private Properties mockDeviceProperties = mock(Properties.class);
+    private Properties mockParentDeviceProperties = mock(Properties.class);
     private Properties mockIp4ConfigProperties = mock(Properties.class);
     private Properties mockIp6ConfigProperties = mock(Properties.class);
+    private Properties mockVlanConfigProperties = mock(Properties.class);
 
     private DevicePropertiesWrapper mockDevicePropertiesWrapper;
 
     private NetworkInterfaceStatus resultingStatus;
     private EthernetInterfaceStatus resultingEthernetStatus;
+    private VlanInterfaceStatus resultingVlanStatus;
 
     private Exception occurredException;
 
@@ -519,6 +524,52 @@ public class NMStatusConverterTest {
                 new NetworkInterfaceIpAddress<IP6Address>(
                         (IP6Address) IP6Address.parseHostAddress("fe80::dea6:32ff:fee0:54f6"), (short) 64)));
     }
+    
+    @Test
+    public void buildVlanStatusWorksWithIPV4Info() throws UnknownHostException {
+        givenDevicePropertiesWith("State", NMDeviceState.toUInt32(NMDeviceState.NM_DEVICE_STATE_ACTIVATED));
+        givenDevicePropertiesWith("Autoconnect", false);
+        givenDevicePropertiesWith("FirmwareVersion", "thunderbolt");
+        givenDevicePropertiesWith("Driver", "lightning");
+        givenDevicePropertiesWith("DriverVersion", "frightening");
+        givenDevicePropertiesWith("Mtu", new UInt32(420));
+        givenDevicePropertiesWith("HwAddress", "F5:5B:66:7C:40:EA");
+        
+        givenVlanConfigPropertiesWith("VlanId", new UInt32(101));
+        givenParentDevicePropertiesWith("Interface", "eth0");
+
+        givenIpv4ConfigPropertiesWith("Gateway", "192.168.3.241");
+        givenIpv4ConfigPropertiesWithDNS(Arrays.asList("1.1.1.1"));
+        givenIpv4ConfigPropertiesWithAddress(Arrays.asList("192.168.3.242/28"));
+
+        givenDevicePropertiesWrapperBuiltWith(this.mockDeviceProperties, Optional.of(this.mockVlanConfigProperties),
+                NMDeviceType.NM_DEVICE_TYPE_VLAN);
+
+        whenBuildVlanStatusIsCalledWith("eth0.101", this.mockDevicePropertiesWrapper,
+                Optional.of(this.mockIp4ConfigProperties), Optional.empty());
+
+        thenNoExceptionOccurred();
+
+        thenResultingNetworkInterfaceIsVirtual(true);
+        thenResultingNetworkInterfaceAutoConnectIs(false);
+        thenResultingNetworkInterfaceStateIs(NetworkInterfaceState.ACTIVATED);
+        thenResultingNetworkInterfaceFirmwareVersionIs("thunderbolt");
+        thenResultingNetworkInterfaceDriverIs("lightning");
+        thenResultingNetworkInterfaceDriverVersionIs("frightening");
+        thenResultingNetworkInterfaceMtuIs(420);
+        thenResultingNetworkInterfaceHardwareAddressIs(
+                new byte[] { (byte) 0xF5, (byte) 0x5B, (byte) 0x66, (byte) 0x7C, (byte) 0x40, (byte) 0xEA });
+        
+        thenResultingVlanIdIs(101);
+        thenResultingVlanParentInterfaceIs("eth0");
+
+        thenResultingIp4InterfaceGatewayIs(IPAddress.parseHostAddress("192.168.3.241"));
+        thenResultingIp4InterfaceDNSIs(Arrays.asList(IPAddress.parseHostAddress("1.1.1.1")));
+        thenResultingIp4InterfaceAddressIs(Arrays.asList(new NetworkInterfaceIpAddress<IP4Address>(
+                (IP4Address) IP4Address.parseHostAddress("192.168.3.242"), (short) 28)));
+
+        thenResultingIp6InterfaceAddressIsMissing();
+    }
 
     /*
      * Given
@@ -526,6 +577,11 @@ public class NMStatusConverterTest {
 
     private void givenDevicePropertiesWith(String propertyName, Object propertyValue) {
         when(this.mockDeviceProperties.Get(NM_DEVICE_BUS_NAME, propertyName))
+                .thenReturn(propertyValue);
+    }
+    
+    private void givenParentDevicePropertiesWith(String propertyName, Object propertyValue) {
+    	when(this.mockParentDeviceProperties.Get(NM_DEVICE_BUS_NAME, propertyName))
                 .thenReturn(propertyValue);
     }
 
@@ -601,6 +657,10 @@ public class NMStatusConverterTest {
 
         when(this.mockIp6ConfigProperties.Get(NM_IP6CONFIG_BUS_NAME, "AddressData")).thenReturn(structureList);
     }
+    
+    private void givenVlanConfigPropertiesWith(String propertyName, Object propertyValue) {
+    	when(this.mockVlanConfigProperties.Get(NM_VLAN_BUS_NAME, propertyName)).thenReturn(propertyValue);
+    }
 
     private void givenDevicePropertiesWrapperBuiltWith(Properties deviceProperties,
             Optional<Properties> deviceSpecificProperties, NMDeviceType nmDeviceType) {
@@ -628,6 +688,17 @@ public class NMStatusConverterTest {
             this.resultingStatus = NMStatusConverter.buildEthernetStatus(ifaceName, deviceProps, ip4Properties,
                     ip6Properties);
             this.resultingEthernetStatus = (EthernetInterfaceStatus) this.resultingStatus;
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+    
+    private void whenBuildVlanStatusIsCalledWith(String ifaceName, DevicePropertiesWrapper deviceProps,
+            Optional<Properties> ip4Properties, Optional<Properties> ip6Properties) {
+        try {
+            this.resultingStatus = NMStatusConverter.buildVlanStatus(ifaceName, deviceProps, ip4Properties,
+                    ip6Properties, this.mockParentDeviceProperties);
+            this.resultingVlanStatus = (VlanInterfaceStatus) this.resultingStatus;
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -791,5 +862,13 @@ public class NMStatusConverterTest {
 
         assertTrue(address.getGateway().isPresent());
         assertEquals(expectedResult, address.getGateway().get());
+    }
+    
+    private void thenResultingVlanIdIs(int expectedVlanId) {
+    	assertEquals(expectedVlanId, resultingVlanStatus.getVlanId());
+    }
+    
+    private void thenResultingVlanParentInterfaceIs(String expectedParentInterface) {
+    	assertEquals(expectedParentInterface, resultingVlanStatus.getParentInterface());
     }
 }

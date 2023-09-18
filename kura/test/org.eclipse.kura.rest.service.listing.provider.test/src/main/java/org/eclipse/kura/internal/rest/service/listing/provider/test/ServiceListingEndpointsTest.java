@@ -225,5 +225,4 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
             serviceRegistration.unregister();
         }
     }
-
 }

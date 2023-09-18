@@ -43,7 +43,7 @@ public class RestServiceListingProvider {
 
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    public void requestHandlerRegistryBinding(RequestHandlerRegistry bindingRegistry) {
+    public void bindRequestHandlerRegistry(RequestHandlerRegistry bindingRegistry) {
         try {
             bindingRegistry.registerRequestHandler(APP_ID_MQTT, this.requestHandler);
         } catch (final Exception e) {
@@ -51,7 +51,7 @@ public class RestServiceListingProvider {
         }
     }
 
-    public void requestHandlerRegistryUnbinding(RequestHandlerRegistry unbindingRegistry) {
+    public void unbindRequestHandlerRegistry(RequestHandlerRegistry unbindingRegistry) {
         try {
             unbindingRegistry.unregister(APP_ID_MQTT);
         } catch (final Exception e) {
@@ -59,7 +59,7 @@ public class RestServiceListingProvider {
         }
     }
 
-    public void userAdminBinding(UserAdmin userAdmin) {
+    public void bindUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(REST_ROLE, Role.GROUP);
     }
 

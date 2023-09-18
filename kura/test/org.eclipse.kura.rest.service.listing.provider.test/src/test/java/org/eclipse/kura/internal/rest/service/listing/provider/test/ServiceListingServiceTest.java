@@ -117,12 +117,12 @@ public class ServiceListingServiceTest {
      */
 
     private void whenBindUserAdmin() {
-        this.service.userAdminBinding(this.userAdmin);
+        this.service.bindUserAdmin(userAdmin);
     }
 
     private void whenBindRequestHandlerRegistry() {
         try {
-            this.service.requestHandlerRegistryBinding(this.requestHandlerRegistry);
+            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistry);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -130,7 +130,7 @@ public class ServiceListingServiceTest {
 
     private void whenUnbindRequestHandlerRegistry() {
         try {
-            this.service.requestHandlerRegistryUnbinding(this.requestHandlerRegistry);
+            this.service.unbindRequestHandlerRegistry(this.requestHandlerRegistry);
         } catch (Exception e) {
             this.occurredException = e;
         }

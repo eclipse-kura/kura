@@ -13,55 +13,73 @@
 package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.beans.EventHandler;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
-import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
-import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.service.listing.provider.test.constants.ServiceListeningTestConstants;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.useradmin.Group;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.UserAdmin;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 
-@RunWith(Parameterized.class)
 public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
-
-    private static final String MQTT_APP_ID = "SERLIST-V1";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
     private static final String REST_APP_ID = "serviceListing/v1";
 
-    @Parameterized.Parameters
-    public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
+    public ServiceListingEndpointsTest() {
+        super(new RestTransport(REST_APP_ID));
     }
 
-    public ServiceListingEndpointsTest(Transport transport) {
-        super(transport);
+    @Test
+    public void shouldReturnNotFoundIfNoServiceIsRegistered() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/nothing");
+
+        thenResponseCodeIs(404);
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedStatusWhenNoRestPermissionIsGiven() {
+
+        givenTestServicesRegitered();
+        givenIdentity("noAuthUser", Optional.of("pass1"), Collections.emptyList());
+        givenBasicCredentials(Optional.empty());
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), ServiceListeningTestConstants.GET_ENDPOINT);
+
+        thenResponseCodeIs(401);
     }
 
     @Test
     public void shouldReturnListOfAllServices() {
 
         givenTestServicesRegitered();
+        givenIdentity("authUser", Optional.of("pass2"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("authUser:pass2"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), ServiceListeningTestConstants.GET_ENDPOINT);
 
@@ -123,6 +141,40 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
      * GIVEN
      */
 
+    @SuppressWarnings("unchecked")
+    private void givenIdentity(final String username, final Optional<String> password, final List<String> roles) {
+        final UserAdmin userAdmin;
+
+        try {
+            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            fail("failed to track UserAdmin");
+            return;
+        }
+
+        final User user = getRoleOrCreateOne(userAdmin, "kura.user." + username, User.class);
+
+        if (password.isPresent()) {
+            try {
+                final CryptoService cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty())
+                        .get(30, TimeUnit.SECONDS);
+
+                user.getCredentials().put("kura.password", cryptoService.sha256Hash(password.get()));
+
+            } catch (Exception e) {
+                fail("failed to compute password hash");
+            }
+        }
+
+        for (final String role : roles) {
+            getRoleOrCreateOne(userAdmin, "kura.permission." + role, Group.class).addMember(user);
+        }
+    }
+
+    public void givenBasicCredentials(final Optional<String> basicCredentials) {
+        ((RestTransport) this.transport).setBasicCredentials(basicCredentials);
+    }
+
     private static void givenTestServicesRegitered() {
 
         EventHandler testService = Mockito.mock(EventHandler.class);
@@ -148,9 +200,30 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     private static ServiceRegistration<EventHandler> serviceRegistration;
 
+    @SuppressWarnings("unchecked")
+    private <S extends Role> S getRoleOrCreateOne(final UserAdmin userAdmin, final String name, final Class<S> classz) {
+
+        final Role role = userAdmin.getRole(name);
+        if (classz.isInstance(role)) {
+            return (S) role;
+        }
+        final int type;
+        if (classz == User.class) {
+            type = Role.USER;
+        } else if (classz == Group.class) {
+            type = Role.GROUP;
+        } else {
+            fail("Unsupported role type");
+            return null;
+        }
+        return (S) userAdmin.createRole(name, type);
+    }
+
     @AfterClass
     public static void unregisterTestService() {
-        serviceRegistration.unregister();
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+        }
     }
 
 }

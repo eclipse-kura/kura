@@ -30,50 +30,18 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider;
 import org.junit.Test;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
 
 public class ServiceListingServiceTest {
 
     private static final String MQTT_APP_ID = "SERLIST-V1";
-    private static final String REST_ROLE_NAME = "serviceListing";
-    private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
     private final RestServiceListingProvider service = new RestServiceListingProvider();
-    private UserAdmin userAdmin;
     private RequestHandlerRegistry requestHandlerRegistry;
     private Exception occurredException;
 
     /*
      * Scenarios
      */
-
-    @Test
-    public void shouldCreateRoleOnUserAdminBinding() {
-        givenMockUserAdmin();
-
-        whenBindUserAdmin();
-
-        thenRoleIsCreated(KURA_PERMISSION_REST_ROLE, Role.GROUP);
-    }
-
-    @Test
-    public void shouldRegisterRequestHandler() throws KuraException {
-        givenMockRequestHandlerRegistry();
-
-        whenBindRequestHandlerRegistry();
-
-        thenRequestHandlerIsRegistered(MQTT_APP_ID);
-    }
-
-    @Test
-    public void shouldUnregisterRequestHandler() throws KuraException {
-        givenMockRequestHandlerRegistry();
-
-        whenUnbindRequestHandlerRegistry();
-
-        thenRequestHandlerIsUnregistered(MQTT_APP_ID);
-    }
 
     @Test
     public void shouldCatchExceptionsOnRequestHandlerBind() throws KuraException {
@@ -97,10 +65,6 @@ public class ServiceListingServiceTest {
      * Given
      */
 
-    private void givenMockUserAdmin() {
-        this.userAdmin = mock(UserAdmin.class);
-    }
-
     private void givenMockRequestHandlerRegistry() {
         this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
     }
@@ -115,10 +79,6 @@ public class ServiceListingServiceTest {
     /*
      * When
      */
-
-    private void whenBindUserAdmin() {
-        this.service.bindUserAdmin(userAdmin);
-    }
 
     private void whenBindRequestHandlerRegistry() {
         try {
@@ -139,10 +99,6 @@ public class ServiceListingServiceTest {
     /*
      * Then
      */
-
-    private void thenRoleIsCreated(String expectedKuraPermission, int expectedRole) {
-        verify(this.userAdmin, times(1)).createRole(expectedKuraPermission, expectedRole);
-    }
 
     private void thenRequestHandlerIsRegistered(String expectedMqttAppId) throws KuraException {
         verify(this.requestHandlerRegistry, times(1)).registerRequestHandler(eq(expectedMqttAppId),

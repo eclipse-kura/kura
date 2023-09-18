@@ -9,18 +9,22 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -30,6 +34,7 @@ import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
 import org.eclipse.kura.nm.signal.handlers.NMDeviceAddedHandler;
@@ -47,6 +52,7 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
+import org.freedesktop.networkmanager.device.Vlan;
 import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -60,6 +66,7 @@ public class NMDbusConnector {
     private static final String NM_BUS_NAME = "org.freedesktop.NetworkManager";
     private static final String NM_DEVICE_BUS_NAME = "org.freedesktop.NetworkManager.Device";
     private static final String NM_DEVICE_WIRELESS_BUS_NAME = "org.freedesktop.NetworkManager.Device.Wireless";
+    private static final String NM_DEVICE_VLAN_BUS_NAME = "org.freedesktop.NetworkManager.Device.Vlan";
     private static final String NM_SETTINGS_BUS_PATH = "/org/freedesktop/NetworkManager/Settings";
 
     private static final String NM_DEVICE_PROPERTY_INTERFACE = "Interface";
@@ -67,13 +74,16 @@ public class NMDbusConnector {
     private static final String NM_DEVICE_PROPERTY_IP6CONFIG = "Ip6Config";
 
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
-            NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM);
+            NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM,
+            NMDeviceType.NM_DEVICE_TYPE_VLAN);
+    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES = Arrays.asList(
+            NMDeviceType.NM_DEVICE_TYPE_VLAN);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
             KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,
-            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
+            NMDeviceType.NM_DEVICE_TYPE_LOOPBACK, NMDeviceType.NM_DEVICE_TYPE_VLAN);
 
     private static final long MAX_SCAN_TIME_SECONDS = 30L;
 
@@ -237,6 +247,21 @@ public class NMDbusConnector {
                 networkInterfaceStatus = NMStatusConverter.buildEthernetStatus(interfaceId, ethernetPropertiesWrapper,
                         ip4configProperties, ip6configProperties);
                 break;
+            case NM_DEVICE_TYPE_VLAN:
+                Vlan vlanDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
+                        Vlan.class);
+                Properties vlanDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        vlanDevice.getObjectPath(), Properties.class);
+                
+                DBusPath parent = (DBusPath) vlanDeviceProperties.Get(NM_DEVICE_VLAN_BUS_NAME, "Parent");
+                Properties parentProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, parent.getPath(),
+                        Properties.class);
+                
+                DevicePropertiesWrapper vlanPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
+                        Optional.of(vlanDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_VLAN);
+                networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper, 
+                            ip4configProperties, ip6configProperties, parentProperties);
+                break;
             case NM_DEVICE_TYPE_LOOPBACK:
                 DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.empty(), NMDeviceType.NM_DEVICE_TYPE_LOOPBACK);
@@ -314,7 +339,7 @@ public class NMDbusConnector {
                 new SupportedChannelsProperties(countryCode, supportedChannels));
         return networkInterfaceStatus;
     }
-
+    
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();
@@ -359,13 +384,18 @@ public class NMDbusConnector {
 
     private synchronized void doApply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.info("Applying configuration using NetworkManager Dbus connector");
-        List<Device> availableDevices = this.networkManager.getAllDevices();
+        NetworkProperties properties = new NetworkProperties(networkConfiguration);
+        List<String> availableDeviceIds = getInterfaceIds();
+        Set<String> availableDevices = new LinkedHashSet<String>(availableDeviceIds);
+        Optional<List<String>> configuredInterfaceIds = properties.getOptStringList("net.interfaces");
+        if (configuredInterfaceIds.isPresent()) {
+            availableDevices.addAll(configuredInterfaceIds.get());
+        }
         availableDevices.forEach(device -> {
             try {
-                String deviceId = getInterfaceIdByDBusPath(device.getObjectPath());
-                doApply(deviceId, networkConfiguration);
+                doApply(device, networkConfiguration);
             } catch (DBusException | DBusExecutionException | IllegalArgumentException | NoSuchElementException e) {
-                logger.error("Unable to apply configuration to the device path {}", device.getObjectPath(), e);
+                logger.error("Unable to apply configuration to the device {}", device, e);
             }
         });
     }
@@ -378,16 +408,30 @@ public class NMDbusConnector {
         Optional<Device> device = getNetworkManagerDeviceByInterfaceId(deviceIdToBeConfigured);
         if (device.isPresent()) {
             if (configuredInterfaceIds.contains(deviceIdToBeConfigured)) {
-                manageConfiguredInterface(device.get(), deviceIdToBeConfigured, properties);
+                manageConfiguredInterface(device, deviceIdToBeConfigured, properties);
             } else {
-                manageNonConfiguredInterface(device.get(), deviceIdToBeConfigured);
+                manageNonConfiguredInterface(device, deviceIdToBeConfigured);
+            }
+        } else {
+            NMDeviceType propertyDeviceType = NMDeviceType.fromPropertiesString(
+                    properties.get(String.class, "net.interface.%s.type", deviceIdToBeConfigured));
+            if (CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES.contains(propertyDeviceType)) {
+                manageConfiguredInterface(Optional.empty(), deviceIdToBeConfigured, properties);
+            } else {
+                logger.warn("Can't apply configuration to disconnected or unsupported virtual device "
+                        + "\"{}\" of type \"{}\"", deviceIdToBeConfigured, propertyDeviceType);
             }
         }
     }
-
-    private synchronized void manageConfiguredInterface(Device device, String deviceId, NetworkProperties properties)
-            throws DBusException {
-        NMDeviceType deviceType = this.networkManager.getDeviceType(device.getObjectPath());
+        
+    private synchronized void manageConfiguredInterface(Optional<Device> device, String deviceId, NetworkProperties properties) throws DBusException {
+        NMDeviceType deviceType;
+        if (device.isPresent()) {
+            deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
+        } else {
+            deviceType = NMDeviceType.fromPropertiesString(
+                    properties.get(String.class, "net.interface.%s.type", deviceId));
+        }
 
         KuraIpStatus ip4Status = KuraIpStatus
                 .fromString(properties.get(String.class, "net.interface.%s.config.ip4.status", deviceId));
@@ -415,7 +459,7 @@ public class NMDbusConnector {
         logger.info("Settings iface \"{}\":{}", deviceId, deviceType);
 
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
-            disable(device);
+            disable(device, deviceId);
         } else if (interfaceStatus == KuraInterfaceStatus.UNMANAGED) {
             logger.info("Iface \"{}\" set as UNMANAGED in Kura. Skipping configuration.", deviceId);
         } else { // NMDeviceEnable.ENABLED
@@ -423,15 +467,24 @@ public class NMDbusConnector {
         }
 
         // Manage GPS independently of device ip status
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM && device.isPresent()) {
             Optional<Boolean> enableGPS = properties.getOpt(Boolean.class, "net.interface.%s.config.gpsEnabled",
                     deviceId);
-            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.get().getObjectPath());
             this.modemManager.setGPS(mmDbusPath, enableGPS);
         }
 
     }
 
+    private void enableInterface(String deviceId, NetworkProperties properties, Optional<Device> device, NMDeviceType deviceType)
+            throws DBusException {
+        if (device.isPresent()) {
+            enableInterface(deviceId, properties, device.get(), deviceType);
+        } else {
+            createVirtualInterface(deviceId, properties, deviceType);
+        }
+    }
+    
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
             throws DBusException {
         if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(device))) {
@@ -481,8 +534,42 @@ public class NMDbusConnector {
         }
 
     }
+    
+    private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
+        throws DBusException {
+        Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
+                Optional.empty(), deviceId, deviceId, deviceType);
+        DeviceCreationLock dcLock = new DeviceCreationLock(this, deviceId);
+        Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+        DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
+        Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                createdConnectionPath.getPath(), Connection.class);
+        try {
+            Optional<Device> returnedDevice = dcLock.waitForDeviceCreation(1L);
+            if (!returnedDevice.isPresent()) {
+                logger.warn("Could not obtain device for {}", deviceId);
+                return;
+            }
+            Device createdDevice = returnedDevice.get();
+            if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(createdDevice))) {
+                this.networkManager.setDeviceManaged(createdDevice, true);
+            }
+            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, createdDevice.getObjectPath(),
+                    NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+            this.networkManager.activateConnection(createdConnection, createdDevice);
+            dsLock.waitForSignal();
+        } catch (DBusExecutionException | DBusException | TimeoutException e) {
+            logger.warn("Couldn't complete creation of device {}, caused by:", deviceId, e);
+        }
+    }
 
-    private void manageNonConfiguredInterface(Device device, String deviceId) throws DBusException {
+    private void manageNonConfiguredInterface(Optional<Device> optDevice, String deviceId) throws DBusException {
+        if (!optDevice.isPresent()) {
+            logger.warn("Ignoring missing, non configured device \"{}\"", deviceId);
+            return;
+        }
+        Device device = optDevice.get();
+        
         NMDeviceType deviceType = this.networkManager.getDeviceType(device.getObjectPath());
 
         if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
@@ -496,7 +583,7 @@ public class NMDbusConnector {
 
         logger.warn("Device \"{}\" of type \"{}\" not configured. Disabling...", deviceId, deviceType);
 
-        disable(device);
+        disable(optDevice, deviceId);
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
@@ -504,9 +591,14 @@ public class NMDbusConnector {
         }
     }
 
-    private void disable(Device device) throws DBusException {
+    private void disable(Optional<Device> optDevice, String deviceId) throws DBusException {
+        if (!optDevice.isPresent()) {
+            logger.warn("Can't disable missing device {}", deviceId);
+            return;
+        }
+        Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
-
+        
         NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
@@ -514,7 +606,7 @@ public class NMDbusConnector {
             device.Disconnect();
             dsLock.waitForSignal();
         }
-
+        
         // Housekeeping
         if (appliedConnection.isPresent()) {
             appliedConnection.get().Delete();
@@ -535,6 +627,8 @@ public class NMDbusConnector {
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         this.configurationEnforcementHandlerIsArmed = true;
+        logger.debug("Network configuration enforcement set to {} (Expected: true)",
+                this.configurationEnforcementHandlerIsArmed);
     }
 
     private void configurationEnforcementDisable() throws DBusException {
@@ -543,5 +637,7 @@ public class NMDbusConnector {
             this.dbusConnection.removeSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         }
         this.configurationEnforcementHandlerIsArmed = false;
+        logger.debug("Network configuration enforcement set to {} (Expected: false)",
+                this.configurationEnforcementHandlerIsArmed);
     }
 }

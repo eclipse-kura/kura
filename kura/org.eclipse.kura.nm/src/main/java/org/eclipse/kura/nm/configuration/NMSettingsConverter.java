@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.nm.configuration;
 
@@ -34,6 +35,7 @@ import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NM8021xEAP;
 import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
+import org.freedesktop.dbus.types.DBusListType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
@@ -103,6 +105,9 @@ public class NMSettingsConverter {
             Map<String, Variant<?>> pppSettingsMap = NMSettingsConverter.buildPPPSettings(properties, deviceId);
             newConnectionSettings.put("gsm", gsmSettingsMap);
             newConnectionSettings.put("ppp", pppSettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
+            Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
+            newConnectionSettings.put("vlan", vlanSettingsMap);
         }
 
         return newConnectionSettings;
@@ -507,6 +512,25 @@ public class NMSettingsConverter {
 
         return settings;
     }
+    
+    public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        settings.put("interface-name", new Variant<>(deviceId));
+        String parent = props.get(String.class, "net.interface.%s.config.vlan.parent", deviceId);
+        settings.put("parent", new Variant<>(parent));
+        Integer vlanId = props.get(Integer.class, "net.interface.%s.config.vlan.id", deviceId);
+        settings.put("id", new Variant<>(new UInt32(vlanId)));
+        Optional<Integer> vlanFlags = props.getOpt(Integer.class, "net.interface.%s.config.vlan.flags", deviceId);
+        settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
+        DBusListType listType = new DBusListType(String.class);
+        Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
+        settings.put("ingress-priority-map", new Variant<>(ingressMap
+                .orElse(new ArrayList<String>()), listType));
+        Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
+        settings.put("egress-priority-map", new Variant<>(egressMap
+                .orElse(new ArrayList<String>()), listType));
+        return settings;
+    }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
@@ -528,7 +552,7 @@ public class NMSettingsConverter {
 
         return connectionMap;
     }
-
+    
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 
@@ -692,6 +716,8 @@ public class NMSettingsConverter {
             return "802-11-wireless";
         case NM_DEVICE_TYPE_MODEM:
             return "gsm";
+        case NM_DEVICE_TYPE_VLAN:
+            return "vlan";
         // ... WIP
         default:
             throw new IllegalArgumentException(String

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.core.net;
 
@@ -28,6 +29,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.core.net.vlan.VlanInterfaceConfigImpl;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.NetConfig;
@@ -186,6 +188,9 @@ public class NetworkConfiguration {
                     break;
                 case MODEM:
                     netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+                    break;
+                case VLAN:
+                    netInterfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
                     break;
                 default:
                     throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
@@ -853,6 +858,19 @@ public class NetworkConfiguration {
                 ((ModemInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(modemInterfaceAddressConfigs);
 
                 ((ModemInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+
+                break;
+            case VLAN:
+                interfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
+                List<NetInterfaceAddressConfig> vlanInterfaceAddressConfigs = new ArrayList<>();
+                netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+                netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                        interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+                vlanInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+                ((VlanInterfaceConfigImpl) interfaceConfig)
+                        .setNetInterfaceAddresses(vlanInterfaceAddressConfigs);
+
+                ((VlanInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
                 break;
             case UNKNOWN:

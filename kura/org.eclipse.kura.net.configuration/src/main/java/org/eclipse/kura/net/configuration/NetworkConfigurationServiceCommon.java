@@ -84,29 +84,34 @@ public class NetworkConfigurationServiceCommon {
                     getLoopbackDefinition(tocd, ifaceName);
                     break;
                 case ETHERNET:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getDhcpServerDefinition(tocd, ifaceName);
                     break;
                 case WIFI:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getDhcpServerDefinition(tocd, ifaceName);
                     getWifiDefinition(tocd, ifaceName);
                     break;
                 case MODEM:
-                    if (usbNetDevices.isPresent()) {
-                        getUsbDeviceDefinition(usbNetDevices.get(), tocd, ifaceName);
-                    }
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
                     getInterfaceCommonDefinition(tocd, ifaceName);
                     getDnsDefinition(tocd, ifaceName);
                     getModemDefinition(tocd, ifaceName);
+                    break;
+                case VLAN:
+                    usbNetDevices.ifPresent(usbNetDevice -> getUsbDeviceDefinition(usbNetDevice,
+                            tocd, ifaceName));
+                    getInterfaceCommonDefinition(tocd, ifaceName);
+                    getDnsDefinition(tocd, ifaceName);
+                    getDhcpServerDefinition(tocd, ifaceName);
+                    getVlanDefinition(tocd, ifaceName);
                     break;
                 default:
                 }
@@ -344,6 +349,20 @@ public class NetworkConfigurationServiceCommon {
         addIp6AddressGenerationModeDefinition(tocd, ifaceName);
         addIp6PrivacyDefinition(tocd, ifaceName);
 
+    }
+    
+    private static void getVlanDefinition(Tocd tocd, String ifaceName) {
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.vlan.parent", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_VLAN_PARENT, Tscalar.STRING));
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.vlan.id", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_VLAN_ID, Tscalar.INTEGER));
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.vlan.ingress", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_VLAN_INGRESS_MAP, Tscalar.STRING));
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.vlan.egress", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_VLAN_EGRESS_MAP, Tscalar.STRING));
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.vlan.flags", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_VLAN_FLAGS, Tscalar.INTEGER));
+        
     }
 
     private static void addIp4InterfaceCommonDefinition(Tocd tocd, String ifaceName) {

@@ -1099,6 +1099,64 @@ public class NMSettingsConverterTest {
 
         thenIllegalArgumentExceptionThrown();
     }
+    
+    @Test
+    public void buildVlanSettingsShouldWorkWithRequiredSettings() {
+        givenMapWith("net.interface.eth0.30.config.vlan.parent", "eth0");
+        givenMapWith("net.interface.eth0.30.config.vlan.id", 30);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("parent", "eth0");
+        thenResultingMapContains("id", new UInt32(30));
+        thenResultingMapContains("flags", new UInt32(1));
+        thenResultingMapContains("ingress-priority-map", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapContains("egress-priority-map", new Variant<>(Arrays.asList(), "as").getValue());
+    }
+    
+    @Test
+    public void buildVlanSettingsShouldWorkWithFullSettings() {
+        givenMapWith("net.interface.eth1.40.config.vlan.parent", "eth1");
+        givenMapWith("net.interface.eth1.40.config.vlan.id", 40);
+        givenMapWith("net.interface.eth1.40.config.vlan.flags", 3);
+        givenMapWith("net.interface.eth1.40.config.vlan.id", 40);
+        givenMapWith("net.interface.eth1.40.config.vlan.ingress", "0:1,4:5");
+        givenMapWith("net.interface.eth1.40.config.vlan.egress", "2:3");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth1.40");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("parent", "eth1");
+        thenResultingMapContains("id", new UInt32(40));
+        thenResultingMapContains("flags", new UInt32(3));
+        thenResultingMapContains("ingress-priority-map", new Variant<>(
+                Arrays.asList("0:1", "4:5"), "as").getValue());
+        thenResultingMapContains("egress-priority-map", new Variant<>(
+                Arrays.asList("2:3"), "as").getValue());    
+    }
+    
+    @Test
+    public void buildVlanSettingsShouldThrowWhenMissingParent() {
+        givenMapWith("net.interface.eth0.30.config.vlan.id", 30);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
+        
+        thenNoSuchElementExceptionThrown();
+    }
+    
+    @Test
+    public void buildVlanSettingsShouldThrowWhenMissingVlanId() {
+        givenMapWith("net.interface.eth0.30.config.vlan.parent", "eth0");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
+        
+        thenNoSuchElementExceptionThrown();
+    }
 
     @Test
     public void buildConnectionSettingsShouldWorkWithWifi() {
@@ -1123,6 +1181,15 @@ public class NMSettingsConverterTest {
         whenBuildConnectionSettings(Optional.empty(), "modem0", NMDeviceType.NM_DEVICE_TYPE_ADSL);
 
         thenIllegalArgumentExceptionThrown();
+    }
+    
+    @Test
+    public void buildConnectionSettingsShouldWorkWithVlan() {
+        whenBuildConnectionSettings(Optional.empty(), "eth0.40", NMDeviceType.NM_DEVICE_TYPE_VLAN);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("type", "vlan");
+        thenResultingMapContains("autoconnect-retries", 1);
     }
 
     @Test
@@ -1488,6 +1555,44 @@ public class NMSettingsConverterTest {
         thenResultingBuildAllMapContains("connection", "id", "kura-eth0-connection");
         thenResultingBuildAllMapContains("connection", "interface-name", "eth0");
         thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
+    }
+    
+    @Test
+    public void buildSettingsShouldWorkWithExpectedInputsVlanAndWanIp4() {
+        givenMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
+        givenMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
+        givenMapWith("net.interface.myVlan.config.ip4.prefix", (short) 25);
+        givenMapWith("net.interface.myVlan.config.ip4.dnsServers", "1.1.1.1");
+        givenMapWith("net.interface.myVlan.config.ip4.gateway", "192.168.0.1");
+        givenMapWith("net.interface.myVlan.config.vlan.parent", "eth0");
+        givenMapWith("net.interface.myVlan.config.vlan.id", 55);
+        givenMapWith("net.interface.myVlan.config.vlan.flags", 2);
+        givenMapWith("net.interface.myVlan.config.vlan.egress", "2:3");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "myVlan", "myVlan",
+                NMDeviceType.NM_DEVICE_TYPE_VLAN);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingBuildAllMapContains("ipv6", "method", "disabled");
+        thenResultingBuildAllMapContains("ipv4", "method", "manual");
+        thenResultingBuildAllMapContains("ipv4", "address-data", buildAddressDataWith("192.168.0.12", new UInt32(25)));
+        thenResultingBuildAllMapContains("ipv4", "gateway", "192.168.0.1");
+        thenResultingBuildAllMapContains("ipv4", "dns",
+                new Variant<>(Arrays.asList(new UInt32(16843009)), "au").getValue());
+        thenResultingBuildAllMapContains("ipv4", "ignore-auto-dns", true);
+        thenResultingBuildAllMapNotContains("ipv4", "ignore-auto-routes");
+        thenResultingBuildAllMapContains("connection", "id", "kura-myVlan-connection");
+        thenResultingBuildAllMapContains("connection", "interface-name", "myVlan");
+        thenResultingBuildAllMapContains("connection", "type", "vlan");
+        thenResultingBuildAllMapContains("vlan", "parent", "eth0");
+        thenResultingBuildAllMapContains("vlan", "id", new UInt32(55));
+        thenResultingBuildAllMapContains("vlan", "flags", new UInt32(2));
+        thenResultingBuildAllMapContains("vlan", "ingress-priority-map", new Variant<>(
+                Arrays.asList(), "as").getValue());
+        thenResultingBuildAllMapContains("vlan", "egress-priority-map", new Variant<>(
+                Arrays.asList("2:3"), "as").getValue());
     }
 
     @Test
@@ -2845,6 +2950,18 @@ public class NMSettingsConverterTest {
     private void whenBuildPPPSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildPPPSettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+    
+    private void whenBuildVlanSettingsIsRunWith(NetworkProperties props, String iface) {
+        try {
+            this.resultMap = NMSettingsConverter.buildVlanSettings(props, iface);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

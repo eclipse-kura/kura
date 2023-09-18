@@ -25,12 +25,6 @@
                name="RequestHandlerRegistry"
                policy="dynamic"/>
 
-    <reference interface="org.osgi.service.useradmin.UserAdmin"
-               bind="bindUserAdmin"
-               cardinality="0..1"
-               name="UserAdmin"
-               policy="static"/>
-
     <service>
         <provide interface="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
     </service>

@@ -14,11 +14,8 @@ package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -26,14 +23,11 @@ import java.util.Objects;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider;
 import org.junit.Test;
 
 public class ServiceListingServiceTest {
-
-    private static final String MQTT_APP_ID = "SERLIST-V1";
 
     private final RestServiceListingProvider service = new RestServiceListingProvider();
     private RequestHandlerRegistry requestHandlerRegistry;
@@ -65,10 +59,6 @@ public class ServiceListingServiceTest {
      * Given
      */
 
-    private void givenMockRequestHandlerRegistry() {
-        this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
-    }
-
     private void givenFailingMockRequestHandlerRegistry() throws KuraException {
         this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
         doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistry)
@@ -99,15 +89,6 @@ public class ServiceListingServiceTest {
     /*
      * Then
      */
-
-    private void thenRequestHandlerIsRegistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistry, times(1)).registerRequestHandler(eq(expectedMqttAppId),
-                any(RequestHandler.class));
-    }
-
-    private void thenRequestHandlerIsUnregistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistry, times(1)).unregister(expectedMqttAppId);
-    }
 
     private void thenNoExceptionOccurred() {
         String errorMessage = "Empty message";

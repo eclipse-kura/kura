@@ -1,16 +1,23 @@
 package org.eclipse.kura.internal.rest.service.listing.provider;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -24,8 +31,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +40,7 @@ public class RestServiceListingProvider {
     private static final Logger logger = LoggerFactory.getLogger(RestServiceListingProvider.class);
     private static final String REQUEST_DEBUG_MESSAGE = "Received request from: '{}'";
 
-    private static final String APP_ID_MQTT = "SERLIST-V1";
-    private static final String REST_ROLE = "kura.permission.rest.serviceListing";
+    private static final String APP_ID_MQTT = "SVCLIST-V1";
 
     private static final String KURA_SERVICE_PID_FILTER = "kura.service.pid";
     private static final String OBJECT_CLASS_FILTER = "(objectClass=";
@@ -59,24 +63,26 @@ public class RestServiceListingProvider {
         }
     }
 
-    public void bindUserAdmin(UserAdmin userAdmin) {
-        userAdmin.createRole(REST_ROLE, Role.GROUP);
-    }
-
     /**
      * GET method
      *
-     * @return list of all services running on kura exposing a <kura.service.pid> property
+     * @return list of all services running on kura exposing a <kura.service.pid>
+     *         property
      */
     @GET
-    @RolesAllowed("serviceListing")
+    @PermitAll
     @Path("/sortedList")
     @Produces(MediaType.APPLICATION_JSON)
-    public SortedServiceListDTO getSortedServicesList() {
+    public SortedServiceListDTO getSortedServicesList(@Context final ContainerRequestContext requestContext) {
         try {
             logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/sortedList");
 
             BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
+
+            if (requestContext != null && !getPrincipal(requestContext).isPresent()) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             List<String> resultDTO = getAllServices(context);
 
             return new SortedServiceListDTO(resultDTO);
@@ -90,19 +96,24 @@ public class RestServiceListingProvider {
     /**
      * POST method
      *
-     * @return list of all services running on kura, filtered by the list of interfaces that the services must
-     *         implement. If more <interfacesList> contains more than one entry, all of them are put in an AND logic
+     * @return list of all services running on kura, filtered by the list of
+     *         interfaces that the services must implement. If more <interfacesList>
+     *         contains more than one entry, all of them are put in an AND logic
      *         value
      */
     @POST
-    @RolesAllowed("serviceListing")
     @Path("/sortedList/byAllInterfaces")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public SortedServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfacesList) {
+    public SortedServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfacesList,
+            @Context final ContainerRequestContext requestContext) {
         try {
 
             logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/list/sortedList/byAllInterfaces");
+
+            if (requestContext != null && !getPrincipal(requestContext).isPresent()) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
 
             InterfacesIdsDTO returnInterfacesList;
             if (interfacesList == null) {
@@ -122,6 +133,10 @@ public class RestServiceListingProvider {
         }
     }
 
+    /*
+     * Utils methods
+     */
+
     private List<String> getAllServices(BundleContext context) throws InvalidSyntaxException {
 
         List<ServiceReference<?>> servicesList = Arrays
@@ -139,7 +154,7 @@ public class RestServiceListingProvider {
         return services;
     }
 
-    private List<String> getStrictFilteredInterfaces(BundleContext context, List<String> interfacesIds)
+    private List<String> getStrictFilteredInterfaces(BundleContext context, Set<String> interfacesIds)
             throws InvalidSyntaxException {
 
         List<ServiceReference<?>> servicesList = Arrays
@@ -158,7 +173,7 @@ public class RestServiceListingProvider {
 
     }
 
-    private String generateFilterString(List<String> interfacesIds) {
+    private String generateFilterString(Set<String> interfacesIds) {
 
         StringBuilder filterStringBuilder = new StringBuilder("(&");
 
@@ -181,6 +196,11 @@ public class RestServiceListingProvider {
         } catch (NullPointerException ex) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "No result found for the passed interfaces");
         }
+    }
+
+    private Optional<Principal> getPrincipal(final ContainerRequestContext containerRequestContext) {
+        return Optional.ofNullable(containerRequestContext.getSecurityContext())
+                .flatMap(entry -> Optional.ofNullable(entry.getUserPrincipal()));
     }
 
 }

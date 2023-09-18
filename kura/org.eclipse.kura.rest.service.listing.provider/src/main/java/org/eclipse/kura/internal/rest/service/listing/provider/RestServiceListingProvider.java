@@ -33,85 +33,92 @@ import org.slf4j.LoggerFactory;
 public class RestServiceListingProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RestServiceListingProvider.class);
-    private static final String DEBUG_MESSSAGE = "Processing request for method '{}'";
+    private static final String REQUEST_DEBUG_MESSAGE = "Received request from: '{}'";
 
-    private static final String MQTT_APP_ID = "SERLIST-V1";
-    private static final String REST_ROLE_NAME = "serviceListing";
-    private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
+    private static final String APP_ID_MQTT = "SERLIST-V1";
+    private static final String REST_ROLE = "kura.permission.rest.serviceListing";
 
     private static final String KURA_SERVICE_PID_FILTER = "kura.service.pid";
     private static final String OBJECT_CLASS_FILTER = "(objectClass=";
 
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    public void bindUserAdmin(UserAdmin userAdmin) {
-        userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
-    }
-
-    public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+    public void requestHandlerRegistryBinding(RequestHandlerRegistry bindingRegistry) {
         try {
-            registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
+            bindingRegistry.registerRequestHandler(APP_ID_MQTT, this.requestHandler);
         } catch (final Exception e) {
-            logger.warn("Failed to register {} request handler", MQTT_APP_ID, e);
+            logger.warn("Failed to register {} request handler", APP_ID_MQTT, e);
         }
     }
 
-    public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+    public void requestHandlerRegistryUnbinding(RequestHandlerRegistry unbindingRegistry) {
         try {
-            registry.unregister(MQTT_APP_ID);
+            unbindingRegistry.unregister(APP_ID_MQTT);
         } catch (final Exception e) {
-            logger.warn("Failed to unregister {} request handler", MQTT_APP_ID, e);
+            logger.warn("Failed to unregister {} request handler", APP_ID_MQTT, e);
         }
+    }
+
+    public void userAdminBinding(UserAdmin userAdmin) {
+        userAdmin.createRole(REST_ROLE, Role.GROUP);
     }
 
     /**
      * GET method
      *
-     * @return true if the debug is permitted. False otherwise.
+     * @return list of all services running on kura exposing a <kura.service.pid> property
      */
     @GET
-    @RolesAllowed(REST_ROLE_NAME)
+    @RolesAllowed("serviceListing")
     @Path("/sortedList")
     @Produces(MediaType.APPLICATION_JSON)
     public SortedServiceListDTO getSortedServicesList() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "serviceListing/v1/sortedList");
+            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/sortedList");
 
             BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
             List<String> resultDTO = getAllServices(context);
 
             return new SortedServiceListDTO(resultDTO);
-        } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+
+        } catch (Exception ex) {
+            throw DefaultExceptionHandler.toWebApplicationException(ex);
         }
 
     }
 
+    /**
+     * POST method
+     *
+     * @return list of all services running on kura, filtered by the list of interfaces that the services must
+     *         implement. If more <interfacesList> contains more than one entry, all of them are put in an AND logic
+     *         value
+     */
     @POST
-    @RolesAllowed(REST_ROLE_NAME)
+    @RolesAllowed("serviceListing")
     @Path("/sortedList/byAllInterfaces")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public SortedServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfaceIds) {
+    public SortedServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfacesList) {
         try {
 
-            logger.debug(DEBUG_MESSSAGE, "serviceListing/v1/list/sortedList/byAllInterfaces");
+            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/list/sortedList/byAllInterfaces");
 
-            InterfacesIdsDTO returnInterfaceIds;
-            if (interfaceIds == null) {
-                returnInterfaceIds = new InterfacesIdsDTO(null);
-                returnInterfaceIds.idsValidation();
+            InterfacesIdsDTO returnInterfacesList;
+            if (interfacesList == null) {
+                returnInterfacesList = new InterfacesIdsDTO(null);
+                returnInterfacesList.idsValidation();
             } else {
-                interfaceIds.idsValidation();
-                returnInterfaceIds = interfaceIds;
+                interfacesList.idsValidation();
+                returnInterfacesList = interfacesList;
             }
 
             BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
 
-            return generateResponseDTO(context, returnInterfaceIds);
+            return generateResponseDTO(context, returnInterfacesList);
 
-        } catch (final Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+        } catch (final Exception ex) {
+            throw DefaultExceptionHandler.toWebApplicationException(ex);
         }
     }
 

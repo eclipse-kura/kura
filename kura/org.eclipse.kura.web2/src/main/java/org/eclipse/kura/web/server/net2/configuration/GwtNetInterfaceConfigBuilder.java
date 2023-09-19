@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.web.server.net2.utils.EnumsParser;
+import org.eclipse.kura.web.shared.model.Gwt8021xConfig;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfConfigMode;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
@@ -66,6 +67,7 @@ public class GwtNetInterfaceConfigBuilder {
         setRouterMode();
         setWifiProperties();
         setModemProperties();
+        set8021xProperties();
 
         return this.gwtConfig;
     }
@@ -225,12 +227,12 @@ public class GwtNetInterfaceConfigBuilder {
         gwtWifiConfig.setIgnoreSSID(this.properties.getWifiMasterIgnoreSsid(this.ifName));
         gwtWifiConfig.setPassword(new String(this.properties.getWifiMasterPassphrase(this.ifName).getPassword()));
         gwtWifiConfig.setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name());
-        gwtWifiConfig.setSecurity(
-                EnumsParser.getGwtWifiSecurity(this.properties.getWifiMasterSecurityType(this.ifName)));
+        gwtWifiConfig
+                .setSecurity(EnumsParser.getGwtWifiSecurity(this.properties.getWifiMasterSecurityType(this.ifName)));
         gwtWifiConfig.setPairwiseCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterPairwiseCiphers(this.ifName)));
-        gwtWifiConfig.setGroupCiphers(
-                EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterGroupCiphers(this.ifName)));
+        gwtWifiConfig
+                .setGroupCiphers(EnumsParser.getGwtWifiCiphers(this.properties.getWifiMasterGroupCiphers(this.ifName)));
         gwtWifiConfig.setChannels(this.properties.getWifiMasterChannel(this.ifName));
 
         // wifi master specific properties
@@ -258,10 +260,10 @@ public class GwtNetInterfaceConfigBuilder {
                 .setSecurity(EnumsParser.getGwtWifiSecurity(this.properties.getWifiInfraSecurityType(this.ifName)));
         gwtWifiConfig.setPairwiseCiphers(
                 EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraPairwiseCiphers(this.ifName)));
-        gwtWifiConfig.setGroupCiphers(
-                EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraGroupCiphers(this.ifName)));
+        gwtWifiConfig
+                .setGroupCiphers(EnumsParser.getGwtWifiCiphers(this.properties.getWifiInfraGroupCiphers(this.ifName)));
         gwtWifiConfig.setChannels(this.properties.getWifiInfraChannel(this.ifName));
-        
+
         // wifi infra specific properties
 
         Optional<String> radioMode = EnumsParser
@@ -305,8 +307,7 @@ public class GwtNetInterfaceConfigBuilder {
         if (this.gwtConfig instanceof GwtModemInterfaceConfig) {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) this.gwtConfig;
 
-            gwtModemConfig
-                    .setAuthType(EnumsParser.getGwtModemAuthType(this.properties.getModemAuthType(this.ifName)));
+            gwtModemConfig.setAuthType(EnumsParser.getGwtModemAuthType(this.properties.getModemAuthType(this.ifName)));
             gwtModemConfig.setPdpType(EnumsParser.getGwtModemPdpType(this.properties.getModemPdpType(this.ifName)));
 
             gwtModemConfig.setDialString(this.properties.getModemDialString(this.ifName));
@@ -330,6 +331,16 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig.setHwUsbDevice(this.properties.getUsbDevicePath(this.ifName));
             gwtModemConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
         }
+    }
+
+    private void set8021xProperties() {
+
+        Gwt8021xConfig gwt8021xConfig = this.gwtConfig.get8021xConfig();
+
+        gwt8021xConfig.setEap(this.properties.get8021xEap(this.ifName));
+        gwt8021xConfig.setInnerAuth(this.properties.get8021xInnerAuth(this.ifName));
+        gwt8021xConfig.setIdentity(this.properties.get8021xIdentity(this.ifName));
+        gwt8021xConfig.setPassword(new String(this.properties.get8021xPassword(this.ifName).getPassword()));
     }
 
 }

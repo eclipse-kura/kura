@@ -47,6 +47,7 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
+import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
@@ -100,6 +101,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String WIFI_SECURITY_WPA_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name());
     private static final String WIFI_SECURITY_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA2.name());
+    private static final String WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE = MessageUtils
+            .get(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name());
     private static final String WIFI_SECURITY_WPA_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
     private static final String WIFI_BGSCAN_NONE_MESSAGE = MessageUtils
@@ -143,8 +146,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private final GwtSession session;
     private final TabIp4Ui tcpTab;
     private final NetworkTabsUi netTabs;
+    private final Tab8021xUi wireless8021x;
     private final ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<>();
+
+    AnchorListItem wireless8021xTabAnchorItem;
 
     private boolean dirty;
     private boolean ssidInit;
@@ -338,12 +344,15 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     Text unavailableChannelErrorText;
 
-    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs) {
+    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, Tab8021xUi wireless8021x,
+            AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tcpTab = tcp;
         this.netTabs = tabs;
+        this.wireless8021x = wireless8021x;
+        this.wireless8021xTabAnchorItem = wireless8021xTabAnchorItem;
 
         detectIfNet2();
 
@@ -665,6 +674,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             // Station mode
             if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
 
+                add8021xFromSecurityDropdown();
+
                 if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     this.wireless.setEnabled(false);
                 }
@@ -672,6 +683,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             } else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 // access point mode
+
+                remove8021xFromSecurityDropdown();
+
                 // disable access point when TCP/IP is set to WAN
                 if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     setForm(false);
@@ -688,11 +702,21 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 this.buttonPassword.setVisible(false);
             }
 
-            // disable Password if security is none
-            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
+            // disable Password if security is none, or if Wifi-Enterprise is enabled
+            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)
+                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.password.setEnabled(false);
                 this.verify.setEnabled(false);
                 this.buttonPassword.setEnabled(false);
+            }
+
+            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                this.password.setEnabled(false);
+                this.verify.setEnabled(false);
+                this.buttonPassword.setEnabled(false);
+                this.wireless8021xTabAnchorItem.setEnabled(true);
+            } else {
+                this.wireless8021xTabAnchorItem.setEnabled(false);
             }
 
             if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
@@ -754,6 +778,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             } else {
                 this.pairwise.setEnabled(false);
                 this.group.setEnabled(false);
+            }
+
+            if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                this.password.setEnabled(false);
             }
         }
 
@@ -1225,6 +1253,29 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
 
         return Collections.singletonList(frequencyEntry);
+    }
+
+    private void remove8021xFromSecurityDropdown() {
+        for (int i = 0; i < this.security.getItemCount(); i++) {
+            if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                this.security.removeItem(i);
+            }
+        }
+    }
+
+    private void add8021xFromSecurityDropdown() {
+
+        if (!this.isNet2) {
+            remove8021xFromSecurityDropdown();
+            return;
+        }
+
+        for (int i = 0; i < this.security.getItemCount(); i++) {
+            if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
+                return;
+            }
+        }
+        this.security.addItem(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE);
     }
 
     private Validator<String> newBgScanValidator(TextBox field) {

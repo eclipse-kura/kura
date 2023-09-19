@@ -28,6 +28,9 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkConfigurationServicePropertiesBuilder {
 
@@ -36,6 +39,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
     private final String ifname;
+
+    private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServicePropertiesBuilder.class);
 
     private final GwtNetInterfaceConfig oldGwtNetInterfaceConfig;
 
@@ -54,16 +59,17 @@ public class NetworkConfigurationServicePropertiesBuilder {
         setIpv6Properties();
         setIpv4DhcpClientProperties();
         setIpv4DhcpServerProperties();
+        set8021xConfig();
 
         switch (this.gwtConfig.getStatusEnum()) {
-            case netIPv4StatusDisabled:
-                break;
-            case netIPv4StatusUnmanaged:
-                break;
-            default:
-                setWifiProperties();
-                setModemProperties();
-                break;
+        case netIPv4StatusDisabled:
+            break;
+        case netIPv4StatusUnmanaged:
+            break;
+        default:
+            setWifiProperties();
+            setModemProperties();
+            break;
         }
 
         // Manage GPS independently of device ip status
@@ -150,25 +156,23 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setIpv4DhcpClientProperties() {
         switch (this.gwtConfig.getConfigModeEnum()) {
-            case netIPv4ConfigModeDHCP:
-                this.properties.setDhcpClient4Enabled(this.ifname, true);
-                break;
-            case netIPv4ConfigModeManual:
-                this.properties.setDhcpClient4Enabled(this.ifname, false);
-                break;
-            default:
-                break;
+        case netIPv4ConfigModeDHCP:
+            this.properties.setDhcpClient4Enabled(this.ifname, true);
+            break;
+        case netIPv4ConfigModeManual:
+            this.properties.setDhcpClient4Enabled(this.ifname, false);
+            break;
+        default:
+            break;
         }
     }
 
     private void setIpv4DhcpServerProperties() {
         boolean isManualAddress = this.gwtConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeManual;
-        boolean isDhcpServer = isManualAddress
-                && this.gwtConfig.getRouterModeEnum() != GwtNetRouterMode.netRouterOff
+        boolean isDhcpServer = isManualAddress && this.gwtConfig.getRouterModeEnum() != GwtNetRouterMode.netRouterOff
                 && this.gwtConfig.getRouterModeEnum() != GwtNetRouterMode.netRouterNat;
-        boolean isNatEnabled = isManualAddress
-                && (this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterNat
-                        || this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchpNat);
+        boolean isNatEnabled = isManualAddress && (this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterNat
+                || this.gwtConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchpNat);
 
         this.properties.setDhcpServer4Enabled(this.ifname, isDhcpServer);
         this.properties.setNatEnabled(this.ifname, isNatEnabled);
@@ -215,9 +219,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
                 gwtWifiNetInterfaceConfig.setUnescaped(true);
 
-                GwtWifiConfig gwtApConfig =  gwtWifiNetInterfaceConfig.getAccessPointWifiConfig();
+                GwtWifiConfig gwtApConfig = gwtWifiNetInterfaceConfig.getAccessPointWifiConfig();
                 gwtApConfig.setUnescaped(true);
-                
+
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtApConfig.getPassword());
             } else {
                 GwtServerUtil.validateUserPassword(gwtWifiConfig.getPassword());
@@ -242,6 +246,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     }
 
+    private void set8021xConfig() {
+        logger.error("setting 802-1x config");
+        this.properties.set8021xEap(this.ifname, this.gwtConfig.get8021xConfig().getEap());
+        this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.get8021xConfig().getInnerAuth());
+        this.properties.set8021xIdentity(this.ifname, this.gwtConfig.get8021xConfig().getUsername());
+        this.properties.set8021xPassword(this.ifname, this.gwtConfig.get8021xConfig().getPassword());
+    }
+
     private void setWifiInfraProperties() {
         GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) this.gwtConfig).getStationWifiConfig();
         gwtWifiConfig.setUnescaped(true);
@@ -256,11 +268,11 @@ public class NetworkConfigurationServicePropertiesBuilder {
                     && oldGwtNetInterfaceConfig instanceof GwtWifiNetInterfaceConfig) {
                 GwtWifiNetInterfaceConfig gwtWifiNetInterfaceConfig = (GwtWifiNetInterfaceConfig) oldGwtNetInterfaceConfig;
                 gwtWifiNetInterfaceConfig.setUnescaped(true);
-                
-                GwtWifiConfig gwtStationConfig =  gwtWifiNetInterfaceConfig.getStationWifiConfig();
+
+                GwtWifiConfig gwtStationConfig = gwtWifiNetInterfaceConfig.getStationWifiConfig();
                 gwtStationConfig.setUnescaped(true);
-                
-                this.properties.setWifiInfraPassphrase(this.ifname,gwtStationConfig.getPassword());
+
+                this.properties.setWifiInfraPassphrase(this.ifname, gwtStationConfig.getPassword());
             } else {
                 this.properties.setWifiInfraPassphrase(this.ifname, gwtWifiConfig.getPassword());
             }
@@ -315,10 +327,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
             if (gwtModemConfig.getPassword() != null) {
                 if (GwtServerUtil.PASSWORD_PLACEHOLDER.equals(gwtModemConfig.getPassword())
                         && oldGwtNetInterfaceConfig instanceof GwtModemInterfaceConfig) {
-                    
+
                     GwtModemInterfaceConfig gwtModemInterfaceConfig = (GwtModemInterfaceConfig) oldGwtNetInterfaceConfig;
                     gwtModemInterfaceConfig.setUnescaped(true);
-                    
+
                     this.properties.setModemPassword(this.ifname, gwtModemInterfaceConfig.getPassword());
                 } else {
                     this.properties.setModemPassword(this.ifname, gwtModemConfig.getPassword());

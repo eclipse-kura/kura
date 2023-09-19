@@ -24,6 +24,20 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     private static final Logger logger = Logger.getLogger(GwtNetInterfaceConfig.class.getSimpleName());
     private static final long serialVersionUID = 7079533925979145804L;
 
+    private Gwt8021xConfig enterpriseConfig = new Gwt8021xConfig();
+
+    public void setEnterpriseConfig(Gwt8021xConfig enterpriseConfig) {
+        this.enterpriseConfig = enterpriseConfig;
+    }
+
+    public Gwt8021xConfig get8021xConfig() {
+        return this.enterpriseConfig;
+    }
+
+    public Map<String, Object> getEnterpriseConfigProps() {
+        return this.enterpriseConfig.getProperties();
+    }
+
     public String getName() {
         return get("name");
     }
@@ -292,7 +306,7 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setIpv6Status(String status) {
         set("ipv6.status", status);
     }
-    
+
     public Integer getIpv6WanPriority() {
         return get("ipv6.priority");
     }

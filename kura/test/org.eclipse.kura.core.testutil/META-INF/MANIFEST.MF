@@ -50,5 +50,5 @@ Export-Package: org.eclipse.kura.core.testutil;version="1.0.0",
  org.eclipse.kura.core.testutil.http;version="1.0.0",
  org.eclipse.kura.core.testutil.json;version="1.0.0",
  org.eclipse.kura.core.testutil.pki;version="1.0.0",
- org.eclipse.kura.core.testutil.requesthandler;version="1.1.0",
+ org.eclipse.kura.core.testutil.requesthandler;version="1.2.0",
  org.eclipse.kura.core.testutil.service;version="1.0.0"

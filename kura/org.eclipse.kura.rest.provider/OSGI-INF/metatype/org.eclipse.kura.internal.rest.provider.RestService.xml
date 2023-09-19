@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+  Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -9,13 +9,75 @@
 	SPDX-License-Identifier: EPL-2.0
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.internal.rest.provider.RestService" name="RestService" description="This service allows to configure settings related to Kura REST APIs">
+    <OCD id="org.eclipse.kura.internal.rest.provider.RestService" 
+    name="RestService" 
+    description="This service allows to configure settings related to Kura REST APIs">
 
-        <AD id="allowed.ports" name="Allowed ports" type="Integer" cardinality="3" required="false" min="1" max="65535" description="If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration."></AD>
+        <AD 
+	        id="allowed.ports" 
+	        name="Allowed Ports" 
+	        type="Integer" 
+	        cardinality="3" 
+	        required="false" 
+	        min="1" 
+	        max="65535" 
+	        description="If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration.">
+        </AD>
 
-        <AD id="auth.password.enabled" name="Password authentication enabled" type="Boolean" required="true" default="true" description="Enables or disables the built-in password authentication support."></AD>
+        <AD 
+        	id="auth.password.enabled" 
+        	name="Password Authentication Enabled" 
+        	type="Boolean" 
+        	required="true" 
+        	default="true" 
+        	description="Enables or disables the built-in password authentication support.">
+        </AD>
 
-        <AD id="auth.certificate.enabled" name="Certificate authentication enabled" type="Boolean" required="true" default="true" description="Enables or disables the built-in certificate authentication support."></AD>
+        <AD 
+        	id="auth.certificate.enabled" 
+        	name="Certificate Authentication Enabled" 
+        	type="Boolean" 
+        	required="true" 
+        	default="true" 
+        	description="Enables or disables the built-in certificate authentication support.">
+        </AD>
+        
+        <AD 
+        	id="session.management.enabled" 
+        	name="Session Based Authentication Enabled" 
+        	type="Boolean" 
+        	required="true" 
+        	default="true" 
+        	description="If set to true, enables authentication using the dedicated /services/session/v1 endpoints and cookie based session management.">
+        </AD>
+        
+        <AD 
+        	id="session.inactivity.interval" 
+        	name="Session Inactivity Interval (Seconds)" 
+        	type="Integer" 
+        	required="true" 
+        	default="900"
+			min="1"
+        	description="The session inactivity interval, sessions will expire if no request is performed for the amount of time specified by this parameter in seconds. This parameter is ignored if Session Based Authentication Enabled is set to false.">
+        </AD>
+        
+        <AD 
+        	id="auth.basic.enabled" 
+        	name="Basic Authentication Enabled" 
+        	type="Boolean" 
+        	required="true" 
+        	default="true" 
+        	description="Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the Password Authentication Enabled parameter is set to true.">
+        </AD>
+        
+        <AD 
+        	id="auth.certificate.stateless.enabled" 
+        	name="Enable Certificate Authentication Without Session Management"
+        	type="Boolean" 
+        	required="true" 
+        	default="true" 
+        	description="If set to true, calling /services/session/v1/certificate to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the Certificate Authentication Enabled parameter is set to true.">
+        </AD>
     </OCD>
 
     <Designate pid="org.eclipse.kura.internal.rest.provider.RestService">

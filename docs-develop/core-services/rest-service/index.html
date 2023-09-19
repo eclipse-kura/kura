@@ -2847,6 +2847,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-session-api/" class="md-nav__link">
+        Session
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../references/rest-apis/rest-system-api/" class="md-nav__link">
         System
       </a>
@@ -2980,6 +2994,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h1 id="rest-service">REST Service</h1>
 <p>Kura provides a built-in REST Service based on the <a href="https://github.com/hstaudacher/osgi-jax-rs-connector">osgi-jax-rs-connector</a> project.</p>
 <p>By default, REST service providers register their services using the context path <code>/services</code>. The REST service provides the <strong>BASIC</strong> Authentication support and HTTPS client certificate authentication support.</p>
+<p>Starting from Kura 5.4.0, REST service provides built in session management support, the <a href="doc:rest-session-api">Session REST APIs</a> can be used to establish a session. Using sessions is the recommended way for interacting with Kura REST APIs from a browser based application, for this use case it is also possible to disable the default session-less BASIC and certificate based authentication (see the <strong>Basic Authentication Enabled</strong> and <strong>Enable Certificate Authentication Whitout Session Management</strong> configuration parameters below).</p>
 <p>REST API access is available on all HTTP ports defined in the <a href="doc:httphttps-configuration">HTTP/HTTPS Configuration</a> section, unless access is restricted to dedicated ports using the corresponding configuration parameter (see below).</p>
 <p>Certificate authentication support is only available on the <strong>HTTPS With Certificate Authentication Ports</strong> configured in <a href="doc:httphttps-configuration">HTTP/HTTPS Configuration</a> section.</p>
 <p>Kura Identity names and passwords can be used for <strong>BASIC</strong> Authentication. Certificate authentication follows the same rules as <a href="../../gateway-configuration/gateway-administration-console-authentication/">Gateway Administration Console Authentication</a>.</p>
@@ -2989,9 +3004,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <p>JAX-RS roles are mapped to Kura permissions, the name of a permission associated with a JAX-RS role is the <em>rest.</em> prefix followed by the role name. For example the <em>assets</em> role is mapped to the <em>rest.assets</em> permission. REST related permissions can be assigned to an identity using the Gateway Administration Console in the <strong>Identities</strong> section.</p>
 <h2 id="rest-service-configuration">Rest Service configuration</h2>
-<p>The RestService configuration contains an <strong>Allowed Ports</strong> parameter that can be used to restrict REST API access to specific ports. If the port list is left empty, access will be enabled on all available ports.</p>
-<p>Furthermore, the <strong>RestService</strong> configuration provides options to disable the built-in authentication methods.</p>
-<p><img alt="REST Service" src="../images/rest-service.png" /></p>
+<p>The available configuration parameters are the following:</p>
+<ul>
+<li>
+<p><strong>Allowed Ports</strong>: If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration. (Default: empty)</p>
+</li>
+<li>
+<p><strong>Password Authentication Enabled</strong>: Enables or disables the built-in password authentication support. (Default: true)</p>
+</li>
+<li>
+<p><strong>Certificate Authentication Enabled</strong>: Enables or disables the built-in certificate authentication support. (Default: true)</p>
+</li>
+<li>
+<p><strong>Session Based Authentication Enabled</strong>: If set to true, enables authentication using the dedicated <code>/services/session/v1</code> endpoints and cookie based session management. (Default: true)</p>
+</li>
+<li>
+<p><strong>Session Inactivity Interval (Seconds)</strong>: The session inactivity interval, sessions will expire if no request is performed for the amount of time specified by this parameter in seconds. This parameter is ignored if Session Based Authentication Enabled is set to false. (Default: 900)</p>
+</li>
+<li>
+<p><strong>Basic Authentication Enabled</strong>: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the <strong>Password Authentication Enabled parameter</strong> is set to true. (Default: true)</p>
+</li>
+<li>
+<p><strong>Enable Certificate Authentication Without Session Management</strong>: If set to true, calling <code>/services/session/v1/certificate</code> to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the <strong>Certificate Authentication Enabled</strong> parameter is set to true. (Default: true)</p>
+</li>
+</ul>
 <h2 id="custom-authentication-methods">Custom authentication methods</h2>
 <p>Starting from Kura 5.2.0 it is also possible to develop custom REST authentication method providers by registering an implementation of the <code>org.eclipse.kura.rest.auth.AuthenticationProvider</code> interface as an OSGi service. The <code>org.eclipse.kura.example.rest.authentication.provider</code> bundle in Kura repository provides an example on how to implement a custom authentication method.</p>
 <h2 id="assets-rest-apis">Assets REST APIs</h2>

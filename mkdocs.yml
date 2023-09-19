@@ -152,6 +152,7 @@ nav:
         - Inventory: references/rest-apis/rest-inventory-api.md
         - Position: references/rest-apis/rest-position-api.md
         - Security: references/rest-apis/rest-security-api.md
+        - Session: references/rest-apis/rest-session-api.md
         - System: references/rest-apis/rest-system-api.md
     - Tutorials:
       - Anomaly Detection: tutorials/AD-EdgeAI.ipynb

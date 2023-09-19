@@ -4,6 +4,8 @@ Kura provides a built-in REST Service based on the [osgi-jax-rs-connector](https
 
 By default, REST service providers register their services using the context path `/services`. The REST service provides the **BASIC** Authentication support and HTTPS client certificate authentication support.
 
+Starting from Kura 5.4.0, REST service provides built in session management support, the [Session REST APIs](doc:rest-session-api) can be used to establish a session. Using sessions is the recommended way for interacting with Kura REST APIs from a browser based application, for this use case it is also possible to disable the default session-less BASIC and certificate based authentication (see the **Basic Authentication Enabled** and **Enable Certificate Authentication Whitout Session Management** configuration parameters below).
+
 REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Configuration](doc:httphttps-configuration) section, unless access is restricted to dedicated ports using the corresponding configuration parameter (see below).
 
 Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in [HTTP/HTTPS Configuration](doc:httphttps-configuration) section.
@@ -19,13 +21,21 @@ JAX-RS roles are mapped to Kura permissions, the name of a permission associated
 
 ## Rest Service configuration
 
-The RestService configuration contains an **Allowed Ports** parameter that can be used to restrict REST API access to specific ports. If the port list is left empty, access will be enabled on all available ports.
+The available configuration parameters are the following:
 
-Furthermore, the **RestService** configuration provides options to disable the built-in authentication methods.
+* **Allowed Ports**: If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration. (Default: empty)
 
-![REST Service](./images/rest-service.png)
+* **Password Authentication Enabled**: Enables or disables the built-in password authentication support. (Default: true)
 
+* **Certificate Authentication Enabled**: Enables or disables the built-in certificate authentication support. (Default: true)
 
+* **Session Based Authentication Enabled**: If set to true, enables authentication using the dedicated `/services/session/v1` endpoints and cookie based session management. (Default: true)
+
+* **Session Inactivity Interval (Seconds)**: The session inactivity interval, sessions will expire if no request is performed for the amount of time specified by this parameter in seconds. This parameter is ignored if Session Based Authentication Enabled is set to false. (Default: 900)
+
+* **Basic Authentication Enabled**: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the **Password Authentication Enabled parameter** is set to true. (Default: true)
+
+* **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: true)
 
 ## Custom authentication methods
 

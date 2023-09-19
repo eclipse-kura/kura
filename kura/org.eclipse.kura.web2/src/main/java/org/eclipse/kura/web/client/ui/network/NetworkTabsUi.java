@@ -62,6 +62,7 @@ public class NetworkTabsUi extends Composite {
     AnchorListItem ip6TabAnchorItem;
     AnchorListItem dhcp4NatTabAnchorItem;
     AnchorListItem wirelessTabAnchorItem;
+    AnchorListItem net8021xTabAnchorItem;
     AnchorListItem modemTabAnchorItem;
     AnchorListItem modemGpsTabAnchorItem;
     AnchorListItem modemAntennaTabAnchorItem;
@@ -74,6 +75,7 @@ public class NetworkTabsUi extends Composite {
     TabIp6Ui ip6Tab;
     TabDhcp4NatUi dhcp4NatTab;
     TabWirelessUi wirelessTab;
+    Tab8021xUi set8021xTab;
     TabModemUi modemTab;
     TabModemGpsUi modemGpsTab;
     TabModemAntennaUi modemAntennaTab;
@@ -122,6 +124,7 @@ public class NetworkTabsUi extends Composite {
 
         initIp4Tab();
         initIp6Tab();
+        initWireless8021xTab();
         initWirelessTab();
         initModemTab();
         initModemGpsTab();
@@ -161,13 +164,26 @@ public class NetworkTabsUi extends Composite {
 
     private void initWirelessTab() {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
-        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this);
+        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.set8021xTab, this.net8021xTabAnchorItem,
+                this);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTabAnchorItem);
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.wirelessTab;
             NetworkTabsUi.this.content.clear();
             NetworkTabsUi.this.content.add(NetworkTabsUi.this.wirelessTab);
+        });
+    }
+
+    private void initWireless8021xTab() {
+        this.net8021xTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless8021x());
+        this.set8021xTab = new Tab8021xUi(this.session, this);
+
+        this.net8021xTabAnchorItem.addClickHandler(event -> {
+            setSelected(NetworkTabsUi.this.net8021xTabAnchorItem);
+            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.set8021xTab;
+            NetworkTabsUi.this.content.clear();
+            NetworkTabsUi.this.content.add(NetworkTabsUi.this.set8021xTab);
         });
     }
 
@@ -250,6 +266,7 @@ public class NetworkTabsUi extends Composite {
         this.ip6Tab.setNetInterface(selection);
         this.dhcp4NatTab.setNetInterface(selection);
         this.wirelessTab.setNetInterface(selection);
+        this.set8021xTab.setNetInterface(selection);
         this.modemTab.setNetInterface(selection);
         this.modemGpsTab.setNetInterface(selection);
         this.modemAntennaTab.setNetInterface(selection);
@@ -263,6 +280,7 @@ public class NetworkTabsUi extends Composite {
         removeAllTabs();
 
         insertTab(this.ip4TabAnchorItem);
+
         if (this.isNet2) {
             insertTab(this.ip6TabAnchorItem);
         }
@@ -276,6 +294,7 @@ public class NetworkTabsUi extends Composite {
         removeTab(this.ip4TabAnchorItem);
         removeTab(this.ip6TabAnchorItem);
         removeTab(this.wirelessTabAnchorItem);
+        removeTab(this.net8021xTabAnchorItem);
         removeTab(this.dhcp4NatTabAnchorItem);
         removeTab(this.modemTabAnchorItem);
         removeTab(this.modemGpsTabAnchorItem);
@@ -328,6 +347,10 @@ public class NetworkTabsUi extends Composite {
         this.wirelessTabAnchorItem.setEnabled(true);
 
         insertTab(this.wirelessTabAnchorItem);
+        if (this.isNet2) {
+            insertTab(this.net8021xTabAnchorItem);
+        }
+
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
@@ -363,6 +386,7 @@ public class NetworkTabsUi extends Composite {
 
     private void removeOptionalTabs() {
         this.visibleTabs.remove(this.wirelessTabAnchorItem);
+        this.visibleTabs.remove(this.net8021xTabAnchorItem);
         this.visibleTabs.remove(this.dhcp4NatTabAnchorItem);
         this.visibleTabs.remove(this.modemTabAnchorItem);
         this.visibleTabs.remove(this.modemGpsTabAnchorItem);
@@ -397,6 +421,9 @@ public class NetworkTabsUi extends Composite {
         }
         if (this.visibleTabs.contains(this.modemAntennaTabAnchorItem)) {
             this.modemAntennaTab.refresh();
+        }
+        if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
+            this.set8021xTab.refresh();
         }
     }
 
@@ -437,6 +464,10 @@ public class NetworkTabsUi extends Composite {
             return true;
         }
 
+        if (this.visibleTabs.contains(this.net8021xTabAnchorItem) && this.set8021xTab.isDirty()) {
+            return true;
+        }
+
         return false;
     }
 
@@ -446,6 +477,7 @@ public class NetworkTabsUi extends Composite {
         this.hardwareTab.setDirty(isDirty);
         this.dhcp4NatTab.setDirty(isDirty);
         this.wirelessTab.setDirty(isDirty);
+        this.set8021xTab.setDirty(isDirty);
         this.modemTab.setDirty(isDirty);
         this.modemGpsTab.setDirty(isDirty);
         this.modemAntennaTab.setDirty(isDirty);
@@ -457,6 +489,7 @@ public class NetworkTabsUi extends Composite {
         this.hardwareTab.refresh();
         this.dhcp4NatTab.refresh();
         this.wirelessTab.refresh();
+        this.set8021xTab.refresh();
         this.modemTab.refresh();
         this.modemGpsTab.refresh();
         this.modemAntennaTab.refresh();
@@ -496,6 +529,9 @@ public class NetworkTabsUi extends Composite {
         }
         if (this.visibleTabs.contains(this.modemAntennaTabAnchorItem)) {
             this.modemAntennaTab.getUpdatedNetInterface(updatedNetIf);
+        }
+        if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
+            this.set8021xTab.getUpdatedNetInterface(updatedNetIf);
         }
 
         return updatedNetIf;
@@ -542,6 +578,11 @@ public class NetworkTabsUi extends Composite {
             return false;
         }
 
+        if (this.visibleTabs.contains(this.net8021xTabAnchorItem) && this.net8021xTabAnchorItem.isEnabled()
+                && !this.set8021xTab.isValid()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -574,6 +615,7 @@ public class NetworkTabsUi extends Composite {
         this.ip6TabAnchorItem.setActive(false);
         this.dhcp4NatTabAnchorItem.setActive(false);
         this.wirelessTabAnchorItem.setActive(false);
+        this.net8021xTabAnchorItem.setActive(false);
         this.modemTabAnchorItem.setActive(false);
         this.modemGpsTabAnchorItem.setActive(false);
         this.modemAntennaTabAnchorItem.setActive(false);
@@ -581,6 +623,7 @@ public class NetworkTabsUi extends Composite {
     }
 
     class InterfaceConfigWrapper {
+
         private GwtNetInterfaceConfig config;
 
         public InterfaceConfigWrapper(GwtNetInterfaceConfig config) {
@@ -604,8 +647,7 @@ public class NetworkTabsUi extends Composite {
         }
 
         public boolean isLoopback() {
-            return this.config.getHwTypeEnum() == GwtNetIfType.LOOPBACK
-                    || this.config.getName().startsWith("mon.wlan");
+            return this.config.getHwTypeEnum() == GwtNetIfType.LOOPBACK || this.config.getName().startsWith("mon.wlan");
         }
     }
 }

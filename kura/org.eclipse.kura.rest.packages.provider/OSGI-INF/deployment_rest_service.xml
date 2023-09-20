@@ -13,11 +13,11 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.eurotech.framework.rest.deployment.agent.DeploymentRestService">
-   <implementation class="com.eurotech.framework.internal.rest.deployment.agent.DeploymentRestService"/>
-   <property name="kura.service.pid" type="String" value="com.eurotech.framework.rest.deployment.agent.DeploymentRestService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.rest.deployment.agent.DeploymentRestService">
+   <implementation class="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"/>
+   <property name="kura.service.pid" type="String" value="org.eclipse.kura.rest.deployment.agent.DeploymentRestService"/>
    <service>
-      <provide interface="com.eurotech.framework.internal.rest.deployment.agent.DeploymentRestService"/>
+      <provide interface="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"/>
    </service>
    <reference bind="setDeploymentAgentService" cardinality="1..1" interface="org.eclipse.kura.deployment.agent.DeploymentAgentService" name="DeploymentAgentService" policy="static" unbind="unsetDeploymentAgentService"/>
    <reference name="DeploymentAdmin"

@@ -23,6 +23,12 @@
 		<version>5.4.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
 	<artifactId>org.eclipse.kura.rest.packages.provider</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>

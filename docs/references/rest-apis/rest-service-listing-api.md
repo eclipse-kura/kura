@@ -4,7 +4,7 @@
 
 #### Get Service List
 - Method: GET
-- API PATH: `/services/serviceListing/v1/sortedList`
+- API PATH: `/services/serviceListing/v1/list`
 
 ##### Responses
 - 200 OK status
@@ -12,7 +12,7 @@
 ```JSON
 {
 	//Alphabetically ordered list of services running on kura
-    "sortedServicesList": [
+    "servicesList": [
         "HttpsKeystore",
         ...
         ...
@@ -29,7 +29,7 @@
 ---
 #### Get Service List filtereb by interfaces 
 - Method: POST
-- API PATH: `/services/serviceListing/v1/sortedList/byAllInterfaces`
+- API PATH: `/services/serviceListing/v1/list/byInterface`
 
 ##### Responses
 - 200 OK status
@@ -48,7 +48,7 @@ Filter example
 ```JSON
 {
     //Alphabetically ordered list of services running on kura filtered by implemented interfaces
-	"sortedServicesList": [
+	"servicesList": [
         "HttpsKeystore",
         "SSLKeystore"
     ]
@@ -71,7 +71,7 @@ Filter example
 ```JSON
 Response:
 {
-    "sortedServicesList": [
+    "servicesList": [
         "org.eclipse.kura.watchdog.WatchdogService"
     ]
 }

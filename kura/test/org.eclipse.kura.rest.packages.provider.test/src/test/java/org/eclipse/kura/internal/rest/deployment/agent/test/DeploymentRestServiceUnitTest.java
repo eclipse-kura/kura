@@ -5,12 +5,12 @@ package org.eclipse.kura.internal.rest.deployment.agent.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-//import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.net.URL;
 import java.util.List;
@@ -77,8 +77,8 @@ public class DeploymentRestServiceUnitTest {
         DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
         deploymentRestService.setDeploymentAgentService(deploymentAgentService);
 
-        // doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
-        // .installDeploymentPackageAsync(anyObject());
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
+                .installDeploymentPackageAsync(any());
 
         InstallRequest installRequest = new InstallRequest("test");
 
@@ -119,8 +119,8 @@ public class DeploymentRestServiceUnitTest {
         DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
         deploymentRestService.setDeploymentAgentService(deploymentAgentService);
 
-        // doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
-        // .uninstallDeploymentPackageAsync(anyObject());
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
+                .uninstallDeploymentPackageAsync(any());
 
         deploymentRestService.uninstallDeploymentPackage("test");
 

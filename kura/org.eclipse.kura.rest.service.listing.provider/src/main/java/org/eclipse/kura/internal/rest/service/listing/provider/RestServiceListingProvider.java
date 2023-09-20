@@ -36,7 +36,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.service.listing.provider.dto.InterfacesIdsDTO;
-import org.eclipse.kura.internal.rest.service.listing.provider.dto.SortedServiceListDTO;
+import org.eclipse.kura.internal.rest.service.listing.provider.dto.ServiceListDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.framework.BundleContext;
@@ -83,11 +83,11 @@ public class RestServiceListingProvider {
      */
     @GET
     @PermitAll
-    @Path("/sortedList")
+    @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public SortedServiceListDTO getSortedServicesList(@Context final ContainerRequestContext requestContext) {
+    public ServiceListDTO getSortedServicesList(@Context final ContainerRequestContext requestContext) {
         try {
-            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/sortedList");
+            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/list");
 
             BundleContext context = FrameworkUtil.getBundle(RestServiceListingProvider.class).getBundleContext();
 
@@ -97,7 +97,7 @@ public class RestServiceListingProvider {
 
             List<String> resultDTO = getAllServices(context);
 
-            return new SortedServiceListDTO(resultDTO);
+            return new ServiceListDTO(resultDTO);
 
         } catch (Exception ex) {
             throw DefaultExceptionHandler.toWebApplicationException(ex);
@@ -114,14 +114,14 @@ public class RestServiceListingProvider {
      *         value
      */
     @POST
-    @Path("/sortedList/byAllInterfaces")
+    @Path("/list/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public SortedServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfacesList,
+    public ServiceListDTO getSortedServicesByInterface(final InterfacesIdsDTO interfacesList,
             @Context final ContainerRequestContext requestContext) {
         try {
 
-            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/list/sortedList/byAllInterfaces");
+            logger.debug(REQUEST_DEBUG_MESSAGE, "serviceListing/v1/list/byInterface");
 
             if (requestContext != null && !getPrincipal(requestContext).isPresent()) {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -200,10 +200,10 @@ public class RestServiceListingProvider {
         return filterStringBuilder.toString();
     }
 
-    private SortedServiceListDTO generateResponseDTO(BundleContext context, InterfacesIdsDTO returnInterfaceIds)
+    private ServiceListDTO generateResponseDTO(BundleContext context, InterfacesIdsDTO returnInterfaceIds)
             throws KuraException, InvalidSyntaxException {
         try {
-            return new SortedServiceListDTO(
+            return new ServiceListDTO(
                     getStrictFilteredInterfaces(context, returnInterfaceIds.getInterfacesIds()));
         } catch (NullPointerException ex) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "No result found for the passed interfaces");

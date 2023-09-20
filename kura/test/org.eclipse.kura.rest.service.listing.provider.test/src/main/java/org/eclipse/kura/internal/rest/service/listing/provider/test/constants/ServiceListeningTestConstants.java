@@ -28,14 +28,14 @@ public class ServiceListeningTestConstants {
      * END POINTS
      */
 
-    public static final String GET_ENDPOINT = "/sortedList";
-    public static final String POST_ENDPOINT = "/sortedList/byAllInterfaces";
+    public static final String GET_ENDPOINT = "/list";
+    public static final String POST_ENDPOINT = "/list/byInterface";
 
     /*
      * CORRECT RESPONSES
      */
 
-    public static final String FILTERED_SERVICES_RESPONSE = "{\"sortedServicesList\":[\"SSLKeystore\"]}";
+    public static final String FILTERED_SERVICES_RESPONSE = "{\"servicesList\":[\"SSLKeystore\"]}";
 
     /*
      * FAILING MESSAGES ON FAILING

@@ -16,12 +16,12 @@ package org.eclipse.kura.internal.rest.service.listing.provider.dto;
 import java.util.Collections;
 import java.util.List;
 
-public class SortedServiceListDTO {
+public class ServiceListDTO {
 
-    List<String> sortedServicesList;
+    List<String> servicesList;
 
-    public SortedServiceListDTO(List<String> entries) {
+    public ServiceListDTO(List<String> entries) {
         Collections.sort(entries, String.CASE_INSENSITIVE_ORDER);
-        this.sortedServicesList = entries;
+        this.servicesList = entries;
     }
 }

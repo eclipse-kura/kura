@@ -190,7 +190,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
      */
 
     private void thenResponseContainsTestServiceKuraServicePid() {
-        JsonArray responseArray = expectJsonResponse().get("sortedServicesList").asArray();
+        JsonArray responseArray = expectJsonResponse().get("servicesList").asArray();
         assertTrue(responseArray.values().contains(Json.value("TestService")));
     }
 

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2020 Eurotech and/or its affiliates. All rights reserved.
  *******************************************************************************/
-package com.eurotech.framework.rest.deployment.agent.api;
+package org.eclipse.kura.rest.deployment.agent.api;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;

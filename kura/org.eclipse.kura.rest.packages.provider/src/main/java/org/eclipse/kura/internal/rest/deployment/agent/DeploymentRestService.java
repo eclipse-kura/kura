@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2021 Eurotech and/or its affiliates. All rights reserved.
  *******************************************************************************/
-package com.eurotech.framework.internal.rest.deployment.agent;
+package org.eclipse.kura.internal.rest.deployment.agent;
 
-import static com.eurotech.framework.rest.deployment.agent.api.Validable.validate;
+import static org.eclipse.kura.rest.deployment.agent.api.Validable.validate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +26,8 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-import com.eurotech.framework.rest.deployment.agent.api.DeploymentRequestStatus;
-import com.eurotech.framework.rest.deployment.agent.api.InstallRequest;
+import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
+import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 
 @Path("/deploy/v1")
 public class DeploymentRestService {

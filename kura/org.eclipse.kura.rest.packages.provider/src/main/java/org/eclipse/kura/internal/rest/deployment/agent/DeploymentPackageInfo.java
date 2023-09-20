@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2020 Eurotech and/or its affiliates. All rights reserved.
  *******************************************************************************/
-package com.eurotech.framework.internal.rest.deployment.agent;
+package org.eclipse.kura.internal.rest.deployment.agent;
 
 public class DeploymentPackageInfo {
 

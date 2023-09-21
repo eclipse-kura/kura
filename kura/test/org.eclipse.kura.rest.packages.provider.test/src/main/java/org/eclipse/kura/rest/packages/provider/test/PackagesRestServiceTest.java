@@ -76,7 +76,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 @RunWith(Parameterized.class)
-public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
+public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportGetSnapshots() throws KuraException {
@@ -86,7 +86,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenResponseBodyEqualsJson("[]");
     }
 
-    public ConfigurationRestServiceTest(Transport transport) {
+    public PackagesRestServiceTest(Transport transport) {
         super(transport);
     }
 
@@ -103,7 +103,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         deploymentServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         deploymentServiceProperties.put("kura.service.pid", "mockConfigurationService");
 
-        FrameworkUtil.getBundle(ConfigurationRestServiceTest.class).getBundleContext()
+        FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext()
                 .registerService(DeploymentAgentService.class, deploymentAgentService, deploymentServiceProperties);
     }
 

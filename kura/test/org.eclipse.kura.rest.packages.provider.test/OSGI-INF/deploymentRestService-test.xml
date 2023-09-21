@@ -39,6 +39,6 @@
               cardinality="0..1"
               interface="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"
               name="DeploymentAgentRestService"
-              target="(kura.service.pid=org.eclipse.kura.deployment.agent.DeploymentRestService)"
+              target="(kura.service.pid=org.eclipse.kura.rest.deployment.agent.DeploymentRestService)"
               policy="dynamic"/>
 </scr:component>

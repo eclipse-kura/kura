@@ -101,7 +101,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     public static void setUp() throws Exception {
         final Dictionary<String, Object> deploymentServiceProperties = new Hashtable<>();
         deploymentServiceProperties.put("service.ranking", Integer.MIN_VALUE);
-        deploymentServiceProperties.put("kura.service.pid", "mockConfigurationService");
+        deploymentServiceProperties.put("kura.service.pid", "mockDeploymentService");
 
         FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext()
                 .registerService(DeploymentAgentService.class, deploymentAgentService, deploymentServiceProperties);

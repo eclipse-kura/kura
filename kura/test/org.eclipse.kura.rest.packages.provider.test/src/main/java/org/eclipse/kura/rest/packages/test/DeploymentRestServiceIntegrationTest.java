@@ -64,7 +64,7 @@ public class DeploymentRestServiceIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentRestServiceIntegrationTest.class);
 
-    private static final String BASE_URL = "http://127.0.0.1:8181/services/deploy/v1";
+    private static final String BASE_URL = "http://127.0.0.1:8181/services/deploy/v2";
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(4);
 

@@ -38,7 +38,7 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 
-@Path("/deploy/v1")
+@Path("/deploy/v2")
 public class DeploymentRestService {
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";

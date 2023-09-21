@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.net.URL;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +72,13 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.service.deploymentadmin.BundleInfo;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentException;
+import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
@@ -79,7 +87,85 @@ import com.eclipsesource.json.JsonValue;
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
-    public void shouldSupportGetSnapshots() throws KuraException {
+    public void getShouldWorkWithEmptyList() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("GET"), "");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson("[]");
+    }
+
+    @Test
+    public void getShouldWorkWithNonEmptyList() throws KuraException {
+        DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
+        deploymentPackages[0] = new DeploymentPackage() {
+
+            @Override
+            public boolean uninstallForced() throws DeploymentException {
+                return false;
+            }
+
+            @Override
+            public void uninstall() throws DeploymentException {
+
+            }
+
+            @Override
+            public boolean isStale() {
+                return false;
+            }
+
+            @Override
+            public Version getVersion() {
+                return new Version("1.0.0");
+            }
+
+            @Override
+            public String[] getResources() {
+                return null;
+            }
+
+            @Override
+            public ServiceReference getResourceProcessor(String arg0) {
+                return null;
+            }
+
+            @Override
+            public String getResourceHeader(String arg0, String arg1) {
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return "testPackage";
+            }
+
+            @Override
+            public URL getIcon() {
+                return null;
+            }
+
+            @Override
+            public String getHeader(String arg0) {
+                return null;
+            }
+
+            @Override
+            public String getDisplayName() {
+                return null;
+            }
+
+            @Override
+            public BundleInfo[] getBundleInfos() {
+                return null;
+            }
+
+            @Override
+            public Bundle getBundle(String arg0) {
+                return null;
+            }
+        };
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
+
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
@@ -91,6 +177,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private static DeploymentAgentService deploymentAgentService = Mockito.mock(DeploymentAgentService.class);
+    private static DeploymentAdmin deploymentAdmin = Mockito.mock(DeploymentAdmin.class);
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -103,8 +190,15 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         deploymentServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         deploymentServiceProperties.put("kura.service.pid", "mockDeploymentService");
 
+        final Dictionary<String, Object> deploymentAdminProperties = new Hashtable<>();
+        deploymentAdminProperties.put("service.ranking", Integer.MIN_VALUE);
+        deploymentAdminProperties.put("kura.service.pid", "mockDeploymentAdmin");
+
         FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext()
                 .registerService(DeploymentAgentService.class, deploymentAgentService, deploymentServiceProperties);
+
+        FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext().registerService(DeploymentAdmin.class,
+                deploymentAdmin, deploymentAdminProperties);
     }
 
 }

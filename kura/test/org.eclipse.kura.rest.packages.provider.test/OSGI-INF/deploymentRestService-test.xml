@@ -14,7 +14,7 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="DeploymentRestServiceTest">
-   <implementation class="org.eclipse.kura.rest.packages.provider.test.DeploymentRestServiceIntegrationTest"/>
+   <implementation class="org.eclipse.kura.rest.deployment.agent.test.DeploymentRestServiceIntegrationTest"/>
    <reference name="ConfigurationService"
               policy="static"
               cardinality="1..1"

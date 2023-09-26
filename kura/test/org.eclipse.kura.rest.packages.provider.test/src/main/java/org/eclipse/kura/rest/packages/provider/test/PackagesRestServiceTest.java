@@ -17,15 +17,19 @@ import static org.eclipse.kura.core.testutil.json.JsonProjection.self;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import java.net.URL;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,27 +105,52 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
+        thenNoExceptionOccurred();
         thenResponseBodyEqualsJson("[]");
     }
 
     @Test
     public void getShouldWorkWithNonEmptyList() throws KuraException {
         givenDeploymentPackageWith("testPackage", "1.0.0");
+        givenDeploymentPackageWith("anotherAwesomePackage", "4.2.0");
         givenDeploymentPackageList();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("[{\"name\":\"testPackage\",\"version\":\"1.0.0\"}]");
+        thenNoExceptionOccurred();
+        thenResponseBodyEqualsJson(
+                "[{\"name\":\"testPackage\",\"version\":\"1.0.0\"},{\"name\":\"anotherAwesomePackage\",\"version\":\"4.2.0\"}]");
     }
 
     @Test
-    public void postInstallShouldWorkWithEmptyList() throws KuraException {
+    public void installShouldWorkWithEmptyRequest() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("POST"), "/_install");
+
+        thenResponseCodeIs(400);
+
+        thenNoExceptionOccurred();
+        thenInstallIsNeverCalled();
+    }
+
+    @Test
+    public void installShouldWorkWithValidURL() throws KuraException {
         whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
 
         thenRequestSucceeds();
 
+        thenNoExceptionOccurred();
         thenInstallIsCalledWith("http://localhost:8080/testPackage.dp");
+    }
+
+    @Test
+    public void uninstallShouldWorkWithValidPackageName() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");
+
+        thenRequestSucceeds();
+
+        thenNoExceptionOccurred();
+        thenUninstallIsCalledWith("testPackage");
     }
 
     public PackagesRestServiceTest(Transport transport) {
@@ -189,5 +218,34 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         } catch (Exception e) {
             this.occurredException = e;
         }
+    }
+
+    private void thenInstallIsNeverCalled() {
+        try {
+            verify(deploymentAgentService, never()).installDeploymentPackageAsync(anyString());
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenUninstallIsCalledWith(String packageName) {
+        try {
+            verify(deploymentAgentService).uninstallDeploymentPackageAsync(packageName);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenNoExceptionOccurred() {
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
     }
 }

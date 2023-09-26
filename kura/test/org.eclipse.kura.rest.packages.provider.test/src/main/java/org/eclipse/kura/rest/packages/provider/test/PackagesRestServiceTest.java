@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -149,24 +150,20 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         deploymentServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         deploymentServiceProperties.put("kura.service.pid", "mockDeploymentService");
 
-        final Dictionary<String, Object> deploymentAdminProperties = new Hashtable<>();
-        deploymentAdminProperties.put("service.ranking", Integer.MIN_VALUE);
-        deploymentAdminProperties.put("kura.service.pid", "mockDeploymentAdmin");
-
         BundleContext packagesRestServiceContext = FrameworkUtil.getBundle(PackagesRestServiceTest.class)
                 .getBundleContext();
         packagesRestServiceContext.registerService(DeploymentAgentService.class, deploymentAgentService,
                 deploymentServiceProperties);
 
-        // Set mock deployment admin
+        // Inject mock deployment admin
         final ServiceReference<DeploymentRestService> deploymentRestServiceRef = packagesRestServiceContext
                 .getServiceReference(DeploymentRestService.class);
-        if (deploymentRestServiceRef == null) {
+        if (Objects.isNull(deploymentRestServiceRef)) {
             throw new IllegalStateException("Unable to find instance of: " + DeploymentRestService.class.getName());
         }
 
         final DeploymentRestService service = packagesRestServiceContext.getService(deploymentRestServiceRef);
-        if (service == null) {
+        if (Objects.isNull(service)) {
             throw new IllegalStateException("Unable to get instance of: " + DeploymentRestService.class.getName());
         }
         service.setDeploymentAdmin(deploymentAdmin);

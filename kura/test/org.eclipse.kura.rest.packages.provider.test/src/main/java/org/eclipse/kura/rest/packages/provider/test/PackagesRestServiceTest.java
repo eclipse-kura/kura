@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
@@ -74,6 +75,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.BundleInfo;
@@ -93,6 +95,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("[]");
+
+        verify(deploymentAdmin).listDeploymentPackages();
     }
 
     @Test
@@ -145,11 +149,24 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         deploymentAdminProperties.put("service.ranking", Integer.MIN_VALUE);
         deploymentAdminProperties.put("kura.service.pid", "mockDeploymentAdmin");
 
-        FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext()
-                .registerService(DeploymentAgentService.class, deploymentAgentService, deploymentServiceProperties);
+        BundleContext packagesRestServiceContext = FrameworkUtil.getBundle(PackagesRestServiceTest.class)
+                .getBundleContext();
+        packagesRestServiceContext.registerService(DeploymentAgentService.class, deploymentAgentService,
+                deploymentServiceProperties);
 
-        FrameworkUtil.getBundle(PackagesRestServiceTest.class).getBundleContext().registerService(DeploymentAdmin.class,
-                deploymentAdmin, deploymentAdminProperties);
+        // Set mock deployment admin
+        final ServiceReference<DeploymentRestService> deploymentRestServiceRef = packagesRestServiceContext
+                .getServiceReference(DeploymentRestService.class);
+        if (deploymentRestServiceRef == null) {
+            throw new IllegalStateException("Unable to find instance of: " + DeploymentRestService.class.getName());
+        }
+
+        final DeploymentRestService service = packagesRestServiceContext.getService(deploymentRestServiceRef);
+        if (service == null) {
+            throw new IllegalStateException("Unable to get instance of: " + DeploymentRestService.class.getName());
+        }
+        service.setDeploymentAdmin(deploymentAdmin);
+
     }
 
 }

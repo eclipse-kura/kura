@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -90,16 +91,16 @@ import com.eclipsesource.json.JsonValue;
 @RunWith(Parameterized.class)
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
+    private ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
+
     @Test
     public void getShouldWorkWithEmptyList() throws KuraException {
-        DeploymentPackage[] deploymentPackages = new DeploymentPackage[0];
-        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
+        givenDeploymentPackageList();
+
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("[]");
-
-        verify(deploymentAdmin).listDeploymentPackages();
     }
 
     @Test
@@ -113,13 +114,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void getShouldWorkWithNonEmptyList() throws KuraException {
-        DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
-        DeploymentPackage dp = Mockito.mock(DeploymentPackage.class);
-        when(dp.getName()).thenReturn("testPackage");
-        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
-        deploymentPackages[0] = dp;
-
-        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
+        givenDeploymentPackageWith("testPackage", "1.0.0");
+        givenDeploymentPackageList();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
@@ -170,4 +166,19 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     }
 
+    /*
+     * GIVEN
+     */
+    private void givenDeploymentPackageWith(String name, String version) {
+        DeploymentPackage dp = Mockito.mock(DeploymentPackage.class);
+        when(dp.getName()).thenReturn(name);
+        when(dp.getVersion()).thenReturn(new Version(version));
+        this.deploymentPackages.add(dp);
+    }
+
+    private void givenDeploymentPackageList() {
+        DeploymentPackage[] deploymentPackagesArray = new DeploymentPackage[this.deploymentPackages.size()];
+        deploymentPackagesArray = this.deploymentPackages.toArray(deploymentPackagesArray);
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackagesArray);
+    }
 }

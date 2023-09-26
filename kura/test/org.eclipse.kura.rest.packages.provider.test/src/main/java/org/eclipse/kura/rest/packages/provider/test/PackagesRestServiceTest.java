@@ -107,73 +107,11 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void getShouldWorkWithNonEmptyList() throws KuraException {
         DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
-        deploymentPackages[0] = new DeploymentPackage() {
+        DeploymentPackage dp = Mockito.mock(DeploymentPackage.class);
+        when(dp.getName()).thenReturn("testPakcage");
+        when(dp.getVersion()).thenReturn(new Version("1.0.0"));
+        deploymentPackages[0] = dp;
 
-            @Override
-            public boolean uninstallForced() throws DeploymentException {
-                return false;
-            }
-
-            @Override
-            public void uninstall() throws DeploymentException {
-
-            }
-
-            @Override
-            public boolean isStale() {
-                return false;
-            }
-
-            @Override
-            public Version getVersion() {
-                return new Version("1.0.0");
-            }
-
-            @Override
-            public String[] getResources() {
-                return null;
-            }
-
-            @Override
-            public ServiceReference getResourceProcessor(String arg0) {
-                return null;
-            }
-
-            @Override
-            public String getResourceHeader(String arg0, String arg1) {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return "testPackage";
-            }
-
-            @Override
-            public URL getIcon() {
-                return null;
-            }
-
-            @Override
-            public String getHeader(String arg0) {
-                return null;
-            }
-
-            @Override
-            public String getDisplayName() {
-                return null;
-            }
-
-            @Override
-            public BundleInfo[] getBundleInfos() {
-                return null;
-            }
-
-            @Override
-            public Bundle getBundle(String arg0) {
-                return null;
-            }
-        };
         when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
 
         whenRequestIsPerformed(new MethodSpec("GET"), "");

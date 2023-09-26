@@ -776,6 +776,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                     || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())) {
                 this.dns.setEnabled(false);
             }
+            this.renew.setEnabled(false);
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
         } else if (this.selectedNetIfConfig != null
                 && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK) {

@@ -141,6 +141,20 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenNoExceptionOccurred();
         thenInstallIsCalledWith("http://localhost:8080/testPackage.dp");
+        thenResponseBodyEqualsJson("\"REQUEST_RECEIVED\"");
+    }
+
+    @Test
+    public void installShouldWorkWithValidURLWhenARequestWasAlreadyIssued() throws KuraException {
+        givenAnInstallationRequestWasAlreadyIssuedFor("http://localhost:8080/testPackage.dp");
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
+
+        thenRequestSucceeds();
+
+        thenNoExceptionOccurred();
+        thenInstallIsNeverCalled();
+        thenResponseBodyEqualsJson("\"INSTALLING\"");
     }
 
     @Test
@@ -151,6 +165,20 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenNoExceptionOccurred();
         thenUninstallIsCalledWith("testPackage");
+        thenResponseBodyEqualsJson("\"REQUEST_RECEIVED\"");
+    }
+
+    @Test
+    public void uninstallShouldWorkWithValidPackageNameWhenARequestWasAlreadyIssued() throws KuraException {
+        givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage");
+
+        whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");
+
+        thenRequestSucceeds();
+
+        thenNoExceptionOccurred();
+        thenUninstallIsNeverCalled();
+        thenResponseBodyEqualsJson("\"UNINSTALLING\"");
     }
 
     public PackagesRestServiceTest(Transport transport) {
@@ -209,6 +237,14 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackagesArray);
     }
 
+    private void givenAnInstallationRequestWasAlreadyIssuedFor(String url) {
+        when(deploymentAgentService.isInstallingDeploymentPackage(url)).thenReturn(true);
+    }
+
+    private void givenAnUninstallationRequestWasAlreadyIssuedFor(String packageName) {
+        when(deploymentAgentService.isUninstallingDeploymentPackage(packageName)).thenReturn(true);
+    }
+
     /*
      * THEN
      */
@@ -231,6 +267,14 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     private void thenUninstallIsCalledWith(String packageName) {
         try {
             verify(deploymentAgentService).uninstallDeploymentPackageAsync(packageName);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenUninstallIsNeverCalled() {
+        try {
+            verify(deploymentAgentService, never()).uninstallDeploymentPackageAsync(anyString());
         } catch (Exception e) {
             this.occurredException = e;
         }

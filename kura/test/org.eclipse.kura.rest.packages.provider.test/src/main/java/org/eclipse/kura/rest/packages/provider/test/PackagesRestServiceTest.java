@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import java.net.URL;
 import java.io.IOException;
@@ -92,6 +93,15 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("[]");
+    }
+
+    @Test
+    public void postInstallShouldWorkWithEmptyList() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
+
+        thenRequestSucceeds();
+
+        verify(deploymentAgentService).isInstallingDeploymentPackage(anyString());
     }
 
     @Test
@@ -170,6 +180,9 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("[]");
+
+        // Verify listDeploymentPackages() was called once
+        verify(deploymentAdmin).listDeploymentPackages();
     }
 
     public PackagesRestServiceTest(Transport transport) {

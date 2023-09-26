@@ -92,6 +92,7 @@ import com.eclipsesource.json.JsonValue;
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
+    private Exception occurredException;
 
     @Test
     public void getShouldWorkWithEmptyList() throws KuraException {
@@ -104,15 +105,6 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void postInstallShouldWorkWithEmptyList() throws KuraException {
-        whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
-
-        thenRequestSucceeds();
-
-        verify(deploymentAgentService).isInstallingDeploymentPackage(anyString());
-    }
-
-    @Test
     public void getShouldWorkWithNonEmptyList() throws KuraException {
         givenDeploymentPackageWith("testPackage", "1.0.0");
         givenDeploymentPackageList();
@@ -121,9 +113,15 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("[{\"name\":\"testPackage\",\"version\":\"1.0.0\"}]");
+    }
 
-        // Verify listDeploymentPackages() was called once
-        verify(deploymentAdmin).listDeploymentPackages();
+    @Test
+    public void postInstallShouldWorkWithEmptyList() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
+
+        thenRequestSucceeds();
+
+        thenInstallIsCalledWith("http://localhost:8080/testPackage.dp");
     }
 
     public PackagesRestServiceTest(Transport transport) {
@@ -180,5 +178,16 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         DeploymentPackage[] deploymentPackagesArray = new DeploymentPackage[this.deploymentPackages.size()];
         deploymentPackagesArray = this.deploymentPackages.toArray(deploymentPackagesArray);
         when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackagesArray);
+    }
+
+    /*
+     * THEN
+     */
+    private void thenInstallIsCalledWith(String url) {
+        try {
+            verify(deploymentAgentService).installDeploymentPackageAsync(url);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
     }
 }

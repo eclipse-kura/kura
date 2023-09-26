@@ -321,7 +321,7 @@ public class NetworkTabsUi extends Composite {
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
             this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
-            showModemTabs();
+            showModemTabs(isIpv4Disabled);
         } else {
             showEthernetTabs();
             if (wrapper.isLoopback()) {
@@ -354,11 +354,11 @@ public class NetworkTabsUi extends Composite {
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
-    private void showModemTabs() {
+    private void showModemTabs(boolean isIpv4Disabled) {
         removeTab(this.wirelessTabAnchorItem);
         removeTab(this.dhcp4NatTabAnchorItem);
 
-        this.modemTabAnchorItem.setEnabled(true);
+        this.modemTabAnchorItem.setEnabled(!isIpv4Disabled);
         this.modemAntennaTabAnchorItem.setEnabled(isModemLTE());
 
         insertTab(this.modemTabAnchorItem);

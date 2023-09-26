@@ -389,8 +389,6 @@ public class NetworkTabsUi extends Composite {
         this.visibleTabs.remove(this.net8021xTabAnchorItem);
         this.visibleTabs.remove(this.dhcp4NatTabAnchorItem);
         this.visibleTabs.remove(this.modemTabAnchorItem);
-        this.visibleTabs.remove(this.modemGpsTabAnchorItem);
-        this.visibleTabs.remove(this.modemAntennaTabAnchorItem);
     }
 
     private void refreshAllVisibleTabs() {

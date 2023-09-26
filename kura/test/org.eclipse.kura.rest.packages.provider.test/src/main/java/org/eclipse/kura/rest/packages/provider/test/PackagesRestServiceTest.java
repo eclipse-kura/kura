@@ -91,6 +91,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void getShouldWorkWithEmptyList() throws KuraException {
+        DeploymentPackage[] deploymentPackages = new DeploymentPackage[0];
+        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
@@ -112,7 +114,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     public void getShouldWorkWithNonEmptyList() throws KuraException {
         DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
         DeploymentPackage dp = Mockito.mock(DeploymentPackage.class);
-        when(dp.getName()).thenReturn("testPakcage");
+        when(dp.getName()).thenReturn("testPackage");
         when(dp.getVersion()).thenReturn(new Version("1.0.0"));
         deploymentPackages[0] = dp;
 
@@ -121,7 +123,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("[]");
+        thenResponseBodyEqualsJson("[{\"name\":\"testPackage\",\"version\":\"1.0.0\"}]");
 
         // Verify listDeploymentPackages() was called once
         verify(deploymentAdmin).listDeploymentPackages();
@@ -129,6 +131,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     public PackagesRestServiceTest(Transport transport) {
         super(transport);
+        Mockito.reset(deploymentAdmin);
+        Mockito.reset(deploymentAgentService);
     }
 
     private static DeploymentAgentService deploymentAgentService = Mockito.mock(DeploymentAgentService.class);

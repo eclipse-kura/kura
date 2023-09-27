@@ -21,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URL;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -34,12 +33,8 @@ import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
-import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -173,73 +168,10 @@ public class DeploymentRestServiceUnitTest {
         DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
         deploymentRestService.setDeploymentAdmin(deploymentAdmin);
         DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
-        deploymentPackages[0] = new DeploymentPackage() {
-
-            @Override
-            public boolean uninstallForced() throws DeploymentException {
-                return false;
-            }
-
-            @Override
-            public void uninstall() throws DeploymentException {
-
-            }
-
-            @Override
-            public boolean isStale() {
-                return false;
-            }
-
-            @Override
-            public Version getVersion() {
-                return new Version("1.0.0");
-            }
-
-            @Override
-            public String[] getResources() {
-                return null;
-            }
-
-            @Override
-            public ServiceReference getResourceProcessor(String arg0) {
-                return null;
-            }
-
-            @Override
-            public String getResourceHeader(String arg0, String arg1) {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return "testPackage";
-            }
-
-            @Override
-            public URL getIcon() {
-                return null;
-            }
-
-            @Override
-            public String getHeader(String arg0) {
-                return null;
-            }
-
-            @Override
-            public String getDisplayName() {
-                return null;
-            }
-
-            @Override
-            public BundleInfo[] getBundleInfos() {
-                return null;
-            }
-
-            @Override
-            public Bundle getBundle(String arg0) {
-                return null;
-            }
-        };
+        DeploymentPackage mockDeploymentPackage = mock(DeploymentPackage.class);
+        deploymentPackages[0] = mockDeploymentPackage;
+        when(mockDeploymentPackage.getName()).thenReturn("testPackage");
+        when(mockDeploymentPackage.getVersion()).thenReturn(new Version("1.0.0"));
         when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
 
         List<DeploymentPackageInfo> result = deploymentRestService.listDeploymentPackages();

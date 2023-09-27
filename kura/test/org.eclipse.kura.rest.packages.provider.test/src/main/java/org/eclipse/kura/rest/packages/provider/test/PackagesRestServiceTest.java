@@ -48,7 +48,7 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 @RunWith(Parameterized.class)
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
-    private ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
+    private final ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
     private Exception occurredException;
 
     @Test

@@ -19,4 +19,4 @@ Import-Package: com.google.gson;version="2.7.0",
  org.osgi.service.deploymentadmin;version="1.0.0",
  org.osgi.service.useradmin;version="1.1.0";resolution:=optional,
  org.slf4j;version="1.7.21"
-Export-Package: org.eclipse.kura.rest.deployment.agent.api;version="1.0.0"
+Export-Package: org.eclipse.kura.rest.deployment.agent.api;version="1.0.0";x-internal:=true

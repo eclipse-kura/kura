@@ -27,7 +27,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
@@ -53,7 +52,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     private Exception occurredException;
 
     @Test
-    public void getShouldWorkWithEmptyList() throws KuraException {
+    public void getShouldWorkWithEmptyList() {
         givenDeploymentPackageList();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "");
@@ -64,7 +63,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void getShouldWorkWithNonEmptyList() throws KuraException {
+    public void getShouldWorkWithNonEmptyList() {
         givenDeploymentPackageWith("testPackage", "1.0.0");
         givenDeploymentPackageWith("anotherAwesomePackage", "4.2.0");
         givenDeploymentPackageList();
@@ -78,7 +77,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void installShouldWorkWithEmptyRequest() throws KuraException {
+    public void installShouldWorkWithEmptyRequest() {
         whenRequestIsPerformed(new MethodSpec("POST"), "/_install");
 
         thenResponseCodeIs(400);
@@ -88,7 +87,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void installShouldWorkWithValidURL() throws KuraException {
+    public void installShouldWorkWithValidURL() {
         whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
 
         thenRequestSucceeds();
@@ -99,7 +98,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void installShouldWorkWithValidURLWhenARequestWasAlreadyIssued() throws KuraException {
+    public void installShouldWorkWithValidURLWhenARequestWasAlreadyIssued() {
         givenAnInstallationRequestWasAlreadyIssuedFor("http://localhost:8080/testPackage.dp");
 
         whenRequestIsPerformed(new MethodSpec("POST"), "/_install", "{'url':'http://localhost:8080/testPackage.dp'}");
@@ -112,7 +111,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void uninstallShouldWorkWithValidPackageName() throws KuraException {
+    public void uninstallShouldWorkWithValidPackageName() {
         whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");
 
         thenRequestSucceeds();
@@ -123,7 +122,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void uninstallShouldWorkWithValidPackageNameWhenARequestWasAlreadyIssued() throws KuraException {
+    public void uninstallShouldWorkWithValidPackageNameWhenARequestWasAlreadyIssued() {
         givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage");
 
         whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");

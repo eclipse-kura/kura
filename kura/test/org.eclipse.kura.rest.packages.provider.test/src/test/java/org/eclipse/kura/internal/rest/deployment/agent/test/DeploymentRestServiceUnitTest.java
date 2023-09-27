@@ -68,7 +68,7 @@ public class DeploymentRestServiceUnitTest {
         whenAnInstallationRequestIsIssuedFor("testPackage");
 
         thenNoExceptionOccurred();
-        thenInstallationResponseIs(DeploymentRequestStatus.INSTALLING);
+        thenDeploymentRequestStatusIs(DeploymentRequestStatus.INSTALLING);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class DeploymentRestServiceUnitTest {
         whenAnUninstallationRequestIsIssuedFor("testPackage");
 
         thenNoExceptionOccurred();
-        thenInstallationResponseIs(DeploymentRequestStatus.UNINSTALLING);
+        thenDeploymentRequestStatusIs(DeploymentRequestStatus.UNINSTALLING);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class DeploymentRestServiceUnitTest {
         whenAnInstallationRequestIsIssuedFor("testPackage");
 
         thenNoExceptionOccurred();
-        thenInstallationResponseIs(DeploymentRequestStatus.REQUEST_RECEIVED);
+        thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DeploymentRestServiceUnitTest {
         whenAnUninstallationRequestIsIssuedFor("testPackage");
 
         thenNoExceptionOccurred();
-        thenInstallationResponseIs(DeploymentRequestStatus.REQUEST_RECEIVED);
+        thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
     }
 
     @Test
@@ -253,7 +253,7 @@ public class DeploymentRestServiceUnitTest {
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
-    private void thenInstallationResponseIs(DeploymentRequestStatus expectedResponse) {
+    private void thenDeploymentRequestStatusIs(DeploymentRequestStatus expectedResponse) {
         assertNotNull(this.resultingDeploymentRequestStatus);
         assertEquals(expectedResponse, this.resultingDeploymentRequestStatus);
     }

@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.rest.deployment.agent.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -21,7 +22,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Objects;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -41,105 +45,149 @@ import org.osgi.service.useradmin.UserAdmin;
 
 public class DeploymentRestServiceUnitTest {
 
-    public void testIsInstallingDeploymentPackage() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+    private DeploymentRestService deploymentRestService = new DeploymentRestService();
+    private DeploymentAgentService mockDeploymentAgentService = mock(DeploymentAgentService.class);
+    private UserAdmin mockUserAdmin = mock(UserAdmin.class);
+    private DeploymentRequestStatus resultingDeploymentRequestStatus;
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+    private Exception occurredException;
 
-        when(deploymentAgentService.isInstallingDeploymentPackage("testPackage")).thenReturn(true);
+    @Test
+    public void installDeploymentPackageWorksWithAreadyIssuedRequest() {
+        givenDeploymentRestService();
 
-        InstallRequest installRequest = new InstallRequest("testPackage");
+        givenAnInstallationRequestWasAlreadyIssuedFor("testPackage", true);
 
-        DeploymentRequestStatus result = deploymentRestService.installDeploymentPackage(installRequest);
+        whenAnInstallationRequestIsIssuedFor("testPackage");
 
-        assertNotNull(result);
-        assertEquals(DeploymentRequestStatus.INSTALLING, result);
+        thenNoExceptionOccurred();
+        thenInstallationResponseIs(DeploymentRequestStatus.INSTALLING);
+    }
 
+    private void thenNoExceptionOccurred() {
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+    }
+
+    private void thenInstallationResponseIs(DeploymentRequestStatus expectedResponse) {
+        assertNotNull(this.resultingDeploymentRequestStatus);
+        assertEquals(expectedResponse, this.resultingDeploymentRequestStatus);
+    }
+
+    private void whenAnInstallationRequestIsIssuedFor(String url) {
+        try {
+            InstallRequest installRequest = new InstallRequest(url);
+            this.resultingDeploymentRequestStatus = deploymentRestService.installDeploymentPackage(installRequest);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void givenAnInstallationRequestWasAlreadyIssuedFor(String url, boolean alreadyIssued) {
+        when(this.mockDeploymentAgentService.isInstallingDeploymentPackage(url)).thenReturn(alreadyIssued);
+    }
+
+    private void givenDeploymentRestService() {
+        deploymentRestService.setDeploymentAgentService(this.mockDeploymentAgentService);
+        deploymentRestService.setUserAdmin(this.mockUserAdmin);
     }
 
     @Test
-    public void testIsUninstallingDeploymentPackage() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+    public void uninstallDeploymentPackageWorksWithAreadyIssuedRequest() {
+        givenDeploymentRestService();
+        givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage", true);
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenAnUninstallationRequestIsIssuedFor("testPackage");
 
-        when(deploymentAgentService.isUninstallingDeploymentPackage("testPackage")).thenReturn(true);
-
-        DeploymentRequestStatus result = deploymentRestService.uninstallDeploymentPackage("testPackage");
-
-        assertNotNull(result);
-        assertEquals(DeploymentRequestStatus.UNINSTALLING, result);
+        thenNoExceptionOccurred();
+        thenInstallationResponseIs(DeploymentRequestStatus.UNINSTALLING);
     }
 
-    @Test(expected = WebApplicationException.class)
+    private void whenAnUninstallationRequestIsIssuedFor(String name) {
+        try {
+            this.resultingDeploymentRequestStatus = deploymentRestService.uninstallDeploymentPackage(name);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void givenAnUninstallationRequestWasAlreadyIssuedFor(String name, boolean alreadyIssued) {
+        when(this.mockDeploymentAgentService.isUninstallingDeploymentPackage(name)).thenReturn(alreadyIssued);
+    }
+
+    @Test
     public void testInstallDPError() throws Exception {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
+        givenDeploymentAgentServiceThrowsExceptionOnInstall();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenAnInstallationRequestIsIssuedFor("testPackage");
 
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
-                .installDeploymentPackageAsync(any());
-
-        InstallRequest installRequest = new InstallRequest("test");
-
-        deploymentRestService.installDeploymentPackage(installRequest);
-
+        thenExceptionOccurred(WebApplicationException.class);
     }
 
-    @Test(expected = WebApplicationException.class)
+    private void givenDeploymentAgentServiceThrowsExceptionOnInstall() throws Exception {
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.mockDeploymentAgentService)
+                .installDeploymentPackageAsync(any());
+    }
+
+    @Test
     public void testInstallDPNullRequest() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenAnInstallationRequestIsIssuedFor(null);
 
-        deploymentRestService.installDeploymentPackage(null);
-
+        thenExceptionOccurred(WebApplicationException.class);
     }
 
     @Test
     public void testInstallDP() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        givenAnInstallationRequestWasAlreadyIssuedFor("testPackage", false);
 
-        InstallRequest installRequest = new InstallRequest("test");
+        whenAnInstallationRequestIsIssuedFor("testPackage");
 
-        DeploymentRequestStatus result = deploymentRestService.installDeploymentPackage(installRequest);
-
-        assertNotNull(result);
-        assertEquals(DeploymentRequestStatus.REQUEST_RECEIVED, result);
+        thenNoExceptionOccurred();
+        thenInstallationResponseIs(DeploymentRequestStatus.REQUEST_RECEIVED);
     }
 
-    @Test(expected = WebApplicationException.class)
+    @Test
     public void testUninstallDPError() throws Exception {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
+        givenDeploymentAgentServiceThrowsExceptionOnUninstall();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenAnUninstallationRequestIsIssuedFor("testPackage");
 
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(deploymentAgentService)
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    private void givenDeploymentAgentServiceThrowsExceptionOnUninstall() throws Exception {
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.mockDeploymentAgentService)
                 .uninstallDeploymentPackageAsync(any());
-
-        deploymentRestService.uninstallDeploymentPackage("test");
-
     }
 
     @Test
     public void testUninstallDP() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
+        givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage", false);
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenAnUninstallationRequestIsIssuedFor("testPackage");
 
-        DeploymentRequestStatus result = deploymentRestService.uninstallDeploymentPackage("test");
-
-        assertNotNull(result);
-        assertEquals(DeploymentRequestStatus.REQUEST_RECEIVED, result);
+        thenNoExceptionOccurred();
+        thenInstallationResponseIs(DeploymentRequestStatus.REQUEST_RECEIVED);
     }
 
     @Test
@@ -186,14 +234,13 @@ public class DeploymentRestServiceUnitTest {
 
     @Test
     public void testActivateWUserAdmin() throws InterruptedException {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
 
-        UserAdmin userAdmin = mock(UserAdmin.class);
+        thenRoleIsCreated("kura.permission.rest.deploy", Role.GROUP);
+    }
 
-        deploymentRestService.setUserAdmin(userAdmin);
-
-        verify(userAdmin, times(1)).createRole("kura.permission.rest.deploy", Role.GROUP);
-
+    private void thenRoleIsCreated(String role, int type) {
+        verify(this.mockUserAdmin, times(1)).createRole(role, type);
     }
 
 }

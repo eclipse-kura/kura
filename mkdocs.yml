@@ -149,6 +149,7 @@ nav:
       - Javadoc: references/javadoc.md
       - REST-APIs:
         - Command: references/rest-apis/rest-command-api.md
+        - Deploy: references/rest-apis/rest-deploy-api.md
         - Inventory: references/rest-apis/rest-inventory-api.md
         - Position: references/rest-apis/rest-position-api.md
         - Security: references/rest-apis/rest-security-api.md

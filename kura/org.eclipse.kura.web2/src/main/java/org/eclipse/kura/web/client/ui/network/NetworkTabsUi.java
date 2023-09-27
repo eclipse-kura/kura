@@ -314,7 +314,7 @@ public class NetworkTabsUi extends Composite {
         InterfaceConfigWrapper wrapper = new InterfaceConfigWrapper(this.netIfConfig);
 
         if (wrapper.isWireless()) {
-            showWirelessTabs();
+            showWirelessTabs(isIpv4Disabled);
             if (!isWirelessAP) {
                 includeDhcpNat = false;
             }
@@ -339,12 +339,12 @@ public class NetworkTabsUi extends Composite {
         }
     }
 
-    private void showWirelessTabs() {
+    private void showWirelessTabs(boolean isIpv4Disabled) {
         removeTab(this.modemTabAnchorItem);
         removeTab(this.modemGpsTabAnchorItem);
         removeTab(this.modemAntennaTabAnchorItem);
 
-        this.wirelessTabAnchorItem.setEnabled(true);
+        this.wirelessTabAnchorItem.setEnabled(!isIpv4Disabled);
 
         insertTab(this.wirelessTabAnchorItem);
         if (this.isNet2) {

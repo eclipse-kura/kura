@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.rest.deployment.agent.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,11 +48,16 @@ import org.osgi.service.useradmin.UserAdmin;
 public class DeploymentRestServiceUnitTest {
 
     private DeploymentRestService deploymentRestService = new DeploymentRestService();
-    private DeploymentAgentService mockDeploymentAgentService = mock(DeploymentAgentService.class);
-    private UserAdmin mockUserAdmin = mock(UserAdmin.class);
-    private DeploymentRequestStatus resultingDeploymentRequestStatus;
 
+    private DeploymentRequestStatus resultingDeploymentRequestStatus;
+    private List<DeploymentPackageInfo> resultingDepoloymentPackagesList;
     private Exception occurredException;
+
+    private DeploymentAgentService mockDeploymentAgentService = mock(DeploymentAgentService.class);
+    private DeploymentAdmin mockDeploymentAdmin = mock(DeploymentAdmin.class);
+    private UserAdmin mockUserAdmin = mock(UserAdmin.class);
+
+    private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
     @Test
     public void installDeploymentPackageWorksWithAreadyIssuedRequest() {
@@ -102,6 +109,7 @@ public class DeploymentRestServiceUnitTest {
 
     private void givenDeploymentRestService() {
         deploymentRestService.setDeploymentAgentService(this.mockDeploymentAgentService);
+        deploymentRestService.setDeploymentAdmin(this.mockDeploymentAdmin);
         deploymentRestService.setUserAdmin(this.mockUserAdmin);
     }
 
@@ -192,44 +200,61 @@ public class DeploymentRestServiceUnitTest {
 
     @Test
     public void testListPackagesEmptyResult() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
+        givenInstalledDeploymentPackageList();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenListDeploymentPackagesIsCalled();
 
-        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
-        deploymentRestService.setDeploymentAdmin(deploymentAdmin);
-        when(deploymentAdmin.listDeploymentPackages()).thenReturn(new DeploymentPackage[0]);
+        thenResponsePackageListHaveSize(0);
+    }
 
-        List<DeploymentPackageInfo> result = deploymentRestService.listDeploymentPackages();
-        assertNotNull(result);
-        assertEquals(0, result.size());
+    private void thenResponsePackageListHaveSize(int expectedSize) {
+        assertNotNull(this.resultingDepoloymentPackagesList);
+        assertEquals(expectedSize, this.resultingDepoloymentPackagesList.size());
+    }
+
+    private void whenListDeploymentPackagesIsCalled() {
+        try {
+            this.resultingDepoloymentPackagesList = deploymentRestService.listDeploymentPackages();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void givenInstalledDeploymentPackageWith(String name, String version) {
+        DeploymentPackage dp = mock(DeploymentPackage.class);
+        when(dp.getName()).thenReturn(name);
+        when(dp.getVersion()).thenReturn(new Version(version));
+        this.installedDeploymentPackages.add(dp);
+    }
+
+    private void givenInstalledDeploymentPackageList() {
+        DeploymentPackage[] deploymentPackagesArray = new DeploymentPackage[this.installedDeploymentPackages.size()];
+        deploymentPackagesArray = this.installedDeploymentPackages.toArray(deploymentPackagesArray);
+        when(this.mockDeploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackagesArray);
     }
 
     @Test
     public void testListPackages() {
-        DeploymentRestService deploymentRestService = new DeploymentRestService();
+        givenDeploymentRestService();
+        givenInstalledDeploymentPackageWith("testPackage", "1.0.0");
+        givenInstalledDeploymentPackageList();
 
-        DeploymentAgentService deploymentAgentService = mock(DeploymentAgentService.class);
-        deploymentRestService.setDeploymentAgentService(deploymentAgentService);
+        whenListDeploymentPackagesIsCalled();
 
-        DeploymentAdmin deploymentAdmin = mock(DeploymentAdmin.class);
-        deploymentRestService.setDeploymentAdmin(deploymentAdmin);
-        DeploymentPackage[] deploymentPackages = new DeploymentPackage[1];
-        DeploymentPackage mockDeploymentPackage = mock(DeploymentPackage.class);
-        deploymentPackages[0] = mockDeploymentPackage;
-        when(mockDeploymentPackage.getName()).thenReturn("testPackage");
-        when(mockDeploymentPackage.getVersion()).thenReturn(new Version("1.0.0"));
-        when(deploymentAdmin.listDeploymentPackages()).thenReturn(deploymentPackages);
+        thenResponsePackageListHaveSize(1);
+        thenResponsePackageListContains("testPackage", "1.0.0");
+    }
 
-        List<DeploymentPackageInfo> result = deploymentRestService.listDeploymentPackages();
-        assertNotNull(result);
-        assertEquals(1, result.size());
+    private void thenResponsePackageListContains(String name, String version) {
 
-        DeploymentPackageInfo content = result.get(0);
+        for (DeploymentPackageInfo dp : this.resultingDepoloymentPackagesList) {
+            if (dp.getName().equals(name) && dp.getVersion().equals(version)) {
+                return;
+            }
+        }
 
-        assertEquals("testPackage", content.getName());
-        assertEquals("1.0.0", content.getVersion());
+        fail(String.format("Package %s:%s not found", name, version));
     }
 
     @Test

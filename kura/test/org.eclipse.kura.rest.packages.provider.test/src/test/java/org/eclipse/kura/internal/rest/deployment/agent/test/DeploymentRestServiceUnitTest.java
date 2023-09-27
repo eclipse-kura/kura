@@ -83,7 +83,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testInstallDPError() throws Exception {
+    public void installDeploymentPackageWorksWhenErrorIsThrown() throws Exception {
         givenDeploymentRestService();
         givenDeploymentAgentServiceThrowsExceptionOnInstall();
 
@@ -93,7 +93,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testInstallDPNullRequest() {
+    public void installDeploymentPackageWorksWithNullRequest() {
         givenDeploymentRestService();
 
         whenAnInstallationRequestIsIssuedFor(null);
@@ -102,7 +102,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testInstallDP() {
+    public void installDeploymentPackageWorks() {
         givenDeploymentRestService();
 
         givenAnInstallationRequestWasAlreadyIssuedFor("testPackage", false);
@@ -114,7 +114,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testUninstallDPError() throws Exception {
+    public void uninstallDeploymentPackageWorksWhenExceptionIsThrown() throws Exception {
         givenDeploymentRestService();
         givenDeploymentAgentServiceThrowsExceptionOnUninstall();
 
@@ -124,7 +124,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testUninstallDP() {
+    public void uninstallDeploymentPackageWorks() {
         givenDeploymentRestService();
         givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage", false);
 
@@ -135,7 +135,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testListPackagesEmptyResult() {
+    public void listDeploymentPackagesWorksWithEmptyList() {
         givenDeploymentRestService();
         givenInstalledDeploymentPackageList();
 
@@ -145,7 +145,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testListPackages() {
+    public void listDeploymentPackagesWorksWithInstalledPackages() {
         givenDeploymentRestService();
         givenInstalledDeploymentPackageWith("testPackage", "1.0.0");
         givenInstalledDeploymentPackageList();
@@ -157,7 +157,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
-    public void testActivateWUserAdmin() throws InterruptedException {
+    public void restDeployRoleGetsCreated() throws InterruptedException {
         givenDeploymentRestService();
 
         thenRoleIsCreated("kura.permission.rest.deploy", Role.GROUP);

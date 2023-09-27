@@ -14,12 +14,12 @@ package org.eclipse.kura.internal.rest.deployment.agent.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.net.URL;
 import java.util.List;
@@ -29,6 +29,10 @@ import javax.ws.rs.WebApplicationException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
+import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
+import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
+import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -39,11 +43,6 @@ import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
-
-import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
-import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
-import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
-import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 
 public class DeploymentRestServiceUnitTest {
 

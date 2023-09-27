@@ -30,13 +30,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
+import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
-
-import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
-import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 
 @Path("/deploy/v2")
 public class DeploymentRestService {

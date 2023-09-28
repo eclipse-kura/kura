@@ -15,7 +15,6 @@ package org.eclipse.kura.nm.configuration;
 import java.net.UnknownHostException;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Arrays;
@@ -30,10 +29,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
@@ -79,6 +78,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+
+    private Map<String, KeystoreService> keystoreServices = new HashMap<>();
     private KeystoreService keystoreService;
 
     private DhcpServerMonitor dhcpServerMonitor;
@@ -134,13 +135,13 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    public void setKeystoreService(KeystoreService keystoreService) {
-        this.keystoreService = keystoreService;
+    public void setKeystoreService(KeystoreService keystoreService, Map<String, Object> properties) {
+        this.keystoreServices.put((String) properties.get(ConfigurationService.KURA_SERVICE_PID), keystoreService);
     }
 
-    public void unsetKeystoreService(KeystoreService keystoreService) {
-        if (this.keystoreService.equals(keystoreService)) {
-            this.keystoreService = null;
+    public void unsetKeystoreService(KeystoreService keystoreService, Map<String, Object> properties) {
+        if (this.keystoreServices.containsValue(keystoreService)) {
+            this.keystoreServices.remove((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
         }
     }
 
@@ -236,6 +237,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
             decryptAndConvertPasswordProperties(modifiedProps);
+            decryptAndConvertCertificatesProperties(modifiedProps);
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
@@ -313,30 +315,39 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps) throws KuraException {
+
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-            if (prop.getKey().contains("cert") || prop.getKey().contains("certificate")) {
+            if (prop.getKey().contains("802-1x.keystore.pid")) {
+                String keystorePid = (String) prop.getValue();
+                getKeystore(keystorePid);
+            }
+        }
+
+        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
+            if (prop.getKey().contains("802-1x.client-cert-name") || prop.getKey().contains("802-1x.ca-cert-name")) {
 
                 Object value = prop.getValue();
-
-                if (value instanceof String) {
-                    modifiedProps.put(prop.getKey(), decryptCertificate(value.toString()));
-                } else {
+                try {
+                    modifiedProps.put(prop.getKey(), decryptCertificate((String) value));
+                } catch (Exception e) {
+                    logger.error("Enable to decode certificate {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
-            } else if (prop.getKey().contains("pem") || prop.getKey().contains("privatekey")) {
+            } else if (prop.getKey().contains("802-1x.private-key-name")) {
                 Object value = prop.getValue();
 
-                if (value instanceof String) {
-                    modifiedProps.put(prop.getKey(), decryptPrivateKey(value.toString()));
-                } else {
+                try {
+                    modifiedProps.put(prop.getKey(), decryptPrivateKey((String) value));
+                } catch (Exception e) {
+                    logger.error("Enable to decode private key {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
+
             }
         }
     }
 
     private Certificate decryptCertificate(String certificateName) throws KuraException {
-
         if (keystoreService.getEntry(certificateName) instanceof TrustedCertificateEntry) {
             TrustedCertificateEntry cert = (TrustedCertificateEntry) keystoreService.getEntry(certificateName);
             return cert.getTrustedCertificate();
@@ -344,7 +355,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             PrivateKeyEntry cert = (PrivateKeyEntry) keystoreService.getEntry(certificateName);
             return cert.getCertificate();
         } else {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Certificate not found");
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                    String.format("Certificate %s is not expected key type or not found.", certificateName));
         }
     }
 
@@ -352,6 +364,14 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
 
         return key.getPrivateKey();
+    }
+
+    private void getKeystore(String keystoreServicePid) {
+        if (this.keystoreServices.containsKey(keystoreServicePid)) {
+            this.keystoreService = this.keystoreServices.get(keystoreServicePid);
+        } else {
+            logger.warn("Cannot find keystore service with pid {}", keystoreServicePid);
+        }
     }
 
     @Override

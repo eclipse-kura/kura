@@ -16,6 +16,8 @@ package org.eclipse.kura.nm.configuration;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -171,16 +173,32 @@ public class NMSettingsConverter {
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
 
-        // TODO: Figure out the client cert and private key
-        String clientCert = props.get(String.class, "net.interface.%s.config.802-1x.client-cert", deviceId);
-        settings.put("client-cert", new Variant<>(clientCert.getBytes(StandardCharsets.UTF_8)));
+        try {
+            Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
+                    deviceId);
+            settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
+            logger.info(identity + " client cert: " + clientCert.getEncoded());
+        } catch (Exception e) {
+            logger.error("Enable to find or decode Client Certificate", e);
+        }
 
-        String privateKey = props.get(String.class, "net.interface.%s.config.802-1x.private-key", deviceId);
-        settings.put("private-key", new Variant<>(privateKey.getBytes(StandardCharsets.UTF_8)));
+        try {
+            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                    deviceId);
+            settings.put("private-key", new Variant<>(privateKey.getEncoded()));
+            logger.info(identity + " private key: " + privateKey.getEncoded());
+        } catch (Exception e) {
+            logger.error("Enable to find or decode Private Key", e);
+        }
 
-        String privateKeyPassword = props
-                .get(Password.class, "net.interface.%s.config.802-1x.private-key-password", deviceId).toString();
-        settings.put("private-key-password", new Variant<>(privateKeyPassword));
+        Optional<Password> privateKeyPassword = props.getOpt(Password.class,
+                "net.interface.%s.config.802-1x.private-key-password", deviceId);
+
+        if (privateKeyPassword.isPresent()) {
+            settings.put("private-key-password", new Variant<>(privateKeyPassword));
+        }
+
+        settings.put("private-key-password-flags", new Variant<>(new UInt32(4)));
 
     }
 
@@ -192,9 +210,14 @@ public class NMSettingsConverter {
             settings.put("anonymous-identity", new Variant<>(anonymousIdentity.get()));
         }
 
-        Optional<String> caCert = props.getOpt(String.class, "net.interface.%s.config.802-1x.ca-cert", deviceId);
-        if (caCert.isPresent()) {
-            settings.put("ca-cert", new Variant<>(caCert.get().getBytes(StandardCharsets.UTF_8)));
+        try {
+            Optional<Certificate> caCert = props.getOpt(Certificate.class,
+                    "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
+            if (caCert.isPresent()) {
+                settings.put("ca-cert", new Variant<>(caCert.get().getEncoded()));
+            }
+        } catch (Exception e) {
+            logger.error("Enable to find or decode CA Certificate", e);
         }
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
@@ -513,7 +536,7 @@ public class NMSettingsConverter {
 
         return settings;
     }
-    
+
     public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
         settings.put("interface-name", new Variant<>(deviceId));
@@ -525,11 +548,9 @@ public class NMSettingsConverter {
         settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
         DBusListType listType = new DBusListType(String.class);
         Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
-        settings.put("ingress-priority-map", new Variant<>(ingressMap
-                .orElse(new ArrayList<String>()), listType));
+        settings.put("ingress-priority-map", new Variant<>(ingressMap.orElse(new ArrayList<String>()), listType));
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
-        settings.put("egress-priority-map", new Variant<>(egressMap
-                .orElse(new ArrayList<String>()), listType));
+        settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<String>()), listType));
         return settings;
     }
 
@@ -553,7 +574,7 @@ public class NMSettingsConverter {
 
         return connectionMap;
     }
-    
+
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 

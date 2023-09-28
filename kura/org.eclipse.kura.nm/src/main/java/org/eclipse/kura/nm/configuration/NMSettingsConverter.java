@@ -536,6 +536,25 @@ public class NMSettingsConverter {
 
         return settings;
     }
+    
+    public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        settings.put("interface-name", new Variant<>(deviceId));
+        String parent = props.get(String.class, "net.interface.%s.config.vlan.parent", deviceId);
+        settings.put("parent", new Variant<>(parent));
+        Integer vlanId = props.get(Integer.class, "net.interface.%s.config.vlan.id", deviceId);
+        settings.put("id", new Variant<>(new UInt32(vlanId)));
+        Optional<Integer> vlanFlags = props.getOpt(Integer.class, "net.interface.%s.config.vlan.flags", deviceId);
+        settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
+        DBusListType listType = new DBusListType(String.class);
+        Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
+        settings.put("ingress-priority-map", new Variant<>(ingressMap
+                .orElse(new ArrayList<String>()), listType));
+        Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
+        settings.put("egress-priority-map", new Variant<>(egressMap
+                .orElse(new ArrayList<String>()), listType));
+        return settings;
+    }
 
     public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
@@ -574,7 +593,7 @@ public class NMSettingsConverter {
 
         return connectionMap;
     }
-
+    
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 

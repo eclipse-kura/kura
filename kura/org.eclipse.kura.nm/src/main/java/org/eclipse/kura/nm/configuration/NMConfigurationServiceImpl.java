@@ -67,6 +67,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final String MODIFIED_INTERFACE_NAMES = "modified.interface.names";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
+    
+    private static final List<NetInterfaceType> SUPPORTED_NAT_INTERFACE_TYPES = Arrays.asList(
+            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.MODEM,
+            NetInterfaceType.VLAN);
+    private static final List<NetInterfaceType> SUPPORTED_DHCP_SERVER_INTERFACE_TYPES = Arrays.asList(
+            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.VLAN);
 
     private static final List<NetInterfaceType> SUPPORTED_NAT_INTERFACE_TYPES = Arrays.asList(NetInterfaceType.ETHERNET,
             NetInterfaceType.WIFI, NetInterfaceType.MODEM, NetInterfaceType.VLAN);
@@ -231,7 +237,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
                 if (NetInterfaceType.MODEM.equals(interfaceTypeProperty.get())) {
                     setModemPppNumber(modifiedProps, interfaceName);
-                }
+                } 
             }
 
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
@@ -271,7 +277,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
         modifiedProps.put(String.format(PREFIX + "%s.config.pppNum", interfaceName), pppNum);
     }
-
+    
     protected void setInterfaceType(Map<String, Object> modifiedProps, String interfaceName, NetInterfaceType type) {
         modifiedProps.put(String.format(PREFIX + "%s.type", interfaceName), type.toString());
     }

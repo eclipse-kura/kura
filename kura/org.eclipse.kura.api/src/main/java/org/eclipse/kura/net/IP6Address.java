@@ -36,7 +36,7 @@ public class IP6Address extends IPAddress {
      * @since 2.6
      */
     public static IP6Address getDefaultAddress() throws UnknownHostException {
-        return (IP6Address) IPAddress.parseHostAddress("::/0");
+        return (IP6Address) IPAddress.parseHostAddress("::");
     }
 
     /**

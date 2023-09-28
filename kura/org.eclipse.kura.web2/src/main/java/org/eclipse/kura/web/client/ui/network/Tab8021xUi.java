@@ -327,13 +327,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         Gwt8021xConfig updated8021xConfig = new Gwt8021xConfig();
 
-        if (this.username.isEnabled()) {
-            updated8021xConfig.setIdentity(this.username.getText());
-        }
-
-        if (this.password.isEnabled()) {
-            updated8021xConfig.setPassword(this.password.getText());
-        }
+        updated8021xConfig.setIdentity(this.username.getText());
+        updated8021xConfig.setPassword(this.password.getText());
 
         updated8021xConfig.setEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
         updated8021xConfig.setInnerAuthEnum(Gwt8021xInnerAuth.valueOf(this.innerAuth.getSelectedValue()));

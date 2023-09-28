@@ -76,7 +76,7 @@ public class DhcpServerMonitor {
                     stopDhcpServer(interfaceName);
                 }
             } catch (KuraException e) {
-                logger.warn("Failed to chech DHCP server status for the interface " + interfaceName, e);
+                logger.warn("Failed to check DHCP server status for the interface " + interfaceName, e);
             }
         });
     }

@@ -71,6 +71,12 @@ body {
 	margin-bottom: 0.3cm;
 }
 
+.panel-default .panel-heading {
+	color: #2860a6 !important;
+	font-size: 16px;
+	font-weight: bold;
+}
+
 .panel:not(.help-panel):not(.network-interfaces-panel):not(.packages-dropzone-message), .panel-header:not(.help-panel) {
 	border: none !important;
 	border-radius: 0 !important;
@@ -83,6 +89,11 @@ body {
 
 .panel-body {
 	padding: 0 !important;
+}
+
+.panel-title {
+	color: #2860a6;
+	font-weight: bold;
 }
 
 .form-control {
@@ -656,6 +667,7 @@ Navbar START
 
 .nav-tabs li.active {
 	border-bottom: solid 0.1cm #2860A6;
+	background: #ffffff;
 }
 
 /**********************

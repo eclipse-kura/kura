@@ -34,6 +34,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
@@ -305,12 +306,13 @@ public class AssetConfigValidator {
 
         String trimmedValue = value.trim();
         final boolean isEmpty = trimmedValue.isEmpty();
+        final boolean isEmptyString = field.getType().equals(Scalar.STRING);
 
         if (field.isRequired() && isEmpty) {
             throw new ValidationException();
         }
 
-        if (!isEmpty) {
+        if (isEmptyOrEmptyString(isEmpty, isEmptyString)) {
             // Validate "Options" field first. Data type will be taken care of next.
             if (!field.getOption().isEmpty()) {
                 boolean foundEqual = false;
@@ -359,6 +361,10 @@ public class AssetConfigValidator {
             }
         }
         return null;
+    }
+
+    private boolean isEmptyOrEmptyString(boolean isEmpty, boolean isEmptyString) {
+        return !isEmpty || isEmptyString;
     }
 
     protected interface ValidationErrorConsumer {

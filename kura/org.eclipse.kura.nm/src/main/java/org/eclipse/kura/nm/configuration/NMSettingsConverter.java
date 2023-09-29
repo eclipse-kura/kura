@@ -192,9 +192,9 @@ public class NMSettingsConverter {
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.private-key-password", deviceId);
 
-        if (privateKeyPassword.isPresent()) {
-            settings.put("private-key-password", new Variant<>(privateKeyPassword));
-        }
+        privateKeyPassword.ifPresent(value -> {
+            settings.put("private-key-password", new Variant<>(value));
+        });
 
         settings.put("private-key-password-flags", new Variant<>(new UInt32(4)));
 
@@ -204,25 +204,28 @@ public class NMSettingsConverter {
             Map<String, Variant<?>> settings) {
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
-        if (anonymousIdentity.isPresent()) {
-            settings.put("anonymous-identity", new Variant<>(anonymousIdentity.get()));
-        }
 
-        try {
-            Optional<Certificate> caCert = props.getOpt(Certificate.class,
-                    "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
-            if (caCert.isPresent()) {
-                settings.put("ca-cert", new Variant<>(caCert.get().getEncoded()));
+        anonymousIdentity.ifPresent(value -> {
+            settings.put("anonymous-identity", new Variant<>(value));
+        });
+
+        Optional<Certificate> caCert = props.getOpt(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name",
+                deviceId);
+
+        caCert.ifPresent(value -> {
+            try {
+                settings.put("ca-cert", new Variant<>(value.getEncoded()));
+            } catch (Exception e) {
+                logger.error("Enable to find or decode CA Certificate", e);
             }
-        } catch (Exception e) {
-            logger.error("Enable to find or decode CA Certificate", e);
-        }
+        });
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
-        if (caCertPassword.isPresent()) {
-            settings.put("ca-cert-password", new Variant<>(caCertPassword.get().toString()));
-        }
+
+        caCertPassword.ifPresent(value -> {
+            settings.put("ca-cert-password", new Variant<>(value.toString()));
+        });
     }
 
     private static void create8021xMschapV2(NetworkProperties props, String deviceId,

@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -133,16 +134,16 @@ public class DeploymentRestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public DeploymentRequestStatus installUploadedDeploymentPackage(
-            @FormDataParam("file") InputStream uploadedInputStream) {
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetails) {
 
-        // logger.info(fileDetails.getFileName());
+        logger.info(fileDetails.getFileName());
 
-        String uploadedFileLocation = "/tmp/dp.dp";
+        String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
 
-        // save it
         writeToFile(uploadedInputStream, uploadedFileLocation);
 
-        logger.info("File uploaded to : " + uploadedFileLocation);
+        logger.info("File uploaded to : {}", uploadedFileLocation);
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;
     }

@@ -54,30 +54,12 @@ public class DeploymentRestService {
         this.userAdmin.createRole(KURA_PERMISSION_REST_DEPLOY_ROLE, Role.GROUP);
     }
 
-    public void unsetUserAdmin(UserAdmin userAdmin) {
-        if (this.userAdmin == userAdmin) {
-            this.userAdmin = null;
-        }
-    }
-
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
         this.deploymentAdmin = deploymentAdmin;
     }
 
-    public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        if (this.deploymentAdmin == deploymentAdmin) {
-            this.deploymentAdmin = null;
-        }
-    }
-
     public void setDeploymentAgentService(DeploymentAgentService deploymentAgentService) {
         this.deploymentAgentService = deploymentAgentService;
-    }
-
-    public void unsetDeploymentAgentService(DeploymentAgentService deploymentAgentService) {
-        if (this.deploymentAgentService == deploymentAgentService) {
-            this.deploymentAgentService = null;
-        }
     }
 
     /**

@@ -143,7 +143,13 @@ public class DeploymentRestService {
         if (file.exists()) {
             logger.warn("File already exists at : {}", uploadedFileLocation);
         } else {
-            writeToFile(uploadedInputStream, uploadedFileLocation);
+            try {
+                writeToFile(uploadedInputStream, file);
+            } catch (IOException e) {
+                logger.warn("Error writing file to : {}", uploadedFileLocation);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileLocation).build());
+            }
             logger.info("File uploaded to : {}", uploadedFileLocation);
         }
 
@@ -161,21 +167,15 @@ public class DeploymentRestService {
         return DeploymentRequestStatus.REQUEST_RECEIVED;
     }
 
-    private void writeToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
-        try {
-            OutputStream out = new FileOutputStream(new File(uploadedFileLocation));
-            int read = 0;
-            byte[] bytes = new byte[1024];
-
-            out = new FileOutputStream(new File(uploadedFileLocation));
-            while ((read = uploadedInputStream.read(bytes)) != -1) {
-                out.write(bytes, 0, read);
-            }
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void writeToFile(InputStream uploadedInputStream, File uploadedFile) throws IOException {
+        OutputStream out = new FileOutputStream(uploadedFile);
+        int read = 0;
+        byte[] bytes = new byte[1024];
+        while ((read = uploadedInputStream.read(bytes)) != -1) {
+            out.write(bytes, 0, read);
         }
+        out.flush();
+        out.close();
     }
 
     /**

@@ -193,7 +193,7 @@ public class NMSettingsConverter {
                 "net.interface.%s.config.802-1x.private-key-password", deviceId);
 
         privateKeyPassword.ifPresent(value -> {
-            settings.put("private-key-password", new Variant<>(value));
+            settings.put("private-key-password", new Variant<>(value.toString()));
         });
 
         settings.put("private-key-password-flags", new Variant<>(new UInt32(4)));

@@ -19,12 +19,22 @@
    <service>
       <provide interface="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"/>
    </service>
-   <reference bind="setDeploymentAgentService" cardinality="1..1" interface="org.eclipse.kura.deployment.agent.DeploymentAgentService" name="DeploymentAgentService" policy="static" unbind="unsetDeploymentAgentService"/>
+   <reference name="DeploymentAgentService"
+       cardinality="1..1"
+       interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"
+       bind="setDeploymentAgentService"
+       unbind="unsetDeploymentAgentService"
+       policy="static"/>
    <reference name="DeploymentAdmin"
-              policy="static"
-              cardinality="1..1"
-              bind="setDeploymentAdmin"
-              unbind="unsetDeploymentAdmin"
-              interface="org.osgi.service.deploymentadmin.DeploymentAdmin"/>
-   <reference bind="setUserAdmin" unbind="unsetUserAdmin" cardinality="0..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+       cardinality="1..1"
+       interface="org.osgi.service.deploymentadmin.DeploymentAdmin"
+       bind="setDeploymentAdmin"
+       unbind="unsetDeploymentAdmin"
+       policy="static"/>
+   <reference name="UserAdmin"
+       cardinality="0..1"
+       interface="org.osgi.service.useradmin.UserAdmin"
+       bind="setUserAdmin"
+       unbind="unsetUserAdmin"
+       policy="static"/>
 </scr:component>

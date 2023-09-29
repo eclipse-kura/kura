@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
@@ -112,6 +113,55 @@ public class DeploymentRestService {
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    /**
+     * POST method.
+     *
+     * Installs the deployment package specified in the {@link InstallRequest}. If
+     * the request was already issued for
+     * the same {@link InstallRequest}, it returns the status of the installation
+     * process.
+     *
+     * @param dataInputStream
+     * @return a {@link DeploymentRequestStatus} object that represents the status
+     *         of the installation request
+     */
+    @POST
+    @RolesAllowed("deploy")
+    @Path("/_upload")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public DeploymentRequestStatus installUploadedDeploymentPackage(
+            @FormDataParam("file") InputStream uploadedInputStream) {
+
+        // logger.info(fileDetails.getFileName());
+
+        String uploadedFileLocation = "/tmp/dp.dp";
+
+        // save it
+        writeToFile(uploadedInputStream, uploadedFileLocation);
+
+        logger.info("File uploaded to : " + uploadedFileLocation);
+
+        return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    private void writeToFile(InputStream uploadedInputStream, String uploadedFileLocation) {
+        try {
+            OutputStream out = new FileOutputStream(new File(uploadedFileLocation));
+            int read = 0;
+            byte[] bytes = new byte[1024];
+
+            out = new FileOutputStream(new File(uploadedFileLocation));
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

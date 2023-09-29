@@ -177,7 +177,6 @@ public class NMSettingsConverter {
             Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
-            logger.info(identity + " client cert: " + clientCert.getEncoded());
         } catch (Exception e) {
             logger.error("Enable to find or decode Client Certificate", e);
         }
@@ -186,7 +185,6 @@ public class NMSettingsConverter {
             PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                     deviceId);
             settings.put("private-key", new Variant<>(privateKey.getEncoded()));
-            logger.info(identity + " private key: " + privateKey.getEncoded());
         } catch (Exception e) {
             logger.error("Enable to find or decode Private Key", e);
         }

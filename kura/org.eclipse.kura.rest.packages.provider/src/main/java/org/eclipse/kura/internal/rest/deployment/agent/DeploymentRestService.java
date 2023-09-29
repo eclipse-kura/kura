@@ -146,22 +146,23 @@ public class DeploymentRestService {
             try {
                 writeToFile(uploadedInputStream, file);
             } catch (IOException e) {
-                logger.warn("Error writing file to : {}, caused by", uploadedFileLocation, e);
+                logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
                 throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileLocation).build());
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
             }
             logger.info("File uploaded to : {}", file.getAbsolutePath());
         }
 
-        if (this.deploymentAgentService.isInstallingDeploymentPackage(uploadedFileLocation)) {
-            return DeploymentRequestStatus.INSTALLING;
-        }
-
         try {
-            this.deploymentAgentService.installDeploymentPackageAsync(file.toURI().toURL().toString());
+            String fileUrl = file.toURI().toURL().toString();
+            if (this.deploymentAgentService.isInstallingDeploymentPackage(fileUrl)) {
+                return DeploymentRequestStatus.INSTALLING;
+            }
+
+            this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
         } catch (Exception e) {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileLocation).build());
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;

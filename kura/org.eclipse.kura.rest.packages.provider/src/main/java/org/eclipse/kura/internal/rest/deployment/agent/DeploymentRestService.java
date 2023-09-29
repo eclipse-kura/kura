@@ -137,13 +137,26 @@ public class DeploymentRestService {
             @FormDataParam("file") InputStream uploadedInputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails) {
 
-        logger.info(fileDetails.getFileName());
-
         String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
 
-        writeToFile(uploadedInputStream, uploadedFileLocation);
+        File file = new File(uploadedFileLocation);
+        if (file.exists()) {
+            logger.warn("File already exists at : {}", uploadedFileLocation);
+        } else {
+            writeToFile(uploadedInputStream, uploadedFileLocation);
+            logger.info("File uploaded to : {}", uploadedFileLocation);
+        }
 
-        logger.info("File uploaded to : {}", uploadedFileLocation);
+        if (this.deploymentAgentService.isInstallingDeploymentPackage(uploadedFileLocation)) {
+            return DeploymentRequestStatus.INSTALLING;
+        }
+
+        try {
+            this.deploymentAgentService.installDeploymentPackageAsync(file.toURI().toURL().toString());
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileLocation).build());
+        }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;
     }

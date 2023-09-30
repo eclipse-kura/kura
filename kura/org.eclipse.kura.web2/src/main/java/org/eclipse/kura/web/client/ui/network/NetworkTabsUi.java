@@ -314,14 +314,14 @@ public class NetworkTabsUi extends Composite {
         InterfaceConfigWrapper wrapper = new InterfaceConfigWrapper(this.netIfConfig);
 
         if (wrapper.isWireless()) {
-            showWirelessTabs(isIpv4Disabled);
+            showWirelessTabs(isIpv4Disabled || isUnmanagedSelected());
             if (!isWirelessAP) {
                 includeDhcpNat = false;
             }
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
             this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
-            showModemTabs(isIpv4Disabled);
+            showModemTabs(isIpv4Disabled || isUnmanagedSelected());
         } else {
             showEthernetTabs();
             if (wrapper.isLoopback()) {
@@ -339,12 +339,12 @@ public class NetworkTabsUi extends Composite {
         }
     }
 
-    private void showWirelessTabs(boolean isIpv4Disabled) {
+    private void showWirelessTabs(boolean interfaceNotEnabled) {
         removeTab(this.modemTabAnchorItem);
         removeTab(this.modemGpsTabAnchorItem);
         removeTab(this.modemAntennaTabAnchorItem);
 
-        this.wirelessTabAnchorItem.setEnabled(!isIpv4Disabled);
+        this.wirelessTabAnchorItem.setEnabled(!interfaceNotEnabled);
 
         insertTab(this.wirelessTabAnchorItem);
         if (this.isNet2) {
@@ -354,11 +354,11 @@ public class NetworkTabsUi extends Composite {
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
-    private void showModemTabs(boolean isIpv4Disabled) {
+    private void showModemTabs(boolean interfaceNotEnabled) {
         removeTab(this.wirelessTabAnchorItem);
         removeTab(this.dhcp4NatTabAnchorItem);
 
-        this.modemTabAnchorItem.setEnabled(!isIpv4Disabled);
+        this.modemTabAnchorItem.setEnabled(!interfaceNotEnabled);
         this.modemAntennaTabAnchorItem.setEnabled(isModemLTE());
 
         insertTab(this.modemTabAnchorItem);

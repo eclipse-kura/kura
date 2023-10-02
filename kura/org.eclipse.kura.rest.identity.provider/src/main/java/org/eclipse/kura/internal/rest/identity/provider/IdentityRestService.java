@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
@@ -38,6 +39,9 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 @Path("identity/v1")
 public class IdentityRestService {
 
@@ -55,6 +59,7 @@ public class IdentityRestService {
     private UserAdmin userAdmin;
     private IdentityService identityService;
     private ConfigurationService configurationService;
+    private Gson gson = new Gson();
 
     public void bindCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
@@ -148,9 +153,12 @@ public class IdentityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/configs")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setUserConfig(Set<UserDTO> userConfig) {
+    public Response setUserConfig(String userConfigJson) {
         try {
+            Set<UserDTO> userConfig = this.gson.fromJson(userConfigJson, new TypeToken<HashSet<UserDTO>>() {
+            }.getType());
             logger.debug(DEBUG_MESSSAGE, "setUserConfig");
+
             for (final UserDTO config : userConfig) {
                 final String newPassword = config.getPassword();
 

@@ -1,0 +1,20 @@
+[
+    {
+        "userName": "admin",
+        "passwordAuthEnabled": true,
+        "passwordChangeNeeded": false,
+        "permissions": [
+            "kura.admin"
+        ]
+    },
+    {
+        "userName": "appadmin",
+        "passwordAuthEnabled": true,
+        "passwordChangeNeeded": true,
+        "permissions": [
+            "kura.cloud.connection.admin",
+            "kura.packages.admin",
+            "kura.wires.admin"
+        ]
+    }
+]

@@ -149,7 +149,7 @@ public class IdentityService {
 
                 final User user = this.userAdminHelper.getOrCreateUser(data.getUserName());
 
-                if (data.getPermissions().contains(permissionName)) {
+                if (data.getPermissions() != null && data.getPermissions().contains(permissionName)) {
                     permissionGroup.addMember(user);
                 } else {
                     permissionGroup.removeMember(user);

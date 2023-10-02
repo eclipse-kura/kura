@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.NMVersion;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
@@ -51,6 +52,8 @@ public class NMSettingsConverterTest {
     Boolean hasNoSuchElementExceptionBeenThrown = false;
     Boolean hasAnIllegalArgumentExceptionThrown = false;
     Boolean hasAGenericExecptionBeenThrown = false;
+    
+    NMVersion nmVersion = NMVersion.parse("1.40");
 
     private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays
             .asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 });
@@ -2844,6 +2847,10 @@ public class NMSettingsConverterTest {
         Mockito.when(this.mockedConnection.GetSettings()).thenReturn(this.internalComparatorAllSettingsMap);
 
     }
+    
+    public void givenNetworkManagerVersion(String nmVersion) {
+    	this.nmVersion = NMVersion.parse(nmVersion);
+    }
 
     /*
      * When
@@ -2853,7 +2860,7 @@ public class NMSettingsConverterTest {
             String deviceId, String iface, NMDeviceType deviceType) {
         try {
             this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, deviceId, iface,
-                    deviceType);
+                    deviceType, this.nmVersion);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
@@ -2877,7 +2884,7 @@ public class NMSettingsConverterTest {
 
     public void whenBuildIpv6SettingsIsRunWith(NetworkProperties props, String iface) {
         try {
-            this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
+            this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface, this.nmVersion);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
@@ -2970,6 +2977,7 @@ public class NMSettingsConverterTest {
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
+    
 
     /*
      * Then

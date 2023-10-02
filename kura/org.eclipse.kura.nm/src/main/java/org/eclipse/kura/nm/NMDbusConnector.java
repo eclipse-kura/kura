@@ -138,7 +138,7 @@ public class NMDbusConnector {
     }
 
     public void checkVersion() throws DBusException {
-        String nmVersion = this.networkManager.getVersion();
+        NMVersion nmVersion = this.networkManager.getVersion();
         logger.debug("NM Version: {}", nmVersion);
     }
 
@@ -487,6 +487,7 @@ public class NMDbusConnector {
     
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
             throws DBusException {
+        NMVersion nmVersion = this.networkManager.getVersion();
         if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(device))) {
             this.networkManager.setDeviceManaged(device, true);
         }
@@ -494,7 +495,7 @@ public class NMDbusConnector {
 
         Optional<Connection> connection = this.networkManager.getAssociatedConnection(device);
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
-                connection, deviceId, interfaceName, deviceType);
+                connection, deviceId, interfaceName, deviceType, nmVersion);
 
         DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
                 NMDeviceState.NM_DEVICE_STATE_CONFIG);
@@ -537,8 +538,9 @@ public class NMDbusConnector {
     
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
         throws DBusException {
+        NMVersion nmVersion = networkManager.getVersion();
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
-                Optional.empty(), deviceId, deviceId, deviceType);
+                Optional.empty(), deviceId, deviceId, deviceType, nmVersion);
         DeviceCreationLock dcLock = new DeviceCreationLock(this, deviceId);
         Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
         DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);

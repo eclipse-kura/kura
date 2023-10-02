@@ -45,14 +45,20 @@ public class NetworkManagerDbusWrapper {
     private final DBusConnection dbusConnection;
     private final NetworkManager networkManager;
 
+    private final NMVersion version;
+
     protected NetworkManagerDbusWrapper(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = dbusConnection;
         this.networkManager = dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
+        Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
+        String strVer = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
+        logger.info("--REMOVEME: nmver from props {}", strVer);
+        this.version = NMVersion.parse(strVer);
+        logger.info("--REMOVEME: nmver parsed {}", this.version.toString());
     }
 
-    protected String getVersion() throws DBusException {
-        Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
-        return nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
+    protected NMVersion getVersion() throws DBusException {
+        return this.version;
     }
 
     protected Map<String, String> getPermissions() {

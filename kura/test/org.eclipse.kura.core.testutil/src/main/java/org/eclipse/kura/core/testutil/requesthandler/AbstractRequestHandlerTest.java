@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,10 @@
 package org.eclipse.kura.core.testutil.requesthandler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.CookieManager;
 import java.util.Optional;
 
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
@@ -42,25 +44,50 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected void thenRequestSucceeds() {
-        thenResponseCodeIs(200);
+        final Response currentResponse = expectResponse();
+
+        assertEquals(true, (currentResponse.getStatus() / 200) == 1);
     }
 
     protected void thenResponseCodeIs(final int expectedResponseCode) {
         final Response currentResponse = expectResponse();
 
-        if (currentResponse.status != expectedResponseCode) {
-            fail("expected status: " + expectedResponseCode + " but was: " + currentResponse.status + " body: "
-                    + currentResponse.body);
+        if (currentResponse.getStatus() != expectedResponseCode) {
+            fail("expected status: " + expectedResponseCode + " but was: " + currentResponse.getStatus() + " body: "
+                    + currentResponse.getBody());
         }
     }
 
     protected void thenResponseBodyEqualsJson(final String value) {
         assertEquals(Json.parse(value), Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected response body"))));
+                .parse(expectResponse().getBody()
+                        .orElseThrow(() -> new IllegalStateException("expected response body"))));
     }
 
     protected void thenResponseBodyIsEmpty() {
-        assertEquals(Optional.empty(), expectResponse().body);
+        assertEquals(Optional.empty(), expectResponse().getBody());
+    }
+
+    protected void thenResponseHasCookie(final String name) {
+        final CookieManager cookieManager = expectCookieManager();
+
+        assertTrue(cookieManager.getCookieStore().getCookies().stream()
+                .anyMatch(c -> c.getName().equals(name)));
+    }
+
+    protected void thenResponseDoesNotHaveCookie(final String name) {
+        final CookieManager cookieManager = expectCookieManager();
+
+        assertTrue(cookieManager.getCookieStore().getCookies().stream()
+                .noneMatch(c -> c.getName().equals(name)));
+    }
+
+    protected CookieManager expectCookieManager() {
+        if (!(this.transport instanceof RestTransport)) {
+            fail("cookies are available only with rest transport");
+        }
+
+        return ((RestTransport) this.transport).getCookieManager();
     }
 
     protected Response expectResponse() {
@@ -68,7 +95,9 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected JsonObject expectJsonResponse() {
-        return Json.parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("response body is empty")))
+        return Json
+                .parse(expectResponse().getBody()
+                        .orElseThrow(() -> new IllegalStateException("response body is empty")))
                 .asObject();
     }
 }

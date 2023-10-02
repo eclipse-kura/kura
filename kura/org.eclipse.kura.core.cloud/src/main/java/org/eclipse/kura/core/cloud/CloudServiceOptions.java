@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,9 +11,6 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
-
-import static org.eclipse.kura.core.cloud.CloudServiceLifecycleCertsPolicy.DISABLE_PUBLISHING;
-import static org.eclipse.kura.core.cloud.CloudServiceLifecycleCertsPolicy.PUBLISH_BIRTH_CONNECT_RECONNECT;
 
 import java.util.Map;
 
@@ -43,7 +40,6 @@ public class CloudServiceOptions {
     private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String REPUB_BIRTH_ON_TAMPER_EVENT = "republish.mqtt.birth.cert.on.tamper.event";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
-    private static final String BIRTH_CERT_POLICY = "birth.cert.policy";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
     private static final int LIFECYCLE_QOS = 0;
@@ -169,43 +165,6 @@ public class CloudServiceOptions {
             enable = (Boolean) this.properties.get(ENABLE_DFLT_SUBSCRIPTIONS);
         }
         return enable;
-    }
-
-    /**
-     * This method parses the Cloud Service configuration and returns true if the Cloud Service instance should
-     * not publish lifecycle messages.
-     *
-     * @return a boolean value.
-     */
-    public boolean isLifecycleCertsDisabled() {
-        boolean birthPubDisabled = false;
-        String birthPubPolicy = "";
-        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
-            birthPubPolicy = (String) this.properties.get(BIRTH_CERT_POLICY);
-        }
-        if (DISABLE_PUBLISHING.getValue().equals(birthPubPolicy)) {
-            birthPubDisabled = true;
-        }
-        return birthPubDisabled;
-    }
-
-    /**
-     * This method parses the Cloud Service configuration and returns true if the Cloud Service instance should
-     * republish the birth message on a reconnection.
-     * By default, this method returns true.
-     *
-     * @return a boolean value.
-     */
-    public boolean getRepubBirthCertOnReconnect() {
-        boolean republishBirt = true;
-        String birthPubPolicy = "";
-        if (this.properties != null && this.properties.get(BIRTH_CERT_POLICY) instanceof String) {
-            birthPubPolicy = (String) this.properties.get(BIRTH_CERT_POLICY);
-        }
-        if (!PUBLISH_BIRTH_CONNECT_RECONNECT.getValue().equals(birthPubPolicy)) {
-            republishBirt = false;
-        }
-        return republishBirt;
     }
 
     /**

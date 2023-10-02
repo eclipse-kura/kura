@@ -260,19 +260,19 @@ public class LinuxProcessUtil {
     }
 
     public static boolean killAll(String command) {
+        boolean result = false;
         try {
             logger.info("attempting to kill process {}", command);
-            if (start("killall " + command) == 0) {
+            result = (start("killall " + command) == 0);
+            if (result) {
                 logger.info("successfully killed process {}", command);
-                return true;
             } else {
                 logger.warn("failed to kill process {}", command);
-                return false;
             }
         } catch (Exception e) {
             logger.warn("failed to kill process {}", command);
-            return false;
         }
+        return result;
     }
 
     public static String getInputStreamAsString(InputStream stream) throws IOException {

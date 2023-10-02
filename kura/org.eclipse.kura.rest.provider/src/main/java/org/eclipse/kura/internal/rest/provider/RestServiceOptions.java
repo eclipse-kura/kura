@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,16 +25,32 @@ public class RestServiceOptions {
 
     private static final Property<Integer[]> ALLOWED_PORTS = new Property<>("allowed.ports", new Integer[] {});
     private static final Property<Boolean> PASSWORD_AUTH_ENABLED = new Property<>("auth.password.enabled", true);
-    private static final Property<Boolean> CERTIFICATE_ENABLED = new Property<>("auth.certificate.enabled", true);
+    private static final Property<Boolean> CERTIFICATE_AUTH_ENABLED = new Property<>("auth.certificate.enabled", true);
+    private static final Property<Boolean> SESSION_MANAGEMENT_ENABLED = new Property<>("session.management.enabled",
+            true);
+    private static final Property<Integer> SESSION_INACTIVITY_INTERVAL = new Property<>("session.inactivity.interval",
+            900);
+    private static final Property<Boolean> BASIC_AUTHENTICATION_ENABLED = new Property<>("auth.basic.enabled", true);
+    private static final Property<Boolean> STATELESS_CERTIFICATE_AUTHENTICATION_ENABLED = new Property<>(
+            "auth.certificate.stateless.enabled",
+            true);
 
     private final Set<Integer> allowedPorts;
     private final boolean passwordAuthEnabled;
     private final boolean certificateAuthEnabled;
+    private final boolean sessionManagementEnabled;
+    private final int sessionInactivityInterval;
+    private final boolean basicAuthEnabled;
+    private final boolean statelessCertificateAuthEnabled;
 
     public RestServiceOptions(final Map<String, Object> properties) {
         this.allowedPorts = loadIntArrayProperty(ALLOWED_PORTS.get(properties));
         this.passwordAuthEnabled = PASSWORD_AUTH_ENABLED.get(properties);
-        this.certificateAuthEnabled = CERTIFICATE_ENABLED.get(properties);
+        this.certificateAuthEnabled = CERTIFICATE_AUTH_ENABLED.get(properties);
+        this.sessionManagementEnabled = SESSION_MANAGEMENT_ENABLED.get(properties);
+        this.sessionInactivityInterval = SESSION_INACTIVITY_INTERVAL.get(properties);
+        this.basicAuthEnabled = BASIC_AUTHENTICATION_ENABLED.get(properties);
+        this.statelessCertificateAuthEnabled = STATELESS_CERTIFICATE_AUTHENTICATION_ENABLED.get(properties);
     }
 
     public Set<Integer> getAllowedPorts() {
@@ -47,6 +63,22 @@ public class RestServiceOptions {
 
     public boolean isCertificateAuthEnabled() {
         return certificateAuthEnabled;
+    }
+
+    public boolean isSessionManagementEnabled() {
+        return sessionManagementEnabled;
+    }
+
+    public int getSessionInactivityInterval() {
+        return sessionInactivityInterval;
+    }
+
+    public boolean isBasicAuthEnabled() {
+        return basicAuthEnabled;
+    }
+
+    public boolean isStatelessCertificateAuthEnabled() {
+        return statelessCertificateAuthEnabled;
     }
 
     private static Set<Integer> loadIntArrayProperty(final Integer[] list) {
@@ -69,7 +101,8 @@ public class RestServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowedPorts, certificateAuthEnabled, passwordAuthEnabled);
+        return Objects.hash(allowedPorts, basicAuthEnabled, certificateAuthEnabled, passwordAuthEnabled,
+                sessionInactivityInterval, sessionManagementEnabled, statelessCertificateAuthEnabled);
     }
 
     @Override
@@ -81,9 +114,12 @@ public class RestServiceOptions {
             return false;
         }
         RestServiceOptions other = (RestServiceOptions) obj;
-        return Objects.equals(allowedPorts, other.allowedPorts)
+        return Objects.equals(allowedPorts, other.allowedPorts) && basicAuthEnabled == other.basicAuthEnabled
                 && certificateAuthEnabled == other.certificateAuthEnabled
-                && passwordAuthEnabled == other.passwordAuthEnabled;
+                && passwordAuthEnabled == other.passwordAuthEnabled
+                && sessionInactivityInterval == other.sessionInactivityInterval
+                && sessionManagementEnabled == other.sessionManagementEnabled
+                && statelessCertificateAuthEnabled == other.statelessCertificateAuthEnabled;
     }
 
 }

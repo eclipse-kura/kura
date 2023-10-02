@@ -590,9 +590,9 @@ public class NetworkConfigurationServiceCommonTest {
     private void thenComponentDefinitionHasModemProperties() {
         assertEquals(38, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
-    
+        
     private void thenComponentDefinitionHasVlanProperties() {
-        assertEquals(33, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0.101")).count());
+        assertEquals(33, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0")).count());
     }
 
     private void thenPppNumIsInteger() {

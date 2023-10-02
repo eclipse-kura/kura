@@ -2977,7 +2977,6 @@ public class NMSettingsConverterTest {
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
-    
 
     /*
      * Then

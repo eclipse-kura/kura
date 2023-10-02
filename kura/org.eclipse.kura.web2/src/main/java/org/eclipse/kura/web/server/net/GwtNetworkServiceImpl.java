@@ -353,16 +353,23 @@ public class GwtNetworkServiceImpl {
                                 gwtWifiConfig.setDriver(wifiConfig.getDriver());
 
                                 // security
-                                if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA2) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WPA_WPA2) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
-                                } else if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
-                                } else {
-                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+                                switch(wifiConfig.getSecurity()){
+                                    case SECURITY_WPA:
+                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
+                                        break;
+                                    case SECURITY_WPA2:
+                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
+                                        break;
+                                    case SECURITY_WPA_WPA2:
+                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
+                                        break;
+                                    case SECURITY_WEP:
+                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
+                                        break;
+                                    case SECURITY_NONE:
+                                    default:
+                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+                                        break;
                                 }
 
                                 if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP_TKIP) {

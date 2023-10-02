@@ -572,7 +572,7 @@ public class NMSettingsConverter {
         settings.put("mtu", new Variant<>(new UInt32(mtu)));
         return settings;
     }
-
+    
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,
             NMDeviceType deviceType) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();

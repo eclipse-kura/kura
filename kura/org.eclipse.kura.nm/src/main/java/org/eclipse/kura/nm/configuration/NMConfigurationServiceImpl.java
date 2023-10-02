@@ -320,12 +320,19 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             if (prop.getKey().contains("802-1x.keystore.pid")) {
                 String keystorePid = (String) prop.getValue();
                 getKeystore(keystorePid);
+
+                String interfaceName = prop.getKey().split("\\.")[2];
+                findAndDecodeCertificatesForInterface(interfaceName, modifiedProps);
             }
         }
+    }
 
+    private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps) {
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-            if (prop.getKey().contains("802-1x.client-cert-name") || prop.getKey().contains("802-1x.ca-cert-name")) {
-
+            String clientCertString = String.format("%s.802-1x.client-cert-name", interfaceName);
+            String caCertString = String.format("%s.802-1x.802-1x.ca-cert-name", interfaceName);
+            String privateKeyString = String.format("%s.802-1x.private-key-name", interfaceName);
+            if (prop.getKey().contains(clientCertString) || prop.getKey().contains(caCertString)) {
                 Object value = prop.getValue();
                 try {
                     modifiedProps.put(prop.getKey(), decryptCertificate((String) value));
@@ -333,7 +340,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                     logger.error("Enable to decode certificate {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
-            } else if (prop.getKey().contains("802-1x.private-key-name")) {
+            } else if (prop.getKey().contains(privateKeyString)) {
                 Object value = prop.getValue();
 
                 try {

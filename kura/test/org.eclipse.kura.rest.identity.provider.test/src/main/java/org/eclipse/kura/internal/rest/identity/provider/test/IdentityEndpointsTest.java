@@ -14,6 +14,8 @@ package org.eclipse.kura.internal.rest.identity.provider.test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -123,7 +125,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldInvokeSetUserConfigSuccessfully() {
+    public void shouldInvokeSetUserConfigSuccessfully() throws KuraException {
         givenIdentityService();
         givenUserConfigs(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"), new UserDTO(
                 "testuser2", new HashSet<String>(Arrays.asList("perm1", "perm2")), false, true, "testpassw2"));
@@ -131,6 +133,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs");
 
         thenRequestSucceeds();
+        thenIdentityServiceWasCalledWith(this.userConfigs);
     }
 
     // @Test
@@ -181,6 +184,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private void givenUserConfigs(UserDTO... userConfigs) {
         this.userConfigs = new HashSet<>(Arrays.asList(userConfigs));
+    }
+
+    private void thenIdentityServiceWasCalledWith(Set<UserDTO> userConfigs) throws KuraException {
+        verify(identityServiceMock, times(1)).setUserConfig(userConfigs);
+
     }
 
     /*

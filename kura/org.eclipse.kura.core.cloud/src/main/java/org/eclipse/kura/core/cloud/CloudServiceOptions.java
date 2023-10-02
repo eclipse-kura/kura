@@ -42,7 +42,7 @@ public class CloudServiceOptions {
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
-    private static final int LIFECYCLE_QOS = 0;
+    private static final int LIFECYCLE_QOS = 1;
     private static final int LIFECYCLE_PRIORITY = 0;
     private static final boolean LIFECYCLE_RETAIN = false;
 

@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -110,6 +111,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
 
     public void setReadOnlyDnsServers(String dnsServers) {
         set("dnsReadOnlyServers", dnsServers);
+    }
+    
+    public Integer getMtu() {
+        return get("mtu");
+    }
+    
+    public void setMtu(Integer mtu) {
+        set("mtu", mtu);
     }
 
     public void setHwState(String hwState) {
@@ -363,6 +372,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
 
     public void setIpv6ReadOnlyDnsServers(String dnsServers) {
         set("ipv6.dnsReadOnly", dnsServers);
+    }
+    
+    public Integer getIpv6Mtu() {
+        return get("ipv6.mtu");
+    }
+    
+    public void setIpv6Mtu(Integer mtu) {
+    	set("ipv6.mtu", mtu);
     }
 
     @Override

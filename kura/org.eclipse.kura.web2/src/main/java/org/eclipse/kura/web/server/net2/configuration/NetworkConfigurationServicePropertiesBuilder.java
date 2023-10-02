@@ -107,6 +107,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isManual && isWan) {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
         }
+        
+        this.properties.setIp4Mtu(this.ifname, this.gwtConfig.getMtu());
     }
 
     private void setIpv6Properties() {
@@ -145,6 +147,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isAuto) {
             this.properties.setIp6AddressGenMode(this.ifname, this.gwtConfig.getIpv6AutoconfigurationMode());
             this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
+        }
+        
+        if(Objects.nonNull(this.gwtConfig.getIpv6Mtu())) {
+        	this.properties.setIp6Mtu(this.ifname, this.gwtConfig.getIpv6Mtu());
         }
     }
 

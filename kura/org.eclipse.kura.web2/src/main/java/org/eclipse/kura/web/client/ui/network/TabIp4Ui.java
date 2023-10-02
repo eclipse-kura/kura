@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
@@ -107,6 +108,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     FormGroup groupGateway;
     @UiField
     FormGroup groupDns;
+    @UiField
+    FormGroup groupMtu;
 
     @UiField
     FormLabel labelStatus;
@@ -122,6 +125,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     FormLabel labelGateway;
     @UiField
     FormLabel labelDns;
+    @UiField
+    FormLabel labelMtu;
 
     @UiField
     HelpBlock helpPriority;
@@ -133,6 +138,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     HelpBlock helpGateway;
     @UiField
     HelpBlock helpDns;
+    @UiField
+    HelpBlock helpMtu;
 
     @UiField
     TextBox ip;
@@ -165,6 +172,9 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     FormControlStatic dnsRead;
 
     @UiField
+    IntegerBox mtu;
+    
+    @UiField
     Modal wanModal;
 
     @UiField
@@ -187,6 +197,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     HelpButton gatewayHelp;
     @UiField
     HelpButton dnsHelp;
+    @UiField
+    HelpButton mtuHelp;
 
     public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -291,6 +303,11 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             } else {
                 updatedNetIf.setDnsServers("");
             }
+            if (this.mtu.getValue() != null) {
+                updatedNetIf.setMtu(this.mtu.getValue());
+            } else {
+                updatedNetIf.setMtu(0);
+            }
         }
     }
 
@@ -316,7 +333,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 || this.groupIp.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupGateway.getValidationState().equals(ValidationState.ERROR)
-                || this.groupDns.getValidationState().equals(ValidationState.ERROR)) {
+                || this.groupDns.getValidationState().equals(ValidationState.ERROR)
+                || this.groupMtu.getValidationState().equals(ValidationState.ERROR)) {
             flag = false;
         }
         return flag;
@@ -399,6 +417,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.subnetHelp.setHelpText(MSGS.netIPv4ToolTipSubnetMask());
         this.gatewayHelp.setHelpText(MSGS.netIPv4ToolTipGateway());
         this.dnsHelp.setHelpText(MSGS.netIPv4ToolTipDns());
+        this.mtuHelp.setHelpText(MSGS.netIPv4ToolTipMtu());
     }
 
     private void initForm() {
@@ -411,6 +430,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.labelSubnet.setText(MSGS.netIPv4SubnetMask());
         this.labelGateway.setText(MSGS.netIPv4Gateway());
         this.labelDns.setText(MSGS.netIPv4DNSServers());
+        this.labelMtu.setText(MSGS.netIPv4Mtu());
 
         for (GwtNetIfConfigMode mode : GwtNetIfConfigMode.values()) {
             this.configure.addItem(MessageUtils.get(mode.name()));
@@ -431,6 +451,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         initDnsServersField();
 
         initDHCPLeaseField();
+        
+        initMtuField();
     }
 
     private void initPriorityField() {
@@ -647,6 +669,38 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             this.renew.setEnabled(false);
         }
     }
+    
+    private void initMtuField() {
+        this.mtu.addMouseOverHandler(event -> {
+            TabIp4Ui.this.helpText.clear();
+            TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipMtu()));
+        });
+        this.mtu.addMouseOutHandler(event -> resetHelp());
+        this.mtu.addValueChangeHandler(valChangeEvent -> {
+            setDirty(true);
+
+            String inputText = TabIp4Ui.this.mtu.getText();
+            boolean isInvalidValue = false;
+
+            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
+                try {
+                    if (Integer.parseInt(inputText) < 0) {
+                        isInvalidValue = true;
+                    }
+                } catch (NumberFormatException e) {
+                    isInvalidValue = true;
+                }
+            }
+
+            if (isInvalidValue) {
+                TabIp4Ui.this.groupMtu.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpMtu.setText(MSGS.netIPv4InvalidMtu());
+            } else {
+                TabIp4Ui.this.groupMtu.setValidationState(ValidationState.NONE);
+                TabIp4Ui.this.helpMtu.setText("");
+            }
+        });
+    }
 
     private void initStatusField() {
         initStatusValues();
@@ -732,6 +786,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             if (this.isNet2) {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
             }
+            
+            this.mtu.setValue(this.selectedNetIfConfig.getMtu());
 
             this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());
@@ -765,6 +821,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.gateway.setEnabled(true);
         this.dns.setEnabled(true);
         this.renew.setEnabled(true);
+        this.mtu.setEnabled(true);
 
         // disabling fields based on the interface
         if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
@@ -787,6 +844,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             this.gateway.setEnabled(false);
             this.dns.setEnabled(false);
             this.renew.setEnabled(false);
+            this.mtu.setEnabled(false);
         } else {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
                     || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())
@@ -803,6 +861,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 this.gateway.setText("");
                 this.dns.setText("");
                 this.renew.setEnabled(false);
+                this.mtu.setEnabled(false);
+                this.mtu.setText("");
             } else {
                 String configureValue = this.configure.getSelectedValue();
                 if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
@@ -845,6 +905,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.subnet.setText("");
         this.gateway.setText("");
         this.dns.setText("");
+        this.mtu.setText("");
         update();
     }
 
@@ -859,6 +920,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.helpGateway.setText("");
         this.groupDns.setValidationState(ValidationState.NONE);
         this.helpDns.setText("");
+        this.groupMtu.setValidationState(ValidationState.NONE);
+        this.helpMtu.setText("");
     }
 
     private void initModal() {

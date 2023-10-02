@@ -80,6 +80,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     FormGroup groupDns;
     @UiField
     FormGroup groupPrivacy;
+    @UiField
+    FormGroup groupMtu;
 
     @UiField
     FormLabel labelStatus;
@@ -99,6 +101,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     FormLabel labelDns;
     @UiField
     FormLabel labelPrivacy;
+    @UiField
+    FormLabel labelMtu;
 
     @UiField
     HelpBlock wrongInputPriority;
@@ -110,6 +114,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     HelpBlock wrongInputGateway;
     @UiField
     HelpBlock wrongInputDns;
+    @UiField
+    HelpBlock wrongInputMtu;
 
     @UiField
     HelpButton helpButtonStatus;
@@ -129,6 +135,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     HelpButton helpButtonDns;
     @UiField
     HelpButton helpButtonPrivacy;
+    @UiField
+    HelpButton helpButtonMtu;
 
     @UiField
     ListBox status;
@@ -148,6 +156,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     TextArea dns;
     @UiField
     ListBox privacy;
+    @UiField
+    IntegerBox mtu;
 
     @UiField
     PanelHeader helpTitle;
@@ -190,6 +200,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.labelGateway.setText(MSGS.netIPv6Gateway());
         this.labelDns.setText(MSGS.netIPv6DNSServers());
         this.labelPrivacy.setText(MSGS.netIPv6Privacy());
+        this.labelMtu.setText(MSGS.netIPv6Mtu());
     }
 
     private void initHelpButtons() {
@@ -202,6 +213,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.helpButtonGateway.setHelpText(MSGS.netIPv6ToolTipGateway());
         this.helpButtonDns.setHelpText(MSGS.netIPv6ToolTipDns());
         this.helpButtonPrivacy.setHelpText(MSGS.netIPv6ToolTipPrivacy());
+        this.helpButtonMtu.setHelpText(MSGS.netIPv6ToolTipMtu());
     }
 
     private void initListBoxes() {
@@ -308,6 +320,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         initSubnetField();
         initGatewayField();
         initDnsField();
+        initMtuField();
     }
 
     private void initPriorityField() {
@@ -338,6 +351,36 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             } else {
                 this.groupPriority.setValidationState(ValidationState.ERROR);
                 this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
+            }
+        });
+    }
+    
+    private void initMtuField() {
+        this.mtu.addMouseOverHandler(event -> {
+            setHelpText(MSGS.netIPv6ToolTipMtu());
+        });
+        this.mtu.addMouseOutHandler(event -> resetHelpText());
+
+        this.mtu.addValueChangeHandler(valChangeEvent -> {
+            setDirty(true);
+
+            String inputText = this.mtu.getText();
+            boolean isValidValue = false;
+
+            if (inputText != null) {
+                if (inputText.trim().isEmpty()) {
+                    isValidValue = true;
+                } else {
+                    isValidValue = isValidIntegerInRange(inputText, 0, Integer.MAX_VALUE);
+                }
+            }
+
+            if (isValidValue) {
+                this.groupMtu.setValidationState(ValidationState.NONE);
+                this.wrongInputMtu.setText("");
+            } else {
+                this.groupMtu.setValidationState(ValidationState.ERROR);
+                this.wrongInputMtu.setText(MSGS.netIPv6InvalidMtu());
             }
         });
     }
@@ -476,6 +519,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.wrongInputGateway.setText("");
         this.groupDns.setValidationState(ValidationState.NONE);
         this.wrongInputDns.setText("");
+        this.groupMtu.setValidationState(ValidationState.NONE);
+        this.wrongInputMtu.setText("");
     }
 
     private void refreshForm() {
@@ -488,6 +533,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.gateway.setEnabled(true);
         this.dns.setEnabled(true);
         this.privacy.setEnabled(true);
+        this.mtu.setEnabled(true);
 
         if (this.selectedNetIfConfig.isPresent()) {
             refreshFieldsBasedOnInterface(this.selectedNetIfConfig.get());
@@ -543,6 +589,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             this.dns.setText("");
             this.privacy.setEnabled(false);
             this.privacy.setSelectedIndex(0);
+            this.mtu.setEnabled(false);
+            this.mtu.setText("");
         }
 
         if (this.status.getSelectedValue().equals(STATUS_LAN)) {
@@ -633,6 +681,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         }
 
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
+        
+        if (this.mtu.getValue() != null) {
+            updatedNetIf.setIpv6Mtu(this.mtu.getValue());
+        }
     }
 
     private boolean nullOrEmpty(String value) {
@@ -660,7 +712,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 || this.groupIp.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupGateway.getValidationState().equals(ValidationState.ERROR)
-                || this.groupDns.getValidationState().equals(ValidationState.ERROR)) {
+                || this.groupDns.getValidationState().equals(ValidationState.ERROR)
+                || this.groupMtu.getValidationState().equals(ValidationState.ERROR)) {
             return false;
         }
 
@@ -691,6 +744,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.gateway.setText("");
         this.dns.setText("");
         this.privacy.setSelectedIndex(0);
+        this.mtu.setText("");
     }
 
     private void fillFormWithCachedConfig() {
@@ -744,6 +798,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 break;
             }
         }
+
+        this.mtu.setValue(this.selectedNetIfConfig.get().getIpv6Mtu());
 
         this.tabs.updateTabs();
         refreshForm();

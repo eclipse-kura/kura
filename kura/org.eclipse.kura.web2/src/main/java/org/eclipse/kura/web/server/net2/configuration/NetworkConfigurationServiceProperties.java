@@ -84,6 +84,7 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP4_NETMASK = "net.interface.%s.config.ip4.prefix";
     private static final String NET_INTERFACE_CONFIG_IP4_GATEWAY = "net.interface.%s.config.ip4.gateway";
     private static final String NET_INTERFACE_CONFIG_IP4_DNS_SERVERS = "net.interface.%s.config.ip4.dnsServers";
+    private static final String NET_INTERFACE_CONFIG_IP4_MTU = "net.interface.%s.config.ip4.mtu";
 
     public Optional<String> getIp4Status(String ifname) {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
@@ -144,6 +145,14 @@ public class NetworkConfigurationServiceProperties {
     public void setIp4DnsServers(String ifname, String dnsServers) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname), dnsServers);
     }
+    
+    public int getIp4Mtu(String ifName) {
+    	return (Integer) properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), 0);
+    }
+
+    public void setIp4Mtu(String ifName, int mtu) {
+    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), mtu);
+    }
 
     /*
      * IPv6 properties
@@ -158,7 +167,8 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP6_NETMASK = "net.interface.%s.config.ip6.prefix";
     private static final String NET_INTERFACE_CONFIG_IP6_GATEWAY = "net.interface.%s.config.ip6.gateway";
     private static final String NET_INTERFACE_CONFIG_IP6_DNS_SERVERS = "net.interface.%s.config.ip6.dnsServers";
-
+    private static final String NET_INTERFACE_CONFIG_IP6_MTU = "net.interface.%s.config.ip6.mtu";
+    
     public Optional<String> getIp6Status(String ifname) {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_STATUS, ifname)));
     }
@@ -238,6 +248,18 @@ public class NetworkConfigurationServiceProperties {
 
     public void setIp6DnsServers(String ifname, String dnsServers) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_DNS_SERVERS, ifname), dnsServers);
+    }
+    
+    public Optional<Integer> getIp6Mtu(String ifname) {
+        if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname))) {
+            Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname));
+            return Optional.ofNullable(mtu);
+        }
+        return Optional.empty();
+    }
+
+    public void setIp6Mtu(String ifname, Integer mtu) {
+    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname), mtu);
     }
 
     /*

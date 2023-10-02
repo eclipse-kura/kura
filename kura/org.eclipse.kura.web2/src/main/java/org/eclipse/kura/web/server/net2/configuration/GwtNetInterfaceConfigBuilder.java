@@ -122,6 +122,7 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setSubnetMask(this.properties.getIp4Netmask(this.ifName));
         this.gwtConfig.setGateway(this.properties.getIp4Gateway(this.ifName));
         this.gwtConfig.setDnsServers(this.properties.getIp4DnsServers(this.ifName));
+        this.gwtConfig.setMtu(this.properties.getIp4Mtu(this.ifName));
     }
 
     private void setIpv6Properties() {
@@ -160,6 +161,11 @@ public class GwtNetInterfaceConfigBuilder {
         Optional<String> privacy = this.properties.getIp6Privacy(this.ifName);
         if (privacy.isPresent()) {
             this.gwtConfig.setIpv6Privacy(privacy.get());
+        }
+
+        Optional<Integer> mtu = this.properties.getIp6Mtu(this.ifName);
+        if (mtu.isPresent()) {
+        	this.gwtConfig.setIpv6Mtu(mtu.get());
         }
     }
 

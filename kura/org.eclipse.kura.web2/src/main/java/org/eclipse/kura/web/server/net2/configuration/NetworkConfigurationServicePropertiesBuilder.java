@@ -113,6 +113,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isManual && isWan) {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
         }
+        
+        this.properties.setIp4Mtu(this.ifname, this.gwtConfig.getMtu());
     }
 
     private void setIpv6Properties() {
@@ -151,6 +153,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isAuto) {
             this.properties.setIp6AddressGenMode(this.ifname, this.gwtConfig.getIpv6AutoconfigurationMode());
             this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
+        }
+        
+        if(Objects.nonNull(this.gwtConfig.getIpv6Mtu())) {
+        	this.properties.setIp6Mtu(this.ifname, this.gwtConfig.getIpv6Mtu());
         }
     }
 
@@ -247,11 +253,13 @@ public class NetworkConfigurationServicePropertiesBuilder {
     }
 
     private void set8021xConfig() {
-        logger.error("setting 802-1x config");
-        this.properties.set8021xEap(this.ifname, this.gwtConfig.get8021xConfig().getEap());
-        this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.get8021xConfig().getInnerAuth());
-        this.properties.set8021xIdentity(this.ifname, this.gwtConfig.get8021xConfig().getUsername());
-        this.properties.set8021xPassword(this.ifname, this.gwtConfig.get8021xConfig().getPassword());
+    	if(this.gwtConfig instanceof GwtWifiNetInterfaceConfig) { // Was this condition missing on purpose?
+            logger.error("setting 802-1x config");
+            this.properties.set8021xEap(this.ifname, this.gwtConfig.get8021xConfig().getEap());
+            this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.get8021xConfig().getInnerAuth());
+            this.properties.set8021xIdentity(this.ifname, this.gwtConfig.get8021xConfig().getUsername());
+            this.properties.set8021xPassword(this.ifname, this.gwtConfig.get8021xConfig().getPassword());
+    	}
     }
 
     private void setWifiInfraProperties() {

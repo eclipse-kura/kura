@@ -32,6 +32,7 @@ import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.NMVersion;
 import org.eclipse.kura.nm.enums.NM8021xEAP;
 import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -69,14 +70,15 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Map<String, Variant<?>>> buildSettings(NetworkProperties properties,
-            Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType) {
+            Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType,
+            NMVersion nmVersion) {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
         Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
         newConnectionSettings.put(NM_SETTINGS_CONNECTION, connectionMap);
 
         Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, deviceId);
-        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, deviceId);
+        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, deviceId, nmVersion);
         newConnectionSettings.put("ipv4", ipv4Map);
         newConnectionSettings.put("ipv6", ipv6Map);
 
@@ -107,7 +109,15 @@ public class NMSettingsConverter {
             newConnectionSettings.put("ppp", pppSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
             Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
             newConnectionSettings.put("vlan", vlanSettingsMap);
+            newConnectionSettings.put("802-3-ethernet", ethSettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
+            newConnectionSettings.put("802-3-ethernet", ethSettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
+            Map<String, Variant<?>> loopSettingsMap = NMSettingsConverter.buildLoopbackSettings(properties, deviceId);
+            newConnectionSettings.put("loopback", loopSettingsMap);
         }
 
         return newConnectionSettings;
@@ -277,7 +287,8 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
+    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId, 
+            NMVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
         // property is not set, it assumes
@@ -374,6 +385,13 @@ public class NMSettingsConverter {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
         }
 
+        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
+        logger.info("REMOVEME-- ip6mtu is {}", mtu);
+        //ipv6.mtu only supported in networkManager 1.40 and above
+        logger.info("--REMOVEME; {} > 1.40? {}", nmVersion, nmVersion.isGreaterEqualThan("1.40"));
+        if (nmVersion.isGreaterEqualThan("1.40")) {
+            mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        }
         return settings;
     }
 
@@ -401,6 +419,8 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
         hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
+        settings.put("mtu", new Variant<>(getIp4MtuFromProperties(props, deviceId)));
+        
         return settings;
     }
 
@@ -494,6 +514,8 @@ public class NMSettingsConverter {
         Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", deviceId);
         number.ifPresent(numberString -> settings.put("number", new Variant<>(numberString)));
 
+        settings.put("mtu", new Variant<>(getIp4MtuFromProperties(props, deviceId)));
+        
         return settings;
     }
 
@@ -529,6 +551,22 @@ public class NMSettingsConverter {
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
         settings.put("egress-priority-map", new Variant<>(egressMap
                 .orElse(new ArrayList<String>()), listType));
+        return settings;
+    }
+    
+    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        Integer mtu = getIp4MtuFromProperties(props, deviceId);
+        logger.info("REMOVEME-- eth mtu {}", mtu);
+        settings.put("mtu", new Variant<>(new UInt32(mtu)));
+        return settings;        
+    }
+
+    public static Map<String, Variant<?>> buildLoopbackSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        Integer mtu = getIp4MtuFromProperties(props, deviceId);
+        logger.info("REMOVEME-- lo mtu {}", mtu);
+        settings.put("mtu", new Variant<>(new UInt32(mtu)));
         return settings;
     }
 
@@ -723,6 +761,11 @@ public class NMSettingsConverter {
             throw new IllegalArgumentException(String
                     .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
+    }
+    
+    private static Integer getIp4MtuFromProperties(NetworkProperties properties, String deviceId) {
+        Optional<Integer> mtu = properties.getOpt(Integer.class, "net.interface.%s.config.ip4.mtu", deviceId);
+        return mtu.orElse(0);
     }
 
 }

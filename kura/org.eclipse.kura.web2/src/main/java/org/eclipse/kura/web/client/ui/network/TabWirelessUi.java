@@ -434,15 +434,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
-        logger.info("Start setNetInterface");
-
         setDirty(true);
         if (this.tcpStatus == null || this.selectedNetIfConfig != config) {
             this.tcpStatus = this.tcpTab.getStatus();
         }
         if (config instanceof GwtWifiNetInterfaceConfig) {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
-            logger.info("Selected ifconfig: " + selectedNetIfConfig.getProperties());
 
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
             if (Objects.nonNull(this.activeConfig)) {
@@ -456,8 +453,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
             loadCountryCode();
         }
-
-        logger.info("Finished setNetInterface");
     }
 
     private void updateChanneList(GwtWifiConfig config) {

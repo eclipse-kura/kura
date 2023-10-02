@@ -314,14 +314,14 @@ public class NetworkTabsUi extends Composite {
         InterfaceConfigWrapper wrapper = new InterfaceConfigWrapper(this.netIfConfig);
 
         if (wrapper.isWireless()) {
-            showWirelessTabs();
+            showWirelessTabs(isIpv4Disabled || isUnmanagedSelected());
             if (!isWirelessAP) {
                 includeDhcpNat = false;
             }
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
             this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
-            showModemTabs();
+            showModemTabs(isIpv4Disabled || isUnmanagedSelected());
         } else {
             showEthernetTabs();
             if (wrapper.isLoopback()) {
@@ -339,12 +339,12 @@ public class NetworkTabsUi extends Composite {
         }
     }
 
-    private void showWirelessTabs() {
+    private void showWirelessTabs(boolean interfaceNotEnabled) {
         removeTab(this.modemTabAnchorItem);
         removeTab(this.modemGpsTabAnchorItem);
         removeTab(this.modemAntennaTabAnchorItem);
 
-        this.wirelessTabAnchorItem.setEnabled(true);
+        this.wirelessTabAnchorItem.setEnabled(!interfaceNotEnabled);
 
         insertTab(this.wirelessTabAnchorItem);
         if (this.isNet2) {
@@ -354,11 +354,11 @@ public class NetworkTabsUi extends Composite {
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
-    private void showModemTabs() {
+    private void showModemTabs(boolean interfaceNotEnabled) {
         removeTab(this.wirelessTabAnchorItem);
         removeTab(this.dhcp4NatTabAnchorItem);
 
-        this.modemTabAnchorItem.setEnabled(true);
+        this.modemTabAnchorItem.setEnabled(!interfaceNotEnabled);
         this.modemAntennaTabAnchorItem.setEnabled(isModemLTE());
 
         insertTab(this.modemTabAnchorItem);
@@ -389,8 +389,6 @@ public class NetworkTabsUi extends Composite {
         this.visibleTabs.remove(this.net8021xTabAnchorItem);
         this.visibleTabs.remove(this.dhcp4NatTabAnchorItem);
         this.visibleTabs.remove(this.modemTabAnchorItem);
-        this.visibleTabs.remove(this.modemGpsTabAnchorItem);
-        this.visibleTabs.remove(this.modemAntennaTabAnchorItem);
     }
 
     private void refreshAllVisibleTabs() {

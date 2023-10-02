@@ -378,6 +378,8 @@ public class NetworkConfigurationServiceCommon {
         tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.gateway", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV4_GATEWAY, Tscalar.STRING));
         addIp4StatusDefinition(tocd, ifaceName);
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.ip4.mtu", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV4_MTU, Tscalar.INTEGER));
 
     }
 
@@ -393,6 +395,8 @@ public class NetworkConfigurationServiceCommon {
 
         tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.ip6.gateway", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_IPV6_GATEWAY, Tscalar.STRING));
+        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.ip6.mtu", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_IPV6_MTU, Tscalar.INTEGER));
         addIp4StatusDefinition(tocd, ifaceName);
 
     }

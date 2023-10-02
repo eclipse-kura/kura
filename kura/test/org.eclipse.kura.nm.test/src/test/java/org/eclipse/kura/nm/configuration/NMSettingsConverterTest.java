@@ -2907,13 +2907,10 @@ public class NMSettingsConverterTest {
         try {
             this.resultMap = NMSettingsConverter.build8021xSettings(props, iface);
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            e.printStackTrace();
             this.hasAGenericExecptionBeenThrown = true;
         }
     }

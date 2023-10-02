@@ -73,6 +73,38 @@ public class Gwt8021xConfig extends KuraBaseModel implements Serializable {
         set("password", password);
     }
 
+    public String getKeystorePid() {
+        return get("keystorePid");
+    }
+
+    public void setKeystorePid(String keystorePid) {
+        set("keystorePid", keystorePid);
+    }
+
+    public String getCaCertName() {
+        return get("caCertName");
+    }
+
+    public void setCaCertName(String caCertName) {
+        set("caCertName", caCertName);
+    }
+
+    public String getClientCertName() {
+        return get("clientCertName");
+    }
+
+    public void setClientCertName(String clientCertName) {
+        set("clientCertName", clientCertName);
+    }
+
+    public String getPrivateKeyName() {
+        return get("privateKeyName");
+    }
+
+    public void setPrivateKeyName(String privateKeyName) {
+        set("privateKeyName", privateKeyName);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Gwt8021xConfig)) {

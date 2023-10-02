@@ -95,6 +95,42 @@
                                 ui:field="password" allowPlaceholder="true"/>
                         </b:FormGroup>
 
+                        <b:FormGroup>
+                            <b:FormLabel for="identityKeystorePid"
+                                ui:field="labelKeystorePid" />
+                            <util:HelpButton ui:field="helpKeystorePid"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextBox b:id="keystorePid"
+                                ui:field="keystorePid" />
+                        </b:FormGroup>
+
+                        <b:FormGroup>
+                            <b:FormLabel for="identityCaCertName"
+                                ui:field="labelCaCertName" />
+                            <util:HelpButton ui:field="helpCaCertName"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextBox b:id="caCertName"
+                                ui:field="caCertName" />
+                        </b:FormGroup>
+
+                        <b:FormGroup>
+                            <b:FormLabel for="identityClientCertName"
+                                ui:field="labelClientCertName" />
+                            <util:HelpButton ui:field="helpClientCertName"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextBox b:id="clientCertName"
+                                ui:field="clientCertName" />
+                        </b:FormGroup>
+
+                        <b:FormGroup>
+                            <b:FormLabel for="identityPrivateKeyName"
+                                ui:field="labelPrivateKeyName" />
+                            <util:HelpButton ui:field="helpPrivateKeyName"/>
+                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
+                            <b:TextBox b:id="privateKeyName"
+                                ui:field="privateKeyName" />
+                        </b:FormGroup>
+
                         <b:FormGroup ui:field="testCredentials">
                             <b:Button ui:field="buttonTestPassword"
                                 icon="EXCHANGE" iconFixedWidth="true" />

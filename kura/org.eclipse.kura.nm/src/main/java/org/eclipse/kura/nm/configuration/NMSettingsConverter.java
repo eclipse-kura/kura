@@ -202,6 +202,7 @@ public class NMSettingsConverter {
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
+
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
 
@@ -209,16 +210,12 @@ public class NMSettingsConverter {
             settings.put("anonymous-identity", new Variant<>(value));
         });
 
-        Optional<Certificate> caCert = props.getOpt(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name",
-                deviceId);
-
-        caCert.ifPresent(value -> {
-            try {
-                settings.put("ca-cert", new Variant<>(value.getEncoded()));
-            } catch (Exception e) {
-                logger.error("Enable to find or decode CA Certificate", e);
-            }
-        });
+        try {
+            Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
+            settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
+        } catch (Exception e) {
+            logger.error("Enable to find or decode CA Certificate", e);
+        }
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);

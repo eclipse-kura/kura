@@ -329,9 +329,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps) {
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-            String clientCertString = String.format("%s.802-1x.client-cert-name", interfaceName);
-            String caCertString = String.format("%s.802-1x.802-1x.ca-cert-name", interfaceName);
-            String privateKeyString = String.format("%s.802-1x.private-key-name", interfaceName);
+            String clientCertString = String.format("%s.config.802-1x.client-cert-name", interfaceName);
+            String caCertString = String.format("%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
+            String privateKeyString = String.format("%s.config.802-1x.private-key-name", interfaceName);
             if (prop.getKey().contains(clientCertString) || prop.getKey().contains(caCertString)) {
                 Object value = prop.getValue();
                 try {

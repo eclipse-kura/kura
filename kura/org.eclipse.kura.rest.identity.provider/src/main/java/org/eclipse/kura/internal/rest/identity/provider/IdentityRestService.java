@@ -82,6 +82,11 @@ public class IdentityRestService {
         }
     }
 
+    // Added mainly for testing purposes. Currently the service is created by this endpoint.
+    public void bindIdentityService(IdentityService identityService) {
+        this.identityService = identityService;
+    }
+
     public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.unregister(MQTT_APP_ID);
@@ -91,7 +96,10 @@ public class IdentityRestService {
     }
 
     public void activate() {
-        this.identityService = new IdentityService(this.cryptoService, this.userAdmin, this.configurationService);
+        // create only if not set externally. Added mainly for testing purposes.
+        if (this.identityService == null) {
+            this.identityService = new IdentityService(this.cryptoService, this.userAdmin, this.configurationService);
+        }
     }
 
     @POST

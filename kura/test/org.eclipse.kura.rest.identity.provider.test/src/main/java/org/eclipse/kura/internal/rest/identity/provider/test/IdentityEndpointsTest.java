@@ -12,12 +12,19 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -25,10 +32,17 @@ import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
+import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
+import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
+import org.eclipse.kura.util.wire.test.WireTestUtil;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.google.gson.Gson;
 
@@ -41,6 +55,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String REST_APP_ID = "identity/v1";
+
+    private static IdentityService identityServiceMock = mock(IdentityService.class);
 
     private UserDTO user;
 
@@ -65,6 +81,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvokeCreateUserSuccessfully() {
+        givenIdentityService();
+
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users", gson.toJson(this.user));
@@ -75,6 +93,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvokeDeleteUserSuccessfully() {
+        givenIdentityService();
 
         givenUsername("testuser");
 
@@ -86,6 +105,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnDefinedPermissions() {
+        givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/defined-permissions");
 
@@ -96,6 +116,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnUserConfig() {
+        givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs");
 
@@ -111,6 +132,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs", gson.toJson(this.userConfigs));
 
         thenRequestSucceeds();
+    }
+
+    private static void givenIdentityService() {
+        reset(identityServiceMock);
+
     }
 
     // @Test
@@ -139,6 +165,32 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     //
     // thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     // }
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        createSecurityServiceMock();
+        registerSecurityServiceMock();
+    }
+
+    private static void createSecurityServiceMock() {
+        givenIdentityService();
+
+        final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
+        configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
+        configurationServiceProperties.put("kura.service.pid", "identityServiceMock");
+        FrameworkUtil.getBundle(IdentityEndpointsTest.class).getBundleContext().registerService(IdentityService.class,
+                identityServiceMock, configurationServiceProperties);
+    }
+
+    private static void registerSecurityServiceMock() throws Exception {
+        final Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("IdentityService.target", "(kura.service.pid=identityServiceMock)");
+
+        final ConfigurationAdmin configurationAdmin = WireTestUtil
+                .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        final Configuration config = configurationAdmin.getConfiguration(IdentityRestService.class.getName(), "?");
+        config.update(properties);
+    }
 
     private void givenUser(UserDTO user) {
         this.user = user;

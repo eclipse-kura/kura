@@ -37,10 +37,10 @@
                name="UserAdmin"
                policy="static"/>
                
-   <reference interface="org.eclipse.kura.configuration.ConfigurationService" 
-               bind="bindConfigurationService" 
-               cardinality="1..1"  
-               name="ConfigurationService" 
+   <reference interface="org.eclipse.kura.internal.rest.identity.provider.IdentityService" 
+               bind="bindIdentityService" 
+               cardinality="0..1"  
+               name="IdentityService" 
                policy="static"/>
 
     <service>

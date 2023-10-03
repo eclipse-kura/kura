@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.rest.identity.provider.test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,7 +69,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private String username;
 
-    private Set<UserDTO> userConfigs;
+    private static Set<UserDTO> userConfigs;
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -110,8 +111,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/defined-permissions");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(
-                "[\"kura.cloud.connection.admin\",\"kura.packages.admin\",\"kura.device\",\"kura.admin\",\"rest.keystores\",\"kura.network.admin\",\"kura.wires.admin\",\"rest.identity\"]");
+        thenResponseBodyEqualsJson("[\"perm1\",\"perm2\"]");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         givenUserConfigs(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"), new UserDTO(
                 "testuser2", new HashSet<String>(Arrays.asList("perm1", "perm2")), false, true, "testpassw2"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs", gson.toJson(this.userConfigs));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs", gson.toJson(userConfigs));
 
         thenRequestSucceeds();
     }
@@ -137,6 +137,10 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static void givenIdentityService() {
         reset(identityServiceMock);
 
+        when(identityServiceMock.getDefinedPermissions())
+                .thenReturn(new HashSet<String>(Arrays.asList("perm1", "perm2")));
+
+        when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
     }
 
     // @Test
@@ -200,8 +204,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         this.username = username;
     }
 
-    private void givenUserConfigs(UserDTO... userConfigs) {
-        this.userConfigs = new HashSet<>(Arrays.asList(userConfigs));
+    private void givenUserConfigs(UserDTO... userConfigurations) {
+        userConfigs = new HashSet<>(Arrays.asList(userConfigurations));
     }
 
 }

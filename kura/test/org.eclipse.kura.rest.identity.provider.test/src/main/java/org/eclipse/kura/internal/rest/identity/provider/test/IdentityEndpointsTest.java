@@ -35,6 +35,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
+import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
@@ -67,7 +68,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
             IdentityEndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
-    private String username;
+    private UserConfigRequestDTO userConfigRequest;
 
     private static Set<UserDTO> userConfigs;
 
@@ -96,9 +97,9 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldInvokeDeleteUserSuccessfully() {
         givenIdentityService();
 
-        givenUsername("testuser");
+        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE), "/users/" + this.username);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE), "/users/", gson.toJson(this.user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -120,7 +121,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 "testpassw2"));
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs", gson.toJson(this.userConfigRequest));
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);
@@ -128,12 +129,18 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvokeSetUserConfigSuccessfully() throws KuraException {
-        givenUserConfigs(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"), new UserDTO(
+        givenUserConfigRequest(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"), new UserDTO(
                 "testuser2", new HashSet<String>(Arrays.asList("perm1", "perm2")), false, true, "testpassw2"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs", gson.toJson(userConfigs));
 
         thenRequestSucceeds();
+    }
+
+    private void givenUserConfigRequest(UserDTO... userDTO) {
+        this.userConfigRequest = new UserConfigRequestDTO();
+        this.userConfigRequest.setUserConfig(new HashSet<>(Arrays.asList(userDTO)));
+
     }
 
     private static void givenIdentityService() {
@@ -200,10 +207,6 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private void givenUser(UserDTO user) {
         this.user = user;
-    }
-
-    private void givenUsername(String username) {
-        this.username = username;
     }
 
     private void givenUserConfigs(UserDTO... userConfigurations) {

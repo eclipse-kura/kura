@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
@@ -21,7 +20,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,6 +29,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
@@ -40,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 @Path("identity/v1")
 public class IdentityRestService {
@@ -120,10 +118,10 @@ public class IdentityRestService {
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/{userName}")
-    public Response deleteUser(@PathParam("userName") final String userName) {
+    public Response deleteUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSSAGE, "deleteUser");
-            this.identityService.deleteUser(userName);
+            this.identityService.deleteUser(userName.getUserName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -161,11 +159,10 @@ public class IdentityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/configs")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setUserConfig(String userConfigJson) {
+    public Response setUserConfig(UserConfigRequestDTO userConfigrRequest) {
         try {
-            Set<UserDTO> userConfig = this.gson.fromJson(userConfigJson, new TypeToken<HashSet<UserDTO>>() {
-            }.getType());
             logger.debug(DEBUG_MESSSAGE, "setUserConfig");
+            Set<UserDTO> userConfig = userConfigrRequest.getUserConfig();
 
             for (final UserDTO config : userConfig) {
                 final String newPassword = config.getPassword();

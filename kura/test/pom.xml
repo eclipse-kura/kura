@@ -931,7 +931,7 @@
         <module>org.eclipse.kura.rest.packages.provider.test</module>
         <module>org.eclipse.kura.rest.position.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
-        <module>org.eclipse.kura.rest.security.provider.test</module>
+        <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.wire.provider.test</module>

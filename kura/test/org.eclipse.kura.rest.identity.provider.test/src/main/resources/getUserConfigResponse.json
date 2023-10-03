@@ -1,20 +1,19 @@
 [
     {
-        "userName": "admin",
-        "passwordAuthEnabled": true,
-        "passwordChangeNeeded": false,
-        "permissions": [
-            "kura.admin"
-        ]
-    },
-    {
-        "userName": "appadmin",
-        "passwordAuthEnabled": true,
+        "password": "testpassw2",
+        "passwordAuthEnabled": false,
         "passwordChangeNeeded": true,
         "permissions": [
-            "kura.cloud.connection.admin",
-            "kura.packages.admin",
-            "kura.wires.admin"
-        ]
+            "perm1",
+            "perm2"
+        ],
+        "userName": "testuser2"
+    },
+    {
+        "password": "testpassw",
+        "passwordAuthEnabled": true,
+        "passwordChangeNeeded": false,
+        "permissions": [],
+        "userName": "testuser"
     }
 ]

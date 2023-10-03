@@ -1,19 +1,19 @@
 [
     {
-        "password": "testpassw2",
+        "userName": "testuser2",
         "passwordAuthEnabled": false,
         "passwordChangeNeeded": true,
         "permissions": [
             "perm1",
             "perm2"
         ],
-        "userName": "testuser2"
+        "password": "testpassw2"
     },
     {
-        "password": "testpassw",
+        "userName": "testuser",
         "passwordAuthEnabled": true,
         "passwordChangeNeeded": false,
         "permissions": [],
-        "userName": "testuser"
+        "password": "testpassw"
     }
 ]

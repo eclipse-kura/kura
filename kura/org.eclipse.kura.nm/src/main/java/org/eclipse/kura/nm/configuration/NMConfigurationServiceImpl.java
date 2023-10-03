@@ -80,7 +80,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private CryptoService cryptoService;
 
     private Map<String, KeystoreService> keystoreServices = new HashMap<>();
-    private KeystoreService keystoreService;
 
     private DhcpServerMonitor dhcpServerMonitor;
     private DnsServerMonitor dnsServerMonitor;
@@ -319,15 +318,21 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
             if (prop.getKey().contains("802-1x.keystore.pid")) {
                 String keystorePid = (String) prop.getValue();
-                getKeystore(keystorePid);
 
                 String interfaceName = prop.getKey().split("\\.")[2];
-                findAndDecodeCertificatesForInterface(interfaceName, modifiedProps);
+                findAndDecodeCertificatesForInterface(interfaceName, modifiedProps, getKeystore(keystorePid));
             }
         }
     }
 
-    private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps) {
+    private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps,
+            KeystoreService keystoreService) {
+
+        if (keystoreService == null) {
+            logger.error("Cannot find keystore service for interface {}", interfaceName);
+            return;
+        }
+
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
             String clientCertString = String.format("%s.config.802-1x.client-cert-name", interfaceName);
             String caCertString = String.format("%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
@@ -335,16 +340,17 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             if (prop.getKey().contains(clientCertString) || prop.getKey().contains(caCertString)) {
                 Object value = prop.getValue();
                 try {
-                    modifiedProps.put(prop.getKey(), decryptCertificate((String) value));
+                    String valueString = (String) prop.getValue();
+                    modifiedProps.put(prop.getKey(), decryptCertificate(valueString, keystoreService));
                 } catch (Exception e) {
                     logger.error("Enable to decode certificate {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
             } else if (prop.getKey().contains(privateKeyString)) {
                 Object value = prop.getValue();
-
                 try {
-                    modifiedProps.put(prop.getKey(), decryptPrivateKey((String) value));
+                    String valueString = (String) prop.getValue();
+                    modifiedProps.put(prop.getKey(), decryptPrivateKey(valueString, keystoreService));
                 } catch (Exception e) {
                     logger.error("Enable to decode private key {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
@@ -354,7 +360,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private Certificate decryptCertificate(String certificateName) throws KuraException {
+    private Certificate decryptCertificate(String certificateName, KeystoreService keystoreService)
+            throws KuraException {
         if (keystoreService.getEntry(certificateName) instanceof TrustedCertificateEntry) {
             TrustedCertificateEntry cert = (TrustedCertificateEntry) keystoreService.getEntry(certificateName);
             return cert.getTrustedCertificate();
@@ -367,18 +374,14 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private PrivateKey decryptPrivateKey(String privateKeyName) throws KuraException {
+    private PrivateKey decryptPrivateKey(String privateKeyName, KeystoreService keystoreService) throws KuraException {
         PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
 
         return key.getPrivateKey();
     }
 
-    private void getKeystore(String keystoreServicePid) {
-        if (this.keystoreServices.containsKey(keystoreServicePid)) {
-            this.keystoreService = this.keystoreServices.get(keystoreServicePid);
-        } else {
-            logger.warn("Cannot find keystore service with pid {}", keystoreServicePid);
-        }
+    private KeystoreService getKeystore(String keystoreServicePid) {
+        return this.keystoreServices.get(keystoreServicePid);
     }
 
     @Override

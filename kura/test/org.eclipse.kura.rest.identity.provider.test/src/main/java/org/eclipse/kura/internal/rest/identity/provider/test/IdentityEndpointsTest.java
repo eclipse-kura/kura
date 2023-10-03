@@ -174,11 +174,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        createSecurityServiceMock();
-        registerSecurityServiceMock();
+        createidentityServiceMock();
+        registeridentityServiceMock();
     }
 
-    private static void createSecurityServiceMock() {
+    private static void createidentityServiceMock() {
         givenIdentityService();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
@@ -188,7 +188,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 identityServiceMock, configurationServiceProperties);
     }
 
-    private static void registerSecurityServiceMock() throws Exception {
+    private static void registeridentityServiceMock() throws Exception {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("IdentityService.target", "(kura.service.pid=identityServiceMock)");
 

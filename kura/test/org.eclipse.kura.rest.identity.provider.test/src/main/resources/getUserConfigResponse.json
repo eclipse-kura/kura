@@ -8,12 +8,5 @@
             "perm2"
         ],
         "password": "testpassw2"
-    },
-    {
-        "userName": "testuser",
-        "passwordAuthEnabled": true,
-        "passwordChangeNeeded": false,
-        "permissions": [],
-        "password": "testpassw"
     }
 ]

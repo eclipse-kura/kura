@@ -143,6 +143,14 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
     }
 
+    private void givenUser(UserDTO user) {
+        this.user = user;
+    }
+
+    private void givenUserConfigs(UserDTO... userConfigurations) {
+        userConfigs = new HashSet<>(Arrays.asList(userConfigurations));
+    }
+
     private void givenUserConfigRequest(UserDTO... userDTO) {
         this.userConfigRequest = new UserConfigDTO();
         this.userConfigRequest.setUserConfig(new HashSet<>(Arrays.asList(userDTO)));
@@ -187,11 +195,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        createidentityServiceMock();
-        registeridentityServiceMock();
+        createIdentityServiceMock();
+        registerIdentityServiceMock();
     }
 
-    private static void createidentityServiceMock() {
+    private static void createIdentityServiceMock() {
         givenIdentityService();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
@@ -201,7 +209,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 identityServiceMock, configurationServiceProperties);
     }
 
-    private static void registeridentityServiceMock() throws Exception {
+    private static void registerIdentityServiceMock() throws Exception {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("IdentityService.target", "(kura.service.pid=identityServiceMock)");
 
@@ -209,14 +217,6 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(IdentityRestService.class.getName(), "?");
         config.update(properties);
-    }
-
-    private void givenUser(UserDTO user) {
-        this.user = user;
-    }
-
-    private void givenUserConfigs(UserDTO... userConfigurations) {
-        userConfigs = new HashSet<>(Arrays.asList(userConfigurations));
     }
 
 }

@@ -114,10 +114,10 @@ public class IdentityRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users/delete")
+    @Path("/users-delete")
     public Response deleteUser(final UserDTO userName) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "deleteUser");
+            logger.debug(DEBUG_MESSSAGE, "users-delete");
             this.identityService.deleteUser(userName.getUserName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);

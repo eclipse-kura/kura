@@ -117,7 +117,7 @@ public class IdentityRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users/{userName}")
+    @Path("/users")
     public Response deleteUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSSAGE, "deleteUser");

@@ -145,11 +145,15 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     @UiField
     CheckBox appendCheck;
     @UiField
+    CheckBox emptyStringCheck;
+    @UiField
     Hidden xsrfTokenField;
     @UiField
     Hidden assetPidField;
     @UiField
     Hidden driverPidField;
+    @UiField
+    Hidden emptyStringCheckField;
     @UiField
     Hidden appendCheckField;
     @UiField
@@ -229,6 +233,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                             .getParameterValue(AssetConstants.ASSET_DRIVER_PROP.value()));
                     AssetConfigurationUi.this.appendCheckField
                             .setValue(AssetConfigurationUi.this.appendCheck.getValue().toString());
+                    AssetConfigurationUi.this.emptyStringCheckField
+                            .setValue(AssetConfigurationUi.this.emptyStringCheck.getValue().toString());
                     AssetConfigurationUi.this.uploadForm.submit();
                     AssetConfigurationUi.this.uploadModal.hide();
                     AssetConfigurationUi.this.formSubmitCallback = context.callback(completeEvent -> {
@@ -679,6 +685,12 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.appendCheckField.setID("doReplace");
         this.appendCheckField.setName("doReplace");
         this.appendCheckField.setValue("");
+
+        this.emptyStringCheck.setName("emptyStringCheck");
+        this.emptyStringCheck.setValue(false);
+        this.emptyStringCheckField.setID("doEmptyStringConversion");
+        this.emptyStringCheckField.setName("doEmptyStringConversion");
+        this.emptyStringCheckField.setValue("");
 
     }
 

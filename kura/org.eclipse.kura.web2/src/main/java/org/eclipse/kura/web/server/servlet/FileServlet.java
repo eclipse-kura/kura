@@ -450,9 +450,10 @@ public class FileServlet extends AuditServlet {
             String csvString = new String(data, StandardCharsets.UTF_8);
             String assetPid = formFields.get("assetPid");
             String driverPid = formFields.get("driverPid");
+            Boolean nullValueAsEmptyString = Boolean.parseBoolean(formFields.get("doEmptyStringConversion"));
 
             List<GwtConfigParameter> parametersFromCsv = AssetConfigValidator.get().validateCsv(csvString, driverPid,
-                    errors);
+                    errors, nullValueAsEmptyString);
 
             final GwtConfigComponent config = new GwtConfigComponent();
             config.setParameters(parametersFromCsv);

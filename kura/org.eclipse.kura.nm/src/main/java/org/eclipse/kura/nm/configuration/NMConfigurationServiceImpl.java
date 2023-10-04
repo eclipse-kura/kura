@@ -236,7 +236,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
             decryptAndConvertPasswordProperties(modifiedProps);
-            decryptAndConvertCertificatesProperties(modifiedProps);
+            decryptAndConvertCertificatesProperties(modifiedProps, interfaces);
             this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
@@ -313,16 +313,22 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps) {
+    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps, Set<String> interfaces) {
 
-        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-            if (prop.getKey().contains("802-1x.keystore.pid")) {
-                String keystorePid = (String) prop.getValue();
+        interfaces.forEach(interfaceName -> {
+            String key = String.format("net.interface.%s.config.802-1x.keystore.pid", interfaceName);
+            if (modifiedProps.containsKey(key)) {
+                
+                Object prop = modifiedProps.get(key);
 
-                String interfaceName = prop.getKey().split("\\.")[2];
-                findAndDecodeCertificatesForInterface(interfaceName, modifiedProps, getKeystore(keystorePid));
+                if (prop instanceof String) {
+                    String keystorePid = (String) prop;
+    
+                    findAndDecodeCertificatesForInterface(interfaceName, modifiedProps,
+                            this.keystoreServices.get(keystorePid));
+                }
             }
-        }
+        });
     }
 
     private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps,
@@ -380,10 +386,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
 
         return key.getPrivateKey();
-    }
-
-    private KeystoreService getKeystore(String keystoreServicePid) {
-        return this.keystoreServices.get(keystoreServicePid);
     }
 
     @Override

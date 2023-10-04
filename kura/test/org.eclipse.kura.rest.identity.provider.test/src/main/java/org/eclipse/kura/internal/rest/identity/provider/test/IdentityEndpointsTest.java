@@ -56,6 +56,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_DELETE = "DELETE";
+    private static final String MQTT_METHOD_SPEC_DEL = "DEL";
     private static final String REST_APP_ID = "identity/v1";
 
     private static IdentityService identityServiceMock = mock(IdentityService.class);
@@ -99,7 +100,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE), "/users", gson.toJson(this.user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users",
+                gson.toJson(this.user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();

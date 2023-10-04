@@ -115,9 +115,6 @@ public class NMSettingsConverter {
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
             newConnectionSettings.put("802-3-ethernet", ethSettingsMap);
-        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_LOOPBACK) {
-            Map<String, Variant<?>> loopSettingsMap = NMSettingsConverter.buildLoopbackSettings(properties, deviceId);
-            newConnectionSettings.put("loopback", loopSettingsMap);
         }
 
         return newConnectionSettings;
@@ -386,11 +383,11 @@ public class NMSettingsConverter {
         }
 
         Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
-        logger.info("REMOVEME-- ip6mtu is {}", mtu);
         //ipv6.mtu only supported in networkManager 1.40 and above
-        logger.info("--REMOVEME; {} > 1.40? {}", nmVersion, nmVersion.isGreaterEqualThan("1.40"));
         if (nmVersion.isGreaterEqualThan("1.40")) {
             mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        } else {
+            logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
         }
         return settings;
     }
@@ -557,17 +554,8 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
         Integer mtu = getIp4MtuFromProperties(props, deviceId);
-        logger.info("REMOVEME-- eth mtu {}", mtu);
         settings.put("mtu", new Variant<>(new UInt32(mtu)));
         return settings;        
-    }
-
-    public static Map<String, Variant<?>> buildLoopbackSettings(NetworkProperties props, String deviceId) {
-        Map<String, Variant<?>> settings = new HashMap<>();
-        Integer mtu = getIp4MtuFromProperties(props, deviceId);
-        logger.info("REMOVEME-- lo mtu {}", mtu);
-        settings.put("mtu", new Variant<>(new UInt32(mtu)));
-        return settings;
     }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,

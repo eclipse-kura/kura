@@ -448,6 +448,34 @@ public class NMSettingsConverterTest {
 
         thenIllegalArgumentExceptionThrown();
     }
+    
+    @Test
+    public void buildIpv6SettingsShouldHaveMtuWhenSupported() {
+    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.mtu", 2345);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.40.18");
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mtu", new UInt32(2345));
+    }
+    
+    @Test
+    public void buildIpv6SettingsShouldNotHaveMtuWhenNotSupported() {
+    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.mtu", 3456);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.22.10");
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("mtu");
+    }
 
     @Test
     public void build8021xSettingsShouldThrowIfIsEmpty() {

@@ -117,6 +117,12 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnUserConfig() {
+        givenUserConfigs(new UserDTO("testuser2", //
+                new HashSet<String>(Arrays.asList("perm1", "perm2")), //
+                false, //
+                true, //
+                "testpassw2"));
+
         givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs", gson.toJson(this.userConfigRequest));

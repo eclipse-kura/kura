@@ -313,7 +313,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps) throws KuraException {
+    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps) {
 
         for (Entry<String, Object> prop : modifiedProps.entrySet()) {
             if (prop.getKey().contains("802-1x.keystore.pid")) {

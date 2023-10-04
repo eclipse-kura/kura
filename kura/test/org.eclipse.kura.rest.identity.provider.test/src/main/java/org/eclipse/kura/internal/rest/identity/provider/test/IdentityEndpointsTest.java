@@ -99,7 +99,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE), "/users-delete", gson.toJson(this.user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE), "/users", gson.toJson(this.user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();

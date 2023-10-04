@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class IdentityRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestService.class);
-    private static final String DEBUG_MESSSAGE = "Processing request for method '{}'";
+    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
 
     private static final String MQTT_APP_ID = "ID-V1";
     private static final String REST_ROLE_NAME = "identity";
@@ -103,7 +103,7 @@ public class IdentityRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserDTO userName) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "createUser");
+            logger.debug(DEBUG_MESSAGE, "createUser");
             this.identityService.createUser(userName.getUserName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -114,10 +114,11 @@ public class IdentityRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users-delete")
+    @Path("/users")
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteUser(final UserDTO userName) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "users-delete");
+            logger.debug(DEBUG_MESSAGE, "deleteUser");
             this.identityService.deleteUser(userName.getUserName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -132,7 +133,7 @@ public class IdentityRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Set<String> getDefinedPermissions() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getDefinedPermissions");
+            logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
             return this.identityService.getDefinedPermissions();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -145,7 +146,7 @@ public class IdentityRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public UserConfigDTO getUserConfig() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getUserConfig");
+            logger.debug(DEBUG_MESSAGE, "getUserConfig");
             UserConfigDTO userConfig = new UserConfigDTO();
             userConfig.setUserConfig(this.identityService.getUserConfig());
             return userConfig;
@@ -160,7 +161,7 @@ public class IdentityRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setUserConfig(UserConfigDTO userConfigRequest) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "setUserConfig");
+            logger.debug(DEBUG_MESSAGE, "setUserConfig");
             Set<UserDTO> userConfig = userConfigRequest.getUserConfig();
 
             for (final UserDTO config : userConfig) {

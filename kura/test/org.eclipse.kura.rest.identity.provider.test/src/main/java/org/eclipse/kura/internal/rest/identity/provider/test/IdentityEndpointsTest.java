@@ -100,8 +100,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users",
-                gson.toJson(this.user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL),
+                "/users/" + this.user.getUserName());
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();

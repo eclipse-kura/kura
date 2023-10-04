@@ -343,7 +343,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                     String valueString = (String) prop.getValue();
                     modifiedProps.put(prop.getKey(), decryptCertificate(valueString, keystoreService));
                 } catch (Exception e) {
-                    logger.error("Enable to decode certificate {} from keystore.", value.toString(), e);
+                    logger.error("Unable to decode certificate {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
             } else if (prop.getKey().contains(privateKeyString)) {
@@ -352,7 +352,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                     String valueString = (String) prop.getValue();
                     modifiedProps.put(prop.getKey(), decryptPrivateKey(valueString, keystoreService));
                 } catch (Exception e) {
-                    logger.error("Enable to decode private key {} from keystore.", value.toString(), e);
+                    logger.error("Unable to decode private key {} from keystore.", value.toString(), e);
                     modifiedProps.put(prop.getKey(), value);
                 }
 

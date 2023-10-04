@@ -178,7 +178,7 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (Exception e) {
-            logger.error("Enable to find or decode Client Certificate", e);
+            logger.error("Unable to find or decode Client Certificate", e);
         }
 
         try {
@@ -186,7 +186,7 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("private-key", new Variant<>(privateKey.getEncoded()));
         } catch (Exception e) {
-            logger.error("Enable to find or decode Private Key", e);
+            logger.error("Unable to find or decode Private Key", e);
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
@@ -214,7 +214,7 @@ public class NMSettingsConverter {
             Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
             settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
         } catch (Exception e) {
-            logger.error("Enable to find or decode CA Certificate", e);
+            logger.error("Unable to find or decode CA Certificate", e);
         }
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,

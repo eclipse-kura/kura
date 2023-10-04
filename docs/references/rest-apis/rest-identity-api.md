@@ -60,7 +60,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 #### Create User
 
-- Description: This method allows to create a new user in the system
+- Description: This method allows to create a new user in the system. The only accepted parameter is the userName.
 - Method: POST
 - API PATH: `services/identity/v1/users/configs`
 
@@ -149,7 +149,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 #### Delete User
 
-- Description: This method allows to delete an existing user in the system
+- Description: This method allows to delete an existing user in the system. The only accepted parameter is the userName.
 - Method: DELETE
 - API PATH: `services/identity/v1/users/configs`
 

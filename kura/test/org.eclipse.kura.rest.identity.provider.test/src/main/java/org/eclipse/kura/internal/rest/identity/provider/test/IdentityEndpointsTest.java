@@ -125,7 +125,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs", gson.toJson(this.userConfigRequest));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);

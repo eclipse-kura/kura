@@ -38,8 +38,6 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 @Path("identity/v1")
 public class IdentityRestService {
 
@@ -57,7 +55,6 @@ public class IdentityRestService {
     private UserAdmin userAdmin;
     private IdentityService identityService;
     private ConfigurationService configurationService;
-    private Gson gson = new Gson();
 
     public void bindCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;

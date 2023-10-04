@@ -70,6 +70,7 @@ public class IdentityServiceTest {
     @Test
     public void shouldUnregisterRequestHandler() throws KuraException {
         givenMockRequestHandlerRegistry();
+        givenBoundRequestHandlerRegistry();
 
         whenUnbindRequestHandlerRegistry();
 
@@ -122,11 +123,11 @@ public class IdentityServiceTest {
     }
 
     private void whenBindRequestHandlerRegistry() {
-        try {
-            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistry);
-        } catch (Exception e) {
-            this.occurredException = e;
-        }
+        bindRequestHandlerRegistry();
+    }
+
+    private void givenBoundRequestHandlerRegistry() {
+        bindRequestHandlerRegistry();
     }
 
     private void whenUnbindRequestHandlerRegistry() {
@@ -165,6 +166,14 @@ public class IdentityServiceTest {
         }
 
         assertNull(errorMessage, this.occurredException);
+    }
+
+    private void bindRequestHandlerRegistry() {
+        try {
+            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistry);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
     }
 
 }

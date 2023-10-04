@@ -35,7 +35,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
-import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigRequestDTO;
+import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
@@ -68,7 +68,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
             IdentityEndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
-    private UserConfigRequestDTO userConfigRequest;
+    private UserConfigDTO userConfigRequest;
 
     private static Set<UserDTO> userConfigs;
 
@@ -144,7 +144,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     private void givenUserConfigRequest(UserDTO... userDTO) {
-        this.userConfigRequest = new UserConfigRequestDTO();
+        this.userConfigRequest = new UserConfigDTO();
         this.userConfigRequest.setUserConfig(new HashSet<>(Arrays.asList(userDTO)));
 
     }

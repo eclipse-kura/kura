@@ -29,7 +29,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigRequestDTO;
+import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
@@ -146,10 +146,12 @@ public class IdentityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/configs")
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<UserDTO> getUserConfig() {
+    public UserConfigDTO getUserConfig() {
         try {
             logger.debug(DEBUG_MESSSAGE, "getUserConfig");
-            return this.identityService.getUserConfig();
+            UserConfigDTO userConfig = new UserConfigDTO();
+            userConfig.setUserConfig(this.identityService.getUserConfig());
+            return userConfig;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -159,10 +161,10 @@ public class IdentityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/configs")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setUserConfig(UserConfigRequestDTO userConfigrRequest) {
+    public Response setUserConfig(UserConfigDTO userConfigRequest) {
         try {
             logger.debug(DEBUG_MESSSAGE, "setUserConfig");
-            Set<UserDTO> userConfig = userConfigrRequest.getUserConfig();
+            Set<UserDTO> userConfig = userConfigRequest.getUserConfig();
 
             for (final UserDTO config : userConfig) {
                 final String newPassword = config.getPassword();

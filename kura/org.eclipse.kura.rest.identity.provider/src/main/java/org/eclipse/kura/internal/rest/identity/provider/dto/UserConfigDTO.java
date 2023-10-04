@@ -15,7 +15,7 @@ package org.eclipse.kura.internal.rest.identity.provider.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-public class UserConfigRequestDTO {
+public class UserConfigDTO {
 
     private Set<UserDTO> userConfig = new HashSet<>();
 

@@ -333,31 +333,33 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             return;
         }
 
-        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-            String clientCertString = String.format("%s.config.802-1x.client-cert-name", interfaceName);
-            String caCertString = String.format("%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
-            String privateKeyString = String.format("%s.config.802-1x.private-key-name", interfaceName);
-            if (prop.getKey().contains(clientCertString) || prop.getKey().contains(caCertString)) {
-                Object value = prop.getValue();
-                try {
-                    String valueString = (String) prop.getValue();
-                    modifiedProps.put(prop.getKey(), decryptCertificate(valueString, keystoreService));
-                } catch (Exception e) {
-                    logger.error("Unable to decode certificate {} from keystore.", value, e);
-                    modifiedProps.put(prop.getKey(), value);
-                }
-            } else if (prop.getKey().contains(privateKeyString)) {
-                Object value = prop.getValue();
-                try {
-                    String valueString = (String) prop.getValue();
-                    modifiedProps.put(prop.getKey(), decryptPrivateKey(valueString, keystoreService));
-                } catch (Exception e) {
-                    logger.error("Unable to decode private key {} from keystore.", value, e);
-                    modifiedProps.put(prop.getKey(), value);
-                }
+        final String clientCertString = String.format("net.interface.%s.config.802-1x.client-cert-name", interfaceName);
+        final String caCertString = String.format("net.interface.%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
+        final String privateKeyString = String.format("net.interface.%s.config.802-1x.private-key-name", interfaceName);
+        final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
 
+        for (String key : keyCertStrings) {
+            if (!modifiedProps.containsKey(key)) {
+                continue;
+            }
+
+            Object value = modifiedProps.get(key);
+            try {
+                String valueString = value.toString();
+                if (isCertificate(key)) {
+                    modifiedProps.put(key, decryptCertificate(valueString, keystoreService));
+                } else {
+                    modifiedProps.put(key, decryptPrivateKey(valueString, keystoreService));
+                }
+            } catch (KuraException e) {
+                logger.error("Unable to decode key/certificate {} from keystore.", key, e);
+                modifiedProps.put(key, value);
             }
         }
+    }
+
+    private boolean isCertificate(String key) {
+        return key.contains("cert");
     }
 
     private Certificate decryptCertificate(String certificateName, KeystoreService keystoreService)

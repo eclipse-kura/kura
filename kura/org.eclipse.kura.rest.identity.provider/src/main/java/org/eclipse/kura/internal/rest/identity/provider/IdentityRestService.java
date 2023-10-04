@@ -20,7 +20,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -116,11 +115,12 @@ public class IdentityRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users/{userName}")
-    public Response deleteUser(@PathParam("userName") final String userName) {
+    @Path("/users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "deleteUser");
-            this.identityService.deleteUser(userName);
+            this.identityService.deleteUser(userName.getUserName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

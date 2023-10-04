@@ -16,11 +16,15 @@ import java.util.Set;
 
 public class UserDTO {
 
-    private final String userName;
-    private final boolean passwordAuthEnabled;
-    private final boolean passwordChangeNeeded;
-    private final Set<String> permissions;
+    private String userName;
+    private boolean passwordAuthEnabled;
+    private boolean passwordChangeNeeded;
+    private Set<String> permissions;
     private String password;
+
+    public UserDTO() {
+
+    }
 
     public UserDTO(final String userName, final Set<String> permissions, final boolean passwordAuthEnabled,
             final boolean passwordChangeNeeded, final String password) {
@@ -43,16 +47,32 @@ public class UserDTO {
         return userName;
     }
 
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public boolean isPasswordAuthEnabled() {
         return passwordAuthEnabled;
+    }
+
+    public void setPasswordAuthEnabled(boolean passwordAuthEnabled) {
+        this.passwordAuthEnabled = passwordAuthEnabled;
     }
 
     public boolean isPasswordChangeNeeded() {
         return passwordChangeNeeded;
     }
 
+    public void setPasswordChangeNeeded(boolean passwordChangeNeeded) {
+        this.passwordChangeNeeded = passwordChangeNeeded;
+    }
+
     public Set<String> getPermissions() {
         return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
     }
 
     public String getPassword() {

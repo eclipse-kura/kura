@@ -168,33 +168,6 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
     }
 
-    // @Test
-    // public void shouldRethrowWebApplicationExceptionOnReloadSecurityPolicyFingerprint() throws KuraException {
-    // givenFailingIdentityService();
-    //
-    // whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/security-policy-fingerprint/reload");
-    //
-    // thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    // }
-    //
-    // @Test
-    // public void shouldRethrowWebApplicationExceptionOnReloadCommandLineFingerprint() throws KuraException {
-    // givenFailingIdentityService();
-    //
-    // whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/command-line-fingerprint/reload");
-    //
-    // thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    // }
-    //
-    // @Test
-    // public void shouldRethrowWebApplicationExceptionOnGetDebugStatus() throws KuraException {
-    // givenFailingIdentityService();
-    //
-    // whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
-    //
-    // thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    // }
-
     @BeforeClass
     public static void setUp() throws Exception {
         createIdentityServiceMock();

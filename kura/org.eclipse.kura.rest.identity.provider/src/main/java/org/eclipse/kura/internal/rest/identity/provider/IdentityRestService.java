@@ -117,7 +117,6 @@ public class IdentityRestService {
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users/{userName}")
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteUser(@PathParam("userName") final String userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "deleteUser");

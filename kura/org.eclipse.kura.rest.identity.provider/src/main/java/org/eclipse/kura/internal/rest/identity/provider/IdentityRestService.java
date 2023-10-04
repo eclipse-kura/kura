@@ -29,6 +29,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
@@ -131,10 +132,10 @@ public class IdentityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/defined-permissions")
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<String> getDefinedPermissions() {
+    public PermissionDTO getDefinedPermissions() {
         try {
             logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
-            return this.identityService.getDefinedPermissions();
+            return new PermissionDTO(this.identityService.getDefinedPermissions());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

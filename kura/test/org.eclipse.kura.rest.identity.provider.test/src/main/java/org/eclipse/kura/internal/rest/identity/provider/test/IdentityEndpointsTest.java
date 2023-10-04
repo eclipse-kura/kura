@@ -112,7 +112,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/defined-permissions");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson("[\"perm1\",\"perm2\"]");
+        thenResponseBodyEqualsJson("{\"permissions\": [\"perm1\",\"perm2\"]}");
     }
 
     @Test

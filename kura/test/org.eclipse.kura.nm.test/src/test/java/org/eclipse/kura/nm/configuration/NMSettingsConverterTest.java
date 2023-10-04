@@ -2858,7 +2858,6 @@ public class NMSettingsConverterTest {
     public void givenMockConnectionWithNullSettings() {
         this.mockedConnection = Mockito.mock(Connection.class);
         Mockito.when(this.mockedConnection.GetSettings()).thenReturn(null);
-
     }
 
     /*

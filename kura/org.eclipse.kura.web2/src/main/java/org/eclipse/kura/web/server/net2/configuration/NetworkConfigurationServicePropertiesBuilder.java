@@ -247,10 +247,11 @@ public class NetworkConfigurationServicePropertiesBuilder {
     }
 
     private void set8021xConfig() {
-        logger.error("setting 802-1x config");
-        if (this.gwtConfig.get8021xConfig() == null) {
+        if (this.gwtConfig.get8021xConfig() == null || !(this.gwtConfig instanceof GwtWifiNetInterfaceConfig)) {
             return;
         }
+
+        logger.info("setting 802-1x config");
 
         if (this.gwtConfig.get8021xConfig().getEap() != null && !this.gwtConfig.get8021xConfig().getEap().isEmpty()) {
             this.properties.set8021xEap(this.ifname, this.gwtConfig.get8021xConfig().getEap());
@@ -270,6 +271,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
                 && !this.gwtConfig.get8021xConfig().getPassword().isEmpty()) {
             this.properties.set8021xPassword(this.ifname, this.gwtConfig.get8021xConfig().getPassword());
         }
+
+        logger.info("DONE - setting 802-1x config");
     }
 
     private void setWifiInfraProperties() {

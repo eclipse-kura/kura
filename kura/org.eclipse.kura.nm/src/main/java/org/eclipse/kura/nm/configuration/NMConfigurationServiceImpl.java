@@ -235,9 +235,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
+            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(modifiedProps)));
+            
             decryptAndConvertPasswordProperties(modifiedProps);
             decryptAndConvertCertificatesProperties(modifiedProps, interfaces);
-            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
 
             writeNetworkConfigurationSettings(modifiedProps);
             writeFirewallNatRules(interfaces, modifiedProps);
@@ -353,9 +354,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             try {
                 String valueString = value.toString();
                 if (isCertificate(key)) {
-                    modifiedProps.put(key, decryptCertificate(valueString, keystoreService));
+                    modifiedProps.put(key, getTrustedCertificateFromKeystore(valueString, keystoreService));
                 } else {
-                    modifiedProps.put(key, decryptPrivateKey(valueString, keystoreService));
+                    modifiedProps.put(key, getTrustedPrivateKeyFromKeystore(valueString, keystoreService));
                 }
             } catch (KuraException e) {
                 logger.error("Unable to decode key/certificate {} from keystore.", key, e);
@@ -368,7 +369,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         return key.contains("cert");
     }
 
-    private Certificate decryptCertificate(String certificateName, KeystoreService keystoreService)
+    private Certificate getTrustedCertificateFromKeystore(String certificateName, KeystoreService keystoreService)
             throws KuraException {
         if (keystoreService.getEntry(certificateName) instanceof TrustedCertificateEntry) {
             TrustedCertificateEntry cert = (TrustedCertificateEntry) keystoreService.getEntry(certificateName);
@@ -382,7 +383,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private PrivateKey decryptPrivateKey(String privateKeyName, KeystoreService keystoreService) throws KuraException {
+    private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService) throws KuraException {
         PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
 
         return key.getPrivateKey();

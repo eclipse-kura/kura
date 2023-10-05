@@ -29,7 +29,7 @@
               bind="bindCryptoService" 
               cardinality="1..1"
               name="CryptoService"
-              policy="static" />/>
+              policy="static" />
 
     <reference interface="org.osgi.service.useradmin.UserAdmin"
                bind="bindUserAdmin"

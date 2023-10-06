@@ -369,18 +369,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         Gwt8021xConfig updated8021xConfig = new Gwt8021xConfig();
 
-<<<<<<< HEAD
-        if (!this.username.getText().isEmpty() && this.username.getText() != null) {
-            updated8021xConfig.setIdentity(this.username.getText());
-        }
-
-        if (!this.password.getText().isEmpty() && this.password.getText() != null) {
-            updated8021xConfig.setPassword(this.password.getText());
-        }
-=======
         updated8021xConfig.setIdentity(this.username.getText());
         updated8021xConfig.setPassword(this.password.getText());
->>>>>>> 8d09bb516 (feat: added extra fields)
 
         if (!this.eap.getSelectedValue().isEmpty() && this.eap.getSelectedValue() != null) {
             updated8021xConfig.setEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
@@ -390,6 +380,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             updated8021xConfig.setInnerAuthEnum(Gwt8021xInnerAuth.valueOf(this.innerAuth.getSelectedValue()));
         }
 
+        updated8021xConfig.setKeystorePid(this.keystorePid.getText());
         updated8021xConfig.setCaCertName(this.caCertName.getText());
         updated8021xConfig.setClientCertName(this.clientCertName.getText());
         updated8021xConfig.setPrivateKeyName(this.privateKeyName.getText());
@@ -418,6 +409,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.username.setValue(config.get8021xConfig().getUsername());
         this.password.setValue(config.get8021xConfig().getPassword());
+        this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
         this.caCertName.setValue(config.get8021xConfig().getCaCertName());
         this.clientCertName.setValue(config.get8021xConfig().getClientCertName());
         this.privateKeyName.setValue(config.get8021xConfig().getPrivateKeyName());

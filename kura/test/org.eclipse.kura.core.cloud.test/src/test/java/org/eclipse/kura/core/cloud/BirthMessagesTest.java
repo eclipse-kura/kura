@@ -123,7 +123,7 @@ public class BirthMessagesTest {
         whenDeactivate();
 
         thenNoExceptionOccurred();
-        thenBirthIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicDisconnectSuffix());
+        thenDisconnectIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicDisconnectSuffix());
     }
 
     @Test
@@ -180,7 +180,7 @@ public class BirthMessagesTest {
         whenOnDisconnecting();
 
         thenNoExceptionOccurred();
-        thenBirthIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicDisconnectSuffix());
+        thenDisconnectIsPublishedImmediately(BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicDisconnectSuffix());
     }
 
     @Test
@@ -400,6 +400,11 @@ public class BirthMessagesTest {
 
     private void thenBirthIsPublishedImmediately(String expectedTopic) throws KuraException {
         verify(this.dataService, timeout(SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(1), eq(false),
+                eq(0));
+    }
+    
+    private void thenDisconnectIsPublishedImmediately(String expectedTopic) throws KuraException {
+        verify(this.dataService, timeout(SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(0), eq(false),
                 eq(0));
     }
 

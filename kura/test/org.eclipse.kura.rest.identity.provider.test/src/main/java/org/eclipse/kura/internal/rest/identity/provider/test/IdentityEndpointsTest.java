@@ -181,7 +181,10 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 .thenReturn(new HashSet<String>(Arrays.asList("perm1", "perm2")));
 
         when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
-        when(identityServiceMock.getUser(user.getUserName())).thenReturn(user);
+
+        if (user != null) {
+            when(identityServiceMock.getUser(user.getUserName())).thenReturn(user);
+        }
     }
 
     @BeforeClass

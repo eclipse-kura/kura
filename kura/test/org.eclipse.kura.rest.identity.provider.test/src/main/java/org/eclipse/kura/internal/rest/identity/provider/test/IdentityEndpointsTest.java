@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
-import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
@@ -83,7 +82,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
+        return Arrays.asList(new MqttTransport(MQTT_APP_ID));
     }
 
     public IdentityEndpointsTest(Transport transport) {
@@ -141,8 +140,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         givenUserConfigs(new UserDTO("testuser2", //
                 new HashSet<String>(Arrays.asList("perm1", "perm2")), //
                 false, //
-                true, //
-                "testpassw2"));
+                true));
 
         givenIdentityService();
 

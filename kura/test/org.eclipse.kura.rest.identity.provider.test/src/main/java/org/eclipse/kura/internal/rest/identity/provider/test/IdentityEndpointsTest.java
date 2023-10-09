@@ -61,7 +61,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static IdentityService identityServiceMock = mock(IdentityService.class);
 
-    private UserDTO user;
+    private static UserDTO user;
 
     private Gson gson = new Gson();
 
@@ -77,7 +77,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static Set<UserDTO> userConfigs;
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "transport={index}")
     public static Collection<Transport> transports() {
         return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
     }
@@ -87,44 +87,43 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldInvokeCreateUserSuccessfully() {
-        givenIdentityService();
-
+    public void shouldInvokeCreateUserSuccessfully() throws KuraException {
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users", gson.toJson(this.user));
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
     }
 
     @Test
-    public void shouldInvokeDeleteUserSuccessfully() {
-        givenIdentityService();
-
+    public void shouldInvokeDeleteUserSuccessfully() throws KuraException {
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users",
-                gson.toJson(this.user));
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
     }
 
     @Test
-    public void shouldReturnUserSuccessfully() {
-        givenIdentityService();
-
+    public void shouldReturnUserSuccessfully() throws KuraException {
         givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET, METHOD_SPEC_GET), "/users", gson.toJson(this.user));
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET, METHOD_SPEC_GET), "/users", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);
     }
 
     @Test
-    public void shouldReturnDefinedPermissions() {
+    public void shouldReturnDefinedPermissions() throws KuraException {
         givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/defined-permissions");
@@ -134,7 +133,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnUserConfig() {
+    public void shouldReturnUserConfig() throws KuraException {
         givenUserConfigs(new UserDTO("testuser2", //
                 new HashSet<String>(Arrays.asList("perm1", "perm2")), //
                 false, //
@@ -161,8 +160,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
     }
 
-    private void givenUser(UserDTO user) {
-        this.user = user;
+    private void givenUser(UserDTO userParam) {
+        user = userParam;
     }
 
     private void givenUserConfigs(UserDTO... userConfigurations) {
@@ -175,13 +174,14 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     }
 
-    private static void givenIdentityService() {
+    private static void givenIdentityService() throws KuraException {
         reset(identityServiceMock);
 
         when(identityServiceMock.getDefinedPermissions())
                 .thenReturn(new HashSet<String>(Arrays.asList("perm1", "perm2")));
 
         when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
+        when(identityServiceMock.getUser(user.getUserName())).thenReturn(user);
     }
 
     @BeforeClass
@@ -190,7 +190,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         registerIdentityServiceMock();
     }
 
-    private static void createIdentityServiceMock() {
+    private static void createIdentityServiceMock() throws KuraException {
         givenIdentityService();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();

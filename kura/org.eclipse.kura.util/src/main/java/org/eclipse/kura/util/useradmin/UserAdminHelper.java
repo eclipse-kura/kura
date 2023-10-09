@@ -89,7 +89,6 @@ public class UserAdminHelper {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void changeUserPassword(final String username, final String userPassword) throws AuthenticationException {
         final User user = getUser(username)
                 .orElseThrow(() -> new AuthenticationException(AuthenticationException.Reason.USER_NOT_FOUND));
@@ -289,6 +288,8 @@ public class UserAdminHelper {
     }
 
     public static class AuthenticationException extends Exception {
+
+        private static final long serialVersionUID = -8534499595655286448L;
 
         public enum Reason {
             USER_NOT_FOUND,

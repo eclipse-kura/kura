@@ -49,7 +49,6 @@ node {
                                 -Dsonar.branch.name=${BRANCH_NAME} \
                                 -Dsonar.branch.target=${CHANGE_TARGET} \
                                 -Dsonar.junit.reportPaths='target/surefire-reports' \
-                                -Dsonar.jacoco.reportPaths='target/jacoco/' \
                                 -Dsonar.java.binaries='target/' \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \

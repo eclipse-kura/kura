@@ -77,7 +77,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static Set<UserDTO> userConfigs;
 
-    @Parameterized.Parameters(name = "transport={index}")
+    @Parameterized.Parameters
     public static Collection<Transport> transports() {
         return Arrays.asList(new RestTransport(REST_APP_ID), new MqttTransport(MQTT_APP_ID));
     }
@@ -100,7 +100,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvokeDeleteUserSuccessfully() throws KuraException {
-        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
+        givenUser(new UserDTO("testuser3", Collections.emptySet(), true, false, "testpassw3"));
 
         givenIdentityService();
 
@@ -184,7 +184,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         if (user != null) {
             when(identityServiceMock.getUser(user.getUserName()))
-                    .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
+                    .thenReturn(new UserDTO("testuser3", Collections.emptySet(), true, false));
         }
     }
 

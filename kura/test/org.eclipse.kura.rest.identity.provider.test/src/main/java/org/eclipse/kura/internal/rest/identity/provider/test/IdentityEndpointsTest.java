@@ -81,7 +81,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static ServiceRegistration<IdentityService> identityServiceRegistration;
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Transport> transports() {
         return Arrays.asList(new MqttTransport(MQTT_APP_ID), new RestTransport(REST_APP_ID));
     }

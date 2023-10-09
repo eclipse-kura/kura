@@ -67,7 +67,7 @@ Identities with `rest.identity` permissions can access these APIs.
 ##### Request
 ```JSON
 {
-    "userName": "example",
+    "userName": "example"
 }
 ```
 
@@ -77,6 +77,32 @@ Identities with `rest.identity` permissions can access these APIs.
 - 500 Internal Server Error
 
 ## GET methods
+
+#### Get User
+
+- Description: This method allows to get data about an user in the system. The only accepted parameter is the userName.
+- Method: GET
+- API PATH: `services/identity/v1/users/configs`
+
+##### Request
+```JSON
+{
+    "userName": "example"
+}
+```
+
+##### Responses
+```JSON
+{
+    "userName": "kura.user.example",
+    "passwordAuthEnabled": false,
+    "passwordChangeNeeded": false,
+    "permissions": []
+}
+```JSON
+
+- 200 OK status
+- 500 Internal Server Error
 
 #### Get defined permissions
 

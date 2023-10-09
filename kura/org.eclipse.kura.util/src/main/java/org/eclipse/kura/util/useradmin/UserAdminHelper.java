@@ -123,7 +123,7 @@ public class UserAdminHelper {
     }
 
     public void createUser(final String userName) {
-        getOrCreateUser(getUserRoleName(userName));
+        getOrCreateUser(userName);
     }
 
     public void deleteUser(final String userName) {

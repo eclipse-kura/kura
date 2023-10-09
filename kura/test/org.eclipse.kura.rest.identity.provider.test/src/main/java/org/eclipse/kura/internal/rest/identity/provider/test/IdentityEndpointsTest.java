@@ -183,7 +183,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
 
         if (user != null) {
-            when(identityServiceMock.getUser(user.getUserName())).thenReturn(user);
+            when(identityServiceMock.getUser(user.getUserName()))
+                    .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
         }
     }
 

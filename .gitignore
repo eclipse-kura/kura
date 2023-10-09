@@ -38,7 +38,3 @@ bin/
 maven.deps
 DEPENDENCIES
 .java-version
-
-# VS Code
-.vscode
-javaConfig.json

@@ -256,7 +256,6 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <destFile>${sonar.jacoco.reportPath}</destFile>
                             <propertyName>jacocoArgs</propertyName>
                         </configuration>
                     </execution>

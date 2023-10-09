@@ -38,11 +38,13 @@ import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -76,6 +78,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private UserConfigDTO userConfigRequest;
 
     private static Set<UserDTO> userConfigs;
+
+    private static ServiceRegistration<IdentityService> identityServiceRegistration;
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -197,14 +201,19 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         registerIdentityServiceMock();
     }
 
+    @AfterClass
+    public static void tearDown() throws Exception {
+        unregisterIdentityServiceMock();
+    }
+
     private static void createIdentityServiceMock() throws KuraException {
         givenIdentityService();
 
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "identityServiceMock");
-        FrameworkUtil.getBundle(IdentityEndpointsTest.class).getBundleContext().registerService(IdentityService.class,
-                identityServiceMock, configurationServiceProperties);
+        identityServiceRegistration = FrameworkUtil.getBundle(IdentityEndpointsTest.class).getBundleContext()
+                .registerService(IdentityService.class, identityServiceMock, configurationServiceProperties);
     }
 
     private static void registerIdentityServiceMock() throws Exception {
@@ -215,6 +224,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
                 .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(IdentityRestService.class.getName(), "?");
         config.update(properties);
+    }
+
+    private static void unregisterIdentityServiceMock() {
+        identityServiceRegistration.unregister();
+
     }
 
 }

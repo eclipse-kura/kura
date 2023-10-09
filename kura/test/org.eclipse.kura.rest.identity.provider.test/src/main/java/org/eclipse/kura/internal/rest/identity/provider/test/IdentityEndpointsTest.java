@@ -100,7 +100,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvokeDeleteUserSuccessfully() throws KuraException {
-        givenUser(new UserDTO("testuser3", Collections.emptySet(), true, false, "testpassw3"));
+        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
 
         givenIdentityService();
 
@@ -112,7 +112,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnUserSuccessfully() throws KuraException {
-        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
+        givenUser(new UserDTO("testuser3", Collections.emptySet(), true, false));
 
         givenIdentityService();
 
@@ -183,8 +183,11 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         when(identityServiceMock.getUserConfig()).thenReturn(userConfigs);
 
         if (user != null) {
-            when(identityServiceMock.getUser(user.getUserName()))
+            when(identityServiceMock.getUser("testuser3"))
                     .thenReturn(new UserDTO("testuser3", Collections.emptySet(), true, false));
+
+            when(identityServiceMock.getUser("testuser"))
+                    .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
         }
     }
 

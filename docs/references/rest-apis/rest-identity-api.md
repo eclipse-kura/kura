@@ -13,7 +13,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows to overwrite the users configuration in the system.
 - Method: POST
-- API PATH: `services/identity/v1/security-policy-fingerprint/reload`
+- API PATH: `services/identity/v1/users/configs`
 
 ##### Request
 ```JSON
@@ -62,7 +62,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows to create a new user in the system. The only accepted parameter is the userName.
 - Method: POST
-- API PATH: `services/identity/v1/users/configs`
+- API PATH: `services/identity/v1/users`
 
 ##### Request
 ```JSON
@@ -82,7 +82,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows to get data about an user in the system. The only accepted parameter is the userName.
 - Method: GET
-- API PATH: `services/identity/v1/users/configs`
+- API PATH: `services/identity/v1/users`
 
 ##### Request
 ```JSON
@@ -99,7 +99,7 @@ Identities with `rest.identity` permissions can access these APIs.
     "passwordChangeNeeded": false,
     "permissions": []
 }
-```JSON
+```
 
 - 200 OK status
 - 500 Internal Server Error
@@ -177,7 +177,7 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows to delete an existing user in the system. The only accepted parameter is the userName.
 - Method: DELETE
-- API PATH: `services/identity/v1/users/configs`
+- API PATH: `services/identity/v1/users`
 
 ##### Request
 ```JSON

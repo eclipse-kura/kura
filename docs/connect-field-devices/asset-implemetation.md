@@ -57,3 +57,46 @@ Driver specific parameters are described in the driver documentation.
 - **emit.errors**: Specifies whether errors should be included or not in the emitted envelope. Default is false.
 - **emit.on.change**: If set to true, this component will include a channel value in the output emitted in Kura Wires only if it is different than the one from the previous read operation or event. Channel errors will always be emitted if **emit.errors** is set to true.
 - **emit.empty.envelopes**: If set to false, this component will not emit empty envelopes. This property can be useful if combined with **emit.on.change**.
+
+## Channels download
+
+The creation of the channels is a process that could be very time and effort consuming. For this reason, once the user has created the desired channels, it is possible to download the entire list from the web UI, by clicking the `Download Channels` button:
+
+![](images/download_upload_webUI.png)
+
+The list is downloaded in csv format and is represented in the form of a table, whose columns represent the entries for the options in the channel definition, while each row is equivalent to a specific channel. For example, the resulting csv file retrieved from downloading the list of channels in the image above is:
+
+![](images/csv_downloaded.png)
+
+The resulting table is composed by some static, pre-defined options (the ones mentioned in Channel Definition section above, from `enabled` to `listen`) that are the same for each component and the ones introduced by the specific bundle under analisys. In this case, the modbus driver introduces these driver-specific options:
+
+- unit.id
+- primary.table
+- memory.address
+- data.order
+- data.type
+- array.data.length
+
+The download tool is extremely useful in all those situations where the user wants to quickly load a long list of channels at once: for example, it can easily clone the same list in multiple assets, export it to another device, or simply save it locally to always have a copy of the channels ready.
+
+## CSV upload
+
+The `Upload Channels` button allows the user to load a local csv file to create the channel list in one shot: the uploading file must implement the same table-structure described in the "Channels download" section above, so with each rows representing a channels, and each column one entry of the channel's options.
+
+Once the user clicks on the button, will be shown a pop-up in which there are a button to locate the file in the user's filesystem and two checkboxes to allow the uploading phase customization. After clicking on `Upload`, if the process is succesful, the new channels list will be shown, and the user is just asked to click on the `Apply` button to save the asset variation.
+
+![](images/csv_upload_popup.png)
+
+### Force import empty string policy
+
+The `Force import empty string policy` checkbox forces the parsing of all empty values present in the csv as empty strings, for all those channel's options that are typed to String and "not required" by the metatype.
+
+So, this box must be checked when the user wants that all *empty values from the csv* are considered as *empty strings* (`""`) when parsed to driver-specific channel option, defined by the metatype as **String type** and **not required**. So, those values that are `null` in the csv, will be set as `""` in the channel options. The user must be cautious, because the framework supposes that it's consciously leaving empty values in the csv.
+
+Otherwise, if the box is unchecked, all the csv empty values will be considered as `null` strings and parsed to the default value set in the metatype of the driver.
+
+If, for example, the user downloads the channels list following the steps described in the precious section, it could upload the same csv file into an other asset, or another device, to get the exactly same asset configuration.
+
+### Replace current channels
+
+The `Replace current channels` must be checked when the user wants to replace **all** the channels currently present in the asset, with the ones that will be created by the csv uploading.

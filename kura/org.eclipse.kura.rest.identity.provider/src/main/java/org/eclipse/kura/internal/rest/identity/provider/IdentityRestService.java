@@ -113,6 +113,20 @@ public class IdentityRestService {
         return Response.ok().build();
     }
 
+    @GET
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/users")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public UserDTO getUser(final UserDTO userName) {
+        try {
+            logger.debug(DEBUG_MESSAGE, "getUser");
+            return this.identityService.getUser(userName.getUserName());
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+    }
+
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/users")

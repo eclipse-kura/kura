@@ -65,8 +65,12 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private Gson gson = new Gson();
 
-    private static final String EXPECTED_GET_USER_RESPONSE = new Scanner(
+    private static final String EXPECTED_GET_USER_CONFIG_RESPONSE = new Scanner(
             IdentityEndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8").useDelimiter("\\A")
+                    .next().replace(" ", "");
+
+    private static final String EXPECTED_GET_USER_RESPONSE = new Scanner(
+            IdentityEndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
     private UserConfigDTO userConfigRequest;
@@ -108,6 +112,19 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnUserSuccessfully() {
+        givenIdentityService();
+
+        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users",
+                gson.toJson(this.user));
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);
+    }
+
+    @Test
     public void shouldReturnDefinedPermissions() {
         givenIdentityService();
 
@@ -130,7 +147,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs");
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);
+        thenResponseBodyEqualsJson(EXPECTED_GET_USER_CONFIG_RESPONSE);
     }
 
     @Test

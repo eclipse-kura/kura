@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -66,6 +67,15 @@ public class IdentityService {
 
     public void deleteUser(String userName) {
         this.userAdminHelper.deleteUser(userName);
+    }
+
+    public UserDTO getUser(String userName) throws KuraException {
+        Optional<User> user = this.userAdminHelper.getUser(userName);
+        if (user.isPresent()) {
+            return initUserConfig(user.get());
+        } else {
+            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userName + " not found");
+        }
     }
 
     public Set<String> getDefinedPermissions() {

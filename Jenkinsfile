@@ -29,11 +29,11 @@ node {
         }
     }
 
-    stage('Archive .deb artifacts') {
-        dir("kura") {
-            archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
-        }
-    }
+    // stage('Archive .deb artifacts') {
+    //     dir("kura") {
+    //         archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+    //     }
+    // }
 
     stage('Sonar') {
         timeout(time: 2, unit: 'HOURS') {

@@ -384,7 +384,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService) throws KuraException {
-        if(!keystoreService.getEntry(privateKeyName) instanceof PrivateKeyEntry) {
+        if (!(keystoreService.getEntry(privateKeyName) instanceof PrivateKeyEntry)) {
              throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     String.format("Private key \"%s\" is not of the expected key type or not found.", privateKeyName));
         }

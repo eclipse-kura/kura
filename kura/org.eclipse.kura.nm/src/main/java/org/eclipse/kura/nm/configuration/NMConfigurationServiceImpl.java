@@ -379,7 +379,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             return cert.getCertificate();
         } else {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    String.format("Certificate %s is not expected key type or not found.", certificateName));
+                    String.format("Certificate \"%s\" is not of the expected key type or not found.", certificateName));
         }
     }
 

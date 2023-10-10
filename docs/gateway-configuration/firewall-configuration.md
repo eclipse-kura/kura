@@ -1,6 +1,6 @@
 # Firewall Configuration
 
-Kura offers easy management of the Linux firewall iptables included in an IoT Gateway. Additionally, Kura provides the ability to manage network access security to an IoT Gateway through the following:
+Kura offers easy management of the Linux firewall iptables and ip6tables included in an IoT Gateway. Additionally, Kura provides the ability to manage network access security to an IoT Gateway for both IPv4 and IPv6 through the following:
 
 - Open Ports (local service rules)
 - Port Forwarding
@@ -8,6 +8,7 @@ Kura offers easy management of the Linux firewall iptables included in an IoT Ga
 - 'Automatic' NAT service rules
 
 Open Ports, Port Forwarding, and IP Forwarding and Masquerading are configured via respective **Firewall** configuration tabs. 'Automatic' NAT is enabled for each local (LAN) interface using the **DHCP & NAT** tab of the respective interface configuration.
+While the IPv4 Firewall configuration capability is present on all IoT Gateways, the IPv6 Firewall is present only on devices that support IPv6 Networking.
 
 ## Firewall Linux Configuration
 
@@ -35,13 +36,15 @@ iptables -t nat -I postrouting-kura -j postrouting-kura-pf
 iptables -t nat -I postrouting-kura -j postrouting-kura-ipf
 ```
 
+The same custom chains are used in the IPv6 case.
+
 Even if many firewall rules can be handled by Kura, it could be that some rules cannot be filled through the Web Console. In this case, custom firewall rules may be added to the /etc/init.d/firewall_cust script manually. These rules are applied/reapplied every time the **firewall** service starts, that is at the gateway startup. These custom rules should **not** be applied to the Kura custom chains, but to the standard ones.
 
 ## Open Ports
 
-If Kura is running on a gateway, all TCP/UDP ports are closed by default unless they are listed in the **Open Ports** tab of the **Firewall** section in the Gateway Administration Console, or in the `/etc/sysconfig/iptables` script. Therefore, if a user needs to connect to a specific port on a gateway, it is insufficient to have an application listening on the desired port; the port also needs to be opened in the firewall.
+If Kura is running on a gateway, all TCP/UDP ports are closed by default unless they are listed in the **Open Ports IPv4** or **Open Ports IPv6** tab of the **Firewall** section in the Gateway Administration Console, or in the `/etc/sysconfig/iptables` script. Therefore, if a user needs to connect to a specific port on a gateway, it is insufficient to have an application listening on the desired port; the port also needs to be opened in the firewall.
 
-To open a port using the Gateway Administration Console, select the **Firewall** option located in the **System** area. The **Firewall** configuration display appears in the main window. With the **Open Ports** tab selected, click the **New** button. The **New Open Port Entry** form appears.
+To open a port using the Gateway Administration Console, select the **Firewall** option located in the **System** area. The **Firewall** configuration display appears in the main window. With the **Open Ports IPv4** or **Open Ports IPV6** tab selected, click the **New** button. The **New Open Port Entry** form appears.
 
 The **New Open Port Entry** form contains the following configuration parameters:
 
@@ -55,7 +58,7 @@ The **New Open Port Entry** form contains the following configuration parameters
 
 Complete the **New Open Port Entry** form and click the **Submit** button when finished. Once the form is submitted, a new port entry will appear. Click the **Apply** button for the change to take effect.
 
-The firewall rules related to the open ports section are stored in the *input-kura* custom chain of the filter table.
+The firewall rules related to the open ports section are stored in the *input-kura* custom chain of the IPv4/IPv6 filter table.
 
 ![Firewall Open Ports](./images/firewall-open-ports.png)
 
@@ -63,7 +66,7 @@ The firewall rules related to the open ports section are stored in the *input-ku
 
 Port forwarding rules are needed to establish connectivity from the WAN side to a specific port on a host that resides on a LAN behind the gateway. In this case, a routing solution may be avoided since the connection is made to a specified _external_ port on a gateway, and packets are forwarded to an _internal_ port on the destination host; therefore, it is not necessary to add the _external_ port to the list of open ports.
 
-To add a port forwarding rule, select the **Port Forwarding** tab on the **Firewall** display and click the **New** button. The **Port Forward Entry** form appears.
+To add a port forwarding rule, select the **Port Forwarding IPv4** or **Port Forwarding IPv6** tab on the **Firewall** display and click the **New** button. The **Port Forward Entry** form appears.
 
 The **Port Forward Entry** form contains the following configuration parameters:
 
@@ -89,11 +92,11 @@ The **Port Forward Entry** form contains the following configuration parameters:
 
 Complete the **Port Forward Entry** form and click the **Apply** button for the desired port forwarding rules to take effect.
 
-The firewall rules related to the port forwarding section are stored in the *forward-kura-pf* custom chain of the filter table and in the *postrouting-kura-pf* and *prerouting-kura-pf* chains of the nat table.
+The firewall rules related to the port forwarding section are stored in the *forward-kura-pf* custom chain of the IPv4/IPv6 filter table and in the *postrouting-kura-pf* and *prerouting-kura-pf* chains of the IPv4/IPv6  nat table.
 
 ### Port Forwarding example
 
-This section describes an example of port forwarding rules. The initial setup is described below.
+This section describes an example of port forwarding rules applied to the IPv4 case. The initial setup is described below.
 
 - A couple of RaspberryPi that shares the same LAN over Ethernet.
 
@@ -153,7 +156,7 @@ Another way to connect to the Kura Gateway Administration Console on the first R
 
 ## IP Forwarding/Masquerading
 
-The advantage of the _Automatic NAT_ method is its simplicity. However, this approach does not handle reverse NATing, and it cannot be used for interfaces that are not listed in the Gateway Administration Console (such as VPN tun0 interface). To set up generic (one-to-many) NATing, select the **IP Forwarding/Masquerading** tab on the **Firewall** display. The **IP Forwarding/Masquerading** form appears.
+The advantage of the _Automatic NAT_ method is its simplicity. However, this approach does not handle reverse NATing, and it cannot be used for interfaces that are not listed in the Gateway Administration Console (such as VPN tun0 interface). To set up generic (one-to-many) NATing, select the **IP Forwarding/Masquerading IPv4** or **IP Forwarding/Masquerading IPv6** tab on the **Firewall** display. Press the **New** button and the **IP Forwarding/Masquerading** form appears.
 
 The **IP Forwarding/Masquerading** form contains the following configuration parameters:
 
@@ -163,13 +166,13 @@ The **IP Forwarding/Masquerading** form contains the following configuration par
 
 - **Protocol**: defines the protocol of the rule to check (all, tcp, or udp). (Required field).
 
-- **Source Network/Host**: identifies the source network or host name (CIDR notation). Set to 0.0.0.0/0 if empty.
+- **Source Network/Host**: identifies the source network or host name (CIDR notation). Set to IPv4 0.0.0.0/0 or IPv6 ::/0 if empty.
 
-- **Destination Network/Host**: identifies the destination network or host name (CIDR notation). Set to 0.0.0.0/0 if empty.
+- **Destination Network/Host**: identifies the destination network or host name (CIDR notation). Set to IPv4 0.0.0.0/0 or IPv6 ::/0 if empty.
 
 - **Enable Masquerading**: defines whether masquerading is used (yes or no). If set to 'yes', masquerading is enabled. If set to 'no', only FORWARDING rules are be added. (Required field).
 
-The rules will be added to the *forward-kura-ipf* chain in the filter table and in the *postrouting-kura-ipf* one in the nat table.
+The rules will be added to the *forward-kura-ipf* chain in the IPv4/IPv6 filter table and in the *postrouting-kura-ipf* one in the IPv4/IPv6 nat table.
 
 As a use-case scenario, consider the same setup as in port forwarding, but with cellular interface disabled and eth1 interface configured as WAN/DHCP client. In this case, the interfaces of the gateway are configured as follows:
 

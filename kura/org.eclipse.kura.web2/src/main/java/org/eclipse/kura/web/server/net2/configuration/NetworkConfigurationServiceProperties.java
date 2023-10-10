@@ -146,8 +146,9 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname), dnsServers);
     }
     
-    public int getIp4Mtu(String ifName) {
-    	return (Integer) properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), 0);
+    public Optional<Integer> getIp4Mtu(String ifName) {
+    	return Optional.ofNullable(
+                (Integer) properties.get(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName)));
     }
 
     public void setIp4Mtu(String ifName, int mtu) {

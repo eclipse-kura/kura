@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class NetworkConfigurationServicePropertiesBuilder {
 
     private static final Integer DEFAULT_WAN_PRIORITY = -1;
+    private static final Integer DEFAULT_MTU = 0;
 
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
@@ -114,7 +115,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
         }
         
-        this.properties.setIp4Mtu(this.ifname, this.gwtConfig.getMtu());
+        this.properties.setIp4Mtu(this.ifname, Objects.nonNull(this.gwtConfig.getMtu()) ? 
+        		this.gwtConfig.getMtu() : DEFAULT_MTU);
     }
 
     private void setIpv6Properties() {
@@ -155,9 +157,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
         }
         
-        if(Objects.nonNull(this.gwtConfig.getIpv6Mtu())) {
-        	this.properties.setIp6Mtu(this.ifname, this.gwtConfig.getIpv6Mtu());
-        }
+        this.properties.setIp6Mtu(this.ifname, Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? 
+                this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
     }
 
     private void setIpv4DhcpClientProperties() {

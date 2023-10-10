@@ -306,8 +306,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             }
             if (this.mtu.getValue() != null) {
                 updatedNetIf.setMtu(this.mtu.getValue());
-            } else {
-                updatedNetIf.setMtu(0);
             }
         }
     }

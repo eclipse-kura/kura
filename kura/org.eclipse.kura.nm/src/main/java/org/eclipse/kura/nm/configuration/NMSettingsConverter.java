@@ -64,6 +64,7 @@ public class NMSettingsConverter {
 
     private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
+    private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -383,7 +384,15 @@ public class NMSettingsConverter {
         }
 
         Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
-        //ipv6.mtu only supported in networkManager 1.40 and above
+        mtu.ifPresent(value -> {
+            if (nmVersion.isGreaterEqualThan("1.40")) {
+                //ipv6.mtu only supported in networkManager 1.40 and above
+                settings.put("mtu", new Variant<>(new UInt32(value)));
+            } else {
+                logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
+            }
+        });
+        
         if (nmVersion.isGreaterEqualThan("1.40")) {
             mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         } else {
@@ -416,7 +425,8 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
         hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
-        settings.put("mtu", new Variant<>(getIp4MtuFromProperties(props, deviceId)));
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         
         return settings;
     }
@@ -511,7 +521,8 @@ public class NMSettingsConverter {
         Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", deviceId);
         number.ifPresent(numberString -> settings.put("number", new Variant<>(numberString)));
 
-        settings.put("mtu", new Variant<>(getIp4MtuFromProperties(props, deviceId)));
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         
         return settings;
     }
@@ -553,8 +564,8 @@ public class NMSettingsConverter {
     
     public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
-        Integer mtu = getIp4MtuFromProperties(props, deviceId);
-        settings.put("mtu", new Variant<>(new UInt32(mtu)));
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         return settings;        
     }
 
@@ -749,11 +760,6 @@ public class NMSettingsConverter {
             throw new IllegalArgumentException(String
                     .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
-    }
-    
-    private static Integer getIp4MtuFromProperties(NetworkProperties properties, String deviceId) {
-        Optional<Integer> mtu = properties.getOpt(Integer.class, "net.interface.%s.config.ip4.mtu", deviceId);
-        return mtu.orElse(0);
     }
 
 }

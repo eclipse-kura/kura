@@ -358,7 +358,9 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
-            setHelpText(MSGS.netIPv6ToolTipMtu());
+            if (this.mtu.isEnabled()) {
+                setHelpText(MSGS.netIPv6ToolTipMtu());
+            }
         });
         this.mtu.addMouseOutHandler(event -> resetHelpText());
 

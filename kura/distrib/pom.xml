@@ -610,6 +610,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.packages.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.packages.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.position.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.position.provider.version}</version>
                                 </artifactItem>
@@ -820,6 +825,7 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.inventory.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.command.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.command.provider_${org.eclipse.kura.rest.command.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.packages.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.packages.provider_${org.eclipse.kura.rest.packages.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.position.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.position.provider_${org.eclipse.kura.rest.position.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.security.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.security.provider_${org.eclipse.kura.rest.security.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.service.listing.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.service.listing.provider_${org.eclipse.kura.rest.service.listing.provider.version}.jar" />
@@ -2535,6 +2541,7 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.command.provider_${org.eclipse.kura.rest.command.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.packages.provider_${org.eclipse.kura.rest.packages.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.position.provider_${org.eclipse.kura.rest.position.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.security.provider_${org.eclipse.kura.rest.security.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.service.listing.provider_${org.eclipse.kura.rest.service.listing.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />

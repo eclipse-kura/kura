@@ -341,7 +341,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
 
         final String clientCertString = String.format("net.interface.%s.config.802-1x.client-cert-name", interfaceName);
-        final String caCertString = String.format("net.interface.%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
+        final String caCertString = String.format("net.interface.%s.config.802-1x.ca-cert-name", interfaceName);
         final String privateKeyString = String.format("net.interface.%s.config.802-1x.private-key-name", interfaceName);
         final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
 

@@ -61,8 +61,13 @@ public class IdentityService {
         this.userAdminHelper = new UserAdminHelper(userAdmin, cryptoService);
     }
 
-    public void createUser(String userName) {
-        this.userAdminHelper.createUser(userName);
+    public void createUser(UserDTO user) throws KuraException {
+        if (!this.userAdminHelper.getUser(user.getUserName()).isPresent()) {
+            this.userAdminHelper.createUser(user.getUserName());
+            this.updateUser(user);
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "user " + user.getUserName() + " already exists");
+        }
     }
 
     public void deleteUser(String userName) {
@@ -147,35 +152,27 @@ public class IdentityService {
         }
     }
 
-    public void setUserConfig(Set<UserDTO> userData) throws KuraException {
-        this.userAdminHelper.foreachUser((name, user) -> {
-            if (userData.stream().noneMatch(data -> data.getUserName().equals(name))) {
-                deleteUser(name);
-            }
-        });
+    public void updateUser(UserDTO userDTO) throws KuraException {
 
-        this.userAdminHelper.foreachPermission((permissionName, permissionGroup) -> {
-            for (final UserDTO data : userData) {
+        final Optional<User> user = this.userAdminHelper.getUser(userDTO.getUserName());
 
-                final User user = this.userAdminHelper.getOrCreateUser(data.getUserName());
+        if (user.isPresent()) {
+            this.userAdminHelper.foreachPermission((permissionName, permissionGroup) -> {
 
-                if (data.getPermissions() != null && data.getPermissions().contains(permissionName)) {
-                    permissionGroup.addMember(user);
+                if (userDTO.getPermissions() != null && userDTO.getPermissions().contains(permissionName)) {
+                    permissionGroup.addMember(user.get());
                 } else {
-                    permissionGroup.removeMember(user);
+                    permissionGroup.removeMember(user.get());
                 }
-            }
-        });
+            });
 
-        for (final UserDTO config : userData) {
-            final User user = this.userAdminHelper.getOrCreateUser(config.getUserName());
+            final Dictionary<String, Object> credentials = user.get().getCredentials();
 
-            final Dictionary<String, Object> credentials = user.getCredentials();
-
-            if (config.isPasswordAuthEnabled()) {
-                final String password = config.getPassword();
+            if (userDTO.isPasswordAuthEnabled()) {
+                final String password = userDTO.getPassword();
 
                 if (password != null) {
+                    this.validateUserPassword(password);
                     try {
                         credentials.put(PASSWORD_PROPERTY, this.cryptoService.sha256Hash(password));
                     } catch (final Exception e) {
@@ -186,13 +183,15 @@ public class IdentityService {
                 credentials.remove(PASSWORD_PROPERTY);
             }
 
-            final Dictionary<String, Object> properties = user.getProperties();
+            final Dictionary<String, Object> properties = user.get().getProperties();
 
-            if (config.isPasswordChangeNeeded()) {
+            if (userDTO.isPasswordChangeNeeded()) {
                 properties.put(KURA_NEED_PASSWORD_CHANGE, "true");
             } else {
                 properties.remove(KURA_NEED_PASSWORD_CHANGE);
             }
+        } else {
+            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userDTO.getUserName() + " not found");
         }
 
     }

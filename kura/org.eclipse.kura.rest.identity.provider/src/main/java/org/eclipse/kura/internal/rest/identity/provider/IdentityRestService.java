@@ -12,19 +12,17 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
-import java.util.Set;
-
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -100,12 +98,12 @@ public class IdentityRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users")
+    @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "createUser");
-            this.identityService.createUser(userName.getUserName());
+            this.identityService.createUser(userName);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -113,9 +111,24 @@ public class IdentityRestService {
         return Response.ok().build();
     }
 
-    @GET
+    @PUT
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users")
+    @Path("/identities")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateUser(final UserDTO user) {
+        try {
+            logger.debug(DEBUG_MESSAGE, "updateUser");
+            this.identityService.updateUser(user);
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+        return Response.ok().build();
+    }
+
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/identities/byName")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO getUser(final UserDTO userName) {
@@ -130,7 +143,7 @@ public class IdentityRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users")
+    @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteUser(final UserDTO userName) {
         try {
@@ -158,7 +171,7 @@ public class IdentityRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users/configs")
+    @Path("/identities")
     @Produces(MediaType.APPLICATION_JSON)
     public UserConfigDTO getUserConfig() {
         try {
@@ -169,30 +182,6 @@ public class IdentityRestService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-    }
-
-    @POST
-    @RolesAllowed(REST_ROLE_NAME)
-    @Path("/users/configs")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response setUserConfig(UserConfigDTO userConfigRequest) {
-        try {
-            logger.debug(DEBUG_MESSAGE, "setUserConfig");
-            Set<UserDTO> userConfig = userConfigRequest.getUserConfig();
-
-            for (final UserDTO config : userConfig) {
-                final String newPassword = config.getPassword();
-
-                if (newPassword != null) {
-                    this.identityService.validateUserPassword(newPassword);
-                }
-            }
-            this.identityService.setUserConfig(userConfig);
-        } catch (KuraException e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
-        }
-
-        return Response.ok().build();
     }
 
 }

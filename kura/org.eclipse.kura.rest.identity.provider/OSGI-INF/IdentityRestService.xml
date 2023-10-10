@@ -23,26 +23,31 @@
                unbind="unbindRequestHandlerRegistry"
                cardinality="0..n"
                name="RequestHandlerRegistry"
-               policy="dynamic"/>
+               policy="dynamic" />
 
-   <reference interface="org.eclipse.kura.crypto.CryptoService" 
-              bind="bindCryptoService" 
-              cardinality="1..1"
-              name="CryptoService"
-              policy="static" />
+    <reference interface="org.eclipse.kura.crypto.CryptoService" 
+               bind="bindCryptoService" 
+               cardinality="1..1"
+               name="CryptoService"
+               policy="static" />
+              
+    <reference interface="org.eclipse.kura.configuration.ConfigurationService"
+                bind="bindConfigurationService"
+                cardinality="1..1"
+                name="ConfigurationService" 
+                policy="static" />
 
     <reference interface="org.osgi.service.useradmin.UserAdmin"
                bind="bindUserAdmin"
                cardinality="1..1"
                name="UserAdmin"
-               policy="static"/>
+               policy="static" />
                
-   <reference interface="org.eclipse.kura.internal.rest.identity.provider.IdentityService" 
+    <reference interface="org.eclipse.kura.internal.rest.identity.provider.IdentityService" 
                bind="bindIdentityService" 
                cardinality="0..1"  
                name="IdentityService" 
-               policy="static"
-               policy-option="greedy" />
+               policy="static" />
 
     <service>
         <provide interface="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
@@ -50,6 +55,6 @@
 
     <property name="service.pid"
               type="String"
-              value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
+              value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService" />
 
 </scr:component>

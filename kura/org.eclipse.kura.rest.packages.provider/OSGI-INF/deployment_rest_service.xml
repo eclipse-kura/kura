@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+	SPDX-License-Identifier: EPL-2.0
+
+	Contributors:
+	 Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.rest.deployment.agent.DeploymentRestService">
+   <implementation class="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"/>
+   <property name="kura.service.pid" type="String" value="org.eclipse.kura.rest.deployment.agent.DeploymentRestService"/>
+   <service>
+      <provide interface="org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService"/>
+   </service>
+   <reference name="DeploymentAgentService"
+       cardinality="1..1"
+       interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"
+       bind="setDeploymentAgentService"
+       policy="static"/>
+   <reference name="DeploymentAdmin"
+       cardinality="1..1"
+       interface="org.osgi.service.deploymentadmin.DeploymentAdmin"
+       bind="setDeploymentAdmin"
+       policy="static"/>
+   <reference name="UserAdmin"
+       cardinality="0..1"
+       interface="org.osgi.service.useradmin.UserAdmin"
+       bind="setUserAdmin"
+       policy="static"/>
+</scr:component>

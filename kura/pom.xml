@@ -110,6 +110,7 @@
         <module>org.eclipse.kura.rest.configuration.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.command.provider</module>
+        <module>org.eclipse.kura.rest.packages.provider</module>
         <module>org.eclipse.kura.rest.position.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>

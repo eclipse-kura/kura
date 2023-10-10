@@ -366,7 +366,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private boolean isCertificate(String key) {
-        return key.contains("cert");
+        return key.contains("802-1x.client-cert-name") || key.contains("802-1x.ca-cert-name");
     }
 
     private Certificate getTrustedCertificateFromKeystore(String certificateName, KeystoreService keystoreService)

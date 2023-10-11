@@ -48,15 +48,15 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private static final Logger logger = Logger.getLogger(Tab8021xUi.class.getSimpleName());
+    private static final String PASSWORD_PLACEHOLDER = "Password-Placeholder-123";
 
     interface Tab8021xUiUiBinder extends UiBinder<Widget, Tab8021xUi> {
     }
 
-    private final GwtSession currentSession;
     private final NetworkTabsUi netTabs;
 
     Gwt8021xConfig activeConfig;
+    GwtSession currentSession;
 
     private boolean dirty;
 
@@ -146,6 +146,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @UiField
     ScrollPanel helpText;
+
+    private boolean no8021xPasswordInSnapshot = false;
 
     public Tab8021xUi(GwtSession currentSession, NetworkTabsUi tabs) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -293,7 +295,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
 
         this.caCertName.addBlurHandler(e -> this.caCertName.validate());
-        this.caCertName.setAllowBlank(false);
+        this.caCertName.setAllowBlank(true);
         this.caCertName.addMouseOutHandler(event -> resetHelpText());
 
         this.caCertName.addChangeHandler(event -> {
@@ -348,9 +350,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             }
         }
 
-        this.password.setText("");
-        this.username.setText("");
-
         update();
     }
 
@@ -369,9 +368,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
                 break;
             }
         }
-
-        this.username.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getUsername()));
-        this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getPassword()));
     }
 
     private boolean checkPassword() {
@@ -431,7 +427,10 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         Gwt8021xConfig updated8021xConfig = new Gwt8021xConfig();
 
         updated8021xConfig.setIdentity(this.username.getText());
-        updated8021xConfig.setPassword(this.password.getText());
+
+        if (!(this.password.getText().equals(PASSWORD_PLACEHOLDER) && no8021xPasswordInSnapshot)) {
+            updated8021xConfig.setPassword(this.password.getText());
+        }
 
         if (!this.eap.getSelectedValue().isEmpty() && this.eap.getSelectedValue() != null) {
             updated8021xConfig.setEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
@@ -470,6 +469,15 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.username.setValue(config.get8021xConfig().getUsername());
         this.password.setValue(config.get8021xConfig().getPassword());
+
+        if (this.activeConfig.getPassword().isEmpty()
+                || GwtSafeHtmlUtils.htmlUnescape(PASSWORD_PLACEHOLDER).isEmpty()) {
+            this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(PASSWORD_PLACEHOLDER));
+            no8021xPasswordInSnapshot = true;
+        } else {
+            this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getPassword()));
+        }
+
         this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
         this.caCertName.setValue(config.get8021xConfig().getCaCertName());
         this.clientCertName.setValue(config.get8021xConfig().getClientCertName());

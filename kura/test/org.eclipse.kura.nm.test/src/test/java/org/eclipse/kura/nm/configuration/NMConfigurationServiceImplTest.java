@@ -164,6 +164,7 @@ public class NMConfigurationServiceImplTest {
     @Test
     public void shouldStartConfigWriterIfEnterpriseWifi() throws KuraException {
         givenNetworkConfigurationService();
+        givenEnterpriseWifiKeystore();
         givenFullProperties();
         givenWifiEnterprisePropertiesForInterfaceWlp2s0();
 

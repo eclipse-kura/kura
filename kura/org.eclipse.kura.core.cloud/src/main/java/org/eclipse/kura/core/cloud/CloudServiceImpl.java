@@ -712,9 +712,7 @@ public class CloudServiceImpl
     public void onMessagePublished(int messageId, String topic) {
         synchronized (this.messageId) {
             if (this.messageId.get() != -1 && this.messageId.get() == messageId) {
-                if (CloudServiceOptions.getLifeCycleMessageQos() == 0) {
-                    this.messageId.set(-1);
-                }
+                this.messageId.set(-1);
                 this.messageId.notifyAll();
                 return;
             }
@@ -885,7 +883,7 @@ public class CloudServiceImpl
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
             int id = this.dataService.publish(message.getTopic(), encodedPayload,
-                    CloudServiceOptions.getLifeCycleMessageQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
+                    message.getQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
                     CloudServiceOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
             try {

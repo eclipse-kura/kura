@@ -540,9 +540,9 @@ public class NMSettingsConverter {
         settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
         DBusListType listType = new DBusListType(String.class);
         Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
-        settings.put("ingress-priority-map", new Variant<>(ingressMap.orElse(new ArrayList<String>()), listType));
+        settings.put("ingress-priority-map", new Variant<>(ingressMap.orElse(new ArrayList<>()), listType));
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
-        settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<String>()), listType));
+        settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<>()), listType));
         return settings;
     }
 

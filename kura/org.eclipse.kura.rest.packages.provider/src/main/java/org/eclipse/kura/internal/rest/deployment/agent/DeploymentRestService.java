@@ -14,11 +14,17 @@ package org.eclipse.kura.internal.rest.deployment.agent;
 
 import static org.eclipse.kura.rest.deployment.agent.api.Validable.validate;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -38,9 +44,13 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/deploy/v2")
 public class DeploymentRestService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DeploymentRestService.class);
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";
     private static final String ERROR_INSTALLING_PACKAGE = "Error installing deployment package: ";

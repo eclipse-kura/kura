@@ -192,9 +192,7 @@ public class NMSettingsConverter {
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.private-key-password", deviceId);
 
-        privateKeyPassword.ifPresent(value -> {
-            settings.put("private-key-password", new Variant<>(value.toString()));
-        });
+        privateKeyPassword.ifPresent(value -> settings.put("private-key-password", new Variant<>(value.toString())));
 
         settings.put("private-key-password-flags", new Variant<>(new UInt32(4)));
 
@@ -206,9 +204,7 @@ public class NMSettingsConverter {
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
 
-        anonymousIdentity.ifPresent(value -> {
-            settings.put("anonymous-identity", new Variant<>(value));
-        });
+        anonymousIdentity.ifPresent(value -> settings.put("anonymous-identity", new Variant<>(value)));
 
         try {
             Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
@@ -220,9 +216,7 @@ public class NMSettingsConverter {
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
 
-        caCertPassword.ifPresent(value -> {
-            settings.put("ca-cert-password", new Variant<>(value.toString()));
-        });
+        caCertPassword.ifPresent(value -> settings.put("ca-cert-password", new Variant<>(value.toString())));
     }
 
     private static void create8021xMschapV2(NetworkProperties props, String deviceId,

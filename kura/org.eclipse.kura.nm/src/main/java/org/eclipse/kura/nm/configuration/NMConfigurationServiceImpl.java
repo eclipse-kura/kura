@@ -140,7 +140,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
     public void unsetKeystoreService(KeystoreService keystoreService, Map<String, Object> properties) {
         if (this.keystoreServices.containsValue(keystoreService)) {
-            this.keystoreServices.remove((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
+            this.keystoreServices.remove(properties.get(ConfigurationService.KURA_SERVICE_PID));
         }
     }
 
@@ -235,8 +235,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
-            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(new HashMap<>(modifiedProps)));
-            
+            this.networkProperties = new NetworkProperties(
+                    discardModifiedNetworkInterfaces(new HashMap<>(modifiedProps)));
+
             decryptAndConvertPasswordProperties(modifiedProps);
             decryptAndConvertCertificatesProperties(modifiedProps, interfaces);
 
@@ -319,12 +320,12 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         interfaces.forEach(interfaceName -> {
             String key = String.format("net.interface.%s.config.802-1x.keystore.pid", interfaceName);
             if (modifiedProps.containsKey(key)) {
-                
+
                 Object prop = modifiedProps.get(key);
 
                 if (prop instanceof String) {
                     String keystorePid = (String) prop;
-    
+
                     findAndDecodeCertificatesForInterface(interfaceName, modifiedProps,
                             this.keystoreServices.get(keystorePid));
                 }
@@ -383,12 +384,13 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
     }
 
-    private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService) throws KuraException {
+    private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService)
+            throws KuraException {
         if (!(keystoreService.getEntry(privateKeyName) instanceof PrivateKeyEntry)) {
-             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     String.format("Private key \"%s\" is not of the expected key type or not found.", privateKeyName));
         }
-        
+
         PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
         return key.getPrivateKey();
     }

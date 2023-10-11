@@ -137,7 +137,7 @@ public class NMDbusConnector {
         }
     }
 
-    public void checkVersion() throws DBusException {
+    public void checkVersion() {
         NMVersion nmVersion = this.networkManager.getVersion();
         logger.debug("NM Version: {}", nmVersion);
     }

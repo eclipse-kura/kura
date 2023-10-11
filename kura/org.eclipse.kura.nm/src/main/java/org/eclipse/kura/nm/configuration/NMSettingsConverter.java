@@ -53,6 +53,7 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
     private static final String NM_SETTINGS_IPV4_IGNORE_AUTO_DNS = "ignore-auto-dns";
     private static final String NM_SETTINGS_IPV6_IGNORE_AUTO_DNS = "ignore-auto-dns";
+    private static final String NM_SETTINGS_ETHERNET = "802-3-ethernet";
 
     private static final String PPP_REFUSE_EAP = "refuse-eap";
     private static final String PPP_REFUSE_CHAP = "refuse-chap";
@@ -112,10 +113,10 @@ public class NMSettingsConverter {
             Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
             Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
             newConnectionSettings.put("vlan", vlanSettingsMap);
-            newConnectionSettings.put("802-3-ethernet", ethSettingsMap);
+            newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
             Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
-            newConnectionSettings.put("802-3-ethernet", ethSettingsMap);
+            newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         }
 
         return newConnectionSettings;
@@ -383,17 +384,9 @@ public class NMSettingsConverter {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
         }
 
-        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
-        mtu.ifPresent(value -> {
-            if (nmVersion.isGreaterEqualThan("1.40")) {
-                //ipv6.mtu only supported in networkManager 1.40 and above
-                settings.put("mtu", new Variant<>(new UInt32(value)));
-            } else {
-                logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
-            }
-        });
-        
+        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);        
         if (nmVersion.isGreaterEqualThan("1.40")) {
+            //ipv6.mtu only supported in NetworkManager 1.40 and above
             mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         } else {
             logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");

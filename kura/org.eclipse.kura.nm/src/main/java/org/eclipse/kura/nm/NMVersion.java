@@ -90,7 +90,7 @@ public class NMVersion implements Comparable<NMVersion> {
 
     private static int[] splitAndPad(String version, int expectedElements) {
         int[] toReturn = new int[expectedElements];
-        String[] tmp = version.split("\\.|-");
+        String[] tmp = version.split("[\\.-]");
         int i = 0;
         for (; i < tmp.length && i < expectedElements; i++) {
             toReturn[i] = parseElementAsInt(tmp[i]);

@@ -51,12 +51,10 @@ public class NetworkManagerDbusWrapper {
         this.networkManager = dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
         Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
         String strVer = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
-        logger.info("--REMOVEME: nmver from props {}", strVer);
         this.version = NMVersion.parse(strVer);
-        logger.info("--REMOVEME: nmver parsed {}", this.version.toString());
     }
 
-    protected NMVersion getVersion() throws DBusException {
+    protected NMVersion getVersion() {
         return this.version;
     }
 

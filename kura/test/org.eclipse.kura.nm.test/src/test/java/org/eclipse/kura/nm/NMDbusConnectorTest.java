@@ -1424,11 +1424,7 @@ public class NMDbusConnectorTest {
     }
 
     private void whenCheckVersionIsRun() {
-        try {
-            this.instanceNMDbusConnector.checkVersion();
-        } catch (DBusException e) {
-            this.hasDBusExceptionBeenThrown = true;
-        }
+        this.instanceNMDbusConnector.checkVersion();
     }
 
     private void whenGetInterfaceIdsIsCalled() {

@@ -1617,6 +1617,40 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#channels-download" class="md-nav__link">
+    Channels download
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#csv-upload" class="md-nav__link">
+    CSV upload
+  </a>
+  
+    <nav class="md-nav" aria-label="CSV upload">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#force-import-empty-string-policy" class="md-nav__link">
+    Force import empty string policy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace-current-channels" class="md-nav__link">
+    Replace current channels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3031,6 +3065,40 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#channels-download" class="md-nav__link">
+    Channels download
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#csv-upload" class="md-nav__link">
+    CSV upload
+  </a>
+  
+    <nav class="md-nav" aria-label="CSV upload">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#force-import-empty-string-policy" class="md-nav__link">
+    Force import empty string policy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace-current-channels" class="md-nav__link">
+    Replace current channels
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3153,6 +3221,32 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>emit.on.change</strong>: If set to true, this component will include a channel value in the output emitted in Kura Wires only if it is different than the one from the previous read operation or event. Channel errors will always be emitted if <strong>emit.errors</strong> is set to true.</li>
 <li><strong>emit.empty.envelopes</strong>: If set to false, this component will not emit empty envelopes. This property can be useful if combined with <strong>emit.on.change</strong>.</li>
 </ul>
+<h2 id="channels-download">Channels download</h2>
+<p>The creation of the channels is a process that could be very time and effort consuming. For this reason, once the user has created the desired channels, it is possible to download the entire list from the web UI, by clicking the <code>Download Channels</code> button:</p>
+<p><img alt="" src="../images/download_upload_webUI.png" /></p>
+<p>The list is downloaded in csv format and is represented in the form of a table, whose columns represent the entries for the options in the channel definition, while each row is equivalent to a specific channel. For example, the resulting csv file retrieved from downloading the list of channels in the image above is:</p>
+<p><img alt="" src="../images/csv_downloaded.png" /></p>
+<p>The resulting table is composed by some static, pre-defined options (the ones mentioned in Channel Definition section above, from <code>enabled</code> to <code>listen</code>) that are the same for each component and the ones introduced by the specific bundle under analisys. In this case, the modbus driver introduces these driver-specific options:</p>
+<ul>
+<li>unit.id</li>
+<li>primary.table</li>
+<li>memory.address</li>
+<li>data.order</li>
+<li>data.type</li>
+<li>array.data.length</li>
+</ul>
+<p>The download tool is extremely useful in all those situations where the user wants to quickly load a long list of channels at once: for example, it can easily clone the same list in multiple assets, export it to another device, or simply save it locally to always have a copy of the channels ready.</p>
+<h2 id="csv-upload">CSV upload</h2>
+<p>The <code>Upload Channels</code> button allows the user to load a local csv file to create the channel list in one shot: the uploading file must implement the same table-structure described in the "Channels download" section above, so with each rows representing a channels, and each column one entry of the channel's options.</p>
+<p>Once the user clicks on the button, will be shown a pop-up in which there are a button to locate the file in the user's filesystem and two checkboxes to allow the uploading phase customization. After clicking on <code>Upload</code>, if the process is succesful, the new channels list will be shown, and the user is just asked to click on the <code>Apply</code> button to save the asset variation.</p>
+<p><img alt="" src="../images/csv_upload_popup.png" /></p>
+<h3 id="force-import-empty-string-policy">Force import empty string policy</h3>
+<p>The <code>Force import empty string policy</code> checkbox forces the parsing of all empty values present in the csv as empty strings, for all those channel's options that are typed to String and "not required" by the metatype.</p>
+<p>So, this box must be checked when the user wants that all <em>empty values from the csv</em> are considered as <em>empty strings</em> (<code>""</code>) when parsed to driver-specific channel option, defined by the metatype as <strong>String type</strong> and <strong>not required</strong>. So, those values that are <code>null</code> in the csv, will be set as <code>""</code> in the channel options. The user must be cautious, because the framework supposes that it's consciously leaving empty values in the csv.</p>
+<p>Otherwise, if the box is unchecked, all the csv empty values will be considered as <code>null</code> strings and parsed to the default value set in the metatype of the driver.</p>
+<p>If, for example, the user downloads the channels list following the steps described in the precious section, it could upload the same csv file into an other asset, or another device, to get the exactly same asset configuration.</p>
+<h3 id="replace-current-channels">Replace current channels</h3>
+<p>The <code>Replace current channels</code> must be checked when the user wants to replace <strong>all</strong> the channels currently present in the asset, with the ones that will be created by the csv uploading.</p>
 
               
             </article>

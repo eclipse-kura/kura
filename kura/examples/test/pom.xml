@@ -273,9 +273,6 @@
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
         <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
-        <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
-        <sonar.coverage.jacoco.xmlReportPaths>
-                ${project.basedir}/../../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <modules>

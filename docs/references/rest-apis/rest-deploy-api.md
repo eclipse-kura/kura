@@ -20,6 +20,14 @@ Identities with `rest.deploy` permissions can access these APIs.
 - Method: POST
 - API PATH: `/deploy/v2/_install`
 
+##### Request Body
+
+```json
+{
+  "url": "http://download.eclipse.org/kura/releases/4.1.0/org.eclipse.kura.demo.heater_1.0.500.dp"
+}
+```
+
 ##### Responses
 - 200 OK status
 - 400 Bad request

@@ -24,9 +24,19 @@ Identities with `rest.deploy` permissions can access these APIs.
 
 ```json
 {
+  "url": "deploymentPackageUrl"
+}
+```
+
+Example:
+
+```json
+{
   "url": "http://download.eclipse.org/kura/releases/4.1.0/org.eclipse.kura.demo.heater_1.0.500.dp"
 }
 ```
+
+Please note that the url can refer to a `.dp` already in the device filesystem.
 
 ##### Responses
 - 200 OK status

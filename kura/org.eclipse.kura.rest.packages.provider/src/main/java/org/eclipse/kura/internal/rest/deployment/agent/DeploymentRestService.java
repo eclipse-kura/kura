@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 @Path("/deploy/v2")
 public class DeploymentRestService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DeploymentRestService.class);
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";
@@ -129,12 +129,9 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * Installs the deployment package specified in the {@link InstallRequest}. If
-     * the request was already issued for
-     * the same {@link InstallRequest}, it returns the status of the installation
-     * process.
+     * WIP
      *
-     * @param dataInputStream
+     * @param WIP
      * @return a {@link DeploymentRequestStatus} object that represents the status
      *         of the installation request
      */

@@ -66,6 +66,8 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
 
+    static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
+
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -194,7 +196,7 @@ public class NMSettingsConverter {
 
         privateKeyPassword.ifPresent(value -> settings.put("private-key-password", new Variant<>(value.toString())));
 
-        settings.put("private-key-password-flags", new Variant<>(new UInt32(4)));
+        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NOT_REQUIRED));
 
     }
 

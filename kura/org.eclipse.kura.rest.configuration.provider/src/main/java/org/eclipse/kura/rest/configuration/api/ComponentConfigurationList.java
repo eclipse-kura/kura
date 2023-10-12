@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.rest.configuration.api;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ComponentConfigurationList implements Validable {
 
@@ -29,5 +30,15 @@ public class ComponentConfigurationList implements Validable {
     @Override
     public void validate() {
         FailureHandler.requireParameter(this.configs, "configs");
+    }
+
+    public ComponentConfigurationList replacePasswordsWithPlaceholder() {
+        if (configs == null) {
+            return this;
+        }
+
+        return new ComponentConfigurationList(
+                configs.stream().map(ComponentConfigurationDTO::replacePasswordsWithPlaceholder)
+                        .collect(Collectors.toList()));
     }
 }

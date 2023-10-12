@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -80,7 +80,7 @@ import com.eclipsesource.json.JsonValue;
 @RunWith(Parameterized.class)
 public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
-    private char[] EncryptedPassword;
+    private char[] encryptedPassword;
 
     @Test
     public void shouldSupportGetSnapshots() throws KuraException {
@@ -270,16 +270,45 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testGetPasswordProperty() throws KuraException {
-        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+    public void testReturnPlaceholderInsteadOfEncryptedPassword() throws KuraException {
+        givenEncryptedPassword("foobar");
         givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password(this.EncryptedPassword));
+                new Password(this.encryptedPassword));
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
-        thenTestPropertyValueIs(Json.value(new String(this.EncryptedPassword)));
+        thenTestPropertyValueIs(Json.value("placeholder"));
+    }
+
+    @Test
+    public void testReturnNoValueForMissingPasswordProperty() throws KuraException {
+        givenEncryptedPassword("foobar");
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
+                null);
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
+
+        thenRequestSucceeds();
+        thenTestPropertyIsMissing();
+    }
+
+    @Test
+    public void testGetSnapshotReturnsUnencryptedPassword() throws KuraException {
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
+                new Password("foobar".toCharArray()));
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId",
+                "{\"id\":1}");
+
+        thenRequestSucceeds();
+        thenTestPropertyTypeIs(Json.value("PASSWORD"));
+        thenTestPropertyValueIs(Json.value("foobar"));
+    }
+
+    private void givenEncryptedPassword(final String password) throws KuraException {
+        this.encryptedPassword = this.cryptoService.encryptAes(password.toCharArray());
     }
 
     @Test
@@ -394,16 +423,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void testGetPasswordArrayProperty() throws KuraException {
 
-        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+        givenEncryptedPassword("foobar");
 
         givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password[] { new Password(this.EncryptedPassword) });
+                new Password[] { new Password(this.encryptedPassword) });
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
-        thenTestPropertyValueIs(Json.array(new String(this.EncryptedPassword)));
+        thenTestPropertyValueIs(Json.array("placeholder"));
     }
 
     @Test
@@ -1036,7 +1065,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetConfigurationByPid() throws KuraException {
-        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+        givenEncryptedPassword("foobar");
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
@@ -1046,7 +1075,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                         .build()) //
                                 .build()) //
                 .withConfigurationProperties(
-                        singletonMap("testProp", new Password[] { new Password(this.EncryptedPassword) }))
+                        singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
                 .build());
 
         whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
@@ -1058,14 +1087,14 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
                         + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
                         + "\"properties\":{\"testProp\":{\"value\":[\""
-                        + new String(this.EncryptedPassword)
+                        + "placeholder"
                         + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
     @Test
     public void testGetConfigurationByPidDefault() throws KuraException {
-        this.EncryptedPassword = this.cryptoService.encryptAes("foobar".toCharArray());
+        givenEncryptedPassword("foobar");
         givenConfigurations(configurationBuilder("foo") //
                 .withDefinition( //
                         ocdBuilder("foo") //
@@ -1076,7 +1105,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                         .build()) //
                                 .build()) //
                 .withConfigurationProperties(
-                        singletonMap("testProp", new Password[] { new Password(this.EncryptedPassword) }))
+                        singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
                 .build());
 
         whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid/_default",
@@ -1088,7 +1117,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                         + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"STRING\","
                         + "\"cardinality\":0,\"defaultValue\":\"default\",\"isRequired\":false}]"
                         + ",\"id\":\"foo\"},\"properties\":{\"testProp\":{\"value\":[\""
-                        + new String(this.EncryptedPassword)
+                        + new String(this.encryptedPassword)
                         + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
@@ -1405,6 +1434,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             final String pid = i.getArgument(0, String.class);
             return byPid.get(pid);
         });
+
+        Mockito.when(configurationService.getSnapshot(Mockito.anyLong()))
+                .thenReturn(byPid.values().stream().collect(Collectors.toList()));
     }
 
     private void givenATestConfigurationPropertyWithAdTypeAndValue(final Scalar type, final Object value)

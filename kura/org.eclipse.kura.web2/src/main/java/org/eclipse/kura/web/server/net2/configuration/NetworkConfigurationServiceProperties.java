@@ -206,8 +206,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getIp6Privacy(String ifname) {
-        return getNonEmptyStringProperty(
-                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_PRIVACY, ifname)));
+        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_PRIVACY, ifname)));
     }
 
     public void setIp6Privacy(String ifname, String privacy) {
@@ -386,8 +385,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Password getWifiMasterPassphrase(String ifname) {
-        return getPasswordFromProperty(this.properties
-                .get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname)));
+        return getPasswordFromProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_PASSPHRASE, ifname)));
     }
 
     public void setWifiMasterPassphrase(String ifname, String passphrase) {
@@ -396,8 +395,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public String getWifiMasterSsid(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_SSID, ifname),
-                "");
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_SSID, ifname), "");
     }
 
     public void setWifiMasterSsid(String ifname, String ssid) {
@@ -414,8 +412,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Optional<String> getWifiMasterMode(String ifname) {
-        return Optional.ofNullable(
-                (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_MODE, ifname)));
+        return Optional
+                .ofNullable((String) this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_MODE, ifname)));
     }
 
     public void setWifiMasterMode(String ifname, String mode) {
@@ -423,9 +421,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public List<Integer> getWifiMasterChannel(String ifname) {
-        return channelsAsIntegersList(
-                (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname),
-                        ""));
+        return channelsAsIntegersList((String) this.properties
+                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_MASTER_CHANNEL, ifname), ""));
     }
 
     public void setWifiMasterChannel(String ifname, List<Integer> channels) {
@@ -502,9 +499,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public List<Integer> getWifiInfraChannel(String ifname) {
-        return channelsAsIntegersList(
-                (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname),
-                        ""));
+        return channelsAsIntegersList((String) this.properties
+                .getOrDefault(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_CHANNEL, ifname), ""));
     }
 
     public void setWifiInfraChannel(String ifname, List<Integer> channels) {
@@ -522,8 +518,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public Password getWifiInfraPassphrase(String ifname) {
-        return getPasswordFromProperty(this.properties
-                .get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname)));
+        return getPasswordFromProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_WIFI_INFRA_PASSPHRASE, ifname)));
     }
 
     public void setWifiInfraPassphrase(String ifname, String passphrase) {
@@ -833,7 +829,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     /**
-     *  Wifi Enterprise / 802-1x Configuration
+     * Wifi Enterprise / 802-1x Configuration
      */
 
     private static final String NET_INTERFACE_CONFIG_8021X_EAP = "net.interface.%s.config.802-1x.eap";
@@ -846,7 +842,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public String get8021xEap(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname), "");
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname),
+                "Kura8021xEapTtls");
     }
 
     public void set8021xInnerAuth(String ifname, String phase2) {
@@ -854,7 +851,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public String get8021xInnerAuth(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname), "");
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_PHASE2, ifname),
+                "Kura8021xEapNone");
     }
 
     public void set8021xIdentity(String ifname, String identity) {
@@ -862,7 +860,8 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public String get8021xIdentity(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_IDENTITY, ifname), "");
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_8021X_IDENTITY, ifname),
+                "changeme");
     }
 
     public void set8021xPassword(String ifname, String password) {

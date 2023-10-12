@@ -17,13 +17,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.security.PrivateKey;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -48,6 +55,7 @@ import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -67,6 +75,7 @@ public class NMConfigurationServiceImplTest {
     private AtomicBoolean posted;
     private Event event;
     private final Set<String> dhcpConfigWriterInterfaces = new HashSet<>();
+    private KeystoreService keystoreService = mock(KeystoreService.class);
 
     @Test
     public void shouldPostEventAfterActivationTest() throws InterruptedException, KuraException {
@@ -150,6 +159,18 @@ public class NMConfigurationServiceImplTest {
         whenServiceIsActivated();
 
         thenDhcpConfigWriterIsCreatedForInterfaces("eno1");
+    }
+
+    @Test
+    public void shouldStartConfigWriterIfEnterpriseWifi() throws KuraException {
+        givenNetworkConfigurationService();
+        givenEnterpriseWifiKeystore();
+        givenFullProperties();
+        givenWifiEnterprisePropertiesForInterfaceWlp2s0();
+
+        whenServiceIsActivated();
+
+        thenDhcpConfigWriterIsCreatedForInterfaces("wlp2s0");
     }
 
     @Test
@@ -367,6 +388,92 @@ public class NMConfigurationServiceImplTest {
         this.properties.put("net.interface.wlp1s0.config.wifi.infra.pairwiseCiphers", "CCMP_TKIP");
         this.properties.put("net.interface.wlp1s0.config.ip4.prefix", 24);
         this.properties.put("net.interface.1-4.config.pdpType", "IP");
+    }
+
+    private void givenWifiEnterprisePropertiesForInterfaceWlp2s0() {
+        this.properties.put("net.interfaces", "enp5s0,lo,eno1,wlp1s0,wlp2s0,1-4");
+
+        this.properties.put("net.interface.wlp2s0.type", "WIFI");
+        this.properties.put("net.interface.wlp2s0.config.ip4.gateway", "");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.driver", "nl80211");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.ssid", "testssid");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.groupCiphers", "CCMP_TKIP");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.bgscan", "");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.rangeStart", "172.16.1.100");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.maxLeaseTime", 7200);
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.pingAccessPoint", false);
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.channel", "1");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.passphrase", "qwerty=");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.groupCiphers", "CCMP_TKIP");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.bgscan", "");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.passphrase", "");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.defaultLeaseTime", 7200);
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.ssid", "kura_gateway_0");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.securityType", "SECURITY_WPA2");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.rangeEnd", "172.16.1.110");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.ignoreSSID", false);
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.mode", "MASTER");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.prefix", 24);
+        this.properties.put("net.interface.wlp2s0.config.wifi.mode", "INFRA");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.mode", "INFRA");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.pingAccessPoint", false);
+        this.properties.put("net.interface.wlp2s0.config.nat.enabled", false);
+        this.properties.put("net.interface.wlp2s0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        this.properties.put("net.interface.wlp2s0.config.ip6.status", "netIPv6StatusDisabled");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.channel", "1");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.radioMode", "RADIO_MODE_80211g");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.driver", "nl80211");
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.enabled", true);
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.ignoreSSID", false);
+        this.properties.put("net.interface.wlp2s0.config.ip4.address", "172.16.1.1");
+        this.properties.put("net.interface.wlp2s0.config.ip6.dnsServers", "");
+        this.properties.put("net.interface.wlp2s0.config.wifi.master.pairwiseCiphers", "CCMP");
+        this.properties.put("net.interface.wlp2s0.config.dhcpClient6.enabled", false);
+        this.properties.put("net.interface.wlp2s0.config.dhcpServer4.passDns", false);
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.securityType", "SECURITY_WPA2_WPA3_ENTERPRISE");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.radioMode", "RADIO_MODE_80211b");
+        this.properties.put("net.interface.wlp2s0.config.ip4.dnsServers", "");
+        this.properties.put("net.interface.wlp2s0.config.wifi.infra.pairwiseCiphers", "CCMP_TKIP");
+        this.properties.put("net.interface.wlp2s0.config.ip4.prefix", 24);
+        this.properties.put("net.interface.wlp2s0.config.802-1x.eap", "Kura8021xEapTls");
+        this.properties.put("net.interface.wlp2s0.config.802-1x.keystore.pid", "WifiKeystore");
+        this.properties.put("net.interface.wlp2s0.config.802-1x.ca-cert-name", "caCert");
+        this.properties.put("net.interface.wlp2s0.config.802-1x.client-cert-name", "privatekey");
+        this.properties.put("net.interface.wlp2s0.config.802-1x.private-key-name", "privatekey");
+    }
+
+    private void givenEnterpriseWifiKeystore() {
+
+        try {
+            TrustedCertificateEntry trustedCertificateEntry = mock(TrustedCertificateEntry.class);
+            Certificate certificate = mock(Certificate.class);
+
+            PrivateKeyEntry privateKeyEntry = mock(PrivateKeyEntry.class);
+            Certificate privateKeyCertificate = mock(Certificate.class);
+            PrivateKey privateKey = mock(PrivateKey.class);
+
+            when(trustedCertificateEntry.getTrustedCertificate()).thenReturn(certificate);
+            when(privateKeyEntry.getCertificate()).thenReturn(privateKeyCertificate);
+            when(privateKeyEntry.getPrivateKey()).thenReturn(privateKey);
+
+            when(certificate.getEncoded()).thenReturn("ca-certificate".getBytes());
+            when(privateKeyCertificate.getEncoded()).thenReturn("certificate-key".getBytes());
+            when(privateKey.getEncoded()).thenReturn("privatekey".getBytes());
+
+            this.keystoreService = mock(KeystoreService.class);
+
+            when(this.keystoreService.getEntry("caCert")).thenReturn(trustedCertificateEntry);
+            when(this.keystoreService.getEntry("privatekey")).thenReturn(privateKeyEntry);
+
+            Map<String, Object> propertiesMap = new HashMap<>();
+            propertiesMap.put(ConfigurationService.KURA_SERVICE_PID, "WifiKeystore");
+
+            this.networkConfigurationService.setKeystoreService(keystoreService, propertiesMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
     }
 
     private void givenPropertiesWithPppInterfaceNames() {
@@ -790,6 +897,55 @@ public class NMConfigurationServiceImplTest {
             }
         }
         assertEquals(40, adsConfigured);
+    }
+
+    private void thenComponentDefinitionHasCorrectEnterpriseProperties() {
+        int adsConfigured = 0;
+        for (AD ad : this.ads) {
+
+            if ("net.interfaces".equals(ad.getId())) {
+                assertEquals("net.interfaces", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertTrue(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlp2s0.config.802-1x.eap".equals(ad.getId())) {
+                assertEquals("net.interface.wlp2s0.config.802-1x.eap", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlp2s0.config.802-1x.keystore.pid".equals(ad.getId())) {
+                assertEquals("net.interface.wlp2s0.config.802-1x.keystore.pid", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlp2s0.config.802-1x.ca-cert-name".equals(ad.getId())) {
+                assertEquals("net.interface.wlp2s0.config.802-1x.ca-cert-name", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlp2s0.config.802-1x.client-cert-name".equals(ad.getId())) {
+                assertEquals("net.interface.wlp2s0.config.802-1x.client-cert-name", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+
+            if ("net.interface.wlp2s0.config.802-1x.private-key-name".equals(ad.getId())) {
+                assertEquals("net.interface.wlp2s0.config.802-1x.private-key-name", ad.getName());
+                assertEquals("STRING", ad.getType().name());
+                assertFalse(ad.isRequired());
+                adsConfigured++;
+            }
+        }
+        assertEquals(5, adsConfigured);
     }
 
     private void thenPropertiesNumberIsCorrect() {

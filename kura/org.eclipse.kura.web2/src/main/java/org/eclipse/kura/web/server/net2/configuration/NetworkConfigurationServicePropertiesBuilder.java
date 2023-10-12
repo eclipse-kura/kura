@@ -254,13 +254,32 @@ public class NetworkConfigurationServicePropertiesBuilder {
     }
 
     private void set8021xConfig() {
-    	if(this.gwtConfig instanceof GwtWifiNetInterfaceConfig) { // Was this condition missing on purpose?
-            logger.error("setting 802-1x config");
+        if (this.gwtConfig.get8021xConfig() == null || !(this.gwtConfig instanceof GwtWifiNetInterfaceConfig)) {
+            return;
+        }
+
+        logger.info("setting 802-1x config");
+
+        if (this.gwtConfig.get8021xConfig().getEap() != null && !this.gwtConfig.get8021xConfig().getEap().isEmpty()) {
             this.properties.set8021xEap(this.ifname, this.gwtConfig.get8021xConfig().getEap());
+        }
+
+        if (this.gwtConfig.get8021xConfig().getInnerAuth() != null
+                && !this.gwtConfig.get8021xConfig().getInnerAuth().isEmpty()) {
             this.properties.set8021xInnerAuth(this.ifname, this.gwtConfig.get8021xConfig().getInnerAuth());
+        }
+
+        if (this.gwtConfig.get8021xConfig().getUsername() != null
+                && !this.gwtConfig.get8021xConfig().getUsername().isEmpty()) {
             this.properties.set8021xIdentity(this.ifname, this.gwtConfig.get8021xConfig().getUsername());
+        }
+
+        if (this.gwtConfig.get8021xConfig().getPassword() != null
+                && !this.gwtConfig.get8021xConfig().getPassword().isEmpty()) {
             this.properties.set8021xPassword(this.ifname, this.gwtConfig.get8021xConfig().getPassword());
-    	}
+        }
+
+        logger.info("DONE - setting 802-1x config");
     }
 
     private void setWifiInfraProperties() {

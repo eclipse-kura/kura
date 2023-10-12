@@ -16,8 +16,14 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -534,7 +540,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
@@ -579,7 +586,8 @@ public class NMSettingsConverterTest {
     public void build8021xSettingsShouldWorkWithPeapAndMschapV2AndCertificates() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
@@ -613,9 +621,12 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
-        givenMapWith("net.interface.wlan0.config.802-1x.client-cert", "binary client cert");
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key", "binary private key");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
@@ -1129,7 +1140,7 @@ public class NMSettingsConverterTest {
 
         thenIllegalArgumentExceptionThrown();
     }
-    
+
     @Test
     public void buildVlanSettingsShouldWorkWithRequiredSettings() {
         givenMapWith("net.interface.eth0.30.config.vlan.parent", "eth0");
@@ -1145,7 +1156,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("ingress-priority-map", new Variant<>(Arrays.asList(), "as").getValue());
         thenResultingMapContains("egress-priority-map", new Variant<>(Arrays.asList(), "as").getValue());
     }
-    
+
     @Test
     public void buildVlanSettingsShouldWorkWithFullSettings() {
         givenMapWith("net.interface.eth1.40.config.vlan.parent", "eth1");
@@ -1162,29 +1173,27 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("parent", "eth1");
         thenResultingMapContains("id", new UInt32(40));
         thenResultingMapContains("flags", new UInt32(3));
-        thenResultingMapContains("ingress-priority-map", new Variant<>(
-                Arrays.asList("0:1", "4:5"), "as").getValue());
-        thenResultingMapContains("egress-priority-map", new Variant<>(
-                Arrays.asList("2:3"), "as").getValue());    
+        thenResultingMapContains("ingress-priority-map", new Variant<>(Arrays.asList("0:1", "4:5"), "as").getValue());
+        thenResultingMapContains("egress-priority-map", new Variant<>(Arrays.asList("2:3"), "as").getValue());
     }
-    
+
     @Test
     public void buildVlanSettingsShouldThrowWhenMissingParent() {
         givenMapWith("net.interface.eth0.30.config.vlan.id", 30);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
-        
+
         thenNoSuchElementExceptionThrown();
     }
-    
+
     @Test
     public void buildVlanSettingsShouldThrowWhenMissingVlanId() {
         givenMapWith("net.interface.eth0.30.config.vlan.parent", "eth0");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
-        
+
         thenNoSuchElementExceptionThrown();
     }
 
@@ -1212,7 +1221,7 @@ public class NMSettingsConverterTest {
 
         thenIllegalArgumentExceptionThrown();
     }
-    
+
     @Test
     public void buildConnectionSettingsShouldWorkWithVlan() {
         whenBuildConnectionSettings(Optional.empty(), "eth0.40", NMDeviceType.NM_DEVICE_TYPE_VLAN);
@@ -1318,7 +1327,8 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTtls");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert", "binary ca cert");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
@@ -1586,7 +1596,7 @@ public class NMSettingsConverterTest {
         thenResultingBuildAllMapContains("connection", "interface-name", "eth0");
         thenResultingBuildAllMapContains("connection", "type", "802-3-ethernet");
     }
-    
+
     @Test
     public void buildSettingsShouldWorkWithExpectedInputsVlanAndWanIp4() {
         givenMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
@@ -1619,10 +1629,10 @@ public class NMSettingsConverterTest {
         thenResultingBuildAllMapContains("vlan", "parent", "eth0");
         thenResultingBuildAllMapContains("vlan", "id", new UInt32(55));
         thenResultingBuildAllMapContains("vlan", "flags", new UInt32(2));
-        thenResultingBuildAllMapContains("vlan", "ingress-priority-map", new Variant<>(
-                Arrays.asList(), "as").getValue());
-        thenResultingBuildAllMapContains("vlan", "egress-priority-map", new Variant<>(
-                Arrays.asList("2:3"), "as").getValue());
+        thenResultingBuildAllMapContains("vlan", "ingress-priority-map",
+                new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingBuildAllMapContains("vlan", "egress-priority-map",
+                new Variant<>(Arrays.asList("2:3"), "as").getValue());
     }
 
     @Test
@@ -2879,6 +2889,11 @@ public class NMSettingsConverterTest {
         this.nmVersion = NMVersion.parse(nmVersion);
     }
 
+    public void givenMockConnectionWithNullSettings() {
+        this.mockedConnection = Mockito.mock(Connection.class);
+        Mockito.when(this.mockedConnection.GetSettings()).thenReturn(null);
+    }
+
     /*
      * When
      */
@@ -2992,7 +3007,7 @@ public class NMSettingsConverterTest {
             this.hasAGenericExecptionBeenThrown = true;
         }
     }
-    
+
     private void whenBuildVlanSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildVlanSettings(props, iface);
@@ -3076,5 +3091,23 @@ public class NMSettingsConverterTest {
         Variant<?> dataVariant = new Variant<>(addressData, "aa{sv}");
 
         return dataVariant.getValue();
+    }
+
+    public Certificate buildMockedCertificateWithCert(String certBytes) {
+        Certificate cert = mock(Certificate.class);
+        try {
+            when(cert.getEncoded()).thenReturn(certBytes.getBytes());
+        } catch (CertificateEncodingException e) {
+            fail();
+        }
+
+        return cert;
+    }
+
+    public PrivateKey buildMockedPrivateKeyWithKey(String keyBytes) {
+        PrivateKey key = mock(PrivateKey.class);
+        when(key.getEncoded()).thenReturn(keyBytes.getBytes());
+
+        return key;
     }
 }

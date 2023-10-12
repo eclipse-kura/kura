@@ -16,6 +16,9 @@ package org.eclipse.kura.nm.configuration;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,6 +69,8 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
     private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
+
+    static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -180,36 +185,51 @@ public class NMSettingsConverter {
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
 
-        String clientCert = props.get(String.class, "net.interface.%s.config.802-1x.client-cert", deviceId);
-        settings.put("client-cert", new Variant<>(clientCert.getBytes(StandardCharsets.UTF_8)));
+        try {
+            Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
+                    deviceId);
+            settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
+        } catch (CertificateEncodingException e) {
+            logger.error("Unable to find or decode Client Certificate");
+        }
 
-        String privateKey = props.get(String.class, "net.interface.%s.config.802-1x.private-key", deviceId);
-        settings.put("private-key", new Variant<>(privateKey.getBytes(StandardCharsets.UTF_8)));
+        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                deviceId);
 
-        String privateKeyPassword = props
-                .get(Password.class, "net.interface.%s.config.802-1x.private-key-password", deviceId).toString();
-        settings.put("private-key-password", new Variant<>(privateKeyPassword));
+        if (privateKey.getEncoded() != null) {
+            settings.put("private-key", new Variant<>(privateKey.getEncoded()));
+        } else {
+            logger.error("Unable to find or decode Private Key");
+        }
+
+        Optional<Password> privateKeyPassword = props.getOpt(Password.class,
+                "net.interface.%s.config.802-1x.private-key-password", deviceId);
+
+        privateKeyPassword.ifPresent(value -> settings.put("private-key-password", new Variant<>(value.toString())));
+
+        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NOT_REQUIRED));
 
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
+
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
-        if (anonymousIdentity.isPresent()) {
-            settings.put("anonymous-identity", new Variant<>(anonymousIdentity.get()));
-        }
 
-        Optional<String> caCert = props.getOpt(String.class, "net.interface.%s.config.802-1x.ca-cert", deviceId);
-        if (caCert.isPresent()) {
-            settings.put("ca-cert", new Variant<>(caCert.get().getBytes(StandardCharsets.UTF_8)));
+        anonymousIdentity.ifPresent(value -> settings.put("anonymous-identity", new Variant<>(value)));
+
+        try {
+            Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
+            settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
+        } catch (Exception e) {
+            logger.error(String.format("Unable to find or decode CA Certificate for interface %s", deviceId));
         }
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
-        if (caCertPassword.isPresent()) {
-            settings.put("ca-cert-password", new Variant<>(caCertPassword.get().toString()));
-        }
+
+        caCertPassword.ifPresent(value -> settings.put("ca-cert-password", new Variant<>(value.toString())));
     }
 
     private static void create8021xMschapV2(NetworkProperties props, String deviceId,
@@ -535,7 +555,7 @@ public class NMSettingsConverter {
 
         return settings;
     }
-    
+
     public static Map<String, Variant<?>> buildVlanSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
         settings.put("interface-name", new Variant<>(deviceId));
@@ -547,11 +567,9 @@ public class NMSettingsConverter {
         settings.put("flags", new Variant<>(new UInt32(vlanFlags.orElse(1))));
         DBusListType listType = new DBusListType(String.class);
         Optional<List<String>> ingressMap = props.getOptStringList("net.interface.%s.config.vlan.ingress", deviceId);
-        settings.put("ingress-priority-map", new Variant<>(ingressMap
-                .orElse(new ArrayList<String>()), listType));
+        settings.put("ingress-priority-map", new Variant<>(ingressMap.orElse(new ArrayList<>()), listType));
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
-        settings.put("egress-priority-map", new Variant<>(egressMap
-                .orElse(new ArrayList<String>()), listType));
+        settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<>()), listType));
         return settings;
     }
     
@@ -582,7 +600,7 @@ public class NMSettingsConverter {
 
         return connectionMap;
     }
-    
+
     private static Map<String, Variant<?>> createConnectionSettings(String iface) {
         Map<String, Variant<?>> connectionMap = new HashMap<>();
 

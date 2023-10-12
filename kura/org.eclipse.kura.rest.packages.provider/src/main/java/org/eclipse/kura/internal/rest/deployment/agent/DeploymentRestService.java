@@ -14,17 +14,24 @@ package org.eclipse.kura.internal.rest.deployment.agent;
 
 import static org.eclipse.kura.rest.deployment.agent.api.Validable.validate;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,9 +43,13 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/deploy/v2")
 public class DeploymentRestService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeploymentRestService.class);
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";
     private static final String ERROR_INSTALLING_PACKAGE = "Error installing deployment package: ";
@@ -112,6 +123,57 @@ public class DeploymentRestService {
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    // See: https://stackoverflow.com/a/63104120/7780889
+    @POST
+    @RolesAllowed("deploy")
+    @Path("/_upload")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public DeploymentRequestStatus installUploadedDeploymentPackage(InputStream uploadedInputStream,
+            @QueryParam("fileName") String fileName) {
+
+        String uploadedFileLocation = "/tmp/upload.dp"; // WIP
+
+        File file = new File(uploadedFileLocation);
+        if (file.exists()) {
+            logger.warn("File already exists at : {}", file.getAbsolutePath());
+        } else {
+            try {
+                writeToFile(uploadedInputStream, file);
+            } catch (IOException e) {
+                logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
+            }
+            logger.info("File uploaded to : {}", file.getAbsolutePath());
+        }
+
+        try {
+            String fileUrl = file.toURI().toURL().toString();
+            if (this.deploymentAgentService.isInstallingDeploymentPackage(fileUrl)) {
+                return DeploymentRequestStatus.INSTALLING;
+            }
+
+            this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
+        }
+
+        return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    private void writeToFile(InputStream uploadedInputStream, File uploadedFile) throws IOException {
+        try (OutputStream out = new FileOutputStream(uploadedFile)) {
+            int read = 0;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ nav:
         - Network Failover: gateway-configuration/network-failover.md
         - Ethernet Configuration: gateway-configuration/ethernet-configuration.md
         - Wi-Fi Configuration: gateway-configuration/wifi-configuration.md
+        - Wi-Fi 802.1x Configuration: gateway-configuration/wifi-configuration-8021x.md
         - Cellular Configuration: gateway-configuration/cellular-configuration.md
       - Firewall Configuration: gateway-configuration/firewall-configuration.md
       - Network Threat Manager: gateway-configuration/network-threat-manager.md

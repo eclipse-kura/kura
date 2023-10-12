@@ -13,6 +13,10 @@
 package org.eclipse.kura.nm.configuration;
 
 import java.net.UnknownHostException;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,9 +29,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
@@ -45,6 +50,7 @@ import org.eclipse.kura.nm.configuration.monitor.DhcpServerMonitor;
 import org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
@@ -61,18 +67,19 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private static final String MODIFIED_INTERFACE_NAMES = "modified.interface.names";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
     private static final Pattern PPP_INTERFACE = Pattern.compile("ppp\\d+");
-    
-    private static final List<NetInterfaceType> SUPPORTED_NAT_INTERFACE_TYPES = Arrays.asList(
-            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.MODEM,
-            NetInterfaceType.VLAN);
-    private static final List<NetInterfaceType> SUPPORTED_DHCP_SERVER_INTERFACE_TYPES = Arrays.asList(
-            NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.VLAN);
+
+    private static final List<NetInterfaceType> SUPPORTED_NAT_INTERFACE_TYPES = Arrays.asList(NetInterfaceType.ETHERNET,
+            NetInterfaceType.WIFI, NetInterfaceType.MODEM, NetInterfaceType.VLAN);
+    private static final List<NetInterfaceType> SUPPORTED_DHCP_SERVER_INTERFACE_TYPES = Arrays
+            .asList(NetInterfaceType.ETHERNET, NetInterfaceType.WIFI, NetInterfaceType.VLAN);
 
     private NetworkService networkService;
     private DnsServerService dnsServer;
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+
+    private Map<String, KeystoreService> keystoreServices = new HashMap<>();
 
     private DhcpServerMonitor dhcpServerMonitor;
     private DnsServerMonitor dnsServerMonitor;
@@ -124,6 +131,16 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     public void unsetCryptoService(CryptoService cryptoService) {
         if (this.cryptoService.equals(cryptoService)) {
             this.cryptoService = null;
+        }
+    }
+
+    public void setKeystoreService(KeystoreService keystoreService, Map<String, Object> properties) {
+        this.keystoreServices.put((String) properties.get(ConfigurationService.KURA_SERVICE_PID), keystoreService);
+    }
+
+    public void unsetKeystoreService(KeystoreService keystoreService, Map<String, Object> properties) {
+        if (this.keystoreServices.containsValue(keystoreService)) {
+            this.keystoreServices.remove(properties.get(ConfigurationService.KURA_SERVICE_PID));
         }
     }
 
@@ -213,13 +230,16 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
                 if (NetInterfaceType.MODEM.equals(interfaceTypeProperty.get())) {
                     setModemPppNumber(modifiedProps, interfaceName);
-                } 
+                }
             }
 
             mergeNetworkConfigurationProperties(modifiedProps, this.networkProperties.getProperties());
 
+            this.networkProperties = new NetworkProperties(
+                    discardModifiedNetworkInterfaces(new HashMap<>(modifiedProps)));
+
             decryptAndConvertPasswordProperties(modifiedProps);
-            this.networkProperties = new NetworkProperties(discardModifiedNetworkInterfaces(modifiedProps));
+            decryptAndConvertCertificatesProperties(modifiedProps, interfaces);
 
             writeNetworkConfigurationSettings(modifiedProps);
             writeFirewallNatRules(interfaces, modifiedProps);
@@ -252,7 +272,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
         modifiedProps.put(String.format(PREFIX + "%s.config.pppNum", interfaceName), pppNum);
     }
-    
+
     protected void setInterfaceType(Map<String, Object> modifiedProps, String interfaceName, NetInterfaceType type) {
         modifiedProps.put(String.format(PREFIX + "%s.type", interfaceName), type.toString());
     }
@@ -293,6 +313,86 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
             }
         }
+    }
+
+    private void decryptAndConvertCertificatesProperties(Map<String, Object> modifiedProps, Set<String> interfaces) {
+
+        interfaces.forEach(interfaceName -> {
+            String key = String.format("net.interface.%s.config.802-1x.keystore.pid", interfaceName);
+            if (modifiedProps.containsKey(key)) {
+
+                Object prop = modifiedProps.get(key);
+
+                if (prop instanceof String) {
+                    String keystorePid = (String) prop;
+
+                    findAndDecodeCertificatesForInterface(interfaceName, modifiedProps,
+                            this.keystoreServices.get(keystorePid));
+                }
+            }
+        });
+    }
+
+    private void findAndDecodeCertificatesForInterface(String interfaceName, Map<String, Object> modifiedProps,
+            KeystoreService keystoreService) {
+
+        if (keystoreService == null) {
+            logger.error("Cannot find keystore service for interface {}", interfaceName);
+            return;
+        }
+
+        final String clientCertString = String.format("net.interface.%s.config.802-1x.client-cert-name", interfaceName);
+        final String caCertString = String.format("net.interface.%s.config.802-1x.ca-cert-name", interfaceName);
+        final String privateKeyString = String.format("net.interface.%s.config.802-1x.private-key-name", interfaceName);
+        final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
+
+        for (String key : keyCertStrings) {
+            if (!modifiedProps.containsKey(key)) {
+                continue;
+            }
+
+            Object value = modifiedProps.get(key);
+            try {
+                String valueString = value.toString();
+                if (isCertificate(key)) {
+                    modifiedProps.put(key, getTrustedCertificateFromKeystore(valueString, keystoreService));
+                } else {
+                    modifiedProps.put(key, getTrustedPrivateKeyFromKeystore(valueString, keystoreService));
+                }
+            } catch (KuraException e) {
+                logger.error("Unable to decode key/certificate {} from keystore.", key, e);
+                modifiedProps.put(key, value);
+            }
+        }
+    }
+
+    private boolean isCertificate(String key) {
+        return key.contains("802-1x.client-cert-name") || key.contains("802-1x.ca-cert-name");
+    }
+
+    private Certificate getTrustedCertificateFromKeystore(String certificateName, KeystoreService keystoreService)
+            throws KuraException {
+        if (keystoreService.getEntry(certificateName) instanceof TrustedCertificateEntry) {
+            TrustedCertificateEntry cert = (TrustedCertificateEntry) keystoreService.getEntry(certificateName);
+            return cert.getTrustedCertificate();
+        } else if (keystoreService.getEntry(certificateName) instanceof PrivateKeyEntry) {
+            PrivateKeyEntry cert = (PrivateKeyEntry) keystoreService.getEntry(certificateName);
+            return cert.getCertificate();
+        } else {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                    String.format("Certificate \"%s\" is not of the expected key type or not found.", certificateName));
+        }
+    }
+
+    private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService)
+            throws KuraException {
+        if (!(keystoreService.getEntry(privateKeyName) instanceof PrivateKeyEntry)) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                    String.format("Private key \"%s\" is not of the expected key type or not found.", privateKeyName));
+        }
+
+        PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
+        return key.getPrivateKey();
     }
 
     @Override

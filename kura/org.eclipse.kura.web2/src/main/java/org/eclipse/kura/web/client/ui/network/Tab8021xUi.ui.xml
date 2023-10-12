@@ -114,15 +114,6 @@
                         </b:FormGroup>
 
                         <b:FormGroup>
-                            <b:FormLabel for="identityClientCertName"
-                                ui:field="labelClientCertName" />
-                            <util:HelpButton ui:field="helpClientCertName"/>
-                            <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                            <b:TextBox b:id="clientCertName"
-                                ui:field="clientCertName" />
-                        </b:FormGroup>
-
-                        <b:FormGroup>
                             <b:FormLabel for="identityPrivateKeyName"
                                 ui:field="labelPrivateKeyName" />
                             <util:HelpButton ui:field="helpPrivateKeyName"/>

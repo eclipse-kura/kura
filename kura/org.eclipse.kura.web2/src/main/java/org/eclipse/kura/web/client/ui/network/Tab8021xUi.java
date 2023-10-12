@@ -80,9 +80,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     FormLabel labelCaCertName;
 
     @UiField
-    FormLabel labelClientCertName;
-
-    @UiField
     FormLabel labelPrivateKeyName;
 
     @UiField
@@ -111,9 +108,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     TextBox caCertName;
 
     @UiField
-    TextBox clientCertName;
-
-    @UiField
     TextBox privateKeyName;
 
     // Help
@@ -134,9 +128,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @UiField
     HelpButton helpCaCertName;
-
-    @UiField
-    HelpButton helpClientCertName;
 
     @UiField
     HelpButton helpPrivateKeyName;
@@ -171,7 +162,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         labelPassword.setText(MSGS.net8021xPassword());
         labelKeystorePid.setText(MSGS.net8021xKeystorePid());
         labelCaCertName.setText(MSGS.net8021xCaCert());
-        labelClientCertName.setText(MSGS.net8021xClientCert());
         labelPrivateKeyName.setText(MSGS.net8021xPrivateKey());
     }
 
@@ -182,7 +172,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.helpPassword.setHelpText(MSGS.net8021xPasswordHelp());
         this.helpKeystorePid.setHelpText(MSGS.net8021xKeystorePidHelp());
         this.helpCaCertName.setHelpText(MSGS.net8021xCaCertHelp());
-        this.helpClientCertName.setHelpText(MSGS.net8021xClientCertHelp());
         this.helpPrivateKeyName.setHelpText(MSGS.net8021xPrivateKeyHelp());
     }
 
@@ -196,7 +185,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         initPasswordTextBox();
         initKeystorePidTextBox();
         initCaCertNameTextBox();
-        initClientCertNameTextBox();
         initPrivateKeyNameTextBox();
     }
 
@@ -299,22 +287,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.caCertName.addMouseOutHandler(event -> resetHelpText());
 
         this.caCertName.addChangeHandler(event -> {
-            setDirty(true);
-        });
-    }
-
-    private void initClientCertNameTextBox() {
-        this.clientCertName.addMouseOverHandler(event -> {
-            if (this.clientCertName.isEnabled()) {
-                setHelpText(MSGS.net8021xClientCertHelp());
-            }
-        });
-
-        this.clientCertName.addBlurHandler(e -> this.clientCertName.validate());
-        this.clientCertName.setAllowBlank(false);
-        this.clientCertName.addMouseOutHandler(event -> resetHelpText());
-
-        this.clientCertName.addChangeHandler(event -> {
             setDirty(true);
         });
     }
@@ -442,7 +414,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         updated8021xConfig.setKeystorePid(this.keystorePid.getText());
         updated8021xConfig.setCaCertName(this.caCertName.getText());
-        updated8021xConfig.setClientCertName(this.clientCertName.getText());
         updated8021xConfig.setPrivateKeyName(this.privateKeyName.getText());
 
         updatedNetIf.setEnterpriseConfig(updated8021xConfig);
@@ -480,7 +451,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
         this.caCertName.setValue(config.get8021xConfig().getCaCertName());
-        this.clientCertName.setValue(config.get8021xConfig().getClientCertName());
         this.privateKeyName.setValue(config.get8021xConfig().getPrivateKeyName());
     }
 
@@ -493,7 +463,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             this.password.setEnabled(true);
             this.keystorePid.setEnabled(false);
             this.caCertName.setEnabled(false);
-            this.clientCertName.setEnabled(false);
             this.privateKeyName.setEnabled(false);
             break;
         case TLS:
@@ -503,7 +472,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             this.password.setEnabled(false);
             this.keystorePid.setEnabled(true);
             this.caCertName.setEnabled(true);
-            this.clientCertName.setEnabled(true);
             this.privateKeyName.setEnabled(true);
             break;
         default:

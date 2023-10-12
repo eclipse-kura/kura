@@ -277,8 +277,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         logger.info("DONE - setting 802-1x config");
     }
 
-    private void set8021xCertificatesAndPrivateKeys(){
-        if (this.gwtConfig.get8021xConfig().getKeystorePid() != null && !this.gwtConfig.get8021xConfig().getKeystorePid().isEmpty()) {
+    private void set8021xCertificatesAndPrivateKeys() {
+        if (this.gwtConfig.get8021xConfig().getKeystorePid() != null
+                && !this.gwtConfig.get8021xConfig().getKeystorePid().isEmpty()) {
             this.properties.set8021xKeystorePid(this.ifname, this.gwtConfig.get8021xConfig().getKeystorePid());
         }
 
@@ -287,14 +288,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.set8021xCaCertName(this.ifname, this.gwtConfig.get8021xConfig().getCaCertName());
         }
 
-        if (this.gwtConfig.get8021xConfig().getClientCertName() != null
-                && !this.gwtConfig.get8021xConfig().getClientCertName().isEmpty()) {
-            this.properties.set8021xClientCertName(this.ifname, this.gwtConfig.get8021xConfig().getClientCertName());
-        }
-
         if (this.gwtConfig.get8021xConfig().getPrivateKeyName() != null
                 && !this.gwtConfig.get8021xConfig().getPrivateKeyName().isEmpty()) {
             this.properties.set8021xPrivateKeyName(this.ifname, this.gwtConfig.get8021xConfig().getPrivateKeyName());
+            this.properties.set8021xClientCertName(this.ifname, this.gwtConfig.get8021xConfig().getPrivateKeyName());
         }
     }
 

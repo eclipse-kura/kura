@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -361,7 +361,7 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false);
+        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false).replacePasswordsWithPlaceholder();
 
     }
 
@@ -398,7 +398,8 @@ public class ConfigurationRestService {
             }
         });
 
-        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
+        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false)
+                .replacePasswordsWithPlaceholder();
     }
 
     /**
@@ -562,4 +563,5 @@ public class ConfigurationRestService {
 
         return Response.ok().build();
     }
+
 }

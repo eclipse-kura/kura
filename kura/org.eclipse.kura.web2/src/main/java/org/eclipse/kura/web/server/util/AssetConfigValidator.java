@@ -34,6 +34,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.kura.configuration.metatype.Option;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
@@ -87,10 +88,10 @@ public class AssetConfigValidator {
         private final List<Tad> adsByIndex;
         private final List<GwtConfigParameter> defaultValues;
 
-        public LineScanner(final List<Tad> fullChannelMetatype, final List<String> columnHeaders)
-                throws ValidationException {
+        public LineScanner(final List<Tad> fullChannelMetatype, final List<String> columnHeaders,
+                Boolean nullValueAsEmptyString) throws ValidationException {
             this.adsByIndex = probeAdsByIndex(fullChannelMetatype, columnHeaders);
-            this.defaultValues = probeDefaultValues(fullChannelMetatype, this.adsByIndex);
+            this.defaultValues = probeDefaultValues(fullChannelMetatype, this.adsByIndex, nullValueAsEmptyString);
         }
 
         private <T> Optional<T> findLast(final Collection<T> collection, final Predicate<T> predicate) {
@@ -169,7 +170,7 @@ public class AssetConfigValidator {
         }
 
         private List<GwtConfigParameter> probeDefaultValues(final List<Tad> fullChannelMetatype,
-                final List<Tad> boundAds) {
+                final List<Tad> boundAds, Boolean nullValueAsEmptyString) {
             final List<Tad> missing = fullChannelMetatype.stream()
                     .filter(c -> boundAds.stream().noneMatch(b -> b.getId().equals(c.getId())))
                     .collect(Collectors.toList());
@@ -183,7 +184,8 @@ public class AssetConfigValidator {
                 }
 
                 try {
-                    final Object defaultValue = validate(ad, ad.getDefault(), new ArrayList<>(), 0);
+                    final Object defaultValue = validate(ad, ad.getDefault(), new ArrayList<>(), 0,
+                            nullValueAsEmptyString);
                     result.add(GwtServerUtil.toGwtConfigParameter(ad, defaultValue));
                 } catch (final Exception e) {
                     logger.warn("Ad default value is probably not valid", e);
@@ -194,7 +196,7 @@ public class AssetConfigValidator {
         }
 
         public String scan(final CSVRecord line, final Consumer<GwtConfigParameter> parameterConsumer,
-                List<String> errors) {
+                List<String> errors, Boolean nullValueAsEmptyString) {
             String channelName = "";
             boolean errorInChannel = false;
             if (line.size() != adsByIndex.size()) {
@@ -212,7 +214,7 @@ public class AssetConfigValidator {
                             channelName = token;
                         }
                         final Tad ad = adsByIndex.get(i);
-                        final Object value = validate(ad, token, errors, lineNumber);
+                        final Object value = validate(ad, token, errors, lineNumber, nullValueAsEmptyString);
 
                         parameterConsumer.accept(GwtServerUtil.toGwtConfigParameter(ad, value));
                     } catch (Exception ex) {
@@ -230,8 +232,8 @@ public class AssetConfigValidator {
         }
     }
 
-    public List<GwtConfigParameter> validateCsv(String csv, String driverPid, List<String> errors)
-            throws ServletException {
+    public List<GwtConfigParameter> validateCsv(String csv, String driverPid, List<String> errors,
+            Boolean nullValueAsEmptyString) throws ServletException {
 
         try (CSVParser parser = CSVParser.parse(csv, CSVFormat.RFC4180)) {
             errors.clear();
@@ -249,11 +251,11 @@ public class AssetConfigValidator {
             final List<String> header = StreamSupport.stream(lines.remove(0).spliterator(), false)
                     .collect(Collectors.toList());
 
-            final LineScanner scanner = new LineScanner(fullChannelMetatype, header);
+            final LineScanner scanner = new LineScanner(fullChannelMetatype, header, nullValueAsEmptyString);
 
             lines.forEach(record -> {
                 final List<GwtConfigParameter> params = new ArrayList<>();
-                String channelName = scanner.scan(record, params::add, errors);
+                String channelName = scanner.scan(record, params::add, errors, nullValueAsEmptyString);
                 if (!channelName.isEmpty() && !channels.contains(channelName)) {
                     channels.add(channelName);
                     for (final GwtConfigParameter param : params) {
@@ -301,16 +303,18 @@ public class AssetConfigValidator {
     }
 
     // Validates all the entered values
-    protected Object validate(Tad field, String value, List<String> errors, int lineNumber) throws ValidationException {
+    protected Object validate(Tad field, String value, List<String> errors, int lineNumber,
+            Boolean nullValueAsEmptyString) throws ValidationException {
 
         String trimmedValue = value.trim();
         final boolean isEmpty = trimmedValue.isEmpty();
+        final boolean convertNullToEmptyString = nullToEmptyStringValueManagement(field, nullValueAsEmptyString);
 
         if (field.isRequired() && isEmpty) {
             throw new ValidationException();
         }
 
-        if (!isEmpty) {
+        if (validateTrimmedValue(isEmpty, convertNullToEmptyString)) {
             // Validate "Options" field first. Data type will be taken care of next.
             if (!field.getOption().isEmpty()) {
                 boolean foundEqual = false;
@@ -359,6 +363,20 @@ public class AssetConfigValidator {
             }
         }
         return null;
+    }
+
+    private boolean nullToEmptyStringValueManagement(Tad field, Boolean nullValueAsEmptyString) {
+
+        boolean returnValue = false;
+
+        if (nullValueAsEmptyString.booleanValue()) {
+            returnValue = field.getType().equals(Scalar.STRING);
+        }
+        return returnValue;
+    }
+
+    private boolean validateTrimmedValue(boolean isEmpty, boolean convertNullToEmptyString) {
+        return !isEmpty || convertNullToEmptyString;
     }
 
     protected interface ValidationErrorConsumer {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,12 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.configuration.api;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class ComponentConfigurationDTO implements Validable {
@@ -43,6 +46,43 @@ public class ComponentConfigurationDTO implements Validable {
 
     public Map<String, PropertyDTO> getProperties() {
         return this.properties;
+    }
+
+    public ComponentConfigurationDTO replacePasswordsWithPlaceholder() {
+
+        if (properties == null) {
+            return this;
+        }
+
+        final Map<String, PropertyDTO> result = new HashMap<>(this.properties);
+
+        for (final Entry<String, PropertyDTO> e : result.entrySet()) {
+            e.setValue(replacePasswordsWithPlaceholder(e.getValue()));
+        }
+
+        return new ComponentConfigurationDTO(pid, definition, result);
+    }
+
+    public PropertyDTO replacePasswordsWithPlaceholder(final PropertyDTO property) {
+
+        if (property == null || property.getType() != Scalar.PASSWORD) {
+            return property;
+        }
+
+        if (property.getValue() instanceof String[]) {
+            final String[] asStringArray = (String[]) property.getValue();
+            final String[] result = new String[asStringArray.length];
+
+            for (int i = 0; i < asStringArray.length; i++) {
+                if (asStringArray[i] != null) {
+                    result[i] = "placeholder";
+                }
+            }
+
+            return new PropertyDTO(result, Scalar.PASSWORD);
+        } else {
+            return new PropertyDTO("placeholder", Scalar.PASSWORD);
+        }
     }
 
     @Override

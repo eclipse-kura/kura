@@ -104,6 +104,8 @@
                                     <b:FormGroup>
                                         <b:FormLabel>File</b:FormLabel>
                                         <g:FileUpload ui:field="filePath"></g:FileUpload>
+                                        <b:CheckBox ui:field="emptyStringCheck" text="{msgs.wiresEmptyStringCheck}"/>
+                                        <b:HelpBlock text="{msgs.wiresEmptyStringCheckHelpText}"/>
                                         <b:CheckBox ui:field="appendCheck" text="{msgs.wiresAppendChannelsCheck}"/>
                                         <b:HelpBlock text="{msgs.wiresAppendChannelsHelpText}"/>
                                     </b:FormGroup>
@@ -115,6 +117,7 @@
                                     <g:Hidden ui:field="assetPidField"></g:Hidden>
                                     <g:Hidden ui:field="driverPidField"></g:Hidden>
                                     <g:Hidden ui:field="appendCheckField"></g:Hidden>
+                                    <g:Hidden ui:field="emptyStringCheckField"></g:Hidden>
                                 </b:FieldSet>
                             </b:Form>
                         </b:Container>

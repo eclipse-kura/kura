@@ -342,7 +342,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
 
         final String clientCertString = String.format("net.interface.%s.config.802-1x.client-cert-name", interfaceName);
-        final String caCertString = String.format("net.interface.%s.config.802-1x.802-1x.ca-cert-name", interfaceName);
+        final String caCertString = String.format("net.interface.%s.config.802-1x.ca-cert-name", interfaceName);
         final String privateKeyString = String.format("net.interface.%s.config.802-1x.private-key-name", interfaceName);
         final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
 
@@ -367,7 +367,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private boolean isCertificate(String key) {
-        return key.contains("cert");
+        return key.contains("802-1x.client-cert-name") || key.contains("802-1x.ca-cert-name");
     }
 
     private Certificate getTrustedCertificateFromKeystore(String certificateName, KeystoreService keystoreService)
@@ -380,14 +380,18 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
             return cert.getCertificate();
         } else {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                    String.format("Certificate %s is not expected key type or not found.", certificateName));
+            String.format("Certificate \"%s\" is not of the expected key type or not found.", certificateName));
         }
     }
 
     private PrivateKey getTrustedPrivateKeyFromKeystore(String privateKeyName, KeystoreService keystoreService)
             throws KuraException {
-        PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
+        if (!(keystoreService.getEntry(privateKeyName) instanceof PrivateKeyEntry)) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                    String.format("Private key \"%s\" is not of the expected key type or not found.", privateKeyName));
+        }
 
+        PrivateKeyEntry key = (PrivateKeyEntry) keystoreService.getEntry(privateKeyName);
         return key.getPrivateKey();
     }
 

@@ -273,7 +273,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
         }
 
         set8021xCertificatesAndPrivateKeys();
-
         logger.info("DONE - setting 802-1x config");
     }
 

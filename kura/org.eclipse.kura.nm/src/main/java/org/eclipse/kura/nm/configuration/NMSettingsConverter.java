@@ -18,6 +18,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -179,16 +180,17 @@ public class NMSettingsConverter {
             Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
-        } catch (Exception e) {
-            logger.error("Unable to find or decode Client Certificate", e);
+        } catch (CertificateEncodingException e) {
+            logger.error("Unable to find or decode Client Certificate");
         }
 
-        try {
-            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
-                    deviceId);
+        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                deviceId);
+
+        if (privateKey.getEncoded() != null) {
             settings.put("private-key", new Variant<>(privateKey.getEncoded()));
-        } catch (Exception e) {
-            logger.error("Unable to find or decode Private Key", e);
+        } else {
+            logger.error("Unable to find or decode Private Key");
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,

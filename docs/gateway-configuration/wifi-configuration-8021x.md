@@ -33,7 +33,7 @@ To connect via TLS-EAP you will need the following items in unencrypted PEM form
  4. Navigate to the `Certificate List` and create a new Certificate. Insert the PEM and Apply, keep note of the name. ![add certificate](images/802-1x-images/wifi-create-keystore-add-certificate.png)
  5. Now press `add` and create a new Private Key. Insert both the certificates in the PEM in the dialogue and press apply. keep note of the name. ![Alt text](images/802-1x-images/wifi-create-keystore-add-Keystore.png)
 
-Wifi Setup
+### Wifi Setup
 
  1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`. ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)

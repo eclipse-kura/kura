@@ -36,8 +36,8 @@ The configuration should look like the following:
 ## EAP-TLS
 To connect via EAP-TLS you will need the following items in unencrypted PEM format:
 
-    - Certificate Authority (CA) Certificate
-    - Client Certificate + Private Key (PKCS8)
+- Certificate Authority (CA) Certificate
+- Client Certificate + Private Key (PKCS8)
 
 ### Enrolling secrets in the [Keystore service](/gateway-configuration/keystores-management/).
 

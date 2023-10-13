@@ -25,7 +25,7 @@ To connect via TLS-EAP you will need the following items in unencrypted PEM form
     - Certificate Authority (CA) Certificate
     - Client Certificate + Private Key (PKCS8)
 
-Enrolling secrets in the Keystore service
+### Enrolling secrets in the Keystore service
 
  1. Navigate to `Security` under the `System` tab.
  2. Under the `Keystore Configuration` add a new keystore, and keep note of the name. ![Adding a new keystore](images/802-1x-images/wifi-create-keystore.png)

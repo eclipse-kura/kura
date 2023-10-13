@@ -1,5 +1,4 @@
 # Wi-Fi 802.1x Configuration
-
 Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](/getting-started/install-kura/#installer-types). The following is a list of currently supported 802.1x authentication methods.
 
  - TTLS-MSCHAPv2
@@ -39,9 +38,8 @@ To connect via TLS-EAP you will need the following items in unencrypted PEM form
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`. ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)
  3. Select the 802.1x tab.
  4. Set Enteprise EAP -> `TLS`.
- 5. Set Inner Authentication -> `MSCHAPV2`.
- 6. Set `Identity (Username)`.
- 7. Set `Keystore Pid` to the name of the keystore created above.
- 8. Set `Certificate Authority Certificate (CA-Cert)` to the name of the certificate created above.
- 9. Set the `Client Private Key` to the name of the Private Key created above.
+ 5. Set `Identity (Username)`.
+ 6. Set `Keystore Pid` to the name of the keystore created above.
+ 7. Set `Certificate Authority Certificate (CA-Cert)` to the name of the certificate created above.
+ 8. Set the `Client Private Key` to the name of the Private Key created above.
 

@@ -20,7 +20,7 @@ Enterprise Wi-Fi is currently only supported on gateways running our [generic pr
 The configuration should look like the following:
 ![Alt text](images/802-1x-images/wifi-ttls.png)
 
-# Setup TLS-EAP
+## Setup TLS-EAP
 To connect via TLS-EAP you will need the following items in unencrypted PEM format:
     - Certificate Authority (CA) Certificate
     - Client Certificate + Private Key (PKCS8)

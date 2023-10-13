@@ -3,7 +3,7 @@ Enterprise Wi-Fi is currently only supported on gateways running our [generic pr
 
  - TTLS-MSCHAPv2
  - PEAP-MSCHAPv2
- - TLS-EAP
+ - EAP-TLS
 
 ## Setup TTLS/PEAP-MSCHAPv2
  1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
@@ -19,12 +19,13 @@ Enterprise Wi-Fi is currently only supported on gateways running our [generic pr
 The configuration should look like the following:
 ![Alt text](images/802-1x-images/wifi-ttls.png)
 
-## Setup TLS-EAP
-To connect via TLS-EAP you will need the following items in unencrypted PEM format:
+## Setup EAP-TLS
+To connect via EAP-TLS you will need the following items in unencrypted PEM format:
+
     - Certificate Authority (CA) Certificate
     - Client Certificate + Private Key (PKCS8)
 
-### Enrolling secrets in the Keystore service
+### Enrolling secrets in the [Keystore service](/gateway-configuration/keystores-management/).
 
  1. Navigate to `Security` under the `System` tab.
  2. Under the `Keystore Configuration` add a new keystore, and keep note of the name. ![Adding a new keystore](images/802-1x-images/wifi-create-keystore.png)

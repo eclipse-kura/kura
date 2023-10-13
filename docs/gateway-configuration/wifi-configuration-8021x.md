@@ -44,3 +44,5 @@ To connect via EAP-TLS you will need the following items in unencrypted PEM form
  7. Set `Certificate Authority Certificate (CA-Cert)` to the name of the certificate created above.
  8. Set the `Client Private Key` to the name of the Private Key created above.
 
+When completed the Wi-Fi configuration should look like the following:
+![tls-configuration](images/802-1x-images/wifi-tls.png)

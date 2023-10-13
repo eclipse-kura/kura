@@ -254,8 +254,7 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     /*
      * Saves rules from the localRules, portForwardRules, natRules, and autoNatRules
-     * into the Kura chains in
-     * /etc/sysconfig/iptables
+     * into the Kura chains in /etc/sysconfig/iptables
      */
     public void saveKuraChains() throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(getFirewallConfigTmpFileName());
@@ -393,8 +392,7 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     /*
      * Saves current configurations from the localRules, portForwardRules, natRules,
-     * and autoNatRules
-     * into specified temporary file
+     * and autoNatRules into specified temporary file
      */
     public void save(String filename) {
         internalSave(filename);
@@ -865,9 +863,8 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     /*
      * Applies the rules contained in the localRules, portForwardRules, natRules,
-     * and autoNatRules,
-     * force the polices for input and forward chains and apply flooding protection
-     * rules if needed.
+     * and autoNatRules, force the polices for input and forward chains and apply
+     * flooding protection rules if needed.
      */
     public void applyRules() {
         applyPolicies();

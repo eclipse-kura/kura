@@ -17,6 +17,7 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -474,12 +475,15 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     }
 
     private boolean isWanInterface(String interfaceName) {
-        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
-
-        if (status.isPresent()) {
-            return status.get() == NetInterfaceStatus.netIPv4StatusEnabledWAN;
+        List<Optional<NetInterfaceStatus>> statusList = getNetInterfaceStatus(interfaceName);
+        boolean isWan = false;
+        for (Optional<NetInterfaceStatus> status : statusList) {
+            if (status.isPresent() && (status.get() == NetInterfaceStatus.netIPv4StatusEnabledWAN
+                    || status.get() == NetInterfaceStatus.netIPv6StatusEnabledWAN)) {
+                isWan = true;
+            }
         }
-        return false;
+        return isWan;
     }
 
     private boolean isNatValid(String interfaceName) {
@@ -487,13 +491,25 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 this.networkProperties.getProperties());
         Optional<Boolean> isNatEnabled = this.networkProperties.getOpt(Boolean.class,
                 "net.interface.%s.config.nat.enabled", interfaceName);
-        Optional<NetInterfaceStatus> status = getNetInterfaceStatus(interfaceName);
+        List<Optional<NetInterfaceStatus>> statusList = getNetInterfaceStatus(interfaceName);
 
-        if (type.isPresent() && isNatEnabled.isPresent() && status.isPresent()) {
+        boolean isStatusListPresent = false;
+        for (Optional<NetInterfaceStatus> status : statusList) {
+            if (status.isPresent()) {
+                isStatusListPresent = true;
+            }
+        }
+
+        if (type.isPresent() && isNatEnabled.isPresent() && isStatusListPresent) {
             boolean isSupportedType = SUPPORTED_NAT_INTERFACE_TYPES.contains(type.get());
             boolean isNat = isNatEnabled.get();
-            boolean isLan = status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN;
-
+            boolean isLan = false;
+            for (Optional<NetInterfaceStatus> status : statusList) {
+                if (status.isPresent() && (status.get() == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                        || status.get() == NetInterfaceStatus.netIPv6StatusEnabledLAN)) {
+                    isLan = true;
+                }
+            }
             return isSupportedType && isNat && isLan;
         }
 
@@ -530,7 +546,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 .orElse(NetInterfaceType.UNKNOWN);
         final boolean isDhcpServerEnabled = this.networkProperties
                 .getOpt(Boolean.class, "net.interface.%s.config.dhcpServer4.enabled", interfaceName).orElse(false);
-        final NetInterfaceStatus status = getNetInterfaceStatus(interfaceName)
+        final NetInterfaceStatus status = getIp4InterfaceStatus(interfaceName)
                 .orElse(NetInterfaceStatus.netIPv4StatusUnknown);
 
         if (!SUPPORTED_DHCP_SERVER_INTERFACE_TYPES.contains(type) || !isDhcpServerEnabled) {
@@ -542,14 +558,39 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 && status != NetInterfaceStatus.netIPv4StatusUnknown;
     }
 
-    private Optional<NetInterfaceStatus> getNetInterfaceStatus(String interfaceName) {
+    private Optional<NetInterfaceStatus> getIp4InterfaceStatus(String interfaceName) {
+
         Optional<String> interfaceStatus = this.networkProperties.getOpt(String.class,
                 "net.interface.%s.config.ip4.status", interfaceName);
+
         if (interfaceStatus.isPresent()) {
             return Optional.of(NetInterfaceStatus.valueOf(interfaceStatus.get()));
         } else {
             return Optional.empty();
         }
+    }
+
+    private List<Optional<NetInterfaceStatus>> getNetInterfaceStatus(String interfaceName) {
+
+        List<Optional<NetInterfaceStatus>> returnList = new ArrayList<>();
+        Optional<String> ip4InterfaceStatus = this.networkProperties.getOpt(String.class,
+                "net.interface.%s.config.ip4.status", interfaceName);
+        Optional<String> ip6InterfaceStatus = this.networkProperties.getOpt(String.class,
+                "net.interface.%s.config.ip4.status", interfaceName);
+
+        if (ip4InterfaceStatus.isPresent()) {
+            returnList.add(Optional.of(NetInterfaceStatus.valueOf(ip4InterfaceStatus.get())));
+        } else {
+            returnList.add(Optional.empty());
+        }
+
+        if (ip6InterfaceStatus.isPresent()) {
+            returnList.add(Optional.of(NetInterfaceStatus.valueOf(ip6InterfaceStatus.get())));
+        } else {
+            returnList.add(Optional.empty());
+        }
+
+        return returnList;
     }
 
     private Map<String, Object> migrateModemConfigs(final Map<String, Object> properties) {

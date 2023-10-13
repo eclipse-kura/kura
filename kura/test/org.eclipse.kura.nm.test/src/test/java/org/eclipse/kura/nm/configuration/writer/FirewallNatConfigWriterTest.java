@@ -26,6 +26,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
+import org.eclipse.kura.linux.net.iptables.LinuxFirewallIPv6;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -38,6 +39,7 @@ public class FirewallNatConfigWriterTest {
     private List<String> natInterfaces;
     private Exception occurredException;
     private LinuxFirewall mockLinuxFirewall;
+    private LinuxFirewallIPv6 mockLinuxFirewallIPv6;
     private ArgumentCaptor<Object> appliedRuleCaptor = ArgumentCaptor.forClass(Object.class);
 
     /*
@@ -121,14 +123,17 @@ public class FirewallNatConfigWriterTest {
         CommandExecutorService mockExecutor = Mockito.mock(CommandExecutorService.class);
 
         this.mockLinuxFirewall = Mockito.mock(LinuxFirewall.class);
+        this.mockLinuxFirewallIPv6 = Mockito.mock(LinuxFirewallIPv6.class);
 
         setPrivateStaticField(LinuxFirewall.class.getDeclaredField("linuxFirewall"), this.mockLinuxFirewall);
+        setPrivateStaticField(LinuxFirewallIPv6.class.getDeclaredField("linuxFirewall"), this.mockLinuxFirewallIPv6);
 
         this.writer = new FirewallNatConfigWriter(mockExecutor, this.wanInterfaces, this.natInterfaces);
     }
 
     private void givenBrokenFirewall() throws Exception {
         Mockito.doThrow(KuraException.class).when(this.mockLinuxFirewall).replaceAllNatRules(Mockito.any());
+        Mockito.doThrow(KuraException.class).when(this.mockLinuxFirewallIPv6).replaceAllNatRules(Mockito.any());
     }
 
     /*
@@ -161,7 +166,8 @@ public class FirewallNatConfigWriterTest {
     @SuppressWarnings("unchecked")
     private void thenNATRuleApplied(String expectedSource, String expectedDestination) throws KuraException {
         Mockito.verify(this.mockLinuxFirewall).replaceAllNatRules((Set<NATRule>) this.appliedRuleCaptor.capture());
-        
+        Mockito.verify(this.mockLinuxFirewallIPv6).replaceAllNatRules((Set<NATRule>) this.appliedRuleCaptor.capture());
+
         assertTrue(
                 natRuleExists((Set<NATRule>) this.appliedRuleCaptor.getValue(), expectedSource, expectedDestination));
     }
@@ -169,6 +175,7 @@ public class FirewallNatConfigWriterTest {
     @SuppressWarnings("unchecked")
     private void thenNATRuleNotApplied(String expectedSource, String expectedDestination) throws KuraException {
         Mockito.verify(this.mockLinuxFirewall).replaceAllNatRules((Set<NATRule>) this.appliedRuleCaptor.capture());
+        Mockito.verify(this.mockLinuxFirewallIPv6).replaceAllNatRules((Set<NATRule>) this.appliedRuleCaptor.capture());
 
         assertFalse(
                 natRuleExists((Set<NATRule>) this.appliedRuleCaptor.getValue(), expectedSource, expectedDestination));

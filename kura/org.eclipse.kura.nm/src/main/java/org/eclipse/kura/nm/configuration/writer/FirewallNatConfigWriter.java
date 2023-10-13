@@ -20,6 +20,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
+import org.eclipse.kura.linux.net.iptables.LinuxFirewallIPv6;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class FirewallNatConfigWriter {
 
     private final CommandExecutorService executorService;
     private final LinuxFirewall firewall;
+    private final LinuxFirewallIPv6 firewallIpv6;
     private final List<String> wanInterfaceNames;
     private final List<String> natInterfaceNames;
 
@@ -39,6 +41,7 @@ public class FirewallNatConfigWriter {
         this.wanInterfaceNames = wanInterfaceNames;
         this.natInterfaceNames = natInterfaceNames;
         this.firewall = LinuxFirewall.getInstance(this.executorService);
+        this.firewallIpv6 = LinuxFirewallIPv6.getInstance(this.executorService);
     }
 
     public void writeConfiguration() throws KuraException {
@@ -54,6 +57,7 @@ public class FirewallNatConfigWriter {
             }
 
             this.firewall.replaceAllNatRules(natRules);
+            this.firewallIpv6.replaceAllNatRules(natRules);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "Failed to replace all NAT rules with new ones for interfaces: " + this.natInterfaceNames, e);

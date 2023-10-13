@@ -1,6 +1,6 @@
 # Wi-Fi 802.1x Configuration
 
-Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](/getting-started/install-kura/#installer-types). The following is a list of currently supported 802.1x configurations.
+Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](/getting-started/install-kura/#installer-types). The following is a list of currently supported 802.1x authentication methods.
 
  - TTLS-MSCHAPv2
  - PEAP-MSCHAPv2

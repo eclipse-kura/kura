@@ -6,7 +6,7 @@ Enterprise Wi-Fi is currently only supported on gateways running our [generic pr
  - PEAP-MSCHAPv2
  - TLS-EAP
 
-# Setup TTLS/PEAP-MSCHAPv2
+## Setup TTLS/PEAP-MSCHAPv2
  1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`
     ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)

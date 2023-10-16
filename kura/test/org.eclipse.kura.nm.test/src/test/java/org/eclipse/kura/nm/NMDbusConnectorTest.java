@@ -1006,8 +1006,8 @@ public class NMDbusConnectorTest {
      */
 
     private void givenBasicMockedDbusConnector() throws DBusException, IOException {
-        when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
-                eq("/org/freedesktop/NetworkManager"), eq(NetworkManager.class)))
+        when(this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/org/freedesktop/NetworkManager", NetworkManager.class))
                 .thenReturn(this.mockedNetworkManager);
 
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
@@ -1022,11 +1022,11 @@ public class NMDbusConnectorTest {
                 eq("/fi/w1/wpa_supplicant1"), any())).thenReturn(this.mockedWpaSupplicant);
         
         Properties nmProperties = mock(Properties.class);
-        when(nmProperties.Get(eq("/org/freedesktop/NetworkManager"),eq("Version")))
+        when(nmProperties.Get("/org/freedesktop/NetworkManager","Version"))
                 .thenReturn(basicNmVersion);
         
-        when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
-                eq("/org/freedesktop/NetworkManager"), eq(Properties.class)))
+        when(this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/org/freedesktop/NetworkManager", Properties.class))
                 .thenReturn(nmProperties);
         
         this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);

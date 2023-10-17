@@ -35,7 +35,6 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
-import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.AfterClass;
@@ -59,7 +58,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String MQTT_METHOD_SPEC_DEL = "DEL";
-    private static final String METHOD_SPEC_UPDATE = "UPDATE";
+    private static final String METHOD_SPEC_PUT = "PUT";
     private static final String REST_APP_ID = "identity/v1";
 
     private static IdentityService identityServiceMock = mock(IdentityService.class);
@@ -75,8 +74,6 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String EXPECTED_GET_USER_RESPONSE = new Scanner(
             IdentityEndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
-
-    private UserConfigDTO userConfigRequest;
 
     private static Set<UserDTO> userConfigs;
 
@@ -109,7 +106,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_UPDATE), "/identities", gson.toJson(user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/identities", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();

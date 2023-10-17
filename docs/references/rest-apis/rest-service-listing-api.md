@@ -1,7 +1,7 @@
 # Service Listing V1 REST APIs
 !!! note
 
-    This API can also be accessed via the RequestHandler with app-id: `SEC-V1`.
+    This API can also be accessed via the RequestHandler with app-id: `SVCLIST-V1`.
 
 The SVCLIST-V1 cloud request handler and the corresponding REST APIs allow to retrieve the identifiers (kura.service.pid) of the service running on the system that match user provided search criteria.
 

@@ -59,6 +59,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String MQTT_METHOD_SPEC_DEL = "DEL";
+    private static final String METHOD_SPEC_UPDATE = "UPDATE";
     private static final String REST_APP_ID = "identity/v1";
 
     private static IdentityService identityServiceMock = mock(IdentityService.class);
@@ -96,7 +97,19 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users", gson.toJson(user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities", gson.toJson(user));
+
+        thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
+    }
+
+    @Test
+    public void shouldInvokeUpdateUserSuccessfully() throws KuraException {
+        givenUser(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"));
+
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_UPDATE), "/identities", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -108,7 +121,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/users", gson.toJson(user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+                gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -120,10 +134,25 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users-get", gson.toJson(user));
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName", gson.toJson(user));
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_USER_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnUserConfig() throws KuraException {
+        givenUserConfigs(new UserDTO("testuser2", //
+                new HashSet<String>(Arrays.asList("perm1", "perm2")), //
+                false, //
+                true));
+
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/identities");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_GET_USER_CONFIG_RESPONSE);
     }
 
     @Test
@@ -136,45 +165,12 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         thenResponseBodyEqualsJson("{\"permissions\": [\"perm1\",\"perm2\"]}");
     }
 
-    @Test
-    public void shouldReturnUserConfig() throws KuraException {
-        givenUserConfigs(new UserDTO("testuser2", //
-                new HashSet<String>(Arrays.asList("perm1", "perm2")), //
-                false, //
-                true));
-
-        givenIdentityService();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/users/configs");
-
-        thenRequestSucceeds();
-        thenResponseBodyEqualsJson(EXPECTED_GET_USER_CONFIG_RESPONSE);
-    }
-
-    @Test
-    public void shouldInvokeSetUserConfigSuccessfully() throws KuraException {
-        givenUserConfigRequest(new UserDTO("testuser", Collections.emptySet(), true, false, "testpassw"), new UserDTO(
-                "testuser2", new HashSet<String>(Arrays.asList("perm1", "perm2")), false, true, "testpassw2"));
-
-        givenIdentityService();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/users/configs", gson.toJson(this.userConfigRequest));
-
-        thenRequestSucceeds();
-    }
-
     private void givenUser(UserDTO userParam) {
         user = userParam;
     }
 
     private void givenUserConfigs(UserDTO... userConfigurations) {
         userConfigs = new HashSet<>(Arrays.asList(userConfigurations));
-    }
-
-    private void givenUserConfigRequest(UserDTO... userDTO) {
-        this.userConfigRequest = new UserConfigDTO();
-        this.userConfigRequest.setUserConfig(new HashSet<>(Arrays.asList(userDTO)));
-
     }
 
     private static void givenIdentityService() throws KuraException {

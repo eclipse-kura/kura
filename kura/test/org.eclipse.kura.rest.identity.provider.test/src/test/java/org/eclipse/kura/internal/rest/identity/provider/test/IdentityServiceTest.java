@@ -28,6 +28,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.junit.Test;
 import org.osgi.service.useradmin.Role;
@@ -41,6 +43,8 @@ public class IdentityServiceTest {
 
     private IdentityRestService service = new IdentityRestService();
     private UserAdmin userAdmin;
+    private CryptoService cryptoService;
+    private ConfigurationService configurationService;
 
     private RequestHandlerRegistry requestHandlerRegistry;
     private Exception occurredException;
@@ -95,9 +99,28 @@ public class IdentityServiceTest {
         thenNoExceptionOccurred();
     }
 
+    @Test
+    public void shouldCreateIdentityService() throws KuraException {
+        givenMockUserAdmin();
+        givenMockCryptoService();
+        givenMockConfigurationService();
+
+        whenActivate();
+
+        thenNoExceptionOccurred();
+    }
+
     /*
      * Given
      */
+
+    private void givenMockCryptoService() {
+        this.cryptoService = mock(CryptoService.class);
+    }
+
+    private void givenMockConfigurationService() {
+        this.configurationService = mock(ConfigurationService.class);
+    }
 
     private void givenMockUserAdmin() {
         this.userAdmin = mock(UserAdmin.class);
@@ -105,6 +128,10 @@ public class IdentityServiceTest {
 
     private void givenMockRequestHandlerRegistry() {
         this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
+    }
+
+    private void givenBoundRequestHandlerRegistry() {
+        bindRequestHandlerRegistry();
     }
 
     private void givenFailingMockRequestHandlerRegistry() throws KuraException {
@@ -126,16 +153,17 @@ public class IdentityServiceTest {
         bindRequestHandlerRegistry();
     }
 
-    private void givenBoundRequestHandlerRegistry() {
-        bindRequestHandlerRegistry();
-    }
-
     private void whenUnbindRequestHandlerRegistry() {
         try {
             this.service.unbindRequestHandlerRegistry(this.requestHandlerRegistry);
         } catch (Exception e) {
             this.occurredException = e;
         }
+    }
+
+    private void whenActivate() {
+        // TODO Auto-generated method stub
+
     }
 
     /*

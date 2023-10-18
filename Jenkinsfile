@@ -52,7 +52,7 @@ node {
                                     -Dmaven.test.failure.ignore=true \
                                     -Dsonar.organization=eclipse \
                                     -Dsonar.host.url=${SONAR_HOST_URL} \
-                                    -Dsonar.login=${SONARCLOUD_TOKEN} \
+                                    -Dsonar.token=${SONARCLOUD_TOKEN} \
                                     -Dsonar.branch.name=${BRANCH_NAME} \
                                     -Dsonar.branch.target=${CHANGE_TARGET} \
                                     -Dsonar.java.source=8 \

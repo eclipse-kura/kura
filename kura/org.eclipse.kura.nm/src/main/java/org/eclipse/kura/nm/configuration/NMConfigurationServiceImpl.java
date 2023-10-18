@@ -576,7 +576,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         Optional<String> ip4InterfaceStatus = this.networkProperties.getOpt(String.class,
                 "net.interface.%s.config.ip4.status", interfaceName);
         Optional<String> ip6InterfaceStatus = this.networkProperties.getOpt(String.class,
-                "net.interface.%s.config.ip4.status", interfaceName);
+                "net.interface.%s.config.ip6.status", interfaceName);
 
         if (ip4InterfaceStatus.isPresent()) {
             returnList.add(Optional.of(NetInterfaceStatus.valueOf(ip4InterfaceStatus.get())));

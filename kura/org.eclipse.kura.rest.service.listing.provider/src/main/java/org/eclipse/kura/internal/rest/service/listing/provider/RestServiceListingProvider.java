@@ -153,7 +153,7 @@ public class RestServiceListingProvider {
     }
 
     @POST
-    @Path("/servicePids/byFilter")
+    @Path("/servicePids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public PidSet getServicePidsByFilter(final FilterDTO filter,
@@ -238,7 +238,7 @@ public class RestServiceListingProvider {
     }
 
     @POST
-    @Path("/factoryPids/byFilter")
+    @Path("/factoryPids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
     public PidSet getFactoryPidsByFilter(final FilterDTO filter,
             @Context final ContainerRequestContext requestContext) {

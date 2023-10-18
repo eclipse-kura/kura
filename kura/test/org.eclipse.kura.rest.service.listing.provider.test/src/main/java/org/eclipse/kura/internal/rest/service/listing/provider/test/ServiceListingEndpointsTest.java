@@ -143,7 +143,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportPropertyMatchFilter() {
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"name\":\"foo\",\"value\":\"bar\"}");
 
         thenRequestSucceeds();
@@ -155,7 +155,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "foo",
                 Collections.singletonMap("foo", new String[] { "bar", "baz" }));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"name\":\"foo\",\"value\":\"bar\"}");
 
         thenRequestSucceeds();
@@ -168,7 +168,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "baz"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter", "{\"name\":\"foo\"}");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{\"name\":\"foo\"}");
 
         thenRequestSucceeds();
         thenResponseContainsPid("foo");
@@ -180,7 +180,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldSupportNotFilter() {
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"not\": {\"name\":\"foo\",\"value\":\"bar\"} }");
 
         thenRequestSucceeds();
@@ -193,7 +193,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"and\": [ {\"name\":\"foo\",\"value\":\"bar\"}, {\"name\":\"kura.service.pid\",\"value\":\"foo\"} ] }");
 
         thenRequestSucceeds();
@@ -208,7 +208,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"or\": [ {\"name\":\"fooo\" }, {\"name\":\"foo\",\"value\":\"bar\"} ] }");
 
         thenRequestSucceeds();
@@ -265,7 +265,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByProperty() {
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"testValue\"}");
 
         thenRequestSucceeds();
@@ -275,7 +275,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByPropertyOfArrayType() {
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"value2\"}");
 
         thenRequestSucceeds();
@@ -285,7 +285,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByPropertyAndObjectClass() {
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"and\": [ {\"name\":\"objectClass\", \"value\":\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"}, {\"name\":\"testProperty\",\"value\": \"testValue\"} ] }");
 
         thenRequestSucceeds();
@@ -296,7 +296,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectEmptyFilter() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter", "{}");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{}");
 
         thenResponseCodeIs(400);
     }
@@ -304,7 +304,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectFilterWithSpacesInPropertyName() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"name\": \" testProperty \", \"value\": \"value2\"}");
 
         thenResponseCodeIs(400);
@@ -313,7 +313,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRejectFilterWithMultipleTypes() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byFilter",
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"and\": [], \"name\": \" testProperty \", \"value\": \"value2\"}");
 
         thenResponseCodeIs(400);

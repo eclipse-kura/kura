@@ -12,14 +12,17 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.beans.EventHandler;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +34,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.service.listing.provider.test.constants.ServiceListeningTestConstants;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -65,11 +68,10 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnUnauthorizedStatusWhenNoRestPermissionIsGiven() {
 
-        givenTestServicesRegitered();
         givenIdentity("noAuthUser", Optional.of("pass1"), Collections.emptyList());
         givenBasicCredentials(Optional.empty());
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), ServiceListeningTestConstants.GET_ENDPOINT);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/servicePids");
 
         thenResponseCodeIs(401);
     }
@@ -77,20 +79,20 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnListOfAllServices() {
 
-        givenTestServicesRegitered();
+        givenRegisteredService(TestInterface.class, "TestService", Collections.emptyMap());
         givenIdentity("authUser", Optional.of("pass2"), Collections.emptyList());
         givenBasicCredentials(Optional.of("authUser:pass2"));
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), ServiceListeningTestConstants.GET_ENDPOINT);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/servicePids");
 
         thenRequestSucceeds();
-        thenResponseContainsTestServiceKuraServicePid();
+        thenResponseContainsPid("TestService");
     }
 
     @Test
     public void shouldReturnListOfFilteredServices() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), ServiceListeningTestConstants.POST_ENDPOINT,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.COMPLETE_POST_BODY);
 
         thenRequestSucceeds();
@@ -100,7 +102,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyIsNull() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), ServiceListeningTestConstants.POST_ENDPOINT,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -110,7 +112,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyIsEmpty() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), ServiceListeningTestConstants.POST_ENDPOINT,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -120,7 +122,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyHasNullField() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), ServiceListeningTestConstants.POST_ENDPOINT,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_FIELD_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
@@ -130,11 +132,223 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyHasEmptyField() {
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), ServiceListeningTestConstants.POST_ENDPOINT,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_FIELD_POST_BODY);
 
         thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
         thenResponseBodyEqualsJson(ServiceListeningTestConstants.EMPTY_FIELD_BODY_RESPONSE);
+    }
+
+    @Test
+    public void shouldSupportPropertyMatchFilter() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"name\":\"foo\",\"value\":\"bar\"}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+    }
+
+    @Test
+    public void shouldSupportPropertyMatchFilterWithArray() {
+        givenRegisteredService(TestInterface.class, "foo",
+                Collections.singletonMap("foo", new String[] { "bar", "baz" }));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"name\":\"foo\",\"value\":\"bar\"}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+    }
+
+    @Test
+    public void shouldSupportPropertyPresenceFilter() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
+        givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "baz"));
+        givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{\"name\":\"foo\"}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+        thenResponseContainsPid("bar");
+        thenResponseDoesNotContainPid("baz");
+    }
+
+    @Test
+    public void shouldSupportNotFilter() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"not\": {\"name\":\"foo\",\"value\":\"bar\"} }");
+
+        thenRequestSucceeds();
+        thenResponseDoesNotContainPid("foo");
+    }
+
+    @Test
+    public void shouldSupportAndFilter() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
+        givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
+        givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"and\": [ {\"name\":\"foo\",\"value\":\"bar\"}, {\"name\":\"kura.service.pid\",\"value\":\"foo\"} ] }");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+        thenResponseDoesNotContainPid("bar");
+        thenResponseDoesNotContainPid("baz");
+    }
+
+    @Test
+    public void shouldSupportOrFilter() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "baz"));
+        givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
+        givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"or\": [ {\"name\":\"fooo\" }, {\"name\":\"foo\",\"value\":\"bar\"} ] }");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("baz");
+        thenResponseContainsPid("bar");
+        thenResponseDoesNotContainPid("foo");
+    }
+
+    @Test
+    public void shouldSupportServicesSatisfyingReference() {
+        givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "baz"));
+        givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
+        givenRegisteredService(OtherTestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+                "{\"pid\": \"org.eclipse.kura.internal.rest.service.listing.provider.test.TargetFilterTestService\","
+                        + " \"referenceName\": \"TestInterface\" }");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("foo");
+        thenResponseContainsPid("bar");
+        thenResponseDoesNotContainPid("baz");
+    }
+
+    @Test
+    public void shouldSupportListingFactoryPids() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/factoryPids");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+    }
+
+    @Test
+    public void shouldSupportListingFactorysPidByInterface() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
+                "{\"interfaceNames\":[\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"]}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+        thenResponseDoesNotContainPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+    }
+
+    @Test
+    public void shouldSupportListingFactoryPidsSpecifyingMultipleInterfaces() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
+                "{\"interfaceNames\":[\"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.internal.rest.service.listing.provider.test.OtherTestInterface\"]}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+        thenResponseDoesNotContainPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+    }
+
+    @Test
+    public void shouldSupportListingFactoryPidsByProperty() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+                "{\"name\": \"testProperty\", \"value\": \"testValue\"}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+        thenResponseDoesNotContainPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+    }
+
+    @Test
+    public void shouldSupportListingFactoryPidsByPropertyOfArrayType() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+                "{\"name\": \"testProperty\", \"value\": \"value2\"}");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+        thenResponseDoesNotContainPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+    }
+
+    @Test
+    public void shouldSupportListingFactoryPidsByPropertyAndObjectClass() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
+                "{\"and\": [ {\"name\":\"objectClass\", \"value\":\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"}, {\"name\":\"testProperty\",\"value\": \"testValue\"} ] }");
+
+        thenRequestSucceeds();
+        thenResponseContainsPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory1");
+        thenResponseDoesNotContainPid("org.eclipse.kura.internal.rest.service.listing.provider.test.TestFactory2");
+    }
+
+    @Test
+    public void shouldRejectEmptyFilter() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectFilterWithSpacesInPropertyName() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"name\": \" testProperty \", \"value\": \"value2\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectFilterWithMultipleTypes() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
+                "{\"and\": [], \"name\": \" testProperty \", \"value\": \"value2\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectReferenceWithoutPid() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+                "{ \"referenceName\": \"TestInterface\" }");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectReferenceWithEmptyPid() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+                "{ \"pid\": \"\", \"referenceName\": \"TestInterface\" }");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectReferenceWithoutReferenceName() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+                "{ \"pid\": \"foo\" }");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectReferenceWithEmptyReferenceName() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
+                "{ \"pid\": \"foo\", \"referenceName\": \"\" }");
+
+        thenResponseCodeIs(400);
     }
 
     /*
@@ -175,30 +389,40 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         ((RestTransport) this.transport).setBasicCredentials(basicCredentials);
     }
 
-    private static void givenTestServicesRegitered() {
+    private <T> void givenRegisteredService(final Class<T> clazz, final String pid,
+            final Map<String, Object> properties) {
 
-        EventHandler testService = Mockito.mock(EventHandler.class);
+        final T testService = Mockito.mock(clazz);
         BundleContext context = FrameworkUtil.getBundle(ServiceListingEndpointsTest.class).getBundleContext();
-        Dictionary<String, String> properties = new Hashtable<>();
-        properties.put("kura.service.pid", "TestService");
-        serviceRegistration = context.registerService(EventHandler.class, testService, properties);
+        final Dictionary<String, Object> dict = new Hashtable<>();
+        dict.put("kura.service.pid", pid);
 
+        for (final Entry<String, Object> e : properties.entrySet()) {
+            dict.put(e.getKey(), e.getValue());
+        }
+
+        registeredServices.add(context.registerService(clazz, testService, dict));
     }
 
     /*
      * THEN
      */
 
-    private void thenResponseContainsTestServiceKuraServicePid() {
-        JsonArray responseArray = expectJsonResponse().get("servicesList").asArray();
-        assertTrue(responseArray.values().contains(Json.value("TestService")));
+    private void thenResponseContainsPid(final String pid) {
+        JsonArray responseArray = expectJsonResponse().get("pids").asArray();
+        assertTrue(responseArray.values().contains(Json.value(pid)));
+    }
+
+    private void thenResponseDoesNotContainPid(final String pid) {
+        JsonArray responseArray = expectJsonResponse().get("pids").asArray();
+        assertFalse(responseArray.values().contains(Json.value(pid)));
     }
 
     /*
      * Utils
      */
 
-    private static ServiceRegistration<EventHandler> serviceRegistration;
+    private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     private <S extends Role> S getRoleOrCreateOne(final UserAdmin userAdmin, final String name, final Class<S> classz) {
@@ -219,10 +443,10 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
         return (S) userAdmin.createRole(name, type);
     }
 
-    @AfterClass
-    public static void unregisterTestService() {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
+    @After
+    public void unregisterTestService() {
+        for (final ServiceRegistration<?> reg : registeredServices) {
+            reg.unregister();
         }
     }
 }

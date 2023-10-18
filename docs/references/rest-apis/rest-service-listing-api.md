@@ -2,18 +2,17 @@
 !!! note
 
     This API can also be accessed via the RequestHandler with app-id: `SVCLIST-V1`.
-
 The SVCLIST-V1 cloud request handler and the corresponding REST APIs allow to retrieve the identifiers (kura.service.pid) of the service running on the system that match user provided search criteria.
 
 
   * [Request definitions](#request-definitions)
     * [GET/servicePids](#getservicepids)
     * [POST/servicePids/byInterface](#postservicepidsbyinterface)
-    * [POST/servicePids/byFilter](#postservicepidsbyfilter)
+    * [POST/servicePids/byProperty](#postservicepidsbyproperty)
     * [POST/servicePids/satisfyingReference](#postservicepidssatisfyingreference)
     * [GET/factoryPids](#getfactorypids)
     * [POST/factoryPids/byInterface](#postfactorypidsbyinterface)
-    * [POST/factoryPids/byFilter](#postfactorypidsbyfilter)
+    * [POST/factoryPids/byProperty](#postfactorypidsbyproperty)
   * [JSON definitions](#json-definitions)
     * [InterfaceNames](#interfacenames)
     * [Reference](#reference)
@@ -58,8 +57,8 @@ The SVCLIST-V1 cloud request handler and the corresponding REST APIs allow to re
           * **response body** :
               * [GenericFailureReport](#genericfailurereport)
 
-### POST/servicePids/byFilter
-  * **REST API path** : /services/serviceListing/v1/servicePids/byFilter
+### POST/servicePids/byProperty
+  * **REST API path** : /services/serviceListing/v1/servicePids/byProperty
   * **description** : Returns the pid of the services whose properties match the specified filter.
   * **request body** :
       * [Filter](#filter)
@@ -128,8 +127,8 @@ The SVCLIST-V1 cloud request handler and the corresponding REST APIs allow to re
           * **response body** :
               * [GenericFailureReport](#genericfailurereport)
 
-### POST/factoryPids/byFilter
-  * **REST API path** : /services/serviceListing/v1/factoryPids/byFilter
+### POST/factoryPids/byProperty
+  * **REST API path** : /services/serviceListing/v1/factoryPids/byProperty
   * **description** : Returns the list of factory pids whose properties match the specified filter.
   * **request body** :
       * [Filter](#filter)
@@ -190,7 +189,7 @@ A object specifying a service pid and a reference name.
 }
 ```
 ### PropertyFilter
-A filter matching property keys and values. If the `value` property omitted the filter will match if the property is set, regardless of the value. If the service property value is of array or list type, the filter will match if at least one of the elements match.
+A filter matching property keys and values. If the `value` property omitted, the filter will match if the property is set, regardless of the value. If the service property value is of array or list type, the filter will match if at least one of the elements match.
 
 <br>**Properties**:
 
@@ -215,7 +214,7 @@ A filter matching property keys and values. If the `value` property omitted the 
 }
 ```
 ### NotFilter
-A filter that matches if filter specified by the "not" propertiy does not match.
+A filter that negates the result returned by the filter specified as the "not" propertiy.
 
 <br>**Properties**:
 
@@ -282,7 +281,7 @@ A filter that matches if any of the filters specified by the "or" propertiy matc
 }
 ```
 ### Filter
-A filter that operates on service properties. This object allow to specify basic property key/value matchers and the `and` `or` and `not` operators.
+A filter that operates on service properties. This object allows to specify basic property key/value matchers and the `and` `or` and `not` operators.
 
 * **Variants**:
   * **object**

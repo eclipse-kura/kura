@@ -13,7 +13,7 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider">
     <implementation class="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
 
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider"/>
@@ -32,5 +32,7 @@
     <property name="service.pid"
               type="String"
               value="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
+    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
+    <reference bind="setServiceComponentRuntime" cardinality="1..1" interface="org.osgi.service.component.runtime.ServiceComponentRuntime" name="ServiceComponentRuntime" policy="static"/>
 
 </scr:component>

@@ -10,18 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
+package org.eclipse.kura.internal.rest.service.listing.provider.test;
 
-package org.eclipse.kura.internal.rest.service.listing.provider.dto;
-
-import java.util.Collections;
-import java.util.List;
-
-public class ServiceListDTO {
-
-    List<String> servicesList;
-
-    public ServiceListDTO(List<String> entries) {
-        Collections.sort(entries, String.CASE_INSENSITIVE_ORDER);
-        this.servicesList = entries;
-    }
+public interface OtherTestInterface {
 }

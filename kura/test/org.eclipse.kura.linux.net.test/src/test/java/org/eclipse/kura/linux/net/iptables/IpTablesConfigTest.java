@@ -12,12 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.iptables;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -142,39 +145,39 @@ public class IpTablesConfigTest extends FirewallTestUtils {
             lines.forEach(line -> {
                 line = line.trim();
                 switch (line) {
-                case "-A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT":
-                    isLocalRulePresent.set(true);
-                    break;
-                case "-A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT":
-                    isPortForwardRulePresent[0].set(true);
-                    break;
-                case "-A forward-kura-pf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
-                    isPortForwardRulePresent[1].set(true);
-                    break;
-                case "-A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050":
-                    isPortForwardRulePresent[2].set(true);
-                    break;
-                case "-A postrouting-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE":
-                    isPortForwardRulePresent[3].set(true);
-                    break;
-                case "-A forward-kura -i eth2 -o eth3 -j ACCEPT":
-                    isAutoNatRulePresent[0].set(true);
-                    break;
-                case "-A forward-kura -i eth3 -o eth2 -m state --state RELATED,ESTABLISHED -j ACCEPT":
-                    isAutoNatRulePresent[1].set(true);
-                    break;
-                case "-A postrouting-kura -o eth3 -j MASQUERADE":
-                    isAutoNatRulePresent[2].set(true);
-                    break;
-                case "-A postrouting-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -o eth5 -p tcp -j MASQUERADE":
-                    isNatRulePresent[0].set(true);
-                    break;
-                case "-A forward-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -i eth4 -o eth5 -p tcp -m tcp -j ACCEPT":
-                    isNatRulePresent[1].set(true);
-                    break;
-                case "-A forward-kura-ipf -s 172.16.0.2/24 -i eth5 -o eth4 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
-                    isNatRulePresent[2].set(true);
-                    break;
+                    case "-A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT":
+                        isLocalRulePresent.set(true);
+                        break;
+                    case "-A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT":
+                        isPortForwardRulePresent[0].set(true);
+                        break;
+                    case "-A forward-kura-pf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
+                        isPortForwardRulePresent[1].set(true);
+                        break;
+                    case "-A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050":
+                        isPortForwardRulePresent[2].set(true);
+                        break;
+                    case "-A postrouting-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE":
+                        isPortForwardRulePresent[3].set(true);
+                        break;
+                    case "-A forward-kura -i eth2 -o eth3 -j ACCEPT":
+                        isAutoNatRulePresent[0].set(true);
+                        break;
+                    case "-A forward-kura -i eth3 -o eth2 -m state --state RELATED,ESTABLISHED -j ACCEPT":
+                        isAutoNatRulePresent[1].set(true);
+                        break;
+                    case "-A postrouting-kura -o eth3 -j MASQUERADE":
+                        isAutoNatRulePresent[2].set(true);
+                        break;
+                    case "-A postrouting-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -o eth5 -p tcp -j MASQUERADE":
+                        isNatRulePresent[0].set(true);
+                        break;
+                    case "-A forward-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -i eth4 -o eth5 -p tcp -m tcp -j ACCEPT":
+                        isNatRulePresent[1].set(true);
+                        break;
+                    case "-A forward-kura-ipf -s 172.16.0.2/24 -i eth5 -o eth4 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
+                        isNatRulePresent[2].set(true);
+                        break;
                 }
 
             });
@@ -233,6 +236,30 @@ public class IpTablesConfigTest extends FirewallTestUtils {
             System.out.println(c);
             verify(executorServiceMock, atLeast(1)).execute(c);
         }
+    }
+
+    @Test
+    public void shouldRestoreConfig() throws KuraException, IOException {
+        IptablesConfig iptablesConfig = new IptablesConfig() {
+            @Override
+            public String getFirewallConfigFileName() {
+                return getFirewallConfigTmpFileName();
+            }
+        };
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(iptablesConfig.getFirewallConfigTmpFileName()));
+        writer.write(FirewallTestUtils.IPTABLES_FILE_CONTENT);
+        writer.close();
+
+        iptablesConfig.restore();
+
+        assertEquals(10, iptablesConfig.localRules.size());
+        assertEquals(1, iptablesConfig.portForwardRules.size());
+        assertEquals(1, iptablesConfig.natRules.size());
+        assertEquals(1, iptablesConfig.autoNatRules.size());
+
+        File configFile = new File(iptablesConfig.getFirewallConfigTmpFileName());
+        Files.deleteIfExists(configFile.toPath());
     }
 
 }

@@ -245,15 +245,16 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Saves (using iptables-save) the current iptables config into /etc/sysconfig/iptables
+     * Saves (using iptables-save) the current iptables config into
+     * /etc/sysconfig/iptables
      */
     public void save() {
         internalSave(null);
     }
 
     /*
-     * Saves rules from the localRules, portForwardRules, natRules, and autoNatRules into the Kura chains in
-     * /etc/sysconfig/iptables
+     * Saves rules from the localRules, portForwardRules, natRules, and autoNatRules
+     * into the Kura chains in /etc/sysconfig/iptables
      */
     public void saveKuraChains() throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(getFirewallConfigTmpFileName());
@@ -362,7 +363,8 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Restores (using iptables-restore) firewall settings from temporary iptables configuration file.
+     * Restores (using iptables-restore) firewall settings from temporary iptables
+     * configuration file.
      * Temporary configuration file is deleted upon completion.
      */
     public void restore(String filename) {
@@ -389,8 +391,8 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Saves current configurations from the localRules, portForwardRules, natRules, and autoNatRules
-     * into specified temporary file
+     * Saves current configurations from the localRules, portForwardRules, natRules,
+     * and autoNatRules into specified temporary file
      */
     public void save(String filename) {
         internalSave(filename);
@@ -623,14 +625,19 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Populates the localRules, portForwardRules, natRules, and autoNatRules by parsing
-     * the iptables configuration file. Only Kura chains are used.
+     * Populates the localRules, portForwardRules, natRules, and autoNatRules by
+     * parsing the iptables configuration file. Only Kura chains are used.
      */
     public void restore() throws KuraException {
+        File iptablesFile = new File(getFirewallConfigFileName());
+        if (!iptablesFile.exists()) {
+            return;
+        }
         List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<>();
         List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<>();
         List<FilterForwardChainRule> filterForwardChain = new ArrayList<>();
-        try (FileReader fr = new FileReader(getFirewallConfigFileName()); BufferedReader br = new BufferedReader(fr)) {
+        try (FileReader fr = new FileReader(getFirewallConfigFileName());
+                BufferedReader br = new BufferedReader(fr)) {
             parseIptablesRules(natPreroutingChain, natPostroutingChain, filterForwardChain, br);
             // ! done parsing !
             parsePortForwardingRules(natPreroutingChain, natPostroutingChain);
@@ -855,8 +862,9 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Applies the rules contained in the localRules, portForwardRules, natRules, and autoNatRules,
-     * force the polices for input and forward chains and apply flooding protection rules if needed.
+     * Applies the rules contained in the localRules, portForwardRules, natRules,
+     * and autoNatRules, force the polices for input and forward chains and apply
+     * flooding protection rules if needed.
      */
     public void applyRules() {
         applyPolicies();
@@ -884,7 +892,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         }
         if (!execute(
                 getIptablesCommand() + " " + String.join(" ", IptablesConfigConstants.IPTABLES_FORWARD_DROP_POLICY))
-                        .getExitStatus().isSuccessful()) {
+                .getExitStatus().isSuccessful()) {
             logger.error("Failed to apply policy to chain FORWARD");
         }
     }
@@ -902,7 +910,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_INPUT_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_INPUT_KURA_CHAIN_MANGLE)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -912,7 +920,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_OUTPUT_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_OUTPUT_KURA_CHAIN_MANGLE)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -922,7 +930,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_FORWARD_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_FORWARD_KURA_CHAIN_MANGLE)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -932,7 +940,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_PREROUTING_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_PREROUTING_KURA_CHAIN_MANGLE)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -942,7 +950,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_POSTROUTING_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_POSTROUTING_KURA_CHAIN_MANGLE))
-                        .getExitStatus().isSuccessful()
+                .getExitStatus().isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -956,7 +964,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_INPUT_KURA_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_INPUT_KURA_CHAIN_NAT)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -966,7 +974,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_OUTPUT_KURA_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_OUTPUT_KURA_CHAIN_NAT)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -976,7 +984,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_PREROUTING_KURA_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_PREROUTING_KURA_CHAIN)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -986,7 +994,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_PREROUTING_KURA_PF_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_PREROUTING_KURA_PF_CHAIN)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -996,7 +1004,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_POSTROUTING_KURA_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_POSTROUTING_KURA_CHAIN)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -1006,7 +1014,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_POSTROUTING_KURA_PF_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_POSTROUTING_KURA_PF_CHAIN)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -1016,7 +1024,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_POSTROUTING_KURA_IPF_CHAIN + " -t " + NAT;
         if (!execute(getIptablesCommand() + " "
                 + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_POSTROUTING_KURA_IPF_CHAIN)).getExitStatus()
-                        .isSuccessful()
+                .isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -1028,7 +1036,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         String rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_INPUT_KURA_CHAIN + " -t " + FILTER;
         if (!execute(
                 getIptablesCommand() + " " + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_INPUT_KURA_CHAIN))
-                        .getExitStatus().isSuccessful()
+                .getExitStatus().isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -1038,7 +1046,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         rule = getIptablesCommand() + " " + IptablesConfigConstants.ADD_OUTPUT_KURA_CHAIN + " -t " + FILTER;
         if (!execute(
                 getIptablesCommand() + " " + String.join(" ", IptablesConfigConstants.IPTABLES_CHECK_OUTPUT_KURA_CHAIN))
-                        .getExitStatus().isSuccessful()
+                .getExitStatus().isSuccessful()
                 && !execute(rule).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -1071,7 +1079,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     private void applyLoopbackRules() {
         if (!execute(
                 (getIptablesCommand() + " " + IptablesConfigConstants.ALLOW_ALL_TRAFFIC_TO_LOOPBACK + " -t " + FILTER))
-                        .getExitStatus().isSuccessful()) {
+                .getExitStatus().isSuccessful()) {
             logger.error("Failed to apply rules to loopback interface");
         }
     }

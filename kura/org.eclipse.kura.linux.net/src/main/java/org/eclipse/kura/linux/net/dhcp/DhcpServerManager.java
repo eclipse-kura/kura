@@ -30,6 +30,7 @@ public class DhcpServerManager {
 
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
+    private static final String LEASE_FILE_DIR = "/etc/"; // <-- to be checked!
     private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
     private final DhcpLinuxTool linuxTool;
 
@@ -116,6 +117,17 @@ public class DhcpServerManager {
             sb.append('-');
             sb.append(interfaceName);
             sb.append(".pid");
+        }
+        return sb.toString();
+    }
+
+    public static String getLeaseFilename(String interfaceName) {
+        StringBuilder sb = new StringBuilder(LEASE_FILE_DIR);
+        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
+            sb.append(dhcpServerTool.getValue());
+            sb.append('-');
+            sb.append(interfaceName);
+            sb.append(".lease");
         }
         return sb.toString();
     }

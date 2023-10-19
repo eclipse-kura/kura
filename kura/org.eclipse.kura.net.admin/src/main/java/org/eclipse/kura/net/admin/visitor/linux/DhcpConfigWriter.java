@@ -135,6 +135,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                 pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
                 pw.println("interface " + ifaceName);
                 pw.println("pidfile " + DhcpServerManager.getPidFilename(ifaceName));
+                pw.println("lease_file " + DhcpServerManager.getLeaseFilename(ifaceName));
                 pw.println("max_leases "
                         + (ip2int(dhcpServerConfig.getRangeEnd()) - ip2int(dhcpServerConfig.getRangeStart())));
                 pw.println("auto_time 0");

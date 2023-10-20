@@ -26,8 +26,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
-import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
@@ -85,78 +85,15 @@ public class DhcpServerConfigWriter {
             throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
             logger.debug("writing to {} with: {}", configFileName, dhcpServerConfig);
-            DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
-            if (dhcpServerTool == DhcpServerTool.DHCPD) {
-                pw.print(dhcpServerConfig.toString());
-            } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-                pw.println("start " + dhcpServerConfig.getRangeStart().getHostAddress());
-                pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
-                pw.println("interface " + ifaceName);
-                pw.println("pidfile " + DhcpServerManager.getPidFilename(ifaceName));
-                pw.println("max_leases "
-                        + (ip2int(dhcpServerConfig.getRangeEnd()) - ip2int(dhcpServerConfig.getRangeStart())));
-                pw.println("auto_time 0");
-                pw.println("decline_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("conflict_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("offer_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("min_lease " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("opt subnet " + dhcpServerConfig.getSubnetMask().getHostAddress());
-                pw.println("opt router " + dhcpServerConfig.getRouterAddress().getHostAddress());
-                pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
-
-                addDNSServersOption(dhcpServerConfig, pw);
-            } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
-                pw.println("interface=" + dhcpServerConfig.getInterfaceName());
-
-                StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=").append(this.interfaceName).append(",")
-                        .append(dhcpServerConfig.getRangeStart()).append(",").append(dhcpServerConfig.getRangeEnd())
-                        .append(",").append(dhcpServerConfig.getDefaultLeaseTime()).append("s");
-                pw.println(dhcpRangeProp.toString());
-
-                pw.println(DHCP_OPTION_KEY + this.interfaceName + ",1,"
-                        + NetworkUtil.getNetmaskStringForm(dhcpServerConfig.getPrefix()));
-                // router property
-                pw.println(
-                        DHCP_OPTION_KEY + this.interfaceName + ",3," + dhcpServerConfig.getRouterAddress().toString());
-
-                if (dhcpServerConfig.isPassDns()) {
-                    // announce DNS servers on this device
-                    pw.println(DHCP_OPTION_KEY + this.interfaceName + ",6,0.0.0.0");
-                } else {
-                    // leaving the option without value disables it
-                    pw.println(DHCP_OPTION_KEY + this.interfaceName + ",6");
-                    pw.println("dhcp-ignore-names=" + this.interfaceName);
-                }
-
-                // all subnets are local
-                pw.println(DHCP_OPTION_KEY + this.interfaceName + ",27,1");
-            }
+            Optional<DhcpServerConfigConverter> configConverter = DhcpServerManager.getConfigConverter();
+            configConverter.ifPresent(converter -> {
+                pw.print(converter.convert(dhcpServerConfig));
+            });
             pw.flush();
             fos.getFD().sync();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, WRITE_ERROR_MESSAGE + this.interfaceName, e);
         }
-    }
-
-    private void addDNSServersOption(DhcpServerConfig4 dhcpServerConfig, PrintWriter pw) {
-        if (!dhcpServerConfig.getDnsServers().isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (IPAddress address : dhcpServerConfig.getDnsServers()) {
-                if (address == null) {
-                    continue;
-                }
-                sb.append(address.getHostAddress()).append(" ");
-            }
-            pw.println("opt dns " + sb.toString().trim());
-        }
-    }
-
-    private int ip2int(IPAddress ip) {
-        int result = 0;
-        for (byte b : ip.getAddress()) {
-            result = result << 8 | b & 0xFF;
-        }
-        return result;
     }
 
     private DhcpServerConfigIP4 buildDhcpServerConfiguration() throws UnknownHostException, KuraException {

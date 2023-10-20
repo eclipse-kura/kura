@@ -44,7 +44,6 @@ public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
             // leaving the option without value disables it
             sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",6").append("\n");
             sb.append("dhcp-ignore-names=").append(config.getInterfaceName()).append("\n");
-            ;
         }
 
         // all subnets are local

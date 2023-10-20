@@ -22,22 +22,23 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
     @Override
     public String convert(DhcpServerConfig config) {
         StringBuilder sb = new StringBuilder();
-        sb.append("start ").append(config.getRangeStart().getHostAddress())
-                .append("end ").append(config.getRangeEnd().getHostAddress())
-                .append("interface ").append(config.getInterfaceName())
-                .append("pidfile ").append(DhcpServerManager.getPidFilename(config.getInterfaceName()))
+        sb.append("start ").append(config.getRangeStart().getHostAddress()).append("\n")
+                .append("end ").append(config.getRangeEnd().getHostAddress()).append("\n")
+                .append("interface ").append(config.getInterfaceName()).append("\n")
+                .append("pidfile ").append(DhcpServerManager.getPidFilename(config.getInterfaceName())).append("\n")
                 .append("lease_file ").append(DhcpServerManager.getLeasesFilename(config.getInterfaceName()))
-                .append("max_leases ").append(getMaxLeases(config))
-                .append("auto_time 0")
-                .append("decline_time ").append(config.getDefaultLeaseTime())
-                .append("conflict_time ").append(config.getDefaultLeaseTime())
-                .append("offer_time ").append(config.getDefaultLeaseTime())
-                .append("min_lease ").append(config.getDefaultLeaseTime())
-                .append("opt subnet ").append(config.getSubnetMask().getHostAddress())
-                .append("opt router ").append(config.getRouterAddress().getHostAddress())
-                .append("opt lease ").append(config.getDefaultLeaseTime());
+                .append("\n")
+                .append("max_leases ").append(getMaxLeases(config)).append("\n")
+                .append("auto_time 0").append("\n")
+                .append("decline_time ").append(config.getDefaultLeaseTime()).append("\n")
+                .append("conflict_time ").append(config.getDefaultLeaseTime()).append("\n")
+                .append("offer_time ").append(config.getDefaultLeaseTime()).append("\n")
+                .append("min_lease ").append(config.getDefaultLeaseTime()).append("\n")
+                .append("opt subnet ").append(config.getSubnetMask().getHostAddress()).append("\n")
+                .append("opt router ").append(config.getRouterAddress().getHostAddress()).append("\n")
+                .append("opt lease ").append(config.getDefaultLeaseTime()).append("\n");
         if (!config.getDnsServers().isEmpty()) {
-            sb.append(addDNSServersOption(config));
+            sb.append(addDNSServersOption(config)).append("\n");
         }
         return sb.toString();
     }

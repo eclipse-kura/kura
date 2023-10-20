@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
@@ -26,9 +27,8 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
-import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
-import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -127,59 +127,16 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
             logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());
-            DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
-            if (dhcpServerTool == DhcpServerTool.DHCPD) {
-//                DhcpdConfigConverter converter = new DhcpdConfigConverter(dhcpServerConfig);
-//                pw.print(converter.convert());
-                pw.print(dhcpServerConfig.toString());
-            } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-//                UdhcpdConfigConverter converter = new UdhcpdConfigConverter(dhcpServerConfig);
-//                pw.print(converter.convert());
-                pw.println("start " + dhcpServerConfig.getRangeStart().getHostAddress());
-                pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
-                pw.println("interface " + ifaceName);
-                pw.println("pidfile " + DhcpServerManager.getPidFilename(ifaceName));
-                pw.println("lease_file " + DhcpServerManager.getLeasesFilename(ifaceName));
-                pw.println("max_leases "
-                        + (ip2int(dhcpServerConfig.getRangeEnd()) - ip2int(dhcpServerConfig.getRangeStart())));
-                pw.println("auto_time 0");
-                pw.println("decline_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("conflict_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("offer_time " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("min_lease " + dhcpServerConfig.getDefaultLeaseTime());
-                pw.println("opt subnet " + dhcpServerConfig.getSubnetMask().getHostAddress());
-                pw.println("opt router " + dhcpServerConfig.getRouterAddress().getHostAddress());
-                pw.println("opt lease " + dhcpServerConfig.getDefaultLeaseTime());
-
-                addDNSServersOption(dhcpServerConfig, pw);
-            }
+            Optional<DhcpServerConfigConverter> configConverter = DhcpServerManager.getConfigConverter();
+            configConverter.ifPresent(converter -> {
+                pw.print(converter.convert(dhcpServerConfig));
+            });
             pw.flush();
             fos.getFD().sync();
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "error while building up new configuration files for dhcp servers", e);
         }
-    }
-
-    private void addDNSServersOption(DhcpServerConfig4 dhcpServerConfig, PrintWriter pw) {
-        if (!dhcpServerConfig.getDnsServers().isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (IPAddress address : dhcpServerConfig.getDnsServers()) {
-                if (address == null) {
-                    continue;
-                }
-                sb.append(address.getHostAddress()).append(" ");
-            }
-            pw.println("opt dns " + sb.toString().trim());
-        }
-    }
-
-    private int ip2int(IPAddress ip) {
-        int result = 0;
-        for (byte b : ip.getAddress()) {
-            result = result << 8 | b & 0xFF;
-        }
-        return result;
     }
 
 }

@@ -83,7 +83,7 @@ public class DhcpdTool implements DhcpLinuxTool {
             command.add("-pf");
             command.add(DhcpServerManager.getPidFilename(interfaceName));
             command.add("-lf");
-            command.add(DhcpServerManager.getLeaseFilename(interfaceName));
+            command.add(DhcpServerManager.getLeasesFilename(interfaceName));
         } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
             command.add(DhcpServerTool.UDHCPD.getValue());
             command.add("-f");

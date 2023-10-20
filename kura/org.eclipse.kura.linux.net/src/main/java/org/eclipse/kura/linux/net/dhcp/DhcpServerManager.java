@@ -121,14 +121,14 @@ public class DhcpServerManager {
         return sb.toString();
     }
 
-    public static String getLeaseFilename(String interfaceName) {
+    public static String getLeasesFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder();
         if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            sb.append("/etc/");
+            sb.append("/var/lib/dhcp/");
             sb.append(dhcpServerTool.getValue());
             sb.append('-');
             sb.append(interfaceName);
-            sb.append(".lease");
+            sb.append(".leases");
         } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
             sb.append("/var/lib/misc/");
             sb.append(dhcpServerTool.getValue());

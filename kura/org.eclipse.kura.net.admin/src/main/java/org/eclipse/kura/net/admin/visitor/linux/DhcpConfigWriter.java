@@ -129,13 +129,17 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());
             DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
             if (dhcpServerTool == DhcpServerTool.DHCPD) {
+//                DhcpdConfigConverter converter = new DhcpdConfigConverter(dhcpServerConfig);
+//                pw.print(converter.convert());
                 pw.print(dhcpServerConfig.toString());
             } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+//                UdhcpdConfigConverter converter = new UdhcpdConfigConverter(dhcpServerConfig);
+//                pw.print(converter.convert());
                 pw.println("start " + dhcpServerConfig.getRangeStart().getHostAddress());
                 pw.println("end " + dhcpServerConfig.getRangeEnd().getHostAddress());
                 pw.println("interface " + ifaceName);
                 pw.println("pidfile " + DhcpServerManager.getPidFilename(ifaceName));
-                pw.println("lease_file " + DhcpServerManager.getLeaseFilename(ifaceName));
+                pw.println("lease_file " + DhcpServerManager.getLeasesFilename(ifaceName));
                 pw.println("max_leases "
                         + (ip2int(dhcpServerConfig.getRangeEnd()) - ip2int(dhcpServerConfig.getRangeStart())));
                 pw.println("auto_time 0");

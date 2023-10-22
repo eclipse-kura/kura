@@ -148,7 +148,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         initTextBoxes();
 
         this.buttonTestPassword.setVisible(false);
-        updateFormEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
     }
 
     private void initLabels() {
@@ -422,6 +421,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         for (int i = 0; i < this.eap.getItemCount(); i++) {
             if (this.eap.getValue(i).equals(config.get8021xConfig().getEapEnum().name())) {
                 this.eap.setSelectedIndex(i);
+                updateFormEap(Gwt8021xEap.valueOf(this.eap.getValue(i)));
                 break;
             }
         }

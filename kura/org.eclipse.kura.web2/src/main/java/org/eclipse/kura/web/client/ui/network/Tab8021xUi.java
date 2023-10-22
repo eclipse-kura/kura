@@ -138,8 +138,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     @UiField
     ScrollPanel helpText;
 
-    private boolean no8021xPasswordInSnapshot = false;
-
     public Tab8021xUi(GwtSession currentSession, NetworkTabsUi tabs) {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -400,7 +398,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         updated8021xConfig.setIdentity(this.username.getText());
 
-        if (!(this.password.getText().equals(PASSWORD_PLACEHOLDER) && no8021xPasswordInSnapshot)) {
+        if (!(this.password.getText().equals(PASSWORD_PLACEHOLDER))) {
             updated8021xConfig.setPassword(this.password.getText());
         }
 
@@ -443,7 +441,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         if (this.activeConfig.getPassword().isEmpty()) {
             this.password.setValue(PASSWORD_PLACEHOLDER);
-            no8021xPasswordInSnapshot = true;
         } else {
             this.password.setValue(this.activeConfig.getPassword());
         }

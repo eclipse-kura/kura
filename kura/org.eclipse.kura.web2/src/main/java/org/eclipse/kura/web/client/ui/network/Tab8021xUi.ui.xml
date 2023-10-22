@@ -114,12 +114,12 @@
                         </b:FormGroup>
 
                         <b:FormGroup>
-                            <b:FormLabel for="identityPrivateKeyName"
-                                ui:field="labelPrivateKeyName" />
-                            <util:HelpButton ui:field="helpPrivateKeyName"/>
+                            <b:FormLabel for="identityPublicPrivateKeyPairName"
+                                ui:field="labelPublicPrivateKeyPairName" />
+                            <util:HelpButton ui:field="helpPublicPrivateKeyPairName"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                            <b:TextBox b:id="privateKeyName"
-                                ui:field="privateKeyName" />
+                            <b:TextBox b:id="publicPrivateKeyPairName"
+                                ui:field="publicPrivateKeyPairName" />
                         </b:FormGroup>
 
                         <b:FormGroup ui:field="testCredentials">

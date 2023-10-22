@@ -80,7 +80,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     FormLabel labelCaCertName;
 
     @UiField
-    FormLabel labelPrivateKeyName;
+    FormLabel labelPublicPrivateKeyPairName;
 
     @UiField
     Form form;
@@ -108,7 +108,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     TextBox caCertName;
 
     @UiField
-    TextBox privateKeyName;
+    TextBox publicPrivateKeyPairName;
 
     // Help
     @UiField
@@ -130,7 +130,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     HelpButton helpCaCertName;
 
     @UiField
-    HelpButton helpPrivateKeyName;
+    HelpButton helpPublicPrivateKeyPairName;
 
     @UiField
     PanelHeader helpTitle;
@@ -162,7 +162,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         labelPassword.setText(MSGS.net8021xPassword());
         labelKeystorePid.setText(MSGS.net8021xKeystorePid());
         labelCaCertName.setText(MSGS.net8021xCaCert());
-        labelPrivateKeyName.setText(MSGS.net8021xPrivateKey());
+        labelPublicPrivateKeyPairName.setText(MSGS.net8021xPublicPrivateKeyPair());
     }
 
     private void initHelpButtons() {
@@ -172,7 +172,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.helpPassword.setHelpText(MSGS.net8021xPasswordHelp());
         this.helpKeystorePid.setHelpText(MSGS.net8021xKeystorePidHelp());
         this.helpCaCertName.setHelpText(MSGS.net8021xCaCertHelp());
-        this.helpPrivateKeyName.setHelpText(MSGS.net8021xPrivateKeyHelp());
+        this.helpPublicPrivateKeyPairName.setHelpText(MSGS.net8021xPublicPrivateKeyPairHelp());
     }
 
     private void initListBoxes() {
@@ -292,17 +292,17 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void initPrivateKeyNameTextBox() {
-        this.privateKeyName.addMouseOverHandler(event -> {
-            if (this.privateKeyName.isEnabled()) {
-                setHelpText(MSGS.net8021xPrivateKeyHelp());
+        this.publicPrivateKeyPairName.addMouseOverHandler(event -> {
+            if (this.publicPrivateKeyPairName.isEnabled()) {
+                setHelpText(MSGS.net8021xPublicPrivateKeyPairHelp());
             }
         });
 
-        this.privateKeyName.addBlurHandler(e -> this.privateKeyName.validate());
-        this.privateKeyName.setAllowBlank(false);
-        this.privateKeyName.addMouseOutHandler(event -> resetHelpText());
+        this.publicPrivateKeyPairName.addBlurHandler(e -> this.publicPrivateKeyPairName.validate());
+        this.publicPrivateKeyPairName.setAllowBlank(false);
+        this.publicPrivateKeyPairName.addMouseOutHandler(event -> resetHelpText());
 
-        this.privateKeyName.addChangeHandler(event -> {
+        this.publicPrivateKeyPairName.addChangeHandler(event -> {
             setDirty(true);
         });
     }
@@ -414,7 +414,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         updated8021xConfig.setKeystorePid(this.keystorePid.getText());
         updated8021xConfig.setCaCertName(this.caCertName.getText());
-        updated8021xConfig.setPrivateKeyName(this.privateKeyName.getText());
+        updated8021xConfig.setPrivateKeyName(this.publicPrivateKeyPairName.getText());
 
         updatedNetIf.setEnterpriseConfig(updated8021xConfig);
     }
@@ -451,7 +451,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
         this.caCertName.setValue(config.get8021xConfig().getCaCertName());
-        this.privateKeyName.setValue(config.get8021xConfig().getPrivateKeyName());
+        this.publicPrivateKeyPairName.setValue(config.get8021xConfig().getPrivateKeyName());
     }
 
     private void updateFormEap(Gwt8021xEap eap) {
@@ -463,7 +463,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             this.password.setEnabled(true);
             this.keystorePid.setEnabled(false);
             this.caCertName.setEnabled(false);
-            this.privateKeyName.setEnabled(false);
+            this.publicPrivateKeyPairName.setEnabled(false);
             break;
         case TLS:
             this.innerAuth.setEnabled(false);
@@ -472,7 +472,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             this.password.setEnabled(false);
             this.keystorePid.setEnabled(true);
             this.caCertName.setEnabled(true);
-            this.privateKeyName.setEnabled(true);
+            this.publicPrivateKeyPairName.setEnabled(true);
             break;
         default:
             break;

@@ -816,7 +816,7 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_8021X_CA_KEYSTORE_PID = "net.interface.%s.config.802-1x.keystore.pid";
     private static final String NET_INTERFACE_CONFIG_8021X_CA_CERT_NAME = "net.interface.%s.config.802-1x.ca-cert-name";
     private static final String NET_INTERFACE_CONFIG_8021X_CLIENT_CERT_NAME = "net.interface.%s.config.802-1x.client-cert-name";
-    private static final String NET_INTERFACE_CONFIG_8021X_PRIVATE_KEY_NAME = "net.interface.%s.config.802-1x.private-key-name";
+    private static final String NET_INTERFACE_CONFIG_8021X_PUBLIC_PRIVATE_KEY_PAIR_NAME = "net.interface.%s.config.802-1x.private-key-name";
 
     public void set8021xEap(String ifname, String eap) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_EAP, ifname), eap);
@@ -877,12 +877,14 @@ public class NetworkConfigurationServiceProperties {
         return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_8021X_CLIENT_CERT_NAME, ifname));
     }
 
-    public void set8021xPrivateKeyName(String ifname, String privateKeyName) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_PRIVATE_KEY_NAME, ifname), privateKeyName);
+    public void set8021xPublicPrivateKeyPairName(String ifname, String privateKeyName) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_8021X_PUBLIC_PRIVATE_KEY_PAIR_NAME, ifname),
+                privateKeyName);
     }
 
-    public String get8021xPrivateKeyName(String ifname) {
-        return (String) this.properties.get(String.format(NET_INTERFACE_CONFIG_8021X_PRIVATE_KEY_NAME, ifname));
+    public String get8021xPublicPrivateKeyPairName(String ifname) {
+        return (String) this.properties
+                .get(String.format(NET_INTERFACE_CONFIG_8021X_PUBLIC_PRIVATE_KEY_PAIR_NAME, ifname));
     }
 
     /**

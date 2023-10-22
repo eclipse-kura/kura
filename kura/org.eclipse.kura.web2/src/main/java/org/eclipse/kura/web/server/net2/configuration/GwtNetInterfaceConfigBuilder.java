@@ -343,7 +343,7 @@ public class GwtNetInterfaceConfigBuilder {
         gwt8021xConfig.setPassword(new String(this.properties.get8021xPassword(this.ifName).getPassword()));
         gwt8021xConfig.setKeystorePid(this.properties.get8021xKeystorePid(this.ifName));
         gwt8021xConfig.setCaCertName(this.properties.get8021xCaCertName(this.ifName));
-        gwt8021xConfig.setPrivateKeyName(this.properties.get8021xPrivateKeyName(this.ifName));
+        gwt8021xConfig.setPublicPrivateKeyPairName(this.properties.get8021xPublicPrivateKeyPairName(this.ifName));
 
     }
 

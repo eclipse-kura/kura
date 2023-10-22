@@ -414,7 +414,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         updated8021xConfig.setKeystorePid(this.keystorePid.getText());
         updated8021xConfig.setCaCertName(this.caCertName.getText());
-        updated8021xConfig.setPrivateKeyName(this.publicPrivateKeyPairName.getText());
+        updated8021xConfig.setPublicPrivateKeyPairName(this.publicPrivateKeyPairName.getText());
 
         updatedNetIf.setEnterpriseConfig(updated8021xConfig);
     }
@@ -451,7 +451,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
         this.caCertName.setValue(config.get8021xConfig().getCaCertName());
-        this.publicPrivateKeyPairName.setValue(config.get8021xConfig().getPrivateKeyName());
+        this.publicPrivateKeyPairName.setValue(config.get8021xConfig().getPublicPrivateKeyPairName());
     }
 
     private void updateFormEap(Gwt8021xEap eap) {

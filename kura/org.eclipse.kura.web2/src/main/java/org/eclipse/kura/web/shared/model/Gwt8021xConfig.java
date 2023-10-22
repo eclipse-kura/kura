@@ -89,11 +89,11 @@ public class Gwt8021xConfig extends KuraBaseModel implements Serializable {
         set("caCertName", caCertName);
     }
 
-    public String getPrivateKeyName() {
+    public String getPublicPrivateKeyPairName() {
         return get("privateKeyName");
     }
 
-    public void setPrivateKeyName(String privateKeyName) {
+    public void setPublicPrivateKeyPairName(String privateKeyName) {
         set("privateKeyName", privateKeyName);
     }
 

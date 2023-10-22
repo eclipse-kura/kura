@@ -48,8 +48,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private static final String PASSWORD_PLACEHOLDER = "Password-Placeholder-123";
-
     interface Tab8021xUiUiBinder extends UiBinder<Widget, Tab8021xUi> {
     }
 
@@ -250,6 +248,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(false);
+        this.password.setAllowPlaceholder(true);
         this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {
@@ -398,9 +397,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         updated8021xConfig.setIdentity(this.username.getText());
 
-        if (!(this.password.getText().equals(PASSWORD_PLACEHOLDER))) {
-            updated8021xConfig.setPassword(this.password.getText());
-        }
+        updated8021xConfig.setPassword(this.password.getText());
 
         if (!this.eap.getSelectedValue().isEmpty() && this.eap.getSelectedValue() != null) {
             updated8021xConfig.setEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
@@ -439,9 +436,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.username.setValue(config.get8021xConfig().getUsername());
         this.password.setValue(config.get8021xConfig().getPassword());
 
-        if (this.activeConfig.getPassword().isEmpty()) {
-            this.password.setValue(PASSWORD_PLACEHOLDER);
-        } else {
+        if (!this.activeConfig.getPassword().isEmpty()) {
             this.password.setValue(this.activeConfig.getPassword());
         }
 

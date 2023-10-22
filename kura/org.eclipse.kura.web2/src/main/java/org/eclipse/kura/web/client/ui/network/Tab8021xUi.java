@@ -445,7 +445,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             this.password.setValue(PASSWORD_PLACEHOLDER);
             no8021xPasswordInSnapshot = true;
         } else {
-            this.password.setValue(GwtSafeHtmlUtils.htmlUnescape(this.activeConfig.getPassword()));
+            this.password.setValue(this.activeConfig.getPassword());
         }
 
         this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());

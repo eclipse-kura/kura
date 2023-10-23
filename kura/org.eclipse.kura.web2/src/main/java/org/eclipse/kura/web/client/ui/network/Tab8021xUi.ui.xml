@@ -76,7 +76,7 @@
                             </g:FlowPanel>
                         </b:FormGroup>
 
-                        <b:FormGroup>
+                        <b:FormGroup ui:field="formgroupIdentityUsername">
                             <b:FormLabel for="identityUsername"
                                 ui:field="labelUsername" />
                             <util:HelpButton ui:field="helpUsername"/>
@@ -95,8 +95,8 @@
                                 ui:field="password" allowPlaceholder="true"/>
                         </b:FormGroup>
 
-                        <b:FormGroup>
-                            <b:FormLabel for="identityKeystorePid"
+                        <b:FormGroup ui:field="identityKeystorePid">
+                            <b:FormLabel for="formKeystorePid"
                                 ui:field="labelKeystorePid" />
                             <util:HelpButton ui:field="helpKeystorePid"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
@@ -104,8 +104,8 @@
                                 ui:field="keystorePid" />
                         </b:FormGroup>
 
-                        <b:FormGroup>
-                            <b:FormLabel for="identityCaCertName"
+                        <b:FormGroup ui:field="identityCaCertName">
+                            <b:FormLabel for="formCaCertName"
                                 ui:field="labelCaCertName" />
                             <util:HelpButton ui:field="helpCaCertName"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
@@ -113,8 +113,8 @@
                                 ui:field="caCertName" />
                         </b:FormGroup>
 
-                        <b:FormGroup>
-                            <b:FormLabel for="identityPublicPrivateKeyPairName"
+                        <b:FormGroup ui:field="identityPublicPrivateKeyPairName">
+                            <b:FormLabel for="formPublicPrivateKeyPairName"
                                 ui:field="labelPublicPrivateKeyPairName" />
                             <util:HelpButton ui:field="helpPublicPrivateKeyPairName"/>
                             <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />

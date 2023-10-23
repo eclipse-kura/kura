@@ -34,6 +34,7 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Text;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.FormGroup;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -136,6 +137,21 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     @UiField
     ScrollPanel helpText;
 
+    @UiField
+    FormGroup formgroupIdentityUsername;
+
+    @UiField
+    FormGroup formgroupPassword;
+
+    @UiField
+    FormGroup identityKeystorePid;
+
+    @UiField
+    FormGroup identityCaCertName;
+
+    @UiField
+    FormGroup identityPublicPrivateKeyPairName;
+
     public Tab8021xUi(GwtSession currentSession, NetworkTabsUi tabs) {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -184,8 +200,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void initEapListBox() {
-        for (Gwt8021xEap eap : Gwt8021xEap.values()) {
-            this.eap.addItem(eap.name());
+        for (Gwt8021xEap eapValue : Gwt8021xEap.values()) {
+            this.eap.addItem(eapValue.name());
         }
 
         this.eap.addMouseOverHandler(event -> {
@@ -199,7 +215,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.eap.addChangeHandler(event -> {
             setDirty(true);
             this.netTabs.updateTabs();
-            updateFormEap(Gwt8021xEap.valueOf(this.eap.getSelectedValue()));
+            refreshForm();
+            resetValidations();
         });
     }
 
@@ -219,6 +236,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.innerAuth.addChangeHandler(event -> {
             setDirty(true);
             this.netTabs.updateTabs();
+            refreshForm();
+            resetValidations();
         });
     }
 
@@ -235,6 +254,13 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.username.addChangeHandler(event -> {
             setDirty(true);
+
+            if (this.username.getValue().isEmpty()) {
+                this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
+            } else {
+                this.formgroupIdentityUsername.setValidationState(ValidationState.NONE);
+            }
+
         });
     }
 
@@ -247,11 +273,16 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(false);
-        this.password.setAllowPlaceholder(true);
         this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {
-            setDirty(true);
+
+            if (!this.password.validate() && this.password.isEnabled()) {
+                this.formgroupPassword.setValidationState(ValidationState.ERROR);
+            } else {
+                this.formgroupPassword.setValidationState(ValidationState.NONE);
+            }
+
         });
     }
 
@@ -268,6 +299,13 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.keystorePid.addChangeHandler(event -> {
             setDirty(true);
+
+            if (this.keystorePid.getValue().isEmpty() && this.keystorePid.isEnabled()) {
+                this.identityKeystorePid.setValidationState(ValidationState.ERROR);
+            } else {
+                this.identityKeystorePid.setValidationState(ValidationState.NONE);
+            }
+
         });
     }
 
@@ -300,7 +338,35 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.publicPrivateKeyPairName.addChangeHandler(event -> {
             setDirty(true);
+
+            if (this.publicPrivateKeyPairName.getValue().isEmpty() && this.publicPrivateKeyPairName.isEnabled()) {
+                this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
+            } else {
+                this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.NONE);
+            }
+
         });
+    }
+
+    private void resetValidations() {
+        this.formgroupIdentityUsername.setValidationState(ValidationState.NONE);
+        this.formgroupPassword.setValidationState(ValidationState.NONE);
+        this.identityKeystorePid.setValidationState(ValidationState.NONE);
+        this.identityCaCertName.setValidationState(ValidationState.NONE);
+        this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.NONE);
+    }
+
+    private void refreshForm() {
+        this.eap.setEnabled(true);
+        this.innerAuth.setEnabled(true);
+        this.username.setEnabled(true);
+        this.password.setEnabled(true);
+        this.keystorePid.setEnabled(true);
+        this.caCertName.setEnabled(true);
+        this.publicPrivateKeyPairName.setEnabled(true);
+
+        refreshFieldsBasedOnSelectedValues();
+
     }
 
     private void reset() {
@@ -312,43 +378,43 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         }
 
         for (int i = 0; i < this.innerAuth.getItemCount(); i++) {
-            if (this.innerAuth.getSelectedItemText().equals(Gwt8021xInnerAuth.NONE.name())) {
+            if (this.innerAuth.getSelectedItemText().equals(Gwt8021xInnerAuth.MSCHAPV2.name())) {
                 this.innerAuth.setSelectedIndex(i);
                 break;
             }
         }
 
-        update();
+        this.username.setValue("");
+        this.password.setValue("");
+
+        this.keystorePid.setValue("");
+        this.caCertName.setValue("");
+        this.publicPrivateKeyPairName.setValue("");
     }
 
     private void setValues() {
 
         for (int i = 0; i < this.eap.getItemCount(); i++) {
-            if (this.eap.getItemText(i).equals(this.activeConfig.getEapEnum().name())) {
+            if (this.eap.getValue(i).equals(this.activeConfig.getEapEnum().name())) {
                 this.eap.setSelectedIndex(i);
                 break;
             }
         }
 
         for (int i = 0; i < this.innerAuth.getItemCount(); i++) {
-            if (this.innerAuth.getItemText(i).equals(this.activeConfig.getInnerAuthEnum().name())) {
+            if (this.innerAuth.getValue(i).equals(this.activeConfig.getInnerAuthEnum().name())) {
                 this.innerAuth.setSelectedIndex(i);
                 break;
             }
         }
-    }
 
-    private boolean checkPassword() {
+        this.username.setValue(this.activeConfig.getUsername());
+        this.password.setValue(this.activeConfig.getPassword());
 
-        if (!this.password.isEnabled()) {
-            return true;
-        }
+        this.keystorePid.setValue(this.activeConfig.getKeystorePid());
+        this.caCertName.setValue(this.activeConfig.getCaCertName());
+        this.publicPrivateKeyPairName.setValue(this.activeConfig.getPublicPrivateKeyPairName());
 
-        return !this.password.getText().isEmpty();
-    }
-
-    private void update() {
-        setValues();
     }
 
     @Override
@@ -360,10 +426,14 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     public void refresh() {
         if (isDirty()) {
             setDirty(false);
+            resetValidations();
+
             if (this.activeConfig == null) {
                 reset();
             } else {
-                update();
+                setValues();
+                refreshForm();
+                this.netTabs.updateTabs();
             }
         }
     }
@@ -375,11 +445,41 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        boolean result = this.form.validate();
+        boolean isTLS = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TLS);
+        boolean isPEAP = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.PEAP);
+        boolean isTTLS = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TTLS);
 
-        result &= checkPassword();
+        if (isTLS) {
 
-        return result;
+            if (this.username.getValue().isEmpty()) {
+                this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
+                return false;
+            }
+
+            if (this.keystorePid.getValue().isEmpty()) {
+                this.identityKeystorePid.setValidationState(ValidationState.ERROR);
+                return false;
+            }
+
+            if (this.publicPrivateKeyPairName.getValue().isEmpty()) {
+                this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
+                return false;
+            }
+        }
+
+        if (isPEAP || isTTLS) {
+            if (this.username.getValue().isEmpty()) {
+                this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
+                return false;
+            }
+
+            if (this.password.getValue().isEmpty()) {
+                this.formgroupPassword.setValidationState(ValidationState.ERROR);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -415,55 +515,23 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
-
+        setDirty(true);
         this.activeConfig = config.get8021xConfig();
-
-        for (int i = 0; i < this.eap.getItemCount(); i++) {
-            if (this.eap.getValue(i).equals(config.get8021xConfig().getEapEnum().name())) {
-                this.eap.setSelectedIndex(i);
-                updateFormEap(Gwt8021xEap.valueOf(this.eap.getValue(i)));
-                break;
-            }
-        }
-
-        for (int i = 0; i < this.innerAuth.getItemCount(); i++) {
-            if (this.innerAuth.getValue(i).equals(config.get8021xConfig().getInnerAuthEnum().name())) {
-                this.innerAuth.setSelectedIndex(i);
-                break;
-            }
-        }
-
-        this.username.setValue(config.get8021xConfig().getUsername());
-        this.password.setValue(config.get8021xConfig().getPassword());
-
-        if (!this.activeConfig.getPassword().isEmpty()) {
-            this.password.setValue(this.activeConfig.getPassword());
-        }
-
-        this.keystorePid.setValue(config.get8021xConfig().getKeystorePid());
-        this.caCertName.setValue(config.get8021xConfig().getCaCertName());
-        this.publicPrivateKeyPairName.setValue(config.get8021xConfig().getPublicPrivateKeyPairName());
     }
 
-    private void updateFormEap(Gwt8021xEap eap) {
-        switch (eap) {
+    private void refreshFieldsBasedOnSelectedValues() {
+        switch (Gwt8021xEap.valueOf(this.eap.getSelectedValue())) {
         case PEAP:
         case TTLS:
-            this.innerAuth.setEnabled(true);
-            this.username.setEnabled(true);
-            this.password.setEnabled(true);
             this.keystorePid.setEnabled(false);
+            setInnerAuthTo(Gwt8021xInnerAuth.MSCHAPV2);
             this.caCertName.setEnabled(false);
             this.publicPrivateKeyPairName.setEnabled(false);
             break;
         case TLS:
             this.innerAuth.setEnabled(false);
             setInnerAuthTo(Gwt8021xInnerAuth.NONE);
-            this.username.setEnabled(true);
             this.password.setEnabled(false);
-            this.keystorePid.setEnabled(true);
-            this.caCertName.setEnabled(true);
-            this.publicPrivateKeyPairName.setEnabled(true);
             break;
         default:
             break;

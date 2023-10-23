@@ -791,7 +791,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                 List<EditorError> result = new ArrayList<>();
                 if (!PortForwardingTabUi.this.permittedNw.getText().trim().isEmpty()
                         && !PortForwardingTabUi.this.permittedNw.getText().trim()
-                                .matches(FieldType.IPV4_ADDRESS_CIDR.getRegex())) {
+                                .matches(FieldType.IPV4_CIDR_NOTATION.getRegex())) {
                     result.add(new BasicEditorError(PortForwardingTabUi.this.permittedNw, value,
                             MSGS.firewallPortForwardFormPermittedNetworkErrorMessage()));
                 }

@@ -174,7 +174,7 @@ public abstract class AbstractLinuxFirewall {
     /*
      * Add a Nat rule to the firewall.
      * 
-     * @deprecated since 1.2. Use {@link aaddNatRules(List<NATRule> newNatRules))}
+     * @deprecated since 1.2. Use {@link addNatRules(List<NATRule> newNatRules))}
      */
     @Deprecated
     public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade, RuleType type)

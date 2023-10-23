@@ -525,7 +525,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         case TTLS:
             this.keystorePid.setEnabled(false);
             setInnerAuthTo(Gwt8021xInnerAuth.MSCHAPV2);
-            this.caCertName.setEnabled(false);
             this.publicPrivateKeyPairName.setEnabled(false);
             break;
         case TLS:

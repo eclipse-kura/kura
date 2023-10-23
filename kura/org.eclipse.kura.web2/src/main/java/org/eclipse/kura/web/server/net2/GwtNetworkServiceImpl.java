@@ -120,15 +120,17 @@ public class GwtNetworkServiceImpl {
 
         try {
             List<NetConfig> firewallConfigs = fcs.getFirewallConfiguration().getConfigs();
-            if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
-                for (NetConfig netConfig : firewallConfigs) {
-                    if (netConfig instanceof FirewallOpenPortConfigIP4) {
-                        FirewallOpenPortConfigIP4 firewallOpenPortConfigIP4 = (FirewallOpenPortConfigIP4) netConfig;
-                        logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
-                                firewallOpenPortConfigIP4.getPort());
-                        gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP4));
-                    }
+            if (firewallConfigs == null || firewallConfigs.isEmpty()) {
+                return new ArrayList<>();
+            }
+            for (NetConfig netConfig : firewallConfigs) {
+                if (!(netConfig instanceof FirewallOpenPortConfigIP4)) {
+                    continue;
                 }
+                FirewallOpenPortConfigIP4 firewallOpenPortConfigIP4 = (FirewallOpenPortConfigIP4) netConfig;
+                logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
+                        firewallOpenPortConfigIP4.getPort());
+                gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP4));
             }
 
             return new ArrayList<>(gwtOpenPortEntries);
@@ -143,22 +145,25 @@ public class GwtNetworkServiceImpl {
                 .ofNullable(ServiceLocator.getInstance().getService(FirewallConfigurationServiceIPv6.class));
         List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
 
-        if (fcs.isPresent()) {
-            try {
-                List<NetConfig> firewallConfigs = fcs.get().getFirewallConfiguration().getConfigs();
-                if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
-                    for (NetConfig netConfig : firewallConfigs) {
-                        if (netConfig instanceof FirewallOpenPortConfigIP6) {
-                            FirewallOpenPortConfigIP6 firewallOpenPortConfigIP6 = (FirewallOpenPortConfigIP6) netConfig;
-                            logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
-                                    firewallOpenPortConfigIP6.getPort());
-                            gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP6));
-                        }
-                    }
-                }
-            } catch (KuraException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        if (!fcs.isPresent()) {
+            return new ArrayList<>();
+        }
+        try {
+            List<NetConfig> firewallConfigs = fcs.get().getFirewallConfiguration().getConfigs();
+            if (firewallConfigs == null || firewallConfigs.isEmpty()) {
+                return new ArrayList<>();
             }
+            for (NetConfig netConfig : firewallConfigs) {
+                if (!(netConfig instanceof FirewallOpenPortConfigIP6)) {
+                    continue;
+                }
+                FirewallOpenPortConfigIP6 firewallOpenPortConfigIP6 = (FirewallOpenPortConfigIP6) netConfig;
+                logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
+                        firewallOpenPortConfigIP6.getPort());
+                gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP6));
+            }
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
         return new ArrayList<>(gwtOpenPortEntries);
     }

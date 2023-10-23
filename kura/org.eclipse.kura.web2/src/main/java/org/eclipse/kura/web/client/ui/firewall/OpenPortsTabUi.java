@@ -718,7 +718,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!OpenPortsTabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK_IPV4.getRegex())
+                if (!OpenPortsTabUi.this.permittedNw.getText().trim().matches(FieldType.IPV4_ADDRESS_CIDR.getRegex())
                         && OpenPortsTabUi.this.permittedNw.getText().trim().length() > 0) {
                     result.add(new BasicEditorError(OpenPortsTabUi.this.permittedNw, value,
                             MSGS.firewallOpenPortFormPermittedNetworkErrorMessage()));

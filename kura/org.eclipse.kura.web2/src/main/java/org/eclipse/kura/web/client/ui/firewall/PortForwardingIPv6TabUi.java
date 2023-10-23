@@ -794,7 +794,7 @@ public class PortForwardingIPv6TabUi extends Composite implements Tab, ButtonBar
                 List<EditorError> result = new ArrayList<>();
                 if (!PortForwardingIPv6TabUi.this.permittedNw.getText().trim().isEmpty()
                         && !PortForwardingIPv6TabUi.this.permittedNw.getText().trim()
-                                .matches(FieldType.NETWORK_IPV6.getRegex())) {
+                                .matches(FieldType.IPV6_ADDRESS_CIDR.getRegex())) {
                     result.add(new BasicEditorError(PortForwardingIPv6TabUi.this.permittedNw, value,
                             MSGS.firewallPortForwardFormPermittedNetworkIPv6ErrorMessage()));
                 }

@@ -721,7 +721,7 @@ public class OpenPortsIPv6TabUi extends Composite implements Tab, ButtonBar.List
             @Override
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
-                if (!OpenPortsIPv6TabUi.this.permittedNw.getText().trim().matches(FieldType.NETWORK_IPV6.getRegex())
+                if (!OpenPortsIPv6TabUi.this.permittedNw.getText().trim().matches(FieldType.IPV6_ADDRESS_CIDR.getRegex())
                         && OpenPortsIPv6TabUi.this.permittedNw.getText().trim().length() > 0) {
                     result.add(new BasicEditorError(OpenPortsIPv6TabUi.this.permittedNw, value,
                             MSGS.firewallOpenPortFormPermittedNetworkIPv6ErrorMessage()));

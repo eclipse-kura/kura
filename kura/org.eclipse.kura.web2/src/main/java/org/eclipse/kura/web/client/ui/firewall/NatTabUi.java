@@ -612,7 +612,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatTabUi.this.source.getText().trim().isEmpty()
-                        && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK_IPV4.getRegex())) {
+                        && !NatTabUi.this.source.getText().trim().matches(FieldType.IPV4_ADDRESS_CIDR.getRegex())) {
                     result.add(new BasicEditorError(NatTabUi.this.source, value,
                             MSGS.firewallNatFormSourceNetworkErrorMessage()));
                 }
@@ -633,7 +633,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatTabUi.this.destination.getText().trim().isEmpty()
-                        && !NatTabUi.this.destination.getText().trim().matches(FieldType.NETWORK_IPV4.getRegex())) {
+                        && !NatTabUi.this.destination.getText().trim().matches(FieldType.IPV4_ADDRESS_CIDR.getRegex())) {
                     result.add(new BasicEditorError(NatTabUi.this.destination, value,
                             MSGS.firewallNatFormDestinationNetworkErrorMessage()));
                 }

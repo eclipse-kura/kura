@@ -613,7 +613,7 @@ public class NatIPv6TabUi extends Composite implements Tab, ButtonBar.Listener {
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatIPv6TabUi.this.source.getText().trim().isEmpty()
-                        && !NatIPv6TabUi.this.source.getText().trim().matches(FieldType.NETWORK_IPV6.getRegex())) {
+                        && !NatIPv6TabUi.this.source.getText().trim().matches(FieldType.IPV6_ADDRESS_CIDR.getRegex())) {
                     result.add(new BasicEditorError(NatIPv6TabUi.this.source, value,
                             MSGS.firewallNatFormSourceNetworkIPv6ErrorMessage()));
                 }
@@ -634,7 +634,7 @@ public class NatIPv6TabUi extends Composite implements Tab, ButtonBar.Listener {
             public List<EditorError> validate(Editor<String> editor, String value) {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatIPv6TabUi.this.destination.getText().trim().isEmpty()
-                        && !NatIPv6TabUi.this.destination.getText().trim().matches(FieldType.NETWORK_IPV6.getRegex())) {
+                        && !NatIPv6TabUi.this.destination.getText().trim().matches(FieldType.IPV6_ADDRESS_CIDR.getRegex())) {
                     result.add(new BasicEditorError(NatIPv6TabUi.this.destination, value,
                             MSGS.firewallNatFormDestinationNetworkIPv6ErrorMessage()));
                 }

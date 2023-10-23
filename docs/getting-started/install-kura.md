@@ -59,7 +59,7 @@ To have all the Kura features working, the following dependencies are required:
 - Gps: `gpsd`.
 - Python: `python3`.
 - Java: `openjdk-8-jre-headless` or `temurin-8-jdk` or `openjdk-17-jre-headless` or `temurin-17-jdk`.
-- Others: `dos2unix`, `mmc-utils` (optional)
+- Others: `dos2unix`
 
 ### Supported devices
 

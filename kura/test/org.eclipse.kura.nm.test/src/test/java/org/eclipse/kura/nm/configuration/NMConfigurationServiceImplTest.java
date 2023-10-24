@@ -23,13 +23,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.security.PrivateKey;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -89,6 +88,7 @@ public class NMConfigurationServiceImplTest {
     public void shouldPostEventAfterUpdateTest() throws InterruptedException, KuraException {
         givenPropertiesWithModifiedInterfaces();
         givenNetworkConfigurationService();
+        whenServiceIsActivated();
         whenServiceIsUpdated();
         thenEventIsPosted();
     }
@@ -567,7 +567,7 @@ public class NMConfigurationServiceImplTest {
     }
 
     private void whenServiceIsUpdated() {
-        this.networkConfigurationService.activate(null, this.properties);
+        this.networkConfigurationService.update(this.properties);
     }
 
     private void whenComponentDefinitionIsRetrieved() throws KuraException {

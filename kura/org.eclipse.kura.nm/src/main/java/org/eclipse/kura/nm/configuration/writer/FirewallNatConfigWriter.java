@@ -44,33 +44,40 @@ public class FirewallNatConfigWriter {
         this.firewallIpv6 = LinuxFirewallIPv6.getInstance(this.executorService);
     }
 
-    public void writeConfiguration() throws KuraException {
+    public void writeConfiguration(boolean isIp4) throws KuraException {
         try {
             Set<NATRule> natRules = new HashSet<>();
 
             for (String source : this.natInterfaceNames) {
                 for (String destination : this.wanInterfaceNames) {
                     if (!source.equalsIgnoreCase(destination)) {
-                        natRules.add(createNATRule(source, destination));
+                        natRules.add(createNATRule(source, destination, isIp4));
                     }
                 }
             }
+            if (isIp4) {
+                this.firewall.replaceAllNatRules(natRules);
+            } else {
+                this.firewallIpv6.replaceAllNatRules(natRules);
+            }
 
-            this.firewall.replaceAllNatRules(natRules);
-            this.firewallIpv6.replaceAllNatRules(natRules);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "Failed to replace all NAT rules with new ones for interfaces: " + this.natInterfaceNames, e);
         }
     }
 
-    private NATRule createNATRule(String source, String destination) {
+    private NATRule createNATRule(String source, String destination, boolean isIp4) {
         NATRule natRule = new NATRule();
         natRule.setSourceInterface(source);
         natRule.setDestinationInterface(destination);
         natRule.setMasquerade(true);
 
-        logger.info("Applying NAT rule {} -> {}: {}", source, destination, natRule);
+        if (isIp4) {
+            logger.info("Applying Ip4 NAT rule {} -> {}: {}", source, destination, natRule);
+        } else {
+            logger.info("Applying Ip6 NAT rule {} -> {}: {}", source, destination, natRule);
+        }
 
         return natRule;
     }

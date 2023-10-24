@@ -142,7 +142,8 @@ public class FirewallNatConfigWriterTest {
 
     private void whenWriteConfiguration() {
         try {
-            this.writer.writeConfiguration();
+            this.writer.writeConfiguration(true);
+            this.writer.writeConfiguration(false);
         } catch (Exception e) {
             this.occurredException = e;
         }

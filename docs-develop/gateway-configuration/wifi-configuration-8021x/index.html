@@ -3076,15 +3076,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="wi-fi-8021x-configuration">Wi-Fi 802.1x Configuration</h1>
-<p>Enterprise Wi-Fi is currently only supported on gateways running our <a href="/getting-started/install-kura/#installer-types">generic profiles</a>. The following is a list of currently supported 802.1x authentication methods.</p>
+<p>Enterprise Wi-Fi is currently only supported on gateways running our <a href="../../getting-started/install-kura/#installer-types">generic profiles</a>. The following is a list of currently supported 802.1x authentication methods.</p>
 <ul>
-<li><a href="/gateway-configuration/wifi-configuration-8021x/#ttls-mschapv2">TTLS-MSCHAPv2</a></li>
-<li><a href="/gateway-configuration/wifi-configuration-8021x/#peap-mschapv2">PEAP-MSCHAPv2</a></li>
-<li><a href="/gateway-configuration/wifi-configuration-8021x/#eap-tls">EAP-TLS</a></li>
+<li><a href="#ttls-mschapv2">TTLS-MSCHAPv2</a></li>
+<li><a href="#peap-mschapv2">PEAP-MSCHAPv2</a></li>
+<li><a href="#eap-tls">EAP-TLS</a></li>
 </ul>
 <h2 id="ttls-mschapv2">TTLS-MSCHAPv2</h2>
 <ol>
-<li>Set up gateway Wi-Fi as described in the <a href="/gateway-configuration/wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
+<li>Set up gateway Wi-Fi as described in the <a href="../wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
 <li>Ensure Wireless Security is set to <code>WPA2/WPA3-Enterprise</code>
     <img alt="Alt text" src="../images/802-1x-images/wifi-enterprise-enum.png" /></li>
 <li>select the 802.1x tab</li>
@@ -3098,7 +3098,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <img alt="Alt text" src="../images/802-1x-images/wifi-ttls.png" /></p>
 <h2 id="peap-mschapv2">PEAP-MSCHAPv2</h2>
 <ol>
-<li>Set up gateway Wi-Fi as described in the <a href="/gateway-configuration/wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
+<li>Set up gateway Wi-Fi as described in the <a href="../wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
 <li>Ensure Wireless Security is set to <code>WPA2/WPA3-Enterprise</code>
     <img alt="Alt text" src="../images/802-1x-images/wifi-enterprise-enum.png" /></li>
 <li>select the 802.1x tab</li>
@@ -3116,7 +3116,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>Certificate Authority (CA) Certificate</li>
 <li>Client Certificate + Private Key (PKCS8)</li>
 </ul>
-<h3 id="enrolling-secrets-in-the-keystore-service">Enrolling secrets in the <a href="/gateway-configuration/keystores-management/">Keystore service</a>.</h3>
+<h3 id="enrolling-secrets-in-the-keystore-service">Enrolling secrets in the <a href="../keystores-management/">Keystore service</a>.</h3>
 <ol>
 <li>Navigate to <code>Security</code> under the <code>System</code> tab.</li>
 <li>Under the <code>Keystore Configuration</code> add a new keystore, and keep note of the name. <img alt="Adding a new keystore" src="../images/802-1x-images/wifi-create-keystore.png" /></li>
@@ -3126,7 +3126,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ol>
 <h3 id="wifi-setup">Wifi Setup</h3>
 <ol>
-<li>Set up gateway Wi-Fi as described in the <a href="/gateway-configuration/wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
+<li>Set up gateway Wi-Fi as described in the <a href="../wifi-configuration/#wireless-configuration">Wi-Fi configuration guide</a>.</li>
 <li>Ensure Wireless Security is set to <code>WPA2/WPA3-Enterprise</code>. <img alt="Alt text" src="../images/802-1x-images/wifi-enterprise-enum.png" /></li>
 <li>Select the 802.1x tab.</li>
 <li>Set Enteprise EAP -&gt; <code>TLS</code>.</li>

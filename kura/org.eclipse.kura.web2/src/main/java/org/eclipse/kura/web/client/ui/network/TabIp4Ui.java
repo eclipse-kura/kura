@@ -304,7 +304,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             } else {
                 updatedNetIf.setDnsServers("");
             }
-            if (this.mtu.getValue() != null) {
+            if (this.mtu.getValue() != null && this.isNet2) {
                 updatedNetIf.setMtu(this.mtu.getValue());
             }
         }
@@ -406,6 +406,10 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.labelPriority.setVisible(isNet2);
         this.priority.setVisible(isNet2);
         this.priorityHelp.setVisible(isNet2);
+
+        this.labelMtu.setVisible(isNet2);
+        this.mtu.setVisible(isNet2);
+        this.mtuHelp.setVisible(isNet2);
     }
 
     private void initHelpButtons() {
@@ -784,9 +788,10 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
             if (this.isNet2) {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
+                this.mtu.setValue(this.selectedNetIfConfig.getMtu());
             }
 
-            this.mtu.setValue(this.selectedNetIfConfig.getMtu());
+
 
             this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());

@@ -125,7 +125,7 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setDnsServers(this.properties.getIp4DnsServers(this.ifName));
 
         Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
-        this.gwtConfig.setMtu(mtu.isPresent() ? mtu.get() : DEFAULT_MTU);
+        this.gwtConfig.setMtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv6Properties() {
@@ -167,7 +167,7 @@ public class GwtNetInterfaceConfigBuilder {
         }
 
         Optional<Integer> mtu = this.properties.getIp6Mtu(this.ifName);
-        this.gwtConfig.setIpv6Mtu(mtu.isPresent() ? mtu.get() : DEFAULT_MTU);
+        this.gwtConfig.setIpv6Mtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv4DhcpClientProperties() {

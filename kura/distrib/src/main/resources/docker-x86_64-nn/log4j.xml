@@ -27,6 +27,15 @@
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
         </Console>
+        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
         <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log" filePattern="${log_dir}/${log_name}-audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext" appName="EclipseKura" mdcPrefix="" newLine="true">
                 <LoggerFields>
@@ -46,6 +55,9 @@
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="console"/>
+        </Logger>
+        <Logger name="org.eclipse" level="info" additivity="false">
+            <AppenderRef ref="RollingFile"/>
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit"/>

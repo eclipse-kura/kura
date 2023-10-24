@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,21 +44,41 @@ public interface GwtNetworkService extends RemoteService {
 
     public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "Update firewall open ports")
-    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+    public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPortsIPv6(GwtXSRFToken xsrfToken)
             throws GwtKuraException;
 
     public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
             throws GwtKuraException;
 
+    public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwardsIPv6(GwtXSRFToken xsrfToken)
+            throws GwtKuraException;
+
     public List<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public List<GwtFirewallNatEntry> findDeviceFirewallNATsIPv6(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Update firewall open ports")
+    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Update firewall open ports IPv6")
+    public void updateDeviceFirewallOpenPortsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Update firewall open ports")
     public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI Network", description = "Update firewall open ports IPv6")
+    public void updateDeviceFirewallPortForwardsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
+            throws GwtKuraException;
+
     @Audit(componentName = "UI Network", description = "Update firewall NAT configuration")
     public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
+            throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Update firewall NAT configuration IPv6")
+    public void updateDeviceFirewallNATsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Renew DHCP lease")

@@ -66,6 +66,13 @@ public abstract class AbstractLinuxFirewall {
 
     protected abstract String getIpForwardFileName();
 
+    /*
+     * Add a Local rule to the firewall.
+     * 
+     * @deprecated since 1.2. Use {@link addLocalRules(List<LocalRule>
+     * newLocalRules)}
+     */
+    @Deprecated
     @SuppressWarnings("checkstyle:parameterNumber")
     public void addLocalRule(int port, String protocol, String permittedNetwork, String permittedNetworkPrefix,
             String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC, String sourcePortRange)
@@ -117,6 +124,13 @@ public abstract class AbstractLinuxFirewall {
         }
     }
 
+    /*
+     * Add a Port Forward rule to the firewall.
+     * 
+     * @deprecated since 1.2. Use {@link addPortForwardRules(List<PortForwardRule>
+     * newPortForwardRules)}
+     */
+    @Deprecated
     @SuppressWarnings("checkstyle:parameterNumber")
     public void addPortForwardRule(String inboundIface, String outboundIface, String address, String protocol,
             int inPort, int outPort, boolean masquerade, String permittedNetwork, String permittedNetworkPrefix,
@@ -157,15 +171,12 @@ public abstract class AbstractLinuxFirewall {
         }
     }
 
-    /**
-     * Adds automatic NAT rule
-     *
-     * @param sourceInterface
-     * @param destinationInterface
-     * @param masquerade
-     * @param type
-     * @throws KuraException
+    /*
+     * Add a Nat rule to the firewall.
+     * 
+     * @deprecated since 1.2. Use {@link addNatRules(List<NATRule> newNatRules))}
      */
+    @Deprecated
     public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade, RuleType type)
             throws KuraException {
         if (sourceInterface == null || sourceInterface.isEmpty()) {
@@ -182,18 +193,12 @@ public abstract class AbstractLinuxFirewall {
         addAutoNatRules(natRuleList);
     }
 
-    /**
-     * Adds NAT Rule
-     *
-     * @param sourceInterface
-     * @param destinationInterface
-     * @param protocol
-     * @param source
-     * @param destination
-     * @param masquerade
-     * @param type
-     * @throws KuraException
+    /*
+     * Add a Nat Forward rule to the firewall.
+     * 
+     * @deprecated since 1.2. Use {@link addNatRules(List<NATRule> newNatRules)}
      */
+    @Deprecated
     public void addNatRule(String sourceInterface, String destinationInterface, String protocol, String source,
             String destination, boolean masquerade, RuleType type) throws KuraException {
 
@@ -279,6 +284,14 @@ public abstract class AbstractLinuxFirewall {
             return;
         }
         this.autoNatRules.remove(rule);
+        update();
+    }
+
+    public void deleteNatRule(NATRule rule) throws KuraException {
+        if (this.natRules == null) {
+            return;
+        }
+        this.natRules.remove(rule);
         update();
     }
 

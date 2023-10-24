@@ -37,6 +37,14 @@ public class FirewallPortForwardConfigIP6 extends FirewallPortForwardConfigIP<IP
     }
 
     /**
+     * @since 2.6
+     */
+    @Override
+    public short getIPAddressNetmask() {
+        return (short) 128;
+    }
+
+    /**
      * The builder class for the IPv6 firewall port forward configuration
      */
     @ProviderType

@@ -72,6 +72,8 @@ public class ServletContainerBridgeFix implements ServiceTrackerCustomizer<Objec
         @Override
         public void run() {
 
+            Thread.currentThread().setName("ServletContainerBridgeFixWorker");
+
             try {
 
                 while (!isInterrupted()) {
@@ -87,7 +89,7 @@ public class ServletContainerBridgeFix implements ServiceTrackerCustomizer<Objec
                     final Object servletConfig = servletConfigField.get(bridge);
 
                     if (servletConfig == null) {
-                        sleep(100);
+                        sleep(200);
                         continue;
                     }
 
@@ -97,6 +99,7 @@ public class ServletContainerBridgeFix implements ServiceTrackerCustomizer<Objec
 
                     configField.set(bridge, servletConfig);
 
+                    return;
                 }
 
             } catch (final InterruptedException e) {

@@ -258,6 +258,7 @@ public abstract class AbstractFirewallConfigurationServiceImpl<U extends IPAddre
                         .inboundIface(portForwardEntry.getInboundInterface())
                         .outboundIface(portForwardEntry.getOutboundInterface())
                         .address(portForwardEntry.getIPAddress().getHostAddress())
+                        .addressMask(portForwardEntry.getIPAddressNetmask())
                         .protocol(portForwardEntry.getProtocol().name()).inPort(portForwardEntry.getInPort())
                         .outPort(portForwardEntry.getOutPort()).masquerade(portForwardEntry.isMasquerade())
                         .permittedNetwork(convertNetworkPairToString(portForwardEntry.getPermittedNetwork()))

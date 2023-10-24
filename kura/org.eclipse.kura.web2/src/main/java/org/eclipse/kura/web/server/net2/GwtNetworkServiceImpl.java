@@ -12,17 +12,28 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.net.IP6Address;
+import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.FirewallConfigurationService;
+import org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP6;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP6;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.web.server.net2.configuration.NetworkConfigurationServiceAdapter;
 import org.eclipse.kura.web.server.net2.status.NetworkStatusServiceAdapter;
@@ -41,6 +52,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GwtNetworkServiceImpl {
+
+    private static final String FIREWALL_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6";
+    private static final String UNKNOWN_NETWORK_SHORT = "::/0";
+    private static final String UNKNOWN_NETWORK_LONG = "0:0:0:0:0:0:0:0/0";
 
     private GwtNetworkServiceImpl() {
 
@@ -99,6 +114,81 @@ public class GwtNetworkServiceImpl {
         }
     }
 
+    public static List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts() throws GwtKuraException {
+        FirewallConfigurationService fcs = ServiceLocator.getInstance().getService(FirewallConfigurationService.class);
+        List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
+
+        try {
+            List<NetConfig> firewallConfigs = fcs.getFirewallConfiguration().getConfigs();
+            if (firewallConfigs == null || firewallConfigs.isEmpty()) {
+                return new ArrayList<>();
+            }
+            for (NetConfig netConfig : firewallConfigs) {
+                if (!(netConfig instanceof FirewallOpenPortConfigIP4)) {
+                    continue;
+                }
+                FirewallOpenPortConfigIP4 firewallOpenPortConfigIP4 = (FirewallOpenPortConfigIP4) netConfig;
+                logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
+                        firewallOpenPortConfigIP4.getPort());
+                gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP4));
+            }
+
+            return new ArrayList<>(gwtOpenPortEntries);
+
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPortsIPv6() throws GwtKuraException {
+        Optional<FirewallConfigurationServiceIPv6> fcs = Optional
+                .ofNullable(ServiceLocator.getInstance().getService(FirewallConfigurationServiceIPv6.class));
+        List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
+
+        if (!fcs.isPresent()) {
+            return new ArrayList<>();
+        }
+        try {
+            List<NetConfig> firewallConfigs = fcs.get().getFirewallConfiguration().getConfigs();
+            if (firewallConfigs == null || firewallConfigs.isEmpty()) {
+                return new ArrayList<>();
+            }
+            for (NetConfig netConfig : firewallConfigs) {
+                if (!(netConfig instanceof FirewallOpenPortConfigIP6)) {
+                    continue;
+                }
+                FirewallOpenPortConfigIP6 firewallOpenPortConfigIP6 = (FirewallOpenPortConfigIP6) netConfig;
+                logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
+                        firewallOpenPortConfigIP6.getPort());
+                gwtOpenPortEntries.add(convertToGwtFirewallOpenPortEntry(firewallOpenPortConfigIP6));
+            }
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+        return new ArrayList<>(gwtOpenPortEntries);
+    }
+
+    private static GwtFirewallOpenPortEntry convertToGwtFirewallOpenPortEntry(
+            FirewallOpenPortConfigIP<? extends IPAddress> firewallOpenPortConfigIP) {
+        GwtFirewallOpenPortEntry entry = new GwtFirewallOpenPortEntry();
+        if (firewallOpenPortConfigIP.getPortRange() != null) {
+            entry.setPortRange(firewallOpenPortConfigIP.getPortRange());
+        } else {
+            entry.setPortRange(String.valueOf(firewallOpenPortConfigIP.getPort()));
+        }
+        entry.setProtocol(firewallOpenPortConfigIP.getProtocol().toString());
+        entry.setPermittedNetwork(firewallOpenPortConfigIP.getPermittedNetwork()
+                .getIpAddress().getHostAddress() + "/"
+                + firewallOpenPortConfigIP.getPermittedNetwork().getPrefix());
+        entry.setPermittedInterfaceName(
+                firewallOpenPortConfigIP.getPermittedInterfaceName());
+        entry.setUnpermittedInterfaceName(
+                firewallOpenPortConfigIP.getUnpermittedInterfaceName());
+        entry.setPermittedMAC(firewallOpenPortConfigIP.getPermittedMac());
+        entry.setSourcePortRange(firewallOpenPortConfigIP.getSourcePortRange());
+        return entry;
+    }
+
     public static List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards() throws GwtKuraException {
         FirewallConfigurationService fcs = ServiceLocator.getInstance().getService(FirewallConfigurationService.class);
         List<GwtFirewallPortForwardEntry> gwtPortForwardEntries = new ArrayList<>();
@@ -109,21 +199,8 @@ public class GwtNetworkServiceImpl {
                 for (NetConfig netConfig : firewallConfigs) {
                     if (netConfig instanceof FirewallPortForwardConfigIP4) {
                         logger.debug("findDeviceFirewallPortForwards() :: adding new Port Forward Entry");
-                        GwtFirewallPortForwardEntry entry = new GwtFirewallPortForwardEntry();
-                        entry.setInboundInterface(((FirewallPortForwardConfigIP4) netConfig).getInboundInterface());
-                        entry.setOutboundInterface(((FirewallPortForwardConfigIP4) netConfig).getOutboundInterface());
-                        entry.setAddress(((FirewallPortForwardConfigIP4) netConfig).getAddress().getHostAddress());
-                        entry.setProtocol(((FirewallPortForwardConfigIP4) netConfig).getProtocol().toString());
-                        entry.setInPort(((FirewallPortForwardConfigIP4) netConfig).getInPort());
-                        entry.setOutPort(((FirewallPortForwardConfigIP4) netConfig).getOutPort());
-                        String masquerade = ((FirewallPortForwardConfigIP4) netConfig).isMasquerade() ? "yes" : "no";
-                        entry.setMasquerade(masquerade);
-                        entry.setPermittedNetwork(
-                                ((FirewallPortForwardConfigIP4) netConfig).getPermittedNetwork().toString());
-                        entry.setPermittedMAC(((FirewallPortForwardConfigIP4) netConfig).getPermittedMac());
-                        entry.setSourcePortRange(((FirewallPortForwardConfigIP4) netConfig).getSourcePortRange());
-
-                        gwtPortForwardEntries.add(entry);
+                        FirewallPortForwardConfigIP4 firewallPortForwardConfigIP4 = (FirewallPortForwardConfigIP4) netConfig;
+                        gwtPortForwardEntries.add(convertToGwtFirewallPortForwardEntry(firewallPortForwardConfigIP4));
                     }
                 }
             }
@@ -135,7 +212,50 @@ public class GwtNetworkServiceImpl {
         }
     }
 
-    public static ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs() throws GwtKuraException {
+    public static List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwardsIPv6() throws GwtKuraException {
+        Optional<FirewallConfigurationServiceIPv6> fcs = Optional
+                .ofNullable(ServiceLocator.getInstance().getService(FirewallConfigurationServiceIPv6.class));
+        List<GwtFirewallPortForwardEntry> gwtPortForwardEntries = new ArrayList<>();
+
+        if (fcs.isPresent()) {
+            try {
+                List<NetConfig> firewallConfigs = fcs.get().getFirewallConfiguration().getConfigs();
+                if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
+                    for (NetConfig netConfig : firewallConfigs) {
+                        if (netConfig instanceof FirewallPortForwardConfigIP6) {
+                            logger.debug("findDeviceFirewallPortForwards() :: adding new Port Forward Entry");
+                            FirewallPortForwardConfigIP6 firewallPortForwardConfigIP6 = (FirewallPortForwardConfigIP6) netConfig;
+                            gwtPortForwardEntries
+                                    .add(convertToGwtFirewallPortForwardEntry(firewallPortForwardConfigIP6));
+                        }
+                    }
+                }
+            } catch (KuraException e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
+        return new ArrayList<>(gwtPortForwardEntries);
+    }
+
+    private static GwtFirewallPortForwardEntry convertToGwtFirewallPortForwardEntry(
+            FirewallPortForwardConfigIP<? extends IPAddress> firewallPortForwardConfigIP) {
+        GwtFirewallPortForwardEntry entry = new GwtFirewallPortForwardEntry();
+        entry.setInboundInterface(firewallPortForwardConfigIP.getInboundInterface());
+        entry.setOutboundInterface(firewallPortForwardConfigIP.getOutboundInterface());
+        entry.setAddress(firewallPortForwardConfigIP.getIPAddress().getHostAddress());
+        entry.setProtocol(firewallPortForwardConfigIP.getProtocol().toString());
+        entry.setInPort(firewallPortForwardConfigIP.getInPort());
+        entry.setOutPort(firewallPortForwardConfigIP.getOutPort());
+        String masquerade = firewallPortForwardConfigIP.isMasquerade() ? "yes" : "no";
+        entry.setMasquerade(masquerade);
+        entry.setPermittedNetwork(
+                firewallPortForwardConfigIP.getPermittedNetwork().toString());
+        entry.setPermittedMAC(firewallPortForwardConfigIP.getPermittedMac());
+        entry.setSourcePortRange(firewallPortForwardConfigIP.getSourcePortRange());
+        return entry;
+    }
+
+    public static List<GwtFirewallNatEntry> findDeviceFirewallNATs() throws GwtKuraException {
         FirewallConfigurationService fcs = ServiceLocator.getInstance().getService(FirewallConfigurationService.class);
         List<GwtFirewallNatEntry> gwtNatEntries = new ArrayList<>();
 
@@ -145,15 +265,8 @@ public class GwtNetworkServiceImpl {
                 for (NetConfig netConfig : firewallConfigs) {
                     if (netConfig instanceof FirewallNatConfig) {
                         logger.debug("findDeviceFirewallNATs() :: adding new NAT Entry");
-                        GwtFirewallNatEntry entry = new GwtFirewallNatEntry();
-                        entry.setInInterface(((FirewallNatConfig) netConfig).getSourceInterface());
-                        entry.setOutInterface(((FirewallNatConfig) netConfig).getDestinationInterface());
-                        entry.setProtocol(((FirewallNatConfig) netConfig).getProtocol());
-                        entry.setSourceNetwork(((FirewallNatConfig) netConfig).getSource());
-                        entry.setDestinationNetwork(((FirewallNatConfig) netConfig).getDestination());
-                        String masquerade = ((FirewallNatConfig) netConfig).isMasquerade() ? "yes" : "no";
-                        entry.setMasquerade(masquerade);
-                        gwtNatEntries.add(entry);
+                        FirewallNatConfig firewallNatConfig = (FirewallNatConfig) netConfig;
+                        gwtNatEntries.add(convertToGwtFirewallNatEntry(firewallNatConfig));
                     }
                 }
             }
@@ -165,42 +278,163 @@ public class GwtNetworkServiceImpl {
         }
     }
 
-    public static List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts() throws GwtKuraException {
-        FirewallConfigurationService fcs = ServiceLocator.getInstance().getService(FirewallConfigurationService.class);
-        List<GwtFirewallOpenPortEntry> gwtOpenPortEntries = new ArrayList<>();
+    public static List<GwtFirewallNatEntry> findDeviceFirewallNATsIPv6() throws GwtKuraException {
+        Optional<FirewallConfigurationServiceIPv6> fcs = Optional
+                .ofNullable(ServiceLocator.getInstance().getService(FirewallConfigurationServiceIPv6.class));
+        List<GwtFirewallNatEntry> gwtNatEntries = new ArrayList<>();
 
-        try {
-            List<NetConfig> firewallConfigs = fcs.getFirewallConfiguration().getConfigs();
-            if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
-                for (NetConfig netConfig : firewallConfigs) {
-                    if (netConfig instanceof FirewallOpenPortConfigIP4) {
-                        logger.debug("findDeviceFirewallOpenPorts() :: adding new Open Port Entry: {}",
-                                ((FirewallOpenPortConfigIP4) netConfig).getPort());
-                        GwtFirewallOpenPortEntry entry = new GwtFirewallOpenPortEntry();
-                        if (((FirewallOpenPortConfigIP4) netConfig).getPortRange() != null) {
-                            entry.setPortRange(((FirewallOpenPortConfigIP4) netConfig).getPortRange());
-                        } else {
-                            entry.setPortRange(String.valueOf(((FirewallOpenPortConfigIP4) netConfig).getPort()));
+        if (fcs.isPresent()) {
+            try {
+                List<NetConfig> firewallConfigs = fcs.get().getFirewallConfiguration().getConfigs();
+                if (firewallConfigs != null && !firewallConfigs.isEmpty()) {
+                    for (NetConfig netConfig : firewallConfigs) {
+                        if (netConfig instanceof FirewallNatConfig) {
+                            logger.debug("findDeviceFirewallNATs() :: adding new NAT Entry");
+                            FirewallNatConfig firewallNatConfig = (FirewallNatConfig) netConfig;
+                            gwtNatEntries.add(convertToGwtFirewallNatEntry(firewallNatConfig));
                         }
-                        entry.setProtocol(((FirewallOpenPortConfigIP4) netConfig).getProtocol().toString());
-                        entry.setPermittedNetwork(((FirewallOpenPortConfigIP4) netConfig).getPermittedNetwork()
-                                .getIpAddress().getHostAddress() + "/"
-                                + ((FirewallOpenPortConfigIP4) netConfig).getPermittedNetwork().getPrefix());
-                        entry.setPermittedInterfaceName(
-                                ((FirewallOpenPortConfigIP4) netConfig).getPermittedInterfaceName());
-                        entry.setUnpermittedInterfaceName(
-                                ((FirewallOpenPortConfigIP4) netConfig).getUnpermittedInterfaceName());
-                        entry.setPermittedMAC(((FirewallOpenPortConfigIP4) netConfig).getPermittedMac());
-                        entry.setSourcePortRange(((FirewallOpenPortConfigIP4) netConfig).getSourcePortRange());
-
-                        gwtOpenPortEntries.add(entry);
                     }
                 }
+            } catch (KuraException e) {
+                throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
+        return new ArrayList<>(gwtNatEntries);
+    }
+
+    private static GwtFirewallNatEntry convertToGwtFirewallNatEntry(FirewallNatConfig firewallNatConfig) {
+        GwtFirewallNatEntry entry = new GwtFirewallNatEntry();
+        entry.setInInterface(firewallNatConfig.getSourceInterface());
+        entry.setOutInterface(firewallNatConfig.getDestinationInterface());
+        entry.setProtocol(firewallNatConfig.getProtocol());
+        entry.setSourceNetwork(firewallNatConfig.getSource());
+        entry.setDestinationNetwork(firewallNatConfig.getDestination());
+        String masquerade = firewallNatConfig.isMasquerade() ? "yes" : "no";
+        entry.setMasquerade(masquerade);
+        return entry;
+    }
+
+    public static void updateDeviceFirewallOpenPortsIPv6(List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException {
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String openPortsPropName = "firewall.ipv6.open.ports";
+        StringBuilder openPorts = new StringBuilder();
+
+        try {
+            for (GwtFirewallOpenPortEntry entry : entries) {
+                openPorts.append(entry.getPortRange()).append(",");
+                openPorts.append(entry.getProtocol()).append(",");
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_NETWORK_LONG)) {
+                    openPorts.append(UNKNOWN_NETWORK_SHORT);
+                } else {
+                    appendNetwork(entry.getPermittedNetwork(), openPorts);
+                }
+                openPorts.append(",");
+                if (entry.getPermittedInterfaceName() != null) {
+                    openPorts.append(entry.getPermittedInterfaceName());
+                }
+                openPorts.append(",");
+                if (entry.getUnpermittedInterfaceName() != null) {
+                    openPorts.append(entry.getUnpermittedInterfaceName());
+                }
+                openPorts.append(",");
+                if (entry.getPermittedMAC() != null) {
+                    openPorts.append(entry.getPermittedMAC());
+                }
+                openPorts.append(",");
+                if (entry.getSourcePortRange() != null) {
+                    openPorts.append(entry.getSourcePortRange());
+                }
+                openPorts.append(",").append("#").append(";");
             }
 
-            return new ArrayList<>(gwtOpenPortEntries);
+            properties.put(openPortsPropName, openPorts.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
 
-        } catch (KuraException e) {
+    public static void updateDeviceFirewallPortForwardsIPv6(List<GwtFirewallPortForwardEntry> entries)
+            throws GwtKuraException {
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String portForwardingPropName = "firewall.ipv6.port.forwarding";
+        StringBuilder portForwarding = new StringBuilder();
+
+        try {
+            for (GwtFirewallPortForwardEntry entry : entries) {
+                portForwarding.append(entry.getInboundInterface()).append(",");
+                portForwarding.append(entry.getOutboundInterface()).append(",");
+                portForwarding.append(((IP6Address) IPAddress.parseHostAddress(entry.getAddress())).getHostAddress())
+                        .append(",");
+                portForwarding.append(entry.getProtocol()).append(",");
+                portForwarding.append(entry.getInPort()).append(",");
+                portForwarding.append(entry.getOutPort()).append(",");
+                if (entry.getMasquerade().equals("yes")) {
+                    portForwarding.append("true");
+                } else {
+                    portForwarding.append("false");
+                }
+                portForwarding.append(",");
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_NETWORK_LONG)) {
+                    portForwarding.append(UNKNOWN_NETWORK_SHORT);
+                } else {
+                    appendNetwork(entry.getPermittedNetwork(), portForwarding);
+                }
+                portForwarding.append(",");
+                if (entry.getPermittedMAC() != null) {
+                    portForwarding.append(entry.getPermittedMAC());
+                }
+                portForwarding.append(",");
+                if (entry.getSourcePortRange() != null) {
+                    portForwarding.append(entry.getSourcePortRange());
+                }
+                portForwarding.append(",").append("#").append(";");
+            }
+
+            properties.put(portForwardingPropName, portForwarding.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static void updateDeviceFirewallNATsIPv6(List<GwtFirewallNatEntry> entries) throws GwtKuraException {
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String natPropName = "firewall.ipv6.nat";
+        StringBuilder nat = new StringBuilder();
+
+        try {
+            for (GwtFirewallNatEntry entry : entries) {
+                nat.append(entry.getInInterface()).append(",");
+                nat.append(entry.getOutInterface()).append(",");
+                nat.append(entry.getProtocol()).append(",");
+                if (UNKNOWN_NETWORK_LONG.equals(entry.getSourceNetwork())) {
+                    nat.append(UNKNOWN_NETWORK_SHORT);
+                } else {
+                    appendNetwork(entry.getSourceNetwork(), nat);
+                }
+                nat.append(",");
+                if (UNKNOWN_NETWORK_LONG.equals(entry.getDestinationNetwork())) {
+                    nat.append(UNKNOWN_NETWORK_SHORT);
+                } else {
+                    appendNetwork(entry.getDestinationNetwork(), nat);
+                }
+                nat.append(",");
+                if (entry.getMasquerade().equals("yes")) {
+                    nat.append("true");
+                } else {
+                    nat.append("false");
+                }
+                nat.append(",").append("#").append(";");
+            }
+
+            properties.put(natPropName, nat.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -257,6 +491,14 @@ public class GwtNetworkServiceImpl {
             return aps;
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    private static void appendNetwork(String address, StringBuilder stringBuilder) throws UnknownHostException {
+        String[] networkAddress = address.split("/");
+        if (networkAddress.length >= 2) {
+            stringBuilder.append(((IP6Address) IPAddress.parseHostAddress(networkAddress[0])).getHostAddress())
+                    .append("/").append(networkAddress[1]);
         }
     }
 

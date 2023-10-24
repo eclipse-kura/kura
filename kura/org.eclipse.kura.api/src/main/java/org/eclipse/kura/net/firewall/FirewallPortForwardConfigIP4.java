@@ -62,6 +62,14 @@ public class FirewallPortForwardConfigIP4 extends FirewallPortForwardConfigIP<IP
     }
 
     /**
+     * @since 2.6
+     */
+    @Override
+    public short getIPAddressNetmask() {
+        return (short) 32;
+    }
+
+    /**
      * The builder class for the IPv4 firewall port forward configuration
      * 
      * @since 2.6

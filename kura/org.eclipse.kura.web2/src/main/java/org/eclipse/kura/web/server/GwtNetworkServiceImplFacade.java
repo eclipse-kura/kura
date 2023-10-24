@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
@@ -53,19 +54,6 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.updateNetInterfaceConfigurations(config);
         } else {
             org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateNetInterfaceConfigurations(config);
-        }
-    }
-
-    @Override
-    public ArrayList<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        if (isNet2()) {
-            return (ArrayList<GwtFirewallOpenPortEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
-                    .findDeviceFirewallOpenPorts();
-        } else {
-            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallOpenPorts();
         }
     }
 
@@ -107,55 +95,6 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.verifyWifiCredentials(interfaceName,
                     gwtWifiConfig);
         }
-    }
-
-    @Override
-    public ArrayList<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        if (isNet2()) {
-            return (ArrayList<GwtFirewallPortForwardEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
-                    .findDeviceFirewallPortForwards();
-        } else {
-            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallPortForwards();
-        }
-    }
-
-    @Override
-    public ArrayList<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        if (isNet2()) {
-            return (ArrayList<GwtFirewallNatEntry>) org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl
-                    .findDeviceFirewallNATs();
-        } else {
-            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallNATs();
-        }
-    }
-
-    @Override
-    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallOpenPorts(entries);
-    }
-
-    @Override
-    public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallPortForwards(entries);
-    }
-
-    @Override
-    public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallNATs(entries);
     }
 
     @Override
@@ -213,6 +152,135 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
             return new ArrayList<>();
         } else {
             return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.getDhcpLeases();
+        }
+    }
+
+    @Override
+    public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallOpenPorts();
+        } else {
+            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallOpenPorts();
+        }
+    }
+
+    @Override
+    public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPortsIPv6(GwtXSRFToken xsrfToken)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallOpenPortsIPv6();
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
+
+    @Override
+    public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallPortForwards();
+        } else {
+            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallPortForwards();
+        }
+    }
+
+    @Override
+    public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwardsIPv6(GwtXSRFToken xsrfToken)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallPortForwardsIPv6();
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
+
+    @Override
+    public List<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallNATs();
+        } else {
+            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.findDeviceFirewallNATs();
+        }
+    }
+
+    @Override
+    public List<GwtFirewallNatEntry> findDeviceFirewallNATsIPv6(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            return org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.findDeviceFirewallNATsIPv6();
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
+
+    @Override
+    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallOpenPorts(entries);
+    }
+
+    @Override
+    public void updateDeviceFirewallOpenPortsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.updateDeviceFirewallOpenPortsIPv6(entries);
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
+
+    @Override
+    public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallPortForwards(entries);
+    }
+
+    @Override
+    public void updateDeviceFirewallPortForwardsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.updateDeviceFirewallPortForwardsIPv6(entries);
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+    }
+
+    @Override
+    public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.updateDeviceFirewallNATs(entries);
+    }
+
+    @Override
+    public void updateDeviceFirewallNATsIPv6(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        if (isNet2()) {
+            org.eclipse.kura.web.server.net2.GwtNetworkServiceImpl.updateDeviceFirewallNATsIPv6(entries);
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
         }
     }
 

@@ -504,8 +504,8 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    TabIp4Ui.this.gwtNetworkService.renewDhcpLease(token,
-                            TabIp4Ui.this.selectedNetIfConfig.getName(), new AsyncCallback<Void>() {
+                    TabIp4Ui.this.gwtNetworkService.renewDhcpLease(token, TabIp4Ui.this.selectedNetIfConfig.getName(),
+                            new AsyncCallback<Void>() {
 
                                 @Override
                                 public void onFailure(Throwable ex) {
@@ -560,7 +560,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             }
 
             for (String dnsEntry : aDnsServers) {
-                if (dnsEntry.trim().length() >= 0 && !dnsEntry.trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
+                if (dnsEntry.trim().length() >= 0 && !dnsEntry.trim().matches(FieldType.IPV4_ADDRESS.getRegex())) {
                     validDnsList = false;
                     break;
                 }
@@ -585,7 +585,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.gateway.addMouseOutHandler(event -> resetHelp());
         this.gateway.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+            if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
                     && TabIp4Ui.this.gateway.getText().trim().length() > 0) {
                 TabIp4Ui.this.groupGateway.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
@@ -606,7 +606,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.subnet.addMouseOutHandler(event -> resetHelp());
         this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+            if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
                     && TabIp4Ui.this.subnet.getText().trim().length() > 0) {
                 TabIp4Ui.this.groupSubnet.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
@@ -627,7 +627,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.ip.addMouseOutHandler(event -> resetHelp());
         this.ip.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.ip.getText().trim().matches(FieldType.IPv4_ADDRESS.getRegex())
+            if (!TabIp4Ui.this.ip.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
                     || TabIp4Ui.this.ip.getText().trim().length() <= 0) {
                 TabIp4Ui.this.groupIp.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpIp.setText(MSGS.netIPv4InvalidAddress());

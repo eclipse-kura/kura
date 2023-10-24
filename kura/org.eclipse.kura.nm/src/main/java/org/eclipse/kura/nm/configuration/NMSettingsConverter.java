@@ -70,7 +70,7 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
     private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
 
-    static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
+    private static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");

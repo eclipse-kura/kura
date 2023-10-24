@@ -39,7 +39,6 @@ public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
         if (config.isPassDns()) {
             // announce DNS servers on this device
             sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",6,0.0.0.0").append("\n");
-            ;
         } else {
             // leaving the option without value disables it
             sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",6").append("\n");

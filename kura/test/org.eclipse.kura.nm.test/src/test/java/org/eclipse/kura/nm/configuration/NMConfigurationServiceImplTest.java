@@ -264,6 +264,58 @@ public class NMConfigurationServiceImplTest {
         thenDhcpConfigWriterIsCreatedForInterfaces();
     }
 
+    @Test
+    public void shouldCreateFirewallNatRules() throws InterruptedException, KuraException {
+        givenPropertiesThatTriggerNatRules();
+        givenNetworkConfigurationService();
+
+        whenServiceIsActivated();
+
+        thenEventIsPosted();
+    }
+
+    private void givenPropertiesThatTriggerNatRules() {
+
+        this.properties.clear();
+        this.properties.put("modified.interface.names", "eno1,enp2s0");
+        this.properties.put("net.interface.eno1.config.ip4.status", "netIPv4StatusEnabledLAN");
+        this.properties.put("net.interface.eno1.config.ip4.address", "172.16.0.1");
+        this.properties.put("net.interface.eno1.config.dhcpClient4.enabled", false);
+        this.properties.put("net.interface.eno1.config.ip4.prefix", 24);
+        this.properties.put("net.interface.eno1.config.dhcpServer4.rangeEnd", "172.16.0.110");
+        this.properties.put("net.interface.eno1.config.dhcpServer4.defaultLeaseTime", 7200);
+        this.properties.put("net.interface.eno1.config.dhcpServer4.enabled", false);
+        this.properties.put("net.interface.eno1.config.dhcpServer4.prefix", 24);
+        this.properties.put("net.interface.eno1.config.ip4.dnsServers", "");
+        this.properties.put("net.interface.eno1.config.dhcpServer4.passDns", false);
+        this.properties.put("net.interface.eno1.type", "ETHERNET");
+        this.properties.put("net.interface.eno1.config.dhcpServer4.rangeStart", "172.16.0.100");
+        this.properties.put("net.interface.eno1.config.nat.enabled", false);
+        this.properties.put("net.interface.eno1.config.ip4.gateway", "");
+        this.properties.put("net.interface.eno1.config.dhcpServer4.maxLeaseTime", 7200);
+
+        this.properties.put("net.interface.eno1.config.ip6.status", "netIPv6StatusEnabledLAN");
+        this.properties.put("net.interface.eno1.config.dhcpClient6.enabled", false);
+        this.properties.put("net.interface.eno1.config.ip6.dnsServers", "");
+        this.properties.put("net.interface.eno1.config.ip6.address.method", "netIPv6MethodManual");
+        this.properties.put("net.interface.eno1.config.ip6.prefix", 64);
+        this.properties.put("net.interface.enp2s0.config.ip6.privacy", "netIPv6PrivacyDisabled");
+        this.properties.put("net.interface.eno1.config.ip6.address", "2001:0000::FFFF");
+
+        this.properties.put("net.interface.enp2s0.type", "ETHERNET");
+        this.properties.put("net.interface.enp2s0.config.ip4.dnsServers", "");
+        this.properties.put("net.interface.enp2s0.config.dhcpClient4.enabled", true);
+        this.properties.put("net.interface.enp2s0.config.ip4.status", "netIPv4StatusEnabledWAN");
+
+        this.properties.put("net.interface.enp2s0.config.ip6.address.method", "netIPv6MethodAuto");
+        this.properties.put("net.interface.enp2s0.config.ip6.privacy", "netIPv6PrivacyDisabled");
+        this.properties.put("net.interface.enp2s0.config.ip6.dnsServers", "");
+        this.properties.put("net.interface.enp2s0.config.ip6.addr.gen.mode", "netIPv6AddressGenModeEUI64");
+        this.properties.put("net.interface.enp2s0.config.nat.enabled", false);
+        this.properties.put("net.interface.enp2s0.config.dhcpServer4.passDns", false);
+        this.properties.put("net.interface.enp2s0.config.ip6.status", "netIPv6StatusEnabledWAN");
+    }
+
     private void givenPropertiesWithModifiedInterfaces() {
         this.properties.clear();
         this.properties.put("modified.interface.names", "eth0");

@@ -138,7 +138,7 @@ public class NMDbusConnector {
     }
 
     public void checkVersion() {
-        NMVersion nmVersion = this.networkManager.getVersion();
+        SemanticVersion nmVersion = this.networkManager.getVersion();
         logger.debug("NM Version: {}", nmVersion);
     }
 

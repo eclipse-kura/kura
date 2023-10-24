@@ -44,17 +44,17 @@ public class NetworkManagerDbusWrapper {
 
     private final DBusConnection dbusConnection;
     private final NetworkManager networkManager;
-    private final NMVersion version;
+    private final SemanticVersion version;
 
     protected NetworkManagerDbusWrapper(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = dbusConnection;
         this.networkManager = dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, NetworkManager.class);
         Properties nmProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_BUS_PATH, Properties.class);
         String strVer = nmProperties.Get(NM_BUS_NAME, NM_PROPERTY_VERSION);
-        this.version = NMVersion.parse(strVer);
+        this.version = SemanticVersion.parse(strVer);
     }
 
-    protected NMVersion getVersion() {
+    protected SemanticVersion getVersion() {
         return this.version;
     }
 

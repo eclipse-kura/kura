@@ -35,7 +35,7 @@ import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
-import org.eclipse.kura.nm.NMVersion;
+import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.enums.NM8021xEAP;
 import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -78,7 +78,7 @@ public class NMSettingsConverter {
 
     public static Map<String, Map<String, Variant<?>>> buildSettings(NetworkProperties properties,
             Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType,
-            NMVersion nmVersion) {
+            SemanticVersion nmVersion) {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
         Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
@@ -307,7 +307,7 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId, 
-            NMVersion nmVersion) {
+            SemanticVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
         // property is not set, it assumes

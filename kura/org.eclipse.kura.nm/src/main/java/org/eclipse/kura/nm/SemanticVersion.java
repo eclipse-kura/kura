@@ -14,13 +14,13 @@ package org.eclipse.kura.nm;
 
 import java.util.Objects;
 
-public class NMVersion implements Comparable<NMVersion> {
+public class SemanticVersion implements Comparable<SemanticVersion> {
 
     private final int major;
     private final int minor;
     private final int revision;
 
-    private NMVersion(int major, int minor, int revision) {
+    private SemanticVersion(int major, int minor, int revision) {
         this.major = major;
         this.minor = minor;
         this.revision = revision;
@@ -39,15 +39,15 @@ public class NMVersion implements Comparable<NMVersion> {
     }
 
     public boolean isGreaterEqualThan(String version) {
-        return isGreaterEqualThan(NMVersion.parse(version));
+        return isGreaterEqualThan(SemanticVersion.parse(version));
     }
 
-    public boolean isGreaterEqualThan(NMVersion other) {
+    public boolean isGreaterEqualThan(SemanticVersion other) {
         return this.compareTo(other) >= 0;
     }
 
     @Override
-    public int compareTo(NMVersion other) {
+    public int compareTo(SemanticVersion other) {
         int majorComp = Integer.compare(this.major, other.getMajor());
         if (majorComp != 0) {
             return majorComp;
@@ -61,10 +61,10 @@ public class NMVersion implements Comparable<NMVersion> {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof NMVersion)) {
+        if (!(obj instanceof SemanticVersion)) {
                 return false;
         }
-        return this.compareTo((NMVersion) obj) == 0;
+        return this.compareTo((SemanticVersion) obj) == 0;
     }
 
     @Override
@@ -79,13 +79,18 @@ public class NMVersion implements Comparable<NMVersion> {
                 .append(", revision=").append(this.revision).append(']');
         return sb.toString();
     }
+    
+    public String asStringValue() {
+        return new StringBuilder().append(this.major).append(".").append(this.minor)
+                .append(".").append(this.revision).toString();
+    }
 
-    public static NMVersion parse(String version) {
+    public static SemanticVersion parse(String version) {
         if (version == null) {
             version = "0.0.0";
         }
-        int[] asArray = NMVersion.splitAndPad(version, 3);
-        return new NMVersion(asArray[0], asArray[1], asArray[2]);
+        int[] asArray = SemanticVersion.splitAndPad(version, 3);
+        return new SemanticVersion(asArray[0], asArray[1], asArray[2]);
     }
 
     private static int[] splitAndPad(String version, int expectedElements) {

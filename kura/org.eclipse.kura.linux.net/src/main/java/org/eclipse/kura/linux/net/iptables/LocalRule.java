@@ -22,7 +22,8 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
 
 /**
- * Creates an iptables command for a Local Rule, allowing an incoming port connection.
+ * Creates an iptables command for a Local Rule, allowing an incoming port
+ * connection.
  *
  */
 public class LocalRule {
@@ -46,19 +47,24 @@ public class LocalRule {
      * Constructor of <code>LocalRule</code> object.
      *
      * @param port
-     *            destination local IP port number to allow
+     *                                 destination local IP port number to allow
      * @param protocol
-     *            protocol of port (tcp, udp)
+     *                                 protocol of port (tcp, udp)
      * @param sourcePortRange
-     *            range of source ports allowed on IP connection (sourcePort1:sourcePort2)
+     *                                 range of source ports allowed on IP
+     *                                 connection (sourcePort1:sourcePort2)
      * @param permittedNetwork
-     *            source network or ip address from which connection is allowed (such as 192.168.1.0/24)
+     *                                 source network or ip address from which
+     *                                 connection is allowed (such as
+     *                                 192.168.1.0/24)
      * @param permittedInterfaceName
-     *            only allow open port for this interface
+     *                                 only allow open port for this interface
      * @param unpermittedInterfaceName
-     *            allow open port for all interfaces except this one
+     *                                 allow open port for all interfaces except
+     *                                 this one
      * @param permittedMAC
-     *            MAC address from which connection is allowed (such as AA:BB:CC:DD:EE:FF)
+     *                                 MAC address from which connection is allowed
+     *                                 (such as AA:BB:CC:DD:EE:FF)
      */
     public LocalRule(int port, String protocol, NetworkPair<? extends IPAddress> permittedNetwork,
             String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC,
@@ -88,19 +94,26 @@ public class LocalRule {
      * Constructor of <code>LocalRule</code> object.
      *
      * @param portRange
-     *            destination local IP port range to allow of the form X:Y where X<Y and both are valid ports
+     *                                 destination local IP port range to allow of
+     *                                 the form X:Y where X<Y and both are valid
+     *                                 ports
      * @param protocol
-     *            protocol of port (tcp, udp)
+     *                                 protocol of port (tcp, udp)
      * @param sourcePortRange
-     *            range of source ports allowed on IP connection (sourcePort1:sourcePort2)
+     *                                 range of source ports allowed on IP
+     *                                 connection (sourcePort1:sourcePort2)
      * @param permittedNetwork
-     *            source network or ip address from which connection is allowed (such as 192.168.1.0/24)
+     *                                 source network or ip address from which
+     *                                 connection is allowed (such as
+     *                                 192.168.1.0/24)
      * @param permittedInterfaceName
-     *            only allow open port for this interface
+     *                                 only allow open port for this interface
      * @param unpermittedInterfaceName
-     *            allow open port for all interfaces except this one
+     *                                 allow open port for all interfaces except
+     *                                 this one
      * @param permittedMAC
-     *            MAC address from which connection is allowed (such as AA:BB:CC:DD:EE:FF)
+     *                                 MAC address from which connection is allowed
+     *                                 (such as AA:BB:CC:DD:EE:FF)
      */
     public LocalRule(String portRange, String protocol, NetworkPair<? extends IPAddress> permittedNetwork,
             String permittedInterfaceName, String unpermittedInterfaceName, String permittedMAC,
@@ -170,7 +183,8 @@ public class LocalRule {
     }
 
     /**
-     * Returns true if the required <code>LocalRule</code> parameters have all been set. Returns false otherwise.
+     * Returns true if the required <code>LocalRule</code> parameters have all been
+     * set. Returns false otherwise.
      *
      * @return A boolean representing whether all parameters have been set.
      */
@@ -188,7 +202,7 @@ public class LocalRule {
      * Setter for the protocol.
      *
      * @param protocol
-     *            A String representing the protocol.
+     *                 A String representing the protocol.
      */
     public void setProtocol(String protocol) {
         this.protocol = protocol;
@@ -198,7 +212,7 @@ public class LocalRule {
      * Setter for the permittedNetwork.
      *
      * @param permittedNetwork
-     *            A String representing the permittedNetwork.
+     *                         A String representing the permittedNetwork.
      */
     public void setPermittedNetwork(NetworkPair<? extends IPAddress> permittedNetwork) {
         if (permittedNetwork != null) {
@@ -211,7 +225,8 @@ public class LocalRule {
      * Setter for the permittedInterfaceName.
      *
      * @param permittedInterfaceName
-     *            A String representing the only interface allowed on this open port
+     *                               A String representing the only interface
+     *                               allowed on this open port
      */
     public void setPermittedInterfaceName(String permittedInterfaceName) {
         if (permittedInterfaceName != null && !permittedInterfaceName.trim().isEmpty()) {
@@ -223,7 +238,8 @@ public class LocalRule {
      * Setter for the unpermittedInterfaceName.
      *
      * @param unpermittedInterfaceName
-     *            A String representing the only interface not allowed on this open port
+     *                                 A String representing the only interface not
+     *                                 allowed on this open port
      */
     public void setUnpermittedInterfaceName(String unpermittedInterfaceName) {
         if (unpermittedInterfaceName != null && !unpermittedInterfaceName.trim().isEmpty()) {
@@ -235,7 +251,7 @@ public class LocalRule {
      * Setter for the permittedMAC.
      *
      * @param permittedMAC
-     *            A String representing the permittedMAC.
+     *                     A String representing the permittedMAC.
      */
     public void setPermittedMAC(String permittedMAC) {
         if (permittedMAC != null && !permittedMAC.trim().isEmpty()) {
@@ -247,7 +263,7 @@ public class LocalRule {
      * Setter for the sourcePortRange.
      *
      * @param sourcePortRange
-     *            A String representing the sourcePortRange.
+     *                        A String representing the sourcePortRange.
      */
     public void setSourcePortRange(String sourcePortRange) {
         if (sourcePortRange != null && !sourcePortRange.trim().isEmpty()) {
@@ -259,7 +275,7 @@ public class LocalRule {
      * Setter for the port.
      *
      * @param port
-     *            An int representing the port.
+     *             An int representing the port.
      */
     public void setPort(int port) {
         this.port = port;
@@ -270,7 +286,8 @@ public class LocalRule {
      * Setter for the portRange
      *
      * @param portRange
-     *            A string representing the port range of the form X:Y where X < Y and both are valid ports
+     *                  A string representing the port range of the form X:Y where X
+     *                  < Y and both are valid ports
      */
     public void setPortRange(String portRange) {
         this.port = -1;
@@ -296,7 +313,8 @@ public class LocalRule {
      * Getter for the permittedInterfaceName.
      *
      * @param permittedInterfaceName
-     *            A String representing the only interface allowed on this open port
+     *                               A String representing the only interface
+     *                               allowed on this open port
      */
     public String getPermittedInterfaceName() {
         if (this.permittedInterfaceName.isPresent()) {
@@ -310,7 +328,8 @@ public class LocalRule {
      * Getter for the unpermittedInterfaceName.
      *
      * @param unpermittedInterfaceName
-     *            A String representing the only interface not allowed on this open port
+     *                                 A String representing the only interface not
+     *                                 allowed on this open port
      */
     public String getUnpermittedInterfaceName() {
         if (this.unpermittedInterfaceName.isPresent()) {
@@ -392,7 +411,8 @@ public class LocalRule {
 
     /**
      * Converts the <code>LocalRule</code> to a <code>String</code>.
-     * Returns one of the following iptables strings depending on the <code>LocalRule</code> format:
+     * Returns one of the following iptables strings depending on the
+     * <code>LocalRule</code> format:
      * <code>
      * <p>  -A input-kura -p {protocol} --dport {port} -j ACCEPT
      * <p>  -A input-kura -p {protocol} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
@@ -407,61 +427,34 @@ public class LocalRule {
      */
     @Override
     public String toString() {
-        String interfaceString = null;
+        StringBuilder localRuleSB = new StringBuilder(A_INPUT_KURA_P).append(this.protocol);
+
+        this.permittedNetworkString.ifPresent(permittedNetwork -> {
+            localRuleSB.append(" -s ").append(permittedNetwork);
+        });
+
         if (this.permittedInterfaceName.isPresent()) {
-            interfaceString = new StringBuilder().append(" -i ").append(this.permittedInterfaceName.get()).toString();
+            localRuleSB.append(" -i ").append(this.permittedInterfaceName.get()).toString();
         } else if (this.unpermittedInterfaceName.isPresent()) {
-            interfaceString = new StringBuilder().append(" ! -i ").append(this.unpermittedInterfaceName.get())
-                    .toString();
+            localRuleSB.append(" ! -i ").append(this.unpermittedInterfaceName.get()).toString();
         }
+
+        this.permittedMAC.ifPresent(macAddress -> {
+            localRuleSB.append(M_MAC_MAC_SOURCE).append(macAddress);
+        });
+
+        this.sourcePortRange.ifPresent(sourceRange -> {
+            localRuleSB.append(SPORT).append(sourceRange);
+        });
 
         if (this.port != -1) {
-            return getLocalRuleWithPort(interfaceString);
+            localRuleSB.append(DPORT).append(this.port);
         } else {
-            return getLocalRuleWithoutPort(interfaceString);
+            localRuleSB.append(DPORT).append(this.portRange.get());
         }
-    }
 
-    private String getLocalRuleWithPort(String interfaceString) {
-        String localRuleString = "";
-        if (!this.permittedMAC.isPresent() && !this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + DPORT + this.port + J_ACCEPT;
-        } else if (!this.permittedMAC.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + SPORT + this.sourcePortRange.get() + DPORT
-                    + this.port + J_ACCEPT;
-        } else if (!this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + DPORT + this.port + J_ACCEPT;
-        } else {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + SPORT + this.sourcePortRange.get() + DPORT + this.port + J_ACCEPT;
-        }
-        return localRuleString;
-    }
-
-    private String getLocalRuleWithoutPort(String interfaceString) {
-        String localRuleString = "";
-        if (!this.permittedMAC.isPresent() && !this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + DPORT + this.portRange.get() + J_ACCEPT;
-        } else if (!this.permittedMAC.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + SPORT + this.sourcePortRange.get() + DPORT
-                    + this.portRange.get() + J_ACCEPT;
-        } else if (!this.sourcePortRange.isPresent()) {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + DPORT + this.portRange.get() + J_ACCEPT;
-        } else {
-            localRuleString = A_INPUT_KURA_P + this.protocol + " -s " + this.permittedNetworkString.get()
-                    + (interfaceString != null ? interfaceString : "") + M_MAC_MAC_SOURCE + this.permittedMAC.get()
-                    + SPORT + this.sourcePortRange.get() + DPORT + this.portRange.get() + J_ACCEPT;
-        }
-        return localRuleString;
+        localRuleSB.append(J_ACCEPT);
+        return localRuleSB.toString();
     }
 
     private boolean isPortRangeValid(String range) {

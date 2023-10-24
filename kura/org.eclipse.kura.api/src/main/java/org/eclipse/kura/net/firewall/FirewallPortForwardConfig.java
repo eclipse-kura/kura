@@ -59,6 +59,14 @@ public interface FirewallPortForwardConfig extends NetConfig {
     public IPAddress getIPAddress();
 
     /**
+     * The netmask of the LAN IP address to forward connections to
+     *
+     * @return The netmask of the LAN IPAddress to forward connections to
+     * @since 2.6
+     */
+    public short getIPAddressNetmask();
+
+    /**
      * Gets the type of network protocol (TCP or UDP) that is used for this configuration
      *
      * @return The NetProtocol type associated with this interface

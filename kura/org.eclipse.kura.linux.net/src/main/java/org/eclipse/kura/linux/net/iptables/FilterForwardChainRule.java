@@ -147,16 +147,10 @@ public class FilterForwardChainRule {
         List<String> ret = new ArrayList<>();
         StringBuilder sb = new StringBuilder("-A " + chain);
         if (this.srcNetwork != null) {
-            sb.append(" -s ") //
-                    .append(this.srcNetwork) //
-                    .append('/') //
-                    .append(this.srcMask);
+            sb.append(" -s ").append(this.srcNetwork).append('/').append(this.srcMask);
         }
         if (this.dstNetwork != null) {
-            sb.append(" -d ") //
-                    .append(this.dstNetwork) //
-                    .append('/') //
-                    .append(this.dstMask);
+            sb.append(" -d ").append(this.dstNetwork).append('/').append(this.dstMask);
         }
         sb.append(" -i ").append(this.inputInterface);
         sb.append(" -o ").append(this.outputInterface);
@@ -168,10 +162,7 @@ public class FilterForwardChainRule {
             sb.append(" -m mac --mac-source ").append(this.permittedMacAddress);
         }
         if (this.srcPortFirst > 0 && this.srcPortLast >= this.srcPortFirst) {
-            sb.append(" --sport ") //
-                    .append(this.srcPortFirst) //
-                    .append(':') //
-                    .append(this.srcPortLast);
+            sb.append(" --sport ").append(this.srcPortFirst).append(':').append(this.srcPortLast);
         }
         if (this.dstPort > 0) {
             sb.append(" --dport ").append(this.dstPort);
@@ -180,10 +171,7 @@ public class FilterForwardChainRule {
         ret.add(sb.toString());
         sb = new StringBuilder("-A " + chain);
         if (this.dstNetwork != null) {
-            sb.append(" -s ") //
-                    .append(this.dstNetwork) //
-                    .append('/') //
-                    .append(this.dstMask);
+            sb.append(" -s ").append(this.dstNetwork).append('/').append(this.dstMask);
         }
         sb.append(" -i ").append(this.outputInterface);
         sb.append(" -o ").append(this.inputInterface);

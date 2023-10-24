@@ -113,7 +113,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
 
         Set<PortForwardRule> portForwardRules = new LinkedHashSet<>();
         PortForwardRule portForwardRule = new PortForwardRule().inboundIface("eth0").outboundIface("eth1")
-                .address("172.16.0.1").protocol("tcp").inPort(3040).outPort(4050).masquerade(true)
+                .address("172.16.0.1").addressMask(32).protocol("tcp").inPort(3040).outPort(4050).masquerade(true)
                 .permittedNetwork("172.16.0.100").permittedNetworkMask(32).permittedMAC("00:11:22:33:44:55:66")
                 .sourcePortRange("10100:10200");
         portForwardRules.add(portForwardRule);

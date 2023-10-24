@@ -140,7 +140,6 @@ public class SemanticVersionTest {
     }
     
     private void thenParsedVersionIs(String expectedResult) {
-    	System.out.println(this.testVersion.asStringValue());
         assertTrue(this.testVersion.asStringValue().equals(expectedResult));
     }
     

@@ -29,7 +29,7 @@ The **Wireless** tab contains the following configuration parameters:
     - WEP: Wired Equivalent Privacy
     - WPA: Wi-Fi Protected Access
     - WPA2: Wi-Fi Protected Access II
-    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x Support (Only available in station mode with [generic profiles](/getting-started/install-kura/#installer-types))
+    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x Support (Only available in station mode with [generic profiles](../../getting-started/install-kura))
 
 - **Wireless Password**: sets the password for the wireless network.
     - WEP: 64-bit or 128-bit encryption key

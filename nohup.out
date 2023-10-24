@@ -1,0 +1,613 @@
+INFO     -  Building documentation...
+INFO     -  Cleaning site directory
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  Documentation built in 11.81 seconds
+INFO     -  [13:26:19] Watching paths for changes: 'docs', 'mkdocs.yml'
+INFO     -  [13:26:19] Serving on http://127.0.0.1:8000/
+[33mWARNING  -  [0m[13:26:31] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:26:31] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+INFO     -  [13:29:09] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:15] Reloading browsers
+INFO     -  [13:29:15] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:29:15] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:29:21] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:26] Reloading browsers
+[33mWARNING  -  [0m[13:29:26] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:29:26] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+INFO     -  [13:29:27] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:32] Reloading browsers
+INFO     -  [13:29:32] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:40] Reloading browsers
+INFO     -  [13:29:40] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:54] Reloading browsers
+INFO     -  [13:29:54] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:29:59] Reloading browsers
+INFO     -  [13:29:59] Detected file changes
+[33mWARNING  -  [0m[13:29:59] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:30:06] Reloading browsers
+[33mWARNING  -  [0m[13:30:07] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:30:07] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:30:07] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:31:50] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:31:50] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[13:31:51] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:31:51] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+[33mWARNING  -  [0m[13:31:56] "GET /gateway-configuration/wifi-configuration/getting-started/install-kura/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:31:56] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:32:01] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[13:32:07] "GET /gateway-configuration/wifi-configuration-8021x/gateway-configuration/wifi-configuration/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:32:08] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:32:43] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to 'gateway-configuration' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:32:50] Reloading browsers
+INFO     -  [13:32:50] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:32:59] Reloading browsers
+INFO     -  [13:32:59] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:04] Reloading browsers
+INFO     -  [13:33:04] Detected file changes
+[33mWARNING  -  [0m[13:33:04] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to 'gateway-configuration' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:11] Reloading browsers
+[33mWARNING  -  [0m[13:33:11] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:33:11] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:33:11] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:33:11] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:33:11] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:33:11] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [13:33:19] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:26] Reloading browsers
+INFO     -  [13:33:26] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:36] Reloading browsers
+INFO     -  [13:33:36] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:42] Reloading browsers
+INFO     -  [13:33:42] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:33:49] Reloading browsers
+INFO     -  [13:33:49] Detected file changes
+[33mWARNING  -  [0m[13:33:49] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:34:02] Reloading browsers
+[33mWARNING  -  [0m[13:34:02] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:34:02] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:34:03] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:34:03] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:34:03] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:34:03] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [13:40:27] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:40:32] Reloading browsers
+INFO     -  [13:40:32] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:40:40] Reloading browsers
+[33mWARNING  -  [0m[13:40:41] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:40:41] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [13:40:41] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:40:41] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:40:57] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to 'gateway-configuration' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:03] Reloading browsers
+[33mWARNING  -  [0m[13:41:03] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:41:03] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:41:03] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:41:03] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [13:41:22] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:30] Reloading browsers
+INFO     -  [13:41:30] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:35] Reloading browsers
+INFO     -  [13:41:35] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:40] Reloading browsers
+INFO     -  [13:41:40] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:49] Reloading browsers
+[33mWARNING  -  [0m[13:41:49] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:41:50] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:41:50] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:41:50] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[13:41:50] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:41:50] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [13:42:02] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:07] Reloading browsers
+INFO     -  [13:42:07] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:12] Reloading browsers
+[33mWARNING  -  [0m[13:42:12] "GET /gateway-configuration/wifi-configuration/getting-started// HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:12] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:12] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:42:12] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+INFO     -  [13:42:14] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[13:42:15] "GET /gateway-configuration/wifi-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:17] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:20] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:42:20] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[13:42:22] "GET /gateway-configuration/wifi-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:23] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:46] "GET /gateway-configuration/wifi-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:46] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:53] "GET /gateway-configuration/wifi-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:42:53] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:43:08] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:16] Reloading browsers
+INFO     -  [13:43:16] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  [13:43:16] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:21] Reloading browsers
+[33mWARNING  -  [0m[13:43:21] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:43:21] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [13:43:26] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[13:55:33] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[13:55:33] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:02:23] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:02:35] Reloading browsers
+[33mWARNING  -  [0m[14:02:35] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+INFO     -  [14:02:37] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:02:37] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:02:40] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:02:40] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:03:02] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:03:12] Reloading browsers
+[33mWARNING  -  [0m[14:03:14] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:03:14] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:04:42] "GET /getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:04:43] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:05:04] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:05:04] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+INFO     -  [14:05:32] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:05:37] Reloading browsers
+INFO     -  [14:05:37] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:05:41] Reloading browsers
+[33mWARNING  -  [0m[14:05:42] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:05:43] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:05:43] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+INFO     -  [14:07:58] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:08:04] Reloading browsers
+INFO     -  [14:08:04] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:08:10] Reloading browsers
+INFO     -  [14:08:10] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:08:15] Reloading browsers
+INFO     -  [14:08:15] Detected file changes
+[33mWARNING  -  [0m[14:08:15] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:08:20] Reloading browsers
+[33mWARNING  -  [0m[14:08:20] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:08:21] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:08:21] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/
+[33mWARNING  -  [0m[14:09:53] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:09:53] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  Cleaning site directory
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  Documentation built in 11.10 seconds
+INFO     -  [14:51:56] Watching paths for changes: 'docs', 'mkdocs.yml'
+INFO     -  [14:51:56] Serving on http://127.0.0.1:8000/
+[33mWARNING  -  [0m[14:54:59] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:54:59] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[14:55:14] "GET /gateway-configuration/getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:55:14] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:55:28] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:55:32] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [14:55:33] Reloading browsers
+[33mWARNING  -  [0m[14:55:33] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:55:33] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:55:34] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:55:34] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:55:36] "GET /getting-started/install-kura.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:55:36] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:55:50] "GET /getting-started/install-kura.md/ HTTP/1.1" code 404
+INFO     -  [14:56:05] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:56:09] Reloading browsers
+INFO     -  [14:56:09] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:56:14] Reloading browsers
+[33mWARNING  -  [0m[14:56:52] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:56:52] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:56:54] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:56:54] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:57:07] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:08] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:10] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:11] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:20] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:20] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:21] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:57:29] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:57:34] Reloading browsers
+[33mWARNING  -  [0m[14:57:35] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:57:35] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:57:37] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:57:37] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:57:39] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:40] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:57:45] "GET /getting-started/install-kura HTTP/1.1" code 302
+INFO     -  [14:57:46] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[14:57:46] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:57:59] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:58:04] Reloading browsers
+INFO     -  [14:58:04] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[14:58:04] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:58:04] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:58:07] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:58:07] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:58:08] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:58:08] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:58:27] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:58:32] Reloading browsers
+[33mWARNING  -  [0m[14:58:32] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:58:32] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [14:58:37] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:58:41] Reloading browsers
+[33mWARNING  -  [0m[14:58:42] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:58:42] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [14:59:16] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:59:20] Reloading browsers
+[33mWARNING  -  [0m[14:59:20] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:59:21] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:59:21] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[14:59:24] "GET /getting-started/install-kura HTTP/1.1" code 302
+[33mWARNING  -  [0m[14:59:24] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:59:24] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+INFO     -  [14:59:28] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:59:32] Reloading browsers
+[33mWARNING  -  [0m[14:59:33] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:59:33] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[14:59:41] "GET /gateway-configuration/wifi-configuration-8021x/wifi-configuration.md/ HTTP/1.1" code 404
+[33mWARNING  -  [0m[14:59:42] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:59:59] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:00:04] Reloading browsers
+[33mWARNING  -  [0m[15:00:07] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:00:07] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+INFO     -  [15:00:14] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:00:19] Reloading browsers
+INFO     -  [15:00:19] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:00:24] Reloading browsers
+[33mWARNING  -  [0m[15:00:24] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:00:24] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [15:00:28] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:00:33] Reloading browsers
+INFO     -  [15:00:33] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[15:00:33] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:01:20] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:01:25] Reloading browsers
+[33mWARNING  -  [0m[15:01:25] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:01:25] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[15:05:01] "GET /getting-started/install-kura HTTP/1.1" code 302
+[33mWARNING  -  [0m[15:05:01] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:05:01] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+INFO     -  [15:05:17] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:05:21] Reloading browsers
+[33mWARNING  -  [0m[15:05:21] "GET /getting-started/install-kura HTTP/1.1" code 302
+[33mWARNING  -  [0m[15:05:22] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:05:22] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+INFO     -  [15:05:22] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+[33mWARNING  -  [0m[15:05:22] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:05:24] "GET /getting-started/install-kura HTTP/1.1" code 302
+[33mWARNING  -  [0m[15:05:24] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:05:24] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+INFO     -  [15:05:27] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [15:05:43] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:05:48] Reloading browsers
+INFO     -  [15:05:48] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:05:53] Reloading browsers
+[33mWARNING  -  [0m[15:05:53] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:05:53] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:05:54] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:05:54] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[15:05:54] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:05:54] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration/
+INFO     -  [15:06:05] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:06:09] Reloading browsers
+[33mWARNING  -  [0m[15:06:10] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:06:10] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+[33mWARNING  -  [0m[15:06:10] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:06:10] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+[33mWARNING  -  [0m[15:06:11] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:06:12] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:06:19] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:06:24] Reloading browsers
+[33mWARNING  -  [0m[15:06:25] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:06:25] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/getting-started/install-kura/
+INFO     -  [15:09:14] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:09:19] Reloading browsers
+[33mWARNING  -  [0m[15:09:32] "GET /getting-started/install-kura.md HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:09:32] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:09:34] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+INFO     -  [15:11:08] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:13] Reloading browsers
+[33mWARNING  -  [0m[15:11:13] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:11:13] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+INFO     -  [15:11:19] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:24] Reloading browsers
+INFO     -  [15:11:24] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:29] Reloading browsers
+INFO     -  [15:11:29] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:34] Reloading browsers
+INFO     -  [15:11:34] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to 'gateway-configuration/images/802-1x-images.mdwifi-create-change-path.png' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:38] Reloading browsers
+INFO     -  [15:11:38] Detected file changes
+[33mWARNING  -  [0m[15:11:38] "GET /versions.json HTTP/1.1" code 404
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to 'gateway-configuration/images/802-1x-images.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:43] Reloading browsers
+[33mWARNING  -  [0m[15:11:43] "GET /versions.json HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:11:44] "GET /gateway-configuration/wifi-configuration-8021x/images/802-1x-images.mdwifi-create-change-path.png HTTP/1.1" code 404
+[33mWARNING  -  [0m[15:11:44] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:11:44] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+[33mWARNING  -  [0m[15:11:44] "GET /gateway-configuration/wifi-configuration-8021x/images/802-1x-images.md HTTP/1.1" code 404
+INFO     -  [15:11:44] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:11:49] Reloading browsers
+[33mWARNING  -  [0m[15:11:49] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:11:49] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+INFO     -  [15:11:57] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:12:02] Reloading browsers
+[33mWARNING  -  [0m[15:12:02] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:12:02] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/
+INFO     -  [15:12:09] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+[33mWARNING  -  [0mDocumentation file 'gateway-configuration/wifi-configuration-8021x.md' contains a link to '../getting-started/install-kura.md' which is not found in the documentation files.
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [15:12:14] Reloading browsers
+[33mWARNING  -  [0m[15:12:14] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [15:12:14] Browser connected: https://opulent-waddle-5vjp59ppq47f7v79-8000.app.github.dev/gateway-configuration/wifi-configuration-8021x/

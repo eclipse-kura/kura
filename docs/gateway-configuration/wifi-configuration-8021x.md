@@ -1,12 +1,12 @@
 # Wi-Fi 802.1x Configuration
-Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](/getting-started/install-kura/#installer-types). The following is a list of currently supported 802.1x authentication methods.
+Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](../../getting-started/install-kura.md). The following is a list of currently supported 802.1x authentication methods.
 
- - [TTLS-MSCHAPv2](/gateway-configuration/wifi-configuration-8021x/#ttls-mschapv2)
- - [PEAP-MSCHAPv2](/gateway-configuration/wifi-configuration-8021x/#peap-mschapv2)
- - [EAP-TLS](/gateway-configuration/wifi-configuration-8021x/#eap-tls)
+ - [TTLS-MSCHAPv2](#ttls-mschapv2)
+ - [PEAP-MSCHAPv2](#peap-mschapv2)
+ - [EAP-TLS](#eap-tls)
 
 ## TTLS-MSCHAPv2
- 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
+ 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](./wifi-configuration.md#wireless-configuration).
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`
     ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)
  3. select the 802.1x tab
@@ -20,7 +20,7 @@ The configuration should look like the following:
 ![Alt text](images/802-1x-images/wifi-ttls.png)
 
 ## PEAP-MSCHAPv2
- 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
+ 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](./wifi-configuration.md#wireless-configuration).
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`
     ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)
  3. select the 802.1x tab
@@ -39,7 +39,7 @@ To connect via EAP-TLS you will need the following items in unencrypted PEM form
 - Certificate Authority (CA) Certificate
 - Client Certificate + Private Key (PKCS8)
 
-### Enrolling secrets in the [Keystore service](/gateway-configuration/keystores-management/).
+### Enrolling secrets in the [Keystore service](/gateway-configuration/keystores-management.md/).
 
  1. Navigate to `Security` under the `System` tab.
  2. Under the `Keystore Configuration` add a new keystore, and keep note of the name. ![Adding a new keystore](images/802-1x-images/wifi-create-keystore.png)
@@ -49,7 +49,7 @@ To connect via EAP-TLS you will need the following items in unencrypted PEM form
 
 ### Wifi Setup
 
- 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](/gateway-configuration/wifi-configuration/#wireless-configuration).
+ 1. Set up gateway Wi-Fi as described in the [Wi-Fi configuration guide](./wifi-configuration.md#wireless-configuration).
  2. Ensure Wireless Security is set to `WPA2/WPA3-Enterprise`. ![Alt text](images/802-1x-images/wifi-enterprise-enum.png)
  3. Select the 802.1x tab.
  4. Set Enteprise EAP -> `TLS`.

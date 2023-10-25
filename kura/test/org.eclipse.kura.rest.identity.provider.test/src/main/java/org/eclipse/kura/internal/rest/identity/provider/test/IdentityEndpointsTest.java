@@ -36,6 +36,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
+import org.eclipse.kura.internal.rest.identity.provider.validator.ValidatorOptions;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -199,6 +200,8 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
             when(identityServiceMock.getUser("testuser"))
                     .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
         }
+
+        when(identityServiceMock.getValidatorOptions()).thenReturn(new ValidatorOptions(8, false, false, false));
     }
 
     @BeforeClass

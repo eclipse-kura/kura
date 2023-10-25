@@ -31,6 +31,7 @@ Identities with `rest.identity` permissions can access these APIs.
 ##### Responses
 
 - 200 OK status
+- 400 Bad Request (Password strenght requirements not satisfied)
 - 500 Internal Server Error
 
 #### Get User  by Name
@@ -132,6 +133,26 @@ Identities with `rest.identity` permissions can access these APIs.
 - 200 OK status
 - 500 Internal Server Error
 
+#### Get password requirements
+
+- Description: This method allows you to get the password requirements.
+- Method: GET
+- API PATH: `services/identity/v1/password-requirements`
+
+##### Responses
+
+```JSON
+{
+    "passwordMinimumLength": 8,
+    "passwordRequireDigits": false,
+    "passwordRequireSpecialChars": false,
+    "passwordRequireBothCases": false
+}
+```
+
+- 200 OK status
+- 500 Internal Server Error
+
 ## PUT methods
 
 #### Update User
@@ -157,6 +178,7 @@ Identities with `rest.identity` permissions can access these APIs.
 ##### Responses
 
 - 200 OK status
+- 400 Bad Request (Password strenght requirements not satisfied)
 - 500 Internal Server Error
 
 ## DELETE methods

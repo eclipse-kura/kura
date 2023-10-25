@@ -86,6 +86,7 @@ public class FirewallPanelUi extends Composite {
     private final Tab.RefreshHandler openPortsIPv6Handler;
     private final Tab.RefreshHandler portForwardingIPv6Handler;
     private final Tab.RefreshHandler ipForwardingIPv6Handler;
+    private boolean isNet2;
 
     public FirewallPanelUi() {
 
@@ -125,7 +126,11 @@ public class FirewallPanelUi extends Composite {
 
         this.portForwardingIPv6Panel.clear();
         this.ipForwardingIPv6Panel.clear();
-        this.openPortsIPv6Panel.refresh();
+        if (this.isNet2) {
+            this.openPortsIPv6Panel.refresh();
+        } else {
+            this.openPortsIPv6Panel.clear();
+        }
 
         this.openPorts.showTab();
     }
@@ -200,11 +205,13 @@ public class FirewallPanelUi extends Composite {
 
             @Override
             public void onFailure(Throwable caught) {
+                FirewallPanelUi.this.isNet2 = false;
                 FailureHandler.handle(caught);
             }
 
             @Override
             public void onSuccess(Boolean result) {
+                FirewallPanelUi.this.isNet2 = result;
                 initNet2FeaturesOnly(result);
             }
         });

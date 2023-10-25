@@ -111,16 +111,16 @@ public class DhcpServerManager {
 
     public static String getConfigFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(FILE_DIR);
-        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(dhcpServerTool.getValue());
-            sb.append('-');
-            sb.append(interfaceName);
-            sb.append(".conf");
+        if (dhcpServerTool == DhcpServerTool.NONE) {
+            return sb.toString();
         }
-
         if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
-            sb.append("dnsmasq.d/dnsmasq-" + interfaceName + ".conf");
+            sb.append("dnsmasq.d/");
         }
+        sb.append(dhcpServerTool.getValue());
+        sb.append('-');
+        sb.append(interfaceName);
+        sb.append(".conf");
 
         return sb.toString();
     }
@@ -138,12 +138,14 @@ public class DhcpServerManager {
 
     public static String getLeasesFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(LEASES_FILE_DIR);
-        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(dhcpServerTool.getValue());
-            sb.append('-');
-            sb.append(interfaceName);
-            sb.append(".leases");
+        if (dhcpServerTool == DhcpServerTool.NONE) {
+            return sb.toString();
         }
+        sb.append(dhcpServerTool.getValue());
+        sb.append('-');
+        sb.append(interfaceName);
+        sb.append(".leases");
+
         return sb.toString();
     }
 

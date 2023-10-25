@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.net.dhcp.server;
 
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 
 public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
@@ -47,6 +48,10 @@ public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
 
         // all subnets are local
         sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",27,1").append("\n");
+
+        // set lease file
+        sb.append("dhcp-leasefile=").append(DhcpServerManager.getLeasesFilename(config.getInterfaceName()))
+                .append("\n");
 
         return sb.toString();
     }

@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.rest.identity.provider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +84,9 @@ public class IdentityService {
     public UserDTO getUser(String userName) throws KuraException {
         Optional<User> user = this.userAdminHelper.getUser(userName);
         if (user.isPresent()) {
-            return initUserConfig(user.get());
+            UserDTO userFound = initUserConfig(user.get());
+            fillPermissions(Collections.singletonMap(user.get().getName(), userFound));
+            return userFound;
         } else {
             throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userName + " not found");
         }
@@ -204,10 +207,7 @@ public class IdentityService {
 
     public void validateUserPassword(String password) throws KuraException {
 
-        ComponentConfiguration consoleConfig = this.configurationService
-                .getComponentConfiguration(KURA_WEB_CONSOLE_SERVICE_PID);
-
-        ValidatorOptions validatorOptions = new ValidatorOptions(consoleConfig.getConfigurationProperties());
+        ValidatorOptions validatorOptions = getValidatorOptions();
 
         final List<Validator<String>> validators = PasswordStrengthValidators.fromConfig(validatorOptions);
 
@@ -222,4 +222,11 @@ public class IdentityService {
         }
     }
 
+    public ValidatorOptions getValidatorOptions() throws KuraException {
+        ComponentConfiguration consoleConfig = this.configurationService
+                .getComponentConfiguration(KURA_WEB_CONSOLE_SERVICE_PID);
+
+        return new ValidatorOptions(consoleConfig.getConfigurationProperties());
+
+    }
 }

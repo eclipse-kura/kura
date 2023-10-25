@@ -75,6 +75,10 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
             IdentityEndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
+    private static final String EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE = new Scanner(
+            IdentityEndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
+
     private static Set<UserDTO> userConfigs;
 
     private static ServiceRegistration<IdentityService> identityServiceRegistration;
@@ -160,6 +164,16 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"permissions\": [\"perm1\",\"perm2\"]}");
+    }
+
+    @Test
+    public void shouldReturnPasswordRequirements() throws KuraException {
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/password-requirements");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE);
     }
 
     private void givenUser(UserDTO userParam) {

@@ -30,6 +30,8 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
+import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
+import org.eclipse.kura.internal.rest.identity.provider.validator.ValidatorOptions;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.osgi.service.useradmin.Role;
@@ -179,6 +181,24 @@ public class IdentityRestService {
             UserConfigDTO userConfig = new UserConfigDTO();
             userConfig.setUserConfig(this.identityService.getUserConfig());
             return userConfig;
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @GET
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/password-requirements")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ValidatorOptionsDTO getValidatorOptions() {
+        try {
+            logger.debug(DEBUG_MESSAGE, "getValidatorOptions");
+            ValidatorOptions validatorOptions = this.identityService.getValidatorOptions();
+            return new ValidatorOptionsDTO(//
+                    validatorOptions.getPasswordMinimumLength(), //
+                    validatorOptions.getPasswordRequireDigits(), //
+                    validatorOptions.getPasswordRequireBothCases(), //
+                    validatorOptions.getPasswordRequireSpecialChars());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

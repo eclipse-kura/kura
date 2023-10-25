@@ -69,7 +69,7 @@ public interface DataTransportService {
      * in-flight messages before actually disconnecting from the broker.
      *
      * @param quiesceTimeout
-     *            - timeout that will be used before forcing a disconnect
+     *            - timeout in milliseconds that will be used before forcing a disconnect
      */
     public void disconnect(long quiesceTimeout);
 

@@ -27,7 +27,7 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
         sb.append("# pass DNS? ").append(config.isPassDns()).append("\n\n");
 
         // Leases file
-        sb.append("lease-file-name " + DhcpServerManager.getLeasesFilename(config.getInterfaceName()) + ";\n\n");
+        sb.append("lease-file-name \"" + DhcpServerManager.getLeasesFilename(config.getInterfaceName()) + "\";\n\n");
 
         sb.append("subnet " + config.getSubnet().getHostAddress() + " netmask "
                 + config.getSubnetMask().getHostAddress() + " {\n");

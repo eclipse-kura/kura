@@ -161,48 +161,50 @@ public class IdentityService {
         }
     }
 
-    public void updateUser(UserDTO userDTO) throws KuraException {
+    public void updateUser(UserDTO userDTOToUpdate) throws KuraException {
 
-        final Optional<User> user = this.userAdminHelper.getUser(userDTO.getUserName());
+        final Optional<User> user = this.userAdminHelper.getUser(userDTOToUpdate.getUserName());
 
         if (user.isPresent()) {
             this.userAdminHelper.foreachPermission((permissionName, permissionGroup) -> {
 
-                if (userDTO.getPermissions() != null && userDTO.getPermissions().contains(permissionName)) {
+                if (userDTOToUpdate.getPermissions() != null && userDTOToUpdate.getPermissions().contains(permissionName)) {
                     permissionGroup.addMember(user.get());
                 } else {
                     permissionGroup.removeMember(user.get());
                 }
             });
 
-            final Dictionary<String, Object> credentials = user.get().getCredentials();
-
-            if (userDTO.isPasswordAuthEnabled()) {
-                final String password = userDTO.getPassword();
-
-                if (password != null) {
-                    this.validateUserPassword(password);
-                    try {
-                        credentials.put(PASSWORD_PROPERTY, this.cryptoService.sha256Hash(password));
-                    } catch (final Exception e) {
-                        throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
-                    }
-                }
-            } else {
-                credentials.remove(PASSWORD_PROPERTY);
-            }
-
-            final Dictionary<String, Object> properties = user.get().getProperties();
-
-            if (userDTO.isPasswordChangeNeeded()) {
-                properties.put(KURA_NEED_PASSWORD_CHANGE, "true");
-            } else {
-                properties.remove(KURA_NEED_PASSWORD_CHANGE);
-            }
+            updatePasswordOptions(userDTOToUpdate, user.get().getCredentials(), user.get().getProperties());
         } else {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userDTO.getUserName() + " not found");
+            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userDTOToUpdate.getUserName() + " not found");
         }
 
+    }
+
+    private void updatePasswordOptions(UserDTO userDTO, final Dictionary<String, Object> credentials,
+            final Dictionary<String, Object> properties) throws KuraException {
+
+        if (userDTO.isPasswordAuthEnabled()) {
+            final String password = userDTO.getPassword();
+
+            if (password != null) {
+                this.validateUserPassword(password);
+                try {
+                    credentials.put(PASSWORD_PROPERTY, this.cryptoService.sha256Hash(password));
+                } catch (final Exception e) {
+                    throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
+                }
+            }
+        } else {
+            credentials.remove(PASSWORD_PROPERTY);
+        }
+
+        if (userDTO.isPasswordChangeNeeded()) {
+            properties.put(KURA_NEED_PASSWORD_CHANGE, "true");
+        } else {
+            properties.remove(KURA_NEED_PASSWORD_CHANGE);
+        }
     }
 
     public void validateUserPassword(String password) throws KuraException {

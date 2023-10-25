@@ -63,6 +63,12 @@ public class IdentityService {
 
     public void createUser(UserDTO user) throws KuraException {
         if (!this.userAdminHelper.getUser(user.getUserName()).isPresent()) {
+
+            final String password = user.getPassword();
+            if (password != null) {
+                this.validateUserPassword(password);
+            }
+
             this.userAdminHelper.createUser(user.getUserName());
             this.updateUser(user);
         } else {

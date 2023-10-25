@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
      Eurotech
-     
+
 -->
 <Configuration status="warn" strict="true" name="KuraConfig" monitorInterval="30">
 
@@ -20,8 +20,13 @@
         <Property name="log_name">kura</Property>
     </Properties>
     <Filter type="ThresholdFilter" level="trace"/>
- 
+
     <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
+            </PatternLayout>
+        </Console>
         <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
@@ -46,17 +51,19 @@
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
     </Appenders>
- 
+
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit"/>
         </Logger>
         <Root level="info">
+            <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
   </Loggers>
- 
+
 </Configuration>

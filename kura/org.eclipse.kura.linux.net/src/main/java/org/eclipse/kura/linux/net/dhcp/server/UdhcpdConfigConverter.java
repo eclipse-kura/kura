@@ -29,7 +29,7 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
                 .append("lease_file ").append(DhcpServerManager.getLeasesFilename(config.getInterfaceName()))
                 .append("\n")
                 .append("max_leases ").append(getMaxLeases(config)).append("\n")
-                .append("auto_time 0").append("\n")
+                .append("auto_time 30").append("\n")
                 .append("decline_time ").append(config.getDefaultLeaseTime()).append("\n")
                 .append("conflict_time ").append(config.getDefaultLeaseTime()).append("\n")
                 .append("offer_time ").append(config.getDefaultLeaseTime()).append("\n")

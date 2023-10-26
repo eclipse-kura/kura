@@ -68,8 +68,7 @@ if [ ${BOARD} = "generic-device" ]; then
     RAM_MB_FOR_KURA=$(expr $RAM_MB / 4)
     RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"
 
-    if RAM_MB > 1024
-    then
+    if [ "$RAM_MB" -gt 1024 ]; then
         echo "Setting kura ram -Xms and -Xmx to ${RAM_MB_FOR_KURA}m"
         sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura.sh
         sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura_debug.sh

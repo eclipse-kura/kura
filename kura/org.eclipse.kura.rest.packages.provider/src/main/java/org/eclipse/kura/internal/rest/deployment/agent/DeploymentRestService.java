@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +35,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
@@ -152,7 +152,9 @@ public class DeploymentRestService {
             logger.warn("File already exists at : {}", file.getAbsolutePath());
         } else {
             try {
-                writeToFile(uploadedInputStream, file);
+                FileOutputStream os = new FileOutputStream(file);
+                IOUtils.copy(uploadedInputStream, os);
+                os.close();
             } catch (IOException e) {
                 logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
                 throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -174,17 +176,6 @@ public class DeploymentRestService {
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;
-    }
-
-    private void writeToFile(InputStream uploadedInputStream, File uploadedFile) throws IOException {
-        try (OutputStream out = new FileOutputStream(uploadedFile)) {
-            int read = 0;
-            byte[] bytes = new byte[1024];
-            while ((read = uploadedInputStream.read(bytes)) != -1) {
-                out.write(bytes, 0, read);
-            }
-            out.flush();
-        }
     }
 
     /**

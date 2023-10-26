@@ -18,10 +18,10 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.kura.core.keystore.request.PrivateKeyWriteRequest;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 @Path("/keystores/v2")
 public class KeystoreRestServiceV2 extends KeystoreRestService {
@@ -39,7 +39,7 @@ public class KeystoreRestServiceV2 extends KeystoreRestService {
         try {
             storePrivateKeyEntryInternal(writeRequest);
         } catch (final Exception e) {
-            throw new WebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 }

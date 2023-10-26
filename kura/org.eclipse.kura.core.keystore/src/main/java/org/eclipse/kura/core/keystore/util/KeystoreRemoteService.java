@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.security.auth.x500.X500Principal;
@@ -50,6 +51,7 @@ import javax.ws.rs.WebApplicationException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.request.CsrReadRequest;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
@@ -290,12 +292,43 @@ public class KeystoreRemoteService {
     protected void storePrivateKeyEntryInternal(final PrivateKeyInfo writeRequest)
             throws KuraException, IOException, GeneralSecurityException {
 
+        final KeystoreService targetKeystore = Optional
+                .ofNullable(this.keystoreServices.get(writeRequest.getKeystoreServicePid()))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "KeystoreService not found"));
+
+        if (writeRequest.getPrivateKey() == null) {
+            updatePrivateKeyEntryCertificateChain(targetKeystore, writeRequest);
+        } else {
+            createPrivateKeyEntry(targetKeystore, writeRequest);
+        }
+    }
+
+    private void updatePrivateKeyEntryCertificateChain(final KeystoreService targetKeystore,
+            final PrivateKeyInfo writeRequest) throws KuraException, CertificateException {
+        final Entry targetEntry = Optional.ofNullable(targetKeystore.getEntry(writeRequest.getAlias()))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND, "Entry not found"));
+
+        if (!(targetEntry instanceof PrivateKeyEntry)) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "Target entry is not a PrivateKeyEntry");
+        }
+
+        final PrivateKeyEntry existingPrivateKeyEntry = (PrivateKeyEntry) targetEntry;
+
+        final Certificate[] certificateChain = parsePublicCertificates(
+                Arrays.stream(writeRequest.getCertificateChain()).collect(Collectors.joining("\n")));
+
+        final PrivateKeyEntry result = new PrivateKeyEntry(existingPrivateKeyEntry.getPrivateKey(), certificateChain);
+
+        targetKeystore.setEntry(writeRequest.getAlias(), result);
+    }
+
+    private void createPrivateKeyEntry(final KeystoreService targetKeystore, final PrivateKeyInfo writeRequest)
+            throws IOException, GeneralSecurityException, KuraException {
         final PrivateKeyEntry privateKeyEntry = createPrivateKey(writeRequest.getPrivateKey(),
                 Arrays.stream(writeRequest.getCertificateChain()).collect(Collectors.joining("\n")));
 
-        this.keystoreServices.get(writeRequest.getKeystoreServicePid()).setEntry(writeRequest.getAlias(),
+        targetKeystore.setEntry(writeRequest.getAlias(),
                 privateKeyEntry);
-
     }
 
     protected void deleteKeyEntryInternal(String keystoreServicePid, String alias) {

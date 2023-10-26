@@ -31,12 +31,7 @@ public class PrivateKeyWriteRequest extends PrivateKeyInfo implements Validable 
 
     @Override
     public boolean isValid() {
-        boolean result = true;
-        if (getKeystoreServicePid() == null || getAlias() == null || getCertificateChain() == null
-                || getCertificateChain().length == 0
-                || getPrivateKey() == null) {
-            result = false;
-        }
-        return result;
+        return getKeystoreServicePid() != null && getAlias() != null && getCertificateChain() != null
+                && getCertificateChain().length > 0;
     }
 }

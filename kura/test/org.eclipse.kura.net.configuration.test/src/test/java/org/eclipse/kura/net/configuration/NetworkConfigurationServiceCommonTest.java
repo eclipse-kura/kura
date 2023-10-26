@@ -284,7 +284,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(176, this.ads.size());
+        assertEquals(186, this.ads.size());
     }
 
     private void thenReturnedPropertyEquals(final String key, final Object value) {
@@ -584,15 +584,15 @@ public class NetworkConfigurationServiceCommonTest {
     }
 
     private void thenComponentDefinitionHasWifiProperties() {
-        assertEquals(47, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
+        assertEquals(49, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
     }
 
     private void thenComponentDefinitionHasModemProperties() {
-        assertEquals(36, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
+        assertEquals(38, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
     
     private void thenComponentDefinitionHasVlanProperties() {
-        assertEquals(31, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0")).count());
+        assertEquals(33, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0")).count());
     }
 
     private void thenPppNumIsInteger() {

@@ -33,6 +33,7 @@ public class GwtNetInterfaceConfigBuilder {
 
     private static final String NA = "N/A";
     private static final Integer DEFAULT_WAN_PRIORITY = -1;
+    private static final Integer DEFAULT_MTU = 0;
 
     private final NetworkConfigurationServiceProperties properties;
     private GwtNetInterfaceConfig gwtConfig;
@@ -122,6 +123,9 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setSubnetMask(this.properties.getIp4Netmask(this.ifName));
         this.gwtConfig.setGateway(this.properties.getIp4Gateway(this.ifName));
         this.gwtConfig.setDnsServers(this.properties.getIp4DnsServers(this.ifName));
+
+        Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
+        this.gwtConfig.setMtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv6Properties() {
@@ -161,6 +165,9 @@ public class GwtNetInterfaceConfigBuilder {
         if (privacy.isPresent()) {
             this.gwtConfig.setIpv6Privacy(privacy.get());
         }
+
+        Optional<Integer> mtu = this.properties.getIp6Mtu(this.ifName);
+        this.gwtConfig.setIpv6Mtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv4DhcpClientProperties() {

@@ -33,6 +33,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
@@ -57,6 +58,7 @@ public class NMSettingsConverterTest {
     Boolean hasNoSuchElementExceptionBeenThrown = false;
     Boolean hasAnIllegalArgumentExceptionThrown = false;
     Boolean hasAGenericExecptionBeenThrown = false;
+    SemanticVersion nmVersion = SemanticVersion.parse("1.40");
 
     private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays
             .asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 });
@@ -236,7 +238,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenIllegalArgumentExceptionThrown();
     }
@@ -247,7 +249,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -260,7 +262,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -272,7 +274,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "dhcp");
@@ -288,7 +290,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "manual");
@@ -305,7 +307,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledLAN");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -324,7 +326,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "manual");
@@ -341,7 +343,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "netIPv6PrivacyDisabled");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -357,7 +359,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "netIPv6PrivacyEnabledPubAdd");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -373,7 +375,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "netIPv6PrivacyEnabledTempAdd");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "auto");
@@ -389,7 +391,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "netIPv6PrivacyEnabledTempAdd");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("method", "disabled");
@@ -405,7 +407,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "netIPv6PrivacyEnabledTempAdd");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenIllegalArgumentExceptionThrown();
     }
@@ -418,7 +420,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.privacy", "WrongPrivacy");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenIllegalArgumentExceptionThrown();
     }
@@ -433,7 +435,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenIllegalArgumentExceptionThrown();
     }
@@ -448,9 +450,37 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.ip6.gateway", "fe80::eed:f0a1:d03a:1");
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
-        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0");
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
         thenIllegalArgumentExceptionThrown();
+    }
+    
+    @Test
+    public void buildIpv6SettingsShouldHaveMtuWhenSupported() {
+    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.mtu", 2345);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.40.18");
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("mtu", new UInt32(2345));
+    }
+    
+    @Test
+    public void buildIpv6SettingsShouldNotHaveMtuWhenNotSupported() {
+    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.mtu", 3456);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.22.10");
+
+        whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
+
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("mtu");
     }
 
     @Test
@@ -2854,6 +2884,10 @@ public class NMSettingsConverterTest {
         Mockito.when(this.mockedConnection.GetSettings()).thenReturn(this.internalComparatorAllSettingsMap);
 
     }
+    
+    public void givenNetworkManagerVersion(String nmVersion) {
+        this.nmVersion = SemanticVersion.parse(nmVersion);
+    }
 
     public void givenMockConnectionWithNullSettings() {
         this.mockedConnection = Mockito.mock(Connection.class);
@@ -2868,7 +2902,7 @@ public class NMSettingsConverterTest {
             String deviceId, String iface, NMDeviceType deviceType) {
         try {
             this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, deviceId, iface,
-                    deviceType);
+                    deviceType, this.nmVersion);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {
@@ -2890,9 +2924,9 @@ public class NMSettingsConverterTest {
         }
     }
 
-    public void whenBuildIpv6SettingsIsRunWith(NetworkProperties props, String iface) {
+    public void whenBuildIpv6SettingsIsRunWith(NetworkProperties props, String iface, SemanticVersion nmVersion) {
         try {
-            this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface);
+            this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface, nmVersion);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

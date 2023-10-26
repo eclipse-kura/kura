@@ -137,8 +137,8 @@ public class NMDbusConnector {
         }
     }
 
-    public void checkVersion() throws DBusException {
-        String nmVersion = this.networkManager.getVersion();
+    public void checkVersion() {
+        SemanticVersion nmVersion = this.networkManager.getVersion();
         logger.debug("NM Version: {}", nmVersion);
     }
 
@@ -494,7 +494,7 @@ public class NMDbusConnector {
 
         Optional<Connection> connection = this.networkManager.getAssociatedConnection(device);
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
-                connection, deviceId, interfaceName, deviceType);
+                connection, deviceId, interfaceName, deviceType, this.networkManager.getVersion());
 
         DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
                 NMDeviceState.NM_DEVICE_STATE_CONFIG);
@@ -538,7 +538,7 @@ public class NMDbusConnector {
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
         throws DBusException {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
-                Optional.empty(), deviceId, deviceId, deviceType);
+                Optional.empty(), deviceId, deviceId, deviceType, this.networkManager.getVersion());
         DeviceCreationLock dcLock = new DeviceCreationLock(this, deviceId);
         Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
         DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);

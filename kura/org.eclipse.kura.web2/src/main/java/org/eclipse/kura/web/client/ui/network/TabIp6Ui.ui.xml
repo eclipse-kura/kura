@@ -115,6 +115,13 @@
                                     <b:ListBox b:id="privacy" ui:field="privacy" />
                                 </g:FlowPanel>
                             </b:FormGroup>
+
+                            <b:FormGroup ui:field="groupMtu">
+                                <b:FormLabel for="mtu" ui:field="labelMtu"></b:FormLabel>
+                                <util:HelpButton ui:field="helpButtonMtu" />
+                                <b:HelpBlock color="red" ui:field="wrongInputMtu" />
+                                <b:IntegerBox b:id="mtu" ui:field="mtu" />
+                            </b:FormGroup>
                             
                         </b:FieldSet>
                     </b:Form>

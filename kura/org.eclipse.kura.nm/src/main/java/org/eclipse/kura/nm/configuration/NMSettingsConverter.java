@@ -35,6 +35,7 @@ import org.eclipse.kura.nm.KuraIp6Privacy;
 import org.eclipse.kura.nm.KuraIpStatus;
 import org.eclipse.kura.nm.KuraWifiSecurityType;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.enums.NM8021xEAP;
 import org.eclipse.kura.nm.enums.NM8021xPhase2Auth;
 import org.eclipse.kura.nm.enums.NMDeviceType;
@@ -55,6 +56,7 @@ public class NMSettingsConverter {
     private static final String NM_SETTINGS_IPV6_METHOD = "method";
     private static final String NM_SETTINGS_IPV4_IGNORE_AUTO_DNS = "ignore-auto-dns";
     private static final String NM_SETTINGS_IPV6_IGNORE_AUTO_DNS = "ignore-auto-dns";
+    private static final String NM_SETTINGS_ETHERNET = "802-3-ethernet";
 
     private static final String PPP_REFUSE_EAP = "refuse-eap";
     private static final String PPP_REFUSE_CHAP = "refuse-chap";
@@ -66,6 +68,7 @@ public class NMSettingsConverter {
 
     private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
+    private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
 
     private static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
 
@@ -74,14 +77,15 @@ public class NMSettingsConverter {
     }
 
     public static Map<String, Map<String, Variant<?>>> buildSettings(NetworkProperties properties,
-            Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType) {
+            Optional<Connection> oldConnection, String deviceId, String iface, NMDeviceType deviceType,
+            SemanticVersion nmVersion) {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = new HashMap<>();
 
         Map<String, Variant<?>> connectionMap = buildConnectionSettings(oldConnection, iface, deviceType);
         newConnectionSettings.put(NM_SETTINGS_CONNECTION, connectionMap);
 
         Map<String, Variant<?>> ipv4Map = NMSettingsConverter.buildIpv4Settings(properties, deviceId);
-        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, deviceId);
+        Map<String, Variant<?>> ipv6Map = NMSettingsConverter.buildIpv6Settings(properties, deviceId, nmVersion);
         newConnectionSettings.put("ipv4", ipv4Map);
         newConnectionSettings.put("ipv6", ipv6Map);
 
@@ -112,7 +116,12 @@ public class NMSettingsConverter {
             newConnectionSettings.put("ppp", pppSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
             Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
             newConnectionSettings.put("vlan", vlanSettingsMap);
+            newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
+        } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
+            newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         }
 
         return newConnectionSettings;
@@ -297,7 +306,8 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId) {
+    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId, 
+            SemanticVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
         // property is not set, it assumes
@@ -394,6 +404,13 @@ public class NMSettingsConverter {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
         }
 
+        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);        
+        if (nmVersion.isGreaterEqualThan("1.40")) {
+            //ipv6.mtu only supported in NetworkManager 1.40 and above
+            mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        } else {
+            logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
+        }
         return settings;
     }
 
@@ -421,6 +438,9 @@ public class NMSettingsConverter {
                 propMode.toLowerCase());
         hidden.ifPresent(hiddenString -> settings.put("hidden", new Variant<>(hiddenString)));
 
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        
         return settings;
     }
 
@@ -514,6 +534,9 @@ public class NMSettingsConverter {
         Optional<String> number = props.getOpt(String.class, "net.interface.%s.config.dialString", deviceId);
         number.ifPresent(numberString -> settings.put("number", new Variant<>(numberString)));
 
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        
         return settings;
     }
 
@@ -548,6 +571,13 @@ public class NMSettingsConverter {
         Optional<List<String>> egressMap = props.getOptStringList("net.interface.%s.config.vlan.egress", deviceId);
         settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<>()), listType));
         return settings;
+    }
+    
+    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
+        Map<String, Variant<?>> settings = new HashMap<>();
+        Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
+        mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        return settings;        
     }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,

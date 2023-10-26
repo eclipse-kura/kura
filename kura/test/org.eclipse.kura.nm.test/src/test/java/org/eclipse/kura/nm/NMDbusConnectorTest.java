@@ -129,6 +129,8 @@ public class NMDbusConnectorTest {
     private List<String> internalStringList;
     private final Map<String, Object> netConfig = new HashMap<>();
     private Location mockModemLocation;
+    
+    private static String basicNmVersion = "1.40";
 
     private static String iwRegGetOutput = "global\n" + "country CA: DFS-FCC\n"
             + "    (2402 - 2472 @ 40), (N/A, 30), (N/A)\n"
@@ -1004,8 +1006,8 @@ public class NMDbusConnectorTest {
      */
 
     private void givenBasicMockedDbusConnector() throws DBusException, IOException {
-        when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
-                eq("/org/freedesktop/NetworkManager"), any()))
+        when(this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/org/freedesktop/NetworkManager", NetworkManager.class))
                 .thenReturn(this.mockedNetworkManager);
 
         when(this.dbusConnection.getRemoteObject(eq("org.freedesktop.NetworkManager"),
@@ -1018,6 +1020,14 @@ public class NMDbusConnectorTest {
         
         when(this.dbusConnection.getRemoteObject(eq("fi.w1.wpa_supplicant1"),
                 eq("/fi/w1/wpa_supplicant1"), any())).thenReturn(this.mockedWpaSupplicant);
+        
+        Properties nmProperties = mock(Properties.class);
+        when(nmProperties.Get("/org/freedesktop/NetworkManager","Version"))
+                .thenReturn(basicNmVersion);
+        
+        when(this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/org/freedesktop/NetworkManager", Properties.class))
+                .thenReturn(nmProperties);
         
         this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
 
@@ -1414,11 +1424,7 @@ public class NMDbusConnectorTest {
     }
 
     private void whenCheckVersionIsRun() {
-        try {
-            this.instanceNMDbusConnector.checkVersion();
-        } catch (DBusException e) {
-            this.hasDBusExceptionBeenThrown = true;
-        }
+        this.instanceNMDbusConnector.checkVersion();
     }
 
     private void whenGetInterfaceIdsIsCalled() {

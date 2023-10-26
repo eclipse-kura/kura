@@ -141,6 +141,11 @@ public class DhcpServerManager {
         if (dhcpServerTool == DhcpServerTool.NONE) {
             return sb.toString();
         }
+        if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            sb.append(dhcpServerTool.getValue());
+            sb.append(".leases");
+            return sb.toString();
+        }
         sb.append(dhcpServerTool.getValue());
         sb.append('-');
         sb.append(interfaceName);

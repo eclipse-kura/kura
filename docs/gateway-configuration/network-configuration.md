@@ -26,6 +26,7 @@ The **TCP/IP** tab contains the following configuration parameters:
 - **Gateway** - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)
 - **DNS Servers** - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.
 - **Search Domains** - Not implemented.
+- **MTU** - defines the Maximum Trasmission unit for IPv4 traffic on the selected interface, a value of 0 or empty delegates the MTU definition to the link layer.
 
 If the network interface is *Enabled for LAN* and manually configured (i.e., not a DHCP client), the **DHCP & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
@@ -102,7 +103,7 @@ The following table describes all the properties related to the Network Configur
 Name                                             | Type     | Description
 -------------------------------------------------|----------|------------------------------------------
 `net.interfaces`                                 | String   | Comma-separated list of the interface names in the device
-`net.interface.<interface>.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK
+`net.interface.<interface>.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM, VLAN and LOOPBACK
 `net.interface.<interface>.config.wifi.mode`   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
 `net.interface.<interface>.config.nat.enabled` | Boolean  | Enable the NAT feature
 
@@ -116,6 +117,7 @@ Name                                                | Type     | Description
 `net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
 `net.interface.<interface>.config.ip4.gateway`    | String   | The IPv4 address of the default gateway
 `net.interface.<interface>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers
+`net.interface.<interface>.config.ip4.mtu`	| Integer   | The Maximum Transition Unit (MTU) for this interface
 
 ### IPv4 DHCP Server properties
 
@@ -148,6 +150,7 @@ Name                                                | Type     | Description
 `net.interface.<interface>.config.ip6.dnsServers`	| String   | Comma-separated list of dns servers
 `net.interface.<interface>.config.ip6.addr.gen.mode`    | String   | The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;
 `net.interface.<interface>.config.ip6.privacy`    | String   | The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD
+`net.interface.<interface>.config.ip6.mtu`	| Integer   | The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer
 
 ### WiFi Master (Access Point) properties
 
@@ -202,6 +205,16 @@ Name                                                  | Type     | Description
 `net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN
 `net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)
 `net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number
+
+### VLAN properties
+
+Name                                                  | Type     | Description
+------------------------------------------------------|----------|------------------------------------------
+`net.interface.<interface>.config.vlan.parent`        | String   | Physical interface Vlan is bound to
+`net.interface.<interface>.config.vlan.id`            | Integer  | Vlan tag identifier
+`net.interface.<interface>.config.vlan.ingress`       | String   | Ingress priority map
+`net.interface.<interface>.config.vlan.egress`        | String   | Egress priority map
+`net.interface.<interface>.config.vlan.flags`         | String   | Vlan flags
 
 ## Network Configuration recipes
 
@@ -524,6 +537,55 @@ This section presents some snapshot examples to perform basic operations on netw
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.1-1.config.apn" type="String">
                 <esf:value>web.omnitel.it</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+</esf:configurations>
+```
+### Create a VLAN
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+    <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="net.interfaces" type="String">
+                <esf:value>wlan0,lo,ens33,vlanFull,ens34</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.dhcpServer4.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.nat.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.dhcpClient4.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.type" type="String">
+                <esf:value>VLAN</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.ip4.status" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.vlan.parent" type="String">
+                <esf:value>ens33</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.vlan.id" type="Integer">
+                <esf:value>41</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.vlan.flags" type="Integer">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.vlan.ingress" type="String">
+                <esf:value>1:2,3:4</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.vlan.egress" type="String">
+                <esf:value>5:6</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.ip4.address" type="String">
+                <esf:value>192.168.41.100</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.vlanFull.config.ip4.prefix" type="Short">
+                <esf:value>24</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

@@ -1,0 +1,449 @@
+INFO     -  Building documentation...
+INFO     -  Cleaning site directory
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  Documentation built in 9.98 seconds
+INFO     -  [13:34:32] Watching paths for changes: 'docs', 'mkdocs.yml'
+INFO     -  [13:34:32] Serving on http://127.0.0.1:8000/
+INFO     -  [13:41:41] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:46] Reloading browsers
+INFO     -  [13:41:46] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:50] Reloading browsers
+INFO     -  [13:41:50] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:41:55] Reloading browsers
+INFO     -  [13:41:56] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:00] Reloading browsers
+INFO     -  [13:42:01] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:06] Reloading browsers
+INFO     -  [13:42:06] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:10] Reloading browsers
+INFO     -  [13:42:10] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:15] Reloading browsers
+INFO     -  [13:42:18] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:23] Reloading browsers
+INFO     -  [13:42:25] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:30] Reloading browsers
+INFO     -  [13:42:31] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:36] Reloading browsers
+INFO     -  [13:42:36] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:41] Reloading browsers
+INFO     -  [13:42:41] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:46] Reloading browsers
+INFO     -  [13:42:47] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:42:51] Reloading browsers
+INFO     -  [13:42:56] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:00] Reloading browsers
+INFO     -  [13:43:00] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:05] Reloading browsers
+INFO     -  [13:43:05] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:10] Reloading browsers
+INFO     -  [13:43:16] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:21] Reloading browsers
+INFO     -  [13:43:25] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:43:30] Reloading browsers
+INFO     -  [13:45:56] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:46:01] Reloading browsers
+INFO     -  [13:46:02] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:46:07] Reloading browsers
+INFO     -  [13:46:08] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:46:13] Reloading browsers
+INFO     -  [13:46:16] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:46:21] Reloading browsers
+INFO     -  [13:49:28] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:49:32] Reloading browsers
+INFO     -  [13:49:32] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:49:37] Reloading browsers
+INFO     -  [13:49:40] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:49:44] Reloading browsers
+INFO     -  [13:50:21] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:50:26] Reloading browsers
+INFO     -  [13:50:26] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:50:30] Reloading browsers
+INFO     -  [13:50:33] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:50:37] Reloading browsers
+INFO     -  [13:51:27] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:51:32] Reloading browsers
+INFO     -  [13:51:53] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:51:58] Reloading browsers
+INFO     -  [13:51:58] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:52:02] Reloading browsers
+INFO     -  [13:52:02] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:52:07] Reloading browsers
+INFO     -  [13:52:09] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:52:13] Reloading browsers
+INFO     -  [13:52:17] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:52:21] Reloading browsers
+INFO     -  [13:52:24] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:52:29] Reloading browsers
+INFO     -  [13:54:36] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:54:41] Reloading browsers
+INFO     -  [13:54:41] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:54:46] Reloading browsers
+INFO     -  [13:54:46] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:54:50] Reloading browsers
+INFO     -  [13:56:32] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:56:37] Reloading browsers
+INFO     -  [13:56:38] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:56:42] Reloading browsers
+INFO     -  [13:56:52] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:56:57] Reloading browsers
+INFO     -  [13:57:01] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:57:06] Reloading browsers
+INFO     -  [13:57:06] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:57:11] Reloading browsers
+INFO     -  [13:57:11] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:57:15] Reloading browsers
+INFO     -  [13:57:19] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:57:24] Reloading browsers
+INFO     -  [13:57:47] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:57:52] Reloading browsers
+INFO     -  [13:57:57] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:01] Reloading browsers
+INFO     -  [13:58:26] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:31] Reloading browsers
+INFO     -  [13:58:31] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:35] Reloading browsers
+INFO     -  [13:58:41] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:46] Reloading browsers
+INFO     -  [13:58:46] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:50] Reloading browsers
+INFO     -  [13:58:50] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:58:55] Reloading browsers
+INFO     -  [13:58:55] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:00] Reloading browsers
+INFO     -  [13:59:00] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:04] Reloading browsers
+INFO     -  [13:59:08] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:13] Reloading browsers
+INFO     -  [13:59:13] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:18] Reloading browsers
+INFO     -  [13:59:18] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:23] Reloading browsers
+INFO     -  [13:59:26] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:30] Reloading browsers
+INFO     -  [13:59:30] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:35] Reloading browsers
+INFO     -  [13:59:35] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:40] Reloading browsers
+INFO     -  [13:59:55] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [13:59:59] Reloading browsers
+INFO     -  [14:00:03] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:00:08] Reloading browsers
+INFO     -  [14:00:13] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:00:18] Reloading browsers
+INFO     -  [14:00:20] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:00:25] Reloading browsers
+INFO     -  [14:00:29] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:00:34] Reloading browsers
+INFO     -  [14:01:16] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:01:21] Reloading browsers
+INFO     -  [14:01:23] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:01:27] Reloading browsers
+INFO     -  [14:01:46] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:01:50] Reloading browsers
+INFO     -  [14:01:51] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:01:56] Reloading browsers
+INFO     -  [14:02:59] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:03:03] Reloading browsers
+INFO     -  [14:03:23] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:03:28] Reloading browsers
+INFO     -  [14:03:28] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:03:32] Reloading browsers
+INFO     -  [14:03:39] Detected file changes
+INFO     -  Building documentation...
+INFO     -  The following pages exist in the docs directory, but are not included in the "nav" configuration:
+  - index.md
+INFO     -  Converting notebook (execute=False): /workspaces/kura/docs/tutorials/AD-EdgeAI.ipynb
+INFO     -  [14:03:44] Reloading browsers
+[33mWARNING  -  [0m[14:04:10] "GET /versions.json HTTP/1.1" code 404
+INFO     -  [14:04:10] Browser connected: https://crispy-happiness-5r457p5v75jcvqg7-8000.app.github.dev/
+INFO     -  [14:05:10] Browser connected: https://crispy-happiness-5r457p5v75jcvqg7-8000.app.github.dev/gateway-configuration/network-configuration/

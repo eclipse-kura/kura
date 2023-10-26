@@ -40,7 +40,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
 
     private String globalConfigFilename = "/etc/dnsmasq.d/dnsmasq-globals.conf";
-    private static final String GLOBAL_CONFIGURATION = "port=0\nbind-interfaces\n";
+    private static final String GLOBAL_CONFIGURATION = "port=0\nbind-interfaces\ndhcp-leasefile=/var/lib/dhcp/dnsmasq.leases\n";
 
     static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
             DhcpServerTool.DNSMASQ.getValue() });

@@ -39,6 +39,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -143,36 +144,47 @@ public class DeploymentRestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public DeploymentRequestStatus installUploadedDeploymentPackage(
-            @FormDataParam("file") InputStream uploadedInputStream) {
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetails) {
 
-        String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID() + ".dp";
+        final String uploadedFileName = fileDetails.getFileName();
+        final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
+                + ".dp";
 
         File file = new File(uploadedFileLocation);
-        if (file.exists()) {
-            logger.warn("File already exists at : {}", file.getAbsolutePath());
-        } else {
-            try {
-                FileOutputStream os = new FileOutputStream(file);
-                IOUtils.copy(uploadedInputStream, os);
-                os.close();
-            } catch (IOException e) {
-                logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
-                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
-            }
-            logger.info("File uploaded to : {}", file.getAbsolutePath());
+        if (file.exists() && !file.delete()) {
+            logger.warn("Cannot delete file: {}", uploadedFileLocation);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
         try {
-            String fileUrl = file.toURI().toURL().toString();
-            if (this.deploymentAgentService.isInstallingDeploymentPackage(fileUrl)) {
-                return DeploymentRequestStatus.INSTALLING;
-            }
+            file.createNewFile();
+            file.deleteOnExit();
+        } catch (IOException e) {
+            logger.warn("Cannot create file: {}, caused by", file, e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        }
 
+        try {
+            FileOutputStream os = new FileOutputStream(file);
+            IOUtils.copy(uploadedInputStream, os);
+            os.close();
+        } catch (IOException e) {
+            logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        }
+        logger.info("Deployment package \"{}\" uploaded to: {}", uploadedFileName, file.getAbsolutePath());
+
+        try {
+            String fileUrl = file.toURI().toURL().toString();
             this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
         } catch (Exception e) {
+            logger.warn("Cannot install deployment package : {}, caused by", uploadedFileName, e);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + file.getAbsolutePath()).build());
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;

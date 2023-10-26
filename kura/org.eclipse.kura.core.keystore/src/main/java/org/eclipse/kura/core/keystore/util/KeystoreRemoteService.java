@@ -36,11 +36,13 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
@@ -49,7 +51,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
+import org.eclipse.kura.core.keystore.request.CsrReadRequest;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.framework.BundleContext;
@@ -283,6 +285,17 @@ public class KeystoreRemoteService {
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
+    }
+
+    protected void storePrivateKeyEntryInternal(final PrivateKeyInfo writeRequest)
+            throws KuraException, IOException, GeneralSecurityException {
+
+        final PrivateKeyEntry privateKeyEntry = createPrivateKey(writeRequest.getPrivateKey(),
+                Arrays.stream(writeRequest.getCertificateChain()).collect(Collectors.joining("\n")));
+
+        this.keystoreServices.get(writeRequest.getKeystoreServicePid()).setEntry(writeRequest.getAlias(),
+                privateKeyEntry);
+
     }
 
     protected void deleteKeyEntryInternal(String keystoreServicePid, String alias) {

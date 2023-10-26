@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *  Eurotech
  *
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.rest.provider;
+package org.eclipse.kura.core.keystore.request;
 
 import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.rest.utils.Validable;
@@ -20,6 +20,14 @@ public class KeyPairWriteRequest extends KeyPairInfo implements Validable {
 
     public KeyPairWriteRequest(String keystoreName, String alias) {
         super(keystoreName, alias);
+    }
+
+    public KeyPairWriteRequest(final KeyPairInfo keyPairInfo) {
+        super(keyPairInfo.getKeystoreServicePid(), keyPairInfo.getAlias());
+        this.setAlgorithm(keyPairInfo.getAlgorithm());
+        this.setAttributes(keyPairInfo.getAttributes());
+        this.setSignatureAlgorithm(keyPairInfo.getSignatureAlgorithm());
+        this.setSize(keyPairInfo.getSize());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,16 +27,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.kura.core.keystore.request.CsrReadRequest;
+import org.eclipse.kura.core.keystore.request.EntryRequest;
+import org.eclipse.kura.core.keystore.request.KeyPairWriteRequest;
+import org.eclipse.kura.core.keystore.request.TrustedCertificateWriteRequest;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-@Path("/keystores/v1")
 public class KeystoreRestService extends KeystoreRemoteService {
 
-    private static final String BAD_REQUEST_MESSAGE = "Bad request, ";
+    protected static final String BAD_REQUEST_MESSAGE = "Bad request, ";
 
     private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": "
@@ -114,7 +117,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteKeyEntry(DeleteRequest deleteRequest) {
+    public void deleteKeyEntry(EntryRequest deleteRequest) {
         validate(deleteRequest, BAD_DELETE_REQUEST_ERROR_MESSAGE);
         deleteKeyEntryInternal(deleteRequest.getKeystoreServicePid(), deleteRequest.getAlias());
     }

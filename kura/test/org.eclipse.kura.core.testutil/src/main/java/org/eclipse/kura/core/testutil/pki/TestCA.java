@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import java.security.KeyStore;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.ProtectionParameter;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -228,6 +229,12 @@ public class TestCA {
     public static void encodeToPEM(final X509CRL crl, final OutputStream out) throws IOException {
         try (final JcaPEMWriter pw = new JcaPEMWriter(new OutputStreamWriter(out))) {
             pw.writeObject(crl);
+        }
+    }
+
+    public static void encodeToPEM(final PrivateKey privateKey, final OutputStream out) throws IOException {
+        try (final JcaPEMWriter pw = new JcaPEMWriter(new OutputStreamWriter(out))) {
+            pw.writeObject(privateKey);
         }
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,8 +21,8 @@ public class PrivateKeyInfo extends EntryInfo {
     private String[] certificateChain;
     private EntryType type = EntryType.PRIVATE_KEY;
 
-    public PrivateKeyInfo(String alias, String keystoreName) {
-        super(alias, keystoreName);
+    public PrivateKeyInfo(String keystoreServicePid, String alias) {
+        super(keystoreServicePid, alias);
     }
 
     public String getAlgorithm() {
@@ -60,4 +60,5 @@ public class PrivateKeyInfo extends EntryInfo {
     public EntryType getType() {
         return this.type;
     }
+
 }

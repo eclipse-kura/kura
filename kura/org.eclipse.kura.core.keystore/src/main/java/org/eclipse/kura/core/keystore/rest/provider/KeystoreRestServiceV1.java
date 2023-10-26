@@ -9,14 +9,12 @@
  *
  * Contributors:
  *  Eurotech
- *  Red Hat Inc
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.request.handler;
+package org.eclipse.kura.core.keystore.rest.provider;
 
-public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRequestHandler {
+import javax.ws.rs.Path;
 
-    public KeystoreServiceRequestHandlerV1() {
-        super("KEYS-V1");
-    }
+@Path("/keystores/v1")
+public class KeystoreRestServiceV1 extends KeystoreRestService {
 
 }

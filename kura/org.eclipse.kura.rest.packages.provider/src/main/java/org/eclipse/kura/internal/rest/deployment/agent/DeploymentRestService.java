@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -38,7 +39,6 @@ import javax.ws.rs.core.Response;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
 public class DeploymentRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentRestService.class);
+
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";
     private static final String ERROR_INSTALLING_PACKAGE = "Error installing deployment package: ";
@@ -141,10 +143,9 @@ public class DeploymentRestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public DeploymentRequestStatus installUploadedDeploymentPackage(
-            @FormDataParam("file") InputStream uploadedInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetails) {
+            @FormDataParam("file") InputStream uploadedInputStream) {
 
-        String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
+        String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID() + ".dp";
 
         File file = new File(uploadedFileLocation);
         if (file.exists()) {

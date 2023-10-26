@@ -13,10 +13,13 @@
 package org.eclipse.kura.nm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Objects;
 
 import org.junit.Test;
 
@@ -25,7 +28,6 @@ public class SemanticVersionTest {
     private SemanticVersion testVersion;
     
     private SemanticVersion comparedVersion;
-    private Boolean exceptionHasBeenThrown = false;
     private Exception thrownException;
     
     @Test
@@ -109,7 +111,7 @@ public class SemanticVersionTest {
         givenSemanticVersionParseWith("1.22.10-1");
         thenParsedVersionIs("1.22.10");
         thenComparedVersionIsEqual();
-        thenNullPointerExceptionHasBeenThrown();
+        thenExceptionHasBeenThrown(NullPointerException.class);
     }
     
     private void givenSemanticVersionParseWith(String version) {
@@ -117,7 +119,6 @@ public class SemanticVersionTest {
             this.testVersion = SemanticVersion.parse(version);
         } catch (Exception e) {
             this.thrownException = e;
-            this.exceptionHasBeenThrown = true;
         }
     }
     
@@ -126,17 +127,25 @@ public class SemanticVersionTest {
             this.comparedVersion = SemanticVersion.parse(version);
         } catch (Exception e) {
             this.thrownException = e;
-            this.exceptionHasBeenThrown = true;
         }
     }
     
     private void thenNoExceptionHasBeenThrown() {
-        assertFalse(this.exceptionHasBeenThrown);
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.thrownException)) {
+            StringWriter sw = new StringWriter();
+            this.thrownException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.thrownException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.thrownException);
     }
     
-    private void thenNullPointerExceptionHasBeenThrown() {
-        assertTrue(this.exceptionHasBeenThrown);
-        assertTrue(this.thrownException instanceof NullPointerException);
+    private void thenExceptionHasBeenThrown(Class<? extends Exception> expectedException) {
+        assertNotNull(this.thrownException);
+        assertTrue(expectedException.isInstance(this.thrownException));
     }
     
     private void thenParsedVersionIs(String expectedResult) {
@@ -148,8 +157,7 @@ public class SemanticVersionTest {
             int compare = this.testVersion.compareTo(this.comparedVersion);
             assertEquals(1, compare);
         } catch (Exception e) {
-            this.thrownException = e;
-            this.exceptionHasBeenThrown = true;           
+            this.thrownException = e;          
         } 
     }
     
@@ -158,8 +166,7 @@ public class SemanticVersionTest {
             int compare = this.testVersion.compareTo(this.comparedVersion);
             assertEquals(-1, compare);
         } catch (Exception e) {
-            this.thrownException = e;
-            this.exceptionHasBeenThrown = true;           
+            this.thrownException = e;          
         }        
     }
     
@@ -168,12 +175,8 @@ public class SemanticVersionTest {
             int compare = this.testVersion.compareTo(this.comparedVersion);
             assertEquals(0, compare);
         } catch (Exception e) {
-            this.thrownException = e;
-            this.exceptionHasBeenThrown = true;           
+            this.thrownException = e;           
         }
     }
-    
-    
-    
-    
+
 }

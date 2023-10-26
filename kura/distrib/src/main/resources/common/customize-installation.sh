@@ -61,4 +61,20 @@ if [ ${BOARD} = "generic-device" ]; then
     else
         echo "python3 not found. snapshot_0.xml, and iptables.init files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
     fi
+    
+    # dynamic ram assignment
+    RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    RAM_MB=$(expr $RAM_KB / 1024)
+    RAM_MB_FOR_KURA=$(expr $RAM_MB / 4)
+    RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"
+
+    if RAM_MB > 1024
+    then
+        echo "Setting kura ram -Xms and -Xmx to ${RAM_MB_FOR_KURA}m"
+        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura.sh
+        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura_debug.sh
+        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura_background.sh
+    else
+        echo "Leaving kura ram as the default set in installer profile"
+    fi
 fi

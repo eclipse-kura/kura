@@ -13,18 +13,34 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService">
-   <implementation class="org.eclipse.kura.internal.rest.network.configuration.ConfigurationRestService"/>
-   
-   <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.network.configuration.ConfigurationRestService"/>
-   
-   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.network.configuration.NetworkConfigurationService" name="NetworkConfigurationService" policy="static"/>
-   <reference bind="setOCDService" cardinality="1..1" interface="org.eclipse.kura.configuration.metatype.OCDService" name="OCDService" policy="static"/>
-   <reference bind="setUserAdmin" cardinality="0..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
-   <reference bind="setRequestHandlerRegistry" cardinality="0..n" interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry" name="RequestHandlerRegistry" policy="dynamic" unbind="unsetRequestHandlerRegistry"/>
-   <service>
-      <provide interface="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService"/>
-   </service>
-   <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService"/>
-   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true"
+	name="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService">
+	<implementation
+		class="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService" />
+
+	<property name="kura.service.pid" type="String"
+		value="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService" />
+
+	<reference bind="setConfigurationService" cardinality="1..1"
+		interface="org.eclipse.kura.configuration.ConfigurationService"
+		name="ConfigurationService" policy="static" />
+	<reference bind="setOCDService" cardinality="1..1"
+		interface="org.eclipse.kura.configuration.metatype.OCDService"
+		name="OCDService" policy="static" />
+	<reference bind="setUserAdmin" cardinality="0..1"
+		interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin"
+		policy="static" />
+	<reference bind="setRequestHandlerRegistry" cardinality="0..n"
+		interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
+		name="RequestHandlerRegistry" policy="dynamic"
+		unbind="unsetRequestHandlerRegistry" />
+	<service>
+		<provide
+			interface="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService" />
+	</service>
+	<property name="service.pid" type="String"
+		value="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService" />
+	<reference bind="setCryptoService" cardinality="1..1"
+		interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService"
+		policy="static" />
 </scr:component>

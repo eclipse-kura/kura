@@ -630,11 +630,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.rest.identity.provider</artifactId>
-                                    <version>${org.eclipse.kura.rest.identity.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.service.listing.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.service.listing.provider.version}</version>
                                 </artifactItem>

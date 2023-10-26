@@ -131,9 +131,9 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * WIP
+     * TODO
      *
-     * @param WIP
+     * @param TODO
      * @return a {@link DeploymentRequestStatus} object that represents the status
      *         of the installation request
      */

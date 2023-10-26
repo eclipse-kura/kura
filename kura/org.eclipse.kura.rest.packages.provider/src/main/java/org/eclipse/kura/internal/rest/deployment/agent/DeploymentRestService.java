@@ -31,7 +31,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,6 +38,8 @@ import javax.ws.rs.core.Response;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
@@ -125,16 +126,25 @@ public class DeploymentRestService {
         return DeploymentRequestStatus.REQUEST_RECEIVED;
     }
 
-    // See: https://stackoverflow.com/a/63104120/7780889
+    /**
+     * POST method.
+     *
+     * WIP
+     *
+     * @param WIP
+     * @return a {@link DeploymentRequestStatus} object that represents the status
+     *         of the installation request
+     */
     @POST
     @RolesAllowed("deploy")
     @Path("/_upload")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public DeploymentRequestStatus installUploadedDeploymentPackage(InputStream uploadedInputStream,
-            @QueryParam("fileName") String fileName) {
+    public DeploymentRequestStatus installUploadedDeploymentPackage(
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetails) {
 
-        String uploadedFileLocation = "/tmp/upload.dp"; // WIP
+        String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
 
         File file = new File(uploadedFileLocation);
         if (file.exists()) {

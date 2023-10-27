@@ -19,10 +19,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Test;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -56,6 +60,8 @@ public class DeploymentRestServiceUnitTest {
     private DeploymentAgentService mockDeploymentAgentService = mock(DeploymentAgentService.class);
     private DeploymentAdmin mockDeploymentAdmin = mock(DeploymentAdmin.class);
     private UserAdmin mockUserAdmin = mock(UserAdmin.class);
+    private InputStream mockInputStream = mock(InputStream.class);
+    private FormDataContentDisposition mockFormDataContent = mock(FormDataContentDisposition.class);
 
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
@@ -163,6 +169,31 @@ public class DeploymentRestServiceUnitTest {
         thenRoleIsCreated("kura.permission.rest.deploy", Role.GROUP);
     }
 
+    @Test
+    public void installUploadedDeploymentPackageWorks() throws Exception {
+        givenDeploymentRestService();
+        givenAMockInputStream();
+        givenAMockFormDataContentWithFileName("mock.dp");
+
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+
+        thenNoExceptionOccurred();
+        thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
+        thenDeploymentAgentServiceIsCalledToInstallDeploymentPackage();
+    }
+
+    @Test
+    public void installUploadedDeploymentPackageThrowsOnInputStreamReadFailure() throws Exception {
+        givenDeploymentRestService();
+        givenAMockInputStreamThrowingOnRead();
+        givenAMockFormDataContentWithFileName("mock.dp");
+
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+
+        thenExceptionOccurred(WebApplicationException.class);
+        thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
+    }
+
     /*
      * GIVEN
      */
@@ -203,6 +234,18 @@ public class DeploymentRestServiceUnitTest {
                 .installDeploymentPackageAsync(any());
     }
 
+    private void givenAMockFormDataContentWithFileName(String fileName) {
+        when(this.mockFormDataContent.getFileName()).thenReturn(fileName);
+    }
+
+    private void givenAMockInputStream() throws IOException {
+        when(this.mockInputStream.read(any())).thenReturn(-1);
+    }
+
+    private void givenAMockInputStreamThrowingOnRead() throws IOException {
+        when(this.mockInputStream.read(any())).thenThrow(new IOException());
+    }
+
     /*
      * WHEN
      */
@@ -226,6 +269,16 @@ public class DeploymentRestServiceUnitTest {
     private void whenListDeploymentPackagesIsCalled() {
         try {
             this.resultingDepoloymentPackagesList = deploymentRestService.listDeploymentPackages();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenInstallUploadedDeploymentPackageIsCalledWith(InputStream mockInputStream,
+            FormDataContentDisposition mockFormDataContent) {
+        try {
+            this.resultingDeploymentRequestStatus = this.deploymentRestService
+                    .installUploadedDeploymentPackage(mockInputStream, mockFormDataContent);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -279,4 +332,11 @@ public class DeploymentRestServiceUnitTest {
         verify(this.mockUserAdmin, times(1)).createRole(role, type);
     }
 
+    private void thenDeploymentAgentServiceIsCalledToInstallDeploymentPackage() throws Exception {
+        verify(this.mockDeploymentAgentService, times(1)).installDeploymentPackageAsync(any());
+    }
+
+    private void thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage() throws Exception {
+        verify(this.mockDeploymentAgentService, never()).installDeploymentPackageAsync(any());
+    }
 }

@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -357,10 +359,12 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void thenInstallIsCalledWithLocalUri() {
+        final String localUri = System.getProperty(JAVA_IO_TMPDIR) + File.separator;
+        final Path localPath = Paths.get(localUri);
+
         try {
-            final String localUri = System.getProperty(JAVA_IO_TMPDIR) + File.separator;
-            File tmp = new File(localUri);
-            verify(deploymentAgentService).installDeploymentPackageAsync(startsWith(tmp.toURI().toURL().toString()));
+            verify(deploymentAgentService, times(1))
+                    .installDeploymentPackageAsync(startsWith(localPath.toUri().toURL().toString()));
         } catch (Exception e) {
             fail();
         }

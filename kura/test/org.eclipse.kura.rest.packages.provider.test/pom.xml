@@ -62,7 +62,6 @@
                         ${tycho.testArgLine}
                         ${tycho.surefire.testenv.args}
                     </argLine>
-                    <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                     <dependencies>
                         <dependency>
                             <type>p2-installable-unit</type>

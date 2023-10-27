@@ -663,13 +663,14 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    TabDhcp4NatUi.this.gwtNetworkService.getDhcpLeases(token,
+                    TabDhcp4NatUi.this.gwtNetworkService.getDhcpLeases(token, selectedNetIfConfig.getInterfaceName(),
                             new AsyncCallback<List<String>>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     System.out.println("DhcpLease Failure");
                                 }
+
                                 @Override
                                 public void onSuccess(List<String> leases) {
                                     String values = "";
@@ -678,7 +679,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
                                     }
                                     TabDhcp4NatUi.this.dhcpLease.setValue(values);
                                 }
-                    });
+                            });
                 }
             });
         }

@@ -22,10 +22,13 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpLinuxTool;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpdConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.DhcpdLeaseReader;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpdTool;
 import org.eclipse.kura.linux.net.dhcp.server.DnsmasqConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.DnsmasqLeaseReader;
 import org.eclipse.kura.linux.net.dhcp.server.DnsmasqTool;
 import org.eclipse.kura.linux.net.dhcp.server.UdhcpdConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.UdhcpdLeaseReader;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,6 +164,17 @@ public class DhcpServerManager {
             return Optional.of(new UdhcpdConfigConverter());
         } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
             return Optional.of(new DnsmasqConfigConverter());
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<DhcpServerLeaseReader> getLeaseReader() {
+        if (dhcpServerTool == DhcpServerTool.DHCPD) {
+            return Optional.of(new DhcpdLeaseReader());
+        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+            return Optional.of(new UdhcpdLeaseReader());
+        } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            return Optional.of(new DnsmasqLeaseReader());
         }
         return Optional.empty();
     }

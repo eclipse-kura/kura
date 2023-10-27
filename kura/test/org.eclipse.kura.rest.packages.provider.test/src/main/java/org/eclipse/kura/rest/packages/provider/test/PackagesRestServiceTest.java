@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -188,9 +190,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     @After
     public void cleanupMockFile() {
         try {
-            File file = new File(MOCK_FILE_PATH);
-            file.delete();
-        } catch (Exception e) {
+            Files.deleteIfExists(Paths.get(MOCK_FILE_PATH));
+        } catch (IOException e) {
             fail();
         }
     }
@@ -251,12 +252,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenMockTemporaryFileAt(String path) {
-        try {
-            File file = new File(path);
-            assertTrue(file.exists());
-        } catch (Exception e) {
-            fail();
-        }
+        assertTrue(Files.exists(Paths.get(path)));
     }
 
     /*

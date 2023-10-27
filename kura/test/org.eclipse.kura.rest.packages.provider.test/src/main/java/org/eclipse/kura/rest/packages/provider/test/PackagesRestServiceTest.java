@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.packages.provider.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -70,8 +71,13 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     private static final String MOCK_FILE_PATH = System.getProperty(JAVA_IO_TMPDIR) + File.separator + "mock.dp";
 
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
+    private static final String REST_UPLOAD_ENDPOINT = "http://localhost:8080/services/deploy/v2/_upload";
+
     private final ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
     private Exception occurredException;
+    private String responseBody;
 
     @Test
     public void getShouldWorkWithEmptyList() {
@@ -164,7 +170,11 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenNoExceptionOccurred();
         thenInstallIsCalledWithLocalUri();
-        // thenResponseBodyEqualsJson("\"REQUEST_RECEIVED\""); WIP
+        thenResponseBodyEquals("\"REQUEST_RECEIVED\"");
+    }
+
+    private void thenResponseBodyEquals(String expectedBody) {
+        assertEquals(expectedBody, this.responseBody);
     }
 
     public PackagesRestServiceTest(Transport transport) {
@@ -260,7 +270,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
      */
 
     private void whenUploadIsPerformedWith(String filePath) {
-        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials("admin", "admin")
+        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials(USERNAME, PASSWORD)
                 .build();
         final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
 
@@ -269,11 +279,10 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar")
                 .bodyPart(filePart);
 
-        final WebTarget target = client.target("http://localhost:8080/services/deploy/v2/_upload");
+        final WebTarget target = client.target(REST_UPLOAD_ENDPOINT);
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
 
-        // Use response object to verify upload success
-        // TODO
+        this.responseBody = response.readEntity(String.class);
 
         try {
             formDataMultiPart.close();

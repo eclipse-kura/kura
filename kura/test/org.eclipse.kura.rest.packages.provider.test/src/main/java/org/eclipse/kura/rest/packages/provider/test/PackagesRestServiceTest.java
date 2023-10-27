@@ -13,11 +13,16 @@
 package org.eclipse.kura.rest.packages.provider.test;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -27,12 +32,24 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +64,9 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 @RunWith(Parameterized.class)
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
+
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    private static final String MOCK_FILE_PATH = System.getProperty(JAVA_IO_TMPDIR) + File.separator + "mock.dp";
 
     private final ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
     private Exception occurredException;
@@ -134,6 +154,17 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         thenResponseBodyEqualsJson("\"UNINSTALLING\"");
     }
 
+    @Test
+    public void installShouldWorkWithFileUpload() {
+        givenMockTemporaryFileAt(MOCK_FILE_PATH);
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenInstallIsCalledWithLocalUri();
+        // thenResponseBodyEqualsJson("\"REQUEST_RECEIVED\""); WIP
+    }
+
     public PackagesRestServiceTest(Transport transport) {
         super(transport);
         Mockito.reset(deploymentAdmin);
@@ -142,6 +173,27 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private static DeploymentAgentService deploymentAgentService = Mockito.mock(DeploymentAgentService.class);
     private static DeploymentAdmin deploymentAdmin = Mockito.mock(DeploymentAdmin.class);
+
+    @Before
+    public void createMockFile() {
+        try {
+            File file = new File(MOCK_FILE_PATH);
+            file.createNewFile();
+        } catch (Exception e) {
+            fail();
+        }
+
+    }
+
+    @After
+    public void cleanupMockFile() {
+        try {
+            File file = new File(MOCK_FILE_PATH);
+            file.delete();
+        } catch (Exception e) {
+            fail();
+        }
+    }
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -198,6 +250,43 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         when(deploymentAgentService.isUninstallingDeploymentPackage(packageName)).thenReturn(true);
     }
 
+    private void givenMockTemporaryFileAt(String path) {
+        try {
+            File file = new File(path);
+            assertTrue(file.exists());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    /*
+     * WHEN
+     */
+
+    private void whenUploadIsPerformedWith(String filePath) {
+        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials("admin", "admin")
+                .build();
+        final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
+
+        final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar")
+                .bodyPart(filePart);
+
+        final WebTarget target = client.target("http://localhost:8080/services/deploy/v2/_upload");
+        final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
+
+        // Use response object to verify upload success
+        // TODO
+
+        try {
+            formDataMultiPart.close();
+            multipart.close();
+        } catch (IOException e) {
+            this.occurredException = e;
+        }
+    }
+
     /*
      * THEN
      */
@@ -245,4 +334,15 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         assertNull(errorMessage, this.occurredException);
     }
+
+    private void thenInstallIsCalledWithLocalUri() {
+        try {
+            final String localUri = System.getProperty(JAVA_IO_TMPDIR) + File.separator;
+            File tmp = new File(localUri);
+            verify(deploymentAgentService).installDeploymentPackageAsync(startsWith(tmp.toURI().toURL().toString()));
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
 }

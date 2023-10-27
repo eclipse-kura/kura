@@ -63,6 +63,15 @@ You do this by adding the `-s` flag when you make the commit(s), e.g.
 
 You can find all the details in the [Contributing via Git](http://wiki.eclipse.org/Development_Resources/Contributing_via_Git) document on the Eclipse web site.
 
+#### Stale PR policy
+
+To avoid piling up too many Issues and Pull Requests we enabled a Github Action that takes care of automatically closing stale Issues/Pull Request.
+
+- An Issue/Pull Request gets tagged as "_stale_" after **60 days** of inactivity (i.e. no comments/commits etc.)
+- An Issue/Pull Request gets automatically closed after being "_stale_" for **14 days** without any update
+
+Keep this in mind when contributing to the Eclipse Kura project.
+
 ## Making your Changes
 
 * Fork the repository on GitHub

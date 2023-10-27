@@ -285,7 +285,6 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     /*
      * WHEN
      */
-
     private void whenUploadIsPerformedWith(String filePath) {
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials(USERNAME, PASSWORD)
                 .build();

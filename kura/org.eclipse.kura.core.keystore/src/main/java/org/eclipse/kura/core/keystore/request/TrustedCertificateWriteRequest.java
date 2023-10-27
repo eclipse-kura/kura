@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,15 +10,27 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.rest.provider;
+package org.eclipse.kura.core.keystore.request;
 
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.rest.utils.Validable;
 
 public class TrustedCertificateWriteRequest extends CertificateInfo implements Validable {
 
-    public TrustedCertificateWriteRequest(String alias, String keystoreName) {
-        super(alias, keystoreName);
+    public TrustedCertificateWriteRequest(String keystoreServicePid, String alias) {
+        super(keystoreServicePid, alias);
+    }
+
+    public TrustedCertificateWriteRequest(final CertificateInfo other) {
+        super(other.getKeystoreServicePid(), other.getAlias());
+        this.setSubjectDN(other.getSubjectDN());
+        this.setSubjectAN(other.getSubjectAN());
+        this.setIssuer(other.getIssuer());
+        this.setStartDate(other.getStartDate());
+        this.setExpirationDate(other.getExpirationDate());
+        this.setAlgorithm(other.getAlgorithm());
+        this.setSize(other.getSize());
+        this.setCertificate(other.getCertificate());
     }
 
     @Override

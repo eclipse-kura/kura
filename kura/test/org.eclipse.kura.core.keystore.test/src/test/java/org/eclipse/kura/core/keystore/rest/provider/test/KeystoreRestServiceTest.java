@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.core.keystore.rest.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -37,12 +36,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
+import org.eclipse.kura.core.keystore.request.CsrReadRequest;
+import org.eclipse.kura.core.keystore.request.EntryRequest;
+import org.eclipse.kura.core.keystore.request.KeyPairWriteRequest;
+import org.eclipse.kura.core.keystore.request.TrustedCertificateWriteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.CsrResponse;
-import org.eclipse.kura.core.keystore.rest.provider.DeleteRequest;
-import org.eclipse.kura.core.keystore.rest.provider.KeyPairWriteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeystoreRestService;
-import org.eclipse.kura.core.keystore.rest.provider.TrustedCertificateWriteRequest;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
@@ -279,9 +278,7 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        DeleteRequest deleteRequest = new DeleteRequest();
-        TestUtil.setFieldValue(deleteRequest, "keystoreServicePid", "MyKeystore");
-        TestUtil.setFieldValue(deleteRequest, "alias", "MyAlias");
+        EntryRequest deleteRequest = new EntryRequest("MyKeystore", "MyAlias");
 
         krs.deleteKeyEntry(deleteRequest);
         verify(ksMock).deleteEntry("MyAlias");
@@ -338,18 +335,16 @@ public class KeystoreRestServiceTest {
         krs.activate(null);
 
         KeyPairWriteRequest writeRequest = new KeyPairWriteRequest("MyKeystore", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "algorithm", "RSA");
-        TestUtil.setFieldValue(writeRequest, "signatureAlgorithm", "SHA256WithRSA");
-        TestUtil.setFieldValue(writeRequest, "size", 1024);
-        TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+        writeRequest.setAlgorithm("RSA");
+        writeRequest.setSignatureAlgorithm("SHA256WithRSA");
+        writeRequest.setSize(1024);
+        writeRequest.setAttributes("CN=Kura, OU=IoT, O=Eclipse, C=US");
 
         krs.storeKeypairEntry(writeRequest);
 
-        CsrReadRequest readRequest = new CsrReadRequest();
-        TestUtil.setFieldValue(readRequest, "keystoreServicePid", "MyKeystore");
-        TestUtil.setFieldValue(readRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(readRequest, "signatureAlgorithm", "SHA256WithRSA");
-        TestUtil.setFieldValue(readRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+        CsrReadRequest readRequest = new CsrReadRequest("MyKeystore", "MyAlias");
+        readRequest.setSignatureAlgorithm("SHA256WithRSA");
+        readRequest.setAttributes("CN=Kura, OU=IoT, O=Eclipse, C=US");
 
         CsrResponse csr = krs.getCSR(readRequest);
         assertNotNull(csr);

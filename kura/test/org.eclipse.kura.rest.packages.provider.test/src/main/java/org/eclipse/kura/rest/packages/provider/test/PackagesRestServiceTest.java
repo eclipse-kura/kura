@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,7 +78,9 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private final ArrayList<DeploymentPackage> deploymentPackages = new ArrayList<>();
     private Exception occurredException;
+
     private String responseBody;
+    private int responseCode;
 
     @Test
     public void getShouldWorkWithEmptyList() {
@@ -173,8 +176,17 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         thenResponseBodyEquals("\"REQUEST_RECEIVED\"");
     }
 
-    private void thenResponseBodyEquals(String expectedBody) {
-        assertEquals(expectedBody, this.responseBody);
+    @Test
+    public void installShouldWorkWithFileUploadAndDeploymentAgentThrowing() throws Exception {
+        givenMockTemporaryFileAt(MOCK_FILE_PATH);
+        givenDeploymentAgentServiceThrowsExceptionOnInstall();
+
+        whenUploadIsPerformedWith(MOCK_FILE_PATH);
+
+        thenNoExceptionOccurred();
+        thenInstallIsCalledWithLocalUri();
+        thenResposeStatusCodeIs(500);
+        thenResponseBodyEquals("Error installing deployment package: mock.dp");
     }
 
     public PackagesRestServiceTest(Transport transport) {
@@ -265,6 +277,10 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         assertTrue(Files.exists(Paths.get(path)));
     }
 
+    private void givenDeploymentAgentServiceThrowsExceptionOnInstall() throws Exception {
+        doThrow(new RuntimeException()).when(deploymentAgentService).installDeploymentPackageAsync(anyString());
+    }
+
     /*
      * WHEN
      */
@@ -283,6 +299,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));
 
         this.responseBody = response.readEntity(String.class);
+        this.responseCode = response.getStatus();
 
         try {
             formDataMultiPart.close();
@@ -348,6 +365,14 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    private void thenResposeStatusCodeIs(int expectedCode) {
+        assertEquals(expectedCode, this.responseCode);
+    }
+
+    private void thenResponseBodyEquals(String expectedBody) {
+        assertEquals(expectedBody, this.responseBody);
     }
 
 }

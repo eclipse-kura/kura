@@ -159,7 +159,9 @@ public class DeploymentRestService {
         }
 
         try {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                throw new IOException("File " + uploadedFileLocation + " was not created");
+            }
             file.deleteOnExit();
         } catch (IOException e) {
             logger.warn("Cannot create file: {}, caused by", file, e);

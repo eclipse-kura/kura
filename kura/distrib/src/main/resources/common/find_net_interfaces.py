@@ -39,13 +39,6 @@ def get_eth_wlan_interfaces_names():
     wireless_interface_names = list()
 
     interface_names = get_interface_names()
-
-    # en, et = ethernet
-    # wl = wireless lan
-    # ww = wireless wan
-    # eno<index> = on-board ethernet
-    # ens<slot> = hotplug on slot <slot> ethernet
-    # enp<index> = pci ethernet
     
     for ifname in interface_names:
         if ifname.startswith("en") or ifname.startswith("et"):

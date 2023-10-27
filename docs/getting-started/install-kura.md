@@ -55,7 +55,7 @@ During the installation of a generic profile with network management support, th
 For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`, `enp3s0`, `eno1`, `ens2`; then `eno1` will be enabled for WAN in DHCP client mode, `wlp2s0` will be configured as an AP, and all other network interfaces will be disabled.
 
 !!! warning
-    On systems that do not use systemd's predicatable interface naming scheme (see [Freedesktop reference](https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/)), it might be the case that the primary network interface name changes whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).
+    On systems that do not use systemd's predictable interface naming scheme (see [Freedesktop reference](https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/)), it might be the case that the primary network interface name changes whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).
 
     The advice is to install Kura on systems that use a reliable naming convention for network interfaces.
 

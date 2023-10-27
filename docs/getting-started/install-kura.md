@@ -26,7 +26,7 @@ Installers of type (3) with the suffix `nn` are **No Networking** profiles that 
 
 ## Generic installers
 
-Kura can be installed using the **generic profiles**
+Kura can be installed using the **generic profiles**:
 
 ```
 kura-<kura-version>_generic-<arch>_installer.deb/rpm
@@ -34,17 +34,48 @@ kura-<kura-version>_generic-<arch>_installer.deb/rpm
 
 where `<arch>` is one of the **supported architectures**: *x86_64*, *arm32*, and *arm64*. A generic Kura profile can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
 
-If installing the generic package on a non supported device (see [Supported Devices](#supported-devices)), only one ethernet interface and one wifi interface (if present) are configured. The firewall will be set up as follows:
+### Initial network configuration
+
+During the installation of a generic profile with network management support, the initial network configuration will be generated dynamically using the rules described below:
+
+- The existing wired and wireless Ethernet network interface names are sorted in ascending lexicographic order.
+- The first wired Ethernet interface in the list will be configured as follows:
+    - **Status**: `Enabled for WAN`
+    - **Configure**: `Using DHCP`
+
+- The first wireless LAN interface will be configured as follows:
+    - **Status**: `Enabled for LAN`
+    - **Configure**: `Manually`
+    - **IP address**: `172.16.1.1`
+    - **Passphrase**: `testKEYS`
+    - **DHCP & NAT**: `enabled`
+
+- All other network interfaces will be disabled.
+
+For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`, `enp3s0`, `eno1`, `ens2`; then `eno1` will be enabled for WAN in DHCP client mode, `wlp2s0` will be configured as an AP, and all other network interfaces will be disabled.
+
+!!! warning
+    On systems that do not use systemd's predictable interface naming scheme (see [Freedesktop reference](https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/)) the primary network interface name might change whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).
+
+    The advice is to install Kura on systems that use a reliable naming convention for network interfaces.
+
+    Systemd consistent network interface naming assigns the name prefix based on the physical location of the device, see [Understanding the Predictable Network Interface Device Names](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-understanding_the_predictable_network_interface_device_names) for further reference.
+
+### Initial firewall configuration
+
+The initial firewall configuration will be as shown in the screenshot below.
 
 ![](./images/firewall-generic.png)
 
-Where `eth0` and `wlan0` will be replaced with the detected primary ethernet and wireless interfaces.
+Please note that installing a Kura generic profile with network configuration support will replace the current network and firewall configuration with the one shown above.
 
-On unsupported devices, Kura will install an empty `jdk.dio.properties` file. Hence, for having the complete set of Kura features, further configurations are recommended after installation:
+### Other Kura services
 
-- other network interfaces, if any, from the web UI;
-- the system firewall from the web UI;
-- editing of `/opt/eclipse/kura/framework/jdk.dio.properties` for correct GPIO mappings.
+Kura generic profiles do not contain gateway specific customizations, this implies that the values of some configuration parameters may be incorrect and/or missing and must be manually filled after installation. For example the user might want to:
+
+- Configure the other network interfaces, if any.
+- Setup additional firewall rules.
+- Edit the `/opt/eclipse/kura/framework/jdk.dio.properties` with the correct GPIO mappings. By default this file is empty.
 
 ### Kura dependencies
 

@@ -134,9 +134,10 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * TODO
+     * Installs the deployment package uploaded through HTTP POST method (multipart/form-data).
      *
-     * @param TODO
+     * @param uploadedInputStread
+     * @param fileDetails
      * @return a {@link DeploymentRequestStatus} object that represents the status
      *         of the installation request
      */

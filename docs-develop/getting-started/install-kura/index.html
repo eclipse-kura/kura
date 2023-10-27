@@ -320,6 +320,27 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#initial-network-configuration" class="md-nav__link">
+    Initial network configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initial-firewall-configuration" class="md-nav__link">
+    Initial firewall configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-kura-services" class="md-nav__link">
+    Other Kura services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kura-dependencies" class="md-nav__link">
     Kura dependencies
   </a>
@@ -3027,6 +3048,27 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#initial-network-configuration" class="md-nav__link">
+    Initial network configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initial-firewall-configuration" class="md-nav__link">
+    Initial firewall configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-kura-services" class="md-nav__link">
+    Other Kura services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#kura-dependencies" class="md-nav__link">
     Kura dependencies
   </a>
@@ -3077,18 +3119,52 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>Network Threat management</li>
 </ul>
 <h2 id="generic-installers">Generic installers</h2>
-<p>Kura can be installed using the <strong>generic profiles</strong></p>
+<p>Kura can be installed using the <strong>generic profiles</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb/rpm
 </code></pre></div>
 <p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>x86_64</em>, <em>arm32</em>, and <em>arm64</em>. A generic Kura profile can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
-<p>If installing the generic package on a non supported device (see <a href="#supported-devices">Supported Devices</a>), only one ethernet interface and one wifi interface (if present) are configured. The firewall will be set up as follows:</p>
-<p><img alt="" src="../images/firewall-generic.png" /></p>
-<p>Where <code>eth0</code> and <code>wlan0</code> will be replaced with the detected primary ethernet and wireless interfaces.</p>
-<p>On unsupported devices, Kura will install an empty <code>jdk.dio.properties</code> file. Hence, for having the complete set of Kura features, further configurations are recommended after installation:</p>
+<h3 id="initial-network-configuration">Initial network configuration</h3>
+<p>During the installation of a generic profile with network management support, the initial network configuration will be generated dynamically using the rules described below:</p>
 <ul>
-<li>other network interfaces, if any, from the web UI;</li>
-<li>the system firewall from the web UI;</li>
-<li>editing of <code>/opt/eclipse/kura/framework/jdk.dio.properties</code> for correct GPIO mappings.</li>
+<li>The existing wired and wireless Ethernet network interface names are sorted in ascending lexicographic order.</li>
+<li>
+<p>The first wired Ethernet interface in the list will be configured as follows:</p>
+<ul>
+<li><strong>Status</strong>: <code>Enabled for WAN</code></li>
+<li><strong>Configure</strong>: <code>Using DHCP</code></li>
+</ul>
+</li>
+<li>
+<p>The first wireless LAN interface will be configured as follows:</p>
+<ul>
+<li><strong>Status</strong>: <code>Enabled for LAN</code></li>
+<li><strong>Configure</strong>: <code>Manually</code></li>
+<li><strong>IP address</strong>: <code>172.16.1.1</code></li>
+<li><strong>Passphrase</strong>: <code>testKEYS</code></li>
+<li><strong>DHCP &amp; NAT</strong>: <code>enabled</code></li>
+</ul>
+</li>
+<li>
+<p>All other network interfaces will be disabled.</p>
+</li>
+</ul>
+<p>For example, if the system contains the following interfaces: <code>wlp2s0</code>, <code>wlp3s0</code>, <code>enp3s0</code>, <code>eno1</code>, <code>ens2</code>; then <code>eno1</code> will be enabled for WAN in DHCP client mode, <code>wlp2s0</code> will be configured as an AP, and all other network interfaces will be disabled.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On systems that do not use systemd's predictable interface naming scheme (see <a href="https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/">Freedesktop reference</a>) the primary network interface name might change whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).</p>
+<p>The advice is to install Kura on systems that use a reliable naming convention for network interfaces.</p>
+<p>Systemd consistent network interface naming assigns the name prefix based on the physical location of the device, see <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-understanding_the_predictable_network_interface_device_names">Understanding the Predictable Network Interface Device Names</a> for further reference.</p>
+</div>
+<h3 id="initial-firewall-configuration">Initial firewall configuration</h3>
+<p>The initial firewall configuration will be as shown in the screenshot below.</p>
+<p><img alt="" src="../images/firewall-generic.png" /></p>
+<p>Please note that installing a Kura generic profile with network configuration support will replace the current network and firewall configuration with the one shown above.</p>
+<h3 id="other-kura-services">Other Kura services</h3>
+<p>Kura generic profiles do not contain gateway specific customizations, this implies that the values of some configuration parameters may be incorrect and/or missing and must be manually filled after installation. For example the user might want to:</p>
+<ul>
+<li>Configure the other network interfaces, if any.</li>
+<li>Setup additional firewall rules.</li>
+<li>Edit the <code>/opt/eclipse/kura/framework/jdk.dio.properties</code> with the correct GPIO mappings. By default this file is empty.</li>
 </ul>
 <h3 id="kura-dependencies">Kura dependencies</h3>
 <p>To have all the Kura features working, the following dependencies are required:</p>

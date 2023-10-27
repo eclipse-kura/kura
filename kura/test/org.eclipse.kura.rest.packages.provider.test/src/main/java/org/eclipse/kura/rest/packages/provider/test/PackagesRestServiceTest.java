@@ -173,6 +173,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
         thenNoExceptionOccurred();
         thenInstallIsCalledWithLocalUri();
+        thenResposeStatusCodeIs(200);
         thenResponseBodyEquals("\"REQUEST_RECEIVED\"");
     }
 
@@ -290,10 +291,9 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
                 .build();
         final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
 
-        final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-        final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.field("foo", "bar")
-                .bodyPart(filePart);
+        final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));
+        final FormDataMultiPart multipart = (FormDataMultiPart) formDataMultiPart.bodyPart(filePart);
 
         final WebTarget target = client.target(REST_UPLOAD_ENDPOINT);
         final Response response = target.request().post(Entity.entity(multipart, multipart.getMediaType()));

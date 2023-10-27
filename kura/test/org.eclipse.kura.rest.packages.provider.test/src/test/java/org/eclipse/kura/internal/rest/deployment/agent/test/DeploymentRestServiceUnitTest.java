@@ -17,6 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,10 +25,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +54,8 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
 public class DeploymentRestServiceUnitTest {
+
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
     private DeploymentRestService deploymentRestService = new DeploymentRestService();
 
@@ -179,7 +185,7 @@ public class DeploymentRestServiceUnitTest {
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
-        thenDeploymentAgentServiceIsCalledToInstallDeploymentPackage();
+        thenDeploymentAgentServiceIsCalledToInstallLocalUrl();
     }
 
     @Test
@@ -332,8 +338,12 @@ public class DeploymentRestServiceUnitTest {
         verify(this.mockUserAdmin, times(1)).createRole(role, type);
     }
 
-    private void thenDeploymentAgentServiceIsCalledToInstallDeploymentPackage() throws Exception {
-        verify(this.mockDeploymentAgentService, times(1)).installDeploymentPackageAsync(any());
+    private void thenDeploymentAgentServiceIsCalledToInstallLocalUrl() throws Exception {
+        final String localUri = System.getProperty(JAVA_IO_TMPDIR) + File.separator;
+        final Path localPath = Paths.get(localUri);
+
+        verify(this.mockDeploymentAgentService, times(1))
+                .installDeploymentPackageAsync(startsWith(localPath.toUri().toURL().toString()));
     }
 
     private void thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage() throws Exception {

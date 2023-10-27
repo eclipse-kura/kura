@@ -72,7 +72,7 @@ public class DeploymentRestServiceUnitTest {
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
     @Test
-    public void installDeploymentPackageWorksWithAreadyIssuedRequest() {
+    public void installDeploymentPackageWorksWithAreadyIssuedRequest() throws Exception {
         givenDeploymentRestService();
 
         givenAnInstallationRequestWasAlreadyIssuedFor("testPackage", true);
@@ -81,10 +81,11 @@ public class DeploymentRestServiceUnitTest {
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.INSTALLING);
+        thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
     }
 
     @Test
-    public void uninstallDeploymentPackageWorksWithAreadyIssuedRequest() {
+    public void uninstallDeploymentPackageWorksWithAreadyIssuedRequest() throws Exception {
         givenDeploymentRestService();
         givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage", true);
 
@@ -92,6 +93,7 @@ public class DeploymentRestServiceUnitTest {
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.UNINSTALLING);
+        thenDeploymentAgentServiceIsNeverCalledToUninstallDeploymentPackage();
     }
 
     @Test
@@ -102,19 +104,21 @@ public class DeploymentRestServiceUnitTest {
         whenAnInstallationRequestIsIssuedFor("testPackage");
 
         thenExceptionOccurred(WebApplicationException.class);
+        thenDeploymentAgentServiceIsCalledToInstallUrl("testPackage");
     }
 
     @Test
-    public void installDeploymentPackageWorksWithNullRequest() {
+    public void installDeploymentPackageWorksWithNullRequest() throws Exception {
         givenDeploymentRestService();
 
         whenAnInstallationRequestIsIssuedFor(null);
 
         thenExceptionOccurred(WebApplicationException.class);
+        thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
     }
 
     @Test
-    public void installDeploymentPackageWorks() {
+    public void installDeploymentPackageWorks() throws Exception {
         givenDeploymentRestService();
 
         givenAnInstallationRequestWasAlreadyIssuedFor("testPackage", false);
@@ -123,6 +127,7 @@ public class DeploymentRestServiceUnitTest {
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
+        thenDeploymentAgentServiceIsCalledToInstallUrl("testPackage");
     }
 
     @Test
@@ -133,10 +138,11 @@ public class DeploymentRestServiceUnitTest {
         whenAnUninstallationRequestIsIssuedFor("testPackage");
 
         thenExceptionOccurred(WebApplicationException.class);
+        thenDeploymentAgentServiceIsCalledToUninstall("testPackage");
     }
 
     @Test
-    public void uninstallDeploymentPackageWorks() {
+    public void uninstallDeploymentPackageWorks() throws Exception {
         givenDeploymentRestService();
         givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage", false);
 
@@ -144,6 +150,7 @@ public class DeploymentRestServiceUnitTest {
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
+        thenDeploymentAgentServiceIsCalledToUninstall("testPackage");
     }
 
     @Test
@@ -338,6 +345,14 @@ public class DeploymentRestServiceUnitTest {
         verify(this.mockUserAdmin, times(1)).createRole(role, type);
     }
 
+    private void thenDeploymentAgentServiceIsCalledToUninstall(String name) throws Exception {
+        verify(this.mockDeploymentAgentService, times(1)).uninstallDeploymentPackageAsync(name);
+    }
+
+    private void thenDeploymentAgentServiceIsCalledToInstallUrl(String url) throws Exception {
+        verify(this.mockDeploymentAgentService, times(1)).installDeploymentPackageAsync(url);
+    }
+
     private void thenDeploymentAgentServiceIsCalledToInstallLocalUrl() throws Exception {
         final String localUri = System.getProperty(JAVA_IO_TMPDIR) + File.separator;
         final Path localPath = Paths.get(localUri);
@@ -349,4 +364,9 @@ public class DeploymentRestServiceUnitTest {
     private void thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage() throws Exception {
         verify(this.mockDeploymentAgentService, never()).installDeploymentPackageAsync(any());
     }
+
+    private void thenDeploymentAgentServiceIsNeverCalledToUninstallDeploymentPackage() throws Exception {
+        verify(this.mockDeploymentAgentService, never()).uninstallDeploymentPackageAsync(any());
+    }
+
 }

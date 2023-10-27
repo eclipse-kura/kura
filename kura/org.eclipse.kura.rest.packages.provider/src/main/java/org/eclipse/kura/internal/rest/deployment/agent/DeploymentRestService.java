@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,13 +153,15 @@ public class DeploymentRestService {
         final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
                 + ".dp";
 
-        File file = new File(uploadedFileLocation);
-        if (file.exists() && !file.delete()) {
+        try {
+            Files.deleteIfExists(Paths.get(uploadedFileLocation));
+        } catch (IOException e) {
             logger.warn("Cannot delete file: {}", uploadedFileLocation);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
+        File file = new File(uploadedFileLocation);
         try {
             if (!file.createNewFile()) {
                 throw new IOException("File " + uploadedFileLocation + " was not created");

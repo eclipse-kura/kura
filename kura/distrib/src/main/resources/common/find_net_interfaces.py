@@ -11,57 +11,51 @@
 # Contributors:
 #  Eurotech
 #
-import subprocess
 import sys
 import logging
+import os
 
-ETHERNET_TYPES = ['ethernet', 'eth', 'wired']
-WIRELESS_TYPES = ['wifi', 'wireless']
+def get_interface_names():
+    if not os.path.exists("/sys/class/net"):
+        logging.error("'/sys/class/net' does not exists, unable to read interface names. Exiting.")
+        sys.exit(1)
+
+    return os.listdir("/sys/class/net")
 
 def get_eth_wlan_interfaces_names():
-    """Reads the network interface names using 'nmcli dev' command.
+    """Reads the network interface names present on the device.
 
     It is assumed that at least one ethernet interface is present.
+
+    Requirements:
+        "/sys/class/net" directory must exist
 
     Returns:
         tuple of lists (eth_names, wlan_names) where:
             'eth_names' are the found ethernet interface names sorted by name;
             'wlan_names' are the found wireless interface names sorted by name, might be an empty list.
     """
-    cmd_output = subprocess.check_output(['nmcli', 'dev']).decode(sys.stdout.encoding).strip()
-    # list comprehension to remove empty items
-    lines = [x.strip() for x in cmd_output.split('\n') if len(x.strip()) > 0]
+    ethernet_interface_names = list()
+    wireless_interface_names = list()
 
-    # removing header
-    del lines[0]
-
-    ethernet_inteface_names = list()
-    wireless_inteface_names = list()
-
-    for line in lines:
-        row = [x.strip() for x in line.split(' ') if len(x.strip()) > 0]
-        
-        interface_name = row[0].lower()
-        interface_type = row[1].lower()
-
-        if interface_type in ETHERNET_TYPES:
-            ethernet_inteface_names.append(interface_name)
-        
-        if  interface_type in WIRELESS_TYPES:
-            wireless_inteface_names.append(interface_name)
+    interface_names = get_interface_names()
     
-    if len(ethernet_inteface_names) < 1:
-        logging.info("ERROR: no ethernet interfaces found")
+    for ifname in interface_names:
+        if ifname.startswith("en") or ifname.startswith("et"):
+            ethernet_interface_names.append(ifname)
+        if ifname.startswith("wl"):
+            wireless_interface_names.append(ifname)
+
+    ethernet_interface_names.sort()
+    wireless_interface_names.sort()
+
+    if len(ethernet_interface_names) < 1:
+        logging.error("No ethernet interfaces found, exiting.")
         sys.exit(1)
 
-    ethernet_inteface_names.sort()
-    wireless_inteface_names.sort()
-
-    logging.info("Found ethernet interfaces: %s", ethernet_inteface_names)
-    logging.info("Found wireless interfaces: %s", wireless_inteface_names)
-
-    return (ethernet_inteface_names, wireless_inteface_names)
-
+    logging.info("Found ethernet interfaces: %s", ethernet_interface_names)
+    logging.info("Found wireless interfaces: %s", wireless_interface_names)
+    return (ethernet_interface_names, wireless_interface_names)
 
 def main():
     logging.basicConfig(

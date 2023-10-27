@@ -67,7 +67,6 @@ systemctl disable systemd-timesyncd
 systemctl stop chrony
 systemctl disable chrony
 systemctl enable NetworkManager
-systemctl start NetworkManager
 systemctl enable ModemManager
 systemctl stop dnsmasq
 systemctl disable dnsmasq

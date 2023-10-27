@@ -11,8 +11,6 @@
 # Contributors:
 #  Eurotech
 #
-import subprocess
-import sys
 import shutil
 import logging
 from os.path import exists

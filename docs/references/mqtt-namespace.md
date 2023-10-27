@@ -1482,7 +1482,7 @@ Starting from Kura 5.4.0, the `KEYS-V2` request handler is also available, it su
 ### Uploading a Private Key Entry
 
 * Request Topic:
-    * **$EDC/account_name/client_id/KEYS-V1/POST/keystores/entries/privatekey**
+    * **$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey**
 
 * Request Payload:
 
@@ -1508,7 +1508,7 @@ Starting from Kura 5.4.0, the `KEYS-V2` request handler is also available, it su
 ### Updating a Private Key Entry
 
 * Request Topic:
-    * **$EDC/account_name/client_id/KEYS-V1/POST/keystores/entries/privatekey**
+    * **$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey**
 
 * Request Payload:
 

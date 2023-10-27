@@ -269,7 +269,7 @@ Starting from Kura 5.4.0, the `keystores/v2` REST API is also available, it supp
 
 ### Uploading a Private Key Entry
 
-**Request**: URL - `https://<gateway-ip>/services/keystores/v1/entries/privatekey`
+**Request**: URL - `https://<gateway-ip>/services/keystores/v2/entries/privatekey`
 
 **Request body**:
 
@@ -293,7 +293,7 @@ WARINING: Please use this endpoint through a secure connection.
 
 ### Updating a Private Key Entry
 
-**Request**: URL - `https://<gateway-ip>/services/keystores/v1/entries/privatekey`
+**Request**: URL - `https://<gateway-ip>/services/keystores/v2/entries/privatekey`
 
 **Request body**:
 

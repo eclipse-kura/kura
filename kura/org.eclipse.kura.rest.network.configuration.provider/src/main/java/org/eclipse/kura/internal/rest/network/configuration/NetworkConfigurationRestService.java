@@ -31,14 +31,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.request.RequestHandler;
-import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
@@ -55,8 +51,6 @@ public class NetworkConfigurationRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationRestService.class);
 
-    private static final String APP_ID = "NETCONF-V1";
-
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.network.configuration";
 
     private static final String NETWORK_CONF_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
@@ -67,8 +61,6 @@ public class NetworkConfigurationRestService {
             IP4_FIREWALL_CONF_SERVICE_PID, IP6_FIREWALL_CONF_SERVICE_PID);
 
     private static final String SNAPSHOT_SUBTASK_ID = "snapshot";
-
-    private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
     private ConfigurationService configurationService;
     private CryptoService cryptoService;
@@ -85,22 +77,6 @@ public class NetworkConfigurationRestService {
         this.cryptoService = cryptoService;
     }
 
-    public void setRequestHandlerRegistry(final RequestHandlerRegistry registry) {
-        try {
-            registry.registerRequestHandler(APP_ID, this.requestHandler);
-        } catch (final Exception e) {
-            logger.warn("failed to register request handler", e);
-        }
-    }
-
-    public void unsetRequestHandlerRegistry(final RequestHandlerRegistry registry) {
-        try {
-            registry.unregister(APP_ID);
-        } catch (KuraException e) {
-            logger.warn("failed to unregister request handler", e);
-        }
-    }
-
     /**
      * GET method.
      *
@@ -112,7 +88,7 @@ public class NetworkConfigurationRestService {
      */
     @GET
     @RolesAllowed("network.configuration")
-    @Path("/networkConfigurableComponents")
+    @Path("/configurableComponents")
     @Produces(MediaType.APPLICATION_JSON)
     public PidSet listNetworkConfigurableComponentsPids() {
 
@@ -135,7 +111,7 @@ public class NetworkConfigurationRestService {
      */
     @GET
     @RolesAllowed("network.configuration")
-    @Path("/networkConfigurableComponents/configurations")
+    @Path("/configurableComponents/configurations")
     @Produces(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listNetworkConfiguration() {
 
@@ -168,7 +144,7 @@ public class NetworkConfigurationRestService {
      */
     @POST
     @RolesAllowed("network.configuration")
-    @Path("/networkConfigurableComponents/configurations/byPid")
+    @Path("/configurableComponents/configurations/byPid")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listNetworkComponentConfigurations(final PidSet pids) {
@@ -203,7 +179,7 @@ public class NetworkConfigurationRestService {
      */
     @POST
     @RolesAllowed("network.configuration")
-    @Path("/networkConfigurableComponents/configurations/byPid/_default")
+    @Path("/configurableComponents/configurations/byPid/_default")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listDefaultNetworkComponentConfiguration(final PidSet pids) {
@@ -238,7 +214,7 @@ public class NetworkConfigurationRestService {
      */
     @PUT
     @RolesAllowed("network.configuration")
-    @Path("/networkConfigurableComponents/configurations/_update")
+    @Path("/configurableComponents/configurations/_update")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateComponentConfigurations(UpdateComponentConfigurationRequest request) {

@@ -27,10 +27,6 @@
 	<reference bind="setUserAdmin" cardinality="0..1"
 		interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin"
 		policy="static" />
-	<reference bind="setRequestHandlerRegistry" cardinality="0..n"
-		interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
-		name="RequestHandlerRegistry" policy="dynamic"
-		unbind="unsetRequestHandlerRegistry" />
 	<service>
 		<provide
 			interface="org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService" />

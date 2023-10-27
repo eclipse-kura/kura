@@ -3182,11 +3182,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#remote-certificates-and-keys-management-via-mqtt-keys-v1" class="md-nav__link">
-    Remote Certificates and Keys management via MQTT (KEYS-V1)
+  <a href="#remote-certificates-and-keys-management-via-mqtt-keys-v1-and-keys-v2" class="md-nav__link">
+    Remote Certificates and Keys management via MQTT (KEYS-V1 and KEYS-V2)
   </a>
   
-    <nav class="md-nav" aria-label="Remote Certificates and Keys management via MQTT (KEYS-V1)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keys-v1" class="md-nav__link">
+    KEYS-V1
+  </a>
+  
+    <nav class="md-nav" aria-label="KEYS-V1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3234,6 +3241,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
           <li class="md-nav__item">
   <a href="#delete-entry" class="md-nav__link">
     Delete Entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keys-v2" class="md-nav__link">
+    KEYS-V2
+  </a>
+  
+    <nav class="md-nav" aria-label="KEYS-V2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uploading-a-private-key-entry" class="md-nav__link">
+    Uploading a Private Key Entry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-private-key-entry" class="md-nav__link">
+    Updating a Private Key Entry
   </a>
   
 </li>
@@ -3944,11 +3978,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#remote-certificates-and-keys-management-via-mqtt-keys-v1" class="md-nav__link">
-    Remote Certificates and Keys management via MQTT (KEYS-V1)
+  <a href="#remote-certificates-and-keys-management-via-mqtt-keys-v1-and-keys-v2" class="md-nav__link">
+    Remote Certificates and Keys management via MQTT (KEYS-V1 and KEYS-V2)
   </a>
   
-    <nav class="md-nav" aria-label="Remote Certificates and Keys management via MQTT (KEYS-V1)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keys-v1" class="md-nav__link">
+    KEYS-V1
+  </a>
+  
+    <nav class="md-nav" aria-label="KEYS-V1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3996,6 +4037,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
           <li class="md-nav__item">
   <a href="#delete-entry" class="md-nav__link">
     Delete Entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keys-v2" class="md-nav__link">
+    KEYS-V2
+  </a>
+  
+    <nav class="md-nav" aria-label="KEYS-V2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uploading-a-private-key-entry" class="md-nav__link">
+    Uploading a Private Key Entry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-private-key-entry" class="md-nav__link">
+    Updating a Private Key Entry
   </a>
   
 </li>
@@ -5319,7 +5387,8 @@ In particular it is possible to use the download and install resources from the 
 <p>Type</p>
 </li>
 </ul>
-<h2 id="remote-certificates-and-keys-management-via-mqtt-keys-v1">Remote Certificates and Keys management via MQTT (KEYS-V1)</h2>
+<h2 id="remote-certificates-and-keys-management-via-mqtt-keys-v1-and-keys-v2">Remote Certificates and Keys management via MQTT (KEYS-V1 and KEYS-V2)</h2>
+<h2 id="keys-v1">KEYS-V1</h2>
 <p>The <strong>KEYS-V1</strong> app-id is exposed by the <code>org.eclipse.kura.core.keystore</code> bundle. This request handler allows the remote management platform to get a list of all the KeystoreService instances and corresponding keys managed by the framework in a given device.</p>
 <p>The request handler allows, also, to install new trusted certificate and to generate new key pairs directly in the device. Finally, the remote platform can request, from a defined key pair, the generation of a CSR that can be countersigned remotely by a trusted CA.  </p>
 <h3 id="read-all-the-kestoreservices">Read All the KestoreServices</h3>
@@ -5616,6 +5685,68 @@ Each entry of the array is specified by the following values:</p>
 <a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="w">    </span><span class="nt">&quot;keystoreServicePid&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MyKeystore&quot;</span><span class="p">,</span>
 <a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="w">    </span><span class="nt">&quot;alias&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mycerttestec&quot;</span>
 <a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="p">}</span>
+</code></pre></div>
+</li>
+<li>
+<p>Response Payload:</p>
+<ul>
+<li>Nothing</li>
+</ul>
+</li>
+</ul>
+<h2 id="keys-v2">KEYS-V2</h2>
+<p>Starting from Kura 5.4.0, the <code>KEYS-V2</code> request handler is also available, it supports all of the request endpoints of <code>KEYS-V1</code> plus an additional endpoint that allows to upload and modify private key entries:</p>
+<h3 id="uploading-a-private-key-entry">Uploading a Private Key Entry</h3>
+<ul>
+<li>
+<p>Request Topic:</p>
+<ul>
+<li><strong>$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey</strong></li>
+</ul>
+</li>
+<li>
+<p>Request Payload:</p>
+<p>The request should include the private key in unencrypted PEM format and the certificate chain in PEM format, the first certificate in the <code>certificateChain</code> list must use the public key associated with the private key supplied as the <code>privateKey</code> parameter.</p>
+<p>The device will overwrite the entry with the provided alias if it already exists.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="p">{</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">    </span><span class="nt">&quot;keystoreServicePid&quot;</span><span class="p">:</span><span class="s2">&quot;MyKeystore&quot;</span><span class="p">,</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">    </span><span class="nt">&quot;alias&quot;</span><span class="p">:</span><span class="s2">&quot;keypair1&quot;</span><span class="p">,</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">    </span><span class="nt">&quot;privateKey&quot;</span><span class="p">:</span><span class="s2">&quot;-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">    </span><span class="nt">&quot;certificateChain&quot;</span><span class="p">:[</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a><span class="p">}</span>
+</code></pre></div>
+</li>
+<li>
+<p>Response Payload:</p>
+<ul>
+<li>Nothing</li>
+</ul>
+</li>
+</ul>
+<h3 id="updating-a-private-key-entry">Updating a Private Key Entry</h3>
+<ul>
+<li>
+<p>Request Topic:</p>
+<ul>
+<li><strong>$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey</strong></li>
+</ul>
+</li>
+<li>
+<p>Request Payload:</p>
+<p>In order to update the certificate chain associated to a specific private key entry it is possible to use the same format as previous request and omit the <code>privateKey</code> parameter.</p>
+<p>In this case the certificate chain of the existing entry will be replaced with the one specified in the request and the existing private key will be retained.</p>
+<p>This request can be useful for example to create a CSR on the device, sign it externally and then updating the corresponding entry with the resulting certificate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="p">{</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="w">    </span><span class="nt">&quot;keystoreServicePid&quot;</span><span class="p">:</span><span class="s2">&quot;MyKeystore&quot;</span><span class="p">,</span>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="w">    </span><span class="nt">&quot;alias&quot;</span><span class="p">:</span><span class="s2">&quot;keypair1&quot;</span><span class="p">,</span>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="w">    </span><span class="nt">&quot;certificateChain&quot;</span><span class="p">:[</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a><span class="p">}</span>
 </code></pre></div>
 </li>
 <li>

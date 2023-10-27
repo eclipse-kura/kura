@@ -724,7 +724,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
     REST APIs
   </a>
   
-    <nav class="md-nav" aria-label="REST APIs">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keystoresv1" class="md-nav__link">
+    keystores/v1
+  </a>
+  
+    <nav class="md-nav" aria-label="keystores/v1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -799,6 +806,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
   <a href="#keys-v1-request-handler" class="md-nav__link">
     KEYS-V1 Request Handler
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keystoresv2" class="md-nav__link">
+    keystores/v2
+  </a>
+  
+    <nav class="md-nav" aria-label="keystores/v2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uploading-a-private-key-entry" class="md-nav__link">
+    Uploading a Private Key Entry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-private-key-entry" class="md-nav__link">
+    Updating a Private Key Entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -3079,7 +3113,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
     REST APIs
   </a>
   
-    <nav class="md-nav" aria-label="REST APIs">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keystoresv1" class="md-nav__link">
+    keystores/v1
+  </a>
+  
+    <nav class="md-nav" aria-label="keystores/v1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3157,6 +3198,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#keystoresv2" class="md-nav__link">
+    keystores/v2
+  </a>
+  
+    <nav class="md-nav" aria-label="keystores/v2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uploading-a-private-key-entry" class="md-nav__link">
+    Uploading a Private Key Entry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-private-key-entry" class="md-nav__link">
+    Updating a Private Key Entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3173,7 +3241,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="keys-and-certificates">Keys and Certificates</h1>
 <p>The framework manages directly different key pairs and trusted certificates from different keystores.
-To simplify the management of such complex objects, the framework provides a dedicated section of its Administrative Web UI, a set of REST APIs for local management and a request handler (KEYS-V1) for cloud remote interaction.</p>
+To simplify the management of such complex objects, the framework provides a dedicated section of its Administrative Web UI, a set of REST APIs for local management and a request handler (KEYS-V1 and KEYS-V2) for cloud remote interaction.</p>
 <h2 id="web-ui">Web UI</h2>
 <p>The <strong>Certificates List</strong> tab in the <strong>Security</strong> section of the Kura Web UI provides a simple way for the user to get the list of all the managed keys and certificates of the framework:</p>
 <p><img alt="Keys and Certificates" src="../images/keys-and-certificates.png" /></p>
@@ -3208,6 +3276,7 @@ To simplify the management of such complex objects, the framework provides a ded
 - <strong>DSA</strong>
 - <strong>EC</strong></p>
 <h2 id="rest-apis">REST APIs</h2>
+<h2 id="keystoresv1">keystores/v1</h2>
 <p>The <code>org.eclipse.kura.core.keystore</code> bundle exposes a REST endpoint under the <code>/services/keystores/v1</code> path.
 The Kura REST APIs for Keys and Certificates support the following calls and are allowed to any user with <code>rest.keystores</code> permission.</p>
 <table>
@@ -3436,6 +3505,61 @@ The Kura REST APIs for Keys and Certificates support the following calls and are
 <h2 id="keys-v1-request-handler">KEYS-V1 Request Handler</h2>
 <p>Mapping the previously defined REST APIs, the framework exposed to the remote cloud platforms a request handler named <strong>KEYS-V1</strong> that allows the remote user to list and manage the keystores, the keys and the certificates in the framework.</p>
 <p>The request handler exposes also the capability to generate on the edge a CSR that can be countersigned remotely by a trusted CA.</p>
+<h2 id="keystoresv2">keystores/v2</h2>
+<p>Starting from Kura 5.4.0, the <code>keystores/v2</code> REST API is also available, it supports all of the request endpoints of <code>keystores/v1</code> plus an additional endpoint that allows to upload and modify private key entries:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Roles allowed</th>
+<th>Encoding</th>
+<th>Request parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/entries/privatekey</code></td>
+<td>keystores</td>
+<td>JSON</td>
+<td>To upload a new private key entry directly in the device, the request format need to follow the references in the following paragraphs.</td>
+<td>This request allows the user to upload a new private key entry into the device or to modify the certificate chain of an existing one.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="uploading-a-private-key-entry">Uploading a Private Key Entry</h3>
+<p><strong>Request</strong>: URL - <code>https://&lt;gateway-ip&gt;/services/keystores/v2/entries/privatekey</code></p>
+<p><strong>Request body</strong>:</p>
+<p>The request should include the private key in unencrypted PEM format and the certificate chain in PEM format, the first certificate in the <code>certificateChain</code> list must use the public key associated with the private key supplied as the <code>privateKey</code> parameter.</p>
+<p>The device will overwrite the entry with the provided alias if it already exists.</p>
+<p>WARINING: Please use this endpoint through a secure connection.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nt">&quot;keystoreServicePid&quot;</span><span class="p">:</span><span class="s2">&quot;MyKeystore&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">&quot;alias&quot;</span><span class="p">:</span><span class="s2">&quot;keypair1&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;privateKey&quot;</span><span class="p">:</span><span class="s2">&quot;-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nt">&quot;certificateChain&quot;</span><span class="p">:[</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="updating-a-private-key-entry">Updating a Private Key Entry</h3>
+<p><strong>Request</strong>: URL - <code>https://&lt;gateway-ip&gt;/services/keystores/v2/entries/privatekey</code></p>
+<p><strong>Request body</strong>:</p>
+<p>In order to update the certificate chain associated to a specific private key entry it is possible to use the same format as previous request and omit the <code>privateKey</code> parameter.</p>
+<p>In this case the certificate chain of the existing entry will be replaced with the one specified in the request and the existing private key will be retained.</p>
+<p>This request can be useful for example to create a CSR on the device, sign it externally and then updating the corresponding entry with the resulting certificate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nt">&quot;keystoreServicePid&quot;</span><span class="p">:</span><span class="s2">&quot;MyKeystore&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&quot;alias&quot;</span><span class="p">:</span><span class="s2">&quot;keypair1&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;certificateChain&quot;</span><span class="p">:[</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="s2">&quot;-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="p">}</span>
+</code></pre></div>
 
               
             </article>

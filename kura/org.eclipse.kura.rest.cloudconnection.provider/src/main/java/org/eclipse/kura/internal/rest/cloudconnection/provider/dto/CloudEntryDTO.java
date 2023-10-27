@@ -15,15 +15,17 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 public class CloudEntryDTO {
 
     private final String pid;
-    private final String factoryPid;
-    private final String defaultFactoryPid;
-    private final String defaultFactoryPidRegex;
+    private String factoryPid;
+    private String defaultFactoryPid;
+    private String defaultFactoryPidRegex;
 
-    public CloudEntryDTO(String pid, String factoryPid, String defaultFactoryPid, String defaultFactoryPidRegex) {
+    public CloudEntryDTO(String pid, String factoryPid) {
         this.pid = pid;
         this.factoryPid = factoryPid;
-        this.defaultFactoryPid = defaultFactoryPid;
-        this.defaultFactoryPidRegex = defaultFactoryPidRegex;
+    }
+
+    public CloudEntryDTO(String pid) {
+        this.pid = pid;
     }
 
     public String getPid() {
@@ -34,12 +36,24 @@ public class CloudEntryDTO {
         return factoryPid;
     }
 
+    public void setFactoryPid(String factoryPid) {
+        this.factoryPid = factoryPid;
+    }
+
     public String getDefaultFactoryPid() {
         return defaultFactoryPid;
     }
 
+    public void setDefaultFactoryPid(String defaultFactoryPid) {
+        this.defaultFactoryPid = defaultFactoryPid;
+    }
+
     public String getDefaultFactoryPidRegex() {
         return defaultFactoryPidRegex;
+    }
+
+    public void setDefaultFactoryPidRegex(String defaultFactoryPidRegex) {
+        this.defaultFactoryPidRegex = defaultFactoryPidRegex;
     }
 
 }

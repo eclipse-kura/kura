@@ -10,20 +10,21 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
+package org.eclipse.kura.internal.rest.cloudconnection.provider;
 
-import java.util.ArrayList;
-import java.util.List;
+public enum ConfigParameterType {
 
-public class CloudEntriesDTO {
+    STRING,
+    LONG,
+    DOUBLE,
+    FLOAT,
+    INTEGER,
+    BYTE,
+    CHAR,
+    BOOLEAN,
+    SHORT,
+    PASSWORD;
 
-    private List<CloudEntryDTO> cloudEntries = new ArrayList<>();
-
-    public CloudEntriesDTO(List<CloudEntryDTO> cloudEntries) {
-        this.cloudEntries = cloudEntries;
-    }
-
-    public List<CloudEntryDTO> getCloudEntries() {
-        return cloudEntries;
+    private ConfigParameterType() {
     }
 }

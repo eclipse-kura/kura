@@ -27,6 +27,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.annotation.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -156,6 +158,81 @@ public final class ServiceUtil {
         }
     }
 
+    /**
+     * Lookup services with a filter and iterate over their instances
+     *
+     * @param serviceClass
+     *            the services to look for
+     * @param consumer
+     *            the consumer which will be called for each service instance
+     * @throws GwtKuraException
+     *             if any service consumer throws an exception
+     * @throws InvalidSyntaxException
+     *             if the filter was not {@code null} and had an invalid syntax
+     */
+    public static <T> void withAllServices(final BundleContext bundleContext, final Class<T> serviceClass,
+            String filter, final ServiceConsumer<T> consumer) throws KuraException {
+
+        withAllServiceReferences(bundleContext, serviceClass, filter, (ref, ctx) -> {
+            final T service = ctx.getService(ref);
+
+            try {
+                consumer.consume(service);
+            } finally {
+                ctx.ungetService(ref);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> void withAllServiceReferences(final BundleContext bundleContext, final Class<T> serviceClass,
+            String filter, final ServiceReferenceConsumer<T> consumer) throws KuraException {
+
+        final ServiceReference<?>[] refs;
+        try {
+            refs = bundleContext.getAllServiceReferences(serviceClass != null ? serviceClass.getName() : null, filter);
+        } catch (InvalidSyntaxException e) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    serviceClass != null ? serviceClass.getName() : "");
+        }
+
+        // no result ... do nothing
+        if (refs == null) {
+            return;
+        }
+
+        // iterate over results
+        for (final ServiceReference<?> ref : refs) {
+            consumer.consume((ServiceReference<T>) ref, bundleContext);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void withAllServices(final BundleContext bundleContext, String filter,
+            final ServiceConsumer<Object> consumer, final Class<?>... classes) throws KuraException {
+
+        if (classes == null || classes.length == 0) {
+            withAllServices(bundleContext, null, filter, consumer);
+        }
+
+        for (Class<?> c : classes) {
+            withAllServices(bundleContext, (Class<Object>) c, filter, consumer);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void withAllServiceReferences(final BundleContext bundleContext, String filter,
+            final ServiceReferenceConsumer<Object> consumer, final Class<?>... classes) throws KuraException {
+
+        if (classes == null || classes.length == 0) {
+            withAllServiceReferences(bundleContext, null, filter, consumer);
+        }
+
+        for (Class<?> c : classes) {
+            withAllServiceReferences(bundleContext, (Class<Object>) c, filter, consumer);
+        }
+    }
+
     public static boolean isFactoryOf(final BundleContext bundleContext, final String factoryPid,
             final Predicate<Set<String>> filter) {
 
@@ -205,5 +282,20 @@ public final class ServiceUtil {
 
             return false;
         });
+    }
+
+    public interface ServiceFunction<T, R> {
+
+        public R apply(T service) throws KuraException;
+    }
+
+    public interface ServiceConsumer<T> {
+
+        public void consume(T service) throws KuraException;
+    }
+
+    public interface ServiceReferenceConsumer<T> {
+
+        public void consume(ServiceReference<T> service, BundleContext context) throws KuraException;
     }
 }

@@ -13,7 +13,7 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService">
     <implementation class="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
 
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
@@ -30,6 +30,12 @@
                cardinality="0..1"
                name="UserAdmin"
                policy="static"/>
+               
+    <reference interface="org.eclipse.kura.configuration.ConfigurationService" 
+               bind="bindConfigurationService" 
+               cardinality="1..1"  
+               name="ConfigurationService" 
+               policy="static" />
 
     <service>
         <provide interface="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>

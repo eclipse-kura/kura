@@ -1,7 +1,7 @@
 # Keys and Certificates
 
 The framework manages directly different key pairs and trusted certificates from different keystores.
-To simplify the management of such complex objects, the framework provides a dedicated section of its Administrative Web UI, a set of REST APIs for local management and a request handler (KEYS-V1) for cloud remote interaction.
+To simplify the management of such complex objects, the framework provides a dedicated section of its Administrative Web UI, a set of REST APIs for local management and a request handler (KEYS-V1 and KEYS-V2) for cloud remote interaction.
 
 ## Web UI
 
@@ -53,6 +53,8 @@ The following cryptographic algorithms are supported for **Trusted Certificates*
 - **EC**
 
 ## REST APIs
+
+## keystores/v1
 
 The `org.eclipse.kura.core.keystore` bundle exposes a REST endpoint under the `/services/keystores/v1` path.
 The Kura REST APIs for Keys and Certificates support the following calls and are allowed to any user with `rest.keystores` permission.
@@ -256,3 +258,58 @@ The Kura REST APIs for Keys and Certificates support the following calls and are
 Mapping the previously defined REST APIs, the framework exposed to the remote cloud platforms a request handler named **KEYS-V1** that allows the remote user to list and manage the keystores, the keys and the certificates in the framework.
 
 The request handler exposes also the capability to generate on the edge a CSR that can be countersigned remotely by a trusted CA.
+
+## keystores/v2
+
+Starting from Kura 5.4.0, the `keystores/v2` REST API is also available, it supports all of the request endpoints of `keystores/v1` plus an additional endpoint that allows to upload and modify private key entries:
+
+| Method | Path | Roles allowed | Encoding | Request parameters | Description |
+| ------ | ---- | ------------- | -------- | ------------------ | ----------- |
+| POST | `/entries/privatekey` | keystores | JSON | To upload a new private key entry directly in the device, the request format need to follow the references in the following paragraphs. | This request allows the user to upload a new private key entry into the device or to modify the certificate chain of an existing one. |
+
+### Uploading a Private Key Entry
+
+**Request**: URL - `https://<gateway-ip>/services/keystores/v2/entries/privatekey`
+
+**Request body**:
+
+The request should include the private key in unencrypted PEM format and the certificate chain in PEM format, the first certificate in the `certificateChain` list must use the public key associated with the private key supplied as the `privateKey` parameter.
+
+The device will overwrite the entry with the provided alias if it already exists.
+
+WARINING: Please use this endpoint through a secure connection.
+
+```JSON
+{
+    "keystoreServicePid":"MyKeystore",
+    "alias":"keypair1",
+    "privateKey":"-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
+    "certificateChain":[
+        "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+        "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+    ]
+}
+```
+
+### Updating a Private Key Entry
+
+**Request**: URL - `https://<gateway-ip>/services/keystores/v2/entries/privatekey`
+
+**Request body**:
+
+In order to update the certificate chain associated to a specific private key entry it is possible to use the same format as previous request and omit the `privateKey` parameter.
+
+In this case the certificate chain of the existing entry will be replaced with the one specified in the request and the existing private key will be retained.
+
+This request can be useful for example to create a CSR on the device, sign it externally and then updating the corresponding entry with the resulting certificate.
+
+```JSON
+{
+    "keystoreServicePid":"MyKeystore",
+    "alias":"keypair1",
+    "certificateChain":[
+        "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+        "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+    ]
+}
+```

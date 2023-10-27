@@ -1200,7 +1200,9 @@ The bundle JSON message is comprised of the following bundle elements:
 
 
 
-## Remote Certificates and Keys management via MQTT (KEYS-V1)
+## Remote Certificates and Keys management via MQTT (KEYS-V1 and KEYS-V2)
+
+## KEYS-V1
 
 The **KEYS-V1** app-id is exposed by the `org.eclipse.kura.core.keystore` bundle. This request handler allows the remote management platform to get a list of all the KeystoreService instances and corresponding keys managed by the framework in a given device.
 
@@ -1467,6 +1469,63 @@ This operation will delete the specified entry from the framework managed keysto
     {
         "keystoreServicePid" : "MyKeystore",
         "alias" : "mycerttestec"
+    }
+    ```
+
+* Response Payload:
+    * Nothing
+
+## KEYS-V2
+
+Starting from Kura 5.4.0, the `KEYS-V2` request handler is also available, it supports all of the request endpoints of `KEYS-V1` plus an additional endpoint that allows to upload and modify private key entries:
+
+### Uploading a Private Key Entry
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey**
+
+* Request Payload:
+
+    The request should include the private key in unencrypted PEM format and the certificate chain in PEM format, the first certificate in the `certificateChain` list must use the public key associated with the private key supplied as the `privateKey` parameter.
+
+    The device will overwrite the entry with the provided alias if it already exists.
+
+    ```JSON
+    {
+        "keystoreServicePid":"MyKeystore",
+        "alias":"keypair1",
+        "privateKey":"-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----",
+        "certificateChain":[
+            "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+            "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+        ]
+    }
+    ```
+
+* Response Payload:
+    * Nothing
+
+### Updating a Private Key Entry
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V2/POST/keystores/entries/privatekey**
+
+* Request Payload:
+
+    In order to update the certificate chain associated to a specific private key entry it is possible to use the same format as previous request and omit the `privateKey` parameter.
+
+    In this case the certificate chain of the existing entry will be replaced with the one specified in the request and the existing private key will be retained.
+
+    This request can be useful for example to create a CSR on the device, sign it externally and then updating the corresponding entry with the resulting certificate.
+
+    ```JSON
+    {
+        "keystoreServicePid":"MyKeystore",
+        "alias":"keypair1",
+        "certificateChain":[
+            "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+            "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+        ]
     }
     ```
 

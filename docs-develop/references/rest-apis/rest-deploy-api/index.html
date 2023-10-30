@@ -2847,6 +2847,60 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#install-package-from-upload" class="md-nav__link">
+    Install package from upload
+  </a>
+  
+    <nav class="md-nav" aria-label="Install package from upload">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_1" class="md-nav__link">
+    Request Body
+  </a>
+  
+    <nav class="md-nav" aria-label="Request Body">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#headers" class="md-nav__link">
+    Headers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#body-formdata" class="md-nav__link">
+    Body (formdata)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_2" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uninstall-a-package" class="md-nav__link">
     Uninstall a package
   </a>
@@ -2855,7 +2909,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#responses_2" class="md-nav__link">
+  <a href="#responses_3" class="md-nav__link">
     Responses
   </a>
   
@@ -3094,6 +3148,60 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#install-package-from-upload" class="md-nav__link">
+    Install package from upload
+  </a>
+  
+    <nav class="md-nav" aria-label="Install package from upload">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_1" class="md-nav__link">
+    Request Body
+  </a>
+  
+    <nav class="md-nav" aria-label="Request Body">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#headers" class="md-nav__link">
+    Headers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#body-formdata" class="md-nav__link">
+    Body (formdata)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_2" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#uninstall-a-package" class="md-nav__link">
     Uninstall a package
   </a>
@@ -3102,7 +3210,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#responses_2" class="md-nav__link">
+  <a href="#responses_3" class="md-nav__link">
     Responses
   </a>
   
@@ -3166,17 +3274,47 @@ Identities with <code>rest.deploy</code> permissions can access these APIs.</p>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&quot;REQUEST_RECEIVED&quot;
 </code></pre></div>
+<h4 id="install-package-from-upload">Install package from upload</h4>
+<ul>
+<li>Description: Upload and install a Deployment Package.</li>
+<li>Method: POST</li>
+<li>API PATH: <code>/deploy/v2/_upload</code></li>
+</ul>
+<h5 id="request-body_1">Request Body</h5>
+<p>The POST request body should be encoded in the <code>multipart/form-data</code> <code>enctype</code>, thus allowing for the upload of the Deployment Package file. The uploaded file is expected to be added in the <code>file</code> field of the form.</p>
+<h6 id="headers">Headers</h6>
+<ul>
+<li><code>Content-Type</code>: <code>multipart/form-data</code></li>
+</ul>
+<h6 id="body-formdata">Body (formdata)</h6>
+<ul>
+<li><code>file</code></li>
+</ul>
+<h6 id="example">Example</h6>
+<p>Example using <code>curl</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USERNAME</span>:<span class="nv">$PASSWORD</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span>--header<span class="w"> </span><span class="s1">&#39;Content-Type: multipart/form-data&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span>--form<span class="w"> </span><span class="s1">&#39;file=@&quot;/path/to/your/file.dp&quot;&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span>https://<span class="nv">$ADDRESS</span>/services/deploy/v2/_upload
+</code></pre></div>
+<h5 id="responses_2">Responses</h5>
+<ul>
+<li>200 OK status</li>
+<li>400 Bad request</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>&quot;REQUEST_RECEIVED&quot;
+</code></pre></div>
 <h4 id="uninstall-a-package">Uninstall a package</h4>
 <ul>
 <li>Description: Uninstalls the deployment package identified by the specified name. If the request was already issued, it reports the status of the uninstallation operation.</li>
 <li>Method: DELETE</li>
 <li>API PATH: <code>/deploy/v2/{name}</code></li>
 </ul>
-<h5 id="responses_2">Responses</h5>
+<h5 id="responses_3">Responses</h5>
 <ul>
 <li>200 OK status</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&quot;REQUEST_RECEIVED&quot;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>&quot;REQUEST_RECEIVED&quot;
 </code></pre></div>
 
               

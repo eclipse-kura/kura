@@ -269,6 +269,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
         MarketplacePackageDescriptorBuilder descriptorBuilder;
 
+        if (!isEclipseMarketplaceUrl(url)) {
+            throw new RuntimeException("Invalid URL");
+        }
+
         try {
             final String nodeId = url.split("=")[1];
             mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
@@ -340,6 +344,12 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
 
         return descriptorBuilder.build();
+    }
+
+    private boolean isEclipseMarketplaceUrl(String url) {
+        return url != null && !url.isEmpty();
+        // TODO
+        // return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
     }
 
     private Node getFirstNode(final Document doc, final String tagName) {

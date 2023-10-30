@@ -70,9 +70,12 @@ if [ ${BOARD} = "generic-device" ]; then
 
     if [ "$RAM_MB" -gt 1024 ]; then
         echo "Setting kura ram -Xms and -Xmx to ${RAM_MB_FOR_KURA}m"
-        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura.sh
-        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura_debug.sh
-        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" /opt/eclipse/kura/bin/start_kura_background.sh
+        start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh")
+
+        for installer_name in "${start_scripts_to_change[@]}"; do
+            echo "Updating RAM values for $installer_name"
+            sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/$installer_name"
+        done
     else
         echo "Leaving kura ram as the default set in installer profile"
     fi

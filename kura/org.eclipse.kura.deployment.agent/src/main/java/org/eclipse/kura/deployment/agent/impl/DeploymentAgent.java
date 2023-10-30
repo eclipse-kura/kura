@@ -96,6 +96,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";
     private static final String READ_TIMEOUT_PROPNAME = "dpa.read.timeout";
 
+    private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
+
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
     private DeploymentAdmin deploymentAdmin;
@@ -266,7 +268,6 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url) {
         URL mpUrl = null;
         HttpsURLConnection connection = null;
-        final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
         MarketplacePackageDescriptorBuilder descriptorBuilder;
 
         if (!isEclipseMarketplaceUrl(url)) {

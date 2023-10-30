@@ -296,15 +296,12 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             descriptorBuilder = MarketplacePackageDescriptor.builder();
 
             final Node updateUrl = getFirstNode(doc, "updateurl");
-
             if (updateUrl == null) {
                 throw new RuntimeException("Unable to find dp install URL");
             }
-
             descriptorBuilder.dpUrl(updateUrl.getTextContent());
 
             final Node node = getFirstNode(doc, "node");
-
             if (node != null) {
                 final NamedNodeMap nodeAttributes = node.getAttributes();
                 descriptorBuilder.nodeId(getAttributeValue(nodeAttributes, "id"));
@@ -312,19 +309,22 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             }
 
             Node versionCompatibility = getFirstNode(doc, "versioncompatibility");
-
+            String minKuraVersion = null;
+            String maxKuraVersion = null;
             if (versionCompatibility != null) {
                 NodeList children = versionCompatibility.getChildNodes();
                 for (int i = 0; i < children.getLength(); i++) {
                     Node n = children.item(i);
                     String nodeName = n.getNodeName();
                     if ("from".equalsIgnoreCase(nodeName)) {
-                        descriptorBuilder.minKuraVersion(n.getTextContent());
+                        minKuraVersion = n.getTextContent();
                     } else if ("to".equalsIgnoreCase(nodeName)) {
-                        descriptorBuilder.maxKuraVersion(n.getTextContent());
+                        maxKuraVersion = n.getTextContent();
                     }
                 }
             }
+            descriptorBuilder.minKuraVersion(minKuraVersion);
+            descriptorBuilder.maxKuraVersion(maxKuraVersion);
 
             String kuraPropertyCompatibilityVersion = getMarketplaceCompatibilityVersionString();
             Version kuraVersion = getMarketplaceCompatibilityVersion(kuraPropertyCompatibilityVersion);
@@ -333,7 +333,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             }
 
             descriptorBuilder.currentKuraVersion(kuraPropertyCompatibilityVersion);
-            boolean isCompatible = checkCompatibility("", "", kuraVersion);
+            boolean isCompatible = checkCompatibility(minKuraVersion, maxKuraVersion, kuraVersion);
             descriptorBuilder.isCompatible(isCompatible);
 
         } catch (Exception e) {
@@ -379,9 +379,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private String getMarketplaceCompatibilityVersionString() {
-        return "5.4.0";
-        // return ServiceLocator.applyToServiceOptionally(SystemService.class,
-        // SystemService::getKuraMarketplaceCompatibilityVersion);
+        return this.systemService.getKuraMarketplaceCompatibilityVersion();
     }
 
     private boolean checkCompatibility(String minKuraVersionString, String maxKuraVersionString,

@@ -46,6 +46,43 @@ Please note that the url can refer to a `.dp` already in the device filesystem.
 "REQUEST_RECEIVED"
 ```
 
+#### Install package from upload
+- Description: Upload and install a Deployment Package.
+- Method: POST
+- API PATH: `/deploy/v2/_upload`
+
+##### Request Body
+
+The POST request body should be encoded in the `multipart/form-data` `enctype`, thus allowing for the upload of the Deployment Package file. The uploaded file is expected to be added in the `file` field of the form.
+
+###### Headers
+
+- `Content-Type`: `multipart/form-data`
+
+###### Body (formdata)
+
+- `file`
+
+
+###### Example
+
+Example using `curl`:
+
+```bash
+curl -X POST -k -u $USERNAME:$PASSWORD \
+    --header 'Content-Type: multipart/form-data' \
+    --form 'file=@"/path/to/your/file.dp"' \
+    https://$ADDRESS/services/deploy/v2/_upload
+```
+
+##### Responses
+- 200 OK status
+- 400 Bad request
+
+```
+"REQUEST_RECEIVED"
+```
+
 #### Uninstall a package
 - Description: Uninstalls the deployment package identified by the specified name. If the request was already issued, it reports the status of the uninstallation operation.
 - Method: DELETE

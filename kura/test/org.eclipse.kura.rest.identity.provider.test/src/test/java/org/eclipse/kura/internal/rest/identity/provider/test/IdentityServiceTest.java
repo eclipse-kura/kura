@@ -413,7 +413,7 @@ public class IdentityServiceTest {
 
         @Override
         public Dictionary<String, Object> getProperties() {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>();
+            Dictionary<String, Object> properties = new Hashtable<>();
             properties.put("kura.need.password.change", this.needPasswordChange);
             return properties;
         }
@@ -425,7 +425,7 @@ public class IdentityServiceTest {
 
         @Override
         public Dictionary<String, Object> getCredentials() {
-            Dictionary<String, Object> credentials = new Hashtable<String, Object>();
+            Dictionary<String, Object> credentials = new Hashtable<>();
             credentials.put("kura.password", this.password);
 
             return credentials;
@@ -433,7 +433,7 @@ public class IdentityServiceTest {
     }
 
     private static Map<String, Object> defaultValidatorProperties() {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
 
         properties.put("new.password.min.length", 8);
         properties.put("new.password.require.digits", false);

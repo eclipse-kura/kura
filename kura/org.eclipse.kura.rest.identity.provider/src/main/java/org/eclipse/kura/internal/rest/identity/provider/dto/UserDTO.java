@@ -46,7 +46,7 @@ public class UserDTO {
     }
 
     public String getUserName() {
-        return userName;
+        return this.userName;
     }
 
     public void setUserName(String userName) {
@@ -54,7 +54,7 @@ public class UserDTO {
     }
 
     public Optional<Boolean> isPasswordAuthEnabled() {
-        return Optional.ofNullable(passwordAuthEnabled);
+        return Optional.ofNullable(this.passwordAuthEnabled);
     }
 
     public void setPasswordAuthEnabled(boolean passwordAuthEnabled) {
@@ -62,7 +62,7 @@ public class UserDTO {
     }
 
     public Optional<Boolean> isPasswordChangeNeeded() {
-        return Optional.ofNullable(passwordChangeNeeded);
+        return Optional.ofNullable(this.passwordChangeNeeded);
     }
 
     public void setPasswordChangeNeeded(boolean passwordChangeNeeded) {
@@ -70,7 +70,7 @@ public class UserDTO {
     }
 
     public Set<String> getPermissions() {
-        return permissions;
+        return this.permissions;
     }
 
     public void setPermissions(Set<String> permissions) {
@@ -78,7 +78,7 @@ public class UserDTO {
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public void setPassword(String password) {
@@ -87,19 +87,19 @@ public class UserDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userName);
+        return Objects.hash(this.userName);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
         UserDTO other = (UserDTO) obj;
-        return Objects.equals(userName, other.userName);
+        return Objects.equals(this.userName, other.userName);
     }
 
 }

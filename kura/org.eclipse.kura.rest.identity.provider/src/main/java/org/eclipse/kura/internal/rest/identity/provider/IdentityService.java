@@ -47,9 +47,9 @@ public class IdentityService {
 
     private static final String KURA_NEED_PASSWORD_CHANGE_PROPERTY = "kura.need.password.change";
 
-    private UserAdminHelper userAdminHelper;
-    private ConfigurationService configurationService;
-    private CryptoService cryptoService;
+    private final UserAdminHelper userAdminHelper;
+    private final ConfigurationService configurationService;
+    private final CryptoService cryptoService;
 
     public IdentityService(CryptoService cryptoService, UserAdmin userAdmin,
             ConfigurationService configurationService) {
@@ -65,11 +65,11 @@ public class IdentityService {
 
             final String password = user.getPassword();
             if (password != null) {
-                this.validateUserPassword(password);
+                validateUserPassword(password);
             }
 
             this.userAdminHelper.createUser(user.getUserName());
-            this.updateUser(user);
+            updateUser(user);
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, "user " + user.getUserName() + " already exists");
         }
@@ -198,7 +198,7 @@ public class IdentityService {
                 final String password = userDTO.getPassword();
 
                 if (password != null) {
-                    this.validateUserPassword(password);
+                    validateUserPassword(password);
                     try {
                         credentials.put(KURA_NEED_PASSWORD_CHANGE_PROPERTY, this.cryptoService.sha256Hash(password));
                     } catch (final Exception e) {

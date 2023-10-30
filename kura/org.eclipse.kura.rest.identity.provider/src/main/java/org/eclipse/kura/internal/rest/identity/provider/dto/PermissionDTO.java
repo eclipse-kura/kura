@@ -23,7 +23,7 @@ public class PermissionDTO {
     }
 
     public Set<String> getPermissions() {
-        return permissions;
+        return this.permissions;
     }
 
 }

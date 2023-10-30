@@ -20,7 +20,7 @@ public class UserConfigDTO {
     private Set<UserDTO> userConfig = new HashSet<>();
 
     public Set<UserDTO> getUserConfig() {
-        return userConfig;
+        return this.userConfig;
     }
 
     public void setUserConfig(Set<UserDTO> userConfig) {

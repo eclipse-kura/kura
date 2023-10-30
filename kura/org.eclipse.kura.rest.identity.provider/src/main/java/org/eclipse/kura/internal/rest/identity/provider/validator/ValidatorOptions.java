@@ -44,10 +44,10 @@ public class ValidatorOptions {
 
     public ValidatorOptions(Map<String, Object> configurationProperties) {
         if (configurationProperties != null) {
-            this.passwordMinimumLength = newPasswMinLenghthProperty.get(configurationProperties);
-            this.passwordRequireDigits = newPassRequireDigits.get(configurationProperties);
-            this.passwordRequireSpecialChars = newPassRequireSpecialChars.get(configurationProperties);
-            this.passwordRequireBothCases = newPassRequireBothCases.get(configurationProperties);
+            this.passwordMinimumLength = this.newPasswMinLenghthProperty.get(configurationProperties);
+            this.passwordRequireDigits = this.newPassRequireDigits.get(configurationProperties);
+            this.passwordRequireSpecialChars = this.newPassRequireSpecialChars.get(configurationProperties);
+            this.passwordRequireBothCases = this.newPassRequireBothCases.get(configurationProperties);
         }
     }
 

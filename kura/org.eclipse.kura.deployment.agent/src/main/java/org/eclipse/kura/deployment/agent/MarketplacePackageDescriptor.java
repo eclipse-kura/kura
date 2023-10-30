@@ -13,6 +13,7 @@
 package org.eclipse.kura.deployment.agent;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class MarketplacePackageDescriptor implements Serializable {
 
@@ -64,6 +65,28 @@ public class MarketplacePackageDescriptor implements Serializable {
 
     public static MarketplacePackageDescriptorBuilder builder() {
         return new MarketplacePackageDescriptorBuilder();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof MarketplacePackageDescriptor)) {
+            return false;
+        }
+        MarketplacePackageDescriptor other = (MarketplacePackageDescriptor) obj;
+        return Objects.equals(this.nodeId, other.nodeId) && Objects.equals(this.url, other.url)
+                && Objects.equals(this.dpUrl, other.dpUrl) && Objects.equals(this.minKuraVersion, other.minKuraVersion)
+                && Objects.equals(this.maxKuraVersion, other.maxKuraVersion)
+                && Objects.equals(this.currentKuraVersion, other.currentKuraVersion)
+                && Objects.equals(this.isCompatible, other.isCompatible);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.nodeId, this.url, this.dpUrl, this.minKuraVersion, this.maxKuraVersion,
+                this.currentKuraVersion, this.isCompatible);
     }
 
     // Builder

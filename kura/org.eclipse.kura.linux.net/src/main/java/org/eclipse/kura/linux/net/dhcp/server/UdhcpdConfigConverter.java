@@ -37,7 +37,7 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
                 .append("opt subnet ").append(config.getSubnetMask().getHostAddress()).append("\n")
                 .append("opt router ").append(config.getRouterAddress().getHostAddress()).append("\n")
                 .append("opt lease ").append(config.getDefaultLeaseTime()).append("\n");
-        if (!config.getDnsServers().isEmpty()) {
+        if (config.getDnsServers() != null && !config.getDnsServers().isEmpty()) {
             sb.append(addDNSServersOption(config)).append("\n");
         }
         return sb.toString();

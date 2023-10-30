@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
@@ -348,9 +349,9 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     }
 
     private boolean isEclipseMarketplaceUrl(String url) {
-        return url != null && !url.isEmpty();
-        // TODO
-        // return url != null && !url.isEmpty() && marketplaceUrlRegexp.test(url);
+        final Pattern marketplaceUrlRegexp = Pattern
+                .compile("http[s]?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
+        return url != null && !url.isEmpty() && marketplaceUrlRegexp.matcher(url).matches();
     }
 
     private Node getFirstNode(final Document doc, final String tagName) {

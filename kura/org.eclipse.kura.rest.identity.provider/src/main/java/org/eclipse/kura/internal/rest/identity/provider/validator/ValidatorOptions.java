@@ -51,19 +51,19 @@ public class ValidatorOptions {
         }
     }
 
-    public int getPasswordMinimumLength() {
+    public int isPasswordMinimumLength() {
         return this.passwordMinimumLength;
     }
 
-    public boolean getPasswordRequireDigits() {
+    public boolean isPasswordRequireDigits() {
         return this.passwordRequireDigits;
     }
 
-    public boolean getPasswordRequireBothCases() {
+    public boolean isPasswordRequireBothCases() {
         return this.passwordRequireBothCases;
     }
 
-    public boolean getPasswordRequireSpecialChars() {
+    public boolean isPasswordRequireSpecialChars() {
         return this.passwordRequireSpecialChars;
     }
 

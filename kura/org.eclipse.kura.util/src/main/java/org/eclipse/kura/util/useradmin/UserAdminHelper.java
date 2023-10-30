@@ -122,7 +122,8 @@ public class UserAdminHelper {
     }
 
     public void createUser(final String userName) {
-        getOrCreateUser(userName);
+        User createdUser = getOrCreateUser(userName);
+        Objects.requireNonNull(createdUser, "Could not create user " + userName);
     }
 
     public void deleteUser(final String userName) {

@@ -32,21 +32,21 @@ public class PasswordStrengthValidators {
     public static List<Validator<String>> fromConfig(final ValidatorOptions userOptions, final Messages messages) {
         final List<Validator<String>> result = new ArrayList<>();
 
-        final int minPasswordLength = userOptions.getPasswordMinimumLength();
+        final int minPasswordLength = userOptions.isPasswordMinimumLength();
 
         if (minPasswordLength > 0) {
             result.add(passwordLengthValidator(minPasswordLength, messages));
         }
 
-        if (userOptions.getPasswordRequireDigits()) {
+        if (userOptions.isPasswordRequireDigits()) {
             result.add(containsDigitsValidator(messages));
         }
 
-        if (userOptions.getPasswordRequireBothCases()) {
+        if (userOptions.isPasswordRequireBothCases()) {
             result.add(containsBothCases(messages));
         }
 
-        if (userOptions.getPasswordRequireSpecialChars()) {
+        if (userOptions.isPasswordRequireSpecialChars()) {
             result.add(containsSpecialChars(messages));
         }
 

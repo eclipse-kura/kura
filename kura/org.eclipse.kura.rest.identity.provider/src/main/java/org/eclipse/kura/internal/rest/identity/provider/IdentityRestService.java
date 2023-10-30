@@ -159,7 +159,6 @@ public class IdentityRestService {
     }
 
     @GET
-    @RolesAllowed(REST_ROLE_NAME)
     @Path("/defined-permissions")
     @Produces(MediaType.APPLICATION_JSON)
     public PermissionDTO getDefinedPermissions() {
@@ -187,7 +186,6 @@ public class IdentityRestService {
     }
 
     @GET
-    @RolesAllowed(REST_ROLE_NAME)
     @Path("/password-requirements")
     @Produces(MediaType.APPLICATION_JSON)
     public ValidatorOptionsDTO getValidatorOptions() {
@@ -195,10 +193,10 @@ public class IdentityRestService {
             logger.debug(DEBUG_MESSAGE, "getValidatorOptions");
             ValidatorOptions validatorOptions = this.identityService.getValidatorOptions();
             return new ValidatorOptionsDTO(//
-                    validatorOptions.getPasswordMinimumLength(), //
-                    validatorOptions.getPasswordRequireDigits(), //
-                    validatorOptions.getPasswordRequireBothCases(), //
-                    validatorOptions.getPasswordRequireSpecialChars());
+                    validatorOptions.isPasswordMinimumLength(), //
+                    validatorOptions.isPasswordRequireDigits(), //
+                    validatorOptions.isPasswordRequireBothCases(), //
+                    validatorOptions.isPasswordRequireSpecialChars());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

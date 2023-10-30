@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.dto;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,6 +83,23 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        UserDTO other = (UserDTO) obj;
+        return Objects.equals(userName, other.userName);
     }
 
 }

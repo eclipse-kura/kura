@@ -17,6 +17,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -29,13 +31,17 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
+import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.service.listing.provider.test.constants.ServiceListeningTestConstants;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -48,14 +54,19 @@ import org.osgi.service.useradmin.UserAdmin;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 
+@RunWith(Parameterized.class)
 public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
-    private static final String REST_APP_ID = "serviceListing/v1";
 
-    public ServiceListingEndpointsTest() {
-        super(new RestTransport(REST_APP_ID));
+    public ServiceListingEndpointsTest(final Transport transport) {
+        super(transport);
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Transport> parameters() {
+        return Arrays.asList(new RestTransport("serviceListing/v1"), new MqttTransport("SVCLIST-V1"));
     }
 
     @Test
@@ -66,14 +77,14 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnUnauthorizedStatusWhenNoRestPermissionIsGiven() {
+    public void restShouldReturnUnauthorizedStatusWhenNoRestPermissionIsGiven() {
 
         givenIdentity("noAuthUser", Optional.of("pass1"), Collections.emptyList());
         givenBasicCredentials(Optional.empty());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/servicePids");
 
-        thenResponseCodeIs(401);
+        thenRestResponseCodeIs(401);
     }
 
     @Test
@@ -91,6 +102,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnListOfFilteredServices() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.COMPLETE_POST_BODY);
@@ -101,6 +113,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyIsNull() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_POST_BODY);
@@ -111,6 +124,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyIsEmpty() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_POST_BODY);
@@ -121,6 +135,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyHasNullField() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.NULL_FIELD_POST_BODY);
@@ -131,6 +146,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnErrorMessageWhenRequestBodyHasEmptyField() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byInterface",
                 ServiceListeningTestConstants.EMPTY_FIELD_POST_BODY);
@@ -141,6 +157,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportPropertyMatchFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
@@ -152,6 +169,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportPropertyMatchFilterWithArray() {
+        givenBasicCredentials(Optional.of("admin:admin"));
         givenRegisteredService(TestInterface.class, "foo",
                 Collections.singletonMap("foo", new String[] { "bar", "baz" }));
 
@@ -164,6 +182,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportPropertyPresenceFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "baz"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
@@ -178,6 +198,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportNotFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
@@ -189,6 +211,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportAndFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
@@ -204,6 +228,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportOrFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "baz"));
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(TestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
@@ -219,6 +245,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportServicesSatisfyingReference() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         givenRegisteredService(TestInterface.class, "foo", Collections.singletonMap("foo", "baz"));
         givenRegisteredService(TestInterface.class, "bar", Collections.singletonMap("foo", "bar"));
         givenRegisteredService(OtherTestInterface.class, "baz", Collections.singletonMap("fooo", "bar"));
@@ -235,6 +263,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPids() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/factoryPids");
 
@@ -245,6 +274,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactorysPidByInterface() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
                 "{\"interfaceNames\":[\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"]}");
 
@@ -255,6 +286,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsSpecifyingMultipleInterfaces() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byInterface",
                 "{\"interfaceNames\":[\"org.eclipse.kura.configuration.ConfigurableComponent\", \"org.eclipse.kura.internal.rest.service.listing.provider.test.OtherTestInterface\"]}");
 
@@ -265,6 +298,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByProperty() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"testValue\"}");
 
@@ -275,6 +310,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByPropertyOfArrayType() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"name\": \"testProperty\", \"value\": \"value2\"}");
 
@@ -285,6 +322,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportListingFactoryPidsByPropertyAndObjectClass() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryPids/byProperty",
                 "{\"and\": [ {\"name\":\"objectClass\", \"value\":\"org.eclipse.kura.internal.rest.service.listing.provider.test.TestInterface\"}, {\"name\":\"testProperty\",\"value\": \"testValue\"} ] }");
 
@@ -295,6 +334,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectEmptyFilter() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty", "{}");
 
@@ -303,6 +343,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectFilterWithSpacesInPropertyName() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"name\": \" testProperty \", \"value\": \"value2\"}");
@@ -312,6 +353,7 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectFilterWithMultipleTypes() {
+        givenBasicCredentials(Optional.of("admin:admin"));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/byProperty",
                 "{\"and\": [], \"name\": \" testProperty \", \"value\": \"value2\"}");
@@ -321,6 +363,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectReferenceWithoutPid() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
                 "{ \"referenceName\": \"TestInterface\" }");
 
@@ -329,6 +373,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectReferenceWithEmptyPid() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
                 "{ \"pid\": \"\", \"referenceName\": \"TestInterface\" }");
 
@@ -337,6 +383,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectReferenceWithoutReferenceName() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
                 "{ \"pid\": \"foo\" }");
 
@@ -345,6 +393,8 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectReferenceWithEmptyReferenceName() {
+        givenBasicCredentials(Optional.of("admin:admin"));
+
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/servicePids/satisfyingReference",
                 "{ \"pid\": \"foo\", \"referenceName\": \"\" }");
 
@@ -386,7 +436,9 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     public void givenBasicCredentials(final Optional<String> basicCredentials) {
-        ((RestTransport) this.transport).setBasicCredentials(basicCredentials);
+        if (this.transport instanceof RestTransport) {
+            ((RestTransport) this.transport).setBasicCredentials(basicCredentials);
+        }
     }
 
     private <T> void givenRegisteredService(final Class<T> clazz, final String pid,
@@ -416,6 +468,12 @@ public class ServiceListingEndpointsTest extends AbstractRequestHandlerTest {
     private void thenResponseDoesNotContainPid(final String pid) {
         JsonArray responseArray = expectJsonResponse().get("pids").asArray();
         assertFalse(responseArray.values().contains(Json.value(pid)));
+    }
+
+    private void thenRestResponseCodeIs(final int responseCode) {
+        if (this.transport instanceof RestTransport) {
+            thenResponseCodeIs(responseCode);
+        }
     }
 
     /*

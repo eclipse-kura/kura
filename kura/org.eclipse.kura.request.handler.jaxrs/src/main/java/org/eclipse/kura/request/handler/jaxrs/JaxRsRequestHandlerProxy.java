@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -40,6 +43,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.request.handler.jaxrs.annotation.EXEC;
+import org.eclipse.kura.request.handler.jaxrs.consumer.RequestArgumentHandler;
 import org.eclipse.kura.request.handler.jaxrs.consumer.RequestParameterHandler;
 import org.eclipse.kura.request.handler.jaxrs.consumer.ResponseBodyHandler;
 import org.slf4j.Logger;
@@ -151,24 +155,24 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
 
         final Parameter[] parameters = method.getParameters();
 
-        final RequestParameterHandler parameterHandler;
+        final List<RequestArgumentHandler<?>> handlers = new ArrayList<>();
 
-        if (parameters.length == 0) {
-            parameterHandler = RequestParameterHandlers.noArgsHandler();
-        } else if (parameters.length == 1) {
-            final Parameter parameter = parameters[0];
+        for (final Parameter parameter : parameters) {
+
             final Class<?> type = parameter.getType();
 
-            if (type == InputStream.class) {
-                parameterHandler = RequestParameterHandlers.inputStreamHandler();
+            if (Arrays.asList(parameter.getAnnotations()).stream().map(a -> a.annotationType())
+                    .anyMatch(Context.class::equals)) {
+                handlers.add(RequestParameterHandlers.nullArgumentHandler());
+            } else if (type == InputStream.class) {
+                handlers.add(RequestParameterHandlers.inputStreamArgumentHandler());
             } else {
-                parameterHandler = RequestParameterHandlers.gsonHandler(type, gson);
+                handlers.add(RequestParameterHandlers.gsonArgumentHandler(type, gson));
             }
 
-        } else {
-            logger.debug("method {} has more than one parameter, ignoring", method);
-            return Optional.empty();
         }
+
+        final RequestParameterHandler parameterHandler = RequestParameterHandlers.fromArgumentHandlers(handlers);
 
         final ResponseBodyHandler bodyHandler;
 

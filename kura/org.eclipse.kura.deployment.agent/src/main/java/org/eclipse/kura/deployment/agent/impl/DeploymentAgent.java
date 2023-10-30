@@ -272,7 +272,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         MarketplacePackageDescriptorBuilder descriptorBuilder = MarketplacePackageDescriptor.builder();
 
         if (!isEclipseMarketplaceUrl(url)) {
-            throw new RuntimeException("Invalid URL");
+            throw new IllegalArgumentException(String.format("Invalid Eclipse Marketplace URL \"%s\"", url));
         }
 
         try {
@@ -295,7 +295,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
             final Node updateUrl = getFirstNode(doc, "updateurl");
             if (updateUrl == null) {
-                throw new RuntimeException("Unable to find dp install URL");
+                throw new IllegalStateException("Cannot find download URL in the deployment package descriptor");
             }
             descriptorBuilder.dpUrl(updateUrl.getTextContent());
 
@@ -335,7 +335,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             descriptorBuilder.isCompatible(isCompatible);
 
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Failed to get deployment package descriptor from Eclipse Marketplace. Caused by: ", e);
         } finally {
             if (connection != null) {
@@ -388,11 +388,10 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
             if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0
                     || haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
-                throw new RuntimeException("MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED");
+                throw new IllegalArgumentException("Unsupported marketplace compatibility version");
             }
 
             return haveMinKuraVersion || haveMaxKuraVersion;
-
         } catch (Exception e) {
             return false;
         }

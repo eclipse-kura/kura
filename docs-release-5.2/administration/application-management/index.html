@@ -2763,11 +2763,11 @@ The <strong>Packages</strong> page has, in the top part of the page a section de
 <p class="admonition-title">Warning</p>
 <p>If the installation from the Eclipse Marketplace fails, it can be for the lack of the correct certificates. In this case, import the certificate in the <em>SSLKeystore</em> from the <em>Certificate List</em> tab under the <em>Security</em> section. For more details about the procedure see <a href="../../gateway-configuration/keys-and-certificates/">here</a>.</p>
 <p>If the bundle is an official add-on for Eclipse Kura, the following certificate has to be imported:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-----BEGIN CERTIFICATE-----
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>MIIHxTCCBq2gAwIBAgIQC3JNX7K6UFPge2A+oFnmdjANBgkqhkiG9w0BAQsFADBP
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-----BEGIN CERTIFICATE-----
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>MIIHxzCCBq+gAwIBAgIQCCxCSNb4iszmNPNCflUcGTANBgkqhkiG9w0BAQsFADBP
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMSkwJwYDVQQDEyBE
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>aWdpQ2VydCBUTFMgUlNBIFNIQTI1NiAyMDIwIENBMTAeFw0yMjExMDkwMDAwMDBa
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Fw0yMzEyMTAyMzU5NTlaMG8xCzAJBgNVBAYTAkNBMRAwDgYDVQQIEwdPbnRhcmlv
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>aWdpQ2VydCBUTFMgUlNBIFNIQTI1NiAyMDIwIENBMTAeFw0yMzA5MTEwMDAwMDBa
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Fw0yNDEwMTEyMzU5NTlaMG8xCzAJBgNVBAYTAkNBMRAwDgYDVQQIEwdPbnRhcmlv
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>MQ8wDQYDVQQHEwZPdHRhd2ExJTAjBgNVBAoTHEVjbGlwc2Uub3JnIEZvdW5kYXRp
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>b24sIEluYy4xFjAUBgNVBAMMDSouZWNsaXBzZS5vcmcwggIiMA0GCSqGSIb3DQEB
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>AQUAA4ICDwAwggIKAoICAQC5hXH2cQoOQlXs5cQ5itZ1Dzct9R+bqr2HaF+imlgo
@@ -2781,45 +2781,46 @@ The <strong>Packages</strong> page has, in the top part of the page a section de
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>IkqsgUfq69M4KvHrdi4nGEOfdBHxjos9ul1AsJR57hrhIchsESthUK04e7d2LYOB
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>hHAr0uJNdwFsFD2EBR25ogN83bZ8NaDrrdK2P6sV+hWWK+MY1qRuRub7/fYuR4AU
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>82toms9p1usjuyMmuIGEpLwk7jZe6XITcbXQEXDA8JKSZrZ/mOA4yTfIGR/gXXB7
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>wQIDAQABo4IDezCCA3cwHwYDVR0jBBgwFoAUt2ui6qiqhIx56rTaD5iyxZV2ufQw
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>wQIDAQABo4IDfTCCA3kwHwYDVR0jBBgwFoAUt2ui6qiqhIx56rTaD5iyxZV2ufQw
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>HQYDVR0OBBYEFO8gL5LNWmSgCqbujR1qH0bUfrIrMCUGA1UdEQQeMByCDSouZWNs
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>aXBzZS5vcmeCC2VjbGlwc2Uub3JnMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAU
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>BggrBgEFBQcDAQYIKwYBBQUHAwIwgY8GA1UdHwSBhzCBhDBAoD6gPIY6aHR0cDov
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>L2NybDMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0VExTUlNBU0hBMjU2MjAyMENBMS00
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>LmNybDBAoD6gPIY6aHR0cDovL2NybDQuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0VExT
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>UlNBU0hBMjU2MjAyMENBMS00LmNybDA+BgNVHSAENzA1MDMGBmeBDAECAjApMCcG
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>CCsGAQUFBwIBFhtodHRwOi8vd3d3LmRpZ2ljZXJ0LmNvbS9DUFMwfwYIKwYBBQUH
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>aXBzZS5vcmeCC2VjbGlwc2Uub3JnMD4GA1UdIAQ3MDUwMwYGZ4EMAQICMCkwJwYI
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>KwYBBQUHAgEWG2h0dHA6Ly93d3cuZGlnaWNlcnQuY29tL0NQUzAOBgNVHQ8BAf8E
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>BAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMIGPBgNVHR8EgYcw
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>gYQwQKA+oDyGOmh0dHA6Ly9jcmwzLmRpZ2ljZXJ0LmNvbS9EaWdpQ2VydFRMU1JT
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>QVNIQTI1NjIwMjBDQTEtNC5jcmwwQKA+oDyGOmh0dHA6Ly9jcmw0LmRpZ2ljZXJ0
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>LmNvbS9EaWdpQ2VydFRMU1JTQVNIQTI1NjIwMjBDQTEtNC5jcmwwfwYIKwYBBQUH
 <a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>AQEEczBxMCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2VydC5jb20wSQYI
 <a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>KwYBBQUHMAKGPWh0dHA6Ly9jYWNlcnRzLmRpZ2ljZXJ0LmNvbS9EaWdpQ2VydFRM
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>U1JTQVNIQTI1NjIwMjBDQTEtMS5jcnQwCQYDVR0TBAIwADCCAX8GCisGAQQB1nkC
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>BAIEggFvBIIBawFpAHcA6D7Q2j71BjUy51covIlryQPTy9ERa+zraeF3fW0GvW4A
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>AAGEXT11NQAABAMASDBGAiEAhcCrw89ikyhqDWv+ITPVSIarKOLMkbXVT7meDkj9
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>fAwCIQDhOyDAtgdvBnICfxqD0InTnc7lKxkgeOjqylPdblAt4wB1ALNzdwfhhFD4
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>Y4bWBancEQlKeS2xZwwLh9zwAw55NqWaAAABhF09dR8AAAQDAEYwRAIgOQWh1vJ8
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>luRpIVG/t5BOxVoOXd8Y1TOjqjbQ5KaUmJQCIEC2Hpaid4+qoOx9F3tLXEtbu234
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>hf6SsMwc/PUiBDb9AHcAtz77JN+cTbp18jnFulj0bF38Qs96nzXEnh0JgSXttJkA
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>AAGEXT107wAABAMASDBGAiEA63aWYNorKwqH6TygcjrK3jdljMXf7eZfC+QAHnid
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>W0gCIQCnneMrOFjl5v8eTXqDR8PCuOJTr2+1CzYGYr3cDvuZNjANBgkqhkiG9w0B
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>AQsFAAOCAQEAkqKtfmiiHsJSlENpyEXCxYUbRi3wDFADhBTw+oItGr24r9YNhatp
-<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>5o+yEDZ3la8vYL5IJd4WSUMZKdPsU+zA6TuMWTjJgRO8jn4Pqye5w5q1XVvXZsvk
-<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>zn+2yHnOfNwFh4yuiy1h7gKjCdI3nUkw/YIA2NtT5Ap58iBJa0py2q3woMalSZZl
-<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>mn/ja9/t8kO2nSFBkFe2HZWWUEp4tOvL9ByQz/5PcpYvFTp54GdpYT/+KEK/zYtG
-<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>27xpfZdJ4icIb/HnCAH77fDLHks/qbK1a0ktUBtrfYRkbUN4ESej3MiKqqgpC2z7
-<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>NDsupck3+/l202BzMqgBliCbJmateCFiWw==
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>U1JTQVNIQTI1NjIwMjBDQTEtMS5jcnQwDAYDVR0TAQH/BAIwADCCAX4GCisGAQQB
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>1nkCBAIEggFuBIIBagFoAHYAdv+IPwq2+5VRwmHM9Ye6NLSkzbsp3GhCCp/mZ0xa
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>OnQAAAGKhcgXYgAABAMARzBFAiEApQsk19PxbsLa452EPaPCXe7SAtpbm5RHnrwj
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>yKAjWx0CICli5A3XAGwmg7IEy4lVA5YBt+mhvlegWkXrKt+oc/CoAHUASLDja9qm
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>RzQP5WoC+p0w6xxSActW3SyB2bu/qznYhHMAAAGKhcgXWQAABAMARjBEAiAvx7lc
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>MyKS6bbnsjbzYOLzJbcS2aAjCzQz4mFiuFA59AIgbt+rpE40/RO0JnFyLP9fsbUf
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>pUj16ZYinOLorqDk9r0AdwDatr9rP7W2Ip+bwrtca+hwkXFsu1GEhTS9pD0wSNf7
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>qwAAAYqFyBc3AAAEAwBIMEYCIQDCrdQYGYA7BlsT5gXZmkutN15gDQDjlfJBxIRb
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>Z0FAAgIhAIr0eNFvkpec6VJ5pPrNklFt78XP0NjEOJxjrCFTLKVdMA0GCSqGSIb3
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>DQEBCwUAA4IBAQCvENXlAGP311/gV5rMD2frsK+hlcs/4wjRKUS+nwp3RLTRd3w4
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>cZLHcsw9qCxeniuHsc/Wa6myr0kKdRc4V6movLq9vMdSjT9dDOZWtZgFaadB0+z2
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>A/Jsq1/AFFWqWisF64627j/Wf7RwuasxM0dnkAl3m9Hli5xKPgjbovXiH/dCeMvS
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>MTxD1p3ewIYITzV+1Q5FoFuGyIyuh1Kzo7A41xKPe+XfWHqt+hKL8MWkJ9ACD2b0
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>ZDlD2OaX7K+vI8aWprmwVdpp3deuUoHgBqa1PkHPRmP0bFbamBdB4H6goRX5+DEy
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>cTW2rRm8jFiLm1kf0/iOL7/ddw0yZQAUMthU
 <a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>-----END CERTIFICATE-----
 </code></pre></div>
-that has the following description:
+<p>that has the following description:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Common Name: *.eclipse.org
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Subject Alternative Names: *.eclipse.org, eclipse.org
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Organization: Eclipse.org Foundation, Inc.
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Locality: Ottawa
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>State: Ontario
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>Country: CA
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Valid From: November 8, 2022
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>Valid To: December 10, 2023
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>Issuer: DigiCert TLS RSA SHA256 2020 CA1, DigiCert Inc
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>Serial Number: 0b724d5fb2ba5053e07b603ea059e676
-</code></pre></div></p>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>Valid From: September 10, 2023
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>Valid To: October 11, 2024
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>Issuer: DigiCert TLS RSA SHA256 2020 CA1, DigiCert Inc Write review of DigiCert
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>Key Size: 4096 bit
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>Serial Number: 082c4248d6f88acce634f3427e551c19
+</code></pre></div>
 <p>If the bundle is not an official one and it is not hosted by Eclipse, retrieve the certificate with this command:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>openssl s_client -showcerts -connect &lt;download_link&gt;:443
 </code></pre></div></p>

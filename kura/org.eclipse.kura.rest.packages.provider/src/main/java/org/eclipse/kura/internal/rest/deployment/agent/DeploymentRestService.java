@@ -14,11 +14,19 @@ package org.eclipse.kura.internal.rest.deployment.agent;
 
 import static org.eclipse.kura.rest.deployment.agent.api.Validable.validate;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,16 +37,25 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/deploy/v2")
 public class DeploymentRestService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeploymentRestService.class);
+
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
     private static final String KURA_PERMISSION_REST_DEPLOY_ROLE = "kura.permission.rest.deploy";
     private static final String ERROR_INSTALLING_PACKAGE = "Error installing deployment package: ";
@@ -109,6 +126,72 @@ public class DeploymentRestService {
         } catch (Exception e) {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + url).build());
+        }
+
+        return DeploymentRequestStatus.REQUEST_RECEIVED;
+    }
+
+    /**
+     * POST method.
+     *
+     * Installs the deployment package uploaded through HTTP POST method (multipart/form-data).
+     *
+     * @param uploadedInputStread
+     * @param fileDetails
+     * @return a {@link DeploymentRequestStatus} object that represents the status
+     *         of the installation request
+     */
+    @POST
+    @RolesAllowed("deploy")
+    @Path("/_upload")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public DeploymentRequestStatus installUploadedDeploymentPackage(
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetails) {
+
+        final String uploadedFileName = fileDetails.getFileName();
+        final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
+                + ".dp";
+
+        try {
+            Files.deleteIfExists(Paths.get(uploadedFileLocation));
+        } catch (IOException e) {
+            logger.warn("Cannot delete file: {}", uploadedFileLocation);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        }
+
+        File file = new File(uploadedFileLocation);
+        try {
+            if (!file.createNewFile()) {
+                throw new IOException("File " + uploadedFileLocation + " was not created");
+            }
+            file.deleteOnExit();
+        } catch (IOException e) {
+            logger.warn("Cannot create file: {}, caused by", file, e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        }
+
+        try {
+            FileOutputStream os = new FileOutputStream(file);
+            IOUtils.copy(uploadedInputStream, os);
+            os.close();
+        } catch (IOException e) {
+            logger.warn("Error writing file to : {}, caused by", file.getAbsolutePath(), e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
+        }
+        logger.info("Deployment package \"{}\" uploaded to: {}", uploadedFileName, file.getAbsolutePath());
+
+        try {
+            String fileUrl = file.toURI().toURL().toString();
+            this.deploymentAgentService.installDeploymentPackageAsync(fileUrl);
+        } catch (Exception e) {
+            logger.warn("Cannot install deployment package : {}, caused by", uploadedFileName, e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity(ERROR_INSTALLING_PACKAGE + uploadedFileName).build());
         }
 
         return DeploymentRequestStatus.REQUEST_RECEIVED;

@@ -187,7 +187,7 @@ public class DhcpConfigTest {
         assertTrue(s.contains("interface testinterface"));
         assertTrue(s.contains("pidfile /var/run/udhcpd-testinterface.pid"));
         assertTrue(s.contains("max_leases 5"));
-        assertTrue(s.contains("auto_time 0"));
+        assertTrue(s.contains("auto_time 30"));
         assertTrue(s.contains("decline_time 900"));
         assertTrue(s.contains("conflict_time 900"));
         assertTrue(s.contains("offer_time 900"));

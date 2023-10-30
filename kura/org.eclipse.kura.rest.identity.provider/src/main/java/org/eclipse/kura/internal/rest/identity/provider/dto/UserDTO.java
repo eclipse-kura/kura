@@ -12,13 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.dto;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class UserDTO {
 
     private String userName;
-    private boolean passwordAuthEnabled;
-    private boolean passwordChangeNeeded;
+    private Boolean passwordAuthEnabled;
+    private Boolean passwordChangeNeeded;
     private Set<String> permissions;
     private String password;
 
@@ -51,16 +52,16 @@ public class UserDTO {
         this.userName = userName;
     }
 
-    public boolean isPasswordAuthEnabled() {
-        return passwordAuthEnabled;
+    public Optional<Boolean> isPasswordAuthEnabled() {
+        return Optional.ofNullable(passwordAuthEnabled);
     }
 
     public void setPasswordAuthEnabled(boolean passwordAuthEnabled) {
         this.passwordAuthEnabled = passwordAuthEnabled;
     }
 
-    public boolean isPasswordChangeNeeded() {
-        return passwordChangeNeeded;
+    public Optional<Boolean> isPasswordChangeNeeded() {
+        return Optional.ofNullable(passwordChangeNeeded);
     }
 
     public void setPasswordChangeNeeded(boolean passwordChangeNeeded) {

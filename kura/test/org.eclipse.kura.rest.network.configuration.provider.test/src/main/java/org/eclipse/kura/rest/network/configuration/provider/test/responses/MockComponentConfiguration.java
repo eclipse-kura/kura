@@ -34,7 +34,6 @@ public class MockComponentConfiguration {
             public Map<String, Object> getConfigurationProperties() {
                 return Collections.emptyMap();
             }
-
         };
     }
 

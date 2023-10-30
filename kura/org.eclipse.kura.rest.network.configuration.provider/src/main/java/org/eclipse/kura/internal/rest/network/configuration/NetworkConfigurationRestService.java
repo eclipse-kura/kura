@@ -50,18 +50,12 @@ import org.slf4j.LoggerFactory;
 public class NetworkConfigurationRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationRestService.class);
-
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.network.configuration";
-
-    private static final String NETWORK_CONF_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
-    private static final String IP4_FIREWALL_CONF_SERVICE_PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
-    private static final String IP6_FIREWALL_CONF_SERVICE_PID = "org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6";
-
-    private static final List<String> NETWORK_CONFIGURATION_PIDS = Arrays.asList(NETWORK_CONF_SERVICE_PID,
-            IP4_FIREWALL_CONF_SERVICE_PID, IP6_FIREWALL_CONF_SERVICE_PID);
-
+    private static final List<String> NETWORK_CONFIGURATION_PIDS = Arrays.asList(
+            "org.eclipse.kura.net.admin.NetworkConfigurationService",
+            "org.eclipse.kura.net.admin.FirewallConfigurationService",
+            "org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6");
     private static final String SUBTASK_SNAPSHOT_TAG = "snapshot";
-
     private ConfigurationService configurationService;
     private CryptoService cryptoService;
 
@@ -91,7 +85,6 @@ public class NetworkConfigurationRestService {
     @Path("/configurableComponents")
     @Produces(MediaType.APPLICATION_JSON)
     public PidSet listNetworkConfigurableComponentsPids() {
-
         Set<String> pids = this.configurationService.getConfigurableComponentPids().stream()
                 .filter(this::isNetworkConfigurationPid).collect(Collectors.toSet());
 
@@ -114,20 +107,15 @@ public class NetworkConfigurationRestService {
     @Path("/configurableComponents/configurations")
     @Produces(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listNetworkConfiguration() {
-
         final List<ComponentConfiguration> ccs = new ArrayList<>();
-
         try {
-            ccs.add(this.configurationService.getComponentConfiguration(NETWORK_CONF_SERVICE_PID));
-            ccs.add(this.configurationService.getComponentConfiguration(IP4_FIREWALL_CONF_SERVICE_PID));
-            ccs.add(this.configurationService.getComponentConfiguration(IP6_FIREWALL_CONF_SERVICE_PID));
-
+            for (String config : NETWORK_CONFIGURATION_PIDS) {
+                ccs.add(this.configurationService.getComponentConfiguration(config));
+            }
         } catch (final Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-
         return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false).replacePasswordsWithPlaceholder();
-
     }
 
     /**
@@ -149,9 +137,7 @@ public class NetworkConfigurationRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listNetworkComponentConfigurations(final PidSet pids) {
         pids.validate();
-
         final List<ComponentConfiguration> networkConfigurations = new ArrayList<>();
-
         pids.getPids().forEach(pid -> {
             try {
                 ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
@@ -162,7 +148,6 @@ public class NetworkConfigurationRestService {
                 throw DefaultExceptionHandler.toWebApplicationException(ex);
             }
         });
-
         return DTOUtil.toComponentConfigurationList(networkConfigurations, this.cryptoService, false)
                 .replacePasswordsWithPlaceholder();
     }
@@ -184,21 +169,16 @@ public class NetworkConfigurationRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList listDefaultNetworkComponentConfiguration(final PidSet pids) {
         pids.validate();
-
         final List<ComponentConfigurationDTO> requestResult = new ArrayList<>();
-
         for (final String pid : pids.getPids()) {
-
             try {
                 final ComponentConfiguration componentConfiguration = this.configurationService
                         .getDefaultComponentConfiguration(pid);
-
                 if (!isNetworkConfigurationPid(pid) || componentConfiguration == null
                         || componentConfiguration.getDefinition() == null) {
                     logger.warn("cannot find default network configuration for {}", pid);
                     continue;
                 }
-
                 requestResult
                         .add(DTOUtil.toComponentConfigurationDTO(componentConfiguration, this.cryptoService, false));
             } catch (final Exception ex) {
@@ -222,13 +202,9 @@ public class NetworkConfigurationRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateNetworkComponentConfigurations(UpdateComponentConfigurationRequest request) {
         request.validate();
-
         final FailureHandler failureHandler = new FailureHandler();
-
         for (ComponentConfigurationDTO componentConfig : request.getComponentConfigurations()) {
-
             if (isNetworkConfigurationPid(componentConfig.getPid())) {
-
                 failureHandler.runFallibleSubtask("update:" + componentConfig.getPid(), () -> {
                     final Map<String, Object> configurationProperties = DTOUtil
                             .dtosToConfigurationProperties(componentConfig.getProperties());
@@ -237,11 +213,9 @@ public class NetworkConfigurationRestService {
                 });
             }
         }
-
         if (request.isTakeSnapshot()) {
             failureHandler.runFallibleSubtask(SUBTASK_SNAPSHOT_TAG, () -> this.configurationService.snapshot());
         }
-
         failureHandler.checkStatus();
         return Response.ok().build();
     }
@@ -255,5 +229,4 @@ public class NetworkConfigurationRestService {
         }
         return result;
     }
-
 }

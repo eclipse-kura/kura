@@ -161,7 +161,6 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
         pids.add(IP6_FIREWALL_CONF_SERVICE_PID);
         pids.add(NETWORK_CONF_SERVICE_PID);
         pids.add(IP4_FIREWALL_CONF_SERVICE_PID);
-
         when(configurationService.getConfigurableComponentPids()).thenReturn(pids);
     }
 
@@ -195,10 +194,8 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
-
     }
 
     /*
@@ -216,51 +213,40 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
     @BeforeClass
     public static void setUp() throws Exception {
         WireTestUtil.trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-
         final ConfigurationAdmin configurationAdmin = WireTestUtil
                 .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-
         final Configuration config = configurationAdmin.getConfiguration(
                 "org.eclipse.kura.internal.rest.network.configuration.NetworkConfigurationRestService", "?");
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("ConfigurationService.target", "(kura.service.pid=mockConfigurationService)");
-
         config.update(properties);
-
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockConfigurationService");
-
         FrameworkUtil.getBundle(NetworkConfigurationRestServiceTest.class).getBundleContext()
                 .registerService(ConfigurationService.class, configurationService, configurationServiceProperties);
-
     }
 
     @SuppressWarnings("unchecked")
     private void givenIdentity(final String username, final Optional<String> password, final List<String> roles) {
         final UserAdmin userAdmin;
-
         try {
             userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail("failed to track UserAdmin");
             return;
         }
-
         final User user = getRoleOrCreateOne(userAdmin, "kura.user." + username, User.class);
-
         if (password.isPresent()) {
             try {
                 final CryptoService cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty())
                         .get(30, TimeUnit.SECONDS);
 
                 user.getCredentials().put("kura.password", cryptoService.sha256Hash(password.get()));
-
             } catch (Exception e) {
                 fail("failed to compute password hash");
             }
         }
-
         for (final String role : roles) {
             getRoleOrCreateOne(userAdmin, "kura.permission." + role, Group.class).addMember(user);
         }
@@ -272,7 +258,6 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
 
     @SuppressWarnings("unchecked")
     private <S extends Role> S getRoleOrCreateOne(final UserAdmin userAdmin, final String name, final Class<S> classz) {
-
         final Role role = userAdmin.getRole(name);
         if (classz.isInstance(role)) {
             return (S) role;
@@ -288,5 +273,4 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
         }
         return (S) userAdmin.createRole(name, type);
     }
-
 }

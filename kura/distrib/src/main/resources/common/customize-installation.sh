@@ -77,6 +77,6 @@ if [ ${BOARD} = "generic-device" ]; then
             sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/$installer_name"
         done
     else
-        echo "Leaving kura ram as the default set in installer profile"
+        echo "System RAM is less than 1GB. Leaving assigned RAM as the default for the Kura profile."
     fi
 fi

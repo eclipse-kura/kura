@@ -41,6 +41,7 @@ import org.osgi.service.useradmin.UserAdmin;
 @SuppressWarnings("restriction")
 public class IdentityService {
 
+    private static final String IDENTITY = "Identity ";
     private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
     private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
@@ -71,7 +72,7 @@ public class IdentityService {
             this.userAdminHelper.createUser(user.getUserName());
             updateUser(user);
         } else {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST, "user " + user.getUserName() + " already exists");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, IDENTITY + user.getUserName() + " already exists");
         }
     }
 
@@ -86,7 +87,7 @@ public class IdentityService {
             fillPermissions(Collections.singletonMap(user.get().getName(), userFound));
             return userFound;
         } else {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userName + " not found");
+            throw new KuraException(KuraErrorCode.NOT_FOUND, IDENTITY + userName + " not found");
         }
     }
 
@@ -182,7 +183,7 @@ public class IdentityService {
 
             updatePasswordOptions(userDTOToUpdate, user.get().getCredentials(), user.get().getProperties());
         } else {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, "user " + userDTOToUpdate.getUserName() + " not found");
+            throw new KuraException(KuraErrorCode.NOT_FOUND, IDENTITY + userDTOToUpdate.getUserName() + " not found");
         }
 
     }

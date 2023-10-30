@@ -60,7 +60,7 @@ public class NetworkConfigurationRestService {
     private static final List<String> NETWORK_CONFIGURATION_PIDS = Arrays.asList(NETWORK_CONF_SERVICE_PID,
             IP4_FIREWALL_CONF_SERVICE_PID, IP6_FIREWALL_CONF_SERVICE_PID);
 
-    private static final String SNAPSHOT_SUBTASK_ID = "snapshot";
+    private static final String SUBTASK_SNAPSHOT_TAG = "snapshot";
 
     private ConfigurationService configurationService;
     private CryptoService cryptoService;
@@ -150,28 +150,28 @@ public class NetworkConfigurationRestService {
     public ComponentConfigurationList listNetworkComponentConfigurations(final PidSet pids) {
         pids.validate();
 
-        final List<ComponentConfiguration> configs = new ArrayList<>();
+        final List<ComponentConfiguration> networkConfigurations = new ArrayList<>();
 
         pids.getPids().forEach(pid -> {
             try {
                 ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
                 if (!isNull(config) && isNetworkConfigurationPid(pid)) {
-                    configs.add(config);
+                    networkConfigurations.add(config);
                 }
-            } catch (Exception e) {
-                throw DefaultExceptionHandler.toWebApplicationException(e);
+            } catch (Exception ex) {
+                throw DefaultExceptionHandler.toWebApplicationException(ex);
             }
         });
 
-        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false)
+        return DTOUtil.toComponentConfigurationList(networkConfigurations, this.cryptoService, false)
                 .replacePasswordsWithPlaceholder();
     }
 
     /**
      * POST method.
      *
-     * Provides the default network Component Configuration for the component identified by
-     * the specified PID
+     * This method provides the default network Component Configuration for the component identified by
+     * the specified PID in the body request
      *
      * @param componentPid
      * @return The default {@link ComponentConfiguration} or a null object if the
@@ -185,30 +185,33 @@ public class NetworkConfigurationRestService {
     public ComponentConfigurationList listDefaultNetworkComponentConfiguration(final PidSet pids) {
         pids.validate();
 
-        final List<ComponentConfigurationDTO> result = new ArrayList<>();
+        final List<ComponentConfigurationDTO> requestResult = new ArrayList<>();
 
         for (final String pid : pids.getPids()) {
-            try {
-                final ComponentConfiguration cc = this.configurationService.getDefaultComponentConfiguration(pid);
 
-                if (!isNetworkConfigurationPid(pid) || cc == null || cc.getDefinition() == null) {
-                    logger.warn("cannot find default configuration for {}", pid);
+            try {
+                final ComponentConfiguration componentConfiguration = this.configurationService
+                        .getDefaultComponentConfiguration(pid);
+
+                if (!isNetworkConfigurationPid(pid) || componentConfiguration == null
+                        || componentConfiguration.getDefinition() == null) {
+                    logger.warn("cannot find default network configuration for {}", pid);
                     continue;
                 }
 
-                result.add(DTOUtil.toComponentConfigurationDTO(cc, this.cryptoService, false));
-            } catch (final Exception e) {
-                logger.warn("failed to get default configuration for {}", pid, e);
+                requestResult
+                        .add(DTOUtil.toComponentConfigurationDTO(componentConfiguration, this.cryptoService, false));
+            } catch (final Exception ex) {
+                logger.warn("failed to get default configuration for {}", pid, ex);
             }
         }
-
-        return new ComponentConfigurationList(result);
+        return new ComponentConfigurationList(requestResult);
     }
 
     /**
      * POST method.
      *
-     * Allows to update the configuration of multiple network configurable components
+     * This method let the user update the configuration of multiple network configurable components
      *
      * @param request
      */
@@ -217,27 +220,29 @@ public class NetworkConfigurationRestService {
     @Path("/configurableComponents/configurations/_update")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateComponentConfigurations(UpdateComponentConfigurationRequest request) {
+    public Response updateNetworkComponentConfigurations(UpdateComponentConfigurationRequest request) {
         request.validate();
 
-        final FailureHandler handler = new FailureHandler();
+        final FailureHandler failureHandler = new FailureHandler();
 
-        for (ComponentConfigurationDTO ccr : request.getComponentConfigurations()) {
+        for (ComponentConfigurationDTO componentConfig : request.getComponentConfigurations()) {
 
-            if (isNetworkConfigurationPid(ccr.getPid())) {
-                handler.runFallibleSubtask("update:" + ccr.getPid(), () -> {
+            if (isNetworkConfigurationPid(componentConfig.getPid())) {
+
+                failureHandler.runFallibleSubtask("update:" + componentConfig.getPid(), () -> {
                     final Map<String, Object> configurationProperties = DTOUtil
-                            .dtosToConfigurationProperties(ccr.getProperties());
-                    this.configurationService.updateConfiguration(ccr.getPid(), configurationProperties, false);
+                            .dtosToConfigurationProperties(componentConfig.getProperties());
+                    this.configurationService.updateConfiguration(componentConfig.getPid(), configurationProperties,
+                            false);
                 });
             }
         }
 
         if (request.isTakeSnapshot()) {
-            handler.runFallibleSubtask(SNAPSHOT_SUBTASK_ID, () -> this.configurationService.snapshot());
+            failureHandler.runFallibleSubtask(SUBTASK_SNAPSHOT_TAG, () -> this.configurationService.snapshot());
         }
 
-        handler.checkStatus();
+        failureHandler.checkStatus();
         return Response.ok().build();
     }
 

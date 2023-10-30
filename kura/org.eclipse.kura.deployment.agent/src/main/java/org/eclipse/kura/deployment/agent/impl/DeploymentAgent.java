@@ -269,7 +269,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url) {
         URL mpUrl = null;
         HttpsURLConnection connection = null;
-        MarketplacePackageDescriptorBuilder descriptorBuilder;
+        MarketplacePackageDescriptorBuilder descriptorBuilder = MarketplacePackageDescriptor.builder();
 
         if (!isEclipseMarketplaceUrl(url)) {
             throw new RuntimeException("Invalid URL");
@@ -292,8 +292,6 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(connection.getInputStream());
-
-            descriptorBuilder = MarketplacePackageDescriptor.builder();
 
             final Node updateUrl = getFirstNode(doc, "updateurl");
             if (updateUrl == null) {

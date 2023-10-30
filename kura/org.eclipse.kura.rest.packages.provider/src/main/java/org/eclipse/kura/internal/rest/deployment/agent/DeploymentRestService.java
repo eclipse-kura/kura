@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -98,6 +99,28 @@ public class DeploymentRestService {
                 dp -> deploymentPackageInfos.add(new DeploymentPackageInfo(dp.getName(), dp.getVersion().toString())));
 
         return deploymentPackageInfos;
+    }
+
+    /**
+     * TODO
+     */
+    @POST
+    @RolesAllowed("deploy")
+    @Path("/_packageDescriptor")
+    @Produces(MediaType.APPLICATION_JSON)
+    public DeploymentRequestStatus getMarketplacePackageDescriptor(InstallRequest installRequest) {
+        validate(installRequest, BAD_REQUEST_MESSAGE);
+        String url = installRequest.getUrl();
+        try {
+            logger.info("Checking package descriptor for {}", url);
+            MarketplacePackageDescriptor descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
+            logger.info(descriptor.toString());
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN).entity("Error checking package descriptor for " + url).build());
+        }
+
+        return DeploymentRequestStatus.REQUEST_RECEIVED;
     }
 
     /**

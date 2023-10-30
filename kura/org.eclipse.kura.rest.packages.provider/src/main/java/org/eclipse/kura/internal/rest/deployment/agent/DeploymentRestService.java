@@ -108,19 +108,20 @@ public class DeploymentRestService {
     @RolesAllowed("deploy")
     @Path("/_packageDescriptor")
     @Produces(MediaType.APPLICATION_JSON)
-    public DeploymentRequestStatus getMarketplacePackageDescriptor(InstallRequest installRequest) {
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(InstallRequest installRequest) {
         validate(installRequest, BAD_REQUEST_MESSAGE);
         String url = installRequest.getUrl();
+        MarketplacePackageDescriptor descriptor;
         try {
             logger.info("Checking package descriptor for {}", url);
-            MarketplacePackageDescriptor descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
+            descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
             logger.info(descriptor.toString());
         } catch (Exception e) {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .type(MediaType.TEXT_PLAIN).entity("Error checking package descriptor for " + url).build());
         }
 
-        return DeploymentRequestStatus.REQUEST_RECEIVED;
+        return descriptor;
     }
 
     /**

@@ -99,6 +99,16 @@ public interface DeploymentAgentService {
      */
     public boolean isInstallingDeploymentPackage(String url);
 
+
+    /**
+     * TODO
+     * 
+     * @param url
+     *            The URL of the deployment package descriptor
+     * @return TODO
+     */
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url);
+
     /**
      * Asks if the uninstallation of a deployment package with the given symbolic name is pending.
      * 

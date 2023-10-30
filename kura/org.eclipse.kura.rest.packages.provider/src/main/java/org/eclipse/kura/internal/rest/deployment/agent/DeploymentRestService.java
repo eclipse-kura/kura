@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
@@ -33,6 +34,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -104,18 +106,21 @@ public class DeploymentRestService {
     /**
      * TODO
      */
-    @POST
+    @GET
     @RolesAllowed("deploy")
     @Path("/_packageDescriptor")
     @Produces(MediaType.APPLICATION_JSON)
-    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(InstallRequest installRequest) {
-        validate(installRequest, BAD_REQUEST_MESSAGE);
-        String url = installRequest.getUrl();
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(@QueryParam("url") String url) {
         MarketplacePackageDescriptor descriptor;
+
+        if (Objects.isNull(url)) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
+                    .entity("Missing url parameter").build());
+        }
+
         try {
             logger.info("Checking package descriptor for {}", url);
             descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
-            logger.info(descriptor.toString());
         } catch (Exception e) {
             logger.warn("Error checking package descriptor for {}. Caused by ", url, e);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)

@@ -926,6 +926,7 @@
         <module>org.eclipse.kura.core.keystore.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
+        <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.command.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
         <module>org.eclipse.kura.rest.packages.provider.test</module>

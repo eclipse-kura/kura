@@ -15,11 +15,14 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -79,6 +82,8 @@ public class CloudConnectionRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/cloudEntries")
+    @Produces(MediaType.APPLICATION_JSON)
     public CloudEntriesDTO findCloudEntries() {
         try {
             logger.debug(DEBUG_MESSSAGE, "findCloudEntries");
@@ -90,10 +95,14 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/stackConfigurations/byFactoryPid")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public List<ConfigComponentDTO> getStackConfigurationsByFactory(final String factoryPid,
             final String cloudServicePid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "getStackConfigurationsByFactory");
+            return this.cloudConnectionService.getStackConfigurationsByFactory(factoryPid, cloudServicePid);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -101,19 +110,13 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/suggestedCloudServicePid/byFactoryPid")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public String findSuggestedCloudServicePid(String factoryPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "findSuggestedCloudServicePid");
-        } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
-        }
-    }
-
-    @GET
-    @RolesAllowed(REST_ROLE_NAME)
-    public String findCloudServicePidRegex(String factoryPid) {
-        try {
-            logger.debug(DEBUG_MESSSAGE, "findCloudServicePidRegex");
+            return this.cloudConnectionService.findSuggestedCloudServicePid(factoryPid);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -121,6 +124,22 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/cloudServicePidRegex")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String findCloudServicePidRegex(String factoryPid) {
+        try {
+            logger.debug(DEBUG_MESSSAGE, "findCloudServicePidRegex");
+            return null;
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/cloudService")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void createCloudServiceFromFactory(String factoryPid, String cloudServicePid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "createCloudServiceFromFactory");
@@ -131,6 +150,8 @@ public class CloudConnectionRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/cloudService")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void deleteCloudServiceFromFactory(String factoryPid, String cloudServicePid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "deleteCloudServiceFromFactory");
@@ -141,9 +162,12 @@ public class CloudConnectionRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/cloudComponentFactories")
+    @Produces(MediaType.APPLICATION_JSON)
     public CloudComponentFactoriesDTO getCloudComponentFactories() {
         try {
             logger.debug(DEBUG_MESSSAGE, "getCloudComponentFactories");
+            return null;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -151,6 +175,8 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/pubSubInstance")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void createPubSubInstance(String pid, String factoryPid, String cloudConnectionPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "createPubSubInstance");
@@ -161,6 +187,8 @@ public class CloudConnectionRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/pubSubInstance")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void deletePubSubInstance(String pid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "deletePubSubInstance");
@@ -171,9 +199,11 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/pubSubInstanceConfiguration")
     public ConfigComponentDTO getPubSubConfiguration(String pid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "getPubSubConfiguration");
+            return null;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -191,6 +221,8 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/dataService/connect")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void connectDataService(String connectionId) {
         try {
             logger.debug(DEBUG_MESSSAGE, "connectDataService");
@@ -201,6 +233,8 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/dataService/disconnect")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void disconnectDataService(String connectionId) {
         try {
             logger.debug(DEBUG_MESSSAGE, "disconnectDataService");
@@ -214,6 +248,7 @@ public class CloudConnectionRestService {
     public boolean isConnected(String connectionId) {
         try {
             logger.debug(DEBUG_MESSSAGE, "isConnected");
+            return false;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

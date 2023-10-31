@@ -17,13 +17,21 @@ import java.util.List;
 
 public class ConfigComponentDTO {
 
-    private List<ConfigParameterDTO> parameters;
+    private List<ConfigParameterDTO> parameters = new ArrayList<>();
 
     private String componentDescription;
     private String componentIcon;
     private String componentId;
     private String componentName;
     private String factoryPid;
+    private String driverPid;
+
+    private boolean factoryComponent;
+    private boolean wireComponent;
+    private boolean driver;
+
+    public ConfigComponentDTO() {
+    }
 
     public ConfigComponentDTO(String componentDescription, String componentIcon, String componentId,
             String componentName, String factoryPid, List<ConfigParameterDTO> parameters) {
@@ -41,27 +49,83 @@ public class ConfigComponentDTO {
     }
 
     public List<ConfigParameterDTO> getParameters() {
-        return this.parameters;
+        return parameters;
+    }
+
+    public void setParameters(List<ConfigParameterDTO> parameters) {
+        this.parameters = parameters;
     }
 
     public String getComponentDescription() {
-        return this.componentDescription;
+        return componentDescription;
+    }
+
+    public void setComponentDescription(String componentDescription) {
+        this.componentDescription = componentDescription;
     }
 
     public String getComponentIcon() {
-        return this.componentIcon;
+        return componentIcon;
+    }
+
+    public void setComponentIcon(String componentIcon) {
+        this.componentIcon = componentIcon;
     }
 
     public String getComponentId() {
-        return this.componentId;
+        return componentId;
+    }
+
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
     }
 
     public String getComponentName() {
-        return this.componentName;
+        return componentName;
     }
 
-    public String getFactoryId() {
-        return this.factoryPid;
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
+    }
+
+    public String getFactoryPid() {
+        return factoryPid;
+    }
+
+    public void setFactoryPid(String factoryPid) {
+        this.factoryPid = factoryPid;
+    }
+
+    public boolean isFactoryComponent() {
+        return factoryComponent;
+    }
+
+    public void setFactoryComponent(boolean factoryComponent) {
+        this.factoryComponent = factoryComponent;
+    }
+
+    public boolean isWireComponent() {
+        return wireComponent;
+    }
+
+    public void setWireComponent(boolean wireComponent) {
+        this.wireComponent = wireComponent;
+    }
+
+    public boolean isDriver() {
+        return driver;
+    }
+
+    public void setDriver(boolean driver) {
+        this.driver = driver;
+    }
+
+    public String getDriverPid() {
+        return driverPid;
+    }
+
+    public void setDriverPid(String driverPid) {
+        this.driverPid = driverPid;
     }
 
 }

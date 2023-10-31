@@ -16,20 +16,22 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService">
     <implementation class="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
 
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
+    <property name="kura.service.pid" 
+              type="String" 
+              value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService" />
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
                unbind="unbindRequestHandlerRegistry"
                cardinality="0..n"
                name="RequestHandlerRegistry"
-               policy="dynamic"/>
+               policy="dynamic" />
 
     <reference interface="org.osgi.service.useradmin.UserAdmin"
                bind="bindUserAdmin"
                cardinality="0..1"
                name="UserAdmin"
-               policy="static"/>
+               policy="static" />
                
     <reference interface="org.eclipse.kura.configuration.ConfigurationService" 
                bind="bindConfigurationService" 
@@ -38,11 +40,11 @@
                policy="static" />
 
     <service>
-        <provide interface="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
+        <provide interface="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService" />
     </service>
 
     <property name="service.pid"
               type="String"
-              value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService"/>
+              value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService" />
 
 </scr:component>

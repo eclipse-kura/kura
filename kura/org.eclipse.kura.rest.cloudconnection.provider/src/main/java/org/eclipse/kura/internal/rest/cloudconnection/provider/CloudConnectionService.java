@@ -16,11 +16,13 @@ import static java.lang.String.format;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -35,10 +37,16 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.metatype.AD;
+import org.eclipse.kura.configuration.metatype.Icon;
+import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudConnectionEntryDTO;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudEntryDTO;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudPubSubEntryDTO;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConfigComponentDTO;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConfigParameterDTO;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.util.PidUtils;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.util.service.ServiceUtil.ServiceConsumer;
 import org.eclipse.kura.util.service.ServiceUtil.ServiceReferenceConsumer;
@@ -53,6 +61,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class CloudConnectionService {
 
     private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(|(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory))";
+    private static final String DRIVER_PID = "driver.pid";
+    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
+
+    private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
 
     private BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
@@ -104,7 +116,7 @@ public class CloudConnectionService {
             }
         });
 
-        return this.findComponentConfigurations(getPidFilter(result.iterator()));
+        return this.findComponentConfigurations(PidUtils.getPidFilter(result.iterator()));
     }
 
     public List<ConfigComponentDTO> findComponentConfigurations(String osgiFilter) throws KuraException {
@@ -113,7 +125,7 @@ public class CloudConnectionService {
             final Filter filter = FrameworkUtil.createFilter(osgiFilter);
             return this.configurationService.getComponentConfigurations(filter) //
                     .stream() //
-                    .map(this::createMetatypeOnlyGwtComponentConfigurationInternal) //
+                    .map(this::createMetatypeOnlyComponentConfigurationInternal) //
                     .filter(Objects::nonNull) //
                     .collect(Collectors.toList());
 
@@ -124,44 +136,66 @@ public class CloudConnectionService {
         }
     }
 
-    private ConfigComponentDTO createMetatypeOnlyGwtComponentConfigurationInternal(ComponentConfiguration config) {
+    public String findSuggestedCloudServicePid(String factoryPid) throws KuraException {
+
+        final AtomicReference<String> result = new AtomicReference<>();
+
+        withAllCloudConnectionFactoryRefs((ref, ctx) -> {
+            final CloudConnectionFactory cloudServiceFactory = wrap(ctx.getService(ref));
+            try {
+                if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
+                    return;
+                }
+                Object propertyObject = ref.getProperty(KURA_UI_CSF_PID_DEFAULT);
+                if (propertyObject != null) {
+                    result.set((String) propertyObject);
+                }
+            } finally {
+                ctx.ungetService(ref);
+            }
+        });
+
+        return result.get();
+    }
+
+    private ConfigComponentDTO createMetatypeOnlyComponentConfigurationInternal(ComponentConfiguration config) {
         ConfigComponentDTO configComponent = null;
 
-        // OCD ocd = config.getDefinition();
-        // if (ocd != null) {
-        //
-        // gwtConfig = new GwtConfigComponent();
-        // gwtConfig.setComponentId(config.getPid());
-        //
-        // Map<String, Object> props = config.getConfigurationProperties();
-        // if (props != null && props.get(DRIVER_PID) != null) {
-        // gwtConfig.set(DRIVER_PID, props.get(DRIVER_PID));
-        // }
-        //
-        // if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
-        // String pid = stripPidPrefix(config.getPid());
-        // gwtConfig.setComponentName(pid);
-        // gwtConfig.setFactoryComponent(true);
-        // gwtConfig.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
-        // } else {
-        // gwtConfig.setComponentName(ocd.getName());
-        // gwtConfig.setFactoryComponent(false);
-        // }
-        //
-        // gwtConfig.setComponentDescription(ocd.getDescription());
-        // if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
-        // Icon icon = ocd.getIcon().get(0);
-        // gwtConfig.setComponentIcon(icon.getResource());
-        // }
-        //
-        // List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        // gwtConfig.setParameters(gwtParams);
-        //
-        // if (config.getConfigurationProperties() != null) {
-        // List<GwtConfigParameter> metatypeProps = getADProperties(config);
-        // gwtParams.addAll(metatypeProps);
-        // }
-        // }
+        OCD ocd = config.getDefinition();
+        if (ocd != null) {
+
+            configComponent = new ConfigComponentDTO();
+            configComponent.setComponentId(config.getPid());
+
+            Map<String, Object> props = config.getConfigurationProperties();
+            if (props != null && props.get(DRIVER_PID) != null) {
+                configComponent.setDriverPid((String) props.get(DRIVER_PID));
+            }
+
+            if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
+                String pid = PidUtils.stripPidPrefix(config.getPid());
+                configComponent.setComponentName(pid);
+                configComponent.setFactoryComponent(true);
+                configComponent.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
+            } else {
+                configComponent.setComponentName(ocd.getName());
+                configComponent.setFactoryComponent(false);
+            }
+
+            configComponent.setComponentDescription(ocd.getDescription());
+            if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
+                Icon icon = ocd.getIcon().get(0);
+                configComponent.setComponentIcon(icon.getResource());
+            }
+
+            List<ConfigParameterDTO> params = new ArrayList<>();
+            configComponent.setParameters(params);
+
+            if (config.getConfigurationProperties() != null) {
+                List<ConfigParameterDTO> metatypeProps = getADProperties(config);
+                params.addAll(metatypeProps);
+            }
+        }
         return configComponent;
     }
 
@@ -281,20 +315,58 @@ public class CloudConnectionService {
 
     }
 
-    public static String getPidFilter(final Iterator<String> pids) {
-        if (!pids.hasNext()) {
-            throw new IllegalArgumentException("pids list must be non empty");
+    private static List<ConfigParameterDTO> getADProperties(ComponentConfiguration config) {
+        List<ConfigParameterDTO> gwtParams = new ArrayList<>();
+        OCD ocd = config.getDefinition();
+        for (AD ad : ocd.getAD()) {
+            ConfigParameterDTO gwtParam = new ConfigParameterDTO();
+            gwtParam.setId(ad.getId());
+            gwtParam.setName(ad.getName());
+            gwtParam.setDescription(ad.getDescription());
+            gwtParam.setType(ConfigParameterType.valueOf(ad.getType().name()));
+            gwtParam.setRequired(ad.isRequired());
+            gwtParam.setCardinality(ad.getCardinality());
+            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
+                Map<String, String> options = new HashMap<>();
+                for (Option option : ad.getOption()) {
+                    options.put(option.getLabel(), option.getValue());
+                }
+                gwtParam.setOptions(options);
+            }
+            gwtParam.setMin(ad.getMin());
+            gwtParam.setMax(ad.getMax());
+
+            // handle the value based on the cardinality of the attribute
+            int cardinality = ad.getCardinality();
+            Object value = config.getConfigurationProperties().get(ad.getId());
+            if (value != null) {
+                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
+                    if (gwtParam.getType().equals(ConfigParameterType.PASSWORD)) {
+                        gwtParam.setValue("Placeholder");
+                    } else {
+                        gwtParam.setValue(String.valueOf(value));
+                    }
+                } else {
+                    // this could be an array value
+                    if (value instanceof Object[]) {
+                        Object[] objValues = (Object[]) value;
+                        List<String> strValues = new ArrayList<>();
+                        for (Object v : objValues) {
+                            if (v != null) {
+                                if (gwtParam.getType().equals(ConfigParameterType.PASSWORD)) {
+                                    strValues.add("Placeholder");
+                                } else {
+                                    strValues.add(String.valueOf(v));
+                                }
+                            }
+                        }
+                        gwtParam.setValues(strValues.toArray(new String[] {}));
+                    }
+                }
+            }
+            gwtParams.add(gwtParam);
         }
-        final StringBuilder builder = new StringBuilder();
-        builder.append("(|");
-        while (pids.hasNext()) {
-            final String pid = pids.next();
-            builder.append("(kura.service.pid=");
-            builder.append(pid);
-            builder.append(")");
-        }
-        builder.append(")");
-        return builder.toString();
+        return gwtParams;
     }
 
 }

@@ -31,70 +31,100 @@ public class ConfigParameterDTO {
     private String value;  // used for fields with single cardinality
     private String[] values; // used for fields with multiple cardinality
 
-    public ConfigParameterDTO(String id, String name, String description, ConfigParameterType type, boolean required,
-            String defaultValue, int cardinality, Map<String, String> options, String min, String max, String value,
-            String[] values) {
-
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.type = type;
-        this.required = required;
-        this.defaultValue = defaultValue;
-        this.cardinality = cardinality;
-        this.options = options;
-        this.min = min;
-        this.max = max;
-        this.value = value;
-        this.values = values;
+    public String getId() {
+        return id;
     }
 
-    public String getId() {
-        return this.id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
-        return this.name;
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public ConfigParameterType getType() {
-        return this.type;
+        return type;
+    }
+
+    public void setType(ConfigParameterType type) {
+        this.type = type;
     }
 
     public boolean isRequired() {
-        return this.required;
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 
     public String getDefaultValue() {
-        return this.defaultValue;
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public int getCardinality() {
-        return this.cardinality;
+        return cardinality;
+    }
+
+    public void setCardinality(int cardinality) {
+        this.cardinality = cardinality;
     }
 
     public Map<String, String> getOptions() {
-        return this.options;
+        return options;
+    }
+
+    public void setOptions(Map<String, String> options) {
+        this.options = options;
     }
 
     public String getMin() {
-        return this.min;
+        return min;
+    }
+
+    public void setMin(String min) {
+        this.min = min;
     }
 
     public String getMax() {
-        return this.max;
+        return max;
+    }
+
+    public void setMax(String max) {
+        this.max = max;
     }
 
     public String getValue() {
-        return this.value;
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String[] getValues() {
-        return this.values;
+        return values;
+    }
+
+    public void setValues(String[] values) {
+        this.values = values;
     }
 
 }

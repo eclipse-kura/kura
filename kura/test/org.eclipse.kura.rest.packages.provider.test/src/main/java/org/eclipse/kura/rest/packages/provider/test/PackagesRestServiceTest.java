@@ -105,6 +105,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "");
 
         thenRequestSucceeds();
+        thenResponseCodeIs(200);
         thenNoExceptionOccurred();
         thenResponseBodyEqualsJson(
                 "[{\"name\":\"testPackage\",\"version\":\"1.0.0\"},{\"name\":\"anotherAwesomePackage\",\"version\":\"4.2.0\"}]");
@@ -213,8 +214,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
                 "/_packageDescriptor?url=https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=69");
 
         thenRequestSucceeds();
+        thenResponseCodeIs(200);
         thenNoExceptionOccurred();
-        // thenResponseCodeIs(200); FAILING
         thenDeploymentAgentServiceIsCalledWithUrl("https://marketplace.eclipse.org/node/69/api/p");
         thenResponseBodyEqualsJson(
                 "{\"nodeId\":\"testNodeId\",\"url\":\"testUrl\",\"dpUrl\":\"testDpUrl2\",\"minKuraVersion\":\"1.1.0\",\"maxKuraVersion\":\"5.3.0\",\"currentKuraVersion\":\"5.4.0\",\"isCompatible\":true}");

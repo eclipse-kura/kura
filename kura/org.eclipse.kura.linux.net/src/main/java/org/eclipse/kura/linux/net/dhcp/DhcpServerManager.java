@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpLinuxTool;
@@ -98,11 +99,11 @@ public class DhcpServerManager {
         return false;
     }
 
-    private void createLeasesFile(String interfaceName) {
+    private void createLeasesFile(String interfaceName) throws KuraIOException {
         try {
             FileUtils.touch(new File(DhcpServerManager.getLeasesFilename(interfaceName)));
         } catch (IOException e) {
-            logger.error("Cannot create DHCP server leases file", e);
+            throw new KuraIOException(e, "Cannot create DHCP server leases file");
         }
     }
 

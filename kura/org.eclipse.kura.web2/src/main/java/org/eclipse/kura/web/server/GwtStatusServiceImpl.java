@@ -271,6 +271,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         String tab = "&nbsp&nbsp&nbsp&nbsp";
 
         GwtNetworkServiceImplFacade gwtNetworkService = new GwtNetworkServiceImplFacade();
+        boolean isNet2 = gwtNetworkService.isNet2();
 
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 
@@ -310,10 +311,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
                         || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
-                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
+                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName() + " - IPv4",
                             gwtNetInterfaceConfig.getStatusEnum().getValue()));
                 } else {
-                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
+                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName() + " - IPv4",
                             currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
                                     + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
                                     + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode));
@@ -361,11 +362,111 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                     + "Interface: " + interfaceName));
                 }
             }
+
+            if (isNet2) {
+                String currentIPv6Address = gwtNetInterfaceConfig.getIpv6Address();
+                String currentIPv6SubnetMask = String.valueOf(gwtNetInterfaceConfig.getIpv6SubnetMask());
+
+                String currentIPv6ConfigMode;
+                String currentIPv6ConfigModeString = gwtNetInterfaceConfig.getIpv6ConfigMode();
+                if (Objects.nonNull(currentIPv6ConfigModeString)) {
+                    if (gwtNetInterfaceConfig.getIpv6ConfigMode().equals("netIPv6MethodAuto")) {
+                        currentIPv6ConfigMode = "Auto";
+                    } else if (currentIPv6ConfigModeString.equals("netIPv6MethodDhcp")) {
+                        currentIPv6ConfigMode = "DHCP";
+                    } else {
+                        currentIPv6ConfigMode = "Manual";
+                    }
+                } else {
+                    currentIPv6ConfigMode = "Manual";
+                }
+
+                String statusIPv6 = gwtNetInterfaceConfig.getIpv6Status();
+
+                if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
+
+                    if (statusIPv6.equals("netIPv6StatusDisabled")
+                            || statusIPv6.equals("netIPv6StatusUnmanaged")
+                            || statusIPv6.equals("netIPv6StatusL2Only")) {
+                        pairs.add(new GwtGroupedNVPair("networkStatusEthernet",
+                                gwtNetInterfaceConfig.getName() + " - IPv6",
+                                convertIPv6Status(statusIPv6)));
+                    } else {
+                        pairs.add(new GwtGroupedNVPair("networkStatusEthernet",
+                                gwtNetInterfaceConfig.getName() + " - IPv6",
+                                currentIPv6Address + nl + tab + SUBNET_MASK + currentIPv6SubnetMask + nl + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
+                                        + currentIPv6ConfigMode));
+                    }
+                } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
+                        && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
+                    String currentWifiMode = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
+                            .getWirelessModeEnum() == GwtWifiWirelessMode.netWifiWirelessModeStation ? "Station Mode"
+                                    : "Access Point";
+                    GwtWifiConfig gwtActiveWifiConfig = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
+                            .getActiveWifiConfig();
+                    String currentWifiSsid = null;
+                    if (gwtActiveWifiConfig != null) {
+                        currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
+                    }
+                    if (statusIPv6.equals("netIPv6StatusDisabled")
+                            || statusIPv6.equals("netIPv6StatusUnmanaged")
+                            || statusIPv6.equals("netIPv6StatusL2Only")) {
+                        pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName() + " - IPv6",
+                                convertIPv6Status(statusIPv6)));
+                    } else {
+                        pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName() + " - IPv6",
+                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
+                                        + currentConfigMode + nl + tab + "Wireless Mode:" + currentWifiMode + nl + tab
+                                        + "SSID: " + currentWifiSsid + nl));
+                    }
+                } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+                    String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
+                    String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
+                    String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
+                    if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
+                        name = name + " (" + interfaceName + ")";
+                    }
+                    if (statusIPv6.equals("netIPv6StatusDisabled")
+                            || statusIPv6.equals("netIPv6StatusUnmanaged")
+                            || statusIPv6.equals("netIPv6StatusL2Only")) {
+                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name + " - IPv6",
+                                convertIPv6Status(statusIPv6)));
+                    } else {
+                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name + " - IPv6",
+                                currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
+                                        + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab
+                                        + "Interface: " + interfaceName));
+                    }
+                }
+            }
         }
 
         networkStatus = pairs;
         lastUpdate = System.currentTimeMillis();
         return networkStatus;
+    }
+
+    private static String convertIPv6Status(String status) {
+        switch (status) {
+            case "netIPv6StatusDisabled":
+                return "Disabled";
+            case "netIPv6StatusUnmanaged":
+                return "Unmanaged";
+            case "netIPv6StatusL2Only":
+                return "L2Only";
+            case "netIPv6StatusEnabledLAN":
+                return "LAN";
+            case "netIPv6StatusEnabledWAN":
+                return "WAN";
+            case "netIPv6StatusUnknown":
+                return "Unknown";
+            default:
+                return "Unknown";
+        }
+
     }
 
     private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {

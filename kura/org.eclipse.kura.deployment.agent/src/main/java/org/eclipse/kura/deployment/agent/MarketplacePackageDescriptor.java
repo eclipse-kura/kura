@@ -92,12 +92,12 @@ public class MarketplacePackageDescriptor implements Serializable {
     // Builder
     public static class MarketplacePackageDescriptorBuilder {
 
-        private String nodeId;
-        private String url;
-        private String dpUrl;
-        private String minKuraVersion;
-        private String maxKuraVersion;
-        private String currentKuraVersion;
+        private String nodeId = "";
+        private String url = "";
+        private String dpUrl = "";
+        private String minKuraVersion = "";
+        private String maxKuraVersion = "";
+        private String currentKuraVersion = "";
         private boolean isCompatible = false;
 
         public MarketplacePackageDescriptorBuilder nodeId(String nodeId) {

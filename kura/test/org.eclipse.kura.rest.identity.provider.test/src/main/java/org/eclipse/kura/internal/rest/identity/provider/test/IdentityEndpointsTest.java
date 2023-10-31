@@ -53,7 +53,7 @@ import com.google.gson.Gson;
 @RunWith(Parameterized.class)
 public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
-    private static final String MQTT_APP_ID = "ID-V1";
+    private static final String MQTT_APP_ID = "IDN-V1";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
@@ -161,7 +161,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnDefinedPermissions() throws KuraException {
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/defined-permissions");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/definedPermissions");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"permissions\": [\"perm1\",\"perm2\"]}");
@@ -171,7 +171,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnPasswordRequirements() throws KuraException {
         givenIdentityService();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/password-requirements");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/passwordRequirements");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE);

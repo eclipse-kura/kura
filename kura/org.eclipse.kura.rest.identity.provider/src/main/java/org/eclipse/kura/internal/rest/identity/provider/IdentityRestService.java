@@ -45,7 +45,7 @@ public class IdentityRestService {
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestService.class);
     private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
 
-    private static final String MQTT_APP_ID = "ID-V1";
+    private static final String MQTT_APP_ID = "IDN-V1";
     private static final String REST_ROLE_NAME = "identity";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
@@ -159,7 +159,7 @@ public class IdentityRestService {
     }
 
     @GET
-    @Path("/defined-permissions")
+    @Path("/definedPermissions")
     @Produces(MediaType.APPLICATION_JSON)
     public PermissionDTO getDefinedPermissions() {
         try {
@@ -186,7 +186,7 @@ public class IdentityRestService {
     }
 
     @GET
-    @Path("/password-requirements")
+    @Path("/passwordRequirements")
     @Produces(MediaType.APPLICATION_JSON)
     public ValidatorOptionsDTO getValidatorOptions() {
         try {

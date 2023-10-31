@@ -348,7 +348,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private boolean isEclipseMarketplaceUrl(String url) {
         final Pattern marketplaceUrlRegexp = Pattern
-                .compile("http[s]?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
+                .compile("https?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
         return url != null && !url.isEmpty() && marketplaceUrlRegexp.matcher(url).matches();
     }
 

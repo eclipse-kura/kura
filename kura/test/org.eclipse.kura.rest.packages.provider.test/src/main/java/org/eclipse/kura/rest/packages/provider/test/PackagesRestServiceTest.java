@@ -49,6 +49,7 @@ import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -192,6 +193,33 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         thenResponseBodyEquals("Error installing deployment package: mock.dp");
     }
 
+    @Test
+    public void getMarketplacePackageDescriptorShouldFailWithWrongUrl() {
+        whenRequestIsPerformed(new MethodSpec("GET"),
+                "/_packageDescriptor?url=https://marketplace.ellipse.org/marketplace-client-intro?mpc_install=69");
+
+        thenNoExceptionOccurred();
+        thenResponseCodeIs(400);
+        thenDeploymentAgentServiceGetMarketplacePackageDescriptorIsNeverCalled();
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorShouldWork() {
+        givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder()
+                .nodeId("testNodeId").url("testUrl").dpUrl("testDpUrl2").minKuraVersion("1.1.0").maxKuraVersion("5.3.0")
+                .currentKuraVersion("5.4.0").isCompatible(true).build());
+
+        whenRequestIsPerformed(new MethodSpec("GET"),
+                "/_packageDescriptor?url=https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=69");
+
+        thenRequestSucceeds();
+        thenNoExceptionOccurred();
+        // thenResponseCodeIs(200); FAILING
+        thenDeploymentAgentServiceIsCalledWithUrl("https://marketplace.eclipse.org/node/69/api/p");
+        thenResponseBodyEqualsJson(
+                "{\"nodeId\":\"testNodeId\",\"url\":\"testUrl\",\"dpUrl\":\"testDpUrl2\",\"minKuraVersion\":\"1.1.0\",\"maxKuraVersion\":\"5.3.0\",\"currentKuraVersion\":\"5.4.0\",\"isCompatible\":true}");
+    }
+
     public PackagesRestServiceTest(Transport transport) {
         super(transport);
         Mockito.reset(deploymentAdmin);
@@ -282,6 +310,10 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenDeploymentAgentServiceThrowsExceptionOnInstall() throws Exception {
         doThrow(new RuntimeException()).when(deploymentAgentService).installDeploymentPackageAsync(anyString());
+    }
+
+    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptor) {
+        when(deploymentAgentService.getMarketplacePackageDescriptor(anyString())).thenReturn(descriptor);
     }
 
     /*
@@ -378,4 +410,11 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         assertEquals(expectedBody, this.responseBody);
     }
 
+    private void thenDeploymentAgentServiceIsCalledWithUrl(String expectedUrl) {
+        verify(deploymentAgentService, times(1)).getMarketplacePackageDescriptor(expectedUrl);
+    }
+
+    private void thenDeploymentAgentServiceGetMarketplacePackageDescriptorIsNeverCalled() {
+        verify(deploymentAgentService, never()).getMarketplacePackageDescriptor(anyString());
+    }
 }

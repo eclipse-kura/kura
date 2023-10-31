@@ -119,7 +119,6 @@ public class DeploymentRestService {
         }
 
         try {
-            logger.info("Checking package descriptor for {}", url);
             descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
         } catch (Exception e) {
             logger.warn("Error checking package descriptor for {}. Caused by ", url, e);

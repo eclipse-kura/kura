@@ -41,6 +41,7 @@ import javax.ws.rs.WebApplicationException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
@@ -70,6 +71,8 @@ public class DeploymentRestServiceUnitTest {
     private FormDataContentDisposition mockFormDataContent = mock(FormDataContentDisposition.class);
 
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
+
+    private MarketplacePackageDescriptor resultingMarketplacePackageDescriptor;
 
     @Test
     public void installDeploymentPackageWorksWithAreadyIssuedRequest() throws Exception {
@@ -207,6 +210,29 @@ public class DeploymentRestServiceUnitTest {
         thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
     }
 
+    @Test
+    public void getMarketplacePackageDescriptorThrowsWithNullUrl() throws Exception {
+        givenDeploymentRestService();
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(null);
+
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorWorksWithUrl() throws Exception {
+        givenDeploymentRestService();
+        givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder()
+                .nodeId("testNodeId").url("testUrl").dpUrl("testDpUrl").minKuraVersion("1.0.0").maxKuraVersion("2.0.0")
+                .currentKuraVersion("1.0.0").isCompatible(true).build());
+
+        whenGetMarketplacePackageDescriptorIsCalledFor("mockUrl");
+
+        thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor.builder().nodeId("testNodeId").url("testUrl")
+                .dpUrl("testDpUrl").minKuraVersion("1.0.0").maxKuraVersion("2.0.0").currentKuraVersion("1.0.0")
+                .isCompatible(true).build());
+    }
+
     /*
      * GIVEN
      */
@@ -259,6 +285,10 @@ public class DeploymentRestServiceUnitTest {
         when(this.mockInputStream.read(any())).thenThrow(new IOException());
     }
 
+    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptorToBeReturned) {
+        when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any())).thenReturn(descriptorToBeReturned);
+    }
+
     /*
      * WHEN
      */
@@ -292,6 +322,15 @@ public class DeploymentRestServiceUnitTest {
         try {
             this.resultingDeploymentRequestStatus = this.deploymentRestService
                     .installUploadedDeploymentPackage(mockInputStream, mockFormDataContent);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenGetMarketplacePackageDescriptorIsCalledFor(String url) {
+        try {
+            this.resultingMarketplacePackageDescriptor = this.deploymentRestService
+                    .getMarketplacePackageDescriptor(url);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -367,6 +406,10 @@ public class DeploymentRestServiceUnitTest {
 
     private void thenDeploymentAgentServiceIsNeverCalledToUninstallDeploymentPackage() throws Exception {
         verify(this.mockDeploymentAgentService, never()).uninstallDeploymentPackageAsync(any());
+    }
+
+    private void thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor expectedDescriptor) {
+        assertEquals(expectedDescriptor, this.resultingMarketplacePackageDescriptor);
     }
 
 }

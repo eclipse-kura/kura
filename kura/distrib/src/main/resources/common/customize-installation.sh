@@ -62,21 +62,22 @@ if [ ${BOARD} = "generic-device" ]; then
         echo "python3 not found. snapshot_0.xml, and iptables.init files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
     fi
     
-    # dynamic ram assignment
+    # dynamic RAM assignment
     RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     RAM_MB=$(expr $RAM_KB / 1024)
     RAM_MB_FOR_KURA=$(expr $RAM_MB / 4)
     RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"
 
-    if [ "$RAM_MB" -gt 1024 ]; then
-        echo "Setting kura ram -Xms and -Xmx to ${RAM_MB_FOR_KURA}m"
-        start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh")
-
-        for installer_name in "${start_scripts_to_change[@]}"; do
-            echo "Updating RAM values for $installer_name"
-            sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/$installer_name"
-        done
-    else
-        echo "System RAM is less than 1GB. Leaving assigned RAM as the default for the Kura profile."
+    if [ "$RAM_MB" -lt 1024 ]; then
+        RAM_REPLACEMENT_STRING="-Xms256m -Xmx256m"
     fi
+
+    echo "Setting kura RAM to ${RAM_REPLACEMENT_STRING}"
+    start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh")
+
+    for installer_name in "${start_scripts_to_change[@]}"; do
+        echo "Updating RAM values for $installer_name"
+        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/$installer_name"
+    done
+    
 fi

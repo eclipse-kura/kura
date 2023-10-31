@@ -9,7 +9,7 @@ The supported workflows are the following:
 
 1. Try calling the [GET/xsrfToken](#getxsrftoken) to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.
 
-It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the session expires, the obtained token is valid as long as the current session is valid.
+It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the current session expires, the obtained token is valid as long as the current session is valid.
 
 2. Call the [POST/login/password](#postloginpassword) or [POST/login/certificate](#postlogincertificate) providing the credentials to create a new session.
   
@@ -85,7 +85,7 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the sessi
 
 ### GET/xsrfToken
   * **REST API path** : /services/session/v1/xsrfToken
-  * **description** : Gets the XSRF token associated with the current session. It is not necessary to call this method again until the session expires, the obtained token is valid as long as the current session is valid.
+  * **description** : Gets the XSRF token associated with the current session. It is not necessary to call this method again until the current session expires, the obtained token is valid as long as the current session is valid.
   * **responses** :
       * **200**
           * **description** : Request succeeded, the XSRF token is returned in response body.

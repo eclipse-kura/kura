@@ -49,19 +49,29 @@ public interface Transport {
         public MethodSpec(final String method) {
             this.requestHandlerMethod = method;
             this.restMethod = method;
+
+            if (this.requestHandlerMethod.equalsIgnoreCase("DELETE")) {
+                throw new IllegalArgumentException(
+                        "Method " + this.requestHandlerMethod + " is not allowed for RequestHandler");
+            }
         }
 
         public MethodSpec(final String restMethod, final String requestHandlerMethod) {
             this.restMethod = restMethod;
             this.requestHandlerMethod = requestHandlerMethod;
+
+            if (this.requestHandlerMethod.equalsIgnoreCase("DELETE")) {
+                throw new IllegalArgumentException(
+                        "Method " + this.requestHandlerMethod + " is not allowed for RequestHandler");
+            }
         }
 
         public String getRestMethod() {
-            return restMethod;
+            return this.restMethod;
         }
 
         public String getRequestHandlerMethod() {
-            return requestHandlerMethod;
+            return this.requestHandlerMethod;
         }
     }
 }

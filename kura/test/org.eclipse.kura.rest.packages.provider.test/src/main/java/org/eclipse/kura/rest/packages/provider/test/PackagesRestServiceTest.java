@@ -145,7 +145,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void uninstallShouldWorkWithValidPackageName() {
-        whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");
+        whenRequestIsPerformed(new MethodSpec("DELETE", "DEL"), "/testPackage");
 
         thenRequestSucceeds();
 
@@ -158,7 +158,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     public void uninstallShouldWorkWithValidPackageNameWhenARequestWasAlreadyIssued() {
         givenAnUninstallationRequestWasAlreadyIssuedFor("testPackage");
 
-        whenRequestIsPerformed(new MethodSpec("DELETE"), "/testPackage");
+        whenRequestIsPerformed(new MethodSpec("DELETE", "DEL"), "/testPackage");
 
         thenRequestSucceeds();
 

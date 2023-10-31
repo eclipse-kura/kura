@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService">
+    <implementation class="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService" />
+
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
+
+    <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
+               bind="bindRequestHandlerRegistry"
+               unbind="unbindRequestHandlerRegistry"
+               cardinality="0..n"
+               name="RequestHandlerRegistry"
+               policy="dynamic" />
+
+    <reference interface="org.eclipse.kura.crypto.CryptoService" 
+               bind="bindCryptoService" 
+               cardinality="1..1"
+               name="CryptoService"
+               policy="static" />
+              
+    <reference interface="org.eclipse.kura.configuration.ConfigurationService"
+                bind="bindConfigurationService"
+                cardinality="1..1"
+                name="ConfigurationService" 
+                policy="static" />
+
+    <reference interface="org.osgi.service.useradmin.UserAdmin"
+               bind="bindUserAdmin"
+               cardinality="1..1"
+               name="UserAdmin"
+               policy="static" />
+               
+    <reference interface="org.eclipse.kura.internal.rest.identity.provider.IdentityService" 
+               bind="bindIdentityService" 
+               cardinality="0..1"  
+               name="IdentityService" 
+               policy="static" />
+
+    <service>
+        <provide interface="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
+    </service>
+
+    <property name="service.pid"
+              type="String"
+              value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService" />
+
+</scr:component>

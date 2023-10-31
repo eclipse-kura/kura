@@ -1,11 +1,11 @@
 # Rest Identity v1 API
 !!! note
 
-    This API can also be accessed via the RequestHandler with app-id: `ID-V1`.
+    This API can also be accessed via the RequestHandler with app-id: `IDN-V1`.
 
 
 The `IdentityRestService` APIs provides methods to manage the system identities.
-Identities with `rest.identity` permissions can access these APIs.
+Unless otherwise specified, identities with `rest.identity` permissions can access these APIs.
 
 ## POST methods
 
@@ -34,7 +34,7 @@ Identities with `rest.identity` permissions can access these APIs.
 - 400 Bad Request (Password strenght requirements not satisfied)
 - 500 Internal Server Error
 
-#### Get User  by Name
+#### Get User by Name
 
 - Description: This method allows to get data about an user in the system. The only considered field is the userName.
 - Method: POST
@@ -66,7 +66,9 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows you to get the list of the permissions defined in the system
 - Method: GET
-- API PATH: `services/identity/v1/defined-permissions`
+- API PATH: `services/identity/v1/definedPermissions`
+
+No specific permission is required to access this resource.
 
 ##### Responses
 
@@ -137,7 +139,9 @@ Identities with `rest.identity` permissions can access these APIs.
 
 - Description: This method allows you to get the password requirements.
 - Method: GET
-- API PATH: `services/identity/v1/password-requirements`
+- API PATH: `services/identity/v1/passwordRequirements`
+
+No specific permission is required to access this resource.
 
 ##### Responses
 

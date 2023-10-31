@@ -76,7 +76,7 @@ public class MarketplacePackageDescriptorTest {
     }
 
     @Test
-    public void marketplacePackageDescriptorEqualsWorksWithNotEquals() {
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsNodeId() {
         givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
                 .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
                 .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
@@ -84,6 +84,90 @@ public class MarketplacePackageDescriptorTest {
         givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("lol").url("url")
                 .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
                 .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsUrl() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId")
+                .url("anotherurl").dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsDpUrl() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("anotherdpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsMinKuraVersion() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("anotherminKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsMaxKuraVersion() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("anothermaxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsCurrentKuraVersion() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("anothercurrentKuraVersion").isCompatible(true).build());
+
+        thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
+        thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
+    }
+
+    @Test
+    public void marketplacePackageDescriptorEqualsWorksWithNotEqualsCompatibility() {
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
+
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(false).build());
 
         thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
         thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);

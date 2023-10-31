@@ -16,21 +16,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
-import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor.MarketplacePackageDescriptorBuilder;
 import org.junit.Test;
 
 public class MarketplacePackageDescriptorTest {
-
-    MarketplacePackageDescriptorBuilder builder;
-    MarketplacePackageDescriptorBuilder otherBuilder;
 
     MarketplacePackageDescriptor descriptor;
     MarketplacePackageDescriptor otherDescriptor;
 
     @Test
     public void marketplacePackageDescriptorBuilderWorksWithNoData() {
-        givenAMarketplacePackageDescriptorBuilder();
-        whenBuildIsCalledForThisBuilder();
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().build());
 
         thenNodeIdEquals(this.descriptor, "");
         thenUrlEquals(this.descriptor, "");
@@ -43,16 +38,9 @@ public class MarketplacePackageDescriptorTest {
 
     @Test
     public void marketplacePackageDescriptorBuilderWorks() {
-        givenAMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.builder, "nodeId");
-        givenBuilderWithUrl(this.builder, "url");
-        givenBuilderWithDpUrl(this.builder, "dpUrl");
-        givenBuilderWithMinKuraVersion(this.builder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.builder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.builder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.builder, true);
-
-        whenBuildIsCalledForThisBuilder();
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
         thenNodeIdEquals(this.descriptor, "nodeId");
         thenUrlEquals(this.descriptor, "url");
@@ -65,16 +53,9 @@ public class MarketplacePackageDescriptorTest {
 
     @Test
     public void marketplacePackageDescriptorEqualsWorksWithSame() {
-        givenAMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.builder, "nodeId");
-        givenBuilderWithUrl(this.builder, "url");
-        givenBuilderWithDpUrl(this.builder, "dpUrl");
-        givenBuilderWithMinKuraVersion(this.builder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.builder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.builder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.builder, true);
-
-        whenBuildIsCalledForThisBuilder();
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
         thenResultingDescriptorsAreEqual(this.descriptor, this.descriptor, true);
         thenResultingHashesAreEqual(this.descriptor, this.descriptor, true);
@@ -82,27 +63,13 @@ public class MarketplacePackageDescriptorTest {
 
     @Test
     public void marketplacePackageDescriptorEqualsWorksWithEquals() {
-        givenAMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.builder, "nodeId");
-        givenBuilderWithUrl(this.builder, "url");
-        givenBuilderWithDpUrl(this.builder, "dpUrl");
-        givenBuilderWithMinKuraVersion(this.builder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.builder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.builder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.builder, true);
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
-        whenBuildIsCalledForThisBuilder();
-
-        givenAnotherMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.otherBuilder, "nodeId");
-        givenBuilderWithUrl(this.otherBuilder, "url");
-        givenBuilderWithDpUrl(this.otherBuilder, "dpUrl");
-        givenBuilderWithMinKuraVersion(this.otherBuilder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.otherBuilder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.otherBuilder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.otherBuilder, true);
-
-        whenBuildIsCalledForTheOtherBuilder();
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
         thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, true);
         thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, true);
@@ -110,27 +77,13 @@ public class MarketplacePackageDescriptorTest {
 
     @Test
     public void marketplacePackageDescriptorEqualsWorksWithNotEquals() {
-        givenAMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.builder, "nodeId");
-        givenBuilderWithUrl(this.builder, "url");
-        givenBuilderWithDpUrl(this.builder, "dpUrl");
-        givenBuilderWithMinKuraVersion(this.builder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.builder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.builder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.builder, true);
+        givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("nodeId").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
-        whenBuildIsCalledForThisBuilder();
-
-        givenAnotherMarketplacePackageDescriptorBuilder();
-        givenBuilderWithNodeId(this.otherBuilder, "nodeId");
-        givenBuilderWithUrl(this.otherBuilder, "url");
-        givenBuilderWithDpUrl(this.otherBuilder, "dpUrl2");
-        givenBuilderWithMinKuraVersion(this.otherBuilder, "minKuraVersion");
-        givenBuilderWithMaxKuraVersion(this.otherBuilder, "maxKuraVersion");
-        givenBuilderWithCurrentKuraVersion(this.otherBuilder, "currentKuraVersion");
-        givenBuilderWithCompatibility(this.otherBuilder, true);
-
-        whenBuildIsCalledForTheOtherBuilder();
+        givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder().nodeId("lol").url("url")
+                .dpUrl("dpUrl").minKuraVersion("minKuraVersion").maxKuraVersion("maxKuraVersion")
+                .currentKuraVersion("currentKuraVersion").isCompatible(true).build());
 
         thenResultingDescriptorsAreEqual(this.descriptor, this.otherDescriptor, false);
         thenResultingHashesAreEqual(this.descriptor, this.otherDescriptor, false);
@@ -139,55 +92,12 @@ public class MarketplacePackageDescriptorTest {
     /*
      * GIVEN
      */
-    private void givenAMarketplacePackageDescriptorBuilder() {
-        this.builder = MarketplacePackageDescriptor.builder();
+    private void givenAMarketplacePackageDescriptor(MarketplacePackageDescriptor passedDescriptor) {
+        this.descriptor = passedDescriptor;
     }
 
-    private void givenAnotherMarketplacePackageDescriptorBuilder() {
-        this.otherBuilder = MarketplacePackageDescriptor.builder();
-    }
-
-    private void givenBuilderWithCompatibility(MarketplacePackageDescriptorBuilder passedBuilder,
-            boolean compatibility) {
-        passedBuilder.isCompatible(compatibility);
-    }
-
-    private void givenBuilderWithCurrentKuraVersion(MarketplacePackageDescriptorBuilder passedBuilder,
-            String currentKuraVersion) {
-        passedBuilder.currentKuraVersion(currentKuraVersion);
-    }
-
-    private void givenBuilderWithMaxKuraVersion(MarketplacePackageDescriptorBuilder passedBuilder,
-            String maxKuraVersion) {
-        passedBuilder.maxKuraVersion(maxKuraVersion);
-    }
-
-    private void givenBuilderWithMinKuraVersion(MarketplacePackageDescriptorBuilder passedBuilder,
-            String minKuraVersion) {
-        passedBuilder.minKuraVersion(minKuraVersion);
-    }
-
-    private void givenBuilderWithDpUrl(MarketplacePackageDescriptorBuilder passedBuilder, String dpUrl) {
-        passedBuilder.dpUrl(dpUrl);
-    }
-
-    private void givenBuilderWithUrl(MarketplacePackageDescriptorBuilder passedBuilder, String url) {
-        passedBuilder.url(url);
-    }
-
-    private void givenBuilderWithNodeId(MarketplacePackageDescriptorBuilder passedBuilder, String nodeId) {
-        passedBuilder.nodeId(nodeId);
-    }
-
-    /*
-     * WHEN
-     */
-    private void whenBuildIsCalledForThisBuilder() {
-        this.descriptor = this.builder.build();
-    }
-
-    private void whenBuildIsCalledForTheOtherBuilder() {
-        this.otherDescriptor = this.otherBuilder.build();
+    private void givenAnotherMarketplacePackageDescriptor(MarketplacePackageDescriptor passedDescriptor) {
+        this.otherDescriptor = passedDescriptor;
     }
 
     /*

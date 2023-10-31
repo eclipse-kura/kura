@@ -41,8 +41,7 @@ public abstract class AbstractDhcpLeaseReader {
                 new ByteArrayInputStream(((ByteArrayOutputStream) status.getOutputStream()).toByteArray()));
     }
 
-    private static CommandStatus execute(final String[] commandLine, CommandExecutorService executorService)
-            throws KuraException {
+    private static CommandStatus execute(final String[] commandLine, CommandExecutorService executorService) {
         Command command = new Command(commandLine);
         command.setOutputStream(new ByteArrayOutputStream());
         return executorService.execute(command);

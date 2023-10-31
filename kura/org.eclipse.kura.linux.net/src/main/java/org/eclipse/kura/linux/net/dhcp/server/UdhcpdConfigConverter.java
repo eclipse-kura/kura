@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
 
+import java.util.Objects;
+
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.net.IPAddress;
@@ -45,7 +47,7 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
 
     private String addDNSServersOption(DhcpServerConfig config) {
         StringBuilder sb = new StringBuilder();
-        config.getDnsServers().stream().filter(address -> address != null)
+        config.getDnsServers().stream().filter(Objects::nonNull)
                 .forEach(address -> sb.append(address.getHostAddress()).append(" "));
 
         return "opt dns " + sb.toString().trim();

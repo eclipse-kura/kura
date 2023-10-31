@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 public class DhcpServerConfigWriter {
 
-    private static final String DHCP_OPTION_KEY = "dhcp-option=";
     private static final Logger logger = LoggerFactory.getLogger(DhcpServerConfigWriter.class);
     private static final String WRITE_ERROR_MESSAGE = "Failed to write DHCP config file for ";
     private final String interfaceName;
@@ -60,7 +59,7 @@ public class DhcpServerConfigWriter {
         String tmpDhcpConfigFileName = new StringBuilder(dhcpConfigFileName).append(".tmp").toString();
         logger.debug("Writing DHCP Server configuration for {} in {}", this.interfaceName, dhcpConfigFileName);
 
-        writeConfigFile(tmpDhcpConfigFileName, this.interfaceName, buildDhcpServerConfiguration());
+        writeConfigFile(tmpDhcpConfigFileName, buildDhcpServerConfiguration());
         File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
         File dhcpConfigFile = new File(dhcpConfigFileName);
         try {
@@ -81,14 +80,12 @@ public class DhcpServerConfigWriter {
         }
     }
 
-    private void writeConfigFile(String configFileName, String ifaceName, DhcpServerConfig4 dhcpServerConfig)
+    private void writeConfigFile(String configFileName, DhcpServerConfig4 dhcpServerConfig)
             throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
             logger.debug("writing to {} with: {}", configFileName, dhcpServerConfig);
             Optional<DhcpServerConfigConverter> configConverter = DhcpServerManager.getConfigConverter();
-            configConverter.ifPresent(converter -> {
-                pw.print(converter.convert(dhcpServerConfig));
-            });
+            configConverter.ifPresent(converter -> pw.print(converter.convert(dhcpServerConfig)));
             pw.flush();
             fos.getFD().sync();
         } catch (Exception e) {

@@ -95,7 +95,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             for (NetConfig netConfig : netConfigs) {
                 if (netConfig instanceof DhcpServerConfig4) {
                     DhcpServerConfig4 dhcpServerConfig = (DhcpServerConfig4) netConfig;
-                    writeConfigFile(tmpDhcpConfigFileName, interfaceName, dhcpServerConfig);
+                    writeConfigFile(tmpDhcpConfigFileName, dhcpServerConfig);
                     // move the file if we made it this far and they are different
                     File tmpDhcpConfigFile = new File(tmpDhcpConfigFileName);
                     File dhcpConfigFile = new File(dhcpConfigFileName);
@@ -123,14 +123,12 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    private void writeConfigFile(String configFileName, String ifaceName, DhcpServerConfig4 dhcpServerConfig)
+    private void writeConfigFile(String configFileName, DhcpServerConfig4 dhcpServerConfig)
             throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
             logger.trace("writing to {} with: {}", configFileName, dhcpServerConfig.toString());
             Optional<DhcpServerConfigConverter> configConverter = DhcpServerManager.getConfigConverter();
-            configConverter.ifPresent(converter -> {
-                pw.print(converter.convert(dhcpServerConfig));
-            });
+            configConverter.ifPresent(converter -> pw.print(converter.convert(dhcpServerConfig)));
             pw.flush();
             fos.getFD().sync();
         } catch (Exception e) {

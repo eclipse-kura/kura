@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -113,13 +114,25 @@ public class DeploymentRestService {
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(@QueryParam("url") String url) {
         MarketplacePackageDescriptor descriptor;
 
-        if (Objects.isNull(url)) {
+        if (Objects.isNull(url) || url.isEmpty()) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
-                    .entity("Missing url parameter").build());
+                    .entity("Missing URL parameter").build());
         }
 
+        if (!isEclipseMarketplaceUrl(url)) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
+                    .entity("The URL passed as argument does not belong to the Eclipse Marketplace").build());
+        }
+
+        final String nodeId = url.split("=")[1];
+        if (Objects.isNull(nodeId) || nodeId.isEmpty()) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
+                    .entity("The URL passed as argument does not contain a valid node id").build());
+        }
+
+        final String descriptorUrl = String.format("https://marketplace.eclipse.org/node/%s/api/p", nodeId);
         try {
-            descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(url);
+            descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(descriptorUrl);
         } catch (Exception e) {
             logger.warn("Error checking package descriptor for {}. Caused by ", url, e);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -127,6 +140,12 @@ public class DeploymentRestService {
         }
 
         return descriptor;
+    }
+
+    private boolean isEclipseMarketplaceUrl(String url) {
+        final Pattern marketplaceUrlRegexp = Pattern
+                .compile("https?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
+        return marketplaceUrlRegexp.matcher(url).matches();
     }
 
     /**

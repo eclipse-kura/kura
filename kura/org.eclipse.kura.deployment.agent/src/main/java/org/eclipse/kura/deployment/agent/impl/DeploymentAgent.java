@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
@@ -96,8 +95,6 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private static final String CONN_TIMEOUT_PROPNAME = "dpa.connection.timeout";
     private static final String READ_TIMEOUT_PROPNAME = "dpa.read.timeout";
-
-    private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
 
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
@@ -267,18 +264,13 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     @Override
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url) {
-        URL mpUrl = null;
+        // Note: the url accepted as argument should be already validated and belonging to the
+        // Eclipse Marketplace domain such that it allows for downloading the descriptor file.
         HttpsURLConnection connection = null;
         MarketplacePackageDescriptorBuilder descriptorBuilder = MarketplacePackageDescriptor.builder();
 
-        if (!isEclipseMarketplaceUrl(url)) {
-            throw new IllegalArgumentException(String.format("Invalid Eclipse Marketplace URL \"%s\"", url));
-        }
-
         try {
-            final String nodeId = url.split("=")[1];
-            mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
-            connection = (HttpsURLConnection) mpUrl.openConnection();
+            connection = (HttpsURLConnection) new URL(url).openConnection();
             connection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
 
             connection.setRequestMethod("GET");
@@ -344,12 +336,6 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
 
         return descriptorBuilder.build();
-    }
-
-    private boolean isEclipseMarketplaceUrl(String url) {
-        final Pattern marketplaceUrlRegexp = Pattern
-                .compile("https?:\\/\\/marketplace.eclipse.org/marketplace-client-intro\\?mpc_install=.*");
-        return url != null && !url.isEmpty() && marketplaceUrlRegexp.matcher(url).matches();
     }
 
     private Node getFirstNode(final Document doc, final String tagName) {

@@ -220,17 +220,70 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
+    public void getMarketplacePackageDescriptorThrowsWithEmptyUrl() throws Exception {
+        givenDeploymentRestService();
+
+        whenGetMarketplacePackageDescriptorIsCalledFor("");
+
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorThrowsWithWrongUrl() throws Exception {
+        givenDeploymentRestService();
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://marketplace.ellipse.org/marketplace-client-intro?mpc_install=");
+
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorThrowsWithMissingNodeId() throws Exception {
+        givenDeploymentRestService();
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=");
+
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    @Test
     public void getMarketplacePackageDescriptorWorksWithUrl() throws Exception {
         givenDeploymentRestService();
         givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder()
                 .nodeId("testNodeId").url("testUrl").dpUrl("testDpUrl").minKuraVersion("1.0.0").maxKuraVersion("2.0.0")
                 .currentKuraVersion("1.0.0").isCompatible(true).build());
 
-        whenGetMarketplacePackageDescriptorIsCalledFor("mockUrl");
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=55535");
 
+        thenNoExceptionOccurred();
+        thenDeploymentAgentServiceIsCalledWithURL("https://marketplace.eclipse.org/node/55535/api/p");
         thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor.builder().nodeId("testNodeId").url("testUrl")
                 .dpUrl("testDpUrl").minKuraVersion("1.0.0").maxKuraVersion("2.0.0").currentKuraVersion("1.0.0")
                 .isCompatible(true).build());
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorWorksWithHTTPUrl() throws Exception {
+        givenDeploymentRestService();
+        givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder()
+                .nodeId("testNodeId").url("testUrl").dpUrl("testDpUrl2").minKuraVersion("1.1.0").maxKuraVersion("5.4.0")
+                .currentKuraVersion("5.4.0").isCompatible(true).build());
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=69");
+
+        thenNoExceptionOccurred();
+        thenDeploymentAgentServiceIsCalledWithURL("https://marketplace.eclipse.org/node/69/api/p");
+        thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor.builder().nodeId("testNodeId").url("testUrl")
+                .dpUrl("testDpUrl2").minKuraVersion("1.1.0").maxKuraVersion("5.4.0").currentKuraVersion("5.4.0")
+                .isCompatible(true).build());
+    }
+
+    private void thenDeploymentAgentServiceIsCalledWithURL(String expectedUrl) {
+        verify(this.mockDeploymentAgentService, times(1)).getMarketplacePackageDescriptor(expectedUrl);
     }
 
     /*

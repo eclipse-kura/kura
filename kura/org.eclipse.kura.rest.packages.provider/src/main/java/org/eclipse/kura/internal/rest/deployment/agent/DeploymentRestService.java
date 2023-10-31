@@ -124,13 +124,13 @@ public class DeploymentRestService {
                     .entity("The URL passed as argument does not belong to the Eclipse Marketplace").build());
         }
 
-        final String nodeId = url.split("=")[1];
-        if (Objects.isNull(nodeId) || nodeId.isEmpty()) {
+        final String[] urlStrings = url.split("=");
+        if (urlStrings.length != 2 || Objects.isNull(urlStrings[1]) || urlStrings[1].isEmpty()) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
                     .entity("The URL passed as argument does not contain a valid node id").build());
         }
 
-        final String descriptorUrl = String.format("https://marketplace.eclipse.org/node/%s/api/p", nodeId);
+        final String descriptorUrl = String.format("https://marketplace.eclipse.org/node/%s/api/p", urlStrings[1]);
         try {
             descriptor = this.deploymentAgentService.getMarketplacePackageDescriptor(descriptorUrl);
         } catch (Exception e) {

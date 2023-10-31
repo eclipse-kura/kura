@@ -29,11 +29,11 @@ public class CloudEntryDTO {
     }
 
     public String getPid() {
-        return pid;
+        return this.pid;
     }
 
     public String getFactoryPid() {
-        return factoryPid;
+        return this.factoryPid;
     }
 
     public void setFactoryPid(String factoryPid) {
@@ -41,7 +41,7 @@ public class CloudEntryDTO {
     }
 
     public String getDefaultFactoryPid() {
-        return defaultFactoryPid;
+        return this.defaultFactoryPid;
     }
 
     public void setDefaultFactoryPid(String defaultFactoryPid) {
@@ -49,7 +49,7 @@ public class CloudEntryDTO {
     }
 
     public String getDefaultFactoryPidRegex() {
-        return defaultFactoryPidRegex;
+        return this.defaultFactoryPidRegex;
     }
 
     public void setDefaultFactoryPidRegex(String defaultFactoryPidRegex) {

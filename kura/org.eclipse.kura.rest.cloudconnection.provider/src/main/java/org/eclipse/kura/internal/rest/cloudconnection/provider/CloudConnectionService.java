@@ -66,9 +66,9 @@ public class CloudConnectionService {
 
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
 
-    private BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+    private final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
-    private ConfigurationService configurationService;
+    private final ConfigurationService configurationService;
 
     public CloudConnectionService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -116,7 +116,7 @@ public class CloudConnectionService {
             }
         });
 
-        return this.findComponentConfigurations(PidUtils.getPidFilter(result.iterator()));
+        return findComponentConfigurations(PidUtils.getPidFilter(result.iterator()));
     }
 
     public List<ConfigComponentDTO> findComponentConfigurations(String osgiFilter) throws KuraException {

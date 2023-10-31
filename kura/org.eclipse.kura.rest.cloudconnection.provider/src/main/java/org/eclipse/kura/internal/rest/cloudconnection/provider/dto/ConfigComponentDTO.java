@@ -49,7 +49,7 @@ public class ConfigComponentDTO {
     }
 
     public List<ConfigParameterDTO> getParameters() {
-        return parameters;
+        return this.parameters;
     }
 
     public void setParameters(List<ConfigParameterDTO> parameters) {
@@ -57,7 +57,7 @@ public class ConfigComponentDTO {
     }
 
     public String getComponentDescription() {
-        return componentDescription;
+        return this.componentDescription;
     }
 
     public void setComponentDescription(String componentDescription) {
@@ -65,7 +65,7 @@ public class ConfigComponentDTO {
     }
 
     public String getComponentIcon() {
-        return componentIcon;
+        return this.componentIcon;
     }
 
     public void setComponentIcon(String componentIcon) {
@@ -73,7 +73,7 @@ public class ConfigComponentDTO {
     }
 
     public String getComponentId() {
-        return componentId;
+        return this.componentId;
     }
 
     public void setComponentId(String componentId) {
@@ -81,7 +81,7 @@ public class ConfigComponentDTO {
     }
 
     public String getComponentName() {
-        return componentName;
+        return this.componentName;
     }
 
     public void setComponentName(String componentName) {
@@ -89,7 +89,7 @@ public class ConfigComponentDTO {
     }
 
     public String getFactoryPid() {
-        return factoryPid;
+        return this.factoryPid;
     }
 
     public void setFactoryPid(String factoryPid) {
@@ -97,7 +97,7 @@ public class ConfigComponentDTO {
     }
 
     public boolean isFactoryComponent() {
-        return factoryComponent;
+        return this.factoryComponent;
     }
 
     public void setFactoryComponent(boolean factoryComponent) {
@@ -105,7 +105,7 @@ public class ConfigComponentDTO {
     }
 
     public boolean isWireComponent() {
-        return wireComponent;
+        return this.wireComponent;
     }
 
     public void setWireComponent(boolean wireComponent) {
@@ -113,7 +113,7 @@ public class ConfigComponentDTO {
     }
 
     public boolean isDriver() {
-        return driver;
+        return this.driver;
     }
 
     public void setDriver(boolean driver) {
@@ -121,7 +121,7 @@ public class ConfigComponentDTO {
     }
 
     public String getDriverPid() {
-        return driverPid;
+        return this.driverPid;
     }
 
     public void setDriverPid(String driverPid) {

@@ -16,8 +16,8 @@ import java.util.List;
 
 public class CloudComponentFactoriesDTO {
 
-    private List<String> cloudConnectionFactoryPids;
-    private List<CloudEntryDTO> pubSubFactories;
+    private final List<String> cloudConnectionFactoryPids;
+    private final List<CloudEntryDTO> pubSubFactories;
 
     public CloudComponentFactoriesDTO(List<String> cloudConnectionFactoryPids, List<CloudEntryDTO> pubSubFactories) {
         this.cloudConnectionFactoryPids = cloudConnectionFactoryPids;
@@ -25,11 +25,11 @@ public class CloudComponentFactoriesDTO {
     }
 
     public List<String> getCloudConnectionFactoryPids() {
-        return cloudConnectionFactoryPids;
+        return this.cloudConnectionFactoryPids;
     }
 
     public List<CloudEntryDTO> getPubSubFactories() {
-        return pubSubFactories;
+        return this.pubSubFactories;
     }
 
 }

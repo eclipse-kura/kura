@@ -32,7 +32,7 @@ public class ConfigParameterDTO {
     private String[] values; // used for fields with multiple cardinality
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -40,7 +40,7 @@ public class ConfigParameterDTO {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -48,7 +48,7 @@ public class ConfigParameterDTO {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -56,7 +56,7 @@ public class ConfigParameterDTO {
     }
 
     public ConfigParameterType getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(ConfigParameterType type) {
@@ -64,7 +64,7 @@ public class ConfigParameterDTO {
     }
 
     public boolean isRequired() {
-        return required;
+        return this.required;
     }
 
     public void setRequired(boolean required) {
@@ -72,7 +72,7 @@ public class ConfigParameterDTO {
     }
 
     public String getDefaultValue() {
-        return defaultValue;
+        return this.defaultValue;
     }
 
     public void setDefaultValue(String defaultValue) {
@@ -80,7 +80,7 @@ public class ConfigParameterDTO {
     }
 
     public int getCardinality() {
-        return cardinality;
+        return this.cardinality;
     }
 
     public void setCardinality(int cardinality) {
@@ -88,7 +88,7 @@ public class ConfigParameterDTO {
     }
 
     public Map<String, String> getOptions() {
-        return options;
+        return this.options;
     }
 
     public void setOptions(Map<String, String> options) {
@@ -96,7 +96,7 @@ public class ConfigParameterDTO {
     }
 
     public String getMin() {
-        return min;
+        return this.min;
     }
 
     public void setMin(String min) {
@@ -104,7 +104,7 @@ public class ConfigParameterDTO {
     }
 
     public String getMax() {
-        return max;
+        return this.max;
     }
 
     public void setMax(String max) {
@@ -112,7 +112,7 @@ public class ConfigParameterDTO {
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     public void setValue(String value) {
@@ -120,7 +120,7 @@ public class ConfigParameterDTO {
     }
 
     public String[] getValues() {
-        return values;
+        return this.values;
     }
 
     public void setValues(String[] values) {

@@ -24,6 +24,6 @@ public class CloudEntriesDTO {
     }
 
     public List<CloudEntryDTO> getCloudEntries() {
-        return cloudEntries;
+        return this.cloudEntries;
     }
 }

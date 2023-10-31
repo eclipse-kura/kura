@@ -282,10 +282,6 @@ public class DeploymentRestServiceUnitTest {
                 .isCompatible(true).build());
     }
 
-    private void thenDeploymentAgentServiceIsCalledWithURL(String expectedUrl) {
-        verify(this.mockDeploymentAgentService, times(1)).getMarketplacePackageDescriptor(expectedUrl);
-    }
-
     /*
      * GIVEN
      */
@@ -463,6 +459,10 @@ public class DeploymentRestServiceUnitTest {
 
     private void thenResultingPackageDescriptorEquals(MarketplacePackageDescriptor expectedDescriptor) {
         assertEquals(expectedDescriptor, this.resultingMarketplacePackageDescriptor);
+    }
+
+    private void thenDeploymentAgentServiceIsCalledWithURL(String expectedUrl) {
+        verify(this.mockDeploymentAgentService, times(1)).getMarketplacePackageDescriptor(expectedUrl);
     }
 
 }

@@ -60,7 +60,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @SuppressWarnings("deprecation")
 public class CloudConnectionService {
 
-    private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(|(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory))";
+    private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(" + "|"
+            + "(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)"
+            + "(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory)" + ")";
     private static final String DRIVER_PID = "driver.pid";
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
 

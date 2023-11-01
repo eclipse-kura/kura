@@ -3247,12 +3247,11 @@ Using this APIs and creating a session is the recommended way for interact with 
 <p>The supported workflows are the following:</p>
 <h3 id="login-and-resource-access-workflow">Login and resource access workflow</h3>
 <ol>
-<li>
-<p>Try calling the <a href="#getxsrftoken">GET/xsrfToken</a> to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.</p>
-</li>
-<li>
-<p>Call the <a href="#postloginpassword">POST/login/password</a> or <a href="#postlogincertificate">POST/login/certificate</a> providing the credentials to create a new session.</p>
-</li>
+<li>Try calling the <a href="#getxsrftoken">GET/xsrfToken</a> to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.</li>
+</ol>
+<p>It is not necessary to call <a href="#getxsrftoken">GET/xsrfToken</a> again until the current session expires, the obtained token is valid as long as the current session is valid.</p>
+<ol>
+<li>Call the <a href="#postloginpassword">POST/login/password</a> or <a href="#postlogincertificate">POST/login/certificate</a> providing the credentials to create a new session.</li>
 </ol>
 <p>The device will return a session cookie with the response, make sure to provide it in successive requests. If the request is performed by a browser, this should be done automatically.</p>
 <p>If password authentication has been used and the response object reports that a password change is needed, perform the <a href="#update-password-workflow">Update password workflow</a></p>
@@ -3367,7 +3366,7 @@ Using this APIs and creating a session is the recommended way for interact with 
 <h3 id="getxsrftoken">GET/xsrfToken</h3>
 <ul>
 <li><strong>REST API path</strong> : /services/session/v1/xsrfToken</li>
-<li><strong>description</strong> : Gets the XSRF token associated with the current session.</li>
+<li><strong>description</strong> : Gets the XSRF token associated with the current session. It is not necessary to call this method again until the current session expires, the obtained token is valid as long as the current session is valid.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong><ul>
 <li><strong>description</strong> : Request succeeded, the XSRF token is returned in response body.</li>

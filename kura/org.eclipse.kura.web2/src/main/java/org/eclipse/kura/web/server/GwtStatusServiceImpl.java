@@ -61,21 +61,16 @@ import org.slf4j.LoggerFactory;
 public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements GwtStatusService {
 
     private static final String IP_ACQUISITION = "IP Acquisition: ";
-
     private static final String MODE = "Mode: ";
-
     private static final String SUBNET_MASK = "Subnet Mask: ";
-
     private static final String POSITION_STATUS = "positionStatus";
-
     private static final Logger logger = LoggerFactory.getLogger(GwtStatusServiceImpl.class);
-
     private static final long serialVersionUID = 8256280782910423734L;
-
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
-
+    private static final String NL = "<br />";
+    private static final String tab = "&nbsp&nbsp&nbsp&nbsp";
     private static final long NETWORK_INFO_REFRESH_TIMEOUT = 30000l;
 
     private static List<GwtGroupedNVPair> networkStatus;
@@ -267,8 +262,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
 
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
-        String nl = "<br />";
-        String tab = "&nbsp&nbsp&nbsp&nbsp";
 
         GwtNetworkServiceImplFacade gwtNetworkService = new GwtNetworkServiceImplFacade();
         boolean isNet2 = gwtNetworkService.isNet2();
@@ -315,9 +308,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                             gwtNetInterfaceConfig.getStatusEnum().getValue()));
                 } else {
                     pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName() + " - IPv4",
-                            currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                    + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode));
+                            currentAddress + NL + tab + SUBNET_MASK + currentSubnetMask + NL + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + NL + tab + IP_ACQUISITION
+                                    + currentConfigMode + NL + tab + "Router Mode: " + currentRouterMode));
                 }
             } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
                     && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
@@ -337,10 +330,10 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                             gwtNetInterfaceConfig.getStatusEnum().getValue()));
                 } else {
                     pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
-                            currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                    + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode + nl + tab
-                                    + "Wireless Mode:" + currentWifiMode + nl + tab + "SSID: " + currentWifiSsid + nl));
+                            currentAddress + NL + tab + SUBNET_MASK + currentSubnetMask + NL + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + NL + tab + IP_ACQUISITION
+                                    + currentConfigMode + NL + tab + "Router Mode: " + currentRouterMode + NL + tab
+                                    + "Wireless Mode:" + currentWifiMode + NL + tab + "SSID: " + currentWifiSsid + NL));
                 }
             } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                 String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
@@ -356,9 +349,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                             gwtNetInterfaceConfig.getStatusEnum().getValue()));
                 } else {
                     pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
-                            currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                    + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab
+                            currentAddress + NL + SUBNET_MASK + currentSubnetMask + NL + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + NL + tab + IP_ACQUISITION
+                                    + currentConfigMode + NL + tab + "APN: " + currentModemApn + NL + tab
                                     + "Interface: " + interfaceName));
                 }
             }
@@ -394,8 +387,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusEthernet",
                                 gwtNetInterfaceConfig.getName() + " - IPv6",
-                                currentIPv6Address + nl + tab + SUBNET_MASK + currentIPv6SubnetMask + nl + tab + MODE
-                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
+                                currentIPv6Address + NL + tab + SUBNET_MASK + currentIPv6SubnetMask + NL + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + NL + tab + IP_ACQUISITION
                                         + currentIPv6ConfigMode));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
@@ -416,10 +409,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 convertIPv6Status(statusIPv6)));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName() + " - IPv6",
-                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
-                                        + currentConfigMode + nl + tab + "Wireless Mode:" + currentWifiMode + nl + tab
-                                        + "SSID: " + currentWifiSsid + nl));
+                                currentIPv6Address + NL + tab + SUBNET_MASK + currentIPv6SubnetMask + NL + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + NL + tab + IP_ACQUISITION
+                                        + currentIPv6ConfigMode + NL + tab + "Wireless Mode:" + currentWifiMode + NL
+                                        + tab
+                                        + "SSID: " + currentWifiSsid + NL));
                     }
                 } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
                     String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
@@ -435,9 +429,9 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                                 convertIPv6Status(statusIPv6)));
                     } else {
                         pairs.add(new GwtGroupedNVPair("networkStatusModem", name + " - IPv6",
-                                currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                        + convertIPv6Status(statusIPv6) + nl + tab + IP_ACQUISITION
-                                        + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab
+                                currentIPv6Address + NL + SUBNET_MASK + currentIPv6SubnetMask + NL + tab + MODE
+                                        + convertIPv6Status(statusIPv6) + NL + tab + IP_ACQUISITION
+                                        + currentIPv6ConfigMode + NL + tab + "APN: " + currentModemApn + NL + tab
                                         + "Interface: " + interfaceName));
                     }
                 }

@@ -84,7 +84,6 @@ public class DhcpdTool implements DhcpLinuxTool {
             command.add(DhcpServerManager.getPidFilename(interfaceName));
         } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
             command.add(DhcpServerTool.UDHCPD.getValue());
-            command.add("-f");
             command.add("-S");
             command.add(DhcpServerManager.getConfigFilename(interfaceName));
         }

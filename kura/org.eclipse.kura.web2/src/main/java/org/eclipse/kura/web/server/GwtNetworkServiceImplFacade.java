@@ -144,14 +144,14 @@ public class GwtNetworkServiceImplFacade extends OsgiRemoteServiceServlet implem
     }
 
     @Override
-    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
         if (isNet2()) {
             // TODO
             return new ArrayList<>();
         } else {
-            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.getDhcpLeases();
+            return org.eclipse.kura.web.server.net.GwtNetworkServiceImpl.getDhcpLeases(interfaceName);
         }
     }
 

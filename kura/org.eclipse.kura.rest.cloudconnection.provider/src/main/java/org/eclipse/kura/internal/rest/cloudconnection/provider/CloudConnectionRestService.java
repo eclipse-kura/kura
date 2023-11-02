@@ -211,6 +211,7 @@ public class CloudConnectionRestService {
 
     @PUT
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/stackConfigurations")
     public void updateStackComponentConfiguration(ConfigComponentDTO component) {
         try {
             logger.debug(DEBUG_MESSSAGE, "updateStackComponentConfiguration");

@@ -320,6 +320,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#java-heap-memory-assignment" class="md-nav__link">
+    Java Heap Memory Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#initial-network-configuration" class="md-nav__link">
     Initial network configuration
   </a>
@@ -3062,6 +3069,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#java-heap-memory-assignment" class="md-nav__link">
+    Java Heap Memory Assignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#initial-network-configuration" class="md-nav__link">
     Initial network configuration
   </a>
@@ -3137,6 +3151,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb/rpm
 </code></pre></div>
 <p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>x86_64</em>, <em>arm32</em>, and <em>arm64</em>. A generic Kura profile can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
+<h3 id="java-heap-memory-assignment">Java Heap Memory Assignment</h3>
+<p>Eclipse Kura's Generic profile incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
 <p>During the installation of a generic profile with network management support, the initial network configuration will be generated dynamically using the rules described below:</p>
 <ul>

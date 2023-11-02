@@ -73,6 +73,22 @@ public class DhcpLeaseToolTest {
     }
 
     @Test
+    public void shouldReturnNothingWhenDhpcdLeaseIsMalformed() throws KuraException {
+        givenDhcpLeaseInfo(
+                "MACX a8:6d:aa:0b:53:ff IP 172.16.1.100 HOSTNAME DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MACX a8:6d:aa:0b:53:ff IP 172.16.1.100 HOSTNAME DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MAC a8:6d:aa:0b:53:ff IPY 172.16.1.100 HOSTNAME DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MAC a8:6d:aa:0b:53:ff IP 172.16.1.100 HOSTNAMET DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MAC a8:6d:aa:0b:53:ff IP 172.16.1.100"
+                        + "IP 172.16.1.100 HOSTNAME DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MAC a8:6d:aa:0b:53:ff HOSTNAME DESKTOP-4E3ACHI BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n"
+                        + "MAC a8:6d:aa:0b:53:ff IP 172.16.1.100 BEGIN 2021-12-17 18:19:13 END 2021-12-17 20:19:13 MANUFACTURER Intel Corporate\n");
+        givenCommandExecutorServiceStub();
+        whenDhcpLeaseIsParsed(DhcpServerTool.DHCPD);
+        thenDhcpLeasesIsEmpty();
+    }
+
+    @Test
     public void shouldReturnUdhcpdLease() throws KuraException {
         givenDhcpLeaseInfo("Mac Address       IP Address      Host Name           Expires in\n" +
                 "a8:6d:aa:0b:53:ff 172.16.1.100    DESKTOP-4E3ACHI      01:28:03");

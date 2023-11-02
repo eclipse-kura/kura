@@ -195,6 +195,16 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void getMarketplacePackageDescriptorShouldFailWithDeploymentAgentServiceThrowing() {
+        givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor();
+        whenRequestIsPerformed(new MethodSpec("GET"),
+                "/_packageDescriptor?url=https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=42");
+
+        thenNoExceptionOccurred();
+        thenResponseCodeIs(500);
+    }
+
+    @Test
     public void getMarketplacePackageDescriptorShouldFailWithWrongUrl() {
         whenRequestIsPerformed(new MethodSpec("GET"),
                 "/_packageDescriptor?url=https://marketplace.ellipse.org/marketplace-client-intro?mpc_install=69");
@@ -315,6 +325,10 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptor) {
         when(deploymentAgentService.getMarketplacePackageDescriptor(anyString())).thenReturn(descriptor);
+    }
+
+    private void givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor() {
+        when(deploymentAgentService.getMarketplacePackageDescriptor(anyString())).thenThrow(new RuntimeException());
     }
 
     /*

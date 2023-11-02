@@ -249,6 +249,16 @@ public class DeploymentRestServiceUnitTest {
     }
 
     @Test
+    public void getMarketplacePackageDescriptorThrowsWhenDeploymentAgentServiceThrows() throws Exception {
+        givenDeploymentRestService();
+        givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor();
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(null);
+
+        thenExceptionOccurred(WebApplicationException.class);
+    }
+
+    @Test
     public void getMarketplacePackageDescriptorWorksWithUrl() throws Exception {
         givenDeploymentRestService();
         givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor.builder()
@@ -336,6 +346,11 @@ public class DeploymentRestServiceUnitTest {
 
     private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptorToBeReturned) {
         when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any())).thenReturn(descriptorToBeReturned);
+    }
+
+    private void givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor() {
+        when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any()))
+                .thenThrow(new RuntimeException());
     }
 
     /*

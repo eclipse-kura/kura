@@ -34,8 +34,8 @@ kura-<kura-version>_generic-<arch>_installer.deb/rpm
 
 where `<arch>` is one of the **supported architectures**: *x86_64*, *arm32*, and *arm64*. A generic Kura profile can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
 
-### RAM Assignent 
-Eclipse Kura's Generic profile incorporates an adaptive RAM allocation system during installation. The RAM allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will allocate 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be allocated.
+### Java Heap Memory Assignment
+Eclipse Kura's Generic profile incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.
 
 ### Initial network configuration
 

@@ -245,6 +245,8 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
+    @Path("/isConnected")
+    @Consumes(MediaType.APPLICATION_JSON)
     public boolean isConnected(String connectionId) {
         try {
             logger.debug(DEBUG_MESSSAGE, "isConnected");

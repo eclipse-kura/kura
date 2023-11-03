@@ -8,14 +8,14 @@ The supported workflows are the following:
 ### Login and resource access workflow
 
 1. Try calling the [GET/xsrfToken](#getxsrftoken) to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.
-
-It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the current session expires, the obtained token is valid as long as the current session is valid.
+  
+    - It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the current session expires, the obtained token is valid as long as the current session is valid.
 
 2. Call the [POST/login/password](#postloginpassword) or [POST/login/certificate](#postlogincertificate) providing the credentials to create a new session.
   
-  The device will return a session cookie with the response, make sure to provide it in successive requests. If the request is performed by a browser, this should be done automatically.
+    - The device will return a session cookie with the response, make sure to provide it in successive requests. If the request is performed by a browser, this should be done automatically.
 
-  If password authentication has been used and the response object reports that a password change is needed, perform the [Update password workflow](#update-password-workflow)
+    - If password authentication has been used and the response object reports that a password change is needed, perform the [Update password workflow](#update-password-workflow)
 
 3. Repeat step 1. to get an XSRF token.
 
@@ -29,42 +29,49 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the curre
 
 3. Repeat the [Authentication and resource access workflow](#authentication-and-resource-access-workflow), starting from step 1.
 
-* Sessions will expire after an inactivity interval that can be configured using the **Session Inactivity Interval (Seconds)** RestService configuration parameter. After session expiration, a new login will be necessary.
 
-* In order to add protection against XSRF attacks, it is necessary to provide an token using the `X-XSRF-Token` HTTP header in all requests. The token can be obtained using the [GET/xsrfToken](#getxsrftoken) endpoint after a successful login.
 
-* Session will be invalidated if the current identity credentials are changed, in this case a new login will be necessary.
+Sessions will expire after an inactivity interval that can be configured using the **Session Inactivity Interval (Seconds)** RestService configuration parameter. After session expiration, a new login will be necessary.
 
-* If a password change is required for the current identity, it will be necessary to perform the [Update password workflow](#update-password-workflow) before being able to access the other resources.
+In order to add protection against XSRF attacks, it is necessary to provide an token using the `X-XSRF-Token` HTTP header in all requests. The token can be obtained using the [GET/xsrfToken](#getxsrftoken) endpoint after a successful login.
+
+Session will be invalidated if the current identity credentials are changed, in this case a new login will be necessary.
+
+If a password change is required for the current identity, it will be necessary to perform the [Update password workflow](#update-password-workflow) before being able to access the other resources.
 
 ## Reference
 
+# Session V1 Rest APIs
   * [Request definitions](#request-definitions)
     * [POST/login/password](#postloginpassword)
     * [POST/login/certificate](#postlogincertificate)
     * [GET/xsrfToken](#getxsrftoken)
     * [POST/logout](#postlogout)
     * [POST/changePassword](#postchangepassword)
+    * [GET/currentIdentity](#getcurrentidentity)
+    * [GET/authenticationMethods](#getauthenticationmethods)
   * [JSON definitions](#json-definitions)
-    * [PasswordAuthenticationResponse](#passwordauthenticationresponse)
+    * [AuthenticationResponse](#authenticationresponse)
     * [UsernamePassword](#usernamepassword)
     * [XSRFToken](#xsrftoken)
     * [PasswordChangeRequest](#passwordchangerequest)
+    * [IdentityInfo](#identityinfo)
+    * [AuthenticationMethodInfo](#authenticationmethodinfo)
     * [GenericFailureReport](#genericfailurereport)
 
 ## Request definitions
 ### POST/login/password
   * **REST API path** : /services/session/v1/login/password
-  * **description** : Creates a new session by providing identity name and password.
+  * **description** : Creates a new session by providing identity name and password. If the response reports that a password change is needed, it is necessary to update the current password in order to be able to access other REST APIs.
   * **request body** :
       * [UsernamePassword](#usernamepassword)
   * **responses** :
       * **200**
           * **description** : Request succeeded.
           * **response body** :
-              * [PasswordAuthenticationResponse](#passwordauthenticationresponse)
+              * [AuthenticationResponse](#authenticationresponse)
       * **401**
-          * **description** : The provided credentials are not correct
+          * **description** : The provided credentials are not correct.
       * **500**
           * **description** : An unexpected error occurred.
           * **response body** :
@@ -72,12 +79,15 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the curre
 
 ### POST/login/certificate
   * **REST API path** : /services/session/v1/login/certificate
-  * **description** : Creates a new session using certificate based authentication. The user must call this endpoint on an HTTPS connection opened by presenting a client certificate which is trusted by the framework and whose common name matches the name of a Kura identity.
+  * **description** : Creates a new session using certificate based authentication. The response will report if the current identity needs a password change for informational purposes only. 
+        If authentication is performed using this endpoint, access to other REST APIs will be allowd even if password change is required for the current identity.
   * **responses** :
-      * **204**
-          * **description** : The status of the network interfaces in the system.
+      * **200**
+          * **description** : Request succeeded.
+          * **response body** :
+              * [AuthenticationResponse](#authenticationresponse)
       * **401**
-          * **description** : The provided credentials are not correct
+          * **description** : The provided credentials are not correct.
       * **500**
           * **description** : An unexpected error occurred.
           * **response body** :
@@ -92,7 +102,7 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the curre
           * **response body** :
               * [XSRFToken](#xsrftoken)
       * **401**
-          * **description** : The current session is not valid
+          * **description** : The current session is not valid.
       * **500**
           * **description** : An unexpected error occurred.
           * **response body** :
@@ -113,14 +123,45 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the curre
 
 ### POST/changePassword
   * **REST API path** : /services/session/v1/changePassword
-  * **description** : Changes the password associated with the current identity.
+  * **description** : Changes the password associated with the current identity. The new password will be validated against the currently configured password strength requirements. 
+        The current password strenght requirements can be retrieved using the `identity/v1/passwordRequirements` endpoint.
   * **request body** :
       * [PasswordChangeRequest](#passwordchangerequest)
   * **responses** :
       * **204**
           * **description** : Request succeeded. The current password has been changed. The session is no longer valid, a new login is required.
       * **400**
-          * **description** : The new password is not valid.
+          * **description** : The new password is not valid. This can be due to the fact that it does not fullfill the current password strenght requirements.
+      * **401**
+          * **description** : The current session is not valid.
+      * **500**
+          * **description** : An unexpected error occurred.
+          * **response body** :
+              * [GenericFailureReport](#genericfailurereport)
+
+### GET/currentIdentity
+  * **REST API path** : /services/session/v1/currentIdentity
+  * **description** : Provides information about the currently authenticated identity.
+  * **responses** :
+      * **200**
+          * **description** : Request succeeded
+          * **response body** :
+              * [IdentityInfo](#identityinfo)
+      * **401**
+          * **description** : The current session is not valid.
+      * **500**
+          * **description** : An unexpected error occurred.
+          * **response body** :
+              * [GenericFailureReport](#genericfailurereport)
+
+### GET/authenticationMethods
+  * **REST API path** : /services/session/v1/authenticationMethods
+  * **description** : Provides information about the available authentication methods.
+  * **responses** :
+      * **200**
+          * **description** : Request succeeded
+          * **response body** :
+              * [AuthenticationMethodInfo](#authenticationmethodinfo)
       * **401**
           * **description** : The current session is not valid.
       * **500**
@@ -129,13 +170,18 @@ It is not necessary to call [GET/xsrfToken](#getxsrftoken) again until the curre
               * [GenericFailureReport](#genericfailurereport)
 
 ## JSON definitions
-### PasswordAuthenticationResponse
-Represents the response for a successful password authentication request.
+### AuthenticationResponse
+Represents the response for a successful authentication request.
 
 <br>**Properties**:
 
   * **passwordChangeNeeded**: `bool` 
-      Determines whether the user needs to change its current password before being able to access REST APIs.
+      Determines whether a password change is required for the current identity.
+
+  
+  * **message**: `bool` (**optional**)
+      Reports the content of the Login Banner, if configured on the device. A browser based application should display this message to the user after login if this property is set.
+            This property will be missing if the login banner is not enabled.
 
   
 
@@ -144,8 +190,14 @@ Represents the response for a successful password authentication request.
   "passwordChangeNeeded": true
 }
 ```
+```json
+{
+  "message": "login banner content",
+  "passwordChangeNeeded": true
+}
+```
 ### UsernamePassword
-Contains an username and password
+Contains an username and password.
 
 <br>**Properties**:
 
@@ -154,7 +206,7 @@ Contains an username and password
 
   
   * **password**: `string` 
-      The user password
+      The user password.
 
   
 
@@ -165,7 +217,7 @@ Contains an username and password
 }
 ```
 ### XSRFToken
-An object containing an XSRF token
+An object containing an XSRF token.
 
 <br>**Properties**:
 
@@ -180,7 +232,7 @@ An object containing an XSRF token
 }
 ```
 ### PasswordChangeRequest
-An object containing the current password and a new password
+An object containing the current password and a new password.
 
 <br>**Properties**:
 
@@ -197,6 +249,75 @@ An object containing the current password and a new password
 {
   "currentPassword": "foo",
   "newPassword": "bar"
+}
+```
+### IdentityInfo
+An object containing information about the current identity
+
+<br>**Properties**:
+
+  * **name**: `string` 
+      The name of the current identity.
+
+  
+  * **passwordChangeNeeded**: `bool` 
+      Determines whether a password change is required for the current identity.
+
+  
+  * **permissions**: `array` 
+      The list of permissions assigned to the current identity.
+
+      * array element type: `string`
+          The permission name.
+
+  
+
+```json
+{
+  "name": "foo",
+  "passwordChangeNeeded": false,
+  "permissions": [
+    "rest.bar",
+    "rest.assets",
+    "rest.foo"
+  ]
+}
+```
+### AuthenticationMethodInfo
+An object containing information about the enabled authentication methods.
+
+<br>**Properties**:
+
+  * **passwordAuthenticationEnabled**: `bool` 
+      Reports whether authentication using the `login/password` endpoint is enabled.
+
+  
+  * **certificateAuthenticationEnabled**: `bool` 
+      Reports whether authentication using the `login/certificate` endpoint is enabled.
+
+  
+  * **certificateAuthenticationPorts**: `array` (**optional**)
+      The list of ports available for certificate based authentication. This property will be present only if `certificateAuthenticationEnabled` is true
+
+      * array element type: `string`
+          A port that can be used for certificate based authentication.
+
+  
+
+```json
+{
+  "certificateAuthenticationEnabled": false,
+  "passwordAuthenticationEnabled": true
+}
+```
+```json
+{
+  "certificateAuthenticationEnabled": true,
+  "certificateAuthenticationPorts": [
+    4443,
+    4444
+  ],
+  "passwordAuthenticationEnabled": true
 }
 ```
 ### GenericFailureReport

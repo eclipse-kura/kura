@@ -38,12 +38,12 @@ public class ComponentUtils {
     }
 
     public static ComponentConfiguration getComponentConfiguration(ConfigurationService cs,
-            ConfigComponentDTO gwtCompConfig) throws KuraException {
+            ConfigComponentDTO componentConfig) throws KuraException {
         Map<String, Object> properties = new HashMap<>();
-        ComponentConfiguration currentCC = cs.getComponentConfiguration(gwtCompConfig.getComponentId());
+        ComponentConfiguration currentCC = cs.getComponentConfiguration(componentConfig.getComponentId());
 
         Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
-        for (ConfigParameterDTO gwtConfigParam : gwtCompConfig.getParameters()) {
+        for (ConfigParameterDTO gwtConfigParam : componentConfig.getParameters()) {
             Object objValue;
             Object currentValue = currentConfigProp.get(gwtConfigParam.getId());
 

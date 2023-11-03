@@ -100,7 +100,7 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/stackConfigurations/byFactoryPid")
+    @Path("/stackConfigurations")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<ConfigComponentDTO> getStackConfigurationsByFactory(final PidsDTO pidsDTO) {
@@ -115,14 +115,14 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/suggestedCloudServicePid/byFactoryPid")
+    @Path("/suggestedCloudServicePid")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public PidsDTO findSuggestedCloudServicePid(final PidsDTO pidsDTO) {
         try {
             logger.debug(DEBUG_MESSSAGE, "findSuggestedCloudServicePid");
             PidsDTO cloudServicePid = new PidsDTO();
-            pidsDTO.setCloudServicePid(
+            cloudServicePid.setCloudServicePid(
                     this.cloudConnectionService.findSuggestedCloudServicePid(pidsDTO.getFactoryPid()));
             return cloudServicePid;
         } catch (Exception e) {

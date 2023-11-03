@@ -11,7 +11,7 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.internal.rest.identity.provider.validator;
+package org.eclipse.kura.util.validation;
 
 import java.util.function.Consumer;
 

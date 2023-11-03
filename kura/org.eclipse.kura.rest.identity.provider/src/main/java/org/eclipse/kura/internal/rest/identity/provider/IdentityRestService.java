@@ -31,14 +31,15 @@ import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
-import org.eclipse.kura.internal.rest.identity.provider.validator.ValidatorOptions;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
+import org.eclipse.kura.util.validation.ValidatorOptions;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("restriction")
 @Path("identity/v1")
 public class IdentityRestService {
 

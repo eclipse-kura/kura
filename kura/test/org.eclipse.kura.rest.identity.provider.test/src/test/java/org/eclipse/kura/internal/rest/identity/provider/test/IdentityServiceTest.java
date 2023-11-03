@@ -42,7 +42,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
-import org.eclipse.kura.internal.rest.identity.provider.validator.ValidatorOptions;
+import org.eclipse.kura.util.validation.ValidatorOptions;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.useradmin.Group;
@@ -50,6 +50,7 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
+@SuppressWarnings("restriction")
 public class IdentityServiceTest {
 
     private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";

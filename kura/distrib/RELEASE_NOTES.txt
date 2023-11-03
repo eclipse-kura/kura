@@ -1,2032 +1,368 @@
-Eclipse Kura - 4.1.1   - May 2020
--------------------------------------------------------------------------
+Eclipse Kura - 5.4.0-SNAPSHOT - November 2023
+-------------------------------------------------------------------------------------------------
 Description:
-Eclipse Kura 4.1.1 is a service release to address various discovered bugs and functional issues.
+[TODO]
 
-
-Changes:
-  * Enhancements
-    * Enhanced the modem support with Huawei MS2372, Zte ME3630, SimTech SIM7000 LTE NB-IOT, Quectel EG25
-
-  * Target Platform Updates
-    * Jetty 9.4.19.v20190610
-    * H2DB 1.4.199
-    * Paho 1.2.1.k2
-
-  * Bug fixes and cleanups
-    * Fixed modem reset issue when the value is configured to 0 (no reset)
-    * Fixed issue with multiple cloud connections
-    * Fixed issue with parsing of ip route command
-    * Fixed issue where assets with only write channels still can call driver.read() method
-    * Fixed issue with token bucket where a change of system type can inpact with the token bucket functionality
-    * Fixed issue where a change in system tyme could impact the Wires Timer
-    * Fixed issue with Asset channel restore functionality
-    * Fixed issue with DEPLOY-V2 failure message publishing
-    * Fixed issue with Paho overriding SSL settings
-    * Fixed issue in CanConnection service with multiple can interfaces
-    * Fixed issue with modem switching from data mode to command mode
-    * Fixed issues with modem reset
-
-
-Compatibility:
-  * Eclipse Kura v4.1.1 does not introduce API breakage with previous releases.
-  * Kura 4.1.1 introduces H2DB v.1.4.199 that requires to delete/upgrade the existing persisted database to be 
-    compatible with this new version. Please refer to http://www.h2database.com/html/tutorial.html#upgrade_backup_restore
-
-
-Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3 based on Raspbian
-    * Intel Up Squared board running Ubuntu 18  
-    * Intel Up Squared board running Centos 7 (Experimental)
-    * Rock960 ARM_64 running Ubuntu 16 (NN version only)
-  * Kura is also available as a pre-built Docker container 
-
-
-Bug Fixes :
-  * Fixed github issues:
-    * #2831: ModemMonitorServiceImpl should use monotonic clock
-    * #2828: Improve modem help section
-    * #2827: Entering wrong dial string and APN can cause a reset loop
-    * #2825: Kura 4.1.x SupportedUsbModems isAttached method can fail
-    * #2822: CommConnectionImpl constructor does not close the serial port on failure
-    * #2820: Modem reset can lead to SIM card not ready
-    * #2811: CanConnection service with multiple can interfaces
-    * #2809: Unescaped loop on modem reset failure
-    * #2800: Switching from data mode to command mode does not work in pppd chat script
-    * #2793: Paho 1.2.1 overrides Kura SSL configuration
-    * #2759: [DEPLOY-V2] Failure status reported by a verifier script is not published
-    * #2679: One of two CloudConnections sometimes fails to connect and never tries to reconnect
-    * #2639: Asset configuration reseted after uploading new channels
-    * #2626: Asset with only write channels still calls driver.read() method
-    * #2605: Wires Timer stop ticking if system time is set in the past
-    * #2581: [DataService] Use System.nanoTime for token bucket 
-    * #2580: Setting modem reset timeout to 0 causes the modem to reset indefinitely
-    * #2540: Default gateway is not correctly parsed
-    * #2437: Add support for Huawei modem MS2372
-
-  * Merged no issue-related Pull Requests:
-    * #2805: Added policies to iptables
-    * #2804: Fixed DB bundle reference in dev-env.
-    * #2665: Added support for Quectel EG25
-    * #2622: Support for SimTech SIM7000 LTE NB-IOT modem
-    * #2611: Zte ME3630 LTE modem support 
-    * #2558: udhcpc pid file parameter fix
-    * #2511: Updating jetty to 9.4.19.v20190610
-    * #2484: Fixed H2db invocation in config.ini file. 
-    * #2466: Updated H2DB to version 1.4.199
-    * #2404: HostapdManager: use absolute path to pid file instead of relative
-    
-    
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE also tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection will encounter a failure.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #2414: Rock 960: cannot get client id
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #2013: Unsaved changes dialog triggers incorrectly
-  * #1993: Search Domains Are Not Supported
-  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1533: MqttDataTransport client-id illegal character
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-
-
-Eclipse Kura - 4.1.0
--------------------------------------------------------------------------
-Description:
-Eclipse Kura 4.1.0 is a minor release dedicated to introduce several new features and continue the process of overall usability improvement.
-The development team spent also a lot of effort trying to refactor and improve the overall code quality.
-
-
-New and Noteworthy:
-  * APIs
-    * New APIs for KuraBirthPayload, KuraDeviceProfile, KuraDisconnectPayload
-  
-  * Features and Enhancements
-    * Enhanced the JSON Service with JSON Message marshalling/unmarshalling
-    * Added timestamp to Lifecycle Messages
-
-  * Target Platform Updates
-    * Google Guava 25.0-jre
-    * Eclipse Milo 0.2.4
-    * Apache Fileupload 1.3.3
-    * Apache Artemis 2.6.4
-    * Eclipse Paho 1.2.1
-
-  * Bug fixes and cleanups
-    * Fixed unnecessary escaping in Drivers and Assets UI
-    * Fixed issue where asset failure messages were not displayed
-    * Fixed a bug where the user could not set cellular attempts option to 0
-    * Fixed incompatibility with systems without iwlist
-    * Solved a possible OSGi framework refresh when a dp is uninstalled or reinstalled 
-    * DEPLOY-V2 cloudlet fixes for GET calls
-
-
-Deprecated APIs:
-  * Deprecated old Bluetooth APIs not based on tinyB
-
-
-Compatibility:
-  * Eclipse Kura v4.1.0 does not introduce API breakage with previous releases.
-  * The Command Service is now disabled by default. To use it, the user needs to opt-in to this feature, enabling the service
-    from configuration.
-
-
-Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3 based on Raspbian
-    * Intel Up Squared board running Ubuntu 16  
-    * Intel Up Squared board running Centos 7 (Experimental)
-    * Rock960 ARM_64 running Ubuntu 16 (NN version only)
-  * Kura is also available as a pre-built Docker container 
-  
-
-Security Fixes:
-  * CVE-2016-1000031
-  * CVE-2018-10237
-  * CVE-2019-10242
-  * CVE-2019-10243
-  * CVE-2019-10244
-
-
-Bug Fixes :
-  * Fixed github issues:
-    * #2423: [Kura QA 4.1.0] Emulator in Oomph installer
-    * #2421: Artemis Server manager NullPointer exception
-    * #2418: Kura does not support systems without iwlist
-    * #2417: [Kura 4.1.0 QA] Asset configuration radio buttons
-    * #2412: Paho issue with WS broker
-    * #2407: Can't set cellular connection attempts to 0
-    * #2399: Update Paho to latest version available
-    * #2389: Unnecessary escaping in Drivers and Assets data UI
-    * #2388: Update Artemis to 2.6.4
-    * #2382: Asset operation failure messages are not always shown
-    * #2372: Add Timestamp to Lifecycle Messages
-    * #2353: [ConfigurationService] Loading unencrypted snapshots discards line breaks
-    * #2352: Guava CVE-2018-10237
-    * #2334: The old Bluetooth APIs should be deprecated
-    * #2330: BLE Beacon data assembly overflow
-    * #2324: Possible OSGi framework refresh when a dp is reinstalled
-    * #2313: Typos in ExamplePublisher metric name and descriptions
-    * #2301: kura.data.dir unused
-    * #2300: Drivers and Assets description is appended
-    * #2296: The BluetoothLE example fails when the cloudPublisher is undefined
-    * #2290: [Kura 4.0.0 QA] Shutdown issue when started multiple times
-    * #2256: Deploy-V2 cloudlet GET status stops responding
-    * #2069: Marketplace install when LAN-only
-    * #362:  Uninstaller leaves most of the files
-
-  * Merged no issue-related Pull Requests:
-    * #2432: Fix GPS enable when PPP is not configured
-    * #2429: Fixed NPE on DhcpClientLeaseBlock
-    * #2416: Fixed issues for Kura on Intel UP2 Ubuntu
-    * #2395: Removed wrong if section in emulator position.
-    * #2394: Fixed lint issues
-    * #2387: CentOS/RPM uninstallation cleanup
-    * #2386: OPCUA Driver updates
-    * #2385: Solved some new lint issues.
-    * #2380: Fixed lint issues
-    * #2379: Moved KuraBirthPayload, KuraDeviceProfile and KuraDisconnectPayload to APIs
-    * #2377: Added missing byte array conversion in optimiser library
-    * #2376: Changes to expose simple message creation in corresponding JSON service
-    * #2373: Added support for null notification publisher in deploy-v2.
-    * #2370: Cleanup Kura folders
-    * #2368: Implemented fixes for possible XXE attacks to XML parsers.
-    * #2366: Changed joint shapes file to default and applied corresponding changes in wires_composer.js file.
-    * #2362: Fixed regression when saving empty wire graph
-    * #2358: Fixed few more lint issues.
-    * #2357: Fixed notification publisher topic.
-    * #2355: Fixed regression in CloudService tab ordering
-    * #2349: Added check for resolv.conf symlink
-    * #2348: Improved Web UI configuration loading
-    * #2347: Solved some blocking lint issues
-    * #2346: Changes to solve lint issues in CloudConnectionStatus.
-    * #2345: Fixed lint issue
-    * #2344: Solved some major lint issues in MqttDataTransport.java
-    * #2343: Removed stale cmpn references. 
-    * #2342: Refactored console code in web2 bundle.
-    * #2333: Another tentative fix to solve lint issue in file check
-    * #2331: Removed osgi.cmpn api bundle.
-    * #2329: Updated retrieving of system parameters on Windows
-    * #2328: Solved some more lint issues
-    * #2327: Changes to fix possible path injection attack in skinServlet.
-    * #2325: Few lint issues fixes
-    * #2309: Always use double as GainOffset return type
-    * #2305: Remove the Jetty version from Server reply.
-    * #2306: Removed unnecessary jaxb imports 
-    * #2302: Provide class to LogManager.getLogger()
-    
-    
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE also tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection will encounter a failure.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #2414: Rock 960: cannot get client id
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #2013: Unsaved changes dialog triggers incorrectly
-  * #1993: Search Domains Are Not Supported
-  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1533: MqttDataTransport client-id illegal character
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-
-
-Eclipse Kura - 4.0.0
--------------------------------------------------------------------------
-Description:
-Eclipse Kura 4.0.0, compatible with Java 9 and OSGi R6, introduces a new model that simplifies plugging new cloud connection implementations.
-It brings up a restructuring of the networking part to make it more pluggable and expandable, new drivers and supported platforms, as well as 
-improvements to usability and bug fixes.
-Being a major release, it also includes breaking changes and removes support for code and platforms no longer maintained by the original contributors.
-
-
-New and Noteworthy:
-  * APIs
-    * Cloud Connections: New Cloud Connections APIs that simplify the integration of third party cloud providers, simplifying the development of 
-      user applications  
-    * Alerts: New Alerting model for special type of messages generated from the device
-    * New Bluetooth LE APIs to leverage new TinyB features: updated the TinyB library and updated Kura APIs to leverage the new changes provided 
-      by the referenced library 
-  
-  * Features
-    * Eclipse IoT WG Cloud Connection: A new Cloud Connection provider that leverages the new Cloud Connections APIs and enables Kura to connect 
-      with remote providers that support the new Eclipse IoT WG Namespace. E.g. this provider supports the integration with Eclipse Hono through 
-      the MQTT Adapter 
-    * Kura Docker container: New Docker Container that wraps in a Centos 7 environment a Kura No Network installation. 
-    * Upload of Asset channels from CSV file: In the Asset view, the user can now download and upload channel descriptions as CSV files.
-
-  * Enhancements
-  	* Non-blocking assets configuration updates
-  	* Wires Graph Blinking rate limit 
-  	* Added fix validity, latitude and longitude hemisphere fields to GPS NMEA Position 
-  	* Reduced CPU usage by Kura Wires
-
-  * Refactor and Cleanup
-    * Modular support of new platforms: Refactoring of framework structure to support, in a pluggable way, different operating systems and 
-      service managers (SysV, Systemd)
-    * SSL Manager Service: Service refactoring and cleanup. By default, Kura uses for secure communications its own cacerts.ks keystore instead 
-      of the one provided by the Java VM. The default installation provides a cacerts.ks keystore that contains only the Eclipse leaf certificate. 
-      To connect to a different provider or broker, the user must install the corresponding certificate in the cacerts.ks keystore, for example 
-      using the Kura web UI.  
-    * New framework folder structure: The framework folder structure has been redesigned to simplify the user interaction.
-
-  * Drivers
-    * New drivers available also in the Eclipse Kura Marketplace:
-      * iBeacon Scanner
-      * Eddystone Scanner
-      * Dummy Driver
-
-  * New Hardware Platforms and Distributions
-    * Intel UP Square Boards running Ubuntu and CentOS
-    * Rockchip Rock960 AARCH 64 running Ubuntu
-
-  * Target Platform Updates
-    * Eclipse Equinox 3.12.50 (Oxygen)
-    * Eclipse Milo 0.2.1
-    * Apache Log4j2 2.8.2
-    * SLF4J 1.7.25
-    * Apache Artemis 2.5.0
-    * Apache Camel 2.21.1
-    * Intel Tinyb 0.5.1
-    * Eclipse Paho 1.2.0
-    * GWT 1.8.2
-
-  * Breaking Changes:
-    * Removed APIs and implementation supporting HSQLDB
-    * org.eclipse.kura.net package cleanup and removal of deprecated APIs
-    * Removed deprecated newWireSupport as causing invocation loop
-    * Removed SslManagerServiceOptions class and modified SSLManagerService APIs
-    * Modified "verifySignature" method in Certificates APIs to accept, as first argument, KuraApplicationTopic instead of KuraTopic
-    * Removed WireService API and references
-
-  * Deprecated APIs
-    * KuraTopic
-    * CloudCallService
-    * CloudClient
-    * CloudClientListener
-    * Cloudlet
-    * CloudletTopic
-    * CloudService
-    * CloudServiceFactory
- 
-  * Discontinued Hardware Platforms and Distributions:
-    * Intel Edison
-    * TI BeagleBone Black
-    * PC Engines APU
-    * Fedora distribution for the Raspberry Pi
-    * Raspberry Pi B+
-    * AARCH64
-
-  * Unmaintained Code
-    * Karaf
-
-
-Compatibility:
-  * Eclipse Kura v4.0.0 introduces API breakage with previous releases.
-  * Containing a folder restructuring, a cleanup of the destination filesystem is required before installing the new version of Kura
-  * The Command Service is now disabled by default. To use it, the user needs to opt-in to this feature, enabling the service
-    from configuration.
-
-
-Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3 based on Raspbian
-    * Intel Up Squared board running Ubuntu 16  
-    * Intel Up Squared board running Centos 7 (Experimental)
-    * Rock960 ARM_64 running Ubuntu 16 (NN version only)
-  * Kura is also available as a pre-built Docker container 
-
-
-Bug Fixes :
-  * Fixed github issues:
-    * #2279: [Kura 4.0.0 QA] Service disappears from menu when reconfigured
-    * #2278: Firewall, "Open port" dialog validation
-    * #2272: Asset CSV upload/download issues if AD name and id differs
-    * #2271: [Kura 4.0.0 QA] Adding wires components in IE/Edge
-    * #2264: [Cellular] PDP Auth failed using context #1 in 4G network (Telit LE910-EU1 and LE910-V2 EU, possibly NA versions)
-    * #2263: Cloud connections table refresh
-    * #2262: Cloud connection PID validation
-    * #2243: [Security] Possible XML External Entity (XXE) attack
-    * #2239: WireAsset Configuration UI check box status can not be saved
-    * #2233: Create CloudServiceFromFactory and Delete CloudServiceFromFactory cause null reference
-    * #2232: Linker issue with tinyb
-    * #2224: Wire Publisher can't initialize properly at kura start
-    * #2219: Update Jetty to version 9.4.12
-    * #2215: NPE during package installation via cloud
-    * #2213: Update TinyB and Bluetooth API
-    * #2210: Remove HSQL db support from code and implementation
-    * #2205: [OPC-UA Driver] Authentication not working
-    * #2202: [DhcpClientLeaseBlock] Failed to add a lease block due to an error parsing dhclient lease file
-    * #2199: BLE iBeacon scanner configuration not synched with code
-    * #2196: BLE provider logging failure
-    * #2189: HTTPS redirects to HTTP
-    * #2185: [Test] Cleanup tycho-surefire-plugin configurations a bit
-    * #2184: [ConfigurationService] XML Marshaling Providers need to be started before
-    * #2181: H2DB file fragmentation
-    * #2169: H2DB file corruption
-    * #2164: [Asset] Make configuration updates non-blocking
-    * #2163: [Paho] WSS connection break silently after a few hours
-    * #2162: [Wires] Implement rate limit in servlet for wires blinking
-    * #2158: [GPS] Add missing fields in NMEA Position
-    * #2153: [DEPLOY-V2] intallVerificationDir is never initialized
-    * #2149: Cloud zip file upload
-    * #2145: Remove libmatthew-java
-    * #2143: Camel XML router service missing
-    * #2138: Cloud service selection in examples
-    * #2125: Impossible to upload device key pair
-    * #2120: BeaconScanner example publishes with qos 2
-    * #2117: Remove Windows bundles
-    * #2115: Artemis 2.5.0 and dev-env
-    * #2114: Review supported platforms
-    * #2110: Add Dummy Driver
-    * #2108: Create a new Cloud Stack for the new D2C Messaging
-    * #2107: Integrate Device to Cloud (D2C) Interaction Type
-    * #2102: emitAllReadChannels method doesn't handle Runtime exceptions
-    * #2101: [Web UI | Driver and Assets]: Show the Asset Read Error Message
-    * #2096: [NetAdmin] Issues using GPS if modem has never been enabled
-    * #2091: version `GLIBCXX_3.4.20' not found 
-    * #2089: [NetAdmin] Some state of the logic that manages modems persists across resets
-    * #2087: [NetAdmin] Race condition between NetAdmin and PositionService after modem reset
-    * #2085: [NetAdmin] Fix AT escape sequence timings in TelitModem
-    * #2079: Empty channel descriptor
-    * #2078: Native Support for UP Development Kit
-    * #2072: Weird behaviour on webUI when click on CloudServices
-    * #2070: Icon not working for factory components
-    * #2068: The duration of Beacon scan should be in seconds
-    * #2067: DataService enable.recovery.on.connection.failure is causing a reboot systematic on first boot
-    * #2065: [Web2] AlertDialog causes duplicate ids
-    * #2057: Upgrade Camel version to 2.21.1
-    * #2055: DefaultCloudServiceFactory manages all CloudServiceImpl instances
-    * #2050: Modem monitor in Not connected state does not trigger reset
-    * #2045: Add support for CloudConnectionStatus with inverted gpio LED
-    * #2040: [Kura 3.2.0 QA] PositionService does not switch between GPS and static position
-    * #2037: The interface number for usb tty devices should be retrieved by the native library
-    * #1999: Connection refresh sometimes causes duplicate entries
-    * #1957: [Wires] Allow using the component name as label
-    * #1933: Support SCR/Declarative Services 1.3+
-    * #1921: Consider using EquinoxLauncher instead of the EclipseStarter
-    * #1911: [Artemis] Upgrade to version 2.5.0
-    * #1849: SSL Configuration - Keystore path change doesn't work
-    * #1644: [Artemis] MQTT clients fail to reconnect after the broker is restarted 
-    * #1358: [GPS] With a USB GPS device, the position service keeps reporting the old position
-    * #1255: Switch away from log4j 1.x
-    * #1186: Get ready for Java 9
-    * #689:  Upgrade to Camel 2.18.x
-    * #673:  CloudServiceFactory deleteConfiguration
-    * #651:  Call to "exit()" in native code
-    * #520:  [Net] PppFactory is not a factory and its design is wrong
-    * #518:  [Net] Modem monitor concurrency issue with multiple modems
-    * #208:  Include camel-amqp component jar in base distribution
-    * #181:  [GPS] position service: code review
-
-  * Merged no issue-related Pull Requests:
-    * #2288: Changes to prevent usage of the same db table between different cloud connections
-    * #2285: Changes to the binary parser library
-    * #2276: Changed validity checks for RMC strings
-    * #2273: Fixed dev-env launch configs.
-    * #2270: Updated Eclipse SSL cert to enable connection to Eclipse Mqtt broker. 
-    * #2269: Set the command service as disabled per default.
-    * #2266: Disabled apparmor at framework installation.
-    * #2260: Fixed modem monitor
-    * #2259: Fix wrong reference to certificate servlet.
-    * #2257: Update to equinox wireadmin 1.0.800
-    * #2255: Added the interfaceName as argument in monitor listeners; fixed NPE
-    * #2251: Fixed old wireService reference.
-    * #2231: Avoid saving snapshot at shutdown
-    * #2230: Fixed cloud connection status url linux path parsing
-    * #2229: Add another type converter for Wires/Camel integration
-    * #2228: Fix a typo in the log message
-    * #2221: Fixed notification publisher topic.
-    * #2222: Fixed change in asset configuration property types
-    * #2216: Implemented forcing endpoint URL in OPCUA driver
-    * #2212: Improved subscription management in default CloudEndpoint
-    * #2198: Synchronized BLE iBeacon scanner configuration with code
-    * #2194: Updated configuration label in BLE example
-    * #2192: Stop default H2 db service
-    * #2191: Set payload timestamp in BLE scanner examples
-    * #2188: Use log4j2 in emulator and tests
-    * #2175: NMEAParser class cleanup
-    * #2173: Implemented nonblocking config update for s7 driver
-    * #2126: Updated wires devel components to use new API 
-    * #2112: Fix the creating of a random topic
-    * #2099: Save two process forks when writing the config files
-    * #2094: Sort interfaces alphabetically
-    * #2083: Improve debug output of known wires
-    * #2081: Fix Wire component labels
-    * #2071: Simplify ifcfg config
-    * #2063: Fix a NPE and provide proper cause of error
-    * #2061: Fixed lint issues
-    * #2053: Update to Eclipse Milo 0.2.1
-    * #2041: Started fixing archetype
-    * #1978: Modbus TCP incorrectly reads frame length
-    * #1940: Solved some possible NPEs in web2 bundle.
-    * #820:  Upgrade to GWT 2.8.2
-    
-    
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE also tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection will encounter a failure.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #2069: Marketplace install when LAN-only
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #2013: Unsaved changes dialog triggers incorrectly
-  * #1993: Search Domains Are Not Supported
-  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1533: MqttDataTransport client-id illegal character
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #362:  Uninstaller leaves most of the files
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-
-
-Eclipse Kura - 3.2.0
--------------------------------------------------------------------------
-Added Features :
-  * Multiport Wires Components: Add Wires components with multiple input/output ports to allow 
-    for better routing of data through the Wire Graph. With the addition of new arithmetic and conditional 
-    Components, this will allow more flexibility and usability in creating logical flows through the Graph.
-  * Wires Conditional Component: Add Wires component that facilitates if/then/else logic.
-  * Wire Arithmetic Component: Add Wires component that facilitates basic arithmetic functions. 
-    This bundle is available as an example project.
-  * Wires Statistical Component: Add Wires component that performs basic statistical analysis. 
-    This bundle is available as an example project.
-  * Wires Join Component: Add Wires component that performs join operations.
-  * Wire Publisher Position: Add support for device position in published messages. The user can decide 
-    whether or not having the position included in messages published to the cloud and also the verbosity 
-    of the position information included.
-  * Wire Graph export: Add support, in the wire composer, to export only a working wire graph.
-  * Assets: Add support for event driven Drivers
-  * Assets: Channels can now be individually enabled and disabled. 
-  * Drivers: To further extend the usability of Kura, new Drivers for GPIO, Raspberry Pi SenseHAT, 
-    and Event Driven Drivers will be introduced.
-
-Compatibility:
-  * Eclipse Kura v3.2.0 does not introduce API breakage with previous releases.
-
-Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi based on Raspbian: Raspberry Pi, Raspberry Pi B+, Raspberry Pi 2/3
-    * BeagleBone Black based on Debian
-    * Fedora on ARM (Experimental) 
-    * Intel Edison (Experimental)
-    * APU Debian (Experimental)
-    * ARM_64 Debian (Experimental)
-
-Bug Fixes :
-  * Fixed github issues:
-    * #2042: Switching network interface status from 'L2Only' to 'Unmanaged' doesn't work.
-    * #2022: Factories don't get removed from creation dialog
-    * #2020: Wrong column content in assert/driver view
-    * #2015: New Factory Component - drop-down-list item missing for a installed package
-    * #2014: Deleting a component keeps tab open
-    * #2012: DB-H2-012 fails
-    * #2010: Exception when disabling watchdog
-    * #2009: DATA-LIMIT-001 fails
-    * #2007: Array validation doesn't work properly
-    * #2002: DEN-DEPLOY-005 failed
-    * #1997: Improve dhcpd shutdown logic
-    * #1853: SensorTagDriver sometimes fails to connect to the SensorTag
-    * #1975: [Kura 3.2.0 QA] Warning logged uploading and old Asset snapshot
-    * #1973: [Kura 3.2.0 QA] Wire graph snapshot includes the Meta Type OCD
-    * #1971: EthernetMonitor can't monitor more than two ethernet interfaces
-    * #1970: [Kura 3.2.0 QA] Multiple handling of PositionLocked
-    * #1959: [Web] Escaping doesn't seem to work properly
-    * #1956: [Wires] Creating a component named ")" is possible
-    * #1955: [Wires] New Wire Component name entry field is broken
-    * #1941: [DbDataStore] Stale messages not purged with timezone other than UTC
-    * #1936: [Driver] Improve the way Driver instances are shared between consumers
-    * #1928: Removing and reinstalling the Script Filter dp causes a lot of components to be restarted
-    * #1924: [Wires] Script Filter and Conditional use different syntax
-    * #1914: User should be able to set PDP context number for setting APN.
-    * #1907: [WireAsset] Implement Driver generated single timestamp
-    * #1906: [Wires] Download graph as a (partial) configuration snapshot
-    * #1905: [WirePublisher] Add option to publish the geographic position
-    * #1902: Allow to enable/disable channels in asset configuration
-    * #1894: Show Wire Component description in the Web Ui
-    * #1892: Add SenseHat Driver
-    * #1886: Package unistall error
-    * #1878: Add support for "Unmanaged" mode for network interfaces.
-    * #1876: Packages URL downloader does not use Kura's SSLContext
-    * #1874: Change the reboot cause string
-    * #1870: Develop a GPIO Driver for Kura Wires
-    * #1863: IBeacon decoder index out of bounds
-    * #1861: Implement a WireAsset reacting to channel changes
-    * #1859: [Drivers and Assets] The channels names and labels in dropdown lists aren't sorted
-    * #1856: DEPLOY-V2: download always uses the defalut java keystore
-    * #1843: BaseChannelDescriptor contains some inconsistencies
-    * #1840: [OPC-UA] Improve type conversions in OPC-UA driver
-    * #1836: Jetty security issue
-    * #1835: [Documentation] AWS connection needs TLSv1.2
-    * #1834: [OPC-UA] The OPC-UA driver should not specify timestamps on write requests
-    * #1826: LE910 V1 doesn't turn back on at modem reset.
-    * #1823: Failure to submit Wifi configuration when wifi password (PSK) ends with the $.
-    * #1822: [Wires] Faulty refresh in Chrome
-    * #1821: [Wires] New Wires features don't work in IE
-    * #1816: [Emulator] NumberFormatException while installing new packages
-    * #1815: [Wires] Channel timestamp should be optional
-    * #1813: Marketplace dp installation popup drop-zone
-    * #1812: [PortFwd] Fields for internal and external ports mixed up
-    * #1811: Wires: Multi-port components and graph execution model
-    * #1809: [Wires] Drag and drop should respect canvas grid
-    * #1808: Define the JSON WireService persistence form
-    * #1807: [Wires] Add Component Multi Port support
-    * #1802: [Wires Refactoring] Wires WebUi refactoring
-    * #1801: Refactor Wires js code. GWT client should be the orchestrator.
-    * #1800: Modify Client code so GWT client prepares wire component configuration from GwtWireGraphConfiguration
-    * #1799: Modify code so GWT client calls jointjs to build graph from GwtWireGraph
-    * #1798: Move Wires-related code out of the GWT Server part
-    * #1797: [Wires Refactoring] Implement new Wires APIs
-    * #1796: [Wires Refactoring] Review APIs
-    * #1795: Refactor WireServiceImpl to also implement WireGraphService
-    * #1793: Update ConfigurationService API with new methods to handle factory OCDs
-    * #1792: Define WireGraphService and deprecate WireService
-    * #1786: Wire publisher do not include a timestamp in the message
-    * #1778: [Wires] Web Ui error when deleting a not saved component
-    * #1777: [Wires] Drag and drop glitch
-    * #1776: [Wires] Add a refresh button in Wire Composer
-    * #1773: Kura DB Store Query
-    * #1772: Remove the icons from the "new component" dialog
-    * #1770: CloudService instance hint should be persistent while the user writes
-    * #1761: NetworkAdminServiceImpl: submitFirewallConfiguration blocks for 30 seconds
-    * #1758: [Web UI] Initial page view on a narrow screen
-    * #1757: Remove GpsClockSyncProvider in Clock Service
-    * #1753: Typo in Eddystone provider component definition
-    * #1737: CloudClient subscribes to more topics than requested
-    * #1734: Display of asset channel data in WebUI in case of failures
-    * #1703: [Kura 3.1.0 QA] Wires page jumping up and down
-    * #1700: [Kura 3.1.0 QA] Rollback doesn't restore deleted services
-    * #1689: Instaling a dp can cause the WebUI to restart
-    * #1657: Bluetooth notifications do not work
-    * #1632: Cleanup old scripts in distrib/resources folder
-    * #1268: [WebUI] Usability Improvements
-    * #1213: [Wires] Should DB Filter clean the cache on empty result set?
-    * #1193: [Wires] Component avoidance during initial placement
-    * #1188: [Wires] Components can be hidden outside the graph area
-    * #1092: Possible NPE and non-working check
-    * #890: [Kura 2.1.0 QA] Snapshot management in web UI
-    * #590: [Cloud] CloudConfigurationHandler casts to ComponentConfigurationImpl without type check
-    * #520: [Net] PppFactory is not a factory and its design is wrong
-
-
-  * Merged no issue-related Pull Requests:
-    * #2044: Fixed dhclient issue after Raspbian fresh install
-    * #2039: Fixed rotation issue in sensehat driver
-    * #2036: Fix for modem serial ports detection and ppp
-    * #2035: Fixed possible NPE in sensehat driver
-    * #2034: Added stop watchdogd step to WatchdogService
-    * #2028: Removed localisation from o.e.k.w.provider bundle
-    * #2023: Removed 'Search Domains' field
-    * #2016: Modified wrong reference to internal modem
-    * #1996: Added dp for gpio driver
-    * #1992: Re-enable plain Fedora installer in addition to RPMs
-    * #1988: Backport maintenance fixes
-    * #1985: DIO: fix unsafe casts in native code for 64 bits architectures
-    * #1984: Changed gpio bundle defaults, removing the hardcoded gpio 1.
-    * #1974: Fixed wrong pid reference in configuration upgrade class.
-    * #1968: Fixed too strict package imports
-    * #1966: Added missing since in APIs for modem management.
-    * #1963: Prevent getters from creating new object instances
-    * #1954: Fixed possible NPE in OPCUA driver
-    * #1949: Added notifications on SensorTagDriver and fix several bugs in SensorTagExample
-    * #1947: Fixed modem reset functionality.
-    * #1944: Fix a possible NPE
-    * #1943: o.e.k.w.c.provider: fix Import-Package version range
-    * #1931: WireAsset: do not log errors if they are emitted
-    * #1925: Changed exists plugin default. Now it's disabled.
-    * #1917: Improve the description of a few settings
-    * #1915: [H2] Updated service description 
-    * #1913: Wires composer robustness and usability improvements
-    * #1891: Fixed potential malfunction of Eddystone-UID advertiser with some hcitool versions
-    * #1888: Added tcp socket connection timeout
-    * #1848: Disabled the kura.primary.network.interface property.
-    * #1847: HTML IDs
-    * #1829: URL.openStream() creates a new connection without SslContextFactory set
-    * #1755: Modified the success notification in order to not being executed in a different thread.
-    * #1738: Modified localization.resources fragment to reference the host with a version range.
-    * #1432: Remove Intel Edison Profile
-    
-
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection will encounter a failure.
-  * The TinyB library used by the Bluetooth LE API implementation sometimes cause a JVM crash.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #2050: Modem monitor in Not connected state does not trigger reset
-  * #2040: [Kura 3.2.0 QA] PositionService does not switch between GPS and static position
-  * #2013: Unsaved changes dialog triggers incorrectly
-  * #1999: Connection refresh sometimes causes duplicate entries
-  * #1995: Failed NET-WIFI-003 on Fedora
-  * #1993: NET-ETH0-003 failed
-  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
-  * #1788: Maven Archetype does not work - or can someone show me how to use it?
-  * #1663: Authentication Issue with Deploy V2
-  * #1644: [Artemis] MQTT clients fail to reconnect after the broker is restarted
-  * #1572: serial modbus has errors on some hardware
-  * #1533: MqttDataTransport client-id illegal character
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1414: SCR exception running Kura Wires in Karaf
-  * #1373: [Kura 3.0.0 QA] Configuration service: mixing configurable services with factory components
-  * #1358: [GPS] With a USB GPS device, the position service keeps reporting the old position
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #924:  [Kura 2.1.0 QA enh] Non-trimmed values of configuration parameters
-  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #651:  Call to "exit()" in native code
-  * #650:  Possible bug in "LinuxUdev.c"
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #520:  [Net] PppFactory is not a factory and its design is wrong
-  * #518:  [Net] Modem monitor concurrency issue with multiple modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #362:  Uninstaller leaves most of the files
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-
-
-Eclipse Kura - 3.1.0
--------------------------------------------------------------------------
-Added Features :
-  * H2 Databases: This release will see the switch from HSQLDB to H2. This migration will allow
-    for a number of performance improvements as well the ability to maintain multiple database instances.
-  * REST API for Kura Drivers and Assets: To allow more flexibility, REST endpoints will be
-    added to Kura for interacting with the Kura Drivers and Assets instances.
-  * Embedded Artemis Broker: The addition of the Apache Artemis Broker will extend Kura's
-    messaging functionality.
-  * BLE via TinyB: To improve the reliability of BLE, Kura will switch to the TinyB library
-    to support BLE via Bluez.
-  * Kura Wires Functional Logic: To extend the usability of Kura Wires, this release will
-    include Functional Logic Wire Components. This will allow the use of plain JavaScript
-    inside a Wire component.
-  * Kura Web UI Update: A new UI element will be added for managing and editing Drivers and Assets.
-  * S7 Industrial Protocol: A new driver will be added to the Eclipse Marketplace to support S7.
-  * BLE/SensorTag: A new driver will be added to the Eclipse Marketplace to support BLE on
-    the TI SensorTag.
-  * MQTT publish rate improvement: A limit parameter will be added to the MQTT transport service
-    to allow throttling of MQTT messages to prevent unnecessary congestion on the MQTT broker.
-  * Connection Monitor: A connection monitor will be introduced to the DataService to further
-    improve connectivity reliability.
-  * RPMs: This release will provide RPM packaging for Fedora based distributions.
-
-Compatibility:
-  * Eclipse Kura v3.1.0 does not introduce API breakage with previous releases.
-  * This release does introduce a new set of APIs for TinyB for interacting with BLE devices.
-    Support for previous BLE APIs will still be present and functional.
-  * In Kura v3.1.0 it is possible to instantiate a Driver instance from the Drivers and Assets
-    section or from Wire Composer only if the following requirements are met:
-      - the Driver implementation class must implement the following interfaces:
-        - Driver
-        - ConfigurableComponent or SelfConfigurableComponent
-      - the Driver must provide a component definition xml file that advertises that
-        the interfaces mentioned above are provided and that sets "required" as configuration policy.
-    It is advisable to update the deployment packages of non compliant drivers if needed.
-    It is still possible to instantiate non compliant drivers using the "+" button under "Services".
-
-Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi based on Raspbian: Raspberry Pi, Raspberry Pi B+, Raspberry Pi 2/3
-    * BeagleBone Black based on Debian
-    * Fedora on ARM (Experimental) 
-    * Intel Edison (Experimental)
-    * APU Debian (Experimental)
-    * ARM_64 Debian (Experimental)
-
-Bug Fixes :
-  * Fixed github issues:
-    * #1725: [Kura 3.1.0 QA] Cloud Services GUI crashes
-    * #1724: [Kura 3.1.0 QA] WiFi DHCP: Gateway IP wrong in GUI
-    * #1720: [Kura 3.1.0 QA] SensorTagDriver NPE if wrong address
-    * #1707: [Kura 3.1.0 QA] BLE iBeacon* only react to company code 004c
-    * #1702: [Kura 3.1.0 QA] Artemis in emulator
-    * #1685: [WebUi] Security policy fingerprint UI does not expand
-    * #1680: getKuraMarketplaceCompatibilityVersion() always returns kura.version
-    * #1665: Create rpm installer for Fedora
-    * #1661: The driver configuration is not applied
-    * #1645: Development environment needs to be updated
-    * #1641: Oomph installer needs to be updated
-    * #1630: Wifi password check failing
-    * #1590: [Assets and Drivers] Byte arrays are not displayed properly
-    * #1588: Password arrays are not well managed by ConfigurationService
-    * #1585: [Messaging] Share cloud connection with external applications
-    * #1575: [Watchdog Service] Write the last reboot cause to a persistent file
-    * #1564: [MqttDataTransport] wss connections without hostname verification do not work
-    * #1558: CommandCloudApp doesn't use received working directory parameter
-    * #1556: connect.retry-interval=0 causes DataService activation failure
-    * #1541: Add support for polling to GPIO example
-    * #1531: Create "Drivers and Assets" tab
-    * #1530: Modify the wire composer to allow driver management
-    * #1517: Verify compatibility of the old Bluetooth implementation with Bluez 5.43
-    * #1513: H2 DB: Web app and TCP server are mutually exclusive
-    * #1511: Add Artemis broker to Kura core
-    * #1506: H2 DB: Changing the db user does not work
-    * #1502: H2 DB: Default service can be deleted
-    * #1501: H2 DB: invalid service configuration not indicated
-    * #1471: [Wires] Deleting a Timer instance might stop all other Timers
-    * #1462: Wire Components list has no scrollbar
-    * #1455: Wiki page documenting H2 use cases
-    * #1453: Remove unused lib directory from org.eclipse.kura.linux.usb
-    * #1447: New BLE beacon/advertisement API
-    * #1442: Add TinyB host and fragment bundles in target-platform
-    * #1435: Snapshot problem on wires
-    * #1429: Support arm 64 bits platform
-    * #1421: Replace HSQLDB with H2
-    * #1420: Promote Assets and Drivers like Cloud Services in the Web UI
-    * #1417: Implement DataService connection monitor as a CriticalComponent
-    * #1416: Limit the rate of messages published by the DataService
-    * #1413: Implementation of a SensorTag Kura Driver
-    * #1412: Beacon/advertisement implementation of the new BLE API
-    * #1411: GATT Implementation of the new Bluetooth Low Energy API
-    * #1409: New Bluetooth Low Energy API
-    * #1405: Fix trivial Sonar Lint problems in the network bundles
-    * #1396: [Beaglebone Black] Log4j log level set to DEBUG
-    * #1391: [Wires] Fifo is really FIFO only while it's full
-    * #1386: [Wires] Null properties in channel configuration are not properly handled
-    * #1384: OPC UA Driver channel descriptor property ids shouldn't be localised
-    * #1383: OPC UA Driver only supports string node ids
-    * #1378: [Wires] DB store primary key
-    * #1376: [Wires] Asset configuration is not updated after a ChannelDescriptor change.
-    * #1369: WiFi password (PSK) can't contain '&'
-    * #1363: [Documentation] Add tutorial on Eclipse Kapua connection
-    * #1362: [Documentation] Kura documentation improvements
-    * #1361: [Documentation] Improve Kura wires documentation
-    * #1360: [Documentation] Add Administration section in Kura documentation
-    * #1359: [Documentation] Add Configuration section in Kura documentation
-    * #1354: Document default tracking of services registering Configurable/SelfConfiguringComponent
-    * #1338: [Kura 3.0.0] camel.aggregation and camel.quickstart examples should be "normalized"
-    * #1325: [Wires] Exception if an Channel Descriptor contains in Option of Integer type
-    * #1321: 64bit Linux version broken
-    * #1288: Clean up JavaDoc of KuraPayload
-    * #1250: Drag and drop of Marketplace listing should send back a successful install count
-    * #1243: Distribute publishing over time
-    * #1207: [Driver] Contribute Siemens S7 Driver
-    * #1196: [Net] PPP password is not a (MetaType) Password
-    * #1032: Eclipse Drag and Drop Review
-    * #864:  [Web UI] Settings pages
-    * #752:  [DbDataStore] repair is very slow on big tables
-    * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
-    * #572:  Unreadable errors in Web UI
-    * #308:  Add a BLE example for advertising as an Eddystone (Google) beacon
-    * #307:  CloudCallService overrides client ID
-    * #153:  Add JAX-RS to target platform
-    * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
-
-  * Merged no issue-related Pull Requests:
-    * #1731: Swapped commands in modem initialization
-    * #1729: Aligned dev-env kura.properties file to the one used in devices.
-    * #1728: Fixed a bug in the parseDhclientLeaseBlock() method.
-    * #1719: Changes to dp generation for examples and drivers.
-    * #1718: Disabled h2 log file by default
-    * #1717: Fixed firewall init script
-    * #1716: Fixed "watchdog did not stop" messages in syslog
-    * #1713: Refreshed kuraHome variable after loading from kura.properties file.
-    * #1711: Fixed component definition for can example
-    * #1699: Setting an higher value for the GPIO pins.
-    * #1697: Fixes a possible NPE in cloud services when a dp is removed.
-    * #1688: Added custom auth request command for Ublox modems
-    * #1687: Updated mapping between services and Ui icons.
-    * #1682: Reduced maximum size for custom icons to 14x14 to match the other build-in icons.
-    * #1676: Removed Karaf dependency from examples.
-    * #1675: Implemented DEPLOY-V2 hook support
-    * #1673: Added fallback into status bundle.
-    * #1671: Removed the dependency existing between examples and distrib.
-    * #1659: Fixed Telit LE 910 v2 reset
-    * #1640: Enhanced core.status bundle.
-    * #1624: Added basic support for Telit 910 LE v2
-    * #1599: Fixed startup scripts and WatchdogService
-    * #1598: Enabled snaphsot dp builds
-    * #1589: Added css to rotate the wires image properly.
-    * #1496: Updated for Windows build
-    * #1483: Added data transfer optimisation library for Drivers
-    * #1480: Changes in Device tab.
-    * #1460: [Testing][Refactoring] NetworkAdminServiceImpl tests, refactoring, fix
-    * #1459: [Refactoring] Linux.position refactoring
-    * #1458: [Testing][Refactoring] Added Camel unit tests
-    * #1454: Cleanup org eclipse kura linux net wifi
-    * #1450: Added exists-maven-plugin.
-    * #1445: Added protection code to prevent null pointer in GwtWireServiceUtil.
-    * #1443: Remove customizers
-    * #1375: Fixed Karaf native libs loading.
-    * #1371: Fixed regression in configuration service
-    * #1370: Fixed connection status icon at page load.
-    * #1368: Wires Web Ui fixes
-    * #1318: Code Cleanups in Localization Bundle
-
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection will encounter a failure.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #1703: [Kura 3.1.0 QA] Wires page jumping up and down
-  * #1700: [Kura 3.1.0 QA] Rollback doesn't restore deleted services
-  * #1689: Instaling a dp can cause the WebUI to restart
-  * #1663: Authentication Issue with Deploy V2
-  * #1657: Bluetooth notifications do not work
-  * #1644: [Artemis] MQTT clients fail to reconnect after the broker is restarted
-  * #1638: Kura does not support Consistent Network Device Naming
-  * #1572: serial modbus has errors on some hardware
-  * #1558: CommandCloudApp doesn't use received working directory parameter
-  * #1533: MqttDataTransport client-id illegal character
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1451: PppAuthSecrets entry removal
-  * #1414: SCR exception running Kura Wires in Karaf
-  * #1373: [Kura 3.0.0 QA] Configuration service: mixing configurable services with factory components
-  * #1358: [GPS] With a USB GPS device, the position service keeps reporting the old position
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1197: [Net] Network configuration cannot be restored purely from snapshot
-  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
-  * #1193: [Wires] Component avoidance during initial placement
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1092: Possible NPE and non-working check
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #924:  [Kura 2.1.0 QA enh] Non-trimmed values of configuration parameters
-  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
-  * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #651:  Call to "exit()" in native code
-  * #650:  Possible bug in "LinuxUdev.c"
-  * #645:  Clean up internal dependencies in Kura
-  * #558:  Update of DPs seems not to work
-  * #547:  [Configuration] Configuration Service may miss configuration-policy=optional components
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #520:  [Net] PppFactory is not a factory and its design is wrong
-  * #518:  [Net] Modem monitor concurrency issue with multiple modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #362:  Uninstaller leaves most of the files
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #311:  [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-
-
-Eclipse Kura - 3.0.0
--------------------------------------------------------------------------
-Added Features :
-  * Eclipse Kura Wires
-    https://github.com/eclipse/kura/wiki/Kura-Wires:-introduction-and-references
-  * Eclipse Kura Drivers and Assets APIs and implementations
-  * Contributed Eclipse Kura OPC UA driver based on Eclipse Milo
-  * Improvements to local Web Console's usability and appearance
-  * Added support for MQTT over Websockets
-  * Added support for AWS IoT and Azure IoT platforms
-  * Simple JSON is now a supported encoding option in Eclipse Kura Cloud Service
-  * Introduced official support to Oomph installer
-  * Added support for Fedora 25 ARM based systems
-
-Compatibility Changes:
-  * Switched to Equinox 3.11.1
-  * Added support for Java 8. It is now the minimal JVM requirement to run Eclipse Kura
-  * Dropped support for all the native libraries but ARMv6 HF and x86_64 architectures
-  * Dropped support for Fedberry 24 systems
-  * The configuration service will only track so called "Relevant services" so the ones that, in their component
-    description files, will provide the ConfigurableComponent interface. The old behavior can be restored by setting the
-    "org.eclipse.kura.core.configuration.legacyServiceTracking" property to true.
-
-Bug Fixes :
-  * Fixed github issues:
-    * #1335: [Kura 3.0.0 QA] User workspace plugins BREE
-    * #1329: Need to respect /etc/network/interfaces command options
-    * #1295: [Wires] Wires DataType lacks the KuraPayload float type
-    * #1294: [Wires] Remove ByteValue and ShortValue as they do not map to KuraPayload metric types
-    * #1282: Apache FileUpload Upgrade
-    * #1277: PR #1126 breaks changes to wire graph that were not saved
-    * #1269: [Wires] Column names in DB Store
-    * #1246: [Wires] MQTT namespace
-    * #1241: Changes to the heater publisher
-    * #1240: Add JSON/Protobuf encoding option in CloudService
-    * #1239: Change wire publisher to remove the JSON/Kura payload serialization
-    * #1222: Commit aa2913dc1031e783d09779dae503018da55889f6 breaks asset persistent storage
-    * #1220: [Driver] DriverRecord and AssetRecord. Clean code vs efficiency
-    * #1216: [Wires] Sub-second Timer
-    * #1212: [Wires] DB WireComponent improvements
-    * #1211: [Wires] Implement regex filter WireComponent
-    * #1210: [Wires] Implement FIFO WireComponent
-    * #1208: [Asset] Driver read method should return void
-    * #1206: [Driver] Driver API optimizations
-    * #1203: [Asset] Document ASSET-V1 topic namespace
-    * #1202: [Asset] Drop channel ID and use unique name
-    * #1176: Kura Wires: Inconsistent design of DbServiceHelper class
-    * #1166: Wrong order of operations in WireAsset
-    * #1160: ClockService should ignore updates with long 'getDelay'
-    * #1139: Factory Components Configurations not deleted from the snapshot
-    * #1131: ConfigurableComponentTracker calls bundleContext.getService(ref) when it shouldn't
-    * #1125: [Kura 3.0.0 M1 QA] Wires: Unexpected component configuration is shown
-    * #1123: [Kura 3.0.0 M1 QA] Bugs in camel example publisher
-    * #1121: [Kura 3.0.0 M1 QA] Wires: cannot add component after deleting one
-    * #1119: [Kura 3.0.0 M1 QA] Wires DB Store partial cleanup
-    * #1118: [Kura 3.0.0 M1 QA] Wires: dirty Component instances warning
-    * #1116: [Kura 3.0.0 M1 QA] Wires: wire components selection
-    * #1113: [Kura 3.0.0 M1 QA] Kura Wires doesn't work on Internet Explorer
-    * #1107: [Kura 3.0.0 M1 QA] Issue with modal confirmation dialog(s)
-    * #1105: [Kura 3.0.0 M1 QA] Issue with binding services
-    * #1104: [Kura 3.0.0 M1 QA] RPi 2/3 installation package contains unwanted files
-    * #1100: Inconsistent use of installation status strings in deployment impl
-    * #1091: Kura doesn't properly report "ALREADY_DONE" state to Kapua
-    * #1069: Change Package Infos in API Bundle that contain @since annotation
-    * #1057: Kura Wires BaseAsset write issue
-    * #1056: Kura Wires severity level based filtering issue
-    * #1053: dhclient is not being killed if interface is switched from DHCP to static
-    * #1041: Restructure Wire Envelope to make compatible with Kura Payload
-    * #1033: Rename org.eclipse.kura.asset.provider.default to org.eclipse.kura.asset.utility.provider
-    * #1026: Dragging a wire component onto the wire graphs pops up the install dialog
-    * #1024: PR #1007 broke distribution for assets
-    * #1022: Move AssetComponent.xml to Asset Provider
-    * #1015: Fix Fedora target to use libudev.so.1
-    * #1013: Drop support for ARMv5 SF/soft float
-    * #1003: Switch to Fedora 25
-    * #1000: Memory leak and concurrency issue in 'EventHandlerServlet'
-    * #999:  Refactoring: PropertiesUi must extend AbstractServicesUi
-    * #990:  Script error in installer
-    * #959:  Replace Preconditions references with Objects
-    * #954:  Fix output of properties
-    * #932:  org.eclipse.kura.asset.provider provides API and service implementation
-    * #918:  [Kura 2.1.0 QA] DEN-POS-002 Position service keeps reporting old position
-    * #916:  DEN-CONF-005 Wrong range limit for "long"
-    * #915:  [Kura 2.1.0 QA] DEN-CONF-005: Internal message when a "too big" number is entered
-    * #914:  [Web UI] Fixed fields can be edited
-    * #911:  [Kura 2.1.0 QA] SSID selection not always shows all SSIDs
-    * #908:  Web UI shows its own WLAN for connecting
-    * #889:  [Kura 2.1.0 QA] Denali Configuration ExamplePublisher error descriptions
-    * #861:  Kura's WEB bundles detection
-    * #846:  Replace INTERNAL_ERROR with suitable error code in Kura Wires
-    * #841:  Add Discouraged Access in Javadoc for INTERNAL_ERROR error code
-    * #824:  SelfConfiguringComponent are not registered properly
-    * #817:  Fix Exception Javadoc
-    * #786:  Services Search throws Exception
-    * #770:  Following the Eclipse versioning schema for OSGi
-    * #736:  Kura installer continues despite errors occurred
-    * #725:  Serial receive timeout is not forwarded to javax.comm.CommPort
-    * #721:  Unnecessary toggles eth0 interface when wlan0 interface is disabled on Raspberry Pi.
-    * #696:  FileServlet fails with NPE when there is no MetaTypeInformation
-    * #688:  Modify Kura Wires Web Copyright Header
-    * #664:  Misconfiguration of eth0 (as dhcp server) filling /var/log directory and finally crashing kura
-    * #657:  No ability to set security level with Bluetooth API
-    * #556:  Add WebSocket as alternative mqtt transport
-    * #555:  CAN bus bundle only supports 11-bit identifiers
-    * #553:  [Modbus] Refactoring of Modbus example
-    * #550:  [Modbus] String evaluation returns false
-    * #476:  Kura makes use of system properties when filtering for native code libraries which is not supported
-    * #460:  Upgrade Equinox to 3.11 and use Java 8 a minimum requirement
-    * #372:  [BLE] BluetoothGattImpl.getCharacteristics(String startHandle, String endHandle) and getServices() methods return empty list
-    * #352:  [Semantic Versioning] Enable analysis through bnd-baseline-maven-plugin
-    * #288:  [Modbus] Implement the MBAP header for TCP/IP communication
-    * #244:  [Web UI] Alphabetical ordering of metatype labels option in ListBoxes
-
-  * Merged no issue-related Pull Requests:
-    * #1370: Fixed connection status icon at page load.
-    * #1365: Fixed deleted factory components not always being removed from snapshot (see also #1371)
-    * #1364: Fixed factory components not being created from uploaded snapshot
-    * #1352: Minor Wires fixes
-    * #1350: Set security level to low
-    * #1349: Changes to the emulator launch profiles used when cloning directly the repo
-    * #1347: Modified emulator position.
-    * #1344: Minor fixes regarding emulator.position and osgi.annotation.
-    * #1343: Hidden export to CSV buttons from Wires Web UI
-    * #1341: Modified Asset Cloudlet protocol
-    * #1340: Fixed selinux check in kura-install.sh file.
-    * #1339: Changes to have dev-env working.
-    * #1337: Fixed watchdog service deactivate method
-    * #1331: Switched equinox mirror.
-    * #1323: Fixed handling of special characters in Wires DB
-    * #1319: Moved Asset configuration constants and documentation out of the APIs.
-    * #1311: Set the wire publisher qos metatype value to 0.
-    * #1307: Add Everyware Cloud broker URL
-    * #1302: Added opcua dp build step.
-    * #1300: Fix modem driver code
-    * #1289: Cleanup the payload encoder a bit
-    * #1276: Asset cloudlet now starts immediately.
-    * #1273: Watchdog code refactor and improvements
-    * #1272: Improved performance of WireSupportImpl.emit()
-    * #1266: Fixed unnecessary allocations by WireAsset
-    * #1264: Heater demo example using Maven/BND.
-    * #1256: Make private method static
-    * #1238: Remove registration of service implementation classes
-    * #1234: [Developer workspace] Updated project setup
-    * #1227: Relax null handling, fix possible NPE, improve javadoc
-    * #1226: Allow providing an input stream for reading XML content
-    * #1224: Make it a functional interface
-    * #1200: Add feature for Camel API
-    * #1198: Changed wires component selection.
-    * #1194: Fix iptables-restore run in background
-    * #1192: WireEmitter/Receiver are ConsumerTypeS
-    * #1184: Partially revert net.wifi breaking change
-    * #1182: Removed timeout based on magic number.
-    * #1179: Drop support for "fedorapi"
-    * #1174: Switch default behavior to only track relevant services
-    * #1173: OPC-UA Driver: Minor Fixes and Cleanup
-    * #1168: Modified emulator launch.
-    * #1154: Use window.parent instead of top in wires js and GWT parts
-    * #1148: Enable JMX by default, allow overriding using system properties
-    * #1144: [Developer workspace] Added 2 plugins and worspaces
-    * #1143: Added support for enabling serial rx timeout
-    * #1140: Improve separation of concerns for camel java example
-    * #1136: Implement Kapua's applicationFramework/applicationFrameworkVersion
-    * #1127: Changes to prevent exception of wires panel refresh.
-    * #1122: Implement new Cloud Client API
-    * #1115: Few more fixes in wires:
-    * #1103: Added drag and drop support to the Wire Composer.
-    * #1102: Improved drag and drop for Eclipse Marketplace.
-    * #1099: Set of changes in EventHandlerServlet to prevent memory leak.
-    * #1097: Check modem up in resetModem method
-    * #1094: Modified jvm dependency.
-    * #1090: Modified interval check in GwtNetworkServiceImpl.java.
-    * #1088: Fixed Web Ui services search bar
-    * #1086: OPC-UA Driver
-    * #1085: Wires refactor 2
-    * #1084: Wire Service Implementation and Wire Configuration Refactoring
-    * #1083: Removing ThrowableUtil Reference
-    * #1076: Wire publisher can publish control messages.
-    * #1075: Fixed a few cases in Configuration Service where NPE could be thrown
-    * #1074: Minor Code Fixes in PropertiesUi for Wires
-    * #1073: Renamed asset cloudlet APP_ID to ASSET-V1.
-    * #1070: Modified log message in ConfigurationServiceImpl.java
-    * #1058: Wires related Web2 enhancements
-    * #1047: Extracted WireHelperService and WireSupport together to a new bundle
-    * #1043: Modified certificates policy in Cloud Service.
-    * #1036: Solved graphical glitch in Assets' channel definition.
-    * #1034: Fix a bunch of C code issues
-    * #1031: Fix wire component provider
-    * #1029: Fix a possible NPE in the Web UI
-    * #1028: Work around Kura sending empty string instead of null for Camel deps
-    * #1019: Fix private members
-    * #1010: Updates and fixes for Karaf
-    * #1005: Fix possible exception and service leak
-    * #1002: Fix M2E errors when directly importing Karaf projects
-    * #998:  Fix wires nulls
-    * #988:  Removed references to windows bundles in 2.1.0.
-    * #987:  Modified web2 bundle packaging.
-    * #986:  Add Eclipse Kura Nexus repository in order to fix the build
-    * #985:  Switch version of SODA Comm to 1.2.4-SNAPSHOT
-    * #982:  Activate maven batch mode by default and reduce console log
-    * #978:  Uniformed build steps, corrected some typos.
-    * #976:  Changed deb dependency requiring java 8.
-    * #953:  Convert P2 repository to Maven 2 repository
-    * #869:  Clean up and document IOUtil
-    * #868:  Fix concurrency issue in command service
-    * #803:  add pcengine-nn profile
-
-
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection failes.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #1338: [Kura 3.0.0] camel.aggregation and camel.quickstart examples should be normalized
-  * #1325: [Wires] Exception if an Channel Descriptor contains in Option of Integer type
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1197: [Net] Network configuration cannot be restored purely from snapshot
-  * #1196: [Net] PPP password is not a (MetaType) Password
-  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
-  * #1193: [Wires] Component avoidance during initial placement
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1092: Possible NPE and non-working check
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #948:  [Kura 2.1.0 QA] NET-ETH0-014 Wrong lease time in DHCP mode
-  * #923:  [Kura 2.1.0 QA] eth0 search domain configuration and storage
-  * #910:  [Kura 2.1.0 QA] Unable to use WLAN as WAN interface
-  * #890:  [Kura 2.1.0 QA] Snapshot management in web UI
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #752:  [DbDataStore] repair is very slow on big tables
-  * #751:  [DbDataStore] defrag and checkpoint are not per-table operations
-  * #654:  Clean up static initialization around "modem" functionality
-  * #651:  Call to "exit()" in native code
-  * #650:  Possible bug in "LinuxUdev.c"
-  * #645:  Clean up internal dependencies in Kura
-  * #572:  Unreadable errors in Web UI
-  * #558:  Update of DPs seems not to work
-  * #547:  [Configuration] Configuration Service may miss configuration-policy=optional components
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #520:  [Net] PppFactory is not a factory and its design is wrong
-  * #518:  [Net] Modem monitor concurrency issue with multiple modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #362:  Uninstaller leaves most of the files
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #311:  [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #307:  CloudCallService overrides client ID
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-  * #108:  CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
-
-
-Eclipse Kura - 2.1.0
--------------------------------------------------------------------------
-Added Features :
-  * Apache Camel Integration
-  * New UI for Cloud Services
-  * Support for Raspbian on Raspberry Pi 3
-  * Support for Fedora on Raspberry Pi 2 and 3
-
-Bug Fixes :
-  * Fixed github issues:
-    * #958: [Kura 2.1.0 QA] Wrong labels in UI's DHCP&NAT configuration
-    * #956: [Sec] Kura firewall rules bypassed with IPv6
-    * #941: [Kura 2.1.0 QA] Raspberry Pi 3 no-net installer
-    * #930: [Kura 2.1.0 QA] Problems with installation of Kura on BeagleBone Black
-    * #917: [Kura 2.1.0 QA] Wrong range messages
-    * #912: [Kura 2.1.0 QA] Exceptions while deploying example service
-    * #909: [Kura 2.1.0 QA] SSID selection dialog too small
-    * #903: [Kura 2.1.0 QA] Impossible to enter multiple DNS servers
-    * #901: [Kura 2.1.0 QA] changing username/password locks out admin access
-    * #900: [Kura 2.1.0 QA] usbutils missing in fedberry README
-    * #895: [Kura 2.1.0 QA] Refreshing configuration in web UI
-    * #893: [Kura 2.1.0 QA] GPIO example bundle configuration
-    * #883: Invalid field validation state when switching from WAN to LAN
-    * #879: [Kura 2.1.0 QA] Raspberry Pi 3 nameserver
-    * #877: [Kura 2.1.0 QA] eth0 netmask configuration
-    * #876: [Kura 2.1.0 QA] Disabling eth0 interface doesn't work properly
-    * #874: [Kura 2.1.0 QA] eth0 DNS server configuration
-    * #867: [Kura 2.1.0 QA] Ethernet interface gateway configuration on Raspberry Pi 3
-    * #860: [Kura 2.1.0 QA] JUnit in Raspberry Pi 3's installation package
-    * #859: [Kura 2.1.0 QA] Installation warnings/errors on Raspberry Pi 3
-    * #851: [Web-UI] Label is sent instead of value for metatype parameters with options
-    * #835: [Kura 2.1.0] Bind/Named service doesn't work properly on Fedora
-    * #793: [Kura 2.1.0] QA for the User Workspace
-    * #776: Serialization issue in cloud window
-    * #767: Change Housekeeping schedule from scheduleAtFixedRate to scheduleWithFixedDelay
-    * #753: libhidapi not correctly compiled for armv5
-    * #743: WLAN not detected as WLAN on Fedberry
-    * #742: Unable to establish stable network connection on Fedberry
-    * #732: Unable to configure CloudService instance when component gets unregistered
-    * #724: [Release 2.1.0] Check API packages
-    * #716: Create a simple Camel Java DSL based example publisher
-    * #692: Drop default to 255 characters on data entry
-    * #691: NPE when CloudService isn't configured
-    * #683: Control Prefix in Request/Response
-    * #660: [kura-build] jdk.dio deployment fails in Hudson
-    * #649: Missing copyright headers
-    * #642: Raspbian Pi3
-    * #641: [Camel] KuraCloudConsumer - Failed to subscribe exception
-    * #640: [Modem] NoClassDefFoundError: Could not initialize class org.eclipse.kura.linux.net.modem.SupportedUsbModems
-    * #635: ExecCommand in org.eclipse.kura.linux.bluetooth.BluetoothAdapterImpl Index Out Of Bounds
-    * #627: Fix Bundle-Vendor to "Eclipse Kura"
-    * #619: Duplicate version of maven-antrun-plugin
-    * #618: Recent CR/LF fix causes 182 file modification pending
-    * #613: Recent addition of checkstyle fails the build
-    * #603: Can "json 20090211" be removed?
-    * #599: WebUI fails completely is `PositionService` is not registered
-    * #596: Replace all calls to ConfigurationAdmin.getConfiguration(String)
-    * #595: ComponentMetaTypeBundleTracker is processing every bundle twice on startup
-    * #592: Again Java 7 code in BREE 6 bundle
-    * #589: [Camel] Camel related exceptions on Kura startup
-    * #581: Missing Package Info in few packages in API Bundle
-    * #573: Commit 41c3180 breaks data entry
-    * #571: Convert files from dos 2 unix format
-    * #564: [Configuration] ConfigurationService doesn't set properly the kura.service.pid
-    * #562: Services UI not getting updated with new properties
-    * #557: Add SLF4J jcl-over-slf4j
-    * #548: Kura 2 Webui on BeagleboneBlack Problem
-    * #544: Web UI shows red-connector although state is CONNECTED
-    * #540: [Web UI] Empty Integer field in a configuration (not required) is causing a NumberFormatException
-    * #539: [Cloud] Required changes in CloudServiceFactory
-    * #521: Device -> Threads shows empty list
-    * #515: [Web UI] Implement Cloud Services UI
-    * #511: Upgrade SLF4J to 1.7.21
-    * #509: [Web 2] ServicesUi validation
-    * #497: SystemServiceImpl uses method from Java 7 but declares a BREE of Java 6
-    * #496: mToolkit Eclipse Plugin does not work under Eclipse Neon
-    * #488: Command cloud App Null Pointer Exception
-    * #485: Change b02bc9a7615ca559349f2b05485ea84fd80d6e77 breaks deployment of "sun.misc" bundles
-    * #473: org.eclipse.kura.linux.net.modem.ModemDriver uses Java 7 API but has BREE of Java 6
-    * #467: Web UI cannot handle Integer with cardinality 0/optional
-    * #465: CloudService.isConnected not shown in Web UI
-    * #461: Registering a component which has a PID without dot crashes the Web UI 2
-    * #451: setting a payload metric to null should throw an exception immediately
-    * #444: Multiple Cloud Support - Web UI does not allow to select new installed cloud service
-    * #419: Migrate ASF camel-kura code to Eclipse
-    * #403: Fix javadoc for the getKuraVersion() method of the SystemService.
-    * #396: iwScanTool fails to parse scan results
-    * #343: [Web2]: Setting the "name" property to anything different than the "id" sets an empty value
-    * #342: [Configuration] Support multiple configurations for SelfConfiguringComponentS
-    * #339: [Web UI] The Disconnect button in the Status menu disconnects all connections
-    * #337: [Web2]: Field validation errors not shown
-    * #326: org.eclipse.kura.web2 is missing about.html
-    * #321: No support for systemd based systems
-    * #318: There should be Oomph based setups for Kura
-    * #315: The Kura documentation should mention the default login credentials admin/admin
-    * #314: The Camel Quickstart example is not working
-    * #281: Add XML routes configuration per Camel CloudService
-    * #265: Camel Examples: review
-    * #262: Maven failure when dev-env isn't built
-    * #257: KuraComponent can't resolve its collaborators
-    * #234: [Web UI] web2 network configuration glitch
-    * #231: Create Maven plugin capable of wrapping regular bundles in DP packages
-    * #221: [Camel] Do we need a Camel API in the org.eclipse.kura.api bundle?
-    * #216: [Test] Test Kura on RaspberryPi 3
-    * #205: All languages from Camel Core should be loaded by CamelRouter
-    * #204: All data formats from Camel Core should be loaded by CamelRouter
-    * #189: [Camel] Camel integration in the Kura CloudService
-    * #119: [Camel] Migrate CamelRouter tests from Rhiot to Kura
-
-  * Merged no issue-related Pull Requests:
-    * #962: Added libudev for rhel based devices
-    * #928: [Web-Ui] Fixed typo in the network config section
-    * #898: Solved modem reset failure.
-    * #855: Modified wrong entry in snapshot 0s
-	* #816: Set the 'kura.ui.service.hide' property
-    * #810: Remaining changes to Camel Web UI
-    * #805: Prepend kura- to modem log files.
-    * #802: Try a fix for the startup exception, missing "kura-cloud"
-    * #798: Add Fedora 24 based ARM7 native library
-    * #765: Reverts change in commit 7704d180296551b0acb68044f7cd6b4c3e77f56a
-    * #761: Allow camel component to be initialized
-    * #756: Allow Camel modules to gracefully handle missing dependencies
-    * #755: Allow automatic conversion from Map to KuraPayload
-    * #745: Solved possible IllegalArgumentException due to null pid
-    * #744: Fixed wifi scan in AP mode
-    * #739: Solved possible 404 error when downloading snapshot
-    * #730: WiFi switching between Station and Access Point is unreliable
-    * #720: Fix wifi issues 2.1.0
-    * #717: Lower camel imports to 2.17.0
-    * #700: Fix Watchdog disabling bug in WatchdogService.
-    * #699: Add DependencyManagement to Camel Examples
-    * #698: Fix ble process leak
-    * #697: Export ConfigurableComponent in service xml
-    * #694: Fix Camel imports
-    * #662: Implement a workaround for issue #590
-    * #643: Clean up imports for Camel
-    * #630: Minor cleanups to the Linux ClockServiceImpl
-    * #625: Kura should not publish modified artifacts under "org.eclipse" namespace
-    * #624: Let example services export ConfigurableComponent
-    * #607: Start the Web UI component immediately
-    * #605: Fix a few resource leaks
-    * #602: Initial support for building a version for PC Engines APU / Debian 8
-    * #594: Implement missing method 'unsetSystemService'
-    * #578: Cleanup dead code
-    * #563: clean up some source code issues
-    * #560: Fixed bug on ConfigurationService about kura.service.pid
-    * #552: Support for RPi running Fedora via Fedberry, Pidora, etc.
-    * #546: Minor fixes for the startup scripts
-    * #542: Re-use existing code to parse kura.properties
-    * #530: Fix service leak in ComponentUtil
-    * #528: Fix the lookup of the default value, now done by id.
-    * #513: Follow Eclipse trademark guidelines
-    * #508: Refactor Camel router
-    * #501: Enh build deploy
-
-
-Know Issues :
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Kura can be run in a Java 8 VM, but current OSGi container does not support bundles with manifests that specify
-    a "Bundle-RequiredExecutionEnvironment" equal to "JavaSE-1.8".
-  * The old GPS position will continue to be shown in the status overview even after the disabling of the static position reporting.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection failes.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #948: [Kura 2.1.0 QA] NET-ETH0-014 Wrong lease time in DHCP mode
-  * #923: [Kura 2.1.0 QA] eth0 search domain configuration and storage
-  * #918: [Kura 2.1.0 QA] DEN-POS-002 Position service keeps reporting old position
-  * #916: [Kura 2.1.0 QA] DEN-CONF-005 Wrong range limit for "long"
-  * #915: [Kura 2.1.0 QA] DEN-CONF-005: Internal message when a "too big" number is entered
-  * #914: [Web UI] Fixed fields can be edited
-  * #911: [Kura 2.1.0 QA] SSID selection not always shows all SSIDs
-  * #910: [Kura 2.1.0 QA] Unable to use WLAN as WAN interface
-  * #908: [Kura 2.1.0 QA] Web UI shows its own WLAN for connecting
-  * #890: [Kura 2.1.0 QA] Snapshot management in web UI
-  * #889: [Kura 2.1.0 QA] Denali Configuration ExamplePublisher error descriptions
-  * #778: [Net] Refactor needed in org.eclipse.kura.core.net
-  * #752: [DbDataStore] repair is very slow on big tables
-  * #751: [DbDataStore] defrag and checkpoint are not per-table operations
-  * #737: Fedora distribution fails to start up
-  * #736: Kura installer continues despite errors occurred
-  * #725: Serial receive timeout is not forwarded to javax.comm.CommPort
-  * #721: Unnecessary toggles eth0 interface when wlan0 interface is disabled on Raspberry Pi.
-  * #696: FileServlet fails with NPE when there is no MetaTypeInformation
-  * #664: Misconfiguration of eth0 (as dhcp server) filling /var/log directory and finally crashing kura
-  * #654: Clean up static initialization around "modem" functionality
-  * #651: Call to "exit()" in native code
-  * #650: Possible bug in "LinuxUdev.c"
-  * #645: Clean up internal dependencies in Kura
-  * #572: Unreadable errors in Web UI
-  * #558: Update of DPs seems not to work
-  * #553: [Modbus] Refactoring of Modbus example
-  * #550: [Modbus] String evaluation returns false
-  * #547: [Configuration] Configuration Service may miss configuration-policy=optional components
-  * #522: [Net] Modem monitor should monitor interfaces, not modems
-  * #520: [Net] PppFactory is not a factory and its design is wrong
-  * #518: [Net] Modem monitor concurrency issue with multiple modems
-  * #406: Replace System.get* with calls to SystemService.getProperties
-  * #362: Uninstaller leaves most of the files
-  * #329: [DEPLOY-V2] Review/refactoring needed
-  * #311: [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #307: CloudCallService overrides client ID
-  * #297: [Status led] What connection instance controls the status led?
-  * #288: [Modbus] Implement the MBAP header for TCP/IP communication
-  * #253: Check if bundle contexes correctly unget services after invoking getService
-  * #235: LinuxNetworkUtil#toolExists() should check for tool's existence in PATH
-  * #222: CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-  * #172: Modem: manually killing pppd with Kura running never triggers a modem reset
-  * #108: CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
-  * #104: org.eclipse.kura.linux.net.ConnectionInfoImpl is IPv4 only
-
-
-Eclipse Kura - 2.0.2
--------------------------------------------------------------------------
-Bug Fixes :
-  * Merged no issue-related Pull Requests:
-    * #653: Hotfixes for WiFi for the 2.0.2 service release. This addresses
-	        Kura not restarting hostapd if the service has stopped for some reason.
-	* #652: This is a hotfix for a process leak in Bluetooth LE when calling hcidump.
-
-Know Issues :
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection failes.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #467: Web UI cannot handle Integer with cardinality 0/optional
-  * #465: CloudService.isConnected not shown in Web UI
-  * #462: ConfigurationServiceImpl cannot handle cardinality >1 for SelfConfiguringComponent
-  * #461: Registering a component which has a PID without dot crashes the Web UI 2
-  * #444: Multiple Cloud Support - Web UI does not allow to select new installed cloud service
-  * #396: iwScanTool fails to parse scan results
-  * #362: Uninstaller leaves most of the files
-  * #355: [Semantic Versioning] org.eclipse.kura.net.wifi version should be increased from 1.2.0 to 1.3.0
-  * #343: [Web2]: Setting the "name" property to anything different than the "id" sets an empty value
-  * #339: [Web UI] The Disconnect button in the Status menu disconnects all connections
-  * #337: [Web2]: Field validation errors not shown
-  * #329: [DEPLOY-V2] Review/refactoring needed
-  * #314: The Camel Quickstart example is not working
-  * #311: [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #307: CloudCallService overrides client ID
-  * #299: On Red Hat Fedora, network-scripts can contain double quotes
-  * #297: [Status led] What connection instance controls the status led?
-  * #288: [Modbus] Implement the MBAP header for TCP/IP communication
-  * #262: Maven failure when dev-env isn't built
-  * #257: KuraComponent can't resolve its collaborators
-  * #253: Check if bundle contexes correctly unget services after invoking getService
-  * #235: LinuxNetworkUtil#toolExists() should check for tool's existence in PATH
-  * #234: [Web UI] web2 network configuration glitch
-  * #224: Fixed modem reset and kura restart issues for gps
-  * #222: CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-  * #174: Networking: check why sometimes eth0 is toggled on wlan0 reconfiguration
-  * #172: Modem: manually killing pppd with Kura running never triggers a modem reset
-  * #108: CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
-  * #104: org.eclipse.kura.linux.net.ConnectionInfoImpl is IPv4 only
-  * #77: Data Service will not connect for other locale than an english one
-
-
-Eclipse Kura - 2.0.1
--------------------------------------------------------------------------
-
-Bug Fixes :
-  * Fixed github issues:
-    * #473: org.eclipse.kura.linux.net.modem.ModemDriver uses Java 7 API but has BREE of Java 6
-    * #468: [Web] NPE in GwtNetworkServiceImpl
-    * #464: Beaglebone install script not creating /etc/sysconfig
-    * #393: [NN] NN profiles are broken in Kura 2.0.0
-    * #373: Kura 2.0.0 distribution for Raspberry-Pi includes emulator.gpio instead of linux.gpio
-    * #340: [Configuration] Metatype not updated in the Web UI
-    * #338: [Web2]: String input forced to a maximum length of 255
-    * #316: Debian package should declare dependency on java
-    * #296: [Web UI] Status | Connection: if the connection username is not set, "null" is shown
-    * #290: [Web UI] Refresh button in network configuration deselects the currently selected interface
-    * #289: [Web UI] Wireless Password disappears after verification
-    * #275: [Dev Env] Add org.eclipse.kura.linux.bluetooth to the target-platform.
-    * #242: [Web UI] Help is not always visible in the new web ui
-
-  * Merged no issue-related Pull Requests:
-    * #489: Modified check for crypto value in isDefaultPassword.
-    * #484: Modified wrong references in some snapshots, modified sslManager service to perform a
-            different check for the default password and the password change.
-    * #483: Modified launch configurations.
-    * #480: Fix firewall issues
-    * #475: Hotfix ble fixes
-    * #441: JDK DIO: disable verbose logging from armv5_sf and x86_64 libraries.
-    * #440: Modified the configuration service to prevent the generation of empty snapshots.
-    * #439: Refactored code, modified behavior with gpio calculation from base address + offset.
-    * #438: Added more checks in ServicesUI to prevent possible exception. Removed servicesUi refresh at every click in status section.
-    * #431: Fix missing license headers
-    * #428: Fix missing camel bundle in dev workspace
-    * #417: Fix logging of exceptions and clean up other logging calls
-    * #404: Fix a possible NPE followed by a NCDFE when system property is missing
-    * #402: Fix two NullPointerExceptions and improve the error output
-    * #400: Fix build warnings
-    * #395: Remove dependency on slf4j-log4j12
-    * #388: Modified snapshot_0s in order to have memory persistance for in-flight messages.
-    * #382: Use a copy-on-write list in order to support concurrent modifications
-    * #361: Use Import-Package in preference of Require-Bundle
-    * #351: Pom cleanup
-    * #347: Reset the original state of the accessible flag
-    * #346: Clean up the error output to actually print out stack traces
-    * #336: Corrected jacoco version due to build failure in JDK8
-    * #328: Fix output of executed commands
-    * #325: Fix a possible Context Class Loader leak
-    * #320: Provide Oomph setup and clean up build issue
-
-
-
-Know Issues :
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
-    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
-    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
-    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
-    gatttool and the BLE connection failes.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network
-    interface which happened even if network configuration hasn't been modified.
-  * #467: Web UI cannot handle Integer with cardinality 0/optional
-  * #465: CloudService.isConnected not shown in Web UI
-  * #462: ConfigurationServiceImpl cannot handle cardinality >1 for SelfConfiguringComponent
-  * #461: Registering a component which has a PID without dot crashes the Web UI 2
-  * #444: Multiple Cloud Support - Web UI does not allow to select new installed cloud service
-  * #396: iwScanTool fails to parse scan results
-  * #362: Uninstaller leaves most of the files
-  * #355: [Semantic Versioning] org.eclipse.kura.net.wifi version should be increased from 1.2.0 to 1.3.0
-  * #343: [Web2]: Setting the "name" property to anything different than the "id" sets an empty value
-  * #339: [Web UI] The Disconnect button in the Status menu disconnects all connections
-  * #337: [Web2]: Field validation errors not shown
-  * #329: [DEPLOY-V2] Review/refactoring needed
-  * #314: The Camel Quickstart example is not working
-  * #311: [Multiple Cloud Connections] Spurious component reactivations upon configuration change
-  * #307: CloudCallService overrides client ID
-  * #299: On Red Hat Fedora, network-scripts can contain double quotes
-  * #297: [Status led] What connection instance controls the status led?
-  * #288: [Modbus] Implement the MBAP header for TCP/IP communication
-  * #262: Maven failure when dev-env isn't built
-  * #257: KuraComponent can't resolve its collaborators
-  * #253: Check if bundle contexes correctly unget services after invoking getService
-  * #235: LinuxNetworkUtil#toolExists() should check for tool's existence in PATH
-  * #234: [Web UI] web2 network configuration glitch
-  * #224: Fixed modem reset and kura restart issues for gps
-  * #222: CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
-  * #174: Networking: check why sometimes eth0 is toggled on wlan0 reconfiguration
-  * #172: Modem: manually killing pppd with Kura running never triggers a modem reset
-  * #108: CloudCallServiceImpl - call methods setting requester.client.id to #client-id sends response to local device
-  * #104: org.eclipse.kura.linux.net.ConnectionInfoImpl is IPv4 only
-  * #77: Data Service will not connect for other locale than an english one
-
-
-Eclipse Kura - 2.0.0
--------------------------------------------------------------------------
-
-Added Features :
-  * Added support for multiple connections
-  * Added support for Wi-Fi Multi Mode
-  * Created a new web UI bundle named org.eclipse.kura.web2 that integrates GWT 2.7 and GwtBootstrap 3 technologies
-  * Updated bluetooth APIs and added support for Bluez 5.x
-  * Initial integration of RedHat's Camel stack
-  * Created a Kura applications section inside the Eclipse marketplace and added support in the local web UI for the application
-    install via drag-and-drop
-  * Created SenseHat example project
-  * Updated the SensorTag Example project exposing buzzer and leds
-  * Created the beacon.scanner project
-  * Native libraries now support x86_64
-  * Reviewed/refactored the GPS position service
-
-Bug Fixes :
-  * Fixed github issues #78, #82, #96, #98, #112, #113, #114, #116, #120, #121, #127, #128, #129, #131,
-    #134, #138, #139, #141, #143, #167, #169, #177, #179, #182, #184, #187, #188, #193, #198, #199, #201,
-    #202, #203, #209, #212, #214, #215, #218, #227, #228, #229, #230, #233, #238, #241, #250, #252, #254,
-    #255, #256, #258, #260, #267, #270, #271, #272, #279, #284, #302, #309
-
-
-Know Issues :
-  * Multiple connections: updating a service (e.g. MqttDataTransport) of a connection
-    has the effect to cause the unwanted reactivation of the next higher layer service (i.e. DataService)
-    of the other connection(s). This in turn will cause the reactivation of all dependent components.
-    This is not desired and not yet understood (Equinox bug?). See also Github issue #311.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
-    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-    must be compiled from sources.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * The reference JVMs are Oracle Java SE Embedded version 7 Update 40 and Java SE Embedded version 8 Update 65.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Web UI may hang when configuration snapshot is uploaded. This happens because HTTP connection is lost due to toggling of the network interface which happened even if network configuration hasn't been modified.
-
-
-
-Eclipse Kura - 1.4.0
--------------------------------------------------------------------------
-
-Added Features :
-  * Grouped Web UI SSL configuration in a single place under 'Settings'
-  * Modified the Web UI adding a check in order to block SSIDs longer than 32 characters
-  * Rolled-back Web UI filtering of SSID
-  * Added some security headers to the Web UI
-  * Refactored security related tabs in the Web UI
-  * Added property to the WatchdogService to specify the watchdog device
-  * Modified build in order to include checks for Java 8 compact 2 compliance
-  * Introduced new deployment application (named DEPLOY-V2) that improves updates download from the cloud platform
-  * New firewall management, now based on iptables-save and iptables-restore
-  * Firewall: allowed open port entries for tcp and udp on the same port
-  * Firewall: enabled the support for port ranges when defining open port entries
-  * Added support for Ublox SARA-U2 modem
-  * Added support to switch between AP and station mode on radios supported by the 'bcmdhd' kernel module
-  * Emulator bundle split into 6 separate bundles, one for each function
-  * Reviewed no-network profiles: removed net.admin bundle and linux.net. Now those bundles are replaced by emulator.net
-  * Linux build date/version is now published in the birth certificate as part of the os.version metric
-  * Improvements to the Development Environment
-  * ConfigurationService: treat an OSGi ManagedService as a ConfigurableComponent
-  * Updated documentation
-
-Bug Fixes :
-  * Fixed github issue #80
-  * Fixed github issue #84
-  * Fixed github issue #85
-  * Fixed github issue #87
-  * Fixed configuration rollback to snapshot 0
-  * Fixed toggling WiFi interface when Ethernet interface is reconfigured
-  * Better Web UI exception handling when manually (dis)connecting to the Cloud
-  * Added various null pointer checks
-  * Started work to fix warnings emitted by Sonar
-  * Fixed JUnit tests
-  * Fixed GPIO example
-  * Fixed bug when image in metatype has no size
-  * Fixed and improved the BLE TI SensorTag example
-
-Know Issues :
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux". Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease) (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on gatttool and the BLE connection failes.
-    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-    must be compiled from sources.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipest.
-  * The reference JVMs are Oracle Java SE Embedded version 7 Update 40 and Java SE Embedded version 8 Update 65.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Web UI may hang when configuration snapshot is apploaded. This happens because HTTP connection is lost due to toogling of the network interface which happened even if network configuration hasn't been mo	   dified.
-
-
-
-Eclipse Kura - 1.3.0
--------------------------------------------------------------------------
-
-Added Features :
-  * API updates (Security, GPIOService)
-  * Enhanced web UI security, which includes:
-    * XSRF protection in all servlets
-    * Different management of user sessions
-    * Arbitrary file writes protection in file servlet for zip uploads
-    * XSS on wireless SSID in network servlet
-    * Command injection on network servlet
-    * Password protection in client UI, in order to prevent access to secrets by unauthorized users
-    * Sanitization of user and system strings in order to prevent malicious attacks
-  * Ability to configure pairwise ciphers in AP mode in web UI.
-  * Ability to stop/start bundles from web UI.
-  * Ability to embed ConfigurableComponent icon within bundle, instead for requiring https location.
-  * Added support for Telit LE910 modems.
-  * Added test code for XML marshalling/unmarshalling.
-  * Removed Xss option from start scripts. This JVM option has a know bug in OpenJDK.
-  * Improvements to usability of Emulator.
-  * Improvements to the Development Environment.
-
-Know Issues :
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
-    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-    must be compiled from sources.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipest.
-  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-    Later versions (including Oracle Java SE Embedded version 8 Update 33)
-    may be affected by a ProcessBuilder memory leak [1]
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
-
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
-
-Eclipse Kura - 1.2.2
--------------------------------------------------------------------------
-
-Added Features :
-  * Added support for Ubuntu 14.04. Note, this is just the initial support for Ubuntu, there are no installation files in this
-    release.
-
-Known Issues :
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
-    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-    must be compiled from sources.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipest.
-  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-    Later versions (including Oracle Java SE Embedded version 8 Update 33)
-    may be affected by a ProcessBuilder memory leak [1]
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
-
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
-
-Eclipse Kura - 1.2.1
--------------------------------------------------------------------------
-
-Added Features :
-  * Added Bluetooth LE Beacon Service
-    * Example: org.eclipse.kura.example.beacon
-  * Reduced number of dependencies for Bluetooth LE bundle
-  * Added support for non cfg80211 wifi modules
-  * Added support for wifi on Raspberry Pi
-  * Added support for Oracle Java 8 SE Compact 2 Profile runtime
-  * Replaced IBM javax.usb implementation with usb4java
-  * Refactor and optimization of SSL Manager
-    * Improved security during keystore loading in SSL Manager
-  * Refactor of ConfigurationService
-  * Replace JAXB XML Parser with a custom one
-  * Startup time improvements due to various code optimizations and uncompressed jars
-  * Web UI: added the possibility to specify a custom web interface user
-  * Web UI: split certificate management in two separate tabs
-
-Bug Fixes :
-  * Web UI: fixed wrong units for memory
-
-Known Issues :
-  * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
-    The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-    must be compiled from sources.
-  * WiFi on Raspberry Pi only tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipest.
-  * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-    Later versions (including Oracle Java SE Embedded version 8 Update 33)
-    may be affected by a ProcessBuilder memory leak [1]
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-    ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-  * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
-
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
-
-Eclipse Kura - 1.2.0
--------------------------------------------------------------------------
-
-Added Features:
-   * Added support for securing Kura
-     * Revised org.eclipse.kura.crypto API.
-     * New org.eclipse.kura.certificate API to enable validation of
-       signed requests from the cloud.
-     * Minimal implementation of the org.eclipse.kura.crypto API.
-     * Implementation of the org.eclipse.kura.certificate API.
-     * Encryption of passwords in snapshot files.
-     * Snapshot encryption.
-     * Improved management and security of the keystore used for the MQTT
-       SSL connection.
-   * Added support for the Raspberry Pi B+ and the Raspberry Pi 2.
-   * Added support for Bluetooth Low Energy (see Known Issues section below).
-     * API: org.eclipse.kura.bluetooth
-     * Example: org.eclipse.kura.example.ble.tisensortag
-   * Added OSGi console commands (get/setkuraloglevel) to control the Kura logger.
-
-Bug Fixes:
-   * Web UI: fixed wrong time units in the DHCP lease interval.
-   * Web UI: filter 5GHz channels when displaying WiFi scan results.
-   * Upgrade Deployment Package: remove the old Kura installation directory.
-   * MqttDataTransport configuration: changed default MQTT protocol version to 3.1.1.
-   * CloudService: even if gzip compression is enabled, publish the uncompressed
-     MQtt payload if its size is less than the compressed payload size.
-   * Network: Reduced executions of external ifconfig processes.
-   * Network: Fixed WiFi background scan configuration.
-
-Known Issues:
-   * BLE only tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag.
-     The only working version of BlueZ is 4.101. The deb package is not available from Raspbian so it
-     must be compiled from sources.
-   * The Intel Edison platform is still a work in progress.
-   * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-     Later versions (including Oracle Java SE Embedded version 8 Update 33)
-     may be affected by a ProcessBuilder memory leak [1]
-   * Hardware watchdog: not implemented on all platforms
-   * Only one WAN interface is currently supported. A warning in displayed
-     in the WEB UI if the user attempts to enable more than one WAN interface
-   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-   * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
-
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
-
-
-Eclipse Kura - 1.1.2
--------------------------------------------------------------------------
-Bug Fixes:
-   * Fixed JVM memory leak by making sure all stream are closed and
-     the streams associated to the stdout and stderr of external processes
-     are consumed asynchronously
-   * Overall optimization of the network related bundles by removing
-     unnecessary executions of external processes
-   * Fixed MANIFESTs removing unused imports and fixing Import-Package version
-     ranges to comply with OSGi Semantic Versioning
-   * Ppp0 connection not starting after a fresh install
-   * Modem did not recover the connection when the antenna is unplugged
-   * Avoid starting two Kura instances
-   * Rolling back to snapshot 0 does not change the modem configuration on the Minigateway
-   * Don't allow to set the gateway on LAN interfaces
-   * When reconfiguring Wifi from Station to Access Point, DHCP&NAT tab gets enabled only
-     after clicking on the 'Wireless' tab
-   * Since we don't support 802.11a, do not allow this in configuration
-   * Poweroff command fails at 'Stopping Kura'
-   * Disable snmpd to avoid excessive flash writes on raw-flash devices
-
-Known Issues:
-   * The reference JVM is Oracle Java SE Embedded version 7 Update 40.
-     Later versions (including Oracle Java SE Embedded version 8 Update 33)
-     may be affected by a ProcessBuilder memory leak [1]
-   * Hardware watchdog: not implemented on all platforms
-   * Only one WAN interface is currently supported. A warning in displayed
-     in the WEB UI if the user attempts to enable more than one WAN interface
-   * When first modem configuration is submitted, unconfigured cellular interface for serial modem (e.g. HE910) is not being replaced by
-     ppp0 interface. Both ppp0 and HE910 interfaces are shown in the Web Admin.
-   * Gateway needs to be rebooted for static GPS coordinates to be published to the cloud.
-
-[1] https://bugs.openjdk.java.net/browse/JDK-8054841
-
-
-Eclipse Kura - 1.1.1
--------------------------------------------------------------------------
-
-Added Features:
-   * Added configurable CommandService to password-protect command execution
-   * Added support to reset WiFi if it cannot be enabled
-   * Added selection of the MQTT protocol version to the MqttDataTransport configuration
-
-Bug Fixes:
-   * Fixed ppp0 interface disappeared from Web UI
-   * Improved tips in the cellular modem advanced options and changed default values
-   * Fixed bug 452499: Kura Debian package name should be lower case
-   * Fixed org.eclipse.kura.linux.position not setting the track heading parameter
-   * Fixed org.eclipse.kura.linux.position to correctly select the GPS receiver
-   * Fixed org.eclipse.kura.linux.usb to better handle removal of USB devices
-   * Fixed org.eclipse.kura.linux.net to properly track USB add/remove events and stale devices
-   * Fixed org.eclipse.kura.net.admin to properly track modems
-   * Fixed org.eclipse.kura.net.admin to keep resetting the modem if PPP link cannot be established
-   * Fixed minor issues
-
-Known Issues:
-   * Hardware watchdog: not implemented on all platforms
-   * Only one WAN interface is currently supported. A warning in displayed in the WEB UI if the user attempts to enable more than one WAN interface
-
-
-Eclipse Kura - 1.1.0
--------------------------------------------------------------------------
-
-Added Features:
-   * OpenJDK Device I/O integration
-   * Added org.eclipse.kura.example.gpio example using OpenJDK Device I/O
-   * Added RPI B+ distribution
-   * Display warning in the WEB UI if the user attempts to enable more than one WAN interface
-   * Modem IMEI and SIM IMSI/ICCID published in the birth certificate
-   * Improved documentation on the Eclipse Kura Wiki
-   * Upgraded to Google Protocol Buffers 2.6.0 (adding union types)
-   * Display client ID in the WEB UI Status page
-
-Bug Fixes:
-   * Upticked API package versions to 1.0.0
-   * Fixed DNS issue when DNS servers are provided in the configuration
-   * Fixed 'iw' scan problem (IBSS capability)
-   * Fixed a MetaTypeBundleTracker issue slowing down the Kura startup
-   * Added a minimum value of two minutes for the modem reset interval
-   * Improved robustness of the Kura upgrade scripts
-   * Upgraded to Paho 1.0.1 (many bug fixes)
-   * Fixed uncaught exception preventing network interfaces being displayed in the WEB UI
-   * Set Paho client callback to null before terminating the client
-   * Removed 'old' native library directories
-   * Fixed WEB UI username/password lost for the in-memory configuration of HSQLDB
-   * Fixed HIDAPI bundle
-   * Fixed HSQLDB exception due to large system time adjustments
-   * Merged pull requests and contributions sent in the form o diff files to the mailing list
-   * Added 'telnet' to the list of 'apt' dependencies
-
-Known Issues:
-   * Hardware watchdog: not implemented on all platforms
-   * Reliagate 50-21: Using eth1 and Windows 7 to access the webui does not work over some network topologies - OSX or Linux are recommended to access the webui in this rare case
-   * Only one WAN interface is currently supported. A warning in displayed in the WEB UI if the user attempts to enable more than one WAN interface
-
-
-Eclipse Kura - Initial Version
--------------------------------------------------------------------------
 
 Features:
-   * Runs on Java SE 7 Embedded and OpenJDK 7
-   * Core OSGi runtime using Eclipse Equinox v3.8.1
-   * API support including:
-	* Clock (both system clock syncing via NTP and hardware clock sync)
-	* Cloud connections (MQTT) with local store and forward capabilities to handle disconnected states as well as Google Protobuf message packing
-	* Service configuration locally and remotely via OSGi ConfigAdmin with Metatype support
-	* Network status including IP address, netmask, DNS, gateway, and hardware types
-	* Network administration: modifying network configuration including IP address, netmask, DNS, gateway, DHPC servers, Nat/Masq,
-				  firewall, wifi AP, wifi station, SSID, wifi security types, wifi channel, and cellular modems, and
-				  routing tables.
-	* GPS configuration
-	* USB devices including dynamic detection
-   * OSGi Deployment Package support
-   * Local configuration web UI
-   * Eclipse based emulator for local host PC development/testing including support for OSX and Linux
-   * Remote configuration and device management capabilities when connected to Eurotech's Everyware Cloud
-   * Support for remote OSGi console and bundle deployment from Eclipse
+  * 17814c7cfe - dynamic ram assignment when over 1GB (#4921) (G_Ivo)
+  * aed5f19fe4 - [linux.net] Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)
+  * 17538d578b - [rest.identity.provider] Added new Identity rest APIs and Request Handler  (#4878) (Salvatore Coppola)
+  * d74484bee2 - [rest.packages.provider] add endpoint for `.dp` upload (#4894) (Mattia Dal Ben)
+  * 80be184745 - [distrib] network interface names retrieved without `nmcli` (#4920) (Marcello Rinaldo Martina)
+  * 21f5f5cd0d - Added KEYS-V2 allowing to upload private key entries (#4917) (nicolatimeus)
+  * fa925958c2 - [nm] mtu configuration support in networkmanager and gui (#4877) (fdizazzo)
+  * 3d8a19998b - add support for same alias in different keystores (#4916) (G_Ivo)
+  * 947c3e0336 - [web2] EAP-TLS Enterprise certificate support frontend (#4895) (G_Ivo)
+  * dc5d8fa5b2 - Firewall IPV6 support in UI (#4805) (Matteo Maiero)
+  * 8c09f934a3 - Extended service listing REST APIs (#4901) (nicolatimeus)
+  * f82c49030c - [nm] Backend implementation to support EAP-TLS + Minor WebUI fixes (#4872) (G_Ivo)
+  * 986c72174e - Birth messages now default to Qos 1 (#4876) (Matteo Maiero)
+  * a9e4c783f6 - [rest.packages.provider] add `deploy/v2` Rest API (#4868) (Mattia Dal Ben)
+  * ecce7db4b2 - [rest.service.listing.provider] Added REST Api for Service Listing (#4857) (sfiorani)
+  * 9c91aa2848 - add front end support for WPA Enterprise (#4852) (G_Ivo)
+  * 7edaa6d88d - Added session management support for REST service (#4855) (nicolatimeus)
+  * 1b81fd9ded - adding support for vlan via networkmanager (#4816) (fdizazzo)
+  * bdf0b2be45 - [api] add jvm_vendor and jdk_vendor_version to BIRTH payload (#4837) (Marcello Rinaldo Martina)
+  * 07582f6554 - [core.cloud] publish BIRTH on EventAdmin install/uninstall events (#4835) (Marcello Rinaldo Martina)
+  * ef08ea90ed - [rest.security.provider] Added REST Api for Security Service (#4843) (Salvatore Coppola)
+  * c988373186 - [network.threat.manager] Update ipv6 flooding protection and fragment filtering (#4840) (Pierantonio Merlino)
+  * d2445217ef - [nm] WPA2 Enterprise (802.1x) backend support (#4820) (G_Ivo)
+  * b96b43825b - [api] add java.vm.vendor and jdk.vendor.version to SystemService APIs (#4833) (Marcello Rinaldo Martina)
+  * b02a4f63aa - add BIRTH message caching on already connected connections for CloudConnectionManager implementations (#4817) (Marcello Rinaldo Martina)
+  * f99573b3fe - Label improvement in Wire Asset creation (#4829) (Matteo Maiero)
+  * 60fa70ce72 - [net.admin] added method for applying additional firewall rules to all tables (#4825) (Pierantonio Merlino)
+  * b2efccf11a - [util] Added new helper class BundleUtil (#4826) (Salvatore Coppola)
+  * 578313d9e8 - Firewall ipv6 implementation (#4802) (Pierantonio Merlino)
+  * eb71100121 - add rest.system.provider (#4812) (Marcello Rinaldo Martina)
+  * da93c4bac5 - [api] Firewall IPv6 API (#4793) (Pierantonio Merlino)
+  * cc97879124 - [distrib] Updated firewall.init script for ipv6 in generic profiles (#4803) (Pierantonio Merlino)
+  * 6be683f532 - [web2] ipv6 status information display (#4809) (Mattia Dal Ben)
+  * 0a9ceb6043 - [nm] ipv6 status information retrieval (#4806) (Mattia Dal Ben)
+  * c8dec10e00 - [web.server.net2] add IPv6 configuration properties support (#4804) (Marcello Rinaldo Martina)
+  * 8566aa9cd5 - [web2] add IPv6 configuration tab (#4800) (Marcello Rinaldo Martina)
+  * 689a4607fd - Remove IPv6 protocol disabling from generic installers (#4795) (sfiorani)
+  * 581e3730a1 - [net.configuration] Updated metatype with new IPv6 properties (#4796) (sfiorani)
+  * d46e5250f1 - Added trigger scan button (#4791) (Salvatore Coppola)
+  * 7e59ca02cb - Added ipv6 status in generic snapshots (#4788) (sfiorani)
+  * 245be53c17 - [nm] implementation of IPv6 configuration (#4786) (sfiorani)
+  * 9fc74b94e5 - REST api's and Request Handler for Position Service (#4777) (G_Ivo)
+  * 91091dc1b8 - [nm] add Access Point rescan leveraging wpa_supplicant (#4782) (Mattia Dal Ben)
+  * 760698438a - [nm] add WPA supplicant auto-generated classes (#4775) (Mattia Dal Ben)
+  * 34e6026c26 - new rest api for command service (#4743) (G_Ivo)
+  * 0ece8698d9 - REST-API's for inventory v1 (#4715) (G_Ivo)
+  * 22631341ab - Improve the graph load time by reducing calls to bundleContext (#4574) (Matteo Maiero)
+  * 51bd7c29b4 - [dnsmasq] support for multiple DHCP server interfaces (#4529) (Marcello Rinaldo Martina)
+  * a5d79072ff - [position] changed metatype default provider to gpsd (#4549) (sfiorani)
+  * 3984ce0311 - [nm] add firewall NAT rules update on configuration change (#4512) (Marcello Rinaldo Martina)
+  * 1aa0ecbe27 - [nm] add modem reset support (#4508) (Mattia Dal Ben)
+  * e28527506e - Added db.defrag.enabled and db.wal.checkpoint.enabled fields. (#4485) (Salvatore Coppola)
+  * d999a4461b - [dhcp-server] added dnsmasq support (#4486) (Marcello Rinaldo Martina)
+
+Target Environments:
+[TODO]
+
+Bug Fixes:
+  * 7fe29dcd28 - Pass null for Context method arguments in JaxRsRequestHandlerProxy (#4935) (nicolatimeus)
+  * 6da1ed929d - [web2] Prevent refresh of IPv6 tabs with old networking (#4914) (Pierantonio Merlino)
+  * c9c25c02d9 - Updated the cacerts.ks with the latest Eclipse certificate (#4923) (Matteo Maiero)
+  * c56e64cde2 - [docker] display logs in console (#4907) (Mattia Dal Ben)
+  * 6c13898b82 - Added missing return statement in ServletContainerBridgeFix (#4904) (nicolatimeus)
+  * bc70f76b42 - [linux.net] Added check for existing file before iptables restore (#4889) (Pierantonio Merlino)
+  * 058cfe251d - Return placeholder instead of encrypted passwords in REST APIs (#4893) (nicolatimeus)
+  * ecd214ec59 - resolved inconsistency for empty string csv input (#4873) (sfiorani)
+  * ec2d052dd3 - fixed UI issues with the modem section (#4869) (Matteo Maiero)
+  * ef48678251 - dhcp lease not enabled in modem view (#4867) (Matteo Maiero)
+  * e6426b0622 - [api] Removed /0 from default IP6Address (#4865) (Pierantonio Merlino)
+  * d4ffa483f4 - [net.admin] Fix ipv6 threat manager (#4864) (Pierantonio Merlino)
+  * afa5f0fab0 - [linux.net] Replaced HashSet with LinkedHashSet (#4846) (Pierantonio Merlino)
+  * 0bc8468900 - [web2] correctly report gateway and WAN priority when not set (#4814) (Mattia Dal Ben)
+  * cc4cadb27e - [util] Bumped org.eclipse.kura.util.osgi exported package version to to 1.1.0 (#4828) (Salvatore Coppola)
+  * d674e3e2c6 - [web2.server] fixed IPv6-related UI settings (#4810) (Marcello Rinaldo Martina)
+  * 1c58f65e48 - [nm] "unmanaged", "unknown" and "disabled" interface status handling inside NMSettingsConverter (#4785) (Mattia Dal Ben)
+  * a92d199676 - Fixed NPE on sqlite activator stop (#4773) (nicolatimeus)
+  * 096b2b942f - [nm] WEP support for Generic Profiles (#4772) (Mattia Dal Ben)
+  * 1daca829ec - [rest.command.service] separated async and non async api's to aline with output (#4764) (G_Ivo)
+  * 05d6688d8a - support for no Wireless Security (#4759) (Mattia Dal Ben)
+  * cfe6f89f6b - [web2] Impossible to apply WiFi configuration in station mode with Security Mode Off (#4754) (Salvatore Coppola)
+  * 90604a7b16 - check support for `GPS_UNMANAGED` in `isGpsSupported` method (#4750) (Mattia Dal Ben)
+  * f1973d9034 - Fixed asset scale and offset not being applied in listen mode (#4736) (nicolatimeus)
+  * cae7d38f49 - added correct permissions to docker file (#4734) (G_Ivo)
+  * bcc89dc5e4 - Fixed error on SQLite dp reinstallation (#4725) (nicolatimeus)
+  * 69e016eeb3 - [network] Fixed issue with concurrent dhcp client and the default route (#4720) (Salvatore Coppola)
+  * dae19acb79 - [wire.component.conditional.provider] corrected unescaped metatype character (#4714) (Marcello Rinaldo Martina)
+  * 145c0aff3f - [setups] Fix oomph setup (#4589) (Salvatore Coppola)
+  * ea7ac205d7 - rest wire provider minor version bugfix (#4709) (G_Ivo)
+  * 554865cd3b - Fixed wrong paths in some build.properties. (#4707) (Salvatore Coppola)
+  * f782f4d7d3 - Fixed script filter copy location (#4700) (nicolatimeus)
+  * 798f3382ff - Added missing dp copy to distrib (#4697) (nicolatimeus)
+  * f952678e6c - [core.deployment] dpa.properties is written even if package is already in persistence (#4690) (Marcello Rinaldo Martina)
+  * d9e15dac69 - [nm] Added convertion between interfaceId and interfaceName in firewall co… (#4688) (Pierantonio Merlino)
+  * 28941cb627 - Removed deprecated named options (#4685) (nicolatimeus)
+  * 8736de47c9 - Updated named apparmor profile to include /usr/share/dns (#4684) (nicolatimeus)
+  * 09a557f133 - Wrong PKCS11KeystoreServiceImpl bind methods (#4676) (Matteo Maiero)
+  * daabb0b16d - Prevented ifup-local from writing duplicate DNS entries (#4674) (nicolatimeus)
+  * af967a2b48 - porting of fixes for the dns management (#4673) (Pierantonio Merlino)
+  * c0070ddbd0 - [nm] actually delete connection upon device disconnection (#4670) (Mattia Dal Ben)
+  * 2b800074ce - Improved the way netplan is disabled on Kura install (#4662) (nicolatimeus)
+  * 3aaa020af9 - wan priority description defaults. (#4652) (Matteo Maiero)
+  * aa78602980 - [web2] save configured wifi channel in GWT interface (#4665) (Marcello Rinaldo Martina)
+  * 1d6aa55add - [web2] DHCP renew button is now disabled except in WAN/LAN mode using dhcp (#4655) (Salvatore Coppola)
+  * 85022828a6 - [web2] Added missing wifi password content check. (#4635) (Salvatore Coppola)
+  * f0d03637f4 - Do not remove interface address while dhclient is running (#4637) (nicolatimeus)
+  * e6ffdc5f8e - [distrib] aligned disabled services on all kura-network installers (#4643) (Marcello Rinaldo Martina)
+  * ca33da957c - [nm] use UNMANAGED location source (#4633) (Mattia Dal Ben)
+  * d45c1e77eb - [web2] GPS modem config is done independently of set IP status (#4638) (Marcello Rinaldo Martina)
+  * ee6b1e89a9 - [distrib] add named.rfc file to apparmor exceptions (#4630) (Mattia Dal Ben)
+  * 777c0b1591 - Disabled dhcpcd service for generic platform. (#4629) (Salvatore Coppola)
+  * 2aba4a1bd9 - [web2] fixed authType and pdpType enums conversion on net2 (#4609) (Marcello Rinaldo Martina)
+  * 00b1d5fca3 - [installer] Added missing named files in generic installers (#4618) (Pierantonio Merlino)
+  * a4eac790a3 - [monitor.dns-server] added check for interface as LAN before starting DNS server (#4615) (Marcello Rinaldo Martina)
+  * 6fb84ada32 - [dnsmasq] added protections against wrong configurations (#4601) (Marcello Rinaldo Martina)
+  * 7584e500ca - [nm] cannot configure ethernet interfaces if the cable is disconnected (#4606) (Mattia Dal Ben)
+  * ffa976599a - [distrib] disabled ntp-servers dhclient config for /etc/dhclient.conf and /etc/dhcp/dhclient.conf (#4612) (Marcello Rinaldo Martina)
+  * 559b9b9ff1 - Fixed ScheduleStrategy shutdown (#4602) (nicolatimeus)
+  * d20d3731f8 - [core] Watchdog is not refreshed when connection to DB missing (#4600) (G_Ivo)
+  * 018a3df53a - [api] Modem SIM representation (#4597) (Mattia Dal Ben)
+  * c861038a84 - password escaping issue with wifi passwords (#4591) (G_Ivo)
+  * d61c8b091b - Ordering of channels when numbers are bigger than int (#4596) (Matteo Maiero)
+  * 1b783f23b0 - [installer] comment configured interfaces in interfaces file (#4585) (Pierantonio Merlino)
+  * eabab0d61e - [distrib] fix errors during network configuration on Jetson Nano (#4587) (Mattia Dal Ben)
+  * 9d0b1ca0ef - [linux.net] Replaced timestamp check for dnsmasq configuration files with a hash check. (#4588) (Salvatore Coppola)
+  * 2d5f00ace6 - [nm] Added legacy dns monitor to NetworkManager bundle (#4582) (Salvatore Coppola)
+  * 27bff99d61 - check if schedule is enabled before parsing (#4584) (G_Ivo)
+  * f4188104b6 - [nm] Fix dns list wrongly split. (#4576) (Salvatore Coppola)
+  * fd44d4f2e7 - Do not write dnsmasq config for disabled interfaces (#4572) (nicolatimeus)
+  * 3c27bd844a - [installer] Added dnsmasq default configuration file (#4568) (Pierantonio Merlino)
+  * f9b8f3a1e5 - Perform defrag after SQLite rekey (#4567) (nicolatimeus)
+  * 12923fbaea - [installer] Added ModemManager enable command in install script (#4548) (Pierantonio Merlino)
+  * 8b23fc659a - [web2] Replaced marketplace url with the updated https url (avoiding redirect). Updated Eclipse Marketplace certificate in the keystore.. (#4533) (Salvatore Coppola)
+  * a741327008 - [web2.server.net2] passwords for wifi infra, AP, and modem are saved as Password not as String (#4553) (Marcello Rinaldo Martina)
+  * f939c4c8fd - [web2] Fix cellular default values (#4547) (Pierantonio Merlino)
+  * 1c8340263b - [web2] networking passwords replaced with placeholder, and html escaping and unescaping  (#4540) (G_Ivo)
+  * 87e80f3a23 - [web2.server.net2] wrong enum default leaves wireless interface as station (#4545) (Marcello Rinaldo Martina)
+  * 07b783bbb1 - Allowed loading certificate chain in private key entry (#4518) (nicolatimeus)
+  * c7dfb5e511 - [distrib] do not rename /etc/network/interface file on installation (#4537) (Mattia Dal Ben)
+  * 63da7853ad - [nm.test] Fixed nm tests. (#4544) (Salvatore Coppola)
+  * 1782285252 - [web2] Fixed fileCountMax. (#4531) (Salvatore Coppola)
+  * 06e60aec3d - Fixed NetworkConfigurationService returning passwords as strings (#4532) (nicolatimeus)
+  * b01a8133d4 - [nm] avoid error when `Modem.Location` interface is missing (#4516) (Mattia Dal Ben)
+  * 22fcb40ed2 - [nm] do not set `gsm.password` if property is empty (#4514) (Mattia Dal Ben)
+  * 006682ebda - [nm] support for pass dns feature in dnsmasq (#4515) (Marcello Rinaldo Martina)
+  * b759503eee - [linux.net] dhcp server tool ordering (#4506) (Marcello Rinaldo Martina)
+  * 7f7f2487c6 - [nm] added conversion from signal quality to signal strength (#4504) (Pierantonio Merlino)
+  * 50f6e89728 - [distrib] let NetworkManager manage gsm type devices (#4505) (Mattia Dal Ben)
+  * d411154f3d - [nm] Settings leak on connection activation failure (#4477) (G_Ivo)
+  * c616b7a056 - Overriding NM unmanaged-devices policy  (#4497) (Matteo Maiero)
+  * 006f2bc19f - Improved local image existence test with exact match (#4492) (Matteo Maiero)
+  * ebdc0246af - [distrib] manage netplan configuration on installation (#4490) (Mattia Dal Ben)
+
+Target Platform Updates:
+  * ca23c485d0 - update jetty dependencies from 9.4.51.v20230217 to 9.4.53.v20231009 (#4940) (Marcello Rinaldo Martina)
+  * 870b84b5e6 - Set default tycho version. (#4794) (Salvatore Coppola)
+  * c2a3199d30 - Updated Netty to 4.1.95.Final (#4789) (Matteo Maiero)
+  * 1acc783827 - Updated GRPC to 1.56.1 (#4784) (Matteo Maiero)
+  * c2aa1c6e2b - Upticked Guava to 32.1.1-jre (#4769) (Matteo Maiero)
+  * 7ee54feba8 - Upticked Jetty to 9.4.51.v20230217 (#4767) (Matteo Maiero)
+  * c3a3bfe624 - Updated org.xerial:sqlite-jdbc to 3.42.0.0 (#4721) (nicolatimeus)
 
 Known Issues:
-   * Hardware watchdog: not implemented on all platforms
-   * Reliagate 50-21: Using eth1 and Windows 7 to access the webui does not work over some network topologies - OSX or Linux are recommended to access the webui in this rare case
-   * Only one WAN interface is currently supported.  Make sure you never have multiple WAN interfaces defined or it could result in network connectivity issues
+[TODO]
+
+Changelog:
+  * 17814c7cfe - feat: dynamic ram assignment when over 1GB (#4921) (G_Ivo)
+  * ca23c485d0 - build(deps): update jetty dependencies from 9.4.51.v20230217 to 9.4.53.v20231009 (#4940) (Marcello Rinaldo Martina)
+  * aed5f19fe4 - feat(linux.net): Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)
+  * 7fe29dcd28 - fix: Pass null for Context method arguments in JaxRsRequestHandlerProxy (#4935) (nicolatimeus)
+  * 17538d578b - feat(rest.identity.provider): Added new Identity rest APIs and Request Handler  (#4878) (Salvatore Coppola)
+  * d74484bee2 - feat(rest.packages.provider): add endpoint for `.dp` upload (#4894) (Mattia Dal Ben)
+  * 6da1ed929d - fix(web2): Prevent refresh of IPv6 tabs with old networking (#4914) (Pierantonio Merlino)
+  * 6199229bc6 - docs(DataTransportService): clarify that quiesceTimeout  is in milliseconds (#4913) (gnunzi)
+  * 80be184745 - feat(distrib): network interface names retrieved without `nmcli` (#4920) (Marcello Rinaldo Martina)
+  * 434aaf5ee9 - ci(automation): enable stale bot (#4910) (Mattia Dal Ben)
+  * c9c25c02d9 - fix: Updated the cacerts.ks with the latest Eclipse certificate (#4923) (Matteo Maiero)
+  * 21f5f5cd0d - feat: Added KEYS-V2 allowing to upload private key entries (#4917) (nicolatimeus)
+  * fa925958c2 - feat(nm): mtu configuration support in networkmanager and gui (#4877) (fdizazzo)
+  * 3d8a19998b - feat: add support for same alias in different keystores (#4916) (G_Ivo)
+  * c56e64cde2 - fix(docker): display logs in console (#4907) (Mattia Dal Ben)
+  * 6c13898b82 - fix: Added missing return statement in ServletContainerBridgeFix (#4904) (nicolatimeus)
+  * 947c3e0336 - feat(web2): EAP-TLS Enterprise certificate support frontend (#4895) (G_Ivo)
+  * dc5d8fa5b2 - feat: Firewall IPV6 support in UI (#4805) (Matteo Maiero)
+  * b9e3ecb898 - ci(automation): fix labels and nr of operations for stale issues bot (#4906) (Mattia Dal Ben)
+  * 4d78acf061 - ci(automation): add bot for closing stale issues and PRs (#4903) (Mattia Dal Ben)
+  * 8c09f934a3 - feat: Extended service listing REST APIs (#4901) (nicolatimeus)
+  * aa0e1d6ec0 - ci(Jenkinsfile): 'sonar.login' is deprecated use 'sonar.token' property instead (#4898) (Mattia Dal Ben)
+  * bc70f76b42 - fix(linux.net): Added check for existing file before iptables restore (#4889) (Pierantonio Merlino)
+  * f82c49030c - feat(nm): Backend implementation to support EAP-TLS + Minor WebUI fixes (#4872) (G_Ivo)
+  * 058cfe251d - fix: Return placeholder instead of encrypted passwords in REST APIs (#4893) (nicolatimeus)
+  * 5b31737e4d - ci(Jenkinsfile): set sonar.java.source (#4892) (Mattia Dal Ben)
+  * ecd214ec59 - fix: resolved inconsistency for empty string csv input (#4873) (sfiorani)
+  * 986c72174e - feat: Birth messages now default to Qos 1 (#4876) (Matteo Maiero)
+  * 7c19a6f768 - ci(Jenkinsfile): correctly import examples test coverage (#4888) (Mattia Dal Ben)
+  * a9e4c783f6 - feat(rest.packages.provider): add `deploy/v2` Rest API (#4868) (Mattia Dal Ben)
+  * d79d4865ae - ci: 'sonar.jacoco.reportPaths' is no longer supported, using JaCoCo's xml report instead (#4882) (Mattia Dal Ben)
+  * ec2d052dd3 - fix: fixed UI issues with the modem section (#4869) (Matteo Maiero)
+  * ef48678251 - fix: dhcp lease not enabled in modem view (#4867) (Matteo Maiero)
+  * e6426b0622 - fix(api): Removed /0 from default IP6Address (#4865) (Pierantonio Merlino)
+  * d4ffa483f4 - fix(net.admin): Fix ipv6 threat manager (#4864) (Pierantonio Merlino)
+  * ecce7db4b2 - feat(rest.service.listing.provider): Added REST Api for Service Listing (#4857) (sfiorani)
+  * 9c91aa2848 - feat: add front end support for WPA Enterprise (#4852) (G_Ivo)
+  * 7edaa6d88d - feat: Added session management support for REST service (#4855) (nicolatimeus)
+  * 1b81fd9ded - feat: adding support for vlan via networkmanager (#4816) (fdizazzo)
+  * 613779f29d - refactor: remove birth.cert.policy from standard cloud service implementations (#4859) (Marcello Rinaldo Martina)
+  * a9ed3b35ad - chore(nm): uptick lower bound of net.wifi dependency (#4853) (G_Ivo)
+  * 3ba1445f18 - refactor: Sonar code smells fixes (#4851) (Pierantonio Merlino)
+  * bdf0b2be45 - feat(api): add jvm_vendor and jdk_vendor_version to BIRTH payload (#4837) (Marcello Rinaldo Martina)
+  * afa5f0fab0 - fix(linux.net): Replaced HashSet with LinkedHashSet (#4846) (Pierantonio Merlino)
+  * 07582f6554 - feat(core.cloud): publish BIRTH on EventAdmin install/uninstall events (#4835) (Marcello Rinaldo Martina)
+  * d2fe2ff2b1 - ci: Added sonar.branch.target to Jenkins file (#4845) (Pierantonio Merlino)
+  * ef08ea90ed - feat(rest.security.provider): Added REST Api for Security Service (#4843) (Salvatore Coppola)
+  * 95014a8ce1 - chore(examples): Fixed examples build with Eclipse IDE (#4844) (Salvatore Coppola)
+  * c988373186 - feat(network.threat.manager): Update ipv6 flooding protection and fragment filtering (#4840) (Pierantonio Merlino)
+  * d2445217ef - feat(nm): WPA2 Enterprise (802.1x) backend support (#4820) (G_Ivo)
+  * b96b43825b - feat(api): add java.vm.vendor and jdk.vendor.version to SystemService APIs (#4833) (Marcello Rinaldo Martina)
+  * b02a4f63aa - feat: add BIRTH message caching on already connected connections for CloudConnectionManager implementations (#4817) (Marcello Rinaldo Martina)
+  * f99573b3fe - feat: Label improvement in Wire Asset creation (#4829) (Matteo Maiero)
+  * 60fa70ce72 - feat(net.admin): added method for applying additional firewall rules to all tables (#4825) (Pierantonio Merlino)
+  * 0bc8468900 - fix(web2): correctly report gateway and WAN priority when not set (#4814) (Mattia Dal Ben)
+  * cc4cadb27e - fix(util): Bumped org.eclipse.kura.util.osgi exported package version to to 1.1.0 (#4828) (Salvatore Coppola)
+  * b2efccf11a - feat(util): Added new helper class BundleUtil (#4826) (Salvatore Coppola)
+  * 578313d9e8 - feat: Firewall ipv6 implementation (#4802) (Pierantonio Merlino)
+  * eb71100121 - feat: add rest.system.provider (#4812) (Marcello Rinaldo Martina)
+  * 13358e24b3 - chore: remove duplicated profile in formatter settings file (#4811) (Mattia Dal Ben)
+  * da93c4bac5 - feat(api): Firewall IPv6 API (#4793) (Pierantonio Merlino)
+  * 93ad9a86ba - docs: add documentation references (#4813) (Mattia Dal Ben)
+  * 870b84b5e6 - build: Set default tycho version. (#4794) (Salvatore Coppola)
+  * 2af2af9509 - ci: update release script so that added [TODO] sections don't get replaced (#4787) (G_Ivo)
+  * cc97879124 - feat(distrib): Updated firewall.init script for ipv6 in generic profiles (#4803) (Pierantonio Merlino)
+  * d674e3e2c6 - fix(web2.server): fixed IPv6-related UI settings (#4810) (Marcello Rinaldo Martina)
+  * 6be683f532 - feat(web2): ipv6 status information display (#4809) (Mattia Dal Ben)
+  * 0a9ceb6043 - feat(nm): ipv6 status information retrieval (#4806) (Mattia Dal Ben)
+  * f0a99ec538 - refactor(web.ui): support unmanaged IPv6 status (#4807) (Marcello Rinaldo Martina)
+  * c8dec10e00 - feat(web.server.net2): add IPv6 configuration properties support (#4804) (Marcello Rinaldo Martina)
+  * 8566aa9cd5 - feat(web2): add IPv6 configuration tab (#4800) (Marcello Rinaldo Martina)
+  * 689a4607fd - feat: Remove IPv6 protocol disabling from generic installers (#4795) (sfiorani)
+  * 581e3730a1 - feat(net.configuration): Updated metatype with new IPv6 properties (#4796) (sfiorani)
+  * 92a5bcfa30 - refactor(web2): renamed IPv4 specific settings in the UI (#4798) (Marcello Rinaldo Martina)
+  * d46e5250f1 - feat: Added trigger scan button (#4791) (Salvatore Coppola)
+  * 7e59ca02cb - feat: Added ipv6 status in generic snapshots (#4788) (sfiorani)
+  * c2a3199d30 - build: Updated Netty to 4.1.95.Final (#4789) (Matteo Maiero)
+  * 245be53c17 - feat(nm): implementation of IPv6 configuration (#4786) (sfiorani)
+  * bee82c112a - chore: Update NOTICE.md (#4770) (Matteo Maiero)
+  * 1c58f65e48 - fix(nm): "unmanaged", "unknown" and "disabled" interface status handling inside NMSettingsConverter (#4785) (Mattia Dal Ben)
+  * 9fc74b94e5 - feat: REST api's and Request Handler for Position Service (#4777) (G_Ivo)
+  * 1acc783827 - build: Updated GRPC to 1.56.1 (#4784) (Matteo Maiero)
+  * 91091dc1b8 - feat(nm): add Access Point rescan leveraging wpa_supplicant (#4782) (Mattia Dal Ben)
+  * 760698438a - feat(nm): add WPA supplicant auto-generated classes (#4775) (Mattia Dal Ben)
+  * 8d906a325b - refactor(nm): add `KuraWifiSecurityType` (#4780) (Mattia Dal Ben)
+  * c48d3784cd - refactor(nm): rename methods to use `interfaceId` consistently (#4774) (Mattia Dal Ben)
+  * a92d199676 - fix: Fixed NPE on sqlite activator stop (#4773) (nicolatimeus)
+  * 096b2b942f - fix(nm): WEP support for Generic Profiles (#4772) (Mattia Dal Ben)
+  * c2aa1c6e2b - build: Upticked Guava to 32.1.1-jre (#4769) (Matteo Maiero)
+  * 7fe286d534 - refactor(nm): add NetworkManagerDbusWrapper and ModemManagerDbusWrapper objects (#4757) (Mattia Dal Ben)
+  * 7ee54feba8 - build: Upticked Jetty to 9.4.51.v20230217 (#4767) (Matteo Maiero)
+  * 1daca829ec - fix(rest.command.service): separated async and non async api's to aline with output (#4764) (G_Ivo)
+  * 05d6688d8a - fix: support for no Wireless Security (#4759) (Mattia Dal Ben)
+  * 7a8d9fa7af - refactor: use `Device.Udi` to retrieve ModemManager device dbus path (#4755) (Mattia Dal Ben)
+  * cfe6f89f6b - fix(web2): Impossible to apply WiFi configuration in station mode with Security Mode Off (#4754) (Salvatore Coppola)
+  * e292e5aca7 - docs: removed gitter badge from README.md (#4751) (Salvatore Coppola)
+  * 90604a7b16 - fix: check support for `GPS_UNMANAGED` in `isGpsSupported` method (#4750) (Mattia Dal Ben)
+  * 34e6026c26 - feat: new rest api for command service (#4743) (G_Ivo)
+  * 0889d91908 - docs: Added kura etymology (#4745) (Salvatore Coppola)
+  * 30b92a50ad - chore: Aligned libsocket-can-osgi versions (#4742) (Matteo Maiero)
+  * f1973d9034 - fix: Fixed asset scale and offset not being applied in listen mode (#4736) (nicolatimeus)
+  * f7ffc9a5d1 - fix(deployment.agent ): Added check on URI schema in the agent configuration file. (#4737) (Salvatore Coppola)
+  * c2800924ab - refactor(nm): move signal handlers into `org.eclipse.kura.nm.signal.handlers` package (#4733) (Mattia Dal Ben)
+  * cae7d38f49 - fix: added correct permissions to docker file (#4734) (G_Ivo)
+  * 393fea153c - refactor(nm): move enums into `org.eclipse.kura.nm.enums` package (#4730) (Mattia Dal Ben)
+  * bcc89dc5e4 - fix: Fixed error on SQLite dp reinstallation (#4725) (nicolatimeus)
+  * c3a3bfe624 - build: Updated org.xerial:sqlite-jdbc to 3.42.0.0 (#4721) (nicolatimeus)
+  * 69e016eeb3 - fix(network): Fixed issue with concurrent dhcp client and the default route (#4720) (Salvatore Coppola)
+  * 0ece8698d9 - feat: REST-API's for inventory v1 (#4715) (G_Ivo)
+  * dae19acb79 - fix(wire.component.conditional.provider): corrected unescaped metatype character (#4714) (Marcello Rinaldo Martina)
+  * 145c0aff3f - fix(setups): Fix oomph setup (#4589) (Salvatore Coppola)
+  * ea7ac205d7 - fix: rest wire provider minor version bugfix (#4709) (G_Ivo)
+  * 554865cd3b - fix: Fixed wrong paths in some build.properties. (#4707) (Salvatore Coppola)
+  * 5b6e42e947 - revert: Reverted sqlite feature renaming (#4703) (nicolatimeus)
+  * f782f4d7d3 - fix: Fixed script filter copy location (#4700) (nicolatimeus)
+  * 798f3382ff - fix: Added missing dp copy to distrib (#4697) (nicolatimeus)
+  * f952678e6c - fix(core.deployment): dpa.properties is written even if package is already in persistence (#4690) (Marcello Rinaldo Martina)
+  * d9e15dac69 - fix(nm): Added convertion between interfaceId and interfaceName in firewall co… (#4688) (Pierantonio Merlino)
+  * 28941cb627 - fix: Removed deprecated named options (#4685) (nicolatimeus)
+  * 8736de47c9 - fix: Updated named apparmor profile to include /usr/share/dns (#4684) (nicolatimeus)
+  * 09a557f133 - fix: Wrong PKCS11KeystoreServiceImpl bind methods (#4676) (Matteo Maiero)
+  * 393b3d39a7 - test(linux.net.dhcp.server): added `DnsmasqToolTest` and `DhcpdToolTest` (#4671) (Marcello Rinaldo Martina)
+  * daabb0b16d - fix: Prevented ifup-local from writing duplicate DNS entries (#4674) (nicolatimeus)
+  * af967a2b48 - fix: porting of fixes for the dns management (#4673) (Pierantonio Merlino)
+  * c0070ddbd0 - fix(nm): actually delete connection upon device disconnection (#4670) (Mattia Dal Ben)
+  * 2b800074ce - fix: Improved the way netplan is disabled on Kura install (#4662) (nicolatimeus)
+  * 3aaa020af9 - fix: wan priority description defaults. (#4652) (Matteo Maiero)
+  * aa78602980 - fix(web2): save configured wifi channel in GWT interface (#4665) (Marcello Rinaldo Martina)
+  * ff5e32527d - docs: Updated Readme.MD look (#4663) (Salvatore Coppola)
+  * 1d6aa55add - fix(web2): DHCP renew button is now disabled except in WAN/LAN mode using dhcp (#4655) (Salvatore Coppola)
+  * 85022828a6 - fix(web2): Added missing wifi password content check. (#4635) (Salvatore Coppola)
+  * 6c6dea9eff - docs(linux.clock): Added some notes on ntpd and chrony (#4641) (Salvatore Coppola)
+  * f0d03637f4 - fix: Do not remove interface address while dhclient is running (#4637) (nicolatimeus)
+  * e6ffdc5f8e - fix(distrib): aligned disabled services on all kura-network installers (#4643) (Marcello Rinaldo Martina)
+  * ca33da957c - fix(nm): use UNMANAGED location source (#4633) (Mattia Dal Ben)
+  * d45c1e77eb - fix(web2): GPS modem config is done independently of set IP status (#4638) (Marcello Rinaldo Martina)
+  * ee6b1e89a9 - fix(distrib): add named.rfc file to apparmor exceptions (#4630) (Mattia Dal Ben)
+  * 777c0b1591 - fix: Disabled dhcpcd service for generic platform. (#4629) (Salvatore Coppola)
+  * 62c1e52a04 - chore: automated uptick to Eclipse Kura 5.4.0-SNAPSHOT (#4614) (github-actions[bot])
+  * 2aba4a1bd9 - fix(web2): fixed authType and pdpType enums conversion on net2 (#4609) (Marcello Rinaldo Martina)
+  * 00b1d5fca3 - fix(installer): Added missing named files in generic installers (#4618) (Pierantonio Merlino)
+  * a4eac790a3 - fix(monitor.dns-server): added check for interface as LAN before starting DNS server (#4615) (Marcello Rinaldo Martina)
+  * 6fb84ada32 - fix(dnsmasq): added protections against wrong configurations (#4601) (Marcello Rinaldo Martina)
+  * 7584e500ca - fix(nm): cannot configure ethernet interfaces if the cable is disconnected (#4606) (Mattia Dal Ben)
+  * ffa976599a - fix(distrib): disabled ntp-servers dhclient config for /etc/dhclient.conf and /etc/dhcp/dhclient.conf (#4612) (Marcello Rinaldo Martina)
+  * 559b9b9ff1 - fix: Fixed ScheduleStrategy shutdown (#4602) (nicolatimeus)
+  * d20d3731f8 - fix(core): Watchdog is not refreshed when connection to DB missing (#4600) (G_Ivo)
+  * 018a3df53a - fix(api): Modem SIM representation (#4597) (Mattia Dal Ben)
+  * c861038a84 - fix: password escaping issue with wifi passwords (#4591) (G_Ivo)
+  * d61c8b091b - fix: Ordering of channels when numbers are bigger than int (#4596) (Matteo Maiero)
+  * 1b783f23b0 - fix(installer): comment configured interfaces in interfaces file (#4585) (Pierantonio Merlino)
+  * 5288e9b653 - docs: Updated Oomph setup instructions (#4583) (Salvatore Coppola)
+  * eabab0d61e - fix(distrib): fix errors during network configuration on Jetson Nano (#4587) (Mattia Dal Ben)
+  * 9d0b1ca0ef - fix(linux.net): Replaced timestamp check for dnsmasq configuration files with a hash check. (#4588) (Salvatore Coppola)
+  * 2d5f00ace6 - fix(nm): Added legacy dns monitor to NetworkManager bundle (#4582) (Salvatore Coppola)
+  * 27bff99d61 - fix: check if schedule is enabled before parsing (#4584) (G_Ivo)
+  * 31ef269ef0 - docs: requests for tests added to the contributing and pr docs (#4563) (sfiorani)
+  * f4188104b6 - fix(nm): Fix dns list wrongly split. (#4576) (Salvatore Coppola)
+  * fd44d4f2e7 - fix: Do not write dnsmasq config for disabled interfaces (#4572) (nicolatimeus)
+  * 22631341ab - feat: Improve the graph load time by reducing calls to bundleContext (#4574) (Matteo Maiero)
+  * 3c27bd844a - fix(installer): Added dnsmasq default configuration file (#4568) (Pierantonio Merlino)
+  * f9b8f3a1e5 - fix: Perform defrag after SQLite rekey (#4567) (nicolatimeus)
+  * 12923fbaea - fix(installer): Added ModemManager enable command in install script (#4548) (Pierantonio Merlino)
+  * 05d0bf1449 - chore: Modified NM configuration to use dhclient (#4564) (Pierantonio Merlino)
+  * 51bd7c29b4 - feat(dnsmasq): support for multiple DHCP server interfaces (#4529) (Marcello Rinaldo Martina)
+  * 8b23fc659a - fix(web2): Replaced marketplace url with the updated https url (avoiding redirect). Updated Eclipse Marketplace certificate in the keystore.. (#4533) (Salvatore Coppola)
+  * a741327008 - fix(web2.server.net2): passwords for wifi infra, AP, and modem are saved as Password not as String (#4553) (Marcello Rinaldo Martina)
+  * f939c4c8fd - fix(web2): Fix cellular default values (#4547) (Pierantonio Merlino)
+  * a5d79072ff - feat(position): changed metatype default provider to gpsd (#4549) (sfiorani)
+  * 1c8340263b - fix(web2):  networking passwords replaced with placeholder, and html escaping and unescaping  (#4540) (G_Ivo)
+  * 87e80f3a23 - fix(web2.server.net2): wrong enum default leaves wireless interface as station (#4545) (Marcello Rinaldo Martina)
+  * 4cc26f1c15 - refactor(web2): clean up ghost code (#4543) (G_Ivo)
+  * 07b783bbb1 - fix: Allowed loading certificate chain in private key entry (#4518) (nicolatimeus)
+  * 9b64377d14 - refactor(nm): `org.eclipse.kura.nm` log cleanup/update (#4535) (Mattia Dal Ben)
+  * c7dfb5e511 - fix(distrib): do not rename /etc/network/interface file on installation (#4537) (Mattia Dal Ben)
+  * 63da7853ad - fix(nm.test): Fixed nm tests. (#4544) (Salvatore Coppola)
+  * 1782285252 - fix(web2): Fixed fileCountMax. (#4531) (Salvatore Coppola)
+  * 841a7693f9 - refactor(nm): NMDBusConnector class refactor (#4517) (Pierantonio Merlino)
+  * 06e60aec3d - fix: Fixed NetworkConfigurationService returning passwords as strings (#4532) (nicolatimeus)
+  * 3984ce0311 - feat(nm): add firewall NAT rules update on configuration change (#4512) (Marcello Rinaldo Martina)
+  * 77dd3bab13 - refactor(api): Changed id field to interfaceId in network APIs (#4530) (Pierantonio Merlino)
+  * 00bc216104 - test(nm.configuration.writer): refactor and added tests dnsmasq cases for DhcpServerConfigWriter (#4520) (Marcello Rinaldo Martina)
+  * 7afe032f3d - style(db.sqlite.provider): Fixed typos in metatype descriptions. (#4524) (Salvatore Coppola)
+  * b01a8133d4 - fix(nm): avoid error when `Modem.Location` interface is missing (#4516) (Mattia Dal Ben)
+  * 1aa0ecbe27 - feat(nm): add modem reset support (#4508) (Mattia Dal Ben)
+  * 22fcb40ed2 - fix(nm): do not set `gsm.password` if property is empty (#4514) (Mattia Dal Ben)
+  * 006682ebda - fix(nm): support for pass dns feature in dnsmasq (#4515) (Marcello Rinaldo Martina)
+  * b759503eee - fix(linux.net): dhcp server tool ordering (#4506) (Marcello Rinaldo Martina)
+  * 7f7f2487c6 - fix(nm): added conversion from signal quality to signal strength (#4504) (Pierantonio Merlino)
+  * 50f6e89728 - fix(distrib): let NetworkManager manage gsm type devices (#4505) (Mattia Dal Ben)
+  * d411154f3d - fix(nm): Settings leak on connection activation failure (#4477) (G_Ivo)
+  * c616b7a056 - fix: Overriding NM unmanaged-devices policy  (#4497) (Matteo Maiero)
+  * e28527506e - feat: Added db.defrag.enabled and db.wal.checkpoint.enabled fields. (#4485) (Salvatore Coppola)
+  * d999a4461b - feat(dhcp-server): added dnsmasq support (#4486) (Marcello Rinaldo Martina)
+  * 006f2bc19f - fix: Improved local image existence test with exact match (#4492) (Matteo Maiero)
+  * ebdc0246af - fix(distrib): manage netplan configuration on installation (#4490) (Mattia Dal Ben)

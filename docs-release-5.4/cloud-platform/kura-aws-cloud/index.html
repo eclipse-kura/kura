@@ -1,0 +1,3504 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Amazon AWS IoT™ platform - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#amazon-aws-iot-platform" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Amazon AWS IoT&trade; platform
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/install-kura/" class="md-nav__link">
+        Install Kura
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspberry Pi OS Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Gateway Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Gateway Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Gateway Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/gateway-administration-console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_4" type="checkbox" id="__nav_2_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_4">
+          Network Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Network Configuration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Network Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/network-configuration/" class="md-nav__link">
+        Network Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/network-failover/" class="md-nav__link">
+        Network Failover
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/wifi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/wifi-configuration-8021x/" class="md-nav__link">
+        Wi-Fi 802.1x Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/cellular-configuration/" class="md-nav__link">
+        Cellular Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/network-threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Cloud Connections
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connections" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connections
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/cloud-connections/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/data-transport-service-configuration/" class="md-nav__link">
+        Data Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/keystores-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/web-console-configuration/" class="md-nav__link">
+        Web Console Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gateway-configuration/gateway-administration-console-authentication/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/snapshot-management/" class="md-nav__link">
+        Snapshot Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/remote-management-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/system-component-inventory/" class="md-nav__link">
+        System Component Inventory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Core Services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Core Services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Core Services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_5">
+          Configuration Service
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration Service" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_5">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration Service
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service/" class="md-nav__link">
+        Configuration Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service-rest-v1/" class="md-nav__link">
+        Configuration V1 REST APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service-rest-v2/" class="md-nav__link">
+        Configuration V2 REST APIs and CONF-V2 Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/h2db-service/" class="md-nav__link">
+        H2Db Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/simple-artemis-mqtt-broker/" class="md-nav__link">
+        Simple Artemis MQTT Broker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/active-mq-artemis-broker/" class="md-nav__link">
+        ActiveMQ Artemis MQTT Broker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_13">
+          Container Orchestration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_13">
+          <span class="md-nav__icon md-icon"></span>
+          Container Orchestration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-apis/" class="md-nav__link">
+        Container Orchestration Provider APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-usage/" class="md-nav__link">
+        Container Orchestration Provider Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-authenticated-registries/" class="md-nav__link">
+        Container Orchestration Provider Authenticated Registries
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/nvidia-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server Inference Engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/device-configuration-changes/" class="md-nav__link">
+        Device Configuration Changes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/network-status-rest-v1/" class="md-nav__link">
+        Network Status Service V1 REST APIs and MQTT Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and Usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and Usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+        User Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+        Application Developer Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/cloud-conn-dev-guide/" class="md-nav__link">
+        Cloud Connection Developer Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/built-in-cloud/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Cloud Platforms Connection
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Platforms Connection" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Platforms Connection
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kura-ec-cloud/" class="md-nav__link">
+        Eurotech Everyware Cloud&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Amazon AWS IoT&trade; platform
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Amazon AWS IoT&trade; platform
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#device-registration" class="md-nav__link">
+    Device registration
+  </a>
+  
+    <nav class="md-nav" aria-label="Device registration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-access-the-aws-iot-management-console" class="md-nav__link">
+    1. Access the AWS IoT management console.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-a-default-policy-for-the-device" class="md-nav__link">
+    2. Create a default policy for the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-register-a-new-device" class="md-nav__link">
+    3. Register a new device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-a-new-certificate-for-the-device" class="md-nav__link">
+    4. Create a new certificate for the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-download-the-device-ssl-keys" class="md-nav__link">
+    5. Download the device SSL keys.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-assign-the-default-policy-to-the-device" class="md-nav__link">
+    6. Assign the default policy to the device.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#device-configuration" class="md-nav__link">
+    Device configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Device configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-create-a-java-keystore-on-the-device" class="md-nav__link">
+    7.  Create a Java keystore on the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-configure-the-ssl-parameters-using-the-kura-web-ui" class="md-nav__link">
+    8.  Configure the SSL parameters using the Kura Web UI.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-setup-a-new-cloud-connection" class="md-nav__link">
+    9.  Setup a new cloud connection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-connect-to-the-cloud-platform" class="md-nav__link">
+    10. Connect to the cloud platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kura-azure/" class="md-nav__link">
+        Azure IoT Hub&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kura-kapua/" class="md-nav__link">
+        Eclipse Kapua&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kura-hono/" class="md-nav__link">
+        Eclipse Hono&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_6" type="checkbox" id="__nav_6_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_6">
+          Apache Camel&trade; Integration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Apache Camel&trade; Integration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_6_6">
+          <span class="md-nav__icon md-icon"></span>
+          Apache Camel&trade; Integration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apache-camel-integration/kura-camel/" class="md-nav__link">
+        Apache Camel&trade; integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apache-camel-integration/kura-camel-app/" class="md-nav__link">
+        Apache Camel&trade; as application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apache-camel-integration/kura-camel-cloud/" class="md-nav__link">
+        Apache Camel&trade; Cloud Service
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Connect Field Devices
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Connect Field Devices" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Connect Field Devices
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/driver-and-assets/" class="md-nav__link">
+        Drivers, Assets and Channels
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/asset-implemetation/" class="md-nav__link">
+        Asset implementation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/driver-implemetation/" class="md-nav__link">
+        Driver implementation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/IO-apis/" class="md-nav__link">
+        I/O APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/field-protocols/" class="md-nav__link">
+        Field Protocols
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_6" type="checkbox" id="__nav_7_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_6">
+          Drivers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Drivers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_6">
+          <span class="md-nav__icon md-icon"></span>
+          Drivers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/opcua-driver/" class="md-nav__link">
+        OPC UA Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/s7-driver/" class="md-nav__link">
+        S7comm Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/gpio-driver/" class="md-nav__link">
+        GPIO Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/sensortag-driver/" class="md-nav__link">
+        TI SensorTag Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/sensehat-driver/" class="md-nav__link">
+        RaspberryPi SenseHat driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/ibeacon-driver/" class="md-nav__link">
+        iBeacon&trade; Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/eddystone-driver/" class="md-nav__link">
+        Eddystone&trade; Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/xdk-driver/" class="md-nav__link">
+        Xdk Driver
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/asset-v1-mqtt-namespace/" class="md-nav__link">
+        ASSET-V1 MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Kura Wires
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Kura Wires" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Kura Wires
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/assets-as-wire-components/" class="md-nav__link">
+        Assets as Wire Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_3" type="checkbox" id="__nav_8_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_3">
+          Single Port Wire Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Single Port Wire Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_3">
+          <span class="md-nav__icon md-icon"></span>
+          Single Port Wire Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/db-store-and-filter/" class="md-nav__link">
+        Wire Record Store and Query
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/fifo-component/" class="md-nav__link">
+        FIFO Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/ai-wire-component/" class="md-nav__link">
+        AI Wire Component
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_4" type="checkbox" id="__nav_8_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_4">
+          Multiport Wire Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Multiport Wire Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_4">
+          <span class="md-nav__icon md-icon"></span>
+          Multiport Wire Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/multiport-wire-components/" class="md-nav__link">
+        Multiport Wire Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/join-component/" class="md-nav__link">
+        Join Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/mathematical-components-example/" class="md-nav__link">
+        Mathematical Components Example
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_5" type="checkbox" id="__nav_8_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_5">
+          Script Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Script Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_5">
+          <span class="md-nav__icon md-icon"></span>
+          Script Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-script-filter/" class="md-nav__link">
+        Nashorn Script Filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-conditional-component/" class="md-nav__link">
+        Nashorn Conditional Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/graalvm-filter-component/" class="md-nav__link">
+        GraalVM&trade; Filter Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/graalvm-conditional-component/" class="md-nav__link">
+        GraalVM&trade; Conditional Component
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_6" type="checkbox" id="__nav_8_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_6">
+          Usage Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Usage Examples" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_6">
+          <span class="md-nav__icon md-icon"></span>
+          Usage Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/opcua-application/" class="md-nav__link">
+        OPC-UA Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/ti-sensortag-application/" class="md-nav__link">
+        TI SensorTag Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/gpio-driver-application/" class="md-nav__link">
+        GPIO Driver Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/ibeacon-driver-application/" class="md-nav__link">
+        iBeacon&trade; Driver Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/eddystone-driver-application/" class="md-nav__link">
+        Eddystone&trade; Driver Application with RuuviTag+
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wires-mqtt-namespace/" class="md-nav__link">
+        Wires MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-graph-service-configuration-format/" class="md-nav__link">
+        WireGraphService Configuration Format
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-service-rest-v1/" class="md-nav__link">
+        Wire Service V1 REST APIs and MQTT Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-service-references/" class="md-nav__link">
+        References
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9">
+          Java Application Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Java Application Development" data-md-level="1">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          Java Application Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/development-environment-setup/" class="md-nav__link">
+        Development Environment Setup
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/hello-world-application/" class="md-nav__link">
+        Hello World Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/deploy-and-debug-applications/" class="md-nav__link">
+        Deploy and Debug Applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/remote-debugging-on-target-platform/" class="md-nav__link">
+        Remote Debugging on Target Platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/configurable-application/" class="md-nav__link">
+        Configurable Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/connected-application/" class="md-nav__link">
+        Connected Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9_7" type="checkbox" id="__nav_9_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9_7">
+          How-tos
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="How-tos" data-md-level="2">
+        <label class="md-nav__title" for="__nav_9_7">
+          <span class="md-nav__icon md-icon"></span>
+          How-tos
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-serial-ports/" class="md-nav__link">
+        How to Use Serial Ports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-gpio/" class="md-nav__link">
+        How to Use GPIO
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-modbus/" class="md-nav__link">
+        How to Use Modbus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-can-bus/" class="md-nav__link">
+        How to Use CAN bus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-watchdog/" class="md-nav__link">
+        How to Use Watchdog
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-manage-network-settings/" class="md-nav__link">
+        How to Manage Network Settings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-le/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-le-beacons/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE Beacons
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-beacon-scanner/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE Beacon Scanner
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-new-bt-le-apis/" class="md-nav__link">
+        How to Use New Bluetooth LE APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-new-beacon-apis/" class="md-nav__link">
+        How to Use New Beacon APIs
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/ram-usage-considerations/" class="md-nav__link">
+        RAM Usage Considerations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10">
+          Quality Assurance
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Quality Assurance" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Quality Assurance
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/unit-testing/" class="md-nav__link">
+        Unit Testing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/system-testing/" class="md-nav__link">
+        System Testing
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11">
+          References
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="References" data-md-level="1">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          References
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/mqtt-namespace/" class="md-nav__link">
+        MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/javadoc/" class="md-nav__link">
+        Javadoc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11_3" type="checkbox" id="__nav_11_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11_3">
+          REST-APIs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="REST-APIs" data-md-level="2">
+        <label class="md-nav__title" for="__nav_11_3">
+          <span class="md-nav__icon md-icon"></span>
+          REST-APIs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-command-api/" class="md-nav__link">
+        Command
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-deploy-api/" class="md-nav__link">
+        Deploy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-identity-api/" class="md-nav__link">
+        Identity
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-inventory-api/" class="md-nav__link">
+        Inventory
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-position-api/" class="md-nav__link">
+        Position
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-security-api/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-service-listing-api/" class="md-nav__link">
+        Service Listing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-session-api/" class="md-nav__link">
+        Session
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-system-api/" class="md-nav__link">
+        System
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12" type="checkbox" id="__nav_12" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_12">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_12">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/AD-EdgeAI/" class="md-nav__link">
+        Edge AI Anomaly Detection
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#device-registration" class="md-nav__link">
+    Device registration
+  </a>
+  
+    <nav class="md-nav" aria-label="Device registration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-access-the-aws-iot-management-console" class="md-nav__link">
+    1. Access the AWS IoT management console.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-a-default-policy-for-the-device" class="md-nav__link">
+    2. Create a default policy for the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-register-a-new-device" class="md-nav__link">
+    3. Register a new device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-a-new-certificate-for-the-device" class="md-nav__link">
+    4. Create a new certificate for the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-download-the-device-ssl-keys" class="md-nav__link">
+    5. Download the device SSL keys.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-assign-the-default-policy-to-the-device" class="md-nav__link">
+    6. Assign the default policy to the device.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#device-configuration" class="md-nav__link">
+    Device configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Device configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-create-a-java-keystore-on-the-device" class="md-nav__link">
+    7.  Create a Java keystore on the device.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-configure-the-ssl-parameters-using-the-kura-web-ui" class="md-nav__link">
+    8.  Configure the SSL parameters using the Kura Web UI.
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-setup-a-new-cloud-connection" class="md-nav__link">
+    9.  Setup a new cloud connection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-connect-to-the-cloud-platform" class="md-nav__link">
+    10. Connect to the cloud platform
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="amazon-aws-iot-platform">Amazon AWS IoT&trade; platform</h1>
+<h2 id="overview">Overview</h2>
+<p>This section provides a guide on connecting an Eclipse Kura&trade; device to the Amazon AWS IoT platform.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>In order to connect a device to Amazon AWS IoT Kura version 1.3 or greater is required.</li>
+<li>An Amazon AWS account is also needed.</li>
+</ul>
+<h2 id="device-registration">Device registration</h2>
+<p>The first step involves the registration of the new device on AWS, this operation can be done using the AWS Web Console or with the AWS CLI command line tool, in this guide the Web based console will be used.</p>
+<h4 id="1-access-the-aws-iot-management-console">1. Access the AWS IoT management console.</h4>
+<p>This can be done by logging in the AWS console and selecting <strong>IoT Core</strong> from the services list, in the <strong>Internet of Things</strong> section.</p>
+<h4 id="2-create-a-default-policy-for-the-device">2. Create a default policy for the device.</h4>
+<p>This step involves creating a default policy for the new device, skip if an existing policy is already available.</p>
+<p>Access the main screen of the console and select <strong>Secure</strong> -&gt; <strong>Policies</strong> from the left side menu and then press the <strong>Create</strong> button, in the top right area of the screen.</p>
+<p>Fill the form as follows and then press the <strong>Create</strong> button:</p>
+<ul>
+<li><strong>Action</strong> -&gt; <code>iot:Connect, iot:Publish, iot:Subscribe, iot:Receive, iot:UpdateThingShadow, iot:GetThingShadow, iot:DeleteThingShadow</code></li>
+<li><strong>Resource ARN</strong> -&gt; <code>*</code></li>
+<li><strong>Effect</strong> -&gt; <code>Allow</code></li>
+</ul>
+<p>This will create a policy that allows a device to connect to the platform, publish/subscribe on any topic and manage its <em>thing shadow</em>.</p>
+<h4 id="3-register-a-new-device">3. Register a new device.</h4>
+<p>Devices on the AWS IoT platform are called <em>things</em>, in order to register a new thing select <strong>Manage</strong> -&gt; <strong>Things</strong> from the left side menu and then press the <strong>Create</strong> button, in the top right section of the screen. Select <strong>Create a single thing</strong>.</p>
+<p><img alt="" src="../images/awsNewThing.png" /></p>
+<p>Enter a name for the new device and then press the <strong>Next</strong> button, from now on <code>kura-gateway</code> will be used as the device name.</p>
+<h4 id="4-create-a-new-certificate-for-the-device">4. Create a new certificate for the device.</h4>
+<p>The AWS IoT platform uses SSL mutual authentication, for this reason it is necessary to download a public/private key pair for the device and a server certificate. Click on <strong>Create certificate</strong> to quickly generate a new certificate for the new device.</p>
+<p>Certificates can be managed later on by clicking on <strong>Secure</strong> -&gt; <strong>Certificates</strong>, in the left part of the console.</p>
+<h4 id="5-download-the-device-ssl-keys">5. Download the device SSL keys.</h4>
+<p>You should see a screen like the following:</p>
+<p><img alt="" src="../images/awsKeys.png" /></p>
+<p>Download the 3 files listed in the table and store them in a safe place, they will be needed later, also copy the link to the root CA for AWS IoT in order to be able to retrieve it later from the device.</p>
+<p>Press the <strong>Activate</strong> button, and then on <strong>Attach a policy</strong>.</p>
+<h4 id="6-assign-the-default-policy-to-the-device">6. Assign the default policy to the device.</h4>
+<p>Select the desired policy and then click on <strong>Register thing</strong>.</p>
+<p>A policy can also be attached to a certificate later on perforiming the following steps:</p>
+<p>Enter the device configuration section, by clicking on <strong>Manage</strong> -&gt; <strong>Things</strong> and then clicking on the newly created device. Click on <strong>Security</strong> on the left panel and then click on the certificate entry (it is identified by an hex code), select <strong>Policies</strong> in the left menu, you should see this screen:
+ <img alt="" src="../images/awsPolicies.png" /></p>
+<p>Click on <strong>Actions</strong> in the top left section of the page and then click on <strong>Attach policy</strong>, select the default policy previously created and then press the <strong>Attach</strong> button.</p>
+<h2 id="device-configuration">Device configuration</h2>
+<p>The following steps should be performed on the device, this guide is based on Kura 3.1.0 version and has been tested on a Raspberry PI 3.</p>
+<h4 id="7-create-a-java-keystore-on-the-device">7.  Create a Java keystore on the device.</h4>
+<p>The first step for using the device keys obtained at the previous step is to create a new Java keystore containing the Root Certificate used by the Amazon IoT platform, this can be done executing the following commands on the device:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>/opt/eclipse/kura/security
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>/opt/eclipse/kura/security
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>https://www.amazontrust.com/repository/AmazonRootCA1.pem<span class="w"> </span>&gt;<span class="w"> </span>/tmp/root-CA.pem
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>keytool<span class="w"> </span>-import<span class="w"> </span>-trustcacerts<span class="w"> </span>-alias<span class="w"> </span>aws<span class="w"> </span>-file<span class="w"> </span>/tmp/root-CA.pem<span class="w"> </span>-keystore<span class="w"> </span>cacerts.ks<span class="w"> </span>-storepass<span class="w"> </span>changeit
+</code></pre></div></p>
+<p>If the last command reports that the certificate already exist in the system-wide store type <code>yes</code> to proceed. The code above will generate a new keystore with <code>changeit</code> as password, change it if needed.</p>
+<h4 id="8-configure-the-ssl-parameters-using-the-kura-web-ui">8.  Configure the SSL parameters using the Kura Web UI.</h4>
+<ol>
+<li>
+<p>Open the Kura Web Console and enter select the <strong>Settings</strong> entry in the left side menu and then click on <strong>SSL Configuration</strong>, you should see this screen:</p>
+<p><img alt="" src="../images/awsSSLConfig.png" /></p>
+<p>Change the <strong>Keystore path</strong> parameter to <code>/opt/eclipse/kura/security/cacerts.ks</code> if needed.</p>
+<p>Change the settings in the form to match the screen above, <strong>set Default protocol to TLSv1.2</strong>, enter <code>changeit</code> as <strong>Keystore Password</strong> (or the password defined at step 7).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Steps from 8.2 to 8.6 will not work on Kura 3.2.0 due to a <a href="https://github.com/eclipse/kura/issues/2125">known issue</a>. On this version, private key and device certificate need to be manually added to the keystore using the command line. If you are running Kura 3.2.0, proceed with step 8.7.</p>
+</div>
+</li>
+<li>
+<p>Open the Kura Web Console and enter select the <strong>Settings</strong> entry in the left side menu and then click on <strong>Device SSL Certificate</strong>, you should see this screen:</p>
+<p><img alt="" src="../images/awsKuraSettings.png" /></p>
+<p>Enter <code>aws-ssl</code> in the <strong>Storage Alias</strong> field.</p>
+</li>
+<li>
+<p>The private key needs to be converted to the PKCS8 format, this step can be performed executing the following command on a Linux or OSX based machine:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>openssl<span class="w"> </span>pkcs8<span class="w"> </span>-topk8<span class="w"> </span>-inform<span class="w"> </span>PEM<span class="w"> </span>-outform<span class="w"> </span>PEM<span class="w"> </span>-in<span class="w"> </span>xxxxxxxxxx-private.pem.key<span class="w"> </span>-out<span class="w"> </span>outKey.pem<span class="w"> </span>-nocrypt
+</code></pre></div>
+<p>where <code>xxxxxxxxxx-private.pem.key</code> is the file containing the private key downloaded at step 4.</p>
+</li>
+<li>
+<p>Paste the contents of the obtained <code>outKey.pem</code> in the "Private Key" field.</p>
+</li>
+<li>
+<p>Paste the contents of <code>xxxxxxxxxx-certificate.pem.crt</code> in the <strong>Certificate</strong> field.</p>
+<p>You should see a screen like this</p>
+<p><img alt="" src="../images/awsKeysConfig.png" /></p>
+</li>
+<li>
+<p>Click the <strong>Apply</strong> button to confirm.</p>
+</li>
+<li>
+<p><strong>Kura 3.2.0 only</strong> - manually import device certificate and private key into keystore.</p>
+<p>On the host machine, open a terminal window in the folder containing the files downloaded at step 5 and execute the following command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>openssl<span class="w"> </span>pkcs12<span class="w"> </span>-export<span class="w"> </span>-in<span class="w"> </span>xxxxxxxxxx-certificate.pem.crt<span class="w"> </span>-inkey<span class="w"> </span>xxxxxxxxxx-private.pem.key<span class="w"> </span>-name<span class="w"> </span>aws-ssl<span class="w"> </span>-out<span class="w"> </span>aws-ssl.p12
+</code></pre></div>
+<p>where <code>xxxxxxxxxx-certificate.pem.crt</code> is the original certificate downloaded from AWS and <code>xxxxxxxxxx-private.pem.key</code> is the private key.</p>
+<p>The command will ask for a password, define a new password.</p>
+<p>Copy the obtained <code>aws-ssl.p12</code> file to the device into the <code>/tmp</code> folder using scp:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>scp<span class="w"> </span>./aws-ssl.p12<span class="w"> </span>pi@&lt;device-address&gt;:/tmp
+</code></pre></div>
+<p>Replacing <code>&lt;device-address&gt;</code> with the hostname or ip address of the device.</p>
+<p>Open a ssh connection to the device and enter the following command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>keytool<span class="w"> </span>-importkeystore<span class="w"> </span>-deststorepass<span class="w"> </span>changeit<span class="w"> </span>-destkeystore<span class="w"> </span>/opt/eclipse/kura/security/cacerts.ks<span class="w"> </span>-srckeystore<span class="w"> </span>/tmp/aws-ssl.p12<span class="w"> </span>-srcstoretype<span class="w"> </span>PKCS12
+</code></pre></div>
+<p>The command will ask for a password, enter the password defined when creating the <code>aws-ssl.p12</code> file.</p>
+<p>Restart Kura to reload the keystore.</p>
+</li>
+</ol>
+<h4 id="9-setup-a-new-cloud-connection">9.  Setup a new cloud connection</h4>
+<ol>
+<li>
+<p>Click on <strong>Cloud Connections</strong> in the left panel, and setup a new cloud connection</p>
+</li>
+<li>
+<p>Click on the <strong>New Connection</strong> button at the top of the page and set the following parameters in the dialog:</p>
+<ul>
+<li><strong>Cloud Connection Factory PID</strong> -&gt; <code>org.eclipse.kura.cloud.CloudService</code></li>
+<li><strong>Cloud Connection Service PID</strong> -&gt; <code>org.eclipse.kura.cloud.CloudService-AWS</code></li>
+</ul>
+<p>Press the <strong>Create</strong> button to confirm and then select the newly created CloudService instance from the list.</p>
+</li>
+<li>
+<p>Set the broker URL in the <strong>MqttDataTransport-AWS</strong> tab, it can be obtained from the AWS IoT Web Console clicking on the <strong>Settings</strong> entry in the bottom left section of the page, the URL will look like the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>a1rm1xxxxxxxxx.iot.us-east-1.amazonaws.com
+</code></pre></div>
+<p>The mqtts protocol must be used, the value for the <strong>broker-url</strong> field derived from the URL above is the following:  </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mqtts://a1rm1xxxxxxxxx.iot.us-east-1.amazonaws.com:8883/
+</code></pre></div>
+</li>
+<li>
+<p>Clear the value of the <strong>username</strong> and <strong>password</strong> fields.</p>
+</li>
+<li>
+<p>Set a value for the <strong>topic.context.account-name</strong> and <strong>client-id</strong>.</p>
+<ul>
+<li>
+<p>Assign an arbitrary account name to <strong>topic.context.account-name</strong> (for example <code>aws-test</code>), this will be used by the CloudClient instances for building the topic structure.</p>
+</li>
+<li>
+<p>Enter the <em>thing</em> name in the <strong>client-id</strong> field (in this example <code>kura-gateway</code>).</p>
+</li>
+</ul>
+</li>
+<li>
+<p>In order for the previously added keys to be used for the SSL connection with the broker enter the <strong>Storage Alias</strong> defined in step 8.2 (e.g <code>aws-ssl</code>) as value for the <strong>ssl.certificate.alias</strong> field.</p>
+</li>
+<li>
+<p>The setting <strong>lwt.topic</strong> under <strong>MqttDataTransport-AWS</strong> needs to be updated as well by entering a value not containing the $ character. This is required because of the fact that AWS IoT does not support topic names starting with $ (except for the $aws/ hierarchy).</p>
+</li>
+<li>
+<p>Press the <strong>Apply</strong> button in the top left section to commit the changes to the <strong>MqttDataTransport-AWS</strong>.</p>
+</li>
+<li>
+<p>Enter a name without the $ character for the <strong>topic.control-prefix</strong> setting in the <strong>CloudService-AWS</strong> tab, for example <code>aws-control</code>.</p>
+</li>
+<li>
+<p>The Kura CloudService uses some well-known topics to allow remote device management and to report device state information, this features are not supported by default by AWS IoT, the following settings can be applied in the <strong>CloudService-AWS</strong> tab in order to avoid sending unnecessary messages:</p>
+<ul>
+<li><strong>republish.mqtt.birth.cert.on.gps.lock</strong> -&gt; <code>false</code></li>
+<li><strong>republish.mqtt.birth.cert.on.modem.detect</strong> -&gt; <code>false</code></li>
+<li><strong>enable.default.subscriptions</strong> -&gt; <code>false</code></li>
+</ul>
+</li>
+<li>
+<p>Click the <strong>Apply</strong> button to save the changes.</p>
+</li>
+</ol>
+<h4 id="10-connect-to-the-cloud-platform">10. Connect to the cloud platform</h4>
+<p>Make sure the AWS CloudService instance is selected from the list in the top section of the page and click on the <strong>Connect</strong> button, if the connection to AWS IoT platform succeeds the <strong>Status</strong> of the instance will be reported as <em>Connected</em>.</p>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../kura-ec-cloud/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Eurotech Everyware Cloud&amp;trade; platform" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Eurotech Everyware Cloud&trade; platform
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../kura-azure/" class="md-footer__link md-footer__link--next" aria-label="Next: Azure IoT Hub&amp;trade; platform" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Azure IoT Hub&trade; platform
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/eclipse/kura" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://gitter.im/eclipse/kura" target="_blank" rel="noopener" title="gitter.im" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M66.4 322.5H16V0h50.4v322.5zM166.9 76.1h-50.4V512h50.4V76.1zm100.6 0h-50.4V512h50.4V76.1zM368 76h-50.4v247H368V76z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/eclipse/kura" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

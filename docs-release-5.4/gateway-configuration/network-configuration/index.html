@@ -1,0 +1,4273 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Network Configuration - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#network-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Network Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/install-kura/" class="md-nav__link">
+        Install Kura
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspberry Pi OS Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Gateway Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Gateway Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Gateway Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gateway-administration-console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_4" type="checkbox" id="__nav_2_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_4">
+          Network Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Network Configuration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Network Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Network Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Network Configuration
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tcpip-configuration" class="md-nav__link">
+    TCP/IP Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="TCP/IP Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+    More details about the Not Managed interface Status
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dhcp-nat-configuration" class="md-nav__link">
+    DHCP &amp; NAT Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-linux-configuration" class="md-nav__link">
+    Network Linux Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-properties" class="md-nav__link">
+    Network Configuration properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-properties" class="md-nav__link">
+    Common properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-properties" class="md-nav__link">
+    IPv4 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-server-properties" class="md-nav__link">
+    IPv4 DHCP Server properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-client-properties" class="md-nav__link">
+    IPv4 DHCP Client properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv6-properties" class="md-nav__link">
+    IPv6 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-master-access-point-properties" class="md-nav__link">
+    WiFi Master (Access Point) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-infra-station-mode-properties" class="md-nav__link">
+    WiFi Infra (Station Mode) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-modem-properties" class="md-nav__link">
+    Cellular Modem properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-recipes" class="md-nav__link">
+    Network Configuration recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#disable-a-network-interface" class="md-nav__link">
+    Disable a network interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server" class="md-nav__link">
+    Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled" class="md-nav__link">
+    Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled" class="md-nav__link">
+    Configure a wireless interface as access point with DHCP server and NAT enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled" class="md-nav__link">
+    Configure a wireless interface as station mode with DHCP client enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-a-cellular-interface" class="md-nav__link">
+    Enable a cellular interface
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-failover/" class="md-nav__link">
+        Network Failover
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wifi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wifi-configuration-8021x/" class="md-nav__link">
+        Wi-Fi 802.1x Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cellular-configuration/" class="md-nav__link">
+        Cellular Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_7" type="checkbox" id="__nav_2_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_7">
+          Cloud Connections
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connections" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connections
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-connections/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-transport-service-configuration/" class="md-nav__link">
+        Data Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keystores-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-console-configuration/" class="md-nav__link">
+        Web Console Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gateway-administration-console-authentication/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/snapshot-management/" class="md-nav__link">
+        Snapshot Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/remote-management-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../administration/system-component-inventory/" class="md-nav__link">
+        System Component Inventory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Core Services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Core Services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Core Services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_5">
+          Configuration Service
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration Service" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_5">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration Service
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service/" class="md-nav__link">
+        Configuration Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service-rest-v1/" class="md-nav__link">
+        Configuration V1 REST APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/configuration-service-rest-v2/" class="md-nav__link">
+        Configuration V2 REST APIs and CONF-V2 Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/h2db-service/" class="md-nav__link">
+        H2Db Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+        SQLite DB Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/simple-artemis-mqtt-broker/" class="md-nav__link">
+        Simple Artemis MQTT Broker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/active-mq-artemis-broker/" class="md-nav__link">
+        ActiveMQ Artemis MQTT Broker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_13" type="checkbox" id="__nav_4_13" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_13">
+          Container Orchestration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Container Orchestration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_13">
+          <span class="md-nav__icon md-icon"></span>
+          Container Orchestration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-apis/" class="md-nav__link">
+        Container Orchestration Provider APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-usage/" class="md-nav__link">
+        Container Orchestration Provider Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/container-orchestration-provider-authenticated-registries/" class="md-nav__link">
+        Container Orchestration Provider Authenticated Registries
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/nvidia-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server Inference Engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/device-configuration-changes/" class="md-nav__link">
+        Device Configuration Changes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/network-status-rest-v1/" class="md-nav__link">
+        Network Status Service V1 REST APIs and MQTT Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and Usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and Usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+        User Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+        Application Developer Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/cloud-conn-dev-guide/" class="md-nav__link">
+        Cloud Connection Developer Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/built-in-cloud/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Cloud Platforms Connection
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Platforms Connection" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Platforms Connection
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/kura-ec-cloud/" class="md-nav__link">
+        Eurotech Everyware Cloud&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/kura-aws-cloud/" class="md-nav__link">
+        Amazon AWS IoT&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/kura-azure/" class="md-nav__link">
+        Azure IoT Hub&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/kura-kapua/" class="md-nav__link">
+        Eclipse Kapua&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/kura-hono/" class="md-nav__link">
+        Eclipse Hono&trade; platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6_6" type="checkbox" id="__nav_6_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6_6">
+          Apache Camel&trade; Integration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Apache Camel&trade; Integration" data-md-level="2">
+        <label class="md-nav__title" for="__nav_6_6">
+          <span class="md-nav__icon md-icon"></span>
+          Apache Camel&trade; Integration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/apache-camel-integration/kura-camel/" class="md-nav__link">
+        Apache Camel&trade; integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/apache-camel-integration/kura-camel-app/" class="md-nav__link">
+        Apache Camel&trade; as application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-platform/apache-camel-integration/kura-camel-cloud/" class="md-nav__link">
+        Apache Camel&trade; Cloud Service
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Connect Field Devices
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Connect Field Devices" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Connect Field Devices
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/driver-and-assets/" class="md-nav__link">
+        Drivers, Assets and Channels
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/asset-implemetation/" class="md-nav__link">
+        Asset implementation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/driver-implemetation/" class="md-nav__link">
+        Driver implementation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/IO-apis/" class="md-nav__link">
+        I/O APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/field-protocols/" class="md-nav__link">
+        Field Protocols
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7_6" type="checkbox" id="__nav_7_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7_6">
+          Drivers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Drivers" data-md-level="2">
+        <label class="md-nav__title" for="__nav_7_6">
+          <span class="md-nav__icon md-icon"></span>
+          Drivers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/opcua-driver/" class="md-nav__link">
+        OPC UA Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/s7-driver/" class="md-nav__link">
+        S7comm Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/gpio-driver/" class="md-nav__link">
+        GPIO Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/sensortag-driver/" class="md-nav__link">
+        TI SensorTag Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/sensehat-driver/" class="md-nav__link">
+        RaspberryPi SenseHat driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/ibeacon-driver/" class="md-nav__link">
+        iBeacon&trade; Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/eddystone-driver/" class="md-nav__link">
+        Eddystone&trade; Driver
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/xdk-driver/" class="md-nav__link">
+        Xdk Driver
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/asset-v1-mqtt-namespace/" class="md-nav__link">
+        ASSET-V1 MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Kura Wires
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Kura Wires" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Kura Wires
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/assets-as-wire-components/" class="md-nav__link">
+        Assets as Wire Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_3" type="checkbox" id="__nav_8_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_3">
+          Single Port Wire Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Single Port Wire Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_3">
+          <span class="md-nav__icon md-icon"></span>
+          Single Port Wire Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/db-store-and-filter/" class="md-nav__link">
+        Wire Record Store and Query
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/fifo-component/" class="md-nav__link">
+        FIFO Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/single-port-wire-components/ai-wire-component/" class="md-nav__link">
+        AI Wire Component
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_4" type="checkbox" id="__nav_8_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_4">
+          Multiport Wire Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Multiport Wire Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_4">
+          <span class="md-nav__icon md-icon"></span>
+          Multiport Wire Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/multiport-wire-components/" class="md-nav__link">
+        Multiport Wire Components
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/join-component/" class="md-nav__link">
+        Join Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/multiport-wire-components/mathematical-components-example/" class="md-nav__link">
+        Mathematical Components Example
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_5" type="checkbox" id="__nav_8_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_5">
+          Script Components
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Script Components" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_5">
+          <span class="md-nav__icon md-icon"></span>
+          Script Components
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-script-filter/" class="md-nav__link">
+        Nashorn Script Filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/nashorn-conditional-component/" class="md-nav__link">
+        Nashorn Conditional Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/graalvm-filter-component/" class="md-nav__link">
+        GraalVM&trade; Filter Component
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/script-components/graalvm-conditional-component/" class="md-nav__link">
+        GraalVM&trade; Conditional Component
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_6" type="checkbox" id="__nav_8_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_6">
+          Usage Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Usage Examples" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_6">
+          <span class="md-nav__icon md-icon"></span>
+          Usage Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/opcua-application/" class="md-nav__link">
+        OPC-UA Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/ti-sensortag-application/" class="md-nav__link">
+        TI SensorTag Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/gpio-driver-application/" class="md-nav__link">
+        GPIO Driver Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/ibeacon-driver-application/" class="md-nav__link">
+        iBeacon&trade; Driver Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/usage-examples/eddystone-driver-application/" class="md-nav__link">
+        Eddystone&trade; Driver Application with RuuviTag+
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wires-mqtt-namespace/" class="md-nav__link">
+        Wires MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-graph-service-configuration-format/" class="md-nav__link">
+        WireGraphService Configuration Format
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-service-rest-v1/" class="md-nav__link">
+        Wire Service V1 REST APIs and MQTT Request Handler
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kura-wires/wire-service-references/" class="md-nav__link">
+        References
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9">
+          Java Application Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Java Application Development" data-md-level="1">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          Java Application Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/development-environment-setup/" class="md-nav__link">
+        Development Environment Setup
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/hello-world-application/" class="md-nav__link">
+        Hello World Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/deploy-and-debug-applications/" class="md-nav__link">
+        Deploy and Debug Applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/remote-debugging-on-target-platform/" class="md-nav__link">
+        Remote Debugging on Target Platform
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/configurable-application/" class="md-nav__link">
+        Configurable Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/connected-application/" class="md-nav__link">
+        Connected Application
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9_7" type="checkbox" id="__nav_9_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9_7">
+          How-tos
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="How-tos" data-md-level="2">
+        <label class="md-nav__title" for="__nav_9_7">
+          <span class="md-nav__icon md-icon"></span>
+          How-tos
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-serial-ports/" class="md-nav__link">
+        How to Use Serial Ports
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-gpio/" class="md-nav__link">
+        How to Use GPIO
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-modbus/" class="md-nav__link">
+        How to Use Modbus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-can-bus/" class="md-nav__link">
+        How to Use CAN bus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-watchdog/" class="md-nav__link">
+        How to Use Watchdog
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-manage-network-settings/" class="md-nav__link">
+        How to Manage Network Settings
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-le/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-le-beacons/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE Beacons
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-legacy-bt-beacon-scanner/" class="md-nav__link">
+        How to Use Legacy Bluetooth LE Beacon Scanner
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-new-bt-le-apis/" class="md-nav__link">
+        How to Use New Bluetooth LE APIs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-new-beacon-apis/" class="md-nav__link">
+        How to Use New Beacon APIs
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/ram-usage-considerations/" class="md-nav__link">
+        RAM Usage Considerations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../java-application-development/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10">
+          Quality Assurance
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Quality Assurance" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Quality Assurance
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/unit-testing/" class="md-nav__link">
+        Unit Testing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quality-assurance/system-testing/" class="md-nav__link">
+        System Testing
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11">
+          References
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="References" data-md-level="1">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          References
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/mqtt-namespace/" class="md-nav__link">
+        MQTT Namespace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/javadoc/" class="md-nav__link">
+        Javadoc
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11_3" type="checkbox" id="__nav_11_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11_3">
+          REST-APIs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="REST-APIs" data-md-level="2">
+        <label class="md-nav__title" for="__nav_11_3">
+          <span class="md-nav__icon md-icon"></span>
+          REST-APIs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-command-api/" class="md-nav__link">
+        Command
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-deploy-api/" class="md-nav__link">
+        Deploy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-identity-api/" class="md-nav__link">
+        Identity
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-inventory-api/" class="md-nav__link">
+        Inventory
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-position-api/" class="md-nav__link">
+        Position
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-security-api/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-service-listing-api/" class="md-nav__link">
+        Service Listing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-session-api/" class="md-nav__link">
+        Session
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-system-api/" class="md-nav__link">
+        System
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_12" type="checkbox" id="__nav_12" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_12">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_12">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/AD-EdgeAI/" class="md-nav__link">
+        Edge AI Anomaly Detection
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tcpip-configuration" class="md-nav__link">
+    TCP/IP Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="TCP/IP Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+    More details about the Not Managed interface Status
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dhcp-nat-configuration" class="md-nav__link">
+    DHCP &amp; NAT Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-linux-configuration" class="md-nav__link">
+    Network Linux Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-properties" class="md-nav__link">
+    Network Configuration properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-properties" class="md-nav__link">
+    Common properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-properties" class="md-nav__link">
+    IPv4 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-server-properties" class="md-nav__link">
+    IPv4 DHCP Server properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-client-properties" class="md-nav__link">
+    IPv4 DHCP Client properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv6-properties" class="md-nav__link">
+    IPv6 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-master-access-point-properties" class="md-nav__link">
+    WiFi Master (Access Point) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-infra-station-mode-properties" class="md-nav__link">
+    WiFi Infra (Station Mode) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-modem-properties" class="md-nav__link">
+    Cellular Modem properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-recipes" class="md-nav__link">
+    Network Configuration recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#disable-a-network-interface" class="md-nav__link">
+    Disable a network interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server" class="md-nav__link">
+    Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled" class="md-nav__link">
+    Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled" class="md-nav__link">
+    Configure a wireless interface as access point with DHCP server and NAT enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled" class="md-nav__link">
+    Configure a wireless interface as station mode with DHCP client enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-a-cellular-interface" class="md-nav__link">
+    Enable a cellular interface
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="network-configuration">Network Configuration</h1>
+<p>To configure the gateway network interfaces using the Gateway Administration Console, select the <strong>Network</strong> option located in the <strong>System</strong> area. With this option selected, the <strong>Network</strong> display appears with a list of available interfaces. Configuration tabs for the selected interface appear on the right side of the screen. By default, the loopback (lo) interface is selected when the network interfaces are displayed. Choose the desired network interface (e.g., eth0, eth1, wlan0, ppp0) and apply the necessary configuration changes using the tabs on the right. Submit the modified configuration by clicking the <strong>Apply</strong> button.</p>
+<p>In case of typing errors, the <strong>Reset</strong> button can be used to reload the prior configuration on the screen.
+Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the <strong>Refresh</strong> button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>It is recommended that the <strong>TCP/IP</strong> tab is configured first since it defines how the interface is going to be used.</p>
+</div>
+<h2 id="tcpip-configuration">TCP/IP Configuration</h2>
+<p>The <strong>TCP/IP</strong> tab contains the following configuration parameters:</p>
+<ul>
+<li><strong>Status</strong><ul>
+<li>Disabled: disables the selected interface (i.e., administratively down).</li>
+<li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
+<li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
+<li>Not Managed: the interface will be ignored by Kura.</li>
+<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
+</ul>
+</li>
+<li><strong>Configure</strong><ul>
+<li>Manually: allows manual entry of the <em>IP Address</em> and <em>Netmask</em> fields, if the interface is configured as LAN; allows manual entry of the <em>IP Address</em>, <em>Netmask</em>, <em>Gateway</em>, and <em>DNS Servers</em> fields, if the interface is designated as WAN.</li>
+<li>Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.</li>
+</ul>
+</li>
+<li><strong>IP Address</strong> - defines the IP address of the interface, if manually configured.</li>
+<li><strong>Subnet Mask</strong> - defines the subnet mask of the interface, if manually configured.</li>
+<li><strong>Gateway</strong> - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)</li>
+<li><strong>DNS Servers</strong> - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.</li>
+<li><strong>Search Domains</strong> - Not implemented.</li>
+</ul>
+<p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
+<h3 id="more-details-about-the-not-managed-interface-status">More details about the Not Managed interface Status</h3>
+<p>When a network interface is configured as <strong>Not Managed</strong>, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.</p>
+<p>Regarding DNS, both Kura and the external tools store the DNS addresses in the <code>/etc/resolv.conf</code> file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.</p>
+<table>
+<thead>
+<tr>
+<th>Is there at least an interface set as <code>WAN</code>?</th>
+<th>Is there at least one interface set as <code>Not Managed</code>?</th>
+<th>Does Kura manage resolv.conf?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NO</td>
+<td>NO</td>
+<td><strong>YES</strong></td>
+</tr>
+<tr>
+<td>NO</td>
+<td>YES</td>
+<td><strong>NO</strong></td>
+</tr>
+<tr>
+<td>YES</td>
+<td>NO</td>
+<td><strong>YES</strong></td>
+</tr>
+<tr>
+<td>YES</td>
+<td>YES</td>
+<td><strong>YES</strong></td>
+</tr>
+</tbody>
+</table>
+<p>So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as <strong>Not Managed</strong> and not to set any interface as <strong>Enabled For Wan</strong> using Kura. If at least one WAN interface is configured by Kura, it will take the control of the <code>/etc/resolv.conf/</code> file. Finally, if any interface is configured in <strong>Enabled For Wan</strong> or <strong>Not Managed</strong> mode, Kura will empty the file.</p>
+<p>To avoid device misconfigurations when <strong>Not Managed</strong> interfaces are used, <strong>don't</strong> use the <em>dns-nameservers</em> directive in the <code>/etc/network/interfaces</code> file. Please add the DNS addresses directly to the <code>/etc/resolv.conf</code> file.</p>
+<p><img alt="Network Configuration TCP/IP" src="../images/network-configuration-tcpip.png" /></p>
+<h2 id="dhcp-nat-configuration">DHCP &amp; NAT Configuration</h2>
+<p>The <strong>DHCP &amp; NAT</strong> tab contains the following configuration parameters:</p>
+<ul>
+<li><strong>Router Mode</strong></li>
+<li>DHCP and NAT: indicates that both DHCP server and NAT are enabled.</li>
+<li>DHCP Only: indicates that DHCP server is enabled and NAT is disabled.</li>
+<li>NAT Only: indicates that NAT is enabled and DHCP server is disabled.</li>
+<li>Off: indicates that both DHCP server and NAT are disabled.</li>
+<li><strong>DHCP Beginning Address</strong>: specifies the first address of DHCP pool (i.e., first available client IP address).</li>
+<li><strong>DHCP Ending Address</strong>: specifies the last address of DHCP pool (i.e., last IP address that can be assigned to a client).</li>
+<li><strong>DHCP Subnet Mask</strong>: defines the subnet mask that is assigned to a client.</li>
+<li><strong>DHCP Default Lease Time</strong>: sets the default time (in minutes) that the client retains the provided IP address. It must be greater than 0.</li>
+<li><strong>DHCP Max Lease Time</strong>: sets the maximum time (in minutes) that the client retains the provided IP address. It must be greater than 0.</li>
+<li><strong>Pass DNS Servers through DHCP</strong>: enables DNS Proxy (i.e., passing DNS servers through DHCP).</li>
+</ul>
+<p>If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the <em>custom automatic NAT service rules</em>_* section of the <code>/etc/init.d/firewall</code> script:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># custom automatic NAT service rules (if NAT option is enabled for LAN interface)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>POSTROUTING<span class="w"> </span>-o<span class="w"> </span>ppp0<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>iptables<span class="w"> </span>-A<span class="w"> </span>FORWARD<span class="w"> </span>-i<span class="w"> </span>ppp0<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>iptables<span class="w"> </span>-A<span class="w"> </span>FORWARD<span class="w"> </span>-i<span class="w"> </span>eth0<span class="w"> </span>-o<span class="w"> </span>ppp0<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+</code></pre></div>
+<p>Also, IP forwarding is enabled in the kernel as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># allow fowarding if any masquerade is defined</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/proc/sys/net/ipv4/ip_forward
+</code></pre></div>
+<p>The rules shown above create an <em>Overloaded</em>_<em> (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the </em><em>DHCP &amp; NAT</em>* tab of the LAN interface; there must also be another interface designated as WAN.</p>
+<p><img alt="Network Configuration DHCP and NAT" src="../images/network-configuration-dhcp-nat.png" /></p>
+<h2 id="network-linux-configuration">Network Linux Configuration</h2>
+<p>When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
+</div>
+<h2 id="network-configuration-properties">Network Configuration properties</h2>
+<p>The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the <a href="doc:configuration-service">Configuration Service</a> or appling a proper <a href="doc:snapshot-management">snapshot</a>.</p>
+<p>The following table describes all the properties related to the Network Configuration. The network configuration pid is <code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>.</p>
+<h3 id="common-properties">Common properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interfaces</code></td>
+<td>String</td>
+<td>Comma-separated list of the interface names in the device</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.type</code></td>
+<td>String</td>
+<td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.mode</code></td>
+<td>String</td>
+<td>For wifi interfaces, specify the modality; possible values are INFRA and MASTER</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.nat.enabled</code></td>
+<td>Boolean</td>
+<td>Enable the NAT feature</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-properties">IPv4 properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
+<td>String</td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
+<td>Integer</td>
+<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.address</code></td>
+<td>String</td>
+<td>The IPv4 address assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.prefix</code></td>
+<td>Short</td>
+<td>The IPv4 netmask assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.gateway</code></td>
+<td>String</td>
+<td>The IPv4 address of the default gateway</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.dnsServers</code></td>
+<td>String</td>
+<td>Comma-separated list of dns servers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-dhcp-server-properties">IPv4 DHCP Server properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.enabled</code></td>
+<td>Boolean</td>
+<td>Specify if the DHCP server is enabled</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeStart</code></td>
+<td>String</td>
+<td>First IP address available for clients</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeEnd</code></td>
+<td>String</td>
+<td>Last IP address available for clients</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.defaultLeaseTime</code></td>
+<td>Integer</td>
+<td>The default lease time</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.maxLeaseTime</code></td>
+<td>Integer</td>
+<td>The maximum lease time</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.prefix</code></td>
+<td>Short</td>
+<td>The netmask for the available IP addresses</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.passDns</code></td>
+<td>Boolean</td>
+<td>Specify if the DNS server addresses has to be passed through DHCP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-dhcp-client-properties">IPv4 DHCP Client properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dhcpClient4.enabled</code></td>
+<td>Boolean</td>
+<td>Specify if the DHCP client is enabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv6-properties">IPv6 properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
+<td>String</td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: netIPv6StatusDisabled, netIPv6StatusUnmanaged, netIPv6StatusL2Only, netIPv6StatusEnabledLAN, netIPv6StatusEnabledWAN, netIPv6StatusUnknown</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code></td>
+<td>Integer</td>
+<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code></td>
+<td>String</td>
+<td>The IPv6 configuration method; possible values are: AUTO, DHCP, MANUAL.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address</code></td>
+<td>String</td>
+<td>The IPv6 address assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.prefix</code></td>
+<td>Short</td>
+<td>The IPv6 netmask assigned to the network interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.gateway</code></td>
+<td>String</td>
+<td>The IPv6 address of the default gateway</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.dnsServers</code></td>
+<td>String</td>
+<td>Comma-separated list of dns servers</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.addr.gen.mode</code></td>
+<td>String</td>
+<td>The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code></td>
+<td>String</td>
+<td>The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wifi-master-access-point-properties">WiFi Master (Access Point) properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.driver</code></td>
+<td>String</td>
+<td>The driver used for the connection</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.passphrase</code></td>
+<td>Password</td>
+<td>The password for the access point</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.ssid</code></td>
+<td>String</td>
+<td>The SSID of the access point</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.securityType</code></td>
+<td>String</td>
+<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.mode</code></td>
+<td>String</td>
+<td>The mode of the wireless connection; for the access point mode set it to MASTER</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.channel</code></td>
+<td>String</td>
+<td>The channel to be used for the access point</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.radioMode</code></td>
+<td>String</td>
+<td>Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.ignoreSSID</code></td>
+<td>Boolean</td>
+<td>Specify if the SSID broadcast is ignored</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.groupCiphers</code></td>
+<td>String</td>
+<td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.master.pairwiseCiphers</code></td>
+<td>String</td>
+<td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="wifi-infra-station-mode-properties">WiFi Infra (Station Mode) properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ssid</code></td>
+<td>String</td>
+<td>The SSID of the wireless network to connect to</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.channel</code></td>
+<td>String</td>
+<td>The channel of the wireless network to connect to</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
+<td>String</td>
+<td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.passphrase</code></td>
+<td>Password</td>
+<td>The password for the wireless network</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ignoreSSID</code></td>
+<td>Boolean</td>
+<td>Specify if a scan for SSID is required before attempting to associate</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.mode</code></td>
+<td>String</td>
+<td>The mode of the wireless connection; for station mode set to INFRA</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
+<td>Boolean</td>
+<td>Enable pinging the access point after connection is established</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
+<td>String</td>
+<td>The driver used for the connection</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.securityType</code></td>
+<td>String</td>
+<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.groupCiphers</code></td>
+<td>String</td>
+<td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pairwiseCiphers</code></td>
+<td>String</td>
+<td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="cellular-modem-properties">Cellular Modem properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.enabled</code></td>
+<td>Boolean</td>
+<td>Enable the interface</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
+<td>Integer</td>
+<td>The idle option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.username</code></td>
+<td>String</td>
+<td>The username used for the connection</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.password</code></td>
+<td>Password</td>
+<td>The password used for the connection</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
+<td>String</td>
+<td>The PdP type; possible values are IP, PPP and IPv6</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
+<td>Integer</td>
+<td>The maxfail option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
+<td>String</td>
+<td>The authentication type; possible values are None, Auto, CHAP and PAP</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
+<td>Integer</td>
+<td>The lcp-echo-interval option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
+<td>String</td>
+<td>The active-filter option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
+<td>Integer</td>
+<td>The lcp-echo-failure option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
+<td>Boolean</td>
+<td>Enable the LTE diversity antenna</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.resetTimeout</code></td>
+<td>Integer</td>
+<td>The modem reset timeout in minutes</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.gpsEnabled</code></td>
+<td>Boolean</td>
+<td>Enable the GPS device in the modem if available</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
+<td>Boolean</td>
+<td>The persist option of the PPP daemon</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.apn</code></td>
+<td>String</td>
+<td>The modem Access Point Name</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
+<td>String</td>
+<td>The dial string used for connecting to the APN</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
+<td>Integer</td>
+<td>The holdoff option of the PPP daemon (in seconds)</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
+<td>Integer</td>
+<td>Assigned ppp interface number</td>
+</tr>
+</tbody>
+</table>
+<h2 id="network-configuration-recipes">Network Configuration recipes</h2>
+<p>This section presents some snapshot examples to perform basic operations on networking. The snippets can be modified adapting them to the required configuration (i.e. changing the interface name in the property to be applied).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be aware that an inconsitent or wrong configuration can compromise the network functionality of the gateway. Try the new configuration on a test device before appling it in a production environment!</p>
+<p>Moreover, if a property is not present in the new snapshot, the old value is used for the configuration. So, the best practice is to set all the needed properties in the snapshot.</p>
+</div>
+<h3 id="disable-a-network-interface">Disable a network interface</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ETHERNET<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusDisabled<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server">Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ETHERNET<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.dnsServers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>1.2.3.4<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledWAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled">Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ETHERNET<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.dnsServers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledLAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.rangeEnd&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>192.168.4.110<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.defaultLeaseTime&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>900<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.prefix&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Short&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>24<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.passDns&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.rangeStart&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>192.168.4.100<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.dhcpServer4.maxLeaseTime&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>900<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.address&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>192.168.4.1<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.prefix&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Short&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>24<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.ip4.gateway&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.enp5s0.config.nat.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled">Configure a wireless interface as access point with DHCP server and NAT enabled</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>WIFI<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledLAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.gateway&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.dnsServers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.prefix&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Short&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>24<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.address&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>172.16.1.1<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.rangeStart&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>172.16.1.100<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.maxLeaseTime&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>900<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.defaultLeaseTime&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>900<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.rangeEnd&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>172.16.1.110<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.prefix&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Short&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>24<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.passDns&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.nat.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MASTER<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.driver&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>nl80211<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ZW5hYmxlbWVwbGVhc2U=<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ssid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-60" name="__codelineno-5-60" href="#__codelineno-5-60"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>kura_gateway_19<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-61" name="__codelineno-5-61" href="#__codelineno-5-61"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-62" name="__codelineno-5-62" href="#__codelineno-5-62"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-63" name="__codelineno-5-63" href="#__codelineno-5-63"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-64" name="__codelineno-5-64" href="#__codelineno-5-64"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-65" name="__codelineno-5-65" href="#__codelineno-5-65"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-66" name="__codelineno-5-66" href="#__codelineno-5-66"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MASTER<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-67" name="__codelineno-5-67" href="#__codelineno-5-67"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-68" name="__codelineno-5-68" href="#__codelineno-5-68"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.channel&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-69" name="__codelineno-5-69" href="#__codelineno-5-69"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>11<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-70" name="__codelineno-5-70" href="#__codelineno-5-70"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-71" name="__codelineno-5-71" href="#__codelineno-5-71"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.radioMode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-72" name="__codelineno-5-72" href="#__codelineno-5-72"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>RADIO_MODE_80211g<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-73" name="__codelineno-5-73" href="#__codelineno-5-73"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-74" name="__codelineno-5-74" href="#__codelineno-5-74"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-75" name="__codelineno-5-75" href="#__codelineno-5-75"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-76" name="__codelineno-5-76" href="#__codelineno-5-76"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-77" name="__codelineno-5-77" href="#__codelineno-5-77"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.pairwiseCiphers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-78" name="__codelineno-5-78" href="#__codelineno-5-78"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>CCMP<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-79" name="__codelineno-5-79" href="#__codelineno-5-79"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-5-80" name="__codelineno-5-80" href="#__codelineno-5-80"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-5-81" name="__codelineno-5-81" href="#__codelineno-5-81"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-5-82" name="__codelineno-5-82" href="#__codelineno-5-82"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled">Configure a wireless interface as station mode with DHCP client enabled</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>WIFI<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledLAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.ip4.dnsServers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>INFRA<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.ssid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MyWirelessNetwork<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.bgscan&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MyPasswordBase64<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>INFRA<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.pingAccessPoint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.driver&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>nl80211<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="enable-a-cellular-interface">Enable a cellular interface</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span><span class="w">  </span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MODEM<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledWAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.ip4.dnsServers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.idle&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>95<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.password&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.pdpType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>IP<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.ipAddress&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.maxFail&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.authType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>NONE<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoInterval&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.activeFilter&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>inbound<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoFailure&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-48" name="__codelineno-7-48" href="#__codelineno-7-48"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-49" name="__codelineno-7-49" href="#__codelineno-7-49"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-50" name="__codelineno-7-50" href="#__codelineno-7-50"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.diversityEnabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-51" name="__codelineno-7-51" href="#__codelineno-7-51"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-52" name="__codelineno-7-52" href="#__codelineno-7-52"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-53" name="__codelineno-7-53" href="#__codelineno-7-53"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.resetTimeout&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-54" name="__codelineno-7-54" href="#__codelineno-7-54"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-55" name="__codelineno-7-55" href="#__codelineno-7-55"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-56" name="__codelineno-7-56" href="#__codelineno-7-56"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.gpsEnabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-57" name="__codelineno-7-57" href="#__codelineno-7-57"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-58" name="__codelineno-7-58" href="#__codelineno-7-58"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-59" name="__codelineno-7-59" href="#__codelineno-7-59"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.persist&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-60" name="__codelineno-7-60" href="#__codelineno-7-60"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-61" name="__codelineno-7-61" href="#__codelineno-7-61"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-62" name="__codelineno-7-62" href="#__codelineno-7-62"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.dialString&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-63" name="__codelineno-7-63" href="#__codelineno-7-63"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>atd*99***2#<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-64" name="__codelineno-7-64" href="#__codelineno-7-64"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-65" name="__codelineno-7-65" href="#__codelineno-7-65"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.apn&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-66" name="__codelineno-7-66" href="#__codelineno-7-66"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>web.omnitel.it<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-67" name="__codelineno-7-67" href="#__codelineno-7-67"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../device-information/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Device Information" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Device Information
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../network-failover/" class="md-footer__link md-footer__link--next" aria-label="Next: Network Failover" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Network Failover
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/eclipse/kura" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://gitter.im/eclipse/kura" target="_blank" rel="noopener" title="gitter.im" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M66.4 322.5H16V0h50.4v322.5zM166.9 76.1h-50.4V512h50.4V76.1zm100.6 0h-50.4V512h50.4V76.1zM368 76h-50.4v247H368V76z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/eclipse/kura" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

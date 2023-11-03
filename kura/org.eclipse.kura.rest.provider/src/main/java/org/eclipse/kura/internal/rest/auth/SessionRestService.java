@@ -264,11 +264,11 @@ public class SessionRestService {
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
                 .loadHttpServiceConfigurationProperties(configAdmin);
 
-        final Optional<Integer> httpsClientAuthPort = ConfigurationAdminHelper
-                .getHttpsMutualAuthPorts(httpServiceConfig).stream().findFirst();
+        final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper
+                .getHttpsMutualAuthPorts(httpServiceConfig);
 
-        if (httpsClientAuthPort.isPresent()) {
-            return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPort.get());
+        if (!httpsClientAuthPorts.isEmpty()) {
+            return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts);
         } else {
             return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, false, null);
         }

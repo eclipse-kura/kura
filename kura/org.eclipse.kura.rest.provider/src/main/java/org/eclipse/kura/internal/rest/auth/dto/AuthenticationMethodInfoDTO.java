@@ -1,16 +1,26 @@
 package org.eclipse.kura.internal.rest.auth.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 public class AuthenticationMethodInfoDTO {
 
     private final boolean passwordAuthenticationEnabled;
     private final boolean certificateAuthenticationEnabled;
-    private final Integer certificateAuthenticationPort;
+    private final List<Integer> certificateAuthenticationPorts;
 
     public AuthenticationMethodInfoDTO(boolean passwordAuthenticationEnabled, boolean certificateAuthenticationEnabled,
-            Integer certificateAuthenticationPort) {
+            Set<Integer> certificateAuthenticationPorts) {
         this.passwordAuthenticationEnabled = passwordAuthenticationEnabled;
         this.certificateAuthenticationEnabled = certificateAuthenticationEnabled;
-        this.certificateAuthenticationPort = certificateAuthenticationPort;
+
+        if (certificateAuthenticationPorts != null) {
+            this.certificateAuthenticationPorts = new ArrayList<>(certificateAuthenticationPorts);
+            this.certificateAuthenticationPorts.sort(null);
+        } else {
+            this.certificateAuthenticationPorts = null;
+        }
     }
 
     public boolean isPasswordAuthenticationEnabled() {
@@ -21,8 +31,8 @@ public class AuthenticationMethodInfoDTO {
         return certificateAuthenticationEnabled;
     }
 
-    public Integer getCertificateAuthenticationPort() {
-        return certificateAuthenticationPort;
+    public List<Integer> getCertificateAuthenticationPorts() {
+        return certificateAuthenticationPorts;
     }
 
 }

@@ -78,6 +78,36 @@ public final class ServiceUtil {
         }
     }
 
+    public static <T> Collection<ServiceReference<T>> getServiceReferencesAsCollection(
+            final BundleContext bundleContext, Class<T> serviceClass, String filter) throws KuraException {
+
+        try {
+            final Collection<ServiceReference<T>> sr = bundleContext.getServiceReferences(serviceClass, filter);
+
+            if (sr == null) {
+                throw KuraException.internalError(serviceClass.toString() + " not found.");
+            }
+
+            return sr;
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
+
+    }
+
+    public static <T> T getService(final BundleContext bundleContext, ServiceReference<T> serviceReference)
+            throws KuraException {
+        T service = null;
+
+        if (serviceReference != null) {
+            service = bundleContext.getService(serviceReference);
+        }
+        if (service == null) {
+            throw KuraException.internalError("Service not found.");
+        }
+        return service;
+    }
+
     /**
      * Resets all the provided service reference use counts. If the provided {@link BundleContext} bundle's use count
      * for the provided service references are already zero, this would not further decrement the counters to
@@ -233,6 +263,78 @@ public final class ServiceUtil {
         }
     }
 
+    public static boolean ungetService(final BundleContext bundleContext, ServiceReference<?> serviceReference) {
+
+        if (serviceReference != null) {
+            return bundleContext.ungetService(serviceReference);
+        }
+
+        return false;
+    }
+
+    public static <T, R> R applyToServiceOptionally(final BundleContext bundleContext, final Class<T> serviceClass,
+            final ServiceFunction<T, R> function) throws KuraException {
+
+        final ServiceReference<T> ref = bundleContext.getServiceReference(serviceClass);
+
+        try {
+            if (ref == null) {
+                return function.apply(null);
+            }
+
+            final T service = bundleContext.getService(ref);
+            try {
+                return function.apply(service);
+            } finally {
+                bundleContext.ungetService(ref);
+            }
+        } catch (Exception e) {
+            throw KuraException.internalError(e.getMessage());
+        }
+    }
+
+    public static boolean providesService(final BundleContext bundleContext, final String kuraServicePid,
+            final Class<?> serviceInterface) {
+        return providesService(bundleContext, kuraServicePid, s -> s.contains(serviceInterface.getName()));
+    }
+
+    public static boolean providesService(final BundleContext bundleContext, final String kuraServicePid,
+            final Predicate<Set<String>> filter) {
+
+        final String pidFilter = "(kura.service.pid=" + kuraServicePid + ")";
+
+        try {
+            final ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(null, pidFilter);
+
+            if (refs == null) {
+                return false;
+            }
+
+            for (final ServiceReference<?> ref : refs) {
+                final Object rawProvidedInterfaces = ref.getProperty("objectClass");
+
+                final Set<String> providedInterfaces;
+
+                if (rawProvidedInterfaces instanceof String) {
+                    providedInterfaces = Collections.singleton((String) rawProvidedInterfaces);
+                } else if (rawProvidedInterfaces instanceof String[]) {
+                    providedInterfaces = Arrays.asList((String[]) rawProvidedInterfaces).stream()
+                            .collect(Collectors.toSet());
+                } else {
+                    providedInterfaces = Collections.emptySet();
+                }
+
+                if (filter.test(providedInterfaces)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (InvalidSyntaxException e) {
+            return false;
+        }
+    }
+
     public static boolean isFactoryOf(final BundleContext bundleContext, final String factoryPid,
             final Predicate<Set<String>> filter) {
 
@@ -298,4 +400,5 @@ public final class ServiceUtil {
 
         public void consume(ServiceReference<T> service, BundleContext context) throws KuraException;
     }
+
 }

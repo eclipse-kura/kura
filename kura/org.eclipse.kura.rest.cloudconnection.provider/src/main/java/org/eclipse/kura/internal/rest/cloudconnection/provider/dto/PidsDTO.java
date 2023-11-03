@@ -12,28 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class CloudEntryDTO {
+public class PidsDTO {
 
     private String pid;
-
     private String factoryPid;
-    private String defaultFactoryPid;
-    private String defaultFactoryPidRegex;
-
-    public CloudEntryDTO() {
-    }
-
-    public CloudEntryDTO(String pid, String factoryPid) {
-        this.pid = pid;
-        this.factoryPid = factoryPid;
-    }
-
-    public CloudEntryDTO(String pid) {
-        this.pid = pid;
-    }
+    private String cloudConnectionPid;
+    private String cloudServicePid;
+    private String cloudServicePidRegex;
 
     public String getPid() {
-        return this.pid;
+        return pid;
     }
 
     public void setPid(String pid) {
@@ -41,27 +29,35 @@ public class CloudEntryDTO {
     }
 
     public String getFactoryPid() {
-        return this.factoryPid;
+        return factoryPid;
     }
 
     public void setFactoryPid(String factoryPid) {
         this.factoryPid = factoryPid;
     }
 
-    public String getDefaultFactoryPid() {
-        return this.defaultFactoryPid;
+    public String getCloudConnectionPid() {
+        return cloudConnectionPid;
     }
 
-    public void setDefaultFactoryPid(String defaultFactoryPid) {
-        this.defaultFactoryPid = defaultFactoryPid;
+    public void setCloudConnectionPid(String cloudConnectionPid) {
+        this.cloudConnectionPid = cloudConnectionPid;
     }
 
-    public String getDefaultFactoryPidRegex() {
-        return this.defaultFactoryPidRegex;
+    public String getCloudServicePid() {
+        return cloudServicePid;
     }
 
-    public void setDefaultFactoryPidRegex(String defaultFactoryPidRegex) {
-        this.defaultFactoryPidRegex = defaultFactoryPidRegex;
+    public void setCloudServicePid(String cloudServicePid) {
+        this.cloudServicePid = cloudServicePid;
+    }
+
+    public String getCloudServicePidRegex() {
+        return cloudServicePidRegex;
+    }
+
+    public void setCloudServicePidRegex(String cloudServicePidRegex) {
+        this.cloudServicePidRegex = cloudServicePidRegex;
     }
 
 }

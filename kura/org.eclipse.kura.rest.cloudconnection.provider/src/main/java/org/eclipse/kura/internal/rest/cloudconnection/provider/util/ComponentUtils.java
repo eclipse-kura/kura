@@ -43,18 +43,18 @@ public class ComponentUtils {
         ComponentConfiguration currentCC = cs.getComponentConfiguration(componentConfig.getComponentId());
 
         Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
-        for (ConfigParameterDTO gwtConfigParam : componentConfig.getParameters()) {
+        for (ConfigParameterDTO configParam : componentConfig.getParameters()) {
             Object objValue;
-            Object currentValue = currentConfigProp.get(gwtConfigParam.getId());
+            Object currentValue = currentConfigProp.get(configParam.getId());
 
-            boolean isReadOnly = gwtConfigParam.getMin() != null
-                    && gwtConfigParam.getMin().equals(gwtConfigParam.getMax());
+            boolean isReadOnly = configParam.getMin() != null
+                    && configParam.getMin().equals(configParam.getMax());
             if (isReadOnly) {
                 objValue = currentValue;
             } else {
-                objValue = getUserDefinedObject(gwtConfigParam, currentValue);
+                objValue = getUserDefinedObject(configParam, currentValue);
             }
-            properties.put(gwtConfigParam.getId(), objValue);
+            properties.put(configParam.getId(), objValue);
         }
 
         // Force kura.service.pid into properties, if originally present
@@ -95,14 +95,14 @@ public class ComponentUtils {
 
     private static Object getObjectValue(ConfigParameterDTO param) {
         Object objValue = null;
-        ConfigParameterType gwtType = param.getType();
+        ConfigParameterType type = param.getType();
         final String strValue = param.getValue();
 
-        if (gwtType == ConfigParameterType.STRING) {
+        if (type == ConfigParameterType.STRING) {
             objValue = strValue;
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             final String trimmedValue = strValue.trim();
-            switch (gwtType) {
+            switch (type) {
             case LONG:
                 objValue = Long.parseLong(trimmedValue);
                 break;

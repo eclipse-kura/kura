@@ -1,7 +1,7 @@
 Eclipse Kura - 5.4.0-SNAPSHOT - November 2023
 -------------------------------------------------------------------------------------------------
 Description:
-[TODO]
+This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces support for IPv6 in new networking and generic profiles, WPA-enterprise client integration, an all new set of REST APIs to expose the framework services to simplify the integration of new and modern web UIs. Eclipse Kura 5.4.0 improves the generic profiles with a new method for interface listing and identification, and an improved system for RAM assignment at installation phase based on the available RAM in the target system. Finally, additional changes and improvements in the northbound connectivity connector for Eclipse Kapua with an improved management of APP messages and birth messages published with QoS 1.
 
 
 Features:
@@ -60,7 +60,15 @@ Features:
   * d999a4461b - [dhcp-server] added dnsmasq support (#4486) (Marcello Rinaldo Martina)
 
 Target Environments:
-[TODO]
+ Kura is released as pre-compiled binary installers for the following platforms:
+  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
+  * Raspberry Pi 3/4 based on 64 bits OS (Kura networking)
+  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
+  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
+  * Generic Debian Package for x86_64 (NetworkManager)
+  * Generic Debian Package for arm32 (NetworkManager)
+  * Generic Debian Package for arm64 (NetworkManager)
+ Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
   * 7fe29dcd28 - Pass null for Context method arguments in JaxRsRequestHandlerProxy (#4935) (nicolatimeus)
@@ -167,7 +175,53 @@ Target Platform Updates:
   * c3a3bfe624 - Updated org.xerial:sqlite-jdbc to 3.42.0.0 (#4721) (nicolatimeus)
 
 Known Issues:
-[TODO]
+  * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
+  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
+  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
+    built and run immediately after installation.
+  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
+    The issue impact is limited, if the dataservice reconnect option is enabled.
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported with old networking. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * #4212: Wrong order of BIRTH/APPLICATION certificates for custom APP IDs registration
+  * #3972: Topic name validation: issue with names containing "//" (Cloud Subscriber)
+  * #4141: Sometimes user is not logged in after changing password
+  * #3796: Server manager does not close properly
+  * #3211: Kura Docker | Bluetooth error in log during starting service
+  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
+  * #2843: Access Banner Content All in One Line
+  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
+  * #2728: WireGraph Component Description Windows Too Wide
+  * #2725: Different Pop-up Windows for Warnings
+  * #2702: Error Message For Long Item Names Not Displayed Properly
+  * #2696: Component Name Inteferes With Wire Graph Border
+  * #2695: Component Names in Wires Not Limited
+  * #2410: Deployment handler and URLs with many query parameters
+  * #2038: [Kura 3.2.0 QA] Package uninstallation log
+  * #1993: Search Domains Are Not Supported
+  * #1663: Authentication Issue with Deploy V2
+  * #1572: serial modbus has errors on some hardware
+  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #654:  Clean up static initialization around "modem" functionality
+  * #645:  Clean up internal dependencies in Kura
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
   * 17814c7cfe - feat: dynamic ram assignment when over 1GB (#4921) (G_Ivo)

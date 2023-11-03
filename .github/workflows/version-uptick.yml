@@ -63,4 +63,4 @@ jobs:
         title: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
         commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
         body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.version }} version"
-        branch-suffix: short-commit-hash
+        branch-suffix: timestamp

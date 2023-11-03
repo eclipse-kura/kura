@@ -1,4 +1,4 @@
-Eclipse Kura - 5.4.0-SNAPSHOT - November 2023
+Eclipse Kura - 5.4.0 - November 2023
 -------------------------------------------------------------------------------------------------
 Description:
 This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces support for IPv6, WPA-enterprise client integration in new networking and generic profiles, an all new set of REST APIs to expose the framework services to simplify the integration of new and modern web UIs. Eclipse Kura 5.4.0 improves the generic profiles with a new method for interface listing and identification, and an improved system for RAM assignment at installation phase based on the available RAM in the target system. Finally, additional changes and improvements in the northbound connectivity connector for Eclipse Kapua with an improved management of APP messages and birth messages published with QoS 1.

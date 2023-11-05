@@ -13,7 +13,7 @@ The supported workflows are the following:
 
 2. Call the [POST/login/password](#postloginpassword) or [POST/login/certificate](#postlogincertificate) providing the credentials to create a new session.
   
-    - The device will return a session cookie with the response, make sure to provide it in successive requests. If the request is performed by a browser, this should be done automatically.
+    - This request will return a session cookie with the response. The session cookie name is currently `JSESSIONID`. It is important to provide the received cookies in successive requests using the [Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cookie) HTTP request header. If this is not done, requests will fail with 401 code. If the request is performed by a browser, cookie management should be performed automatically.
 
     - If password authentication has been used and the response object reports that a password change is needed, perform the [Update password workflow](#update-password-workflow)
 
@@ -28,8 +28,6 @@ The supported workflows are the following:
 2. Call the [POST/changePassword](#postchangepassword), providing both the new and old password, make sure to include the `X-XSRF-Token` HTTP header.
 
 3. Repeat the [Authentication and resource access workflow](#authentication-and-resource-access-workflow), starting from step 1.
-
-
 
 Sessions will expire after an inactivity interval that can be configured using the **Session Inactivity Interval (Seconds)** RestService configuration parameter. After session expiration, a new login will be necessary.
 

@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,8 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
@@ -257,6 +261,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSessionWithUsernameAndPassword() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
@@ -438,6 +444,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithSamePassword() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 1, //
+                "new.password.require.digits", false, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false //
+        );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
@@ -453,6 +465,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAllowResourceAccessAfterPasswordChange() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 1, //
+                "new.password.require.digits", false, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false //
+        );
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
@@ -645,6 +663,171 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(401);
     }
 
+    @Test
+    public void shouldReturnMessageIfLoginBannnerIsEnabled() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", true, //
+                "access.banner.content", "foo");
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+
+        thenResponseCodeIs(200);
+        thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false,\"message\":\"foo\"}");
+        thenResponseHasCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldRejectPassordChangeWithTooShort() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 4, //
+                "new.password.require.digits", false, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false //
+        );
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectPassordChangeWithoutDigits() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 4, //
+                "new.password.require.digits", true, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false //
+        );
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"nodigits\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectPassordChangeWithoutSpecialCharacters() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 4, //
+                "new.password.require.digits", true, //
+                "new.password.require.special.characters", true, //
+                "new.password.require.both.cases", false //
+        );
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"nospecialcharacters1\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldRejectPassordChangeWithoutBothCases() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 4, //
+                "new.password.require.digits", true, //
+                "new.password.require.special.characters", true, //
+                "new.password.require.both.cases", true //
+        );
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"nobothcases1@\"}");
+
+        thenResponseCodeIs(400);
+    }
+
+    @Test
+    public void shouldAcceptPasswordThatFullfillsRequirements() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 4, //
+                "new.password.require.digits", true, //
+                "new.password.require.special.characters", true, //
+                "new.password.require.both.cases", true //
+        );
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"), true);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"1validPW@\"}");
+
+        thenRequestSucceeds();
+    }
+
+    @Test
+    public void shouldReturnCurrentIdentityInfo() {
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets", "rest.foo", "rest.bar"), false);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/currentIdentity", null);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"name\":\"foo\",\"passwordChangeNeeded\":false,\"permissions\":[\"rest.bar\",\"rest.assets\",\"rest.foo\"]}");
+    }
+
+    @Test
+    public void shouldReturnCurrentIdentityInfoWithNoPermissions() {
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("nopermissions", Optional.of("bar"), Collections.emptyList(), false);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"nopermissions\",\"password\":\"bar\"}");
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/currentIdentity", null);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"name\":\"nopermissions\",\"passwordChangeNeeded\":false,\"permissions\":[]}");
+    }
+
+    @Test
+    public void shouldReturnCurrentAuthenticationMethodInfo() {
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationMethods", null);
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(
+                "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false}");
+    }
+
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
     private CompletableFuture<Void> providerEnabled = new CompletableFuture<>();
     private CompletableFuture<Void> providerDisabled = new CompletableFuture<>();
@@ -757,6 +940,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
         } catch (Exception e) {
             fail("cannot set httpservice keystore pid");
+        }
+    }
+
+    private void givenConfiguration(final String pid, final Object... properties) {
+        try {
+            final ConfigurationAdmin configAdmin = ServiceUtil
+                    .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+            final Configuration configuration = configAdmin.getConfiguration(pid, "?");
+
+            final Dictionary<String, Object> configurationProperties = Optional
+                    .ofNullable(configuration.getProperties())
+                    .orElseGet(Hashtable::new);
+
+            final Iterator<Object> iter = Arrays.asList(properties).iterator();
+
+            while (iter.hasNext()) {
+                final String key = (String) iter.next();
+                final Object value = iter.next();
+
+                configurationProperties.put(key, value);
+            }
+
+            configuration.update(configurationProperties);
+
+        } catch (Exception e) {
+            fail("cannot updtate configuration");
         }
     }
 

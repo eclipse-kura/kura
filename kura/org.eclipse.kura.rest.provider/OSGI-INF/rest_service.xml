@@ -24,4 +24,5 @@
    <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static" />
    <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static" />
    <reference bind="bindAuthenticationProvider" cardinality="0..n" interface="org.eclipse.kura.rest.auth.AuthenticationProvider" name="AuthenticationProvider" policy="dynamic" unbind="unbindAuthenticationProvider" />
+   <reference bind="setConfigurationAdmin" cardinality="1..1" interface="org.osgi.service.cm.ConfigurationAdmin" name="ConfigurationAdmin" policy="static"/>
 </scr:component>

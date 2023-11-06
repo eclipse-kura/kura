@@ -105,7 +105,13 @@ public class DeploymentRestService {
     }
 
     /**
-     * TODO
+     * GET method.
+     *
+     * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
+     * passed as query
+     * parameter.
+     *
+     * @return a list of {@link MarketplacePackageDescriptor}
      */
     @GET
     @RolesAllowed("deploy")

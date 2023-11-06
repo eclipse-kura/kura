@@ -15,13 +15,13 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionState;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionType;
 
-public class CloudConnectionEntryDTO extends CloudEntryDTO {
+public class CloudConnection extends Cloud {
 
     private final String cloudConnectionFactoryPid;
     private CloudConnectionState state;
     private CloudConnectionType connectionType;
 
-    public CloudConnectionEntryDTO(String pid, String cloudConnectionFactoryPid) {
+    public CloudConnection(String pid, String cloudConnectionFactoryPid) {
         super(pid);
         this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
     }

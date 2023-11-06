@@ -12,20 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class PidsDTO {
+public class FactoryPidAndCloudServicePid {
 
-    private String pid;
     private String factoryPid;
-    private String cloudConnectionPid;
     private String cloudServicePid;
-    private String cloudServicePidRegex;
 
-    public String getPid() {
-        return pid;
-    }
-
-    public void setPid(String pid) {
-        this.pid = pid;
+    public FactoryPidAndCloudServicePid(String factoryPid, String cloudServicePid) {
+        this.factoryPid = factoryPid;
+        this.cloudServicePid = cloudServicePid;
     }
 
     public String getFactoryPid() {
@@ -36,28 +30,12 @@ public class PidsDTO {
         this.factoryPid = factoryPid;
     }
 
-    public String getCloudConnectionPid() {
-        return cloudConnectionPid;
-    }
-
-    public void setCloudConnectionPid(String cloudConnectionPid) {
-        this.cloudConnectionPid = cloudConnectionPid;
-    }
-
     public String getCloudServicePid() {
         return cloudServicePid;
     }
 
     public void setCloudServicePid(String cloudServicePid) {
         this.cloudServicePid = cloudServicePid;
-    }
-
-    public String getCloudServicePidRegex() {
-        return cloudServicePidRegex;
-    }
-
-    public void setCloudServicePidRegex(String cloudServicePidRegex) {
-        this.cloudServicePidRegex = cloudServicePidRegex;
     }
 
 }

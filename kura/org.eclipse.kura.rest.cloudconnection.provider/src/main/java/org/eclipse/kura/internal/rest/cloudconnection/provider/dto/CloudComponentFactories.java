@@ -14,22 +14,23 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
 import java.util.List;
 
-public class CloudComponentFactoriesDTO {
+public class CloudComponentFactories {
 
-    private final List<String> cloudConnectionFactoryPids;
-    private final List<CloudEntryDTO> pubSubFactories;
+    private final List<CloudConnectionFactoryInfo> cloudConnectionFactoryInfos;
+    private final List<Cloud> pubSubFactories;
 
-    public CloudComponentFactoriesDTO(List<String> cloudConnectionFactoryPids, List<CloudEntryDTO> pubSubFactories) {
-        this.cloudConnectionFactoryPids = cloudConnectionFactoryPids;
+    public CloudComponentFactories(List<CloudConnectionFactoryInfo> cloudConnectionFactoryInfos,
+            List<Cloud> pubSubFactories) {
+        this.cloudConnectionFactoryInfos = cloudConnectionFactoryInfos;
         this.pubSubFactories = pubSubFactories;
     }
 
-    public List<String> getCloudConnectionFactoryPids() {
-        return this.cloudConnectionFactoryPids;
+    public List<CloudConnectionFactoryInfo> getCloudConnectionFactoryInfos() {
+        return cloudConnectionFactoryInfos;
     }
 
-    public List<CloudEntryDTO> getPubSubFactories() {
-        return this.pubSubFactories;
+    public List<Cloud> getPubSubFactories() {
+        return pubSubFactories;
     }
 
 }

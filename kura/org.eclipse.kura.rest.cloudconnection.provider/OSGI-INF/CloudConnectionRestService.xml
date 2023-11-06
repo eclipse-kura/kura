@@ -19,6 +19,12 @@
     <property name="kura.service.pid" 
               type="String" 
               value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService" />
+              
+    <reference interface="org.eclipse.kura.crypto.CryptoService" 
+               bind="bindCryptoService" 
+               cardinality="1..1" 
+               name="CryptoService" 
+               policy="static" />
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"

@@ -14,12 +14,12 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
 import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudPubSubType;
 
-public class CloudPubSubEntryDTO extends CloudEntryDTO {
+public class CloudPubSub extends Cloud {
 
     private final String cloudConnectionPid;
     private final CloudPubSubType type;
 
-    public CloudPubSubEntryDTO(String pid, String factoryPid, String cloudConnectionPid, CloudPubSubType type) {
+    public CloudPubSub(String pid, String factoryPid, String cloudConnectionPid, CloudPubSubType type) {
         super(pid, factoryPid);
         this.cloudConnectionPid = cloudConnectionPid;
         this.type = type;

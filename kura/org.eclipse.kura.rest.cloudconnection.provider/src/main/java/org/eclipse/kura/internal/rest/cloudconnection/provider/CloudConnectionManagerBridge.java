@@ -31,9 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("deprecation")
-public class DataServiceService {
+public class CloudConnectionManagerBridge {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataServiceService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerBridge.class);
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
 

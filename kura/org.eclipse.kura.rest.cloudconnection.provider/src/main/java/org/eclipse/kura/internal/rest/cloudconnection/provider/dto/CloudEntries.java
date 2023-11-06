@@ -12,15 +12,18 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class ConnectedDTO {
+import java.util.ArrayList;
+import java.util.List;
 
-    private boolean connected;
+public class CloudEntries {
 
-    public ConnectedDTO(boolean connected) {
-        this.connected = connected;
+    private List<Cloud> cloudEntries = new ArrayList<>();
+
+    public CloudEntries(List<Cloud> cloudEntries) {
+        this.cloudEntries = cloudEntries;
     }
 
-    public boolean isConnected() {
-        return this.connected;
+    public List<Cloud> getCloudEntries() {
+        return this.cloudEntries;
     }
 }

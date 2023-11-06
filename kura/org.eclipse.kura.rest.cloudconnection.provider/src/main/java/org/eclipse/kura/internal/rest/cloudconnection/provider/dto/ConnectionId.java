@@ -12,11 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class ConnectionIdDTO {
+public class ConnectionId {
 
     private final String connectionId;
 
-    public ConnectionIdDTO(String connectionId) {
+    public ConnectionId(String connectionId) {
         this.connectionId = connectionId;
     }
 

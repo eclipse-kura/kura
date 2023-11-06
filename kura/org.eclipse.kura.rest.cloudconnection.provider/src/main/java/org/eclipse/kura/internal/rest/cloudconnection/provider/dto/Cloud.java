@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class CloudEntryDTO {
+public class Cloud {
 
     private String pid;
 
@@ -20,15 +20,15 @@ public class CloudEntryDTO {
     private String defaultFactoryPid;
     private String defaultFactoryPidRegex;
 
-    public CloudEntryDTO() {
+    public Cloud() {
     }
 
-    public CloudEntryDTO(String pid, String factoryPid) {
+    public Cloud(String pid, String factoryPid) {
         this.pid = pid;
         this.factoryPid = factoryPid;
     }
 
-    public CloudEntryDTO(String pid) {
+    public Cloud(String pid) {
         this.pid = pid;
     }
 

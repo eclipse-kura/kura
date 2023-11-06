@@ -18,14 +18,12 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -40,18 +38,14 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.metatype.AD;
-import org.eclipse.kura.configuration.metatype.Icon;
-import org.eclipse.kura.configuration.metatype.OCD;
-import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudComponentFactoriesDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudConnectionEntryDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudEntryDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudPubSubEntryDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConfigComponentDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConfigParameterDTO;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.util.ComponentUtils;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.Cloud;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudComponentFactories;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudConnection;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudConnectionFactoryInfo;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudPubSub;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.util.PidUtils;
+import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
+import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.util.service.ServiceUtil.ServiceConsumer;
 import org.eclipse.kura.util.service.ServiceUtil.ServiceReferenceConsumer;
@@ -74,8 +68,6 @@ public class CloudConnectionService {
     private static final String CLOUD_CONNECTION_FACTORY_FILTER = "(" + "|"
             + "(objectClass=org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory)"
             + "(objectClass=org.eclipse.kura.cloud.factory.CloudServiceFactory)" + ")";
-    private static final String DRIVER_PID = "driver.pid";
-    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
 
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
     private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
@@ -91,9 +83,9 @@ public class CloudConnectionService {
         this.configurationService = configurationService;
     }
 
-    public List<CloudEntryDTO> findCloudEntries() throws KuraException {
+    public List<Cloud> findCloudEntries() throws KuraException {
 
-        final List<CloudEntryDTO> result = new ArrayList<>();
+        final List<Cloud> result = new ArrayList<>();
 
         withAllCloudConnectionFactories(service -> {
 
@@ -107,7 +99,7 @@ public class CloudConnectionService {
                     continue;
                 }
 
-                final CloudConnectionEntryDTO cloudConnectionEntry = new CloudConnectionEntryDTO(pid, factoryPid);
+                final CloudConnection cloudConnectionEntry = new CloudConnection(pid, factoryPid);
 
                 fillState(cloudConnectionEntry);
 
@@ -122,7 +114,7 @@ public class CloudConnectionService {
         return result;
     }
 
-    public List<ConfigComponentDTO> getStackConfigurationsByFactory(final String factoryPid,
+    public List<ComponentConfiguration> getStackConfigurationsByFactory(final String factoryPid,
             final String cloudServicePid) throws KuraException {
 
         final List<String> result = new ArrayList<>();
@@ -136,14 +128,12 @@ public class CloudConnectionService {
         return findComponentConfigurations(PidUtils.getPidFilter(result.iterator()));
     }
 
-    private List<ConfigComponentDTO> findComponentConfigurations(String osgiFilter) throws KuraException {
+    private List<ComponentConfiguration> findComponentConfigurations(String osgiFilter) throws KuraException {
 
         try {
             final Filter filter = FrameworkUtil.createFilter(osgiFilter);
             return this.configurationService.getComponentConfigurations(filter) //
-                    .stream() //
-                    .map(this::createMetatypeOnlyComponentConfigurationInternal) //
-                    .filter(Objects::nonNull) //
+                    .stream().filter(Objects::nonNull) //
                     .collect(Collectors.toList());
 
         } catch (InvalidSyntaxException e) {
@@ -151,51 +141,6 @@ public class CloudConnectionService {
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-    }
-
-    public String findSuggestedCloudServicePid(String factoryPid) throws KuraException {
-
-        final AtomicReference<String> result = new AtomicReference<>();
-
-        withAllCloudConnectionFactoryRefs((ref, ctx) -> {
-            final CloudConnectionFactory cloudServiceFactory = wrap(ctx.getService(ref));
-            try {
-                if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
-                    return;
-                }
-                Object propertyObject = ref.getProperty(KURA_UI_CSF_PID_DEFAULT);
-                if (propertyObject != null) {
-                    result.set((String) propertyObject);
-                }
-            } finally {
-                ctx.ungetService(ref);
-            }
-        });
-
-        return result.get();
-    }
-
-    public String findCloudServicePidRegex(String factoryPid) throws KuraException {
-
-        final AtomicReference<String> result = new AtomicReference<>();
-
-        withAllCloudConnectionFactoryRefs((ref, ctx) -> {
-            final CloudConnectionFactory cloudServiceFactory = wrap(ctx.getService(ref));
-            try {
-                if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
-                    return;
-                }
-                Object propertyObject = ref.getProperty(KURA_UI_CSF_PID_REGEX);
-                ServiceUtil.ungetService(this.bundleContext, ref);
-                if (propertyObject != null) {
-                    result.set((String) propertyObject);
-                }
-            } finally {
-                ctx.ungetService(ref);
-            }
-        });
-
-        return result.get();
     }
 
     public void createCloudServiceFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
@@ -224,14 +169,29 @@ public class CloudConnectionService {
         });
     }
 
-    public CloudComponentFactoriesDTO getCloudComponentFactories() throws KuraException {
-        final List<String> cloudConnectionFactoryPids = new ArrayList<>();
+    public CloudComponentFactories getCloudComponentFactories() throws KuraException {
+        final List<CloudConnectionFactoryInfo> cloudConnectionFactoryPids = new ArrayList<>();
 
-        withAllCloudConnectionFactories(service -> cloudConnectionFactoryPids.add(service.getFactoryPid()));
+        withAllCloudConnectionFactoryRefs((ref, ctx) -> {
 
-        final List<CloudEntryDTO> pubSubFactories = getPubSubFactories();
+            try {
+                final CloudConnectionFactory service = wrap(ctx.getService(ref));
+                String defaultPid = (String) ref.getProperty(KURA_UI_CSF_PID_DEFAULT);
+                String pidRegex = (String) ref.getProperty(KURA_UI_CSF_PID_REGEX);
 
-        return new CloudComponentFactoriesDTO(cloudConnectionFactoryPids, pubSubFactories);
+                CloudConnectionFactoryInfo cloudConnectionFactoryInfoDTO = new CloudConnectionFactoryInfo(
+                        service.getFactoryPid(), defaultPid, pidRegex);
+
+                cloudConnectionFactoryPids.add(cloudConnectionFactoryInfoDTO);
+            } finally {
+                ctx.ungetService(ref);
+            }
+
+        });
+
+        final List<Cloud> pubSubFactories = getPubSubFactories();
+
+        return new CloudComponentFactories(cloudConnectionFactoryPids, pubSubFactories);
     }
 
     public void createPubSubInstance(final String pid, final String factoryPid, final String cloudConnectionPid)
@@ -258,29 +218,30 @@ public class CloudConnectionService {
         });
     }
 
-    public ConfigComponentDTO getPubSubConfiguration(String pid) throws KuraException {
+    public ComponentConfiguration getPubSubConfiguration(String pid) throws KuraException {
 
         requireIsPubSub(pid);
 
-        return findFilteredComponentConfiguration(pid).get(0);
+        return findFilteredComponentConfiguration(pid);
     }
 
-    public void updateStackComponentConfiguration(ConfigComponentDTO component) throws KuraException {
+    public void updateStackComponentConfiguration(List<ComponentConfigurationDTO> componentConfigurations)
+            throws KuraException {
 
-        if (!(isPubSub(component.getComponentId()) || isComponentManagedByFactory(component.getComponentId()))) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+        for (ComponentConfigurationDTO componentConfig : componentConfigurations) {
+            if (!(isPubSub(componentConfig.getPid()) || isComponentManagedByFactory(componentConfig.getPid()))) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR);
+            }
+
+            updateComponentConfiguration(componentConfig);
         }
 
-        updateComponentConfiguration(component);
     }
 
-    private void updateComponentConfiguration(ConfigComponentDTO componentConfig) throws KuraException {
+    private void updateComponentConfiguration(ComponentConfigurationDTO componentConfig) throws KuraException {
 
-        ComponentConfiguration componentConfiguration = ComponentUtils
-                .getComponentConfiguration(this.configurationService, componentConfig);
-
-        this.configurationService.updateConfiguration(componentConfig.getComponentId(),
-                componentConfiguration.getConfigurationProperties());
+        this.configurationService.updateConfiguration(componentConfig.getPid(),
+                DTOUtil.dtosToConfigurationProperties(componentConfig.getProperties()), true);
 
     }
 
@@ -303,26 +264,14 @@ public class CloudConnectionService {
         return result.get();
     }
 
-    private List<ConfigComponentDTO> findFilteredComponentConfiguration(String componentPid) throws KuraException {
-        return findFilteredComponentConfigurationInternal(componentPid);
-    }
+    private ComponentConfiguration findFilteredComponentConfiguration(String componentPid) throws KuraException {
 
-    private List<ConfigComponentDTO> findFilteredComponentConfigurationInternal(String componentPid)
-            throws KuraException {
-
-        List<ConfigComponentDTO> configs = new ArrayList<>();
         try {
-            ComponentConfiguration config = this.configurationService.getComponentConfiguration(componentPid);
+            return this.configurationService.getComponentConfiguration(componentPid);
 
-            if (config != null) {
-                ConfigComponentDTO configComponent = createMetatypeOnlyComponentConfigurationInternal(config);
-                configs.add(configComponent);
-            }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
-
-        return configs;
     }
 
     private void requireIsPubSub(final String pid) throws KuraException {
@@ -336,7 +285,7 @@ public class CloudConnectionService {
                 || ServiceUtil.providesService(this.bundleContext, pid, CloudSubscriber.class);
     }
 
-    private List<CloudEntryDTO> getPubSubFactories() throws KuraException {
+    private List<Cloud> getPubSubFactories() throws KuraException {
 
         return ServiceUtil.applyToServiceOptionally(this.bundleContext, ServiceComponentRuntime.class, scr ->
 
@@ -361,7 +310,7 @@ public class CloudConnectionService {
         }
     }
 
-    private CloudEntryDTO pubSubToCloudEntry(final ComponentDescriptionDTO component) {
+    private Cloud pubSubToCloudEntry(final ComponentDescriptionDTO component) {
 
         if (Arrays.stream(component.serviceInterfaces)
                 .noneMatch(intf -> CLOUD_PUBLISHER.equals(intf) || CLOUD_SUBSCRIBER.equals(intf))) {
@@ -389,7 +338,7 @@ public class CloudConnectionService {
             return null;
         }
 
-        final CloudEntryDTO entry = new CloudEntryDTO();
+        final Cloud entry = new Cloud();
 
         entry.setPid((String) factoryPid);
         entry.setFactoryPid((String) ccsfFactoryPid);
@@ -399,48 +348,7 @@ public class CloudConnectionService {
         return entry;
     }
 
-    private ConfigComponentDTO createMetatypeOnlyComponentConfigurationInternal(ComponentConfiguration config) {
-        ConfigComponentDTO configComponent = null;
-
-        OCD ocd = config.getDefinition();
-        if (ocd != null) {
-
-            configComponent = new ConfigComponentDTO();
-            configComponent.setComponentId(config.getPid());
-
-            Map<String, Object> props = config.getConfigurationProperties();
-            if (props != null && props.get(DRIVER_PID) != null) {
-                configComponent.setDriverPid((String) props.get(DRIVER_PID));
-            }
-
-            if (props != null && props.get(SERVICE_FACTORY_PID) != null) {
-                String pid = PidUtils.stripPidPrefix(config.getPid());
-                configComponent.setComponentName(pid);
-                configComponent.setFactoryComponent(true);
-                configComponent.setFactoryPid(String.valueOf(props.get(ConfigurationAdmin.SERVICE_FACTORYPID)));
-            } else {
-                configComponent.setComponentName(ocd.getName());
-                configComponent.setFactoryComponent(false);
-            }
-
-            configComponent.setComponentDescription(ocd.getDescription());
-            if (ocd.getIcon() != null && !ocd.getIcon().isEmpty()) {
-                Icon icon = ocd.getIcon().get(0);
-                configComponent.setComponentIcon(icon.getResource());
-            }
-
-            List<ConfigParameterDTO> params = new ArrayList<>();
-            configComponent.setParameters(params);
-
-            if (config.getConfigurationProperties() != null) {
-                List<ConfigParameterDTO> metatypeProps = getADProperties(config);
-                params.addAll(metatypeProps);
-            }
-        }
-        return configComponent;
-    }
-
-    private void fillState(final CloudConnectionEntryDTO cloudConnectionEntry) throws KuraException {
+    private void fillState(final CloudConnection cloudConnectionEntry) throws KuraException {
 
         cloudConnectionEntry.setState(CloudConnectionState.UNREGISTERED);
 
@@ -510,9 +418,9 @@ public class CloudConnectionService {
         return null;
     }
 
-    private Set<CloudPubSubEntryDTO> getPublisherInstances() throws KuraException {
+    private Set<CloudPubSub> getPublisherInstances() throws KuraException {
 
-        final Set<CloudPubSubEntryDTO> result = new HashSet<>();
+        final Set<CloudPubSub> result = new HashSet<>();
 
         try {
             this.bundleContext.getServiceReferences(CloudPublisher.class, null).stream()
@@ -525,9 +433,9 @@ public class CloudConnectionService {
         }
     }
 
-    private Set<CloudPubSubEntryDTO> getSubscriberInstances() throws KuraException {
+    private Set<CloudPubSub> getSubscriberInstances() throws KuraException {
 
-        final Set<CloudPubSubEntryDTO> result = new HashSet<>();
+        final Set<CloudPubSub> result = new HashSet<>();
 
         try {
             this.bundleContext.getServiceReferences(CloudSubscriber.class, null).stream()
@@ -540,7 +448,7 @@ public class CloudConnectionService {
         }
     }
 
-    private static CloudPubSubEntryDTO pubSubRefToDTO(final ServiceReference<?> ref, final CloudPubSubType type) {
+    private static CloudPubSub pubSubRefToDTO(final ServiceReference<?> ref, final CloudPubSubType type) {
         final Object ccsPid = ref.getProperty(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
         final Object factoryPid = ref.getProperty(ConfigurationAdmin.SERVICE_FACTORYPID);
 
@@ -550,65 +458,8 @@ public class CloudConnectionService {
 
         final String kuraServicePid = (String) ref.getProperty(ConfigurationService.KURA_SERVICE_PID);
 
-        return new CloudPubSubEntryDTO(kuraServicePid, (String) factoryPid, (String) ccsPid, type);
+        return new CloudPubSub(kuraServicePid, (String) factoryPid, (String) ccsPid, type);
 
-    }
-
-    private static List<ConfigParameterDTO> getADProperties(ComponentConfiguration config) {
-        List<ConfigParameterDTO> configParams = new ArrayList<>();
-
-        OCD ocd = config.getDefinition();
-        for (AD ad : ocd.getAD()) {
-
-            ConfigParameterDTO configParam = new ConfigParameterDTO();
-            configParam.setId(ad.getId());
-            configParam.setName(ad.getName());
-            configParam.setDescription(ad.getDescription());
-            configParam.setType(ConfigParameterType.valueOf(ad.getType().name()));
-            configParam.setRequired(ad.isRequired());
-            configParam.setCardinality(ad.getCardinality());
-
-            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                Map<String, String> options = new HashMap<>();
-                for (Option option : ad.getOption()) {
-                    options.put(option.getLabel(), option.getValue());
-                }
-                configParam.setOptions(options);
-            }
-            configParam.setMin(ad.getMin());
-            configParam.setMax(ad.getMax());
-
-            // handle the value based on the cardinality of the attribute
-            int cardinality = ad.getCardinality();
-            Object value = config.getConfigurationProperties().get(ad.getId());
-            if (value != null) {
-                if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-                    if (configParam.getType().equals(ConfigParameterType.PASSWORD)) {
-                        configParam.setValue("Placeholder");
-                    } else {
-                        configParam.setValue(String.valueOf(value));
-                    }
-                } else {
-                    // this could be an array value
-                    if (value instanceof Object[]) {
-                        Object[] objValues = (Object[]) value;
-                        List<String> strValues = new ArrayList<>();
-                        for (Object v : objValues) {
-                            if (v != null) {
-                                if (configParam.getType().equals(ConfigParameterType.PASSWORD)) {
-                                    strValues.add("Placeholder");
-                                } else {
-                                    strValues.add(String.valueOf(v));
-                                }
-                            }
-                        }
-                        configParam.setValues(strValues.toArray(new String[] {}));
-                    }
-                }
-            }
-            configParams.add(configParam);
-        }
-        return configParams;
     }
 
 }

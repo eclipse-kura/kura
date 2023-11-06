@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider.test;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -19,8 +20,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,8 @@ import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.security.provider.SecurityRestService;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
@@ -42,6 +47,10 @@ import org.junit.runners.Parameterized;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.useradmin.Group;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.UserAdmin;
 
 @RunWith(Parameterized.class)
 public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
@@ -70,6 +79,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldInvokeReloadSecurityPolicyFingerprintSuccessfully() {
         givenSecurityService();
+        givenRestBasicCredentials("admin:admin");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/security-policy-fingerprint/reload");
 
@@ -80,6 +90,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldInvokeReloadCommandLineFingerprintSuccessfully() {
         givenSecurityService();
+        givenRestBasicCredentials("admin:admin");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/command-line-fingerprint/reload");
 
@@ -91,6 +102,32 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldReturnExpectedDebugStatus() {
         givenDebugEnabledStatus(true);
         givenSecurityService();
+        givenRestBasicCredentials("admin:admin");
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_DEBUG_ENABLE_TRUE_RESPONSE);
+    }
+
+    @Test
+    public void shouldNotReturnDebugStatusOverRestIfNotLoggedIn() {
+        givenDebugEnabledStatus(true);
+        givenSecurityService();
+        givenNoRestBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
+
+        thenRestResponseCodeIs(401);
+        thenMqttResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldReturnDebugStatusEvenIfIdentityHasNoPermissions() {
+        givenDebugEnabledStatus(true);
+        givenSecurityService();
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), false);
+        givenRestBasicCredentials("foo:bar");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
 
@@ -101,6 +138,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRethrowWebApplicationExceptionOnReloadSecurityPolicyFingerprint() throws KuraException {
         givenFailingSecurityService();
+        givenRestBasicCredentials("admin:admin");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/security-policy-fingerprint/reload");
 
@@ -110,6 +148,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRethrowWebApplicationExceptionOnReloadCommandLineFingerprint() throws KuraException {
         givenFailingSecurityService();
+        givenRestBasicCredentials("admin:admin");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/command-line-fingerprint/reload");
 
@@ -119,6 +158,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldRethrowWebApplicationExceptionOnGetDebugStatus() throws KuraException {
         givenFailingSecurityService();
+        givenRestBasicCredentials("admin:admin");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/debug-enabled");
 
@@ -147,6 +187,67 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
      * Utilities
      */
 
+    @SuppressWarnings("unchecked")
+    private void givenIdentity(final String username, final Optional<String> password, final List<String> roles,
+            final boolean needsPasswordChange) {
+        final UserAdmin userAdmin;
+
+        try {
+            userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            fail("failed to track UserAdmin");
+            return;
+        }
+
+        final User user = getOrCreateRole(userAdmin, "kura.user." + username, User.class);
+
+        if (password.isPresent()) {
+            try {
+                final CryptoService cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty())
+                        .get(30, TimeUnit.SECONDS);
+
+                user.getCredentials().put("kura.password", cryptoService.sha256Hash(password.get()));
+
+            } catch (Exception e) {
+                fail("failed to compute password hash");
+            }
+        }
+
+        if (needsPasswordChange) {
+            user.getProperties().put("kura.need.password.change", "true");
+        } else {
+            user.getProperties().remove("kura.need.password.change");
+        }
+
+        for (final String role : roles) {
+            getOrCreateRole(userAdmin, "kura.permission." + role, Group.class).addMember(user);
+        }
+    }
+
+    private void givenNoRestBasicCredentials() {
+        if (this.transport instanceof RestTransport) {
+            ((RestTransport) this.transport).setBasicCredentials(Optional.empty());
+        }
+    }
+
+    private void givenRestBasicCredentials(final String credentials) {
+        if (this.transport instanceof RestTransport) {
+            ((RestTransport) this.transport).setBasicCredentials(Optional.of(credentials));
+        }
+    }
+
+    private void thenRestResponseCodeIs(final int expectedStatusCode) {
+        if (this.transport instanceof RestTransport) {
+            thenResponseCodeIs(expectedStatusCode);
+        }
+    }
+
+    private void thenMqttResponseCodeIs(final int expectedStatusCode) {
+        if (this.transport instanceof MqttTransport) {
+            thenResponseCodeIs(expectedStatusCode);
+        }
+    }
+
     @BeforeClass
     public static void setUp() throws Exception {
         createSecurityServiceMock();
@@ -171,6 +272,29 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
                 .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(SecurityRestService.class.getName(), "?");
         config.update(properties);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Role> T getOrCreateRole(final UserAdmin userAdmin, final String name, final Class<T> classz) {
+
+        final Role existing = userAdmin.getRole(name);
+
+        if (classz.isInstance(existing)) {
+            return (T) existing;
+        }
+
+        final int type;
+
+        if (classz == User.class) {
+            type = Role.USER;
+        } else if (classz == Group.class) {
+            type = Role.GROUP;
+        } else {
+            fail("Unsupported role type");
+            return null;
+        }
+
+        return (T) userAdmin.createRole(name, type);
     }
 
 }

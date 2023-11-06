@@ -12,13 +12,19 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
+import java.util.Optional;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -118,11 +124,16 @@ public class SecurityRestService {
      * @return true if the debug is permitted. False otherwise.
      */
     @GET
-    @RolesAllowed(REST_ROLE_NAME)
     @Path("/debug-enabled")
     @Produces(MediaType.APPLICATION_JSON)
-    public DebugEnabledDTO isDebugEnabled() {
+    public DebugEnabledDTO isDebugEnabled(final @Context ContainerRequestContext context) {
         try {
+
+            if (context != null && !Optional.ofNullable(context.getSecurityContext())
+                    .filter(c -> c.getUserPrincipal() != null).isPresent()) {
+                throw new WebApplicationException(Status.UNAUTHORIZED);
+            }
+
             logger.debug(DEBUG_MESSSAGE, "isDebugEnabled");
             return new DebugEnabledDTO(this.security.isDebugEnabled());
         } catch (Exception e) {

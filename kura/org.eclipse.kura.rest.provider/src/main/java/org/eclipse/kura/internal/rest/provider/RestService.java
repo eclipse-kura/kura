@@ -61,6 +61,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.useradmin.UserAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -81,6 +82,7 @@ public class RestService
 
     private CryptoService cryptoService;
     private UserAdmin userAdmin;
+    private ConfigurationAdmin configurationAdmin;
 
     RestServiceOptions options;
 
@@ -106,6 +108,10 @@ public class RestService
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
+    }
+
+    public void setConfigurationAdmin(final ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 
     public void bindAuthenticationProvider(final AuthenticationProvider provider) {
@@ -150,7 +156,7 @@ public class RestService
         this.sessionAuthenticationProvider = new SessionAuthProvider(restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
                 Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
-        this.authRestService = new SessionRestService(this.userAdminHelper, restSessionHelper);
+        this.authRestService = new SessionRestService(this.userAdminHelper, restSessionHelper, this.configurationAdmin);
 
         this.registeredServices
                 .add(bundleContext.registerService(SessionRestService.class, this.authRestService, null));

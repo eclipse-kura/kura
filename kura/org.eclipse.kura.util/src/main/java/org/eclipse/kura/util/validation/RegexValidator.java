@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.identity.provider.validator;
+package org.eclipse.kura.util.validation;
 
 public class RegexValidator extends PredicateValidator {
 

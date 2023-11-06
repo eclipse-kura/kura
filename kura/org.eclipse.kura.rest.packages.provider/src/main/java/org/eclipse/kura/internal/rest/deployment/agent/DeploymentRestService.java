@@ -108,8 +108,7 @@ public class DeploymentRestService {
      * GET method.
      *
      * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
-     * passed as query
-     * parameter.
+     * passed as query parameter.
      *
      * @return a list of {@link MarketplacePackageDescriptor}
      */

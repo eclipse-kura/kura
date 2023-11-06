@@ -101,11 +101,13 @@ public interface DeploymentAgentService {
 
 
     /**
-     * TODO
-     * 
+     * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
+     * passed as query parameter.
+     *
      * @param url
-     *            The URL of the deployment package descriptor
-     * @return TODO
+     *                The URL of the deployment package descriptor. Note: the url accepted as argument should be
+     *                already validated and such that it allows for downloading the descriptor file.
+     * @return the {@link MarketplacePackageDescriptor} object
      */
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url);
 

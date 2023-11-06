@@ -2904,102 +2904,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#request-definitions" class="md-nav__link">
-    Request definitions
-  </a>
-  
-    <nav class="md-nav" aria-label="Request definitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#postloginpassword" class="md-nav__link">
-    POST/login/password
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postlogincertificate" class="md-nav__link">
-    POST/login/certificate
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#getxsrftoken" class="md-nav__link">
-    GET/xsrfToken
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postlogout" class="md-nav__link">
-    POST/logout
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postchangepassword" class="md-nav__link">
-    POST/changePassword
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#json-definitions" class="md-nav__link">
-    JSON definitions
-  </a>
-  
-    <nav class="md-nav" aria-label="JSON definitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#passwordauthenticationresponse" class="md-nav__link">
-    PasswordAuthenticationResponse
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#usernamepassword" class="md-nav__link">
-    UsernamePassword
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#xsrftoken" class="md-nav__link">
-    XSRFToken
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#passwordchangerequest" class="md-nav__link">
-    PasswordChangeRequest
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#genericfailurereport" class="md-nav__link">
-    GenericFailureReport
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -3131,102 +3035,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#request-definitions" class="md-nav__link">
-    Request definitions
-  </a>
-  
-    <nav class="md-nav" aria-label="Request definitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#postloginpassword" class="md-nav__link">
-    POST/login/password
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postlogincertificate" class="md-nav__link">
-    POST/login/certificate
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#getxsrftoken" class="md-nav__link">
-    GET/xsrfToken
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postlogout" class="md-nav__link">
-    POST/logout
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#postchangepassword" class="md-nav__link">
-    POST/changePassword
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#json-definitions" class="md-nav__link">
-    JSON definitions
-  </a>
-  
-    <nav class="md-nav" aria-label="JSON definitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#passwordauthenticationresponse" class="md-nav__link">
-    PasswordAuthenticationResponse
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#usernamepassword" class="md-nav__link">
-    UsernamePassword
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#xsrftoken" class="md-nav__link">
-    XSRFToken
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#passwordchangerequest" class="md-nav__link">
-    PasswordChangeRequest
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#genericfailurereport" class="md-nav__link">
-    GenericFailureReport
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -3247,15 +3055,23 @@ Using this APIs and creating a session is the recommended way for interact with 
 <p>The supported workflows are the following:</p>
 <h3 id="login-and-resource-access-workflow">Login and resource access workflow</h3>
 <ol>
-<li>Try calling the <a href="#getxsrftoken">GET/xsrfToken</a> to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.</li>
-</ol>
-<p>It is not necessary to call <a href="#getxsrftoken">GET/xsrfToken</a> again until the current session expires, the obtained token is valid as long as the current session is valid.</p>
-<ol>
-<li>Call the <a href="#postloginpassword">POST/login/password</a> or <a href="#postlogincertificate">POST/login/certificate</a> providing the credentials to create a new session.</li>
-</ol>
-<p>The device will return a session cookie with the response, make sure to provide it in successive requests. If the request is performed by a browser, this should be done automatically.</p>
+<li>
+<p>Try calling the <a href="#getxsrftoken">GET/xsrfToken</a> to get an XSRF token, if the request succeeds a vaild session is already available, it is possible to proceed to step 4.</p>
+<ul>
+<li>It is not necessary to call <a href="#getxsrftoken">GET/xsrfToken</a> again until the current session expires, the obtained token is valid as long as the current session is valid.</li>
+</ul>
+</li>
+<li>
+<p>Call the <a href="#postloginpassword">POST/login/password</a> or <a href="#postlogincertificate">POST/login/certificate</a> providing the credentials to create a new session.</p>
+<ul>
+<li>
+<p>This request will return a session cookie with the response. The session cookie name is currently <code>JSESSIONID</code>. It is important to provide the received cookies in successive requests using the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cookie">Cookie</a> HTTP request header. If this is not done, requests will fail with 401 code. If the request is performed by a browser, cookie management should be performed automatically.</p>
+</li>
+<li>
 <p>If password authentication has been used and the response object reports that a password change is needed, perform the <a href="#update-password-workflow">Update password workflow</a></p>
-<ol>
+</li>
+</ul>
+</li>
 <li>
 <p>Repeat step 1. to get an XSRF token.</p>
 </li>
@@ -3274,20 +3090,13 @@ Using this APIs and creating a session is the recommended way for interact with 
 <li>
 <p>Repeat the <a href="#authentication-and-resource-access-workflow">Authentication and resource access workflow</a>, starting from step 1.</p>
 </li>
-<li>
-<p>Sessions will expire after an inactivity interval that can be configured using the <strong>Session Inactivity Interval (Seconds)</strong> RestService configuration parameter. After session expiration, a new login will be necessary.</p>
-</li>
-<li>
-<p>In order to add protection against XSRF attacks, it is necessary to provide an token using the <code>X-XSRF-Token</code> HTTP header in all requests. The token can be obtained using the <a href="#getxsrftoken">GET/xsrfToken</a> endpoint after a successful login.</p>
-</li>
-<li>
-<p>Session will be invalidated if the current identity credentials are changed, in this case a new login will be necessary.</p>
-</li>
-<li>
-<p>If a password change is required for the current identity, it will be necessary to perform the <a href="#update-password-workflow">Update password workflow</a> before being able to access the other resources.</p>
-</li>
 </ol>
+<p>Sessions will expire after an inactivity interval that can be configured using the <strong>Session Inactivity Interval (Seconds)</strong> RestService configuration parameter. After session expiration, a new login will be necessary.</p>
+<p>In order to add protection against XSRF attacks, it is necessary to provide an token using the <code>X-XSRF-Token</code> HTTP header in all requests. The token can be obtained using the <a href="#getxsrftoken">GET/xsrfToken</a> endpoint after a successful login.</p>
+<p>Session will be invalidated if the current identity credentials are changed, in this case a new login will be necessary.</p>
+<p>If a password change is required for the current identity, it will be necessary to perform the <a href="#update-password-workflow">Update password workflow</a> before being able to access the other resources.</p>
 <h2 id="reference">Reference</h2>
+<h1 id="session-v1-rest-apis_1">Session V1 Rest APIs</h1>
 <ul>
 <li><a href="#request-definitions">Request definitions</a><ul>
 <li><a href="#postloginpassword">POST/login/password</a></li>
@@ -3295,13 +3104,17 @@ Using this APIs and creating a session is the recommended way for interact with 
 <li><a href="#getxsrftoken">GET/xsrfToken</a></li>
 <li><a href="#postlogout">POST/logout</a></li>
 <li><a href="#postchangepassword">POST/changePassword</a></li>
+<li><a href="#getcurrentidentity">GET/currentIdentity</a></li>
+<li><a href="#getauthenticationmethods">GET/authenticationMethods</a></li>
 </ul>
 </li>
 <li><a href="#json-definitions">JSON definitions</a><ul>
-<li><a href="#passwordauthenticationresponse">PasswordAuthenticationResponse</a></li>
+<li><a href="#authenticationresponse">AuthenticationResponse</a></li>
 <li><a href="#usernamepassword">UsernamePassword</a></li>
 <li><a href="#xsrftoken">XSRFToken</a></li>
 <li><a href="#passwordchangerequest">PasswordChangeRequest</a></li>
+<li><a href="#identityinfo">IdentityInfo</a></li>
+<li><a href="#authenticationmethodinfo">AuthenticationMethodInfo</a></li>
 <li><a href="#genericfailurereport">GenericFailureReport</a></li>
 </ul>
 </li>
@@ -3310,7 +3123,7 @@ Using this APIs and creating a session is the recommended way for interact with 
 <h3 id="postloginpassword">POST/login/password</h3>
 <ul>
 <li><strong>REST API path</strong> : /services/session/v1/login/password</li>
-<li><strong>description</strong> : Creates a new session by providing identity name and password.</li>
+<li><strong>description</strong> : Creates a new session by providing identity name and password. If the response reports that a password change is needed, it is necessary to update the current password in order to be able to access other REST APIs.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#usernamepassword">UsernamePassword</a></li>
 </ul>
@@ -3319,13 +3132,13 @@ Using this APIs and creating a session is the recommended way for interact with 
 <li><strong>200</strong><ul>
 <li><strong>description</strong> : Request succeeded.</li>
 <li><strong>response body</strong> :<ul>
-<li><a href="#passwordauthenticationresponse">PasswordAuthenticationResponse</a></li>
+<li><a href="#authenticationresponse">AuthenticationResponse</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><strong>401</strong><ul>
-<li><strong>description</strong> : The provided credentials are not correct</li>
+<li><strong>description</strong> : The provided credentials are not correct.</li>
 </ul>
 </li>
 <li><strong>500</strong><ul>
@@ -3342,14 +3155,19 @@ Using this APIs and creating a session is the recommended way for interact with 
 <h3 id="postlogincertificate">POST/login/certificate</h3>
 <ul>
 <li><strong>REST API path</strong> : /services/session/v1/login/certificate</li>
-<li><strong>description</strong> : Creates a new session using certificate based authentication. The user must call this endpoint on an HTTPS connection opened by presenting a client certificate which is trusted by the framework and whose common name matches the name of a Kura identity.</li>
+<li><strong>description</strong> : Creates a new session using certificate based authentication. The response will report if the current identity needs a password change for informational purposes only. 
+        If authentication is performed using this endpoint, access to other REST APIs will be allowd even if password change is required for the current identity.</li>
 <li><strong>responses</strong> :<ul>
-<li><strong>204</strong><ul>
-<li><strong>description</strong> : The status of the network interfaces in the system.</li>
+<li><strong>200</strong><ul>
+<li><strong>description</strong> : Request succeeded.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#authenticationresponse">AuthenticationResponse</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><strong>401</strong><ul>
-<li><strong>description</strong> : The provided credentials are not correct</li>
+<li><strong>description</strong> : The provided credentials are not correct.</li>
 </ul>
 </li>
 <li><strong>500</strong><ul>
@@ -3377,7 +3195,7 @@ Using this APIs and creating a session is the recommended way for interact with 
 </ul>
 </li>
 <li><strong>401</strong><ul>
-<li><strong>description</strong> : The current session is not valid</li>
+<li><strong>description</strong> : The current session is not valid.</li>
 </ul>
 </li>
 <li><strong>500</strong><ul>
@@ -3418,7 +3236,8 @@ Using this APIs and creating a session is the recommended way for interact with 
 <h3 id="postchangepassword">POST/changePassword</h3>
 <ul>
 <li><strong>REST API path</strong> : /services/session/v1/changePassword</li>
-<li><strong>description</strong> : Changes the password associated with the current identity.</li>
+<li><strong>description</strong> : Changes the password associated with the current identity. The new password will be validated against the currently configured password strength requirements. 
+        The current password strenght requirements can be retrieved using the <code>identity/v1/passwordRequirements</code> endpoint.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#passwordchangerequest">PasswordChangeRequest</a></li>
 </ul>
@@ -3429,7 +3248,63 @@ Using this APIs and creating a session is the recommended way for interact with 
 </ul>
 </li>
 <li><strong>400</strong><ul>
-<li><strong>description</strong> : The new password is not valid.</li>
+<li><strong>description</strong> : The new password is not valid. This can be due to the fact that it does not fullfill the current password strenght requirements.</li>
+</ul>
+</li>
+<li><strong>401</strong><ul>
+<li><strong>description</strong> : The current session is not valid.</li>
+</ul>
+</li>
+<li><strong>500</strong><ul>
+<li><strong>description</strong> : An unexpected error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="getcurrentidentity">GET/currentIdentity</h3>
+<ul>
+<li><strong>REST API path</strong> : /services/session/v1/currentIdentity</li>
+<li><strong>description</strong> : Provides information about the currently authenticated identity.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong><ul>
+<li><strong>description</strong> : Request succeeded</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#identityinfo">IdentityInfo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>401</strong><ul>
+<li><strong>description</strong> : The current session is not valid.</li>
+</ul>
+</li>
+<li><strong>500</strong><ul>
+<li><strong>description</strong> : An unexpected error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="getauthenticationmethods">GET/authenticationMethods</h3>
+<ul>
+<li><strong>REST API path</strong> : /services/session/v1/authenticationMethods</li>
+<li><strong>description</strong> : Provides information about the available authentication methods.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong><ul>
+<li><strong>description</strong> : Request succeeded</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#authenticationmethodinfo">AuthenticationMethodInfo</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><strong>401</strong><ul>
@@ -3448,19 +3323,31 @@ Using this APIs and creating a session is the recommended way for interact with 
 </li>
 </ul>
 <h2 id="json-definitions">JSON definitions</h2>
-<h3 id="passwordauthenticationresponse">PasswordAuthenticationResponse</h3>
-<p>Represents the response for a successful password authentication request.</p>
+<h3 id="authenticationresponse">AuthenticationResponse</h3>
+<p>Represents the response for a successful authentication request.</p>
 <p><br><strong>Properties</strong>:</p>
 <ul>
-<li><strong>passwordChangeNeeded</strong>: <code>bool</code> 
-      Determines whether the user needs to change its current password before being able to access REST APIs.</li>
+<li>
+<p><strong>passwordChangeNeeded</strong>: <code>bool</code> 
+      Determines whether a password change is required for the current identity.</p>
+</li>
+<li>
+<p><strong>message</strong>: <code>bool</code> (<strong>optional</strong>)
+      Reports the content of the Login Banner, if configured on the device. A browser based application should display this message to the user after login if this property is set.
+            This property will be missing if the login banner is not enabled.</p>
+</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span>
 </code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;login banner content&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+</code></pre></div></p>
 <h3 id="usernamepassword">UsernamePassword</h3>
-<p>Contains an username and password</p>
+<p>Contains an username and password.</p>
 <p><br><strong>Properties</strong>:</p>
 <ul>
 <li>
@@ -3469,27 +3356,27 @@ Using this APIs and creating a session is the recommended way for interact with 
 </li>
 <li>
 <p><strong>password</strong>: <code>string</code> 
-      The user password</p>
+      The user password.</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="xsrftoken">XSRFToken</h3>
-<p>An object containing an XSRF token</p>
+<p>An object containing an XSRF token.</p>
 <p><br><strong>Properties</strong>:</p>
 <ul>
 <li><strong>xsrfToken</strong>: <code>string</code> 
       The XSRF token.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;xsrfToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d2b68613-152f-41d5-8b5b-a19448ed0e4e&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;xsrfToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;d2b68613-152f-41d5-8b5b-a19448ed0e4e&quot;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="passwordchangerequest">PasswordChangeRequest</h3>
-<p>An object containing the current password and a new password</p>
+<p>An object containing the current password and a new password.</p>
 <p><br><strong>Properties</strong>:</p>
 <ul>
 <li>
@@ -3501,11 +3388,77 @@ Using this APIs and creating a session is the recommended way for interact with 
       The new password.</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;currentPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;newPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;currentPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;newPassword&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bar&quot;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
 </code></pre></div>
+<h3 id="identityinfo">IdentityInfo</h3>
+<p>An object containing information about the current identity</p>
+<p><br><strong>Properties</strong>:</p>
+<ul>
+<li>
+<p><strong>name</strong>: <code>string</code> 
+      The name of the current identity.</p>
+</li>
+<li>
+<p><strong>passwordChangeNeeded</strong>: <code>bool</code> 
+      Determines whether a password change is required for the current identity.</p>
+</li>
+<li>
+<p><strong>permissions</strong>: <code>array</code> 
+      The list of permissions assigned to the current identity.</p>
+<ul>
+<li>array element type: <code>string</code>
+      The permission name.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="s2">&quot;rest.bar&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="s2">&quot;rest.assets&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="s2">&quot;rest.foo&quot;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="authenticationmethodinfo">AuthenticationMethodInfo</h3>
+<p>An object containing information about the enabled authentication methods.</p>
+<p><br><strong>Properties</strong>:</p>
+<ul>
+<li>
+<p><strong>passwordAuthenticationEnabled</strong>: <code>bool</code> 
+      Reports whether authentication using the <code>login/password</code> endpoint is enabled.</p>
+</li>
+<li>
+<p><strong>certificateAuthenticationEnabled</strong>: <code>bool</code> 
+      Reports whether authentication using the <code>login/certificate</code> endpoint is enabled.</p>
+</li>
+<li>
+<p><strong>certificateAuthenticationPorts</strong>: <code>array</code> (<strong>optional</strong>)
+      The list of ports available for certificate based authentication. This property will be present only if <code>certificateAuthenticationEnabled</code> is true</p>
+<ul>
+<li>array element type: <code>string</code>
+      A port that can be used for certificate based authentication.</li>
+</ul>
+</li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;certificateAuthenticationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">&quot;passwordAuthenticationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;certificateAuthenticationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;certificateAuthenticationPorts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="mi">4443</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="mi">4444</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">&quot;passwordAuthenticationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</code></pre></div></p>
 <h3 id="genericfailurereport">GenericFailureReport</h3>
 <p>An object reporting a failure message.</p>
 <p><br><strong>Properties</strong>:</p>

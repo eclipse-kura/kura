@@ -5,6 +5,8 @@ This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduc
 
 
 Features:
+  * dc9fb8be6a - Session REST API improvements [backport release-5.4.0] (#4953) (github-actions[bot])
+  * 69ffcf4f15 - [web2] IPv6 Network on Status tab [backport release-5.4.0] (#4952) (github-actions[bot])
   * 17814c7cfe - dynamic ram assignment when over 1GB (#4921) (G_Ivo)
   * aed5f19fe4 - [linux.net] Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)
   * 17538d578b - [rest.identity.provider] Added new Identity rest APIs and Request Handler  (#4878) (Salvatore Coppola)
@@ -71,6 +73,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 34d8993312 - Allow any authenticated identity to access security/v1/debug-enabled [backport release-5.4.0] (#4951) (github-actions[bot])
   * 7fe29dcd28 - Pass null for Context method arguments in JaxRsRequestHandlerProxy (#4935) (nicolatimeus)
   * 6da1ed929d - [web2] Prevent refresh of IPv6 tabs with old networking (#4914) (Pierantonio Merlino)
   * c9c25c02d9 - Updated the cacerts.ks with the latest Eclipse certificate (#4923) (Matteo Maiero)
@@ -224,6 +227,11 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * dc9fb8be6a - feat: Session REST API improvements [backport release-5.4.0] (#4953) (github-actions[bot])
+  * 69ffcf4f15 - feat(web2): IPv6 Network on Status tab [backport release-5.4.0] (#4952) (github-actions[bot])
+  * 34d8993312 - fix: Allow any authenticated identity to access security/v1/debug-enabled [backport release-5.4.0] (#4951) (github-actions[bot])
+  * 9fd918c660 - chore: add Kura 5.4.0 release notes (#4946) (github-actions[bot])
+  * c85c7729f2 - chore: automated uptick to 5.4.0 (#4941) (github-actions[bot])
   * 17814c7cfe - feat: dynamic ram assignment when over 1GB (#4921) (G_Ivo)
   * ca23c485d0 - build(deps): update jetty dependencies from 9.4.51.v20230217 to 9.4.53.v20231009 (#4940) (Marcello Rinaldo Martina)
   * aed5f19fe4 - feat(linux.net): Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)

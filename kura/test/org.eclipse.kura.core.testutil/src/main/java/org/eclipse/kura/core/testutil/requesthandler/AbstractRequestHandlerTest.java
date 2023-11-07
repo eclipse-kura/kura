@@ -46,7 +46,10 @@ public abstract class AbstractRequestHandlerTest {
     protected void thenRequestSucceeds() {
         final Response currentResponse = expectResponse();
 
-        assertEquals(true, (currentResponse.getStatus() / 200) == 1);
+        if ((currentResponse.getStatus() / 200) != 1) {
+            fail("expected success status, but was: " + currentResponse.getStatus() + " body: "
+                    + currentResponse.getBody());
+        }
     }
 
     protected void thenResponseCodeIs(final int expectedResponseCode) {

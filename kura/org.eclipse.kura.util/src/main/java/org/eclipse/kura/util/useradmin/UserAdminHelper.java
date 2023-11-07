@@ -15,6 +15,7 @@ package org.eclipse.kura.util.useradmin;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Objects;
@@ -87,6 +88,29 @@ public class UserAdminHelper {
                 throw new AuthenticationException(AuthenticationException.Reason.USER_NOT_IN_ROLE);
             }
         }
+    }
+
+    public Set<String> getIdentityPermissions(final String name) {
+        final String userRoleName = getUserRoleName(name);
+        final Role role = userAdmin.getRole(userRoleName);
+
+        if (!(role instanceof User)) {
+            return Collections.emptySet();
+        }
+
+        final Set<String> result = new HashSet<>();
+
+        foreachPermission((permission, group) -> {
+
+            final Role[] members = group.getMembers();
+
+            if (members != null && Arrays.stream(members).anyMatch(r -> r.getName().equals(userRoleName))) {
+
+                result.add(getBaseName(group));
+            }
+        });
+
+        return result;
     }
 
     public void changeUserPassword(final String username, final String userPassword) throws AuthenticationException {

@@ -36,7 +36,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
-import org.eclipse.kura.internal.rest.identity.provider.validator.ValidatorOptions;
+import org.eclipse.kura.util.validation.ValidatorOptions;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -50,6 +50,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.google.gson.Gson;
 
+@SuppressWarnings("restriction")
 @RunWith(Parameterized.class)
 public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 

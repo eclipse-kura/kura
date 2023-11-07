@@ -15,10 +15,14 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
+import org.eclipse.kura.KuraDisconnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.data.DataService;
@@ -41,118 +45,79 @@ public class CloudConnectionManagerBridge {
 
     public void connectDataService(String connectionId) throws KuraException {
 
-        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceUtil
-                .getServiceReferencesAsCollection(this.bundleContext, CloudService.class, null);
-
-        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-            if (cloudServicePid.endsWith(connectionId)) {
-                String dataServiceRef = (String) cloudServiceReference
-                        .getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences = ServiceUtil
-                        .getServiceReferencesAsCollection(this.bundleContext, DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService = ServiceUtil.getService(this.bundleContext, dataServiceReference);
-                    if (dataService != null) {
-                        KuraException kuraException = null;
-                        int counter = 10;
-                        try {
-                            dataService.connect();
-                            while (!dataService.isConnected() && counter > 0) {
-                                Thread.sleep(1000);
-                                counter--;
-                            }
-                        } catch (KuraConnectException e) {
-                            logger.warn("Error connecting", e);
-                            kuraException = new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
-                                    "Error connecting. Please review your configuration.");
-                        } catch (InterruptedException e) {
-                            logger.warn("Interrupt Exception");
-                            Thread.currentThread().interrupt();
-                        } catch (IllegalStateException e) {
-                            logger.warn("Illegal client state", e);
-                            kuraException = new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
-                        }
-
-                        if (kuraException != null) {
-                            throw kuraException;
-                        }
+        try {
+            runOnDataService(connectionId, dataService -> {
+                int counter = 10;
+                try {
+                    dataService.connect();
+                    while (!dataService.isConnected() && counter > 0) {
+                        Thread.sleep(1000);
+                        counter--;
                     }
-                    ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
-            ServiceUtil.ungetService(this.bundleContext, cloudServiceReference);
-        }
+            });
 
-        Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceUtil
-                .getServiceReferencesAsCollection(this.bundleContext, CloudConnectionManager.class, null);
-
-        for (ServiceReference<CloudConnectionManager> cloudConnectionManagerReference : cloudConnectionManagerReferences) {
-            String cloudConnectionManagerPid = (String) cloudConnectionManagerReference.getProperty(KURA_SERVICE_PID);
-            if (cloudConnectionManagerPid.endsWith(connectionId)) {
-                CloudConnectionManager cloudConnectionManager = ServiceUtil.getService(this.bundleContext,
-                        cloudConnectionManagerReference);
+            runOnCloudConnectionManager(connectionId, cloudConnectionManager -> {
                 try {
                     cloudConnectionManager.connect();
-                } catch (KuraException e) {
-                    logger.warn("Error connecting");
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
+                } catch (KuraConnectException e) {
+                    throw new KuraRuntimeException(KuraErrorCode.CONNECTION_FAILED, e,
                             "Error connecting. Please review your configuration.");
                 }
+            });
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof KuraConnectException) {
+                logger.warn("Error connecting", e);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
+                        "Error connecting. Please review your configuration.");
+            } else if (cause instanceof InterruptedException) {
+                logger.warn("Interrupt Exception");
+                Thread.currentThread().interrupt();
+            } else if (cause instanceof IllegalStateException) {
+                logger.warn("Illegal client state", e);
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
             }
-            ServiceUtil.ungetService(this.bundleContext, cloudConnectionManagerReference);
         }
+
     }
 
     public void disconnectDataService(String connectionId) throws KuraException {
 
-        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceUtil
-                .getServiceReferencesAsCollection(this.bundleContext, CloudService.class, null);
+        runOnDataService(connectionId, dataService -> dataService.disconnect(10));
 
-        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-            if (cloudServicePid.endsWith(connectionId)) {
-                String dataServiceRef = (String) cloudServiceReference
-                        .getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences = ServiceUtil
-                        .getServiceReferencesAsCollection(this.bundleContext, DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService = ServiceUtil.getService(this.bundleContext, dataServiceReference);
-                    if (dataService != null) {
-                        dataService.disconnect(10);
-                    }
-                    ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
-                }
-            }
-            ServiceUtil.ungetService(this.bundleContext, cloudServiceReference);
-        }
-
-        Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceUtil
-                .getServiceReferencesAsCollection(this.bundleContext, CloudConnectionManager.class, null);
-
-        for (ServiceReference<CloudConnectionManager> cloudConnectionManagerReference : cloudConnectionManagerReferences) {
-            String cloudConnectionManagerPid = (String) cloudConnectionManagerReference.getProperty(KURA_SERVICE_PID);
-            if (cloudConnectionManagerPid.endsWith(connectionId)) {
-                CloudConnectionManager cloudConnectionManager = ServiceUtil.getService(this.bundleContext,
-                        cloudConnectionManagerReference);
+        try {
+            runOnCloudConnectionManager(connectionId, cloudConnectionManager -> {
                 try {
                     cloudConnectionManager.disconnect();
-                } catch (KuraException e) {
-                    logger.warn("Error disconnecting");
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
-                            "Error disconnecting. Please review your configuration.");
+                } catch (KuraDisconnectException e) {
+                    throw new KuraRuntimeException(KuraErrorCode.CONNECTION_FAILED);
                 }
-            }
-            ServiceUtil.ungetService(this.bundleContext, cloudConnectionManagerReference);
+            });
+        } catch (KuraRuntimeException e) {
+            logger.warn("Error disconnecting");
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
+                    "Error disconnecting. Please review your configuration.");
         }
+
     }
 
     public boolean isConnected(String connectionId) throws KuraException {
 
-        boolean isConnected = false;
+        AtomicReference<Boolean> connectionStatusHolder = new AtomicReference<>(false);
 
+        runOnDataService(connectionId, dataService -> connectionStatusHolder.set(dataService.isConnected()));
+
+        runOnCloudConnectionManager(connectionId,
+                cloudConnectionManager -> connectionStatusHolder.set(cloudConnectionManager.isConnected()));
+
+        return connectionStatusHolder.get();
+
+    }
+
+    private void runOnDataService(String connectionId, Consumer<DataService> dataServiceConsumer) throws KuraException {
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceUtil
                 .getServiceReferencesAsCollection(this.bundleContext, CloudService.class, null);
 
@@ -167,14 +132,17 @@ public class CloudConnectionManagerBridge {
                 for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
                     DataService dataService = ServiceUtil.getService(this.bundleContext, dataServiceReference);
                     if (dataService != null) {
-                        isConnected = dataService.isConnected();
+                        dataServiceConsumer.accept(dataService);
                     }
                     ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
                 }
             }
             ServiceUtil.ungetService(this.bundleContext, cloudServiceReference);
         }
+    }
 
+    private void runOnCloudConnectionManager(String connectionId,
+            Consumer<CloudConnectionManager> cloudConnectionManagerConsumer) throws KuraException {
         Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceUtil
                 .getServiceReferencesAsCollection(this.bundleContext, CloudConnectionManager.class, null);
 
@@ -184,12 +152,10 @@ public class CloudConnectionManagerBridge {
                 CloudConnectionManager cloudConnectionManager = ServiceUtil.getService(this.bundleContext,
                         cloudConnectionManagerReference);
 
-                isConnected = cloudConnectionManager.isConnected();
+                cloudConnectionManagerConsumer.accept(cloudConnectionManager);
             }
             ServiceUtil.ungetService(this.bundleContext, cloudConnectionManagerReference);
         }
-
-        return isConnected;
     }
 
 }

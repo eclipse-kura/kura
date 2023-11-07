@@ -1,6 +1,6 @@
 # VLAN Configuration
 
-For devices configured to use [NetworkManager](https://networkmanager.dev), it is possible to configure multiple VLAN interfaces.
+For devices configured to use [NetworkManager](https://networkmanager.dev), it is possible to configure multiple VLAN interfaces. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
 
 A VLAN, or Virtual Local Area Network, is a network segmentation technology that allows a single physical network to be logically divided into multiple isolated networks. These virtual networks operate as if they are independent, even though they share the same physical infrastructure.
 This is achieved via a VLAN ID, or VLAN tag, a numerical label added to network frames to identify the specific Virtual Local Area Network (VLAN) to which they belong. It's a critical component in VLAN technology, allowing network switches and routers to differentiate and route traffic within a VLAN. VLAN tags are added to the Ethernet frame's header, indicating which virtual network a data packet should be directed to when it traverses the physical network infrastructure. Therefore, VLANs must also be supported and configured on the network equipment a device is connected to.
@@ -13,14 +13,15 @@ This is achieved by NetworkManager by creating a virtual device bound to the und
 Currently, VLAN configuration is supported via uploading snapshot.xml fragments.
 
 !!! warning
-    When creating a new VLAN be sure to include the net.interfaces parameter, containing both the previously existing network interface and the name of the new vlan to be created.
+    When creating a new VLAN be sure to include the `net.interfaces` parameter, containing both the previously existing network interfaces, either virtual or physical, and the name of the new VLAN to be created.
 
 ### Basic VLAN configuration example
 
 The following example creates a VLAN with ID 40 over the ethernet interface ens33, naming it `ens33.40`, using a predefined IP address, enabled for LAN.
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="net.interfaces" type="String">
@@ -48,7 +49,7 @@ The following example creates a VLAN with ID 40 over the ethernet interface ens3
                 <esf:value>40</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.ens33.40.config.ip4.address" type="String">
-                <esf:value>10.209.55.242</esf:value>
+                <esf:value>10.0.55.37</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.ens33.40.config.ip4.prefix" type="Short">
                 <esf:value>24</esf:value>
@@ -61,10 +62,11 @@ The following example creates a VLAN with ID 40 over the ethernet interface ens3
 ### Complete VLAN configuration example
 
 The following example creates a VLAN with ID 41 over the ethernet interface ens33, naming it `ens33.41`, using a predefined IP address, enabled for WAN.
-This example also sets the 'flags' and 'traffic priority' optional parameters as described in [Network Manager API documentation](https://networkmanager.dev/docs/api/latest/settings-vlan.html)
+This example also sets the 'flags' and 'traffic priority' optional parameters as described in [Network Manager API documentation](https://networkmanager.dev/docs/api/latest/settings-vlan.html).
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="net.interfaces" type="String">
@@ -119,16 +121,17 @@ This example also sets the 'flags' and 'traffic priority' optional parameters as
 
 
 ## VLAN Management
-Once a VLAN is created it can be managed via the Kura UI just like an Ethernet interface.
-![VLAN UI management](./images/vlan-example.png)
+Once a VLAN is created it can be managed via the Kura UI just like any other Ethernet interface.
+![VLAN UI management](./images/vlan-interface-example.png)
 
 !!! warning
-    Setting a VLAN status to Disabled deletes its configuration in NetworkManager and is no longer visible on the UI but all the configurations are left in Kura. In can be restored by setting the `net.interface.<interface>.config.ip4.status` to `netIPv4StatusEnabledLAN` or `netIPv4StatusEnabledWAN` via snapshot upload, then resume configuration via UI.
+    Setting a VLAN status to Disabled deletes its configuration in NetworkManager and the related virtual interface from the system. Although it will is no longer be visible on the UI, all the configurations are left in Kura. Therefore the VLAN can be restored by setting the `net.interface.<interface>.config.ip4.status` to `netIPv4StatusEnabledLAN` or `netIPv4StatusEnabledWAN` via snapshot upload, then resume configuration via UI.
     
 As an example, the configuration to reactivate a disabled VLAN named ens33.40 would be as follows:
  
 ```xml
-<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="net.interface.ens33.40.config.ip4.status" type="String">

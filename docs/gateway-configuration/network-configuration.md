@@ -211,10 +211,10 @@ Name                                                  | Type     | Description
 Name                                                  | Type     | Description
 ------------------------------------------------------|----------|------------------------------------------
 `net.interface.<interface>.config.vlan.parent`        | String   | Physical interface Vlan is bound to
-`net.interface.<interface>.config.vlan.id`            | Integer  | Vlan tag identifier
-`net.interface.<interface>.config.vlan.ingress`       | String   | Ingress priority map
-`net.interface.<interface>.config.vlan.egress`        | String   | Egress priority map
-`net.interface.<interface>.config.vlan.flags`         | String   | Vlan flags
+`net.interface.<interface>.config.vlan.id`            | Integer  | Vlan tag identifier, between 0 and 4094
+`net.interface.<interface>.config.vlan.ingress`       | String   | Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional)
+`net.interface.<interface>.config.vlan.egress`        | String   | Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)
+`net.interface.<interface>.config.vlan.flags`         | String   | Configuration flags, between 0 and 15, default 1 (Optional)
 
 ## Network Configuration recipes
 

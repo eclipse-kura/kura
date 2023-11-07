@@ -116,11 +116,11 @@ public class NMSettingsConverter {
             newConnectionSettings.put("ppp", pppSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
             Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
-            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId, nmVersion);
             newConnectionSettings.put("vlan", vlanSettingsMap);
             newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId, nmVersion);
             newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         }
 
@@ -573,10 +573,19 @@ public class NMSettingsConverter {
         return settings;
     }
     
-    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
+    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId, SemanticVersion nmVersion) {
         Map<String, Variant<?>> settings = new HashMap<>();
         Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
         mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        
+        Optional<Integer> promisc = props.getOpt(Integer.class, "net.interface.%s.config.promisc", deviceId);
+        if (nmVersion.isGreaterEqualThan("1.32")) {
+            //ethernet.accept-all-mac-addresses only supported in NetworkManager 1.32 and above
+            promisc.ifPresent(value -> settings.put("accept-all-mac-addresses", new Variant<>(value)));
+        } else {
+            promisc.ifPresent(value -> 
+                logger.warn("Ignoring parameter accept-all-mac-addresses [{}]: NetworkManager 1.32 or above is required", value));
+        }
         return settings;        
     }
 

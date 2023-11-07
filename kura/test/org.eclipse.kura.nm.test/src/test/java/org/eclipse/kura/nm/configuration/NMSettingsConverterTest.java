@@ -482,6 +482,30 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapNotContains("mtu");
     }
+    
+    @Test
+    public void buildEthernetSettingsShouldHavePromiscWhenSupported() {
+    	givenMapWith("net.interface.eth0.config.promisc", -1);
+    	givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.32");
+        
+        whenBuildEthernetSettingsIsRunWith(networkProperties, "eth0", nmVersion);
+        
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapContains("accept-all-mac-addresses", -1);
+    }
+    
+    @Test    
+    public void buildEthernetSettingsShouldNotHavePromiscWhenNotSupported() {
+    	givenMapWith("net.interface.eth0.config.promisc", 1);
+    	givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenNetworkManagerVersion("1.31");
+        
+        whenBuildEthernetSettingsIsRunWith(networkProperties, "eth0", nmVersion);
+        
+        thenNoExceptionsHaveBeenThrown();
+        thenResultingMapNotContains("accept-all-mac-addresses");
+    }
 
     @Test
     public void build8021xSettingsShouldThrowIfIsEmpty() {
@@ -3011,6 +3035,18 @@ public class NMSettingsConverterTest {
     private void whenBuildVlanSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildVlanSettings(props, iface);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (IllegalArgumentException e) {
+            this.hasAnIllegalArgumentExceptionThrown = true;
+        } catch (Exception e) {
+            this.hasAGenericExecptionBeenThrown = true;
+        }
+    }
+    
+    private void whenBuildEthernetSettingsIsRunWith(NetworkProperties props, String iface, SemanticVersion nmVersion) {
+        try {
+            this.resultMap = NMSettingsConverter.buildEthernetSettings(props, iface, nmVersion);
         } catch (NoSuchElementException e) {
             this.hasNoSuchElementExceptionBeenThrown = true;
         } catch (IllegalArgumentException e) {

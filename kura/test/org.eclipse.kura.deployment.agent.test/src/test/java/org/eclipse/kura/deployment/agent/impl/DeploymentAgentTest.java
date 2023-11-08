@@ -51,6 +51,7 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,6 +90,11 @@ public class DeploymentAgentTest {
     @AfterClass
     public static void stopMockServer() {
         mockServer.stop();
+    }
+
+    @After
+    public void resetMockServer() {
+        mockServer.reset();
     }
 
     @Test

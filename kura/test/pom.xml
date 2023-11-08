@@ -907,12 +907,12 @@
         <module>org.eclipse.kura.net.admin.firewall.test</module>
         <module>org.eclipse.kura.nm.test</module>
         <module>org.eclipse.kura.net.configuration.test</module>
-        <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>
         <module>org.eclipse.kura.test</module>
         <module>org.eclipse.kura.util.test</module>
         <module>org.eclipse.kura.watchdog.criticaltest</module>
+        <module>org.eclipse.kura.wire.ai.component.provider.test</module>
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
         <module>org.eclipse.kura.wire.db.component.provider.test</module>
@@ -925,26 +925,28 @@
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.core.keystore.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
+        
+        <module>org.eclipse.kura.rest.provider.test</module>
+        <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
-<!--        <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>-->
+        <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.command.provider.test</module>
+        <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
+        <module>org.eclipse.kura.rest.network.status.provider.test</module>
         <module>org.eclipse.kura.rest.packages.provider.test</module>
         <module>org.eclipse.kura.rest.position.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
-        <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.wire.provider.test</module>
+        
         <module>org.eclipse.kura.util.test.driver</module>
         <module>org.eclipse.kura.container.orchestration.provider.test</module>
-        <module>org.eclipse.kura.wire.ai.component.provider.test</module>
         <module>org.eclipse.kura.container.provider.test</module>
         <module>org.eclipse.kura.ai.triton.server.test</module>
-        <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.db.sqlite.provider.test</module>
         <module>org.eclipse.kura.message.store.provider.test</module>
-        <module>org.eclipse.kura.rest.network.status.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

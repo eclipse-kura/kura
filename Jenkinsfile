@@ -21,7 +21,7 @@ node {
                 withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.6.3') {
                     sh "touch /tmp/isJenkins.txt"
                     sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
-                    sh "DOCKER_HOST=unix:///run/user/${UID}/podman/podman.sock mvn TESTCONTAINERS_RYUK_DISABLED=true -f kura/pom.xml clean install -Pcheck-exists-plugin"
+                    sh "mvn -f kura/pom.xml clean install -Pcheck-exists-plugin"
                     sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
                     sh "mvn -f kura/examples/pom.xml clean install -Pcheck-exists-plugin"
                 }

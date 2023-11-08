@@ -126,7 +126,7 @@ Once a VLAN is created it can be managed via the Kura UI just like any other Eth
 ![VLAN UI management](./images/vlan-interface-example.png)
 
 !!! warning
-    Setting a VLAN status to Disabled deletes its configuration in NetworkManager and the related virtual interface from the system. Although it will is no longer be visible on the UI, all the configurations are left in Kura. Therefore the VLAN can be restored by setting the `net.interface.<interface>.config.ip4.status` to `netIPv4StatusEnabledLAN` or `netIPv4StatusEnabledWAN` via snapshot upload, then resume configuration via UI.
+    Setting a VLAN status to "_Disabled_" deletes its configuration in NetworkManager and the related virtual interface from the system. Although it will is no longer be visible on the UI, all the configurations are left in Kura. Therefore the VLAN can be restored by setting the `net.interface.<interface>.config.ip4.status` to `netIPv4StatusEnabledLAN` or `netIPv4StatusEnabledWAN` via snapshot upload, then resume configuration via UI.
     
 As an example, the configuration to reactivate a disabled VLAN named ens33.40 would be as follows:
  

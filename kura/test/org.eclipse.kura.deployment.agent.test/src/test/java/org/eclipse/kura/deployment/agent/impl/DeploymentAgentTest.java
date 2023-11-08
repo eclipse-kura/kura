@@ -51,6 +51,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.logging.MockServerLogger;
+import org.mockserver.socket.PortFactory;
 import org.mockserver.socket.tls.KeyStoreFactory;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -76,7 +77,7 @@ public class DeploymentAgentTest {
 
     @BeforeClass
     public static void startMockServer() {
-        mockServer = ClientAndServer.startClientAndServer(1080);
+        mockServer = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
     }
 
     @AfterClass

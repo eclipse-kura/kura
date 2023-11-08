@@ -122,6 +122,7 @@ This example also sets the 'flags' and 'traffic priority' optional parameters as
 
 ## VLAN Management
 Once a VLAN is created it can be managed via the Kura UI just like any other Ethernet interface.
+
 ![VLAN UI management](./images/vlan-interface-example.png)
 
 !!! warning

@@ -46,9 +46,10 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
-import org.junit.Rule;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
 import org.mockserver.logging.MockServerLogger;
 import org.mockserver.socket.tls.KeyStoreFactory;
 import org.osgi.framework.Version;
@@ -56,16 +57,8 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.testcontainers.containers.MockServerContainer;
-import org.testcontainers.utility.DockerImageName;
 
 public class DeploymentAgentTest {
-
-    public static final DockerImageName MOCKSERVER_IMAGE = DockerImageName.parse("mockserver/mockserver")
-            .withTag("mockserver-5.15.0");
-
-    @Rule
-    public MockServerContainer mockServer = new MockServerContainer(MOCKSERVER_IMAGE);
 
     private static final String VERSION_1_0_0 = "1.0.0";
     private static final String DP_NAME = "dpName";
@@ -79,6 +72,17 @@ public class DeploymentAgentTest {
     private SslManagerService sslManagerServiceMock = mock(SslManagerService.class);
 
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
+    private static ClientAndServer mockServer;
+
+    @BeforeClass
+    public static void startMockServer() {
+        mockServer = ClientAndServer.startClientAndServer(1080);
+    }
+
+    @AfterClass
+    public static void stopMockServer() {
+        mockServer.stop();
+    }
 
     @Test
     public void testInstallDeploymentPackageAsyncAlreadyDeploying() throws Exception {
@@ -524,6 +528,7 @@ public class DeploymentAgentTest {
         givenDeploymentAgent();
         givenDeploymentAgentUsingSSLContectDefinedByMockServer();
         givenSystemServiceReturnsCurrentKuraVersion("5.4.0");
+
         givenAMockServerThatReturns("54435", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<marketplace>\n"
                 + "  <node id=\"5514714\" name=\"AI Wire Component for Eclipse Kura 5\" url=\"https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5\">\n"
                 + "    <type>iot_package</type>\n" + "    <owner>Matteo Maiero</owner>\n"
@@ -551,7 +556,7 @@ public class DeploymentAgentTest {
                 + "</marketplace>");
 
         whenGetMarketplacePackageDescriptorIsCalledFor(
-                "https://" + mockServer.getHost() + ":" + mockServer.getServerPort().toString() + "/node/54435/api/p");
+                "https://localhost:" + mockServer.getLocalPort() + "/node/54435/api/p");
 
         thenDescriptorIsEqualTo(MarketplacePackageDescriptor.builder().nodeId("5514714")
                 .url("https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5")
@@ -591,7 +596,7 @@ public class DeploymentAgentTest {
                 + "</marketplace>");
 
         whenGetMarketplacePackageDescriptorIsCalledFor(
-                "https://" + mockServer.getHost() + ":" + mockServer.getServerPort().toString() + "/node/54435/api/p");
+                "https://localhost:" + mockServer.getLocalPort() + "/node/54435/api/p");
 
         thenDescriptorIsEqualTo(MarketplacePackageDescriptor.builder().nodeId("5514714")
                 .url("https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5")
@@ -609,8 +614,8 @@ public class DeploymentAgentTest {
 
     private void givenAMockServerThatReturns(String nodeId, String responseXML) {
         String url = String.format("/node/%s/api/p", nodeId);
-        MockServerClient mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort());
-        mockServerClient.when(request().withPath(url)).respond(response().withBody(responseXML));
+        mockServer.withSecure(true).when(request().withMethod("GET").withPath(url))
+                .respond(response().withBody(responseXML));
     }
 
     private void givenDpWithUrlScheme(String dpName, String dpUrl) throws IOException {

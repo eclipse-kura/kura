@@ -27,4 +27,5 @@ Bundle-ClassPath: lib/commons-compress-1.23.0.jar,
  lib/testcontainers-1.18.3.jar,
  lib/mockserver-1.18.3.jar,
  lib/mockserver-client-java-no-dependencies-5.15.0.jar,
+ lib/mockserver-netty-no-dependencies-5.15.0.jar,
  .

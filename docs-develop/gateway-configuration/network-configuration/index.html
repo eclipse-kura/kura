@@ -590,6 +590,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vlan-properties" class="md-nav__link">
+    VLAN properties
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -641,6 +648,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
           <li class="md-nav__item">
   <a href="#enable-a-cellular-interface" class="md-nav__link">
     Enable a cellular interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-vlan" class="md-nav__link">
+    Create a VLAN
   </a>
   
 </li>
@@ -723,6 +737,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <li class="md-nav__item">
       <a href="../cellular-configuration/" class="md-nav__link">
         Cellular Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vlan-configuration/" class="md-nav__link">
+        VLAN Configuration
       </a>
     </li>
   
@@ -3249,6 +3277,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vlan-properties" class="md-nav__link">
+    VLAN properties
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3304,6 +3339,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#create-a-vlan" class="md-nav__link">
+    Create a VLAN
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3352,6 +3394,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li><strong>Gateway</strong> - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)</li>
 <li><strong>DNS Servers</strong> - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.</li>
 <li><strong>Search Domains</strong> - Not implemented.</li>
+<li><strong>MTU</strong> - defines the Maximum Trasmission unit for IPv4 traffic on the selected interface, a value of 0 or empty delegates the MTU definition to the link layer.</li>
 </ul>
 <p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
 <h3 id="more-details-about-the-not-managed-interface-status">More details about the Not Managed interface Status</h3>
@@ -3445,7 +3488,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.type</code></td>
 <td>String</td>
-<td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK</td>
+<td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM, VLAN and LOOPBACK</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.mode</code></td>
@@ -3498,6 +3541,11 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.ip4.dnsServers</code></td>
 <td>String</td>
 <td>Comma-separated list of dns servers</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.mtu</code></td>
+<td>Integer</td>
+<td>The Maximum Transition Unit (MTU) for this interface</td>
 </tr>
 </tbody>
 </table>
@@ -3619,6 +3667,11 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code></td>
 <td>String</td>
 <td>The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.mtu</code></td>
+<td>Integer</td>
+<td>The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer</td>
 </tr>
 </tbody>
 </table>
@@ -3850,6 +3903,43 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
 <td>Integer</td>
 <td>Assigned ppp interface number</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vlan-properties">VLAN properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.parent</code></td>
+<td>String</td>
+<td>Physical interface Vlan is bound to</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.id</code></td>
+<td>Integer</td>
+<td>Vlan tag identifier, between 0 and 4094</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.ingress</code></td>
+<td>String</td>
+<td>Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional)</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.egress</code></td>
+<td>String</td>
+<td>Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.flags</code></td>
+<td>String</td>
+<td>Configuration flags, between 0 and 15, default 1 (Optional)</td>
 </tr>
 </tbody>
 </table>
@@ -4159,6 +4249,53 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
 <a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
 <a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+</code></pre></div>
+<h3 id="create-a-vlan">Create a VLAN</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&lt;esf:configuration</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">        </span><span class="nt">&lt;esf:properties&gt;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interfaces&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>wlan0,lo,ens33,vlanFull,ens34<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.nat.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.dhcpClient4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.type&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>VLAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.ip4.status&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>netIPv4StatusEnabledLAN<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.vlan.parent&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ens33<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.vlan.id&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>41<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.vlan.flags&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>1<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-31" name="__codelineno-8-31" href="#__codelineno-8-31"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.vlan.ingress&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-32" name="__codelineno-8-32" href="#__codelineno-8-32"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>1:2,3:4<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-33" name="__codelineno-8-33" href="#__codelineno-8-33"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-34" name="__codelineno-8-34" href="#__codelineno-8-34"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.vlan.egress&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-35" name="__codelineno-8-35" href="#__codelineno-8-35"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5:6<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-36" name="__codelineno-8-36" href="#__codelineno-8-36"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-37" name="__codelineno-8-37" href="#__codelineno-8-37"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.ip4.address&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-38" name="__codelineno-8-38" href="#__codelineno-8-38"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>192.168.41.100<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-39" name="__codelineno-8-39" href="#__codelineno-8-39"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-40" name="__codelineno-8-40" href="#__codelineno-8-40"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.vlanFull.config.ip4.prefix&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Short&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-8-41" name="__codelineno-8-41" href="#__codelineno-8-41"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>24<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-8-42" name="__codelineno-8-42" href="#__codelineno-8-42"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
+<a id="__codelineno-8-43" name="__codelineno-8-43" href="#__codelineno-8-43"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-8-44" name="__codelineno-8-44" href="#__codelineno-8-44"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-8-45" name="__codelineno-8-45" href="#__codelineno-8-45"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
 
               

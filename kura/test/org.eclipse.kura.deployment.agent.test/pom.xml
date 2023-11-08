@@ -66,51 +66,6 @@ Eurotech
                                 <artifactId>mockserver-netty-no-dependencies</artifactId>
                                 <version>5.15.0</version>
                             </artifactItem>
-                            <artifactItem>
-                                <groupId>org.testcontainers</groupId>
-                                <artifactId>mockserver</artifactId>
-                                <version>1.18.3</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.testcontainers</groupId>
-                                <artifactId>testcontainers</artifactId>
-                                <version>1.18.3</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>com.github.docker-java</groupId>
-                                <artifactId>docker-java-api</artifactId>
-                                <version>3.3.1</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>com.github.docker-java</groupId>
-                                <artifactId>docker-java-transport</artifactId>
-                                <version>3.3.1</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>com.github.docker-java</groupId>
-                                <artifactId>docker-java-transport-zerodep</artifactId>
-                                <version>3.3.1</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.rnorth.duct-tape</groupId>
-                                <artifactId>duct-tape</artifactId>
-                                <version>1.0.8</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.apache.commons</groupId>
-                                <artifactId>commons-compress</artifactId>
-                                <version>1.23.0</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>net.java.dev.jna</groupId>
-                                <artifactId>jna</artifactId>
-                                <version>5.12.1</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>com.fasterxml.jackson.core</groupId>
-                                <artifactId>jackson-annotations</artifactId>
-                                <version>2.15.2</version>
-                            </artifactItem>
                         </artifactItems>
                     </configuration>
                     <goals>

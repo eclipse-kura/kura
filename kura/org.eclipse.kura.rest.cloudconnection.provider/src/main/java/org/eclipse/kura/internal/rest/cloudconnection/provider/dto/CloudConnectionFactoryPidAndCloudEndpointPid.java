@@ -24,11 +24,11 @@ public class CloudConnectionFactoryPidAndCloudEndpointPid {
     }
 
     public String getCloudConnectionFactoryPid() {
-        return cloudConnectionFactoryPid;
+        return this.cloudConnectionFactoryPid;
     }
 
     public String getCloudEndpointPid() {
-        return cloudEndpointPid;
+        return this.cloudEndpointPid;
     }
 
 }

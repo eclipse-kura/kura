@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
 public class ConnectedStatus {
 
-    private boolean connected;
+    private final boolean connected;
 
     public ConnectedStatus(boolean connected) {
         this.connected = connected;

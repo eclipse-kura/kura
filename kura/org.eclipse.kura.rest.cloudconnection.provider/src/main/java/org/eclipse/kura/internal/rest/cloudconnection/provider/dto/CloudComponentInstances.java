@@ -28,11 +28,11 @@ public class CloudComponentInstances {
     }
 
     public List<CloudEndpointInstance> getCloudEndpointInstances() {
-        return cloudEndpointInstances;
+        return this.cloudEndpointInstances;
     }
 
     public List<PubSubInstance> getPubsubInstances() {
-        return pubsubInstances;
+        return this.pubsubInstances;
     }
 
 }

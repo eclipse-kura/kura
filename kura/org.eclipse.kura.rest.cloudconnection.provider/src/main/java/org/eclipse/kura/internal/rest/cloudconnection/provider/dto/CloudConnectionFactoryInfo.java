@@ -27,15 +27,15 @@ public class CloudConnectionFactoryInfo {
     }
 
     public String getCloudConnectionFactoryPid() {
-        return cloudConnectionFactoryPid;
+        return this.cloudConnectionFactoryPid;
     }
 
     public String getDefaultCloudEndpointPid() {
-        return defaultCloudEndpointPid;
+        return this.defaultCloudEndpointPid;
     }
 
     public String getCloudEndpointPidRegex() {
-        return cloudEndpointPidRegex;
+        return this.cloudEndpointPidRegex;
     }
 
 }

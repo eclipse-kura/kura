@@ -15,5 +15,4 @@ package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 public enum CloudEndpointType {
     CLOUD_ENDPOINT,
     CLOUD_CONNECTION_MANAGER;
-    ;
 }

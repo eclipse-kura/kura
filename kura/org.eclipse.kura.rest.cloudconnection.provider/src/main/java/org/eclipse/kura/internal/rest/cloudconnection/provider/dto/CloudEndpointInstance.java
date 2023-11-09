@@ -26,15 +26,15 @@ public class CloudEndpointInstance {
     }
 
     public String getCloudConnectionFactoryPid() {
-        return cloudConnectionFactoryPid;
+        return this.cloudConnectionFactoryPid;
     }
 
     public String getCloudEndpointPid() {
-        return cloudEndpointPid;
+        return this.cloudEndpointPid;
     }
 
     public CloudConnectionState getState() {
-        return state;
+        return this.state;
     }
 
     public void setState(CloudConnectionState state) {

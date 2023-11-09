@@ -96,21 +96,24 @@ curl -X POST -k -u $USERNAME:$PASSWORD \
 ```
 
 #### Get Eclipse Marketplace Package Descriptor
-- Description: Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL passed as query parameter.
-- Method: GET
+- Description: Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL passed in the request.
+- Method: PUT
 - API PATH: `/deploy/v2/_packageDescriptor`
 
-##### Request
+##### Request Body
 
-The API accepts the `url` passed as a [query parameter](https://en.wikipedia.org/wiki/Query_string).
+```json
+{
+  "url": "deploymentPackageUrl"
+}
+```
 
-###### Example
+Example:
 
-Example using `curl`:
-
-```bash
-curl -X GET -k -u $USERNAME:$PASSWORD 
-    https://$ADDRESS/services/deploy/v2/_packageDescriptor\?url\="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=5514714"
+```json
+{
+  "url": "http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=5514714"
+}
 ```
 
 ##### Responses

@@ -45,10 +45,10 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String MQTT_METHOD_SPEC_DEL = "DEL";
     private static final String METHOD_SPEC_PUT = "PUT";
-    private static final String REST_APP_ID = "identity/v1";
+    private static final String REST_APP_ID = "cloudconnection/v1";
 
     private static final String EXPECTED_GET_CLOUD_ENTRIES_RESPONSE = new Scanner(
-            CloudConnectionEndpointsTest.class.getResourceAsStream("/getcloudEntriesResponse.json"), "UTF-8")
+            CloudConnectionEndpointsTest.class.getResourceAsStream("/getCloudEntriesResponse.json"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
 
     @Parameterized.Parameters(name = "{0}")

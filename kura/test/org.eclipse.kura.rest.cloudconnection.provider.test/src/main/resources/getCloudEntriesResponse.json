@@ -1,0 +1,10 @@
+{
+    "cloudEntries": [
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "state": "DISCONNECTED",
+            "connectionType": "CONNECTION",
+            "pid": "org.eclipse.kura.cloud.CloudService"
+        }
+    ]
+}

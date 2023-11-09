@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -27,8 +28,10 @@ import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -45,6 +48,10 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     private static final String MQTT_METHOD_SPEC_DEL = "DEL";
     private static final String METHOD_SPEC_PUT = "PUT";
     private static final String REST_APP_ID = "identity/v1";
+
+    private static final String EXPECTED_GET_CLOUD_ENTRIES_RESPONSE = new Scanner(
+            CloudConnectionEndpointsTest.class.getResourceAsStream("/getcloudEntriesResponse.json"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Transport> transports() {
@@ -65,6 +72,30 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
         assertTrue("Unable to create the test CloudEndpoint",
                 cloudConnectionFactory.getManagedCloudConnectionPids().contains(CLOUD_ENDPOINT_INSTANCE_TEST));
+    }
+
+    @Test
+    public void shouldGetCloudEntries() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/cloudEntries");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson(EXPECTED_GET_CLOUD_ENTRIES_RESPONSE);
+    }
+
+    @Test
+    public void b() {
+
+    }
+
+    @Test
+    public void c() {
+
+    }
+
+    @Test
+    public void d() {
+
     }
 
 }

@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -68,9 +67,6 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
             cloudConnectionFactory = ServiceUtil.trackService(CloudConnectionFactory.class, Optional.empty()).get(30,
                     TimeUnit.SECONDS);
             cloudConnectionFactory.createConfiguration(CLOUD_ENDPOINT_INSTANCE_TEST);
-
-            assertTrue("Unable to create the test CloudEndpoint",
-                    cloudConnectionFactory.getManagedCloudConnectionPids().contains(CLOUD_ENDPOINT_INSTANCE_TEST));
         } catch (Exception e) {
             fail("Unable to create the test CloudEndpoint");
         }

@@ -13,16 +13,14 @@
 package org.eclipse.kura.internal.rest.cloudconnection.provider.test;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
@@ -64,14 +62,18 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @BeforeClass
-    public static void setup() throws InterruptedException, ExecutionException, TimeoutException, KuraException {
-        final CloudConnectionFactory cloudConnectionFactory = ServiceUtil
-                .trackService(CloudConnectionFactory.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+    public static void setup() {
+        CloudConnectionFactory cloudConnectionFactory;
+        try {
+            cloudConnectionFactory = ServiceUtil.trackService(CloudConnectionFactory.class, Optional.empty()).get(30,
+                    TimeUnit.SECONDS);
+            cloudConnectionFactory.createConfiguration(CLOUD_ENDPOINT_INSTANCE_TEST);
 
-        cloudConnectionFactory.createConfiguration(CLOUD_ENDPOINT_INSTANCE_TEST);
-
-        assertTrue("Unable to create the test CloudEndpoint",
-                cloudConnectionFactory.getManagedCloudConnectionPids().contains(CLOUD_ENDPOINT_INSTANCE_TEST));
+            assertTrue("Unable to create the test CloudEndpoint",
+                    cloudConnectionFactory.getManagedCloudConnectionPids().contains(CLOUD_ENDPOINT_INSTANCE_TEST));
+        } catch (Exception e) {
+            fail("Unable to create the test CloudEndpoint");
+        }
     }
 
     @Test

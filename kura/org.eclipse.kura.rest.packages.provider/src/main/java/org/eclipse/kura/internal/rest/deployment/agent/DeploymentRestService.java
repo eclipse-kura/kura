@@ -32,10 +32,10 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -44,6 +44,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
+import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -86,7 +87,8 @@ public class DeploymentRestService {
     /**
      * GET method.
      *
-     * Provides the list of all the deployment packages installed and tracked by the framework.
+     * Provides the list of all the deployment packages installed and tracked by the
+     * framework.
      *
      * @return a list of {@link DeploymentPackageInfo}
      */
@@ -105,18 +107,23 @@ public class DeploymentRestService {
     }
 
     /**
-     * GET method.
+     * PUT method.
      *
-     * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
-     * passed as query parameter.
+     * Provides the Eclipse Marketplace Package Descriptor information of the
+     * deployment package identified by URL passed as query parameter.
+     * 
+     * @param DescriptorRequest
      *
      * @return a list of {@link MarketplacePackageDescriptor}
      */
-    @GET
+    @PUT
     @RolesAllowed("deploy")
     @Path("/_packageDescriptor")
     @Produces(MediaType.APPLICATION_JSON)
-    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(@QueryParam("url") String url) {
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(DescriptorRequest descriptorRequest) {
+        validate(descriptorRequest, BAD_REQUEST_MESSAGE);
+        String url = descriptorRequest.getUrl();
+
         MarketplacePackageDescriptor descriptor;
 
         if (Objects.isNull(url) || url.isEmpty()) {
@@ -156,11 +163,14 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * Installs the deployment package specified in the {@link InstallRequest}. If the request was already issued for
-     * the same {@link InstallRequest}, it returns the status of the installation process.
+     * Installs the deployment package specified in the {@link InstallRequest}. If
+     * the request was already issued for
+     * the same {@link InstallRequest}, it returns the status of the installation
+     * process.
      *
      * @param installRequest
-     * @return a {@link DeploymentRequestStatus} object that represents the status of the installation request
+     * @return a {@link DeploymentRequestStatus} object that represents the status
+     *         of the installation request
      */
     @POST
     @RolesAllowed("deploy")
@@ -187,7 +197,8 @@ public class DeploymentRestService {
     /**
      * POST method.
      *
-     * Installs the deployment package uploaded through HTTP POST method (multipart/form-data).
+     * Installs the deployment package uploaded through HTTP POST method
+     * (multipart/form-data).
      *
      * @param uploadedInputStread
      * @param fileDetails
@@ -253,11 +264,13 @@ public class DeploymentRestService {
     /**
      * DELETE method.
      *
-     * Uninstalls the deployment package identified by the specified name. If the request was already issued, it reports
+     * Uninstalls the deployment package identified by the specified name. If the
+     * request was already issued, it reports
      * the status of the uninstallation operation.
      *
      * @param name
-     * @return a {@link DeploymentRequestStatus} object that represents the status of the uninstallation request
+     * @return a {@link DeploymentRequestStatus} object that represents the status
+     *         of the uninstallation request
      */
     @DELETE
     @RolesAllowed("deploy")

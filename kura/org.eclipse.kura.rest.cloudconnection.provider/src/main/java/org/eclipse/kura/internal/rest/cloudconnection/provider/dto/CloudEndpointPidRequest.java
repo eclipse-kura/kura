@@ -12,15 +12,17 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class Connected {
+public class CloudEndpointPidRequest {
 
-    private boolean connected;
+    private final String cloudEndpointPid;
 
-    public Connected(boolean connected) {
-        this.connected = connected;
+    public CloudEndpointPidRequest(String cloudEndpointPid) {
+
+        this.cloudEndpointPid = cloudEndpointPid;
     }
 
-    public boolean isConnected() {
-        return this.connected;
+    public String getCloudEndpointPid() {
+        return this.cloudEndpointPid;
     }
+
 }

@@ -13,6 +13,8 @@
 package org.eclipse.kura.internal.rest.cloudconnection.provider;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -30,17 +32,17 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudComponentFactories;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudEntries;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.Connected;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConnectionId;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.FactoryPidAndCloudServicePid;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.PidAndFactoryPidAndCloudConnectionPid;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudComponentInstances;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudConnectionFactoryPidAndCloudEndpointPid;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.CloudEndpointPidRequest;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.ConnectedStatus;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.dto.PidAndFactoryPidAndCloudEndpointPid;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
-import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
+import org.eclipse.kura.rest.configuration.api.PidSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -99,12 +101,13 @@ public class CloudConnectionRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudEntries")
+    @Path("/instances")
     @Produces(MediaType.APPLICATION_JSON)
-    public CloudEntries findCloudEntries() {
+    public CloudComponentInstances findCloudEntries() {
         try {
             logger.debug(DEBUG_MESSSAGE, "findCloudEntries");
-            return new CloudEntries(this.cloudConnectionService.findCloudEntries());
+            return new CloudComponentInstances(this.cloudConnectionService.findCloudEndpointInstances(),
+                    this.cloudConnectionService.findPubsubInstances());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -112,20 +115,18 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/stackConfigurations")
+    @Path("/cloudEndpoint/stackComponentPids")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList getStackConfigurationsByFactory(
-            final FactoryPidAndCloudServicePid factoryPidAndCloudServicePid) {
+    public PidSet getStackConfigurationsByFactory(
+            final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "getStackConfigurationsByFactory");
-            List<ComponentConfiguration> cloudStackConfigurations = this.cloudConnectionService
-                    .getStackConfigurationsByFactory(factoryPidAndCloudServicePid.getFactoryPid(),
-                            factoryPidAndCloudServicePid.getCloudServicePid());
+            Set<String> pidSet = this.cloudConnectionService.getStackConfigurationsByFactory(
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
 
-            return DTOUtil.toComponentConfigurationList(cloudStackConfigurations, this.cryptoService, false)
-                    .replacePasswordsWithPlaceholder();
-
+            return new PidSet(pidSet);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -133,13 +134,15 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudService")
+    @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createCloudServiceFromFactory(final FactoryPidAndCloudServicePid factoryPidAndCloudServicePid) {
+    public void createCloudServiceFromFactory(
+            final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "createCloudServiceFromFactory");
-            this.cloudConnectionService.createCloudServiceFromFactory(factoryPidAndCloudServicePid.getFactoryPid(),
-                    factoryPidAndCloudServicePid.getCloudServicePid());
+            this.cloudConnectionService.createCloudServiceFromFactory(
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -147,13 +150,15 @@ public class CloudConnectionRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudService")
+    @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteCloudServiceFromFactory(final FactoryPidAndCloudServicePid factoryPidAndCloudServicePid) {
+    public void deleteCloudServiceFromFactory(
+            final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "deleteCloudServiceFromFactory");
-            this.cloudConnectionService.deleteCloudServiceFromFactory(factoryPidAndCloudServicePid.getFactoryPid(),
-                    factoryPidAndCloudServicePid.getCloudServicePid());
+            this.cloudConnectionService.deleteCloudServiceFromFactory(
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
+                    cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -161,7 +166,7 @@ public class CloudConnectionRestService {
 
     @GET
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudComponentFactories")
+    @Path("/factories")
     @Produces(MediaType.APPLICATION_JSON)
     public CloudComponentFactories getCloudComponentFactories() {
         try {
@@ -174,15 +179,14 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/pubSubInstance")
+    @Path("/pubSub")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createPubSubInstance(
-            final PidAndFactoryPidAndCloudConnectionPid pidAndFactoryPidAndCloudConnectionPid) {
+    public void createPubSubInstance(final PidAndFactoryPidAndCloudEndpointPid pidAndFactoryPidAndCloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "createPubSubInstance");
-            this.cloudConnectionService.createPubSubInstance(pidAndFactoryPidAndCloudConnectionPid.getPid(),
-                    pidAndFactoryPidAndCloudConnectionPid.getFactoryPid(),
-                    pidAndFactoryPidAndCloudConnectionPid.getCloudConnectionPid());
+            this.cloudConnectionService.createPubSubInstance(pidAndFactoryPidAndCloudEndpointPid.getPid(),
+                    pidAndFactoryPidAndCloudEndpointPid.getFactoryPid(),
+                    pidAndFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -190,7 +194,7 @@ public class CloudConnectionRestService {
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/pubSubInstance")
+    @Path("/pubSub")
     @Consumes(MediaType.APPLICATION_JSON)
     public void deletePubSubInstance(final PidAndFactoryPid pidAndFactoryPid) {
         try {
@@ -203,14 +207,19 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/pubSubInstance/configuration")
+    @Path("/configurations")
     @Consumes(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationDTO getPubSubConfiguration(final PidAndFactoryPid pidAndFactoryPid) {
+    public ComponentConfigurationList getConfiguration(final PidSet pidSet) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getPubSubConfiguration");
-            return DTOUtil.toComponentConfigurationDTO(
-                    this.cloudConnectionService.getPubSubConfiguration(pidAndFactoryPid.getPid()), this.cryptoService,
-                    false).replacePasswordsWithPlaceholder();
+            logger.debug(DEBUG_MESSSAGE, "getConfiguration");
+            List<ComponentConfiguration> result = this.cloudConnectionService.getPubSubConfiguration(pidSet.getPids());
+
+            result.addAll(this.cloudConnectionService.getStackConfigurationsByPid(pidSet.getPids()));
+
+            return new ComponentConfigurationList(
+                    result.stream().map(c -> DTOUtil.toComponentConfigurationDTO(c, this.cryptoService, false)
+                            .replacePasswordsWithPlaceholder()).collect(Collectors.toList()));
+
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -218,14 +227,15 @@ public class CloudConnectionRestService {
 
     @PUT
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/stackConfigurations")
+    @Path("/configurations")
     @Consumes(MediaType.APPLICATION_JSON)
     public void updateStackComponentConfiguration(
             UpdateComponentConfigurationRequest updateComponentConfigurationRequest) {
         try {
             logger.debug(DEBUG_MESSSAGE, "updateStackComponentConfiguration");
             this.cloudConnectionService.updateStackComponentConfiguration(
-                    updateComponentConfigurationRequest.getComponentConfigurations());
+                    updateComponentConfigurationRequest.getComponentConfigurations(),
+                    updateComponentConfigurationRequest.isTakeSnapshot());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -233,12 +243,12 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudConnectionManager/connect")
+    @Path("/cloudEndpoint/connect")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void connectDataService(ConnectionId connectionIdDTO) {
+    public void connectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "connectDataService");
-            this.cloudConnectionManagerBridge.connectDataService(connectionIdDTO.getConnectionId());
+            this.cloudConnectionManagerBridge.connectDataService(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -246,12 +256,12 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudConnectionManager/disconnect")
+    @Path("/cloudEndpoint/disconnect")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void disconnectDataService(ConnectionId connectionIdDTO) {
+    public void disconnectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "disconnectDataService");
-            this.cloudConnectionManagerBridge.disconnectDataService(connectionIdDTO.getConnectionId());
+            this.cloudConnectionManagerBridge.disconnectDataService(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -259,13 +269,14 @@ public class CloudConnectionRestService {
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/cloudConnectionManager/isConnected")
+    @Path("/cloudEndpoint/isConnected")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Connected isConnected(ConnectionId connectionIdDTO) {
+    public ConnectedStatus isConnected(CloudEndpointPidRequest cloudEndpointPid) {
         try {
             logger.debug(DEBUG_MESSSAGE, "isConnected");
-            return new Connected(this.cloudConnectionManagerBridge.isConnected(connectionIdDTO.getConnectionId()));
+            return new ConnectedStatus(
+                    this.cloudConnectionManagerBridge.isConnected(cloudEndpointPid.getCloudEndpointPid()));
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

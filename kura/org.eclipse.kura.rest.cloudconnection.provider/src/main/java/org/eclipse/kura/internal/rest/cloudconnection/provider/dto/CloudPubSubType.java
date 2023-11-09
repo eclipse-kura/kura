@@ -10,11 +10,9 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.cloudconnection.provider;
+package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public enum CloudConnectionState {
-
-    UNREGISTERED,
-    DISCONNECTED,
-    CONNECTED;
+public enum CloudPubSubType {
+    PUBLISHER,
+    SUBSCRIBER
 }

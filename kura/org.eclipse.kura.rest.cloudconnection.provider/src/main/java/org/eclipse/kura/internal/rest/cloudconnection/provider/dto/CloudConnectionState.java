@@ -12,15 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class ConnectionId {
-
-    private final String connectionId;
-
-    public ConnectionId(String connectionId) {
-        this.connectionId = connectionId;
-    }
-
-    public String getConnectionId() {
-        return connectionId;
-    }
+public enum CloudConnectionState {
+    UNREGISTERED,
+    DISCONNECTED,
+    CONNECTED;
 }

@@ -12,30 +12,36 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class CloudConnectionFactoryInfo {
+public class PubSubFactoryInfo {
 
+    private final String factoryPid;
     private final String cloudConnectionFactoryPid;
-    private final String defaultCloudEndpointPid;
-    private final String cloudEndpointPidRegex;
+    private final String defaultPid;
+    private final String defaultPidRegex;
 
-    public CloudConnectionFactoryInfo(String cloudConnectionFactoryPid, String defaultCloudEndpointPid,
-            String cloudEndpointPidRegex) {
+    public PubSubFactoryInfo(String factoryPid, String cloudConnectionFactoryPid, String defaultPid,
+            String defaultPidRegex) {
 
+        this.factoryPid = factoryPid;
         this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
-        this.defaultCloudEndpointPid = defaultCloudEndpointPid;
-        this.cloudEndpointPidRegex = cloudEndpointPidRegex;
+        this.defaultPid = defaultPid;
+        this.defaultPidRegex = defaultPidRegex;
+    }
+
+    public String getFactoryPid() {
+        return this.factoryPid;
     }
 
     public String getCloudConnectionFactoryPid() {
-        return cloudConnectionFactoryPid;
+        return this.cloudConnectionFactoryPid;
     }
 
-    public String getDefaultCloudEndpointPid() {
-        return defaultCloudEndpointPid;
+    public String getDefaultPid() {
+        return this.defaultPid;
     }
 
-    public String getCloudEndpointPidRegex() {
-        return cloudEndpointPidRegex;
+    public String getDefaultPidRegex() {
+        return this.defaultPidRegex;
     }
 
 }

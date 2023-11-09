@@ -12,25 +12,23 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudPubSubType;
+public class CloudConnectionFactoryPidAndCloudEndpointPid {
 
-public class CloudPubSub extends Cloud {
+    private final String cloudConnectionFactoryPid;
+    private final String cloudEndpointPid;
 
-    private final String cloudConnectionPid;
-    private final CloudPubSubType type;
-
-    public CloudPubSub(String pid, String factoryPid, String cloudConnectionPid, CloudPubSubType type) {
-        super(pid, factoryPid);
-        this.cloudConnectionPid = cloudConnectionPid;
-        this.type = type;
+    public CloudConnectionFactoryPidAndCloudEndpointPid(String cloudConnectionFactoryPid, String cloudEndpointPid) {
+        super();
+        this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
+        this.cloudEndpointPid = cloudEndpointPid;
     }
 
-    public String getCloudConnectionPid() {
-        return this.cloudConnectionPid;
+    public String getCloudConnectionFactoryPid() {
+        return cloudConnectionFactoryPid;
     }
 
-    public CloudPubSubType getType() {
-        return this.type;
+    public String getCloudEndpointPid() {
+        return cloudEndpointPid;
     }
 
 }

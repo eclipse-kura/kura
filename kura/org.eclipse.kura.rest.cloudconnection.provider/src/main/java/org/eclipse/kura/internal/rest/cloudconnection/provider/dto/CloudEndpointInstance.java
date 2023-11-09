@@ -12,38 +12,41 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionState;
-import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionType;
-
-public class CloudConnection extends Cloud {
+public class CloudEndpointInstance {
 
     private final String cloudConnectionFactoryPid;
+    private final String cloudEndpointPid;
     private CloudConnectionState state;
-    private CloudConnectionType connectionType;
+    private CloudEndpointType cloudEndpointType;
 
-    public CloudConnection(String pid, String cloudConnectionFactoryPid) {
-        super(pid);
+    public CloudEndpointInstance(String cloudConnectionFactoryPid, String cloudEndpointPid) {
+        super();
         this.cloudConnectionFactoryPid = cloudConnectionFactoryPid;
+        this.cloudEndpointPid = cloudEndpointPid;
     }
 
     public String getCloudConnectionFactoryPid() {
-        return this.cloudConnectionFactoryPid;
+        return cloudConnectionFactoryPid;
+    }
+
+    public String getCloudEndpointPid() {
+        return cloudEndpointPid;
     }
 
     public CloudConnectionState getState() {
-        return this.state;
+        return state;
     }
 
     public void setState(CloudConnectionState state) {
         this.state = state;
     }
 
-    public CloudConnectionType getConnectionType() {
-        return this.connectionType;
+    public CloudEndpointType getCloudEndpointType() {
+        return this.cloudEndpointType;
     }
 
-    public void setConnectionType(CloudConnectionType connectionType) {
-        this.connectionType = connectionType;
+    public void setConnectionType(CloudEndpointType connectionType) {
+        this.cloudEndpointType = connectionType;
     }
 
 }

@@ -12,18 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class CloudEntries {
-
-    private List<Cloud> cloudEntries = new ArrayList<>();
-
-    public CloudEntries(List<Cloud> cloudEntries) {
-        this.cloudEntries = cloudEntries;
-    }
-
-    public List<Cloud> getCloudEntries() {
-        return this.cloudEntries;
-    }
+public enum CloudEndpointType {
+    CLOUD_ENDPOINT,
+    CLOUD_CONNECTION_MANAGER;
+    ;
 }

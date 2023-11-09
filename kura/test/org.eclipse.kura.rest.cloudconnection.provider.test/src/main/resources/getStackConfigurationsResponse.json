@@ -1,0 +1,806 @@
+{
+    "configs": [
+        {
+            "pid": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test",
+            "definition": {
+                "ad": [
+                    {
+                        "name": "Broker-url",
+                        "description": "URL of the MQTT broker to connect to, specifying protocol, hostname and port (for example mqtt://your.broker.url:1883/ ). Supported protocols are mqtt, mqtts, ws and wss.",
+                        "id": "broker-url",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "mqtt://broker-url:1883/",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Topic Context Account-Name",
+                        "description": "The value of this attribute will replace the '#account-name' token found in publishing topics. For connections to remote management servers, this is generally the name of the server side account.",
+                        "id": "topic.context.account-name",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "account-name",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Username",
+                        "description": "Username to be used when connecting to the MQTT broker.",
+                        "id": "username",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "username",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Password",
+                        "description": "Password to be used when connecting to the MQTT broker.",
+                        "id": "password",
+                        "type": "PASSWORD",
+                        "cardinality": 0,
+                        "defaultValue": "password",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Client-id",
+                        "description": "Client identifier to be used when connecting to the MQTT broker. The identifier has to be unique within your account. Characters '/', '+', '#' and '.' are invalid and they will be replaced by '-'. If left empty, this is automatically determined by the client software as the MAC address of the main network interface (in general uppercase and without ':').",
+                        "id": "client-id",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Keep-alive",
+                        "description": "Frequency in seconds for the periodic MQTT PING message.",
+                        "id": "keep-alive",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "defaultValue": "30",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Timeout",
+                        "description": "Timeout used for all interactions with the MQTT broker.",
+                        "id": "timeout",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "defaultValue": "10",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Clean-session",
+                        "description": "MQTT Clean Session flag.",
+                        "id": "clean-session",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "LWT Topic",
+                        "description": "MQTT Last Will and Testament topic. The tokens '#account-name' and '#client-id' will be replaced by the values of the properties topic.context.account-name and client-id",
+                        "id": "lwt.topic",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "$EDC/#account-name/#client-id/MQTT/LWT",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "LWT Payload",
+                        "description": "MQTT Last Will and Testament payload as a string.",
+                        "id": "lwt.payload",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "isRequired": false
+                    },
+                    {
+                        "option": [
+                            {
+                                "label": "0",
+                                "value": "0"
+                            },
+                            {
+                                "label": "1",
+                                "value": "1"
+                            },
+                            {
+                                "label": "2",
+                                "value": "2"
+                            }
+                        ],
+                        "name": "LWT Qos",
+                        "description": "MQTT Last Will and Testament QoS (0..2).",
+                        "id": "lwt.qos",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "defaultValue": "0",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "LWT Retain",
+                        "description": "MQTT Last Will and Testament Retain flag.",
+                        "id": "lwt.retain",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": false
+                    },
+                    {
+                        "option": [
+                            {
+                                "label": "file",
+                                "value": "file"
+                            },
+                            {
+                                "label": "memory",
+                                "value": "memory"
+                            }
+                        ],
+                        "name": "In-flight Persistence",
+                        "description": "Storage type where in-flight messages are persisted across reconnections.",
+                        "id": "in-flight.persistence",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "memory",
+                        "isRequired": true
+                    },
+                    {
+                        "option": [
+                            {
+                                "label": "3.1",
+                                "value": "3"
+                            },
+                            {
+                                "label": "3.1.1",
+                                "value": "4"
+                            }
+                        ],
+                        "name": "Protocol-version",
+                        "description": "MQTT Protocol Version.",
+                        "id": "protocol-version",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "defaultValue": "4",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "SslManagerService Target Filter",
+                        "description": "Specifies, as an OSGi target filter, the pid of the SslManagerService used to create SSL connections.",
+                        "id": "SslManagerService.target",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)",
+                        "isRequired": true
+                    }
+                ],
+                "icon": [
+                    {
+                        "resource": "MqttDataTransport",
+                        "size": 32
+                    }
+                ],
+                "name": "MqttDataTransport",
+                "description": "The MqttDataTransport provides an MQTT connection. Its configuration parameters are used to determine the MQTT broker and the credentials to connect to the broker.",
+                "id": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"
+            },
+            "properties": {
+                "in-flight.persistence": {
+                    "value": "memory",
+                    "type": "STRING"
+                },
+                "SslManagerService.target": {
+                    "value": "(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)",
+                    "type": "STRING"
+                },
+                "clean-session": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "lwt.retain": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "protocol-version": {
+                    "value": 4,
+                    "type": "INTEGER"
+                },
+                "service.factoryPid": {
+                    "value": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+                    "type": "STRING"
+                },
+                "timeout": {
+                    "value": 20,
+                    "type": "INTEGER"
+                },
+                "kura.service.pid": {
+                    "value": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+                    "type": "STRING"
+                },
+                "service.pid": {
+                    "value": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-1699285622865-3",
+                    "type": "STRING"
+                },
+                "broker-url": {
+                    "value": "mqtt://mqtt.eclipseprojects.io:1883",
+                    "type": "STRING"
+                },
+                "password": {
+                    "value": "placeholder",
+                    "type": "PASSWORD"
+                },
+                "keep-alive": {
+                    "value": 30,
+                    "type": "INTEGER"
+                },
+                "topic.context.account-name": {
+                    "value": "account-name-test",
+                    "type": "STRING"
+                },
+                "lwt.topic": {
+                    "value": "$EDC/#account-name/#client-id/MQTT/LWT",
+                    "type": "STRING"
+                },
+                "lwt.payload": {
+                    "value": "",
+                    "type": "STRING"
+                },
+                "lwt.qos": {
+                    "value": 0,
+                    "type": "INTEGER"
+                },
+                "ssl.hostname.verification": {
+                    "value": "use-ssl-service-config",
+                    "type": "STRING"
+                },
+                "kura.cloud.service.factory.pid": {
+                    "value": "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory",
+                    "type": "STRING"
+                },
+                "client-id": {
+                    "value": "",
+                    "type": "STRING"
+                },
+                "username": {
+                    "value": "username",
+                    "type": "STRING"
+                }
+            }
+        },
+        {
+            "pid": "org.eclipse.kura.data.DataService-test",
+            "definition": {
+                "ad": [
+                    {
+                        "name": "Connect Auto-on-startup",
+                        "description": "Enable automatic connect of the Data Publishers on startup and after a disconnection.",
+                        "id": "connect.auto-on-startup",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Connect Retry-interval",
+                        "description": "Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1).",
+                        "id": "connect.retry-interval",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "60",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Enable Recovery On Connection Failure",
+                        "description": "Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well.",
+                        "id": "enable.recovery.on.connection.failure",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Connection Recovery Max Failures",
+                        "description": "Number of failures in Data Publishers connection before forcing a reboot.",
+                        "id": "connection.recovery.max.failures",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "10",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Disconnect Quiesce-timeout",
+                        "description": "Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher.",
+                        "id": "disconnect.quiesce-timeout",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "0",
+                        "defaultValue": "10",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Message Store Provider Service PID",
+                        "description": "The Kura service pid of the Message Store instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService.",
+                        "id": "store.db.service.pid",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "org.eclipse.kura.db.H2DbService",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Store Housekeeper-interval",
+                        "description": "Interval in seconds used to run the Data Store housekeeper task (min 5).",
+                        "id": "store.housekeeper-interval",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "5",
+                        "defaultValue": "900",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Store Purge-age",
+                        "description": "Age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (min 5).",
+                        "id": "store.purge-age",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "5",
+                        "defaultValue": "60",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Store Capacity",
+                        "description": "Maximum number of messages persisted in the Data Store. The limit does not apply to messages with the priority less than 2. These priority levels are reserved to the framework which uses it for life-cycle messages - birth and death certificates - and replies to request/response flows.",
+                        "id": "store.capacity",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "10000",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "In-flight-messages Republish-on-new-session",
+                        "description": "Whether to republish in-flight messages on a new MQTT session.",
+                        "id": "in-flight-messages.republish-on-new-session",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "In-flight-messages Max-number",
+                        "description": "The maximum number of in-flight messages.",
+                        "id": "in-flight-messages.max-number",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "max": "10",
+                        "defaultValue": "9",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "In-flight-messages Congestion-timeout",
+                        "description": "Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable).",
+                        "id": "in-flight-messages.congestion-timeout",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "0",
+                        "defaultValue": "0",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Enable Rate Limit",
+                        "description": "Enables the token bucket message rate limiting.",
+                        "id": "enable.rate.limit",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Rate Limit Average",
+                        "description": "The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). This parameter has some limitations described in https://eclipse.github.io/kura/latest/gateway-configuration/data-service-configuration/",
+                        "id": "rate.limit.average",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "1",
+                        "isRequired": true
+                    },
+                    {
+                        "option": [
+                            {
+                                "label": "SECONDS",
+                                "value": "SECONDS"
+                            },
+                            {
+                                "label": "MINUTES",
+                                "value": "MINUTES"
+                            },
+                            {
+                                "label": "HOURS",
+                                "value": "HOURS"
+                            },
+                            {
+                                "label": "DAYS",
+                                "value": "DAYS"
+                            }
+                        ],
+                        "name": "Rate Limit Time Unit",
+                        "description": "The time unit for the rate.limit.average.",
+                        "id": "rate.limit.time.unit",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "SECONDS",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Rate Limit Burst Size",
+                        "description": "The token bucket burst size.",
+                        "id": "rate.limit.burst.size",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "1",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Enable Connection Schedule",
+                        "description": "Enables or disables the connection scheduling feature.",
+                        "id": "connection.schedule.enabled",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Connection Schedule CRON Expression",
+                        "description": "A CRON expression that specifies the instants when the gateway should perform a connection attempt. This parameter is only used if Enable Connection Schedule is set to true. The default expression schedules a connection every day at midnight.",
+                        "id": "connection.schedule.expression",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "0 0 0 ? * * *",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Allow priority message to overide connection schedule",
+                        "description": "Allows messages beyond a specified priority to force a connection and be sent regardless of connection schedule.",
+                        "id": "connection.schedule.priority.override.enable",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Message schedule priority override threshold",
+                        "description": "A message with a priority equal to or less than this threshold will cause the framework to automatically re-connect and send regardless of the connection schedule.",
+                        "id": "connection.schedule.priority.override.threshold",
+                        "type": "INTEGER",
+                        "cardinality": 0,
+                        "defaultValue": "1",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Connection Schedule Disconnect Inactivity Interval Seconds",
+                        "description": "Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This parameter is only used if Enable Connection Schedule is set to true.",
+                        "id": "connection.schedule.inactivity.interval.seconds",
+                        "type": "LONG",
+                        "cardinality": 0,
+                        "min": "1",
+                        "defaultValue": "60",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Maximum Payload Size",
+                        "description": "The maximum allowed size in bytes for the message payload.",
+                        "id": "maximum.payload.size",
+                        "type": "LONG",
+                        "cardinality": 0,
+                        "min": "0",
+                        "defaultValue": "16777216",
+                        "isRequired": true
+                    }
+                ],
+                "icon": [
+                    {
+                        "resource": "DataService",
+                        "size": 32
+                    }
+                ],
+                "name": "DataService",
+                "description": "DataService provides auto-connect, reconnect on connection drops and storing of outgoing messages.",
+                "id": "org.eclipse.kura.data.DataService"
+            },
+            "properties": {
+                "in-flight-messages.congestion-timeout": {
+                    "value": 0,
+                    "type": "INTEGER"
+                },
+                "in-flight-messages.max-number": {
+                    "value": 9,
+                    "type": "INTEGER"
+                },
+                "service.factoryPid": {
+                    "value": "org.eclipse.kura.data.DataService",
+                    "type": "STRING"
+                },
+                "connection.recovery.max.failures": {
+                    "value": 10,
+                    "type": "INTEGER"
+                },
+                "disconnect.quiesce-timeout": {
+                    "value": 10,
+                    "type": "INTEGER"
+                },
+                "store.housekeeper-interval": {
+                    "value": 900,
+                    "type": "INTEGER"
+                },
+                "connection.schedule.inactivity.interval.seconds": {
+                    "value": 60,
+                    "type": "LONG"
+                },
+                "connection.schedule.priority.override.threshold": {
+                    "value": 1,
+                    "type": "INTEGER"
+                },
+                "rate.limit.average": {
+                    "value": 1,
+                    "type": "INTEGER"
+                },
+                "connection.schedule.priority.override.enable": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "connect.retry-interval": {
+                    "value": 60,
+                    "type": "INTEGER"
+                },
+                "enable.recovery.on.connection.failure": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "kura.cloud.service.factory.pid": {
+                    "value": "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory",
+                    "type": "STRING"
+                },
+                "connection.schedule.enabled": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "in-flight-messages.republish-on-new-session": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "store.purge-age": {
+                    "value": 60,
+                    "type": "INTEGER"
+                },
+                "connection.schedule.expression": {
+                    "value": "0 0 0 ? * * *",
+                    "type": "STRING"
+                },
+                "enable.rate.limit": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "kura.service.pid": {
+                    "value": "org.eclipse.kura.data.DataService",
+                    "type": "STRING"
+                },
+                "service.pid": {
+                    "value": "org.eclipse.kura.data.DataService-1699285622913-9",
+                    "type": "STRING"
+                },
+                "connect.auto-on-startup": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "rate.limit.time.unit": {
+                    "value": "SECONDS",
+                    "type": "STRING"
+                },
+                "store.db.service.pid": {
+                    "value": "org.eclipse.kura.db.H2DbService",
+                    "type": "STRING"
+                },
+                "DataTransportService.target": {
+                    "value": "(kura.service.pid=org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport)",
+                    "type": "STRING"
+                },
+                "maximum.payload.size": {
+                    "value": 16777216,
+                    "type": "LONG"
+                },
+                "rate.limit.burst.size": {
+                    "value": 1,
+                    "type": "INTEGER"
+                },
+                "store.capacity": {
+                    "value": 1000,
+                    "type": "INTEGER"
+                }
+            }
+        },
+        {
+            "pid": "org.eclipse.kura.cloud.CloudService-test",
+            "definition": {
+                "ad": [
+                    {
+                        "option": [
+                            {
+                                "label": "Set display name as device name",
+                                "value": "device-name"
+                            },
+                            {
+                                "label": "Set display name from hostname",
+                                "value": "hostname"
+                            },
+                            {
+                                "label": "Custom",
+                                "value": "custom"
+                            },
+                            {
+                                "label": "Server defined",
+                                "value": "server"
+                            }
+                        ],
+                        "name": "Device Display-Name",
+                        "description": "Friendly name of the device. Device name is the common name of the device (eg: Reliagate 20-25, Raspberry Pi, etc.). Hostname will use the linux hostname utility.                  Custom allows for defining a unique string. Server defined relies on the remote management server to define a name.",
+                        "id": "device.display-name",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "device-name",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Device Custom-Name",
+                        "description": "Custom name for the device. This value is applied ONLY if device.display-name is set to \"Custom\"",
+                        "id": "device.custom-name",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Topic Control-Prefix",
+                        "description": "Topic prefix for system and device management messages.",
+                        "id": "topic.control-prefix",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "$EDC",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Encode gzip",
+                        "description": "Compress message payloads before sending them to the remote server to reduce the network traffic.",
+                        "id": "encode.gzip",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": false
+                    },
+                    {
+                        "name": "Republish Mqtt Birth Cert On Gps Lock",
+                        "description": "Whether or not to republish the MQTT Birth Certificate on GPS lock event",
+                        "id": "republish.mqtt.birth.cert.on.gps.lock",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Republish Mqtt Birth Cert On Modem Detect",
+                        "description": "Whether or not to republish the MQTT Birth Certificate on modem detection event",
+                        "id": "republish.mqtt.birth.cert.on.modem.detect",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "false",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Republish Mqtt Birth Cert On Tamper Event",
+                        "description": "Whether or not to republish the MQTT Birth Certificate on a tamper event. This has effect only if a TamperDetectionService is available in the framework.",
+                        "id": "republish.mqtt.birth.cert.on.tamper.event",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": true
+                    },
+                    {
+                        "name": "Enable Default Subscriptions",
+                        "description": "Manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable.",
+                        "id": "enable.default.subscriptions",
+                        "type": "BOOLEAN",
+                        "cardinality": 0,
+                        "defaultValue": "true",
+                        "isRequired": true
+                    },
+                    {
+                        "option": [
+                            {
+                                "label": "Kura Protobuf",
+                                "value": "kura-protobuf"
+                            },
+                            {
+                                "label": "Simple JSON",
+                                "value": "simple-json"
+                            }
+                        ],
+                        "name": "Payload Encoding",
+                        "description": "Specify the message payload encoding.",
+                        "id": "payload.encoding",
+                        "type": "STRING",
+                        "cardinality": 0,
+                        "defaultValue": "kura-protobuf",
+                        "isRequired": true
+                    }
+                ],
+                "icon": [
+                    {
+                        "resource": "CloudService",
+                        "size": 32
+                    }
+                ],
+                "name": "CloudService",
+                "description": "The CloudService allows for setting a user friendly name for the current device. It also provides the option to compress message payloads to reduce network traffic.",
+                "id": "org.eclipse.kura.cloud.CloudService"
+            },
+            "properties": {
+                "topic.control-prefix": {
+                    "value": "$EDC",
+                    "type": "STRING"
+                },
+                "republish.mqtt.birth.cert.on.tamper.event": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "device.custom-name": {
+                    "value": "Intel UP²",
+                    "type": "STRING"
+                },
+                "device.display-name": {
+                    "value": "device-name",
+                    "type": "STRING"
+                },
+                "payload.encoding": {
+                    "value": "kura-protobuf",
+                    "type": "STRING"
+                },
+                "republish.mqtt.birth.cert.on.modem.detect": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "service.factoryPid": {
+                    "value": "org.eclipse.kura.cloud.CloudService",
+                    "type": "STRING"
+                },
+                "kura.service.pid": {
+                    "value": "org.eclipse.kura.cloud.CloudService",
+                    "type": "STRING"
+                },
+                "service.pid": {
+                    "value": "org.eclipse.kura.cloud.CloudService-1699285622904-7",
+                    "type": "STRING"
+                },
+                "enable.default.subscriptions": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "republish.mqtt.birth.cert.on.gps.lock": {
+                    "value": false,
+                    "type": "BOOLEAN"
+                },
+                "encode.gzip": {
+                    "value": true,
+                    "type": "BOOLEAN"
+                },
+                "DataService.target": {
+                    "value": "(kura.service.pid=org.eclipse.kura.data.DataService)",
+                    "type": "STRING"
+                },
+                "kura.cloud.service.factory.pid": {
+                    "value": "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory",
+                    "type": "STRING"
+                }
+            }
+        }
+    ]
+}

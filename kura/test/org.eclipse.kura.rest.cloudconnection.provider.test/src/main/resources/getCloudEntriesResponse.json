@@ -2,9 +2,21 @@
     "cloudEntries": [
         {
             "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
-            "state": "DISCONNECTED",
+            "state": "CONNECTED",
             "connectionType": "CONNECTION",
             "pid": "org.eclipse.kura.cloud.CloudService"
+        },
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "state": "DISCONNECTED",
+            "connectionType": "CONNECTION",
+            "pid": "org.eclipse.kura.cloud.CloudService-test"
+        },
+        {
+            "cloudConnectionPid": "org.eclipse.kura.cloud.CloudService",
+            "type": "PUBLISHER",
+            "pid": "heaterPublisher",
+            "factoryPid": "org.eclipse.kura.cloud.publisher.CloudPublisher"
         }
     ]
 }

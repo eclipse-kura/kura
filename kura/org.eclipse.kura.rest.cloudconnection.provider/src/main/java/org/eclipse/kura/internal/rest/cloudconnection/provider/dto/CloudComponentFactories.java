@@ -16,21 +16,22 @@ import java.util.List;
 
 public class CloudComponentFactories {
 
-    private final List<CloudConnectionFactoryInfo> cloudConnectionFactoryInfos;
-    private final List<Cloud> pubSubFactories;
+    private final List<CloudConnectionFactoryInfo> cloudConnectionFactories;
+    private final List<PubSubFactoryInfo> pubSubFactories;
 
-    public CloudComponentFactories(List<CloudConnectionFactoryInfo> cloudConnectionFactoryInfos,
-            List<Cloud> pubSubFactories) {
-        this.cloudConnectionFactoryInfos = cloudConnectionFactoryInfos;
+    public CloudComponentFactories(List<CloudConnectionFactoryInfo> cloudConnectionFactories,
+            List<PubSubFactoryInfo> pubSubFactories) {
+
+        this.cloudConnectionFactories = cloudConnectionFactories;
         this.pubSubFactories = pubSubFactories;
     }
 
-    public List<CloudConnectionFactoryInfo> getCloudConnectionFactoryInfos() {
-        return cloudConnectionFactoryInfos;
+    public List<CloudConnectionFactoryInfo> getCloudConnectionFactories() {
+        return this.cloudConnectionFactories;
     }
 
-    public List<Cloud> getPubSubFactories() {
-        return pubSubFactories;
+    public List<PubSubFactoryInfo> getPubSubFactories() {
+        return this.pubSubFactories;
     }
 
 }

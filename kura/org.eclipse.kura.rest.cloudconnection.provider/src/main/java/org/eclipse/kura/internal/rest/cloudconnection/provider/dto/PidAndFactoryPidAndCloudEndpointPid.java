@@ -12,28 +12,29 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.dto;
 
-public class PidAndFactoryPidAndCloudConnectionPid {
+public class PidAndFactoryPidAndCloudEndpointPid {
 
     private final String pid;
     private final String factoryPid;
-    private final String cloudConnectionPid;
+    private final String cloudEndpointPid;
 
-    public PidAndFactoryPidAndCloudConnectionPid(String pid, String factoryPid, String cloudConnectionPid) {
+    public PidAndFactoryPidAndCloudEndpointPid(String pid, String factoryPid, String cloudEndpointPid) {
+
         this.pid = pid;
         this.factoryPid = factoryPid;
-        this.cloudConnectionPid = cloudConnectionPid;
+        this.cloudEndpointPid = cloudEndpointPid;
     }
 
     public String getPid() {
-        return pid;
+        return this.pid;
     }
 
     public String getFactoryPid() {
-        return factoryPid;
+        return this.factoryPid;
     }
 
-    public String getCloudConnectionPid() {
-        return cloudConnectionPid;
+    public String getCloudEndpointPid() {
+        return this.cloudEndpointPid;
     }
 
 }

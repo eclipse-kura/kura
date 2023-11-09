@@ -45,6 +45,7 @@ import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentPackageInfo;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
+import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Test;
@@ -394,7 +395,7 @@ public class DeploymentRestServiceUnitTest {
     private void whenGetMarketplacePackageDescriptorIsCalledFor(String url) {
         try {
             this.resultingMarketplacePackageDescriptor = this.deploymentRestService
-                    .getMarketplacePackageDescriptor(url);
+                    .getMarketplacePackageDescriptor(new DescriptorRequest(url));
         } catch (Exception e) {
             this.occurredException = e;
         }

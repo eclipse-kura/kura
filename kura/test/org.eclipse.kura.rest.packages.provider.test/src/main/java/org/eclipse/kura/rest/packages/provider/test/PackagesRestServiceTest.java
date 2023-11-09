@@ -197,8 +197,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void getMarketplacePackageDescriptorShouldFailWithDeploymentAgentServiceThrowing() {
         givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor();
-        whenRequestIsPerformed(new MethodSpec("GET"),
-                "/_packageDescriptor?url=https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=42");
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/_packageDescriptor",
+                "{'url':'https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=42'}");
 
         thenNoExceptionOccurred();
         thenResponseCodeIs(500);
@@ -206,8 +206,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void getMarketplacePackageDescriptorShouldFailWithWrongUrl() {
-        whenRequestIsPerformed(new MethodSpec("GET"),
-                "/_packageDescriptor?url=https://marketplace.ellipse.org/marketplace-client-intro?mpc_install=69");
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/_packageDescriptor",
+                "{'url':'https://marketplace.ellipse.org/marketplace-client-intro?mpc_install=69'}");
 
         thenNoExceptionOccurred();
         thenResponseCodeIs(400);
@@ -220,13 +220,13 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
                 .nodeId("testNodeId").url("testUrl").dpUrl("testDpUrl2").minKuraVersion("1.1.0").maxKuraVersion("5.3.0")
                 .currentKuraVersion("5.4.0").isCompatible(true).build());
 
-        whenRequestIsPerformed(new MethodSpec("GET"),
-                "/_packageDescriptor?url=https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=69");
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/_packageDescriptor",
+                "{'url':'https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=70'}");
 
         thenRequestSucceeds();
         thenResponseCodeIs(200);
         thenNoExceptionOccurred();
-        thenDeploymentAgentServiceIsCalledWithUrl("https://marketplace.eclipse.org/node/69/api/p");
+        thenDeploymentAgentServiceIsCalledWithUrl("https://marketplace.eclipse.org/node/70/api/p");
         thenResponseBodyEqualsJson(
                 "{\"nodeId\":\"testNodeId\",\"url\":\"testUrl\",\"dpUrl\":\"testDpUrl2\",\"minKuraVersion\":\"1.1.0\",\"maxKuraVersion\":\"5.3.0\",\"currentKuraVersion\":\"5.4.0\",\"isCompatible\":true}");
     }

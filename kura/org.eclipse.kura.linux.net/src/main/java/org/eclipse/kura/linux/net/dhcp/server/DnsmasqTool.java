@@ -42,10 +42,10 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private String globalConfigFilename = "/etc/dnsmasq.d/dnsmasq-globals.conf";
     private static final String GLOBAL_CONFIGURATION = "port=0\nbind-dynamic\ndhcp-leasefile=/var/lib/dhcp/dnsmasq.leases\n";
 
-    static final Command IS_ACTIVE_COMMAND = new Command(
-            new String[] { "systemctl", "is-active", "--quiet", DhcpServerTool.DNSMASQ.getValue() });
-    static final Command RESTART_COMMAND = new Command(
-            new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
+    static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
+            DhcpServerTool.DNSMASQ.getValue() });
+    static final Command RESTART_COMMAND = new Command(new String[] { "systemctl", "restart",
+            DhcpServerTool.DNSMASQ.getValue() });
 
     private CommandExecutorService executorService;
     private Map<String, byte[]> configsLastHash = Collections.synchronizedMap(new HashMap<>());

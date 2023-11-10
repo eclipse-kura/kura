@@ -314,7 +314,7 @@ public class CloudConnectionService {
 
         return ServiceUtil.applyToServiceOptionally(this.bundleContext, ServiceComponentRuntime.class, scr ->
 
-        scr.getComponentDescriptionDTOs().stream().map(this::pubSubToCloudEntry).filter(Objects::nonNull)
+        scr.getComponentDescriptionDTOs().stream().map(this::pubSubFactoryToInfo).filter(Objects::nonNull)
                 .collect(Collectors.toList()));
     }
 
@@ -327,7 +327,7 @@ public class CloudConnectionService {
                         return false;
                     }
 
-                    return Objects.equals(factoryPid, properties.get("service.pid")) && pubSubToCloudEntry(c) != null;
+                    return Objects.equals(factoryPid, properties.get("service.pid")) && pubSubFactoryToInfo(c) != null;
                 }));
 
         if (!isPubSub) {
@@ -335,7 +335,7 @@ public class CloudConnectionService {
         }
     }
 
-    private PubSubFactoryInfo pubSubToCloudEntry(final ComponentDescriptionDTO component) {
+    private PubSubFactoryInfo pubSubFactoryToInfo(final ComponentDescriptionDTO component) {
 
         if (Arrays.stream(component.serviceInterfaces)
                 .noneMatch(intf -> CLOUD_PUBLISHER.equals(intf) || CLOUD_SUBSCRIBER.equals(intf))) {
@@ -367,24 +367,24 @@ public class CloudConnectionService {
                 (String) defaultFactoryPidRegex);
     }
 
-    private void fillState(final CloudEndpointInstance cloudConnectionEntry) throws KuraException {
+    private void fillState(final CloudEndpointInstance cloudEndpointInstance) throws KuraException {
 
-        cloudConnectionEntry.setState(CloudConnectionState.UNREGISTERED);
+        cloudEndpointInstance.setState(CloudConnectionState.UNREGISTERED);
 
-        final String filter = format("(%s=%s)", KURA_SERVICE_PID, cloudConnectionEntry.getCloudEndpointPid());
+        final String filter = format("(%s=%s)", KURA_SERVICE_PID, cloudEndpointInstance.getCloudEndpointPid());
 
         ServiceUtil.withAllServices(this.bundleContext, null, filter, service -> {
             if (service instanceof CloudConnectionManager) {
-                cloudConnectionEntry
+                cloudEndpointInstance
                         .setState(((CloudConnectionManager) service).isConnected() ? CloudConnectionState.CONNECTED
                                 : CloudConnectionState.DISCONNECTED);
-                cloudConnectionEntry.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
+                cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             } else if (service instanceof CloudEndpoint) {
-                cloudConnectionEntry.setConnectionType(CloudEndpointType.CLOUD_ENDPOINT);
+                cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_ENDPOINT);
             } else if (service instanceof CloudService) {
-                cloudConnectionEntry.setState(((CloudService) service).isConnected() ? CloudConnectionState.CONNECTED
+                cloudEndpointInstance.setState(((CloudService) service).isConnected() ? CloudConnectionState.CONNECTED
                         : CloudConnectionState.DISCONNECTED);
-                cloudConnectionEntry.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
+                cloudEndpointInstance.setConnectionType(CloudEndpointType.CLOUD_CONNECTION_MANAGER);
             }
         });
     }

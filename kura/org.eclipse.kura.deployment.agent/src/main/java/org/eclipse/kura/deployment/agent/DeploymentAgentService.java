@@ -104,6 +104,8 @@ public interface DeploymentAgentService {
      * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
      * passed as query parameter.
      *
+     * @since 1.4.0
+     *
      * @param url
      *                The URL of the deployment package descriptor. Note: the url accepted as argument should be
      *                already validated and such that it allows for downloading the descriptor file.

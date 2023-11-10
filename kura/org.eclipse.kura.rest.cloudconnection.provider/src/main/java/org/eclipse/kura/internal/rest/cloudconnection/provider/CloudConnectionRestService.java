@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 public class CloudConnectionRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionRestService.class);
-    private static final String DEBUG_MESSSAGE = "Processing request for method '{}'";
 
     private static final String MQTT_APP_ID = "CC-V1";
     private static final String REST_ROLE_NAME = "cloudconnection";

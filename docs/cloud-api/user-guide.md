@@ -12,19 +12,19 @@ The involved steps are the following
 
 1. Open the Cloud Connections section of the Web UI:
 
-    ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-1.png)
+    ![cloud-connections](images/cloud-connections-user-1.png)
 
 2. Create a new Cloud Connection
 
     1. Click on the **New Connection** button
 
-        ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-2.png)
+        ![cloud-connections](images/cloud-connections-user-2.png)
 
     2. Enter a new unique identifier in the **Cloud Connection Service** PID field. The identifier must be a valid `kura.service.pid` and, in case of a Kapua Cloud Connection, it must start with the `org.eclipse.kura.cloud.CloudService-` prefix. A valid identifier can be `org.eclipse.kura.cloud.CloudService-KAPUA`. As an alternative it is possible to reconfigure the existing `org.eclipse.kura.cloud.CloudService` Cloud Connection.
 
     3. Configure the `MQTTDataTrasport` service.
 
-        ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-3.png)
+        ![cloud-connections](images/cloud-connections-user-3.png)
 
         Click on the `MQTTDataTrasport-KAPUA` tab and fill the parameters required for establishing the MQTT connection:
 
@@ -35,7 +35,7 @@ The involved steps are the following
 
     4. Configure the `DataService-KAPUA` service.
 
-        ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-4.png)
+        ![cloud-connections](images/cloud-connections-user-4.png)
 
         In order to enable automatic connection, set the `Connect Auto-on-startup` parameter to `true`
 
@@ -45,7 +45,7 @@ The involved steps are the following
 
 2. Click on the **New Pub/Sub** button.
 
-    ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-5.png)
+    ![cloud-connections](images/cloud-connections-user-5.png)
 
 3. Select the type of component to be created, from the **Available Publisher/Subscriber factories** drop down list, in order to create a Publisher
 select the `org.eclipse.kura.cloud.publisher.CloudPublisher` entry.
@@ -54,7 +54,7 @@ select the `org.eclipse.kura.cloud.publisher.CloudPublisher` entry.
 
 5. Click **Apply**, you should see the publisher configuration
 
-    ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-6.png)
+    ![cloud-connections](images/cloud-connections-user-6.png)
 
 6. Select and configure the newly created publisher instance, and then click **Apply**
 
@@ -66,6 +66,6 @@ select the `org.eclipse.kura.cloud.publisher.CloudPublisher` entry.
 
 3. Click on the **Select available targets** link and select the desired Publisher instance to bind to.
 
-    ![cloud-connections](https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-7.png)
+    ![cloud-connections](images/cloud-connections-user-7.png)
 
 4. Click on **Apply**

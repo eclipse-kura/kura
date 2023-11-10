@@ -1,0 +1,52 @@
+{
+    "cloudConnectionFactories": [
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "defaultCloudEndpointPid": "org.eclipse.kura.cloud.CloudService-2",
+            "cloudEndpointPidRegex": "^org.eclipse.kura.cloud.CloudService\\-[a-zA-Z0-9]+$"
+        },
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+            "defaultCloudEndpointPid": "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+            "cloudEndpointPidRegex": "^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$"
+        },
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+            "defaultCloudEndpointPid": "org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint",
+            "cloudEndpointPidRegex": "^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$"
+        },
+        {
+            "cloudConnectionFactoryPid": "org.eclipse.kura.camel.cloud.factory.CamelFactory",
+            "defaultCloudEndpointPid": "org.eclipse.kura.camel.cloud.factory.CamelFactory",
+            "cloudEndpointPidRegex": "^org.eclipse.kura.camel.cloud.factory.CamelFactory(\\-[a-zA-Z0-9]+)?$"
+        }
+    ],
+    "pubSubFactories": [
+        {
+            "factoryPid": "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint"
+        },
+        {
+            "factoryPid": "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+            "defaultPid": "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+            "defaultPidRegex": "^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\\-[a-zA-Z0-9]+)?$"
+        },
+        {
+            "factoryPid": "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService"
+        },
+        {
+            "factoryPid": "org.eclipse.kura.cloud.publisher.CloudPublisher",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService"
+        },
+        {
+            "factoryPid": "org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint"
+        },
+        {
+            "factoryPid": "org.eclipse.kura.event.publisher.EventPublisher",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService"
+        }
+    ]
+}

@@ -129,9 +129,22 @@ public class CloudConnectionService {
 
         withAllCloudConnectionFactories(factory -> {
             if (factoryPid.equals(factory.getFactoryPid())) {
-                result.addAll(factory.getStackComponentsPids(cloudServicePid));
+                result.addAll(getStackComponentPids(factory, cloudServicePid));
             }
         });
+
+        return result;
+    }
+
+    private List<String> getStackComponentPids(CloudConnectionFactory factory, String pid) {
+
+        List<String> result = new ArrayList<>();
+
+        try {
+            result = factory.getStackComponentsPids(pid);
+        } catch (Exception e) {
+            // nothing to do, just return an empty list
+        }
 
         return result;
     }
@@ -147,7 +160,7 @@ public class CloudConnectionService {
             Set<String> managedCloudConnectionPids = factory.getManagedCloudConnectionPids();
 
             for (String cloudConnectionPid : managedCloudConnectionPids) {
-                List<String> stackComponentsPids = factory.getStackComponentsPids(cloudConnectionPid);
+                List<String> stackComponentsPids = getStackComponentPids(factory, cloudConnectionPid);
 
                 pids.stream().filter(stackComponentsPids::contains).forEach(result::add);
             }

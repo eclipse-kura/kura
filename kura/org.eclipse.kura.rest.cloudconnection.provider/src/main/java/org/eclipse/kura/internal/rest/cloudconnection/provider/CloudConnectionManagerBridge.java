@@ -43,7 +43,7 @@ public class CloudConnectionManagerBridge {
 
     private final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
-    public void connectDataService(String connectionId) throws KuraException {
+    public void connectCloudEndpoint(String connectionId) throws KuraException {
 
         try {
             runOnDataService(connectionId, dataService -> {
@@ -84,7 +84,7 @@ public class CloudConnectionManagerBridge {
 
     }
 
-    public void disconnectDataService(String connectionId) throws KuraException {
+    public void disconnectCloudEndpoint(String connectionId) throws KuraException {
 
         runOnDataService(connectionId, dataService -> dataService.disconnect(10));
 
@@ -104,7 +104,7 @@ public class CloudConnectionManagerBridge {
 
     }
 
-    public boolean isConnected(String connectionId) throws KuraException {
+    public boolean isConnectedCloudEndpoint(String connectionId) throws KuraException {
 
         AtomicReference<Boolean> connectionStatusHolder = new AtomicReference<>(false);
 

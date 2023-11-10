@@ -122,7 +122,7 @@ public class CloudConnectionService {
         return result;
     }
 
-    public Set<String> getStackConfigurationsByFactory(final String factoryPid, final String cloudServicePid)
+    public Set<String> getStackComponentsPids(final String factoryPid, final String cloudServicePid)
             throws KuraException {
 
         final Set<String> result = new HashSet<>();
@@ -165,7 +165,7 @@ public class CloudConnectionService {
         return resultSet;
     }
 
-    public void createCloudServiceFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
+    public void createCloudEndpointFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
         if (factoryPid == null || factoryPid.trim().isEmpty() || cloudServicePid == null
                 || cloudServicePid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
@@ -178,7 +178,7 @@ public class CloudConnectionService {
         });
     }
 
-    public void deleteCloudServiceFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
+    public void deleteCloudEndpointFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
         if (factoryPid == null || factoryPid.trim().isEmpty() || cloudServicePid == null
                 || cloudServicePid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);

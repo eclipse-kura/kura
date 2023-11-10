@@ -103,9 +103,8 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/instances")
     @Produces(MediaType.APPLICATION_JSON)
-    public CloudComponentInstances findCloudEntries() {
+    public CloudComponentInstances findCloudComponentInstances() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "findCloudEntries");
             return new CloudComponentInstances(this.cloudConnectionService.findCloudEndpointInstances(),
                     this.cloudConnectionService.findPubsubInstances());
         } catch (Exception e) {
@@ -118,11 +117,10 @@ public class CloudConnectionRestService {
     @Path("/cloudEndpoint/stackComponentPids")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PidSet getStackConfigurationsByFactory(
+    public PidSet getStackComponentsPids(
             final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getStackConfigurationsByFactory");
-            Set<String> pidSet = this.cloudConnectionService.getStackConfigurationsByFactory(
+            Set<String> pidSet = this.cloudConnectionService.getStackComponentsPids(
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
 
@@ -136,11 +134,10 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createCloudServiceFromFactory(
+    public void createCloudEndpoint(
             final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "createCloudServiceFromFactory");
-            this.cloudConnectionService.createCloudServiceFromFactory(
+            this.cloudConnectionService.createCloudEndpointFromFactory(
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
@@ -152,11 +149,10 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteCloudServiceFromFactory(
+    public void deleteCloudEndpoint(
             final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "deleteCloudServiceFromFactory");
-            this.cloudConnectionService.deleteCloudServiceFromFactory(
+            this.cloudConnectionService.deleteCloudEndpointFromFactory(
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudConnectionFactoryPid(),
                     cloudConnectionFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
@@ -170,7 +166,6 @@ public class CloudConnectionRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public CloudComponentFactories getCloudComponentFactories() {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getCloudComponentFactories");
             return this.cloudConnectionService.getCloudComponentFactories();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -183,7 +178,6 @@ public class CloudConnectionRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void createPubSubInstance(final PidAndFactoryPidAndCloudEndpointPid pidAndFactoryPidAndCloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "createPubSubInstance");
             this.cloudConnectionService.createPubSubInstance(pidAndFactoryPidAndCloudEndpointPid.getPid(),
                     pidAndFactoryPidAndCloudEndpointPid.getFactoryPid(),
                     pidAndFactoryPidAndCloudEndpointPid.getCloudEndpointPid());
@@ -198,7 +192,6 @@ public class CloudConnectionRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void deletePubSubInstance(final PidAndFactoryPid pidAndFactoryPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "deletePubSubInstance");
             this.cloudConnectionService.deletePubSubInstance(pidAndFactoryPid.getPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -209,9 +202,8 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/configurations")
     @Consumes(MediaType.APPLICATION_JSON)
-    public ComponentConfigurationList getConfiguration(final PidSet pidSet) {
+    public ComponentConfigurationList getConfigurations(final PidSet pidSet) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "getConfiguration");
             List<ComponentConfiguration> result = this.cloudConnectionService.getPubSubConfiguration(pidSet.getPids());
 
             result.addAll(this.cloudConnectionService.getStackConfigurationsByPid(pidSet.getPids()));
@@ -229,10 +221,9 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/configurations")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateStackComponentConfiguration(
+    public void updateStackComponentConfigurations(
             UpdateComponentConfigurationRequest updateComponentConfigurationRequest) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "updateStackComponentConfiguration");
             this.cloudConnectionService.updateStackComponentConfiguration(
                     updateComponentConfigurationRequest.getComponentConfigurations(),
                     updateComponentConfigurationRequest.isTakeSnapshot());
@@ -247,8 +238,7 @@ public class CloudConnectionRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void connectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "connectDataService");
-            this.cloudConnectionManagerBridge.connectDataService(cloudEndpointPid.getCloudEndpointPid());
+            this.cloudConnectionManagerBridge.connectCloudEndpoint(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -260,8 +250,7 @@ public class CloudConnectionRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public void disconnectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "disconnectDataService");
-            this.cloudConnectionManagerBridge.disconnectDataService(cloudEndpointPid.getCloudEndpointPid());
+            this.cloudConnectionManagerBridge.disconnectCloudEndpoint(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -272,11 +261,10 @@ public class CloudConnectionRestService {
     @Path("/cloudEndpoint/isConnected")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ConnectedStatus isConnected(CloudEndpointPidRequest cloudEndpointPid) {
+    public ConnectedStatus isConnectedCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
-            logger.debug(DEBUG_MESSSAGE, "isConnected");
             return new ConnectedStatus(
-                    this.cloudConnectionManagerBridge.isConnected(cloudEndpointPid.getCloudEndpointPid()));
+                    this.cloudConnectionManagerBridge.isConnectedCloudEndpoint(cloudEndpointPid.getCloudEndpointPid()));
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

@@ -210,7 +210,11 @@ public class CloudConnectionService {
         withAllCloudConnectionFactories(service -> {
             if (service.getFactoryPid().equals(factoryPid)) {
                 found.set(true);
-                service.deleteConfiguration(cloudEndpointPid);
+                try {
+                    service.deleteConfiguration(cloudEndpointPid);
+                } catch (Exception e) {
+                    throw new KuraException(KuraErrorCode.NOT_FOUND);
+                }
             }
         });
 
@@ -335,7 +339,7 @@ public class CloudConnectionService {
 
     private void requireIsPubSub(final String pid) throws KuraException {
         if (!isPubSub(pid)) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
     }
 

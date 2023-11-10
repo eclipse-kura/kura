@@ -20,8 +20,8 @@ public interface DeploymentAgentService {
      * {@linkplain org.osgi.service.event.Event Event} topic on which the result
      * of the deployment package installation is posted.
      */
-    public static final String EVENT_INSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName()
-                    .replace('.', '/') + "/INSTALLED";
+    public static final String EVENT_INSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName().replace('.',
+            '/') + "/INSTALLED";
 
     /**
      * {@linkplain org.osgi.service.event.Event Event} property
@@ -48,7 +48,7 @@ public interface DeploymentAgentService {
      * of the deployment package uninstallation is posted.
      */
     public static final String EVENT_UNINSTALLED_TOPIC = DeploymentAgentService.class.getPackage().getName()
-                    .replace('.', '/') + "/UNINSTALLED";
+            .replace('.', '/') + "/UNINSTALLED";
 
     /**
      * {@linkplain org.osgi.service.event.Event Event} property
@@ -69,9 +69,9 @@ public interface DeploymentAgentService {
      * 
      * 
      * @param url
-     *                The URL of the deployment package
+     *            The URL of the deployment package
      * @throws Exception
-     *                 If the installation of a deployment package at the same URL is still pending
+     *             If the installation of a deployment package at the same URL is still pending
      */
     public void installDeploymentPackageAsync(String url) throws Exception;
 
@@ -86,9 +86,9 @@ public interface DeploymentAgentService {
      * 
      * 
      * @param name
-     *                The symbolic name of the deployment package
+     *            The symbolic name of the deployment package
      * @throws Exception
-     *                 If the uninstallation of a deployment package at the same symbolic name is still pending
+     *             If the uninstallation of a deployment package at the same symbolic name is still pending
      */
     public void uninstallDeploymentPackageAsync(String name) throws Exception;
 
@@ -96,7 +96,7 @@ public interface DeploymentAgentService {
      * Asks if the installation of a deployment package at the given URL is pending.
      * 
      * @param url
-     *                The URL of the deployment package
+     *            The URL of the deployment package
      * @return true if the installation of a deployment package at URL is pending
      */
     public boolean isInstallingDeploymentPackage(String url);
@@ -132,11 +132,12 @@ public interface DeploymentAgentService {
     public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url,
                     SslManagerService sslManagerService);
 
+
     /**
      * Asks if the uninstallation of a deployment package with the given symbolic name is pending.
      * 
      * @param name
-     *                The symbolic name of the deployment package
+     *            The symbolic name of the deployment package
      * @return true if the uninstallation of a deployment package at URL is pending
      */
     public boolean isUninstallingDeploymentPackage(String name);

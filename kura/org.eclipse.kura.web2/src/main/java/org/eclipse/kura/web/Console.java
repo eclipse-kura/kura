@@ -489,8 +489,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/package", new GwtPackageServiceImpl(), null,
-                this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/package",
+                new GwtPackageServiceImpl(this.sslManagerService), null, this.sessionContext);
 
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(), null,
                 this.sessionContext);

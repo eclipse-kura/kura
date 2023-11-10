@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -57,8 +58,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
 
-    public GwtPackageServiceImpl() {
-        // nothing to do here
+    private final SslManagerService sslManagerService;
+
+    public GwtPackageServiceImpl(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
     }
 
     @Override
@@ -125,7 +128,7 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance()
                     .getService(DeploymentAgentService.class);
             MarketplacePackageDescriptor marketplacePackageDescriptor = deploymentAgentService
-                    .getMarketplacePackageDescriptor(url);
+                    .getMarketplacePackageDescriptor(url, this.sslManagerService);
 
             descriptor.setCompatible(marketplacePackageDescriptor.isCompatible());
             descriptor.setDpUrl(marketplacePackageDescriptor.getDpUrl());

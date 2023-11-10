@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -184,11 +185,18 @@ public class CloudConnectionService {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
+        AtomicReference<Boolean> found = new AtomicReference<>(false);
+
         withAllCloudConnectionFactories(service -> {
             if (service.getFactoryPid().equals(factoryPid)) {
+                found.set(true);
                 service.createConfiguration(cloudServicePid);
             }
         });
+
+        if (Boolean.FALSE.equals(found.get())) {
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
+        }
     }
 
     public void deleteCloudEndpointFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
@@ -197,11 +205,18 @@ public class CloudConnectionService {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
+        AtomicReference<Boolean> found = new AtomicReference<>(false);
+
         withAllCloudConnectionFactories(service -> {
             if (service.getFactoryPid().equals(factoryPid)) {
+                found.set(true);
                 service.deleteConfiguration(cloudServicePid);
             }
         });
+
+        if (Boolean.FALSE.equals(found.get())) {
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
+        }
     }
 
     public CloudComponentFactories getCloudComponentFactories() throws KuraException {
@@ -344,7 +359,7 @@ public class CloudConnectionService {
                 }));
 
         if (!isPubSub) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
     }
 

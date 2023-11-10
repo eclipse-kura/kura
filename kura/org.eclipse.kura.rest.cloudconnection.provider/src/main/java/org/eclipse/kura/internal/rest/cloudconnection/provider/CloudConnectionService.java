@@ -123,14 +123,14 @@ public class CloudConnectionService {
         return result;
     }
 
-    public Set<String> getStackComponentsPids(final String factoryPid, final String cloudServicePid)
+    public Set<String> getStackComponentsPids(final String factoryPid, final String cloudEndpointPid)
             throws KuraException {
 
         final Set<String> result = new HashSet<>();
 
         withAllCloudConnectionFactories(factory -> {
             if (factoryPid.equals(factory.getFactoryPid())) {
-                result.addAll(getStackComponentPids(factory, cloudServicePid));
+                result.addAll(getStackComponentPids(factory, cloudEndpointPid));
             }
         });
 
@@ -199,9 +199,9 @@ public class CloudConnectionService {
         }
     }
 
-    public void deleteCloudEndpointFromFactory(String factoryPid, String cloudServicePid) throws KuraException {
-        if (factoryPid == null || factoryPid.trim().isEmpty() || cloudServicePid == null
-                || cloudServicePid.trim().isEmpty()) {
+    public void deleteCloudEndpointFromFactory(String factoryPid, String cloudEndpointPid) throws KuraException {
+        if (factoryPid == null || factoryPid.trim().isEmpty() || cloudEndpointPid == null
+                || cloudEndpointPid.trim().isEmpty()) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -210,7 +210,7 @@ public class CloudConnectionService {
         withAllCloudConnectionFactories(service -> {
             if (service.getFactoryPid().equals(factoryPid)) {
                 found.set(true);
-                service.deleteConfiguration(cloudServicePid);
+                service.deleteConfiguration(cloudEndpointPid);
             }
         });
 
@@ -244,14 +244,20 @@ public class CloudConnectionService {
         return new CloudComponentFactories(cloudConnectionFactoryPids, pubSubFactories);
     }
 
-    public void createPubSubInstance(final String pid, final String factoryPid, final String cloudConnectionPid)
+    public void createPubSubInstance(final String pid, final String factoryPid, final String cloudEndpointPid)
             throws KuraException {
+
+        if (pid == null || pid.trim().isEmpty() || //
+                factoryPid == null || factoryPid.trim().isEmpty() //
+                || cloudEndpointPid == null || cloudEndpointPid.trim().isEmpty()) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
 
         requireIsPubSubFactory(factoryPid);
 
         ServiceUtil.applyToServiceOptionally(this.bundleContext, ConfigurationService.class, cs -> {
             cs.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
-                    CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudConnectionPid), true);
+                    CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid), true);
 
             return null;
         });

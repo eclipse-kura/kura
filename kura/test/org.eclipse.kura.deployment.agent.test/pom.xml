@@ -29,7 +29,7 @@ Eurotech
 <properties>
     <kura.basedir>${project.basedir}/../..</kura.basedir>
     <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    <mockserver.version>5.14.0</mockserver.version>
+    <mockserver.version>5.15.0</mockserver.version>
 </properties>
 
 <dependencies>
@@ -56,6 +56,7 @@ Eurotech
                     <phase>generate-sources</phase>
                     <configuration>
                         <outputDirectory>${project.basedir}/lib</outputDirectory>
+                        <stripVersion>true</stripVersion>
                         <artifactItems>
                             <artifactItem>
                                 <groupId>org.mock-server</groupId>

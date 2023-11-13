@@ -95,3 +95,39 @@ curl -X POST -k -u $USERNAME:$PASSWORD \
 "REQUEST_RECEIVED"
 ```
 
+#### Get Eclipse Marketplace Package Descriptor
+- Description: Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL passed in the request.
+- Method: PUT
+- API PATH: `/deploy/v2/_packageDescriptor`
+
+##### Request Body
+
+```json
+{
+  "url": "deploymentPackageUrl"
+}
+```
+
+Example:
+
+```json
+{
+  "url": "http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=5514714"
+}
+```
+
+##### Responses
+- 200 OK status
+- 400 Bad request
+
+```json
+{
+   "nodeId":"5514714",
+   "url":"https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5",
+   "dpUrl":"https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp",
+   "minKuraVersion":"5.1.0",
+   "maxKuraVersion":"",
+   "currentKuraVersion":"5.4.0",
+   "isCompatible":true
+}
+```

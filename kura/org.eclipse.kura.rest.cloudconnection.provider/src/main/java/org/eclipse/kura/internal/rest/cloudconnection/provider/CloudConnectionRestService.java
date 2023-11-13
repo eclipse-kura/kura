@@ -25,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -133,7 +134,7 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createCloudEndpoint(
+    public Response createCloudEndpoint(
             final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
             this.cloudConnectionService.createCloudEndpointFromFactory(
@@ -142,13 +143,15 @@ public class CloudConnectionRestService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteCloudEndpoint(
+    public Response deleteCloudEndpoint(
             final CloudConnectionFactoryPidAndCloudEndpointPid cloudConnectionFactoryPidAndCloudEndpointPid) {
         try {
             this.cloudConnectionService.deleteCloudEndpointFromFactory(
@@ -157,6 +160,8 @@ public class CloudConnectionRestService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @GET
@@ -175,7 +180,8 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/pubSub")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createPubSubInstance(final PidAndFactoryPidAndCloudEndpointPid pidAndFactoryPidAndCloudEndpointPid) {
+    public Response createPubSubInstance(
+            final PidAndFactoryPidAndCloudEndpointPid pidAndFactoryPidAndCloudEndpointPid) {
         try {
             this.cloudConnectionService.createPubSubInstance(pidAndFactoryPidAndCloudEndpointPid.getPid(),
                     pidAndFactoryPidAndCloudEndpointPid.getFactoryPid(),
@@ -183,18 +189,22 @@ public class CloudConnectionRestService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/pubSub")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deletePubSubInstance(final PidAndFactoryPid pidAndFactoryPid) {
+    public Response deletePubSubInstance(final PidAndFactoryPid pidAndFactoryPid) {
         try {
             this.cloudConnectionService.deletePubSubInstance(pidAndFactoryPid.getPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @POST
@@ -220,7 +230,7 @@ public class CloudConnectionRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/configurations")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateStackComponentConfigurations(
+    public Response updateStackComponentConfigurations(
             UpdateComponentConfigurationRequest updateComponentConfigurationRequest) {
         try {
             this.cloudConnectionService.updateStackComponentConfiguration(
@@ -229,30 +239,36 @@ public class CloudConnectionRestService {
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint/connect")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void connectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
+    public Response connectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
             this.cloudConnectionManagerBridge.connectCloudEndpoint(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @POST
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/cloudEndpoint/disconnect")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void disconnectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
+    public Response disconnectCloudEndpoint(CloudEndpointPidRequest cloudEndpointPid) {
         try {
             this.cloudConnectionManagerBridge.disconnectCloudEndpoint(cloudEndpointPid.getCloudEndpointPid());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
+
+        return Response.ok().build();
     }
 
     @POST

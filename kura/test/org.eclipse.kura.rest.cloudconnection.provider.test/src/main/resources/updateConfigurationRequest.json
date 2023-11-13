@@ -1,7 +1,7 @@
 {
     "configs": [
         {
-            "pid": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+            "pid": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test",
             "properties": {
                 "broker-url": {
                     "type": "STRING",

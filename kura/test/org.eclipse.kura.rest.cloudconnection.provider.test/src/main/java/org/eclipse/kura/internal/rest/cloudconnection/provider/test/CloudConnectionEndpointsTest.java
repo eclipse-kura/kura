@@ -291,10 +291,6 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
                 cloudEndpointPid);
     }
 
-    private void givenPidAndFactoryPid(String pid, String factoryPid) {
-        this.pidAndFactoryPid = new PidAndFactoryPid(pid, factoryPid);
-    }
-
     private void givenPid(String pid) {
         this.pidAndFactoryPid = new PidAndFactoryPid(pid);
     }

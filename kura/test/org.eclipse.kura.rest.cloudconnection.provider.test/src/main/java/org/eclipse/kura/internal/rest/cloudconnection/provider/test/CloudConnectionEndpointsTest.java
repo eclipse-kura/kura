@@ -143,7 +143,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldCreateCloudEndpoint() {
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.cloud.CloudService-createTest");
+                "org.eclipse.kura.cloud.CloudService-createTest" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
@@ -153,9 +153,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldDeleteCloudEndpoint() {
-        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete");
+        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.cloud.CloudService-toDelete");
+                "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
@@ -174,8 +174,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreatePublisherInstance() {
-        givenPidAndFactoryPidAndCloudEndpointPid("test-pub", "org.eclipse.kura.cloud.publisher.CloudPublisher",
-                CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPidAndFactoryPidAndCloudEndpointPid("test-pub-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.publisher.CloudPublisher", CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
                 gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
@@ -185,8 +185,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSubscriberInstance() {
-        givenPidAndFactoryPidAndCloudEndpointPid("test-sub", "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-                CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPidAndFactoryPidAndCloudEndpointPid("test-sub-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
                 gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
@@ -196,9 +196,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldDeletePublisherInstance() {
-        givenPubSubInstance("pub-to-delete", "org.eclipse.kura.cloud.publisher.CloudPublisher",
-                CLOUD_ENDPOINT_INSTANCE_TEST);
-        givenPid("pub-to-delete");
+        givenPubSubInstance("pub-to-delete-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.publisher.CloudPublisher", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPid("pub-to-delete-" + this.getTransportType());
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));
 
@@ -207,9 +207,9 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldDeleteSubscriberInstance() {
-        givenPubSubInstance("sub-to-delete", "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-                CLOUD_ENDPOINT_INSTANCE_TEST);
-        givenPid("sub-to-delete");
+        givenPubSubInstance("sub-to-delete-" + this.getTransportType(),
+                "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
+        givenPid("sub-to-delete" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));

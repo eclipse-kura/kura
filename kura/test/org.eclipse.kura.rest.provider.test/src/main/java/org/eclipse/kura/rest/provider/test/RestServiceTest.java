@@ -664,22 +664,6 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnMessageIfLoginBannnerIsEnabled() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", true, //
-                "access.banner.content", "foo");
-        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
-        givenNoBasicCredentials();
-
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
-                "{\"username\":\"foo\",\"password\":\"bar\"}");
-
-        thenResponseCodeIs(200);
-        thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false,\"message\":\"foo\"}");
-        thenResponseHasCookie("JSESSIONID");
-    }
-
-    @Test
     public void shouldRejectPassordChangeWithTooShort() {
         givenConfiguration("org.eclipse.kura.web.Console", //
                 "new.password.min.length", 4, //
@@ -818,14 +802,32 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldReturnCurrentAuthenticationMethodInfo() {
+        givenHttpServiceClientCertAuthDisabled();
         givenService(new RequiresAssetsRole());
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
         givenNoBasicCredentials();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationMethods", null);
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(
                 "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false}");
+    }
+
+    @Test
+    public void shouldReturnMessageIfLoginBannnerIsEnabled() {
+        givenHttpServiceClientCertAuthDisabled();
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", true, //
+                "access.banner.content", "foo");
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
+
+        thenResponseCodeIs(200);
+        thenResponseBodyEqualsJson(
+                "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false,\"message\":\"foo\"}");
     }
 
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
@@ -937,6 +939,23 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
 
             RestTransport.waitPortOpen("localhost", port, 1, TimeUnit.MINUTES);
+
+        } catch (Exception e) {
+            fail("cannot set httpservice keystore pid");
+        }
+    }
+
+    private void givenHttpServiceClientCertAuthDisabled() {
+        try {
+            final ConfigurationService configurationService = ServiceUtil
+                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+            final Map<String, Object> properties = Collections.singletonMap("https.client.auth.ports",
+                    new Integer[] {});
+
+            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
+
+            RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
 
         } catch (Exception e) {
             fail("cannot set httpservice keystore pid");

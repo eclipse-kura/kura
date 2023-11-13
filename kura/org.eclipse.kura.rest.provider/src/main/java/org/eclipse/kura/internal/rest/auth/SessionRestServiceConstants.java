@@ -21,7 +21,7 @@ public class SessionRestServiceConstants {
     public static final String CHANGE_PASSWORD_PATH = "/changePassword";
     public static final String LOGOUT_PATH = "/logout";
     public static final String CURRENT_IDENTITY = "/currentIdentity";
-    public static final String AUTHENTICATION_METHODS = "/authenticationMethods";
+    public static final String AUTHENTICATION_INFO = "/authenticationInfo";
 
     private SessionRestServiceConstants() {
     }

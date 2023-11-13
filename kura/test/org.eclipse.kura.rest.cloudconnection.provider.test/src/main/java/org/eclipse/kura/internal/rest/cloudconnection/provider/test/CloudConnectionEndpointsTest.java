@@ -131,7 +131,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldGetStackComponentPids() {
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.cloud.CloudService-test");
+                CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/stackComponentPids",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));
@@ -175,7 +175,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldCreatePublisherInstance() {
         givenPidAndFactoryPidAndCloudEndpointPid("test-pub", "org.eclipse.kura.cloud.publisher.CloudPublisher",
-                "org.eclipse.kura.cloud.CloudService-test");
+                CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
                 gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
@@ -186,7 +186,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldCreateSubscriberInstance() {
         givenPidAndFactoryPidAndCloudEndpointPid("test-sub", "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-                "org.eclipse.kura.cloud.CloudService-test");
+                CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/pubSub",
                 gson.toJson(this.pidAndFactoryPidAndCloudEndpointPid));
@@ -197,7 +197,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldDeletePublisherInstance() {
         givenPubSubInstance("pub-to-delete", "org.eclipse.kura.cloud.publisher.CloudPublisher",
-                "org.eclipse.kura.cloud.CloudService-test");
+                CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("pub-to-delete");
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));
@@ -208,7 +208,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldDeleteSubscriberInstance() {
         givenPubSubInstance("sub-to-delete", "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
-                "org.eclipse.kura.cloud.CloudService-test");
+                CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("sub-to-delete");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
@@ -219,9 +219,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldGetConfigurations() {
-        givenPidSet("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", //
-                "org.eclipse.kura.data.DataService");
+        givenPidSet(CLOUD_ENDPOINT_INSTANCE_TEST, "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test", //
+                "org.eclipse.kura.data.DataService-test");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/configurations", gson.toJson(this.pidSet));
 
@@ -242,7 +241,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldConnectEndpoint() {
-        givenCloudEndpointPidRequest("org.eclipse.kura.cloud.CloudService");
+        givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/connect",
                 gson.toJson(this.cloudEndpointPidRequest));
@@ -252,7 +251,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldDisconnectEndpoint() {
-        givenCloudEndpointPidRequest("org.eclipse.kura.cloud.CloudService");
+        givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/disconnect",
                 gson.toJson(this.cloudEndpointPidRequest));
@@ -262,7 +261,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCheckEndpointStatus() {
-        givenCloudEndpointPidRequest("org.eclipse.kura.cloud.CloudService");
+        givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/cloudEndpoint/isConnected",
                 gson.toJson(this.cloudEndpointPidRequest));

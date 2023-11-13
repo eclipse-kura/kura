@@ -275,9 +275,6 @@ This project leverages the following third party content.
 * com.eurotech.gpsd4java_1.0.0, Apache-2.0, approved, CQ23923
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777
 * org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
-* org.mock-server.mockserver-client-java-no-dependencies 5.15.0, Apache-2.0 AND LGPL-3.0-only, approved, #11514
-* org.mock-server.mockserver-netty-no-dependencies 5.15.0, Apache-2.0 AND LGPL-3.0-only AND OFL-1.1 AND (BSD-3-Clause AND MIT), approved, #11515
-
 
 ## Cryptography
 

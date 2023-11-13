@@ -79,6 +79,10 @@ public abstract class AbstractRequestHandlerTest {
         assertEquals(Optional.empty(), expectResponse().getBody());
     }
 
+    protected void thenResponseBodyIsNotEmpty() {
+        assertTrue(expectResponse().getBody().isPresent());
+    }
+
     protected void thenResponseHasCookie(final String name) {
         final CookieManager cookieManager = expectCookieManager();
 

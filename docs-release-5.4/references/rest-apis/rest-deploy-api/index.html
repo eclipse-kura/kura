@@ -2934,6 +2934,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#get-eclipse-marketplace-package-descriptor" class="md-nav__link">
+    Get Eclipse Marketplace Package Descriptor
+  </a>
+  
+    <nav class="md-nav" aria-label="Get Eclipse Marketplace Package Descriptor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_2" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_4" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3249,6 +3276,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#get-eclipse-marketplace-package-descriptor" class="md-nav__link">
+    Get Eclipse Marketplace Package Descriptor
+  </a>
+  
+    <nav class="md-nav" aria-label="Get Eclipse Marketplace Package Descriptor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body_2" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#responses_4" class="md-nav__link">
+    Responses
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3343,6 +3397,37 @@ Identities with <code>rest.deploy</code> permissions can access these APIs.</p>
 <li>200 OK status</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>&quot;REQUEST_RECEIVED&quot;
+</code></pre></div>
+<h4 id="get-eclipse-marketplace-package-descriptor">Get Eclipse Marketplace Package Descriptor</h4>
+<ul>
+<li>Description: Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL passed in the request.</li>
+<li>Method: PUT</li>
+<li>API PATH: <code>/deploy/v2/_packageDescriptor</code></li>
+</ul>
+<h5 id="request-body_2">Request Body</h5>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;deploymentPackageUrl&quot;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=5514714&quot;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">}</span>
+</code></pre></div>
+<h5 id="responses_4">Responses</h5>
+<ul>
+<li>200 OK status</li>
+<li>400 Bad request</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">   </span><span class="nt">&quot;nodeId&quot;</span><span class="p">:</span><span class="s2">&quot;5514714&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">   </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="s2">&quot;https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">   </span><span class="nt">&quot;dpUrl&quot;</span><span class="p">:</span><span class="s2">&quot;https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">   </span><span class="nt">&quot;minKuraVersion&quot;</span><span class="p">:</span><span class="s2">&quot;5.1.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">   </span><span class="nt">&quot;maxKuraVersion&quot;</span><span class="p">:</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">   </span><span class="nt">&quot;currentKuraVersion&quot;</span><span class="p">:</span><span class="s2">&quot;5.4.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">   </span><span class="nt">&quot;isCompatible&quot;</span><span class="p">:</span><span class="kc">true</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">}</span>
 </code></pre></div>
 
               

@@ -155,7 +155,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldDeleteCloudEndpoint() {
         givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete");
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
-                "org.eclipse.kura.cloud.CloudService-createTest");
+                "org.eclipse.kura.cloud.CloudService-toDelete");
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/cloudEndpoint",
                 gson.toJson(this.cloudConnectionFactoryPidAndCloudEndpointPid));

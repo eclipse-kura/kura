@@ -39,7 +39,6 @@ If a password change is required for the current identity, it will be necessary 
 
 ## Reference
 
-# Session V1 Rest APIs
   * [Request definitions](#request-definitions)
     * [POST/login/password](#postloginpassword)
     * [POST/login/certificate](#postlogincertificate)
@@ -54,7 +53,7 @@ If a password change is required for the current identity, it will be necessary 
     * [XSRFToken](#xsrftoken)
     * [PasswordChangeRequest](#passwordchangerequest)
     * [IdentityInfo](#identityinfo)
-    * [AuthenticationMethodInfo](#authenticationmethodinfo)
+    * [AuthenticationInfo](#authenticationinfo)
     * [GenericFailureReport](#genericfailurereport)
 
 ## Request definitions
@@ -153,13 +152,13 @@ If a password change is required for the current identity, it will be necessary 
               * [GenericFailureReport](#genericfailurereport)
 
 ### GET/authenticationMethods
-  * **REST API path** : /services/session/v1/authenticationMethods
+  * **REST API path** : /services/session/v1/authenticationInfo
   * **description** : Provides information about the available authentication methods.
   * **responses** :
       * **200**
           * **description** : Request succeeded
           * **response body** :
-              * [AuthenticationMethodInfo](#authenticationmethodinfo)
+              * [AuthenticationInfo](#authenticationinfo)
       * **401**
           * **description** : The current session is not valid.
       * **500**
@@ -177,20 +176,9 @@ Represents the response for a successful authentication request.
       Determines whether a password change is required for the current identity.
 
   
-  * **message**: `bool` (**optional**)
-      Reports the content of the Login Banner, if configured on the device. A browser based application should display this message to the user after login if this property is set.
-            This property will be missing if the login banner is not enabled.
-
-  
 
 ```json
 {
-  "passwordChangeNeeded": true
-}
-```
-```json
-{
-  "message": "login banner content",
   "passwordChangeNeeded": true
 }
 ```
@@ -281,7 +269,7 @@ An object containing information about the current identity
   ]
 }
 ```
-### AuthenticationMethodInfo
+### AuthenticationInfo
 An object containing information about the enabled authentication methods.
 
 <br>**Properties**:
@@ -301,6 +289,11 @@ An object containing information about the enabled authentication methods.
           A port that can be used for certificate based authentication.
 
   
+  * **message**: `string` (**optional**)
+      Reports the content of the Login Banner, if configured on the device. A browser based application should display this message to the user before login if this property is set.
+          This property will be missing if the login banner is not enabled.
+
+  
 
 ```json
 {
@@ -315,6 +308,13 @@ An object containing information about the enabled authentication methods.
     4443,
     4444
   ],
+  "passwordAuthenticationEnabled": true
+}
+```
+```json
+{
+  "certificateAuthenticationEnabled": false,
+  "message": "login banner content",
   "passwordAuthenticationEnabled": true
 }
 ```

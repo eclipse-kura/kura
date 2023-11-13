@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +46,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor.MarketplacePackageDescriptorBuilder;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Version;
@@ -56,6 +60,10 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author cdealti
@@ -251,6 +259,133 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     public boolean isUninstallingDeploymentPackage(String name) {
         synchronized (this.uninstPackageNames) {
             return this.uninstPackageNames.contains(name);
+        }
+    }
+
+    @Override
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url) {
+        return getMarketplacePackageDescriptor(url, this.sslManagerService);
+    }
+
+    @Override
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url,
+            SslManagerService sslManagerServiceOverride) {
+        // Note: the url accepted as argument should be already validated and belonging to the
+        // Eclipse Marketplace domain such that it allows for downloading the descriptor file.
+        HttpsURLConnection connection = null;
+        MarketplacePackageDescriptorBuilder descriptorBuilder = MarketplacePackageDescriptor.builder();
+
+        try {
+            connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.setSSLSocketFactory(sslManagerServiceOverride.getSSLSocketFactory());
+
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(connection.getInputStream());
+
+            final Node updateUrl = getFirstNode(doc, "updateurl");
+            if (updateUrl == null) {
+                throw new IllegalStateException("Cannot find download URL in the deployment package descriptor");
+            }
+            descriptorBuilder.dpUrl(updateUrl.getTextContent());
+
+            final Node node = getFirstNode(doc, "node");
+            if (node != null) {
+                final NamedNodeMap nodeAttributes = node.getAttributes();
+                descriptorBuilder.nodeId(getAttributeValue(nodeAttributes, "id"));
+                descriptorBuilder.url(getAttributeValue(nodeAttributes, "url"));
+            }
+
+            Node versionCompatibility = getFirstNode(doc, "versioncompatibility");
+            String minKuraVersion = null;
+            String maxKuraVersion = null;
+            if (versionCompatibility != null) {
+                NodeList children = versionCompatibility.getChildNodes();
+                for (int i = 0; i < children.getLength(); i++) {
+                    Node n = children.item(i);
+                    String nodeName = n.getNodeName();
+                    if ("from".equalsIgnoreCase(nodeName)) {
+                        minKuraVersion = n.getTextContent();
+                    } else if ("to".equalsIgnoreCase(nodeName)) {
+                        maxKuraVersion = n.getTextContent();
+                    }
+                }
+            }
+            descriptorBuilder.minKuraVersion(minKuraVersion);
+            descriptorBuilder.maxKuraVersion(maxKuraVersion);
+
+            String kuraPropertyCompatibilityVersion = getMarketplaceCompatibilityVersionString();
+            Version kuraVersion = getMarketplaceCompatibilityVersion(kuraPropertyCompatibilityVersion);
+            if (kuraVersion != null) {
+                kuraPropertyCompatibilityVersion = kuraVersion.toString();
+            }
+
+            descriptorBuilder.currentKuraVersion(kuraPropertyCompatibilityVersion);
+            boolean isCompatible = checkCompatibility(minKuraVersion, maxKuraVersion, kuraVersion);
+            descriptorBuilder.isCompatible(isCompatible);
+
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Failed to get deployment package descriptor from Eclipse Marketplace. Caused by: ", e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return descriptorBuilder.build();
+    }
+
+    private Node getFirstNode(final Document doc, final String tagName) {
+        final NodeList elements = doc.getElementsByTagName(tagName);
+        if (elements.getLength() == 0) {
+            return null;
+        }
+        return elements.item(0);
+    }
+
+    private String getAttributeValue(NamedNodeMap attributes, String attribute) {
+        final Node node = attributes.getNamedItem(attribute);
+        if (node == null) {
+            return null;
+        }
+        return node.getNodeValue();
+    }
+
+    private Version getMarketplaceCompatibilityVersion(String marketplaceCompatibilityVersion) {
+        try {
+            return new Version(marketplaceCompatibilityVersion);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getMarketplaceCompatibilityVersionString() {
+        return this.systemService.getKuraMarketplaceCompatibilityVersion();
+    }
+
+    private boolean checkCompatibility(String minKuraVersionString, String maxKuraVersionString,
+            Version currentProductVersion) {
+        try {
+            boolean haveMinKuraVersion = minKuraVersionString != null && !minKuraVersionString.isEmpty();
+            boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
+
+            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0
+                    || haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
+                throw new IllegalArgumentException("Unsupported marketplace compatibility version");
+            }
+
+            return haveMinKuraVersion || haveMaxKuraVersion;
+        } catch (Exception e) {
+            return false;
         }
     }
 

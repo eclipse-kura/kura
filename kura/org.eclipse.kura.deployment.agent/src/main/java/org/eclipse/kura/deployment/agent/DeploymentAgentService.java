@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,8 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent;
+
+import org.eclipse.kura.ssl.SslManagerService;
 
 public interface DeploymentAgentService {
 
@@ -98,6 +100,38 @@ public interface DeploymentAgentService {
      * @return true if the installation of a deployment package at URL is pending
      */
     public boolean isInstallingDeploymentPackage(String url);
+
+    /**
+     * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
+     * passed as parameter.
+     *
+     * @since 1.4.0
+     *
+     * @param url
+     *                The URL of the deployment package descriptor. Note: the url accepted as argument should be
+     *                already validated and such that it allows for downloading the descriptor file.
+     * @return the {@link MarketplacePackageDescriptor} object
+     */
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url);
+
+    /**
+     * Provides the Eclipse Marketplace Package Descriptor information of the deployment package identified by URL
+     * passed as parameter.
+     *
+     * @since 1.4.0
+     *
+     * @param url
+     *                The URL of the deployment package descriptor. Note: the url accepted as argument should be
+     *                already validated and such that it allows for downloading the descriptor file.
+     * @param sslManagerService
+     *                The {@link SslManagerService} to use for establishing the SSL connection and downloading the
+     *                descriptor file.
+     *
+     * @return the {@link MarketplacePackageDescriptor} object
+     */
+    public MarketplacePackageDescriptor getMarketplacePackageDescriptor(String url,
+                    SslManagerService sslManagerService);
+
 
     /**
      * Asks if the uninstallation of a deployment package with the given symbolic name is pending.

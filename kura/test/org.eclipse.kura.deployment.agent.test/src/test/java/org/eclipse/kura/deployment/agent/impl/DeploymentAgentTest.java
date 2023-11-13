@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,8 @@ package org.eclipse.kura.deployment.agent.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,21 +29,36 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.security.GeneralSecurityException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.logging.MockServerLogger;
+import org.mockserver.socket.PortFactory;
+import org.mockserver.socket.tls.KeyStoreFactory;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -52,11 +69,33 @@ public class DeploymentAgentTest {
 
     private static final String VERSION_1_0_0 = "1.0.0";
     private static final String DP_NAME = "dpName";
-    private DeploymentAgent deploymentAgent;
+    private DeploymentAgent deploymentAgent = new DeploymentAgent();
     private String dpaConfigurationFilepath;
     private DeploymentAgent spiedDeploymentAgent;
 
+    private MarketplacePackageDescriptor resultingPackageDescriptor;
+
+    private SystemService systemServiceMock = mock(SystemService.class);
+    private SslManagerService sslManagerServiceMock = mock(SslManagerService.class);
+    private Exception occurredException;
+
     private static final String DPA_CONF_PATH_PROPNAME = "dpa.configuration";
+    private static ClientAndServer mockServer;
+
+    @BeforeClass
+    public static void startMockServer() {
+        mockServer = ClientAndServer.startClientAndServer(PortFactory.findFreePort());
+    }
+
+    @AfterClass
+    public static void stopMockServer() {
+        mockServer.stop();
+    }
+
+    @After
+    public void resetMockServer() {
+        mockServer.reset();
+    }
 
     @Test
     public void testInstallDeploymentPackageAsyncAlreadyDeploying() throws Exception {
@@ -495,7 +534,139 @@ public class DeploymentAgentTest {
         whenActivate();
 
         thenNoPackageInstalled();
+    }
 
+    @Test
+    public void getMarketplacePackageDescriptorShouldWorkWithCompatible() {
+        givenDeploymentAgent();
+        givenDeploymentAgentUsingSSLContectDefinedByMockServer();
+        givenSystemServiceReturnsCurrentKuraVersion("5.4.0");
+
+        givenAMockServerThatReturns("54435", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<marketplace>\n"
+                + "  <node id=\"5514714\" name=\"AI Wire Component for Eclipse Kura 5\" url=\"https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5\">\n"
+                + "    <type>iot_package</type>\n" + "    <owner>Matteo Maiero</owner>\n"
+                + "    <favorited>0</favorited>\n" + "    <installstotal>0</installstotal>\n"
+                + "    <installsrecent>0</installsrecent>\n" + "    <shortdescription><![CDATA[]]></shortdescription>\n"
+                + "    <body><![CDATA[<p><strong>OFFICIAL ADD-ON for Eclipse Kura</strong>&nbsp; - This wire component enables Eclipse Kura to interact with an Inference Engine to perform machine learning-related tasks.</p>\n"
+                + "\n"
+                + "<p>This package is an official add-on provided and maintained by the Eclipse Kura Development Team</p>\n"
+                + "\n"
+                + "<p>To install the package, simply drag and drop the Eclipse Marketplace link into the ESF/Kura Packages section of the Web UI.</p>\n"
+                + "\n" + "<p><strong>Compatibility</strong></p>\n" + "\n"
+                + "<p>The bundle requires Eclipse Kura 5.1.0+.</p>\n" + "]]></body>\n"
+                + "    <created>1648566806</created>\n" + "    <changed>1685628355</changed>\n"
+                + "    <foundationmember>1</foundationmember>\n" + "    <homepageurl></homepageurl>\n"
+                + "    <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/badge_logo/public/iot-package/logo/Kura_logo_2_44.png?itok=gr-2SSey]]></image>\n"
+                + "    <screenshot><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/medium/public/iot-package/screenshot/kura_marketplace_drag_drop_60.png?itok=pitMd0Qe]]></screenshot>\n"
+                + "    <license>EPL 2.0</license>\n" + "    <companyname><![CDATA[Eurotech]]></companyname>\n"
+                + "    <status>Production/Stable</status>\n" + "    <supporturl><![CDATA[]]></supporturl>\n"
+                + "    <version>1.2.0</version>\n" + "    <min_java_version>java_8</min_java_version>\n"
+                + "    <updateurl>https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp</updateurl>\n"
+                + "    <packagetypes>wire_component</packagetypes>\n"
+                + "    <sourceurl>https://github.com/eclipse/kura/tree/KURA_5.3.0_RELEASE/kura/org.eclipse.kura.wire.ai.component.provider</sourceurl>\n"
+                + "    <versioncompatibility>\n" + "      <from>5.1.0</from>\n" + "      <to></to>\n"
+                + "    </versioncompatibility>\n" + "    <environmentrequirements/>\n" + "  </node>\n"
+                + "</marketplace>");
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://localhost:" + mockServer.getLocalPort() + "/node/54435/api/p");
+
+        thenNoExceptionOccurred();
+        thenDescriptorIsEqualTo(MarketplacePackageDescriptor.builder().nodeId("5514714")
+                .url("https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5")
+                .dpUrl("https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp")
+                .minKuraVersion("5.1.0").maxKuraVersion("").currentKuraVersion("5.4.0").isCompatible(true).build());
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorShouldWorkWithNotCompatible() {
+        givenDeploymentAgent();
+        givenDeploymentAgentUsingSSLContectDefinedByMockServer();
+        givenSystemServiceReturnsCurrentKuraVersion("5.0.0");
+        givenAMockServerThatReturns("54435", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<marketplace>\n"
+                + "  <node id=\"5514714\" name=\"AI Wire Component for Eclipse Kura 5\" url=\"https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5\">\n"
+                + "    <type>iot_package</type>\n" + "    <owner>Matteo Maiero</owner>\n"
+                + "    <favorited>0</favorited>\n" + "    <installstotal>0</installstotal>\n"
+                + "    <installsrecent>0</installsrecent>\n" + "    <shortdescription><![CDATA[]]></shortdescription>\n"
+                + "    <body><![CDATA[<p><strong>OFFICIAL ADD-ON for Eclipse Kura</strong>&nbsp; - This wire component enables Eclipse Kura to interact with an Inference Engine to perform machine learning-related tasks.</p>\n"
+                + "\n"
+                + "<p>This package is an official add-on provided and maintained by the Eclipse Kura Development Team</p>\n"
+                + "\n"
+                + "<p>To install the package, simply drag and drop the Eclipse Marketplace link into the ESF/Kura Packages section of the Web UI.</p>\n"
+                + "\n" + "<p><strong>Compatibility</strong></p>\n" + "\n"
+                + "<p>The bundle requires Eclipse Kura 5.1.0+.</p>\n" + "]]></body>\n"
+                + "    <created>1648566806</created>\n" + "    <changed>1685628355</changed>\n"
+                + "    <foundationmember>1</foundationmember>\n" + "    <homepageurl></homepageurl>\n"
+                + "    <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/badge_logo/public/iot-package/logo/Kura_logo_2_44.png?itok=gr-2SSey]]></image>\n"
+                + "    <screenshot><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/medium/public/iot-package/screenshot/kura_marketplace_drag_drop_60.png?itok=pitMd0Qe]]></screenshot>\n"
+                + "    <license>EPL 2.0</license>\n" + "    <companyname><![CDATA[Eurotech]]></companyname>\n"
+                + "    <status>Production/Stable</status>\n" + "    <supporturl><![CDATA[]]></supporturl>\n"
+                + "    <version>1.2.0</version>\n" + "    <min_java_version>java_8</min_java_version>\n"
+                + "    <updateurl>https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp</updateurl>\n"
+                + "    <packagetypes>wire_component</packagetypes>\n"
+                + "    <sourceurl>https://github.com/eclipse/kura/tree/KURA_5.3.0_RELEASE/kura/org.eclipse.kura.wire.ai.component.provider</sourceurl>\n"
+                + "    <versioncompatibility>\n" + "      <from>5.1.0</from>\n" + "      <to></to>\n"
+                + "    </versioncompatibility>\n" + "    <environmentrequirements/>\n" + "  </node>\n"
+                + "</marketplace>");
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://localhost:" + mockServer.getLocalPort() + "/node/54435/api/p");
+
+        thenNoExceptionOccurred();
+        thenDescriptorIsEqualTo(MarketplacePackageDescriptor.builder().nodeId("5514714")
+                .url("https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5")
+                .dpUrl("https://download.eclipse.org/kura/releases/5.3.0/org.eclipse.kura.wire.ai.component.provider-1.2.0.dp")
+                .minKuraVersion("5.1.0").maxKuraVersion("").currentKuraVersion("5.0.0").isCompatible(false).build());
+    }
+
+    @Test
+    public void getMarketplacePackageDescriptorShouldThrowWithNullNode() {
+        givenDeploymentAgent();
+        givenDeploymentAgentUsingSSLContectDefinedByMockServer();
+        givenSystemServiceReturnsCurrentKuraVersion("5.0.0");
+        givenAMockServerThatReturns("54435", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<marketplace>\n"
+                + "  <node id=\"5514714\" name=\"AI Wire Component for Eclipse Kura 5\" url=\"https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5\">\n"
+                + "    <type>iot_package</type>\n" + "    <owner>Matteo Maiero</owner>\n"
+                + "    <favorited>0</favorited>\n" + "    <installstotal>0</installstotal>\n"
+                + "    <installsrecent>0</installsrecent>\n" + "    <shortdescription><![CDATA[]]></shortdescription>\n"
+                + "    <body><![CDATA[<p><strong>OFFICIAL ADD-ON for Eclipse Kura</strong>&nbsp; - This wire component enables Eclipse Kura to interact with an Inference Engine to perform machine learning-related tasks.</p>\n"
+                + "\n"
+                + "<p>This package is an official add-on provided and maintained by the Eclipse Kura Development Team</p>\n"
+                + "\n"
+                + "<p>To install the package, simply drag and drop the Eclipse Marketplace link into the ESF/Kura Packages section of the Web UI.</p>\n"
+                + "\n" + "<p><strong>Compatibility</strong></p>\n" + "\n"
+                + "<p>The bundle requires Eclipse Kura 5.1.0+.</p>\n" + "]]></body>\n"
+                + "    <created>1648566806</created>\n" + "    <changed>1685628355</changed>\n"
+                + "    <foundationmember>1</foundationmember>\n" + "    <homepageurl></homepageurl>\n"
+                + "    <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/badge_logo/public/iot-package/logo/Kura_logo_2_44.png?itok=gr-2SSey]]></image>\n"
+                + "    <screenshot><![CDATA[https://marketplace.eclipse.org/sites/default/files/styles/medium/public/iot-package/screenshot/kura_marketplace_drag_drop_60.png?itok=pitMd0Qe]]></screenshot>\n"
+                + "    <license>EPL 2.0</license>\n" + "    <companyname><![CDATA[Eurotech]]></companyname>\n"
+                + "    <status>Production/Stable</status>\n" + "    <supporturl><![CDATA[]]></supporturl>\n"
+                + "    <version>1.2.0</version>\n" + "    <min_java_version>java_8</min_java_version>\n"
+                + "    <packagetypes>wire_component</packagetypes>\n"
+                + "    <sourceurl>https://github.com/eclipse/kura/tree/KURA_5.3.0_RELEASE/kura/org.eclipse.kura.wire.ai.component.provider</sourceurl>\n"
+                + "    <versioncompatibility>\n" + "      <from>5.1.0</from>\n" + "      <to></to>\n"
+                + "    </versioncompatibility>\n" + "    <environmentrequirements/>\n" + "  </node>\n"
+                + "</marketplace>");
+
+        whenGetMarketplacePackageDescriptorIsCalledFor(
+                "https://localhost:" + mockServer.getLocalPort() + "/node/54435/api/p");
+
+        thenExceptionOccurred(IllegalStateException.class);
+    }
+
+    /*
+     * GIVEN
+     */
+
+    private void givenSystemServiceReturnsCurrentKuraVersion(String returnedVersion) {
+        when(this.systemServiceMock.getKuraMarketplaceCompatibilityVersion()).thenReturn(returnedVersion);
+    }
+
+    private void givenAMockServerThatReturns(String nodeId, String responseXML) {
+        String url = String.format("/node/%s/api/p", nodeId);
+        mockServer.withSecure(true).when(request().withMethod("GET").withPath(url))
+                .respond(response().withBody(responseXML));
     }
 
     private void givenDpWithUrlScheme(String dpName, String dpUrl) throws IOException {
@@ -505,18 +676,22 @@ public class DeploymentAgentTest {
     }
 
     private void givenDeploymentAgent() {
-        this.deploymentAgent = new DeploymentAgent();
-
-        SystemService systemServiceMock = mock(SystemService.class);
         Properties properties = new Properties();
-
         properties.put("kura.packages", "fake-packages-path");
-
         when(systemServiceMock.getProperties()).thenReturn(properties);
-
         this.deploymentAgent.setSystemService(systemServiceMock);
-
         this.spiedDeploymentAgent = spy(this.deploymentAgent);
+    }
+
+    private void givenDeploymentAgentUsingSSLContectDefinedByMockServer() {
+        try {
+            when(sslManagerServiceMock.getSSLSocketFactory())
+                    .thenReturn(new KeyStoreFactory(new MockServerLogger()).sslContext().getSocketFactory());
+        } catch (GeneralSecurityException | IOException e) {
+            fail();
+        }
+
+        this.deploymentAgent.setSslManagerService(sslManagerServiceMock);
 
     }
 
@@ -525,14 +700,50 @@ public class DeploymentAgentTest {
         System.setProperty(DPA_CONF_PATH_PROPNAME, dpaConfigurationFilepath);
     }
 
+    /*
+     * WHEN
+     */
+
     private void whenActivate() {
-
         this.deploymentAgent.activate();
-
     }
+
+    private void whenGetMarketplacePackageDescriptorIsCalledFor(String url) {
+        try {
+            this.resultingPackageDescriptor = this.deploymentAgent.getMarketplacePackageDescriptor(url);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    /*
+     * THEN
+     */
 
     private void thenNoPackageInstalled() throws Exception {
         verify(this.spiedDeploymentAgent, times(0)).installDeploymentPackageAsync(anyString());
+    }
+
+    private void thenDescriptorIsEqualTo(MarketplacePackageDescriptor expectedDescriptor) {
+        assertEquals(expectedDescriptor, this.resultingPackageDescriptor);
+    }
+
+    private void thenNoExceptionOccurred() {
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
 }

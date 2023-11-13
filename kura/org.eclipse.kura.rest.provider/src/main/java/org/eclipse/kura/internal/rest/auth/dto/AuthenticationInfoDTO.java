@@ -16,14 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class AuthenticationMethodInfoDTO {
+public class AuthenticationInfoDTO {
 
     private final boolean passwordAuthenticationEnabled;
     private final boolean certificateAuthenticationEnabled;
     private final List<Integer> certificateAuthenticationPorts;
+    private final String message;
 
-    public AuthenticationMethodInfoDTO(boolean passwordAuthenticationEnabled, boolean certificateAuthenticationEnabled,
-            Set<Integer> certificateAuthenticationPorts) {
+    public AuthenticationInfoDTO(boolean passwordAuthenticationEnabled, boolean certificateAuthenticationEnabled,
+            Set<Integer> certificateAuthenticationPorts, final String message) {
         this.passwordAuthenticationEnabled = passwordAuthenticationEnabled;
         this.certificateAuthenticationEnabled = certificateAuthenticationEnabled;
 
@@ -33,6 +34,8 @@ public class AuthenticationMethodInfoDTO {
         } else {
             this.certificateAuthenticationPorts = null;
         }
+
+        this.message = message;
     }
 
     public boolean isPasswordAuthenticationEnabled() {
@@ -45,6 +48,10 @@ public class AuthenticationMethodInfoDTO {
 
     public List<Integer> getCertificateAuthenticationPorts() {
         return certificateAuthenticationPorts;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
 }

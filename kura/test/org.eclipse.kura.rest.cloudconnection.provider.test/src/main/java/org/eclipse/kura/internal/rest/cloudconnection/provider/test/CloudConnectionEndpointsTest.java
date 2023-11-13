@@ -209,7 +209,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     public void shouldDeleteSubscriberInstance() {
         givenPubSubInstance("sub-to-delete-" + this.getTransportType(),
                 "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
-        givenPid("sub-to-delete" + this.getTransportType());
+        givenPid("sub-to-delete-" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/pubSub",
                 gson.toJson(this.pidAndFactoryPid));

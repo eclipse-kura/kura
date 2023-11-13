@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
-import org.eclipse.kura.internal.rest.auth.dto.AuthenticationMethodInfoDTO;
+import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
@@ -250,15 +250,20 @@ public class SessionRestService {
     }
 
     @GET
-    @Path(SessionRestServiceConstants.AUTHENTICATION_METHODS)
+    @Path(SessionRestServiceConstants.AUTHENTICATION_INFO)
     @Produces(MediaType.APPLICATION_JSON)
-    public AuthenticationMethodInfoDTO getAuthenticationMethodInfo() {
+    public AuthenticationInfoDTO getAuthenticationMethodInfo() {
 
         final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();
         final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
 
+        final Map<String, Object> consoleConfig = ConfigurationAdminHelper
+                .loadConsoleConfigurationProperties(configAdmin);
+
+        final String message = ConfigurationAdminHelper.getLoginMessage(consoleConfig).orElse(null);
+
         if (!isCertificateAuthenticationEnabled) {
-            return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, false, null);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
         }
 
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
@@ -268,9 +273,9 @@ public class SessionRestService {
                 .getHttpsMutualAuthPorts(httpServiceConfig);
 
         if (!httpsClientAuthPorts.isEmpty()) {
-            return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, message);
         } else {
-            return new AuthenticationMethodInfoDTO(isPasswordAuthEnabled, false, null);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
         }
 
     }
@@ -297,16 +302,7 @@ public class SessionRestService {
         final boolean needsPasswordChange = this.userAdminHelper
                 .isPasswordChangeRequired(username);
 
-        final Map<String, Object> consoleConfig = ConfigurationAdminHelper
-                .loadConsoleConfigurationProperties(configAdmin);
-
-        final Optional<String> message = ConfigurationAdminHelper.getLoginMessage(consoleConfig);
-
-        if (message.isPresent()) {
-            return new AuthenticationResponseDTO(needsPasswordChange, message.get());
-        } else {
-            return new AuthenticationResponseDTO(needsPasswordChange);
-        }
+        return new AuthenticationResponseDTO(needsPasswordChange);
     }
 
     private void handleAuthenticationException(final AuthenticationException e) {

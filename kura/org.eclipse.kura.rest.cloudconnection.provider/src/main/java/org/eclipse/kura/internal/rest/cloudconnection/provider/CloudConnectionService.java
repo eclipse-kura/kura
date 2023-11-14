@@ -130,6 +130,9 @@ public class CloudConnectionService {
 
         withAllCloudConnectionFactories(factory -> {
             if (factoryPid.equals(factory.getFactoryPid())) {
+                if (!factory.getManagedCloudConnectionPids().contains(cloudEndpointPid)) {
+                    throw new KuraException(KuraErrorCode.NOT_FOUND);
+                }
                 result.addAll(getStackComponentPids(factory, cloudEndpointPid));
             }
         });
@@ -207,14 +210,12 @@ public class CloudConnectionService {
 
         AtomicReference<Boolean> found = new AtomicReference<>(false);
 
-        withAllCloudConnectionFactories(service -> {
-            if (service.getFactoryPid().equals(factoryPid)) {
+        withAllCloudConnectionFactories(factory -> {
+            if (factory.getFactoryPid().equals(factoryPid)
+                    && factory.getManagedCloudConnectionPids().contains(cloudEndpointPid)) {
+
+                factory.deleteConfiguration(cloudEndpointPid);
                 found.set(true);
-                try {
-                    service.deleteConfiguration(cloudEndpointPid);
-                } catch (Exception e) {
-                    throw new KuraException(KuraErrorCode.NOT_FOUND);
-                }
             }
         });
 

@@ -21,6 +21,60 @@ The supported workflows are the following:
 
 4. Access the desired resources, set the XSRF token previously obtained as the value of the `X-XSRF-Token` HTTP header on each request. If a reuqest fails with error code 401, proceed to step 2.
 
+#### Login example with `curl`
+
+1. Login with username/password and collect the session cookie
+
+```bash
+curl -k -X POST \
+    -H 'Content-Type: application/json' \
+    https://$ADDRESS/services/session/v1/login/password \
+    -d '{"password": "$KURA_PASS", "username": "$KURA_USER"}' -v
+```
+
+where:
+- `$ADDRESS`: is the address of the Kura instance
+- `$KURA_USER`: is the Kura username
+- `$KURA_PASS`: is the Kura password
+
+in the log you should find a `JSESSIONID` you'll use in subsequent reqeusts
+
+```
+...
+< HTTP/1.1 200 OK
+< Date: Tue, 14 Nov 2023 08:17:26 GMT
+< Set-Cookie: JSESSIONID=myawesomecookie; Path=/; Secure; HttpOnly
+< Expires: Thu, 01 Jan 1970 00:00:00 GMT
+< Content-Type: application/json
+< Content-Length: 30
+<
+* Connection #0 to host 192.168.1.111 left intact
+{"passwordChangeNeeded":false}%
+```
+
+2. Retrieve the XSRF token
+
+```bash
+curl -k -X GET \
+    -b "JSESSIONID=myawesomecookie" \
+    https://$ADDRESS/services/session/v1/xsrfToken
+```
+
+in the response you'll find you token
+
+```
+{"xsrfToken":"myawesometoken"}%
+```
+
+3. Access the resource
+
+```bash
+curl -k -X GET \
+    -H 'X-XSRF-Token: myawesometoken' \
+    -b "JSESSIONID=myawesomecookie" \
+    https://$ADDRESS/services/deploy/v2/
+```
+
 ### Update password workflow
 
 1. Get an XSRF token using the [GET/xsrfToken](#getxsrftoken) endpoint.

@@ -23,7 +23,7 @@ The supported workflows are the following:
 
 #### Login example with `curl`
 
-1. Login with username/password and collect the session cookie
+##### 1. Login with username/password and collect the session cookie
 
 ```bash
 curl -k -X POST \
@@ -33,6 +33,7 @@ curl -k -X POST \
 ```
 
 where:
+
 - `$ADDRESS`: is the address of the Kura instance
 - `$KURA_USER`: is the Kura username
 - `$KURA_PASS`: is the Kura password
@@ -52,7 +53,7 @@ in the log you should find a `JSESSIONID` you'll use in subsequent reqeusts
 {"passwordChangeNeeded":false}%
 ```
 
-2. Retrieve the XSRF token
+##### 2. Retrieve the XSRF token
 
 ```bash
 curl -k -X GET \
@@ -66,7 +67,9 @@ in the response you'll find your XSRF token you'll need to use in subsequent req
 {"xsrfToken":"myawesometoken"}%
 ```
 
-3. Access the resource
+##### 3. Access the resource
+
+Using the Cookie and the XSRF token you just retrieved you can access your desired resource
 
 ```bash
 curl -k -X GET \

@@ -102,7 +102,7 @@ public class CloudConnectionService {
                     continue;
                 }
 
-                final CloudEndpointInstance cloudConnectionEntry = new CloudEndpointInstance(pid, factoryPid);
+                final CloudEndpointInstance cloudConnectionEntry = new CloudEndpointInstance(factoryPid, pid);
 
                 fillState(cloudConnectionEntry);
 

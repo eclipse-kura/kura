@@ -479,9 +479,11 @@ public class CloudConnectionService {
 
         final Set<PubSubInstance> result = new HashSet<>();
 
+        Class<?> clazz = (type == CloudPubSubType.PUBLISHER) ? CloudPublisher.class : CloudSubscriber.class;
+
         try {
-            this.bundleContext.getServiceReferences(CloudPublisher.class, null).stream()
-                    .map(ref -> pubSubRefToDTO(ref, type)).filter(Objects::nonNull).forEach(result::add);
+            this.bundleContext.getServiceReferences(clazz, null).stream().map(ref -> pubSubRefToDTO(ref, type))
+                    .filter(Objects::nonNull).forEach(result::add);
 
             return result;
         } catch (InvalidSyntaxException e) {

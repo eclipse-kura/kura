@@ -68,6 +68,7 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
     ]
 }
 ```
+  - `cloudEndpointType` CLOUD_ENDPOINT if the component implements [CloudEndpoint](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/CloudEndpoint.html), CLOUD_CONNECTION_MANAGER otherwise.
 - 500 Internal Server Error
 
 #### Get CloudComponent Factories
@@ -133,13 +134,17 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
     ]
 }
 ```
+  - `cloudConnectionFactoryPid/factoryPid`: the PID of the factory
+  - `defaultPid`: the default PID for an instance of a new component suggested by the factory.
+  - `defaultPidRegex`: the regular expression to which a PID component must correspond.
+  - in pubSubFactories `cloudConnectionFactoryPid`: the CloudEndpoint Factory to which the publisher or subscriber component is linked.
 - 500 Internal Server error
 
 ## POST methods
 
 #### Get StackComponents Pids
 
-- Description: This method retrieves all all PIDs of Component instances that make up the stack for a specific [CloudEndpoint](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/CloudEndpoint.html), including its [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
+- Description: This method retrieves all all PIDs of Component instances that make up the stack for a specific [CloudEndpoint](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/CloudEndpoint.html). For example its [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
 - Method: POST
 - API PATH: `services/cloudconnection/v1/cloudEndpoint/stackComponentPids`
 
@@ -167,7 +172,7 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
 
 #### Create Cloud Endpoint
 
-- Description: This method create a new [CloudEndpoint](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/CloudEndpoint.html), and the related stack components: [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
+- Description: This method create a new [CloudEndpoint](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/CloudEndpoint.html), and the related stack components, for example [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
 - Method: POST
 - API PATH: `services/cloudconnection/v1/cloudEndpoint`
 
@@ -209,7 +214,7 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
 
 #### Get Configurations
 
-- Description: This method retrieves the complete configuration, including the metatype description, of the component instance which are [CloudPublisher](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.html) or a [CloudSubscriber](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/subscriber/CloudSubscriber.html) or [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
+- Description: This method retrieves the complete configuration, including the metatype description, of the component instance, for example [CloudPublisher](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.html) or a [CloudSubscriber](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/subscriber/CloudSubscriber.html) or [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
 - Method: POST
 - API PATH: `services/cloudconnection/v1/configurations`
 
@@ -604,7 +609,7 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
 
 #### Update CloudEndpoint stack component configurations
 
-- Description: This method allows to update the configuration of one or more components instance member of a stack configuration, i.e. [CloudPublisher](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.html) or a [CloudSubscriber](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/subscriber/CloudSubscriber.html) or [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
+- Description: This method allows to update the configuration of one or more components instance member of a stack configuration, for example. [CloudPublisher](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.html) or a [CloudSubscriber](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloudconnection/subscriber/CloudSubscriber.html) or [CloudService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/cloud/CloudService.html), [DataService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataService.html), [DataTransportService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/data/DataTransportService.html)
 - Method: PUT
 - API PATH: `services/cloudconnection/v1/configurations`
 

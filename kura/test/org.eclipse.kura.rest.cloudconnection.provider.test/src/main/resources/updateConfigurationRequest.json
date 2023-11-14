@@ -1,0 +1,70 @@
+{
+    "configs": [
+        {
+            "pid": "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test",
+            "properties": {
+                "broker-url": {
+                    "type": "STRING",
+                    "value": "mqtt://mqtt.eclipseprojects.io:1883"
+                },
+                "topic.context.account-name": {
+                    "type": "STRING",
+                    "value": "account-name-testX2"
+                },
+                "username": {
+                    "type": "STRING",
+                    "value": "username"
+                },
+                "password": {
+                    "type": "PASSWORD",
+                    "value": "Placeholder"
+                },
+                "client-id": {
+                    "type": "STRING",
+                    "value": ""
+                },
+                "keep-alive": {
+                    "type": "INTEGER",
+                    "value": 30
+                },
+                "timeout": {
+                    "type": "INTEGER",
+                    "value": 20
+                },
+                "clean-session": {
+                    "type": "BOOLEAN",
+                    "value": true
+                },
+                "lwt.topic": {
+                    "type": "STRING",
+                    "value": "$EDC/#account-name/#client-id/MQTT/LWT"
+                },
+                "lwt.payload": {
+                    "type": "STRING",
+                    "value": ""
+                },
+                "lwt.qos": {
+                    "type": "INTEGER",
+                    "value": 0
+                },
+                "lwt.retain": {
+                    "type": "BOOLEAN",
+                    "value": false
+                },
+                "in-flight.persistence": {
+                    "type": "STRING",
+                    "value": "memory"
+                },
+                "protocol-version": {
+                    "type": "INTEGER",
+                    "value": 4
+                },
+                "SslManagerService.target": {
+                    "type": "STRING",
+                    "value": "(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)"
+                }
+            }
+        }
+    ],
+    "takeSnapshot" : true
+}

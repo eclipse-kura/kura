@@ -29,26 +29,26 @@ Identities with `rest.cloudconnection` permissions can access these APIs.
             "cloudEndpointType": "CLOUD_CONNECTION_MANAGER"
         },
         {
-            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService-todelete",
-            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService-todelete",
             "state": "DISCONNECTED",
             "cloudEndpointType": "CLOUD_CONNECTION_MANAGER"
         },
         {
-            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService-2",
-            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService-2",
             "state": "DISCONNECTED",
             "cloudEndpointType": "CLOUD_CONNECTION_MANAGER"
         },
         {
-            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService-3",
-            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService-3",
             "state": "DISCONNECTED",
             "cloudEndpointType": "CLOUD_CONNECTION_MANAGER"
         },
         {
-            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService-test",
-            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudConnectionFactoryPid": "org.eclipse.kura.cloud.CloudService",
+            "cloudEndpointPid": "org.eclipse.kura.cloud.CloudService-test",
             "state": "DISCONNECTED",
             "cloudEndpointType": "CLOUD_CONNECTION_MANAGER"
         }
@@ -186,6 +186,7 @@ For `pubSubFactories` elements:
     ]
 }
 ```
+- 404 if `cloudConnectionFactoryPid` or `cloudEndpointPid` are not found
 - 500 Internal Server Error
 
 #### Create Cloud Endpoint
@@ -738,7 +739,7 @@ For `pubSubFactories` elements:
 ##### Responses
 
 - 204 Status OK
-- 404 Wrong `cloudConnectionFactoryPid` or `cloudEndpointPid`.
+- 404 if `cloudConnectionFactoryPid` or `cloudEndpointPid` are not found
 
 #### Delete Publisher/Subscriber instance
 

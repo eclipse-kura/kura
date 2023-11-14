@@ -60,7 +60,7 @@ curl -k -X GET \
     https://$ADDRESS/services/session/v1/xsrfToken
 ```
 
-in the response you'll find you token
+in the response you'll find your XSRF token you'll need to use in subsequent requests
 
 ```
 {"xsrfToken":"myawesometoken"}%

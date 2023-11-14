@@ -107,7 +107,9 @@
         <module>org.eclipse.kura.network.threat.manager</module>
         <module>org.eclipse.kura.core.tamper.detection</module>
         <module>org.eclipse.kura.log.filesystem.provider</module>
+        <module>org.eclipse.kura.rest.cloudconnection.provider</module>
         <module>org.eclipse.kura.rest.configuration.provider</module>
+        <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.command.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
@@ -126,7 +128,6 @@
         <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.rest.network.status.provider</module>
-        <module>org.eclipse.kura.rest.identity.provider</module>
         <module>emulator</module>
         <module>test-util</module>
     </modules>

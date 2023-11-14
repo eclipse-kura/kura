@@ -149,6 +149,7 @@
         <setEntry value="org.eclipse.kura.localization@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.cloudconnection.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.identity.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.inventory.provider@default:default"/>

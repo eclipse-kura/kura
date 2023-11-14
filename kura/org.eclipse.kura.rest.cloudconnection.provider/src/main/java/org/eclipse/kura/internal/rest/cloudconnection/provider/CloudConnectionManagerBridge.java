@@ -16,7 +16,6 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
@@ -37,6 +36,8 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("deprecation")
 public class CloudConnectionManagerBridge {
 
+    private static final String CONNECTION_ERROR_MESSAGE = "Error connecting. Please review your configuration.";
+
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerBridge.class);
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
@@ -47,42 +48,24 @@ public class CloudConnectionManagerBridge {
 
         boolean ran = false;
 
-        try {
-            ran = runOnDataService(connectionId, dataService -> {
-                int counter = 10;
-                try {
-                    dataService.connect();
-                    while (!dataService.isConnected() && counter > 0) {
-                        Thread.sleep(1000);
-                        counter--;
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        ran = runOnDataService(connectionId, dataService -> {
+            int counter = 10;
 
-            ran = ran || runOnCloudConnectionManager(connectionId, cloudConnectionManager -> {
-                try {
-                    cloudConnectionManager.connect();
-                } catch (KuraConnectException e) {
-                    throw new KuraRuntimeException(KuraErrorCode.CONNECTION_FAILED, e,
-                            "Error connecting. Please review your configuration.");
-                }
-            });
-        } catch (RuntimeException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof KuraConnectException) {
-                logger.warn("Error connecting", e);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
-                        "Error connecting. Please review your configuration.");
-            } else if (cause instanceof InterruptedException) {
-                logger.warn("Interrupt Exception");
-                Thread.currentThread().interrupt();
-            } else if (cause instanceof IllegalStateException) {
-                logger.warn("Illegal client state", e);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
+            dataService.connect();
+            while (!dataService.isConnected() && counter > 0) {
+                Thread.sleep(1000);
+                counter--;
             }
-        }
+
+        });
+
+        ran = ran || runOnCloudConnectionManager(connectionId, cloudConnectionManager -> {
+            try {
+                cloudConnectionManager.connect();
+            } catch (KuraConnectException e) {
+                throw new KuraRuntimeException(KuraErrorCode.CONNECTION_FAILED, e, CONNECTION_ERROR_MESSAGE);
+            }
+        });
 
         if (!ran) {
             throw new KuraException(KuraErrorCode.NOT_FOUND);
@@ -95,19 +78,7 @@ public class CloudConnectionManagerBridge {
 
         ran = runOnDataService(connectionId, dataService -> dataService.disconnect(10));
 
-        try {
-            ran = ran || runOnCloudConnectionManager(connectionId, cloudConnectionManager -> {
-                try {
-                    cloudConnectionManager.disconnect();
-                } catch (KuraDisconnectException e) {
-                    throw new KuraRuntimeException(KuraErrorCode.CONNECTION_FAILED);
-                }
-            });
-        } catch (KuraRuntimeException e) {
-            logger.warn("Error disconnecting");
-            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e,
-                    "Error disconnecting. Please review your configuration.");
-        }
+        ran = ran || runOnCloudConnectionManager(connectionId, CloudConnectionManager::disconnect);
 
         if (!ran) {
             throw new KuraException(KuraErrorCode.NOT_FOUND);
@@ -134,7 +105,7 @@ public class CloudConnectionManagerBridge {
 
     }
 
-    private boolean runOnDataService(String connectionId, Consumer<DataService> dataServiceConsumer)
+    private boolean runOnDataService(String connectionId, InterruptableConsumer<DataService> dataServiceConsumer)
             throws KuraException {
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceUtil
                 .getServiceReferencesAsCollection(this.bundleContext, CloudService.class, null);
@@ -150,7 +121,8 @@ public class CloudConnectionManagerBridge {
                 for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
                     DataService dataService = ServiceUtil.getService(this.bundleContext, dataServiceReference);
                     if (dataService != null) {
-                        dataServiceConsumer.accept(dataService);
+
+                        invokeAndHandleExceptions(dataServiceConsumer, dataService);
                         return true;
                     }
                     ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
@@ -163,7 +135,7 @@ public class CloudConnectionManagerBridge {
     }
 
     private boolean runOnCloudConnectionManager(String connectionId,
-            Consumer<CloudConnectionManager> cloudConnectionManagerConsumer) throws KuraException {
+            InterruptableConsumer<CloudConnectionManager> cloudConnectionManagerConsumer) throws KuraException {
         Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceUtil
                 .getServiceReferencesAsCollection(this.bundleContext, CloudConnectionManager.class, null);
 
@@ -173,7 +145,7 @@ public class CloudConnectionManagerBridge {
                 CloudConnectionManager cloudConnectionManager = ServiceUtil.getService(this.bundleContext,
                         cloudConnectionManagerReference);
 
-                cloudConnectionManagerConsumer.accept(cloudConnectionManager);
+                invokeAndHandleExceptions(cloudConnectionManagerConsumer, cloudConnectionManager);
 
                 return true;
             }
@@ -181,6 +153,25 @@ public class CloudConnectionManagerBridge {
         }
 
         return false;
+    }
+
+    private <T> void invokeAndHandleExceptions(InterruptableConsumer<T> consumer, T service) throws KuraException {
+        try {
+            consumer.accept(service);
+        } catch (KuraConnectException e) {
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e, CONNECTION_ERROR_MESSAGE);
+        } catch (IllegalStateException e) {
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Illegal client state");
+        } catch (InterruptedException e) {
+            logger.warn("Interrupt Exception");
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public interface InterruptableConsumer<T> {
+
+        void accept(T t)
+                throws InterruptedException, KuraConnectException, KuraDisconnectException, IllegalStateException;
     }
 
 }

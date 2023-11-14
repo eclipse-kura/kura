@@ -55,7 +55,7 @@ public class CloudConnectionRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionRestService.class);
 
-    private static final String MQTT_APP_ID = "CC-V1";
+    private static final String MQTT_APP_ID = "CLD-V1";
     private static final String REST_ROLE_NAME = "cloudconnection";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 

@@ -50,7 +50,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String CLOUD_ENDPOINT_INSTANCE_TEST = "org.eclipse.kura.cloud.CloudService-test";
 
-    private static final String MQTT_APP_ID = "CC-V1";
+    private static final String MQTT_APP_ID = "CLD-V1";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";

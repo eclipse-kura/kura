@@ -175,6 +175,7 @@ Target Platform Updates:
   * c3a3bfe624 - Updated org.xerial:sqlite-jdbc to 3.42.0.0 (#4721) (nicolatimeus)
 
 Known Issues:
+  * The system reboot command cannot be issued even with a privileged user in Debian Bookworm due to an OS issue related to the CAP_SYS_BOOT capability
   * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
   * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is

@@ -35,8 +35,7 @@
    	          cardinality="1..1"
    	          interface="org.eclipse.kura.wire.WireHelperService"
    	          name="WireHelperService"
-   	          policy="static"
-   	          unbind="unbindWireHelperService"/>
+   	          policy="static"/>
    <reference name="WireRecordStoreProvider"
            policy="dynamic"
            bind="bindWireRecordStoreProvider"

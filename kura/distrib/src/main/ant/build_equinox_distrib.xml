@@ -1310,6 +1310,8 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.cloudconnection.provider_${org.eclipse.kura.rest.cloudconnection.provider.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar@4:start" />
@@ -1411,7 +1413,13 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.rest.cloudconnection.provider_${org.eclipse.kura.rest.cloudconnection.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.rest.identity.provider_${org.eclipse.kura.rest.identity.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar"
@@ -1427,9 +1435,6 @@ fi]]>
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.security.provider_${org.eclipse.kura.rest.security.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.rest.identity.provider_${org.eclipse.kura.rest.identity.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.service.listing.provider_${org.eclipse.kura.rest.service.listing.provider.version}.jar"

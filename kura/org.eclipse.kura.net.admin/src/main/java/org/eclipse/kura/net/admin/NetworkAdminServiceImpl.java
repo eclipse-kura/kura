@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1637,7 +1637,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public List<DhcpLease> getDhcpLeases() {
-        return DhcpLeaseTool.probeLeases(this.executorService);
+    public List<DhcpLease> getDhcpLeases() throws KuraException {
+        List<DhcpLease> leases = new ArrayList<>();
+        String interfaces = (String) this.networkConfigurationService.getNetworkConfiguration()
+                .getConfigurationProperties().get("net.interfaces");
+        for (String interfaceName : interfaces.split(",")) {
+            leases.addAll(getDhcpLeases(interfaceName));
+        }
+        return leases;
+    }
+
+    @Override
+    public List<DhcpLease> getDhcpLeases(String ifaceName) throws KuraException {
+        return DhcpLeaseTool.probeLeases(ifaceName, this.executorService);
     }
 }

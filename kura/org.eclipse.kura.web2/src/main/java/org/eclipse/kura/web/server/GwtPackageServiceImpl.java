@@ -24,13 +24,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.eclipse.kura.deployment.agent.DeploymentAgentService;
+import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.ssl.SslManagerService;
-import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -43,7 +39,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -52,10 +47,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements GwtPackageService {
 
@@ -126,134 +117,32 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private Node getFirstNode(final Document doc, final String tagName) {
-        final NodeList elements = doc.getElementsByTagName(tagName);
-        if (elements.getLength() == 0) {
-            return null;
-        }
-        return elements.item(0);
-    }
-
-    private String getAttributeValue(NamedNodeMap attributes, String attribute) {
-        final Node node = attributes.getNamedItem(attribute);
-        if (node == null) {
-            return null;
-        }
-        return node.getNodeValue();
-    }
-
     @Override
     public GwtMarketplacePackageDescriptor getMarketplacePackageDescriptor(GwtXSRFToken xsrfToken, String nodeId)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        GwtMarketplacePackageDescriptor descriptor = null;
-        URL mpUrl = null;
-        HttpsURLConnection connection = null;
-
+        GwtMarketplacePackageDescriptor descriptor = new GwtMarketplacePackageDescriptor();
         try {
+            String url = String.format(MARKETPLACE_URL, nodeId);
+            DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance()
+                    .getService(DeploymentAgentService.class);
+            MarketplacePackageDescriptor marketplacePackageDescriptor = deploymentAgentService
+                    .getMarketplacePackageDescriptor(url, this.sslManagerService);
 
-            mpUrl = new URL(String.format(MARKETPLACE_URL, nodeId));
-            connection = (HttpsURLConnection) mpUrl.openConnection();
-            connection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
-
-            connection.setRequestMethod("GET");
-            connection.connect();
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            dbf.setXIncludeAware(false);
-            dbf.setExpandEntityReferences(false);
-
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(connection.getInputStream());
-
-            descriptor = new GwtMarketplacePackageDescriptor();
-
-            final Node updateUrl = getFirstNode(doc, "updateurl");
-
-            if (updateUrl == null) {
-                throw new GwtKuraException("Unable to find dp install URL");
-            }
-
-            descriptor.setDpUrl(updateUrl.getTextContent());
-
-            final Node node = getFirstNode(doc, "node");
-
-            if (node != null) {
-                final NamedNodeMap nodeAttributes = node.getAttributes();
-                descriptor.setNodeId(getAttributeValue(nodeAttributes, "id"));
-                descriptor.setUrl(getAttributeValue(nodeAttributes, "url"));
-            }
-
-            Node versionCompatibility = getFirstNode(doc, "versioncompatibility");
-
-            if (versionCompatibility != null) {
-                NodeList children = versionCompatibility.getChildNodes();
-                for (int i = 0; i < children.getLength(); i++) {
-                    Node n = children.item(i);
-                    String nodeName = n.getNodeName();
-                    if ("from".equalsIgnoreCase(nodeName)) {
-                        descriptor.setMinKuraVersion(n.getTextContent());
-                    } else if ("to".equalsIgnoreCase(nodeName)) {
-                        descriptor.setMaxKuraVersion(n.getTextContent());
-                    }
-                }
-            }
-
-            String kuraPropertyCompatibilityVersion = getMarketplaceCompatibilityVersionString();
-            Version kuraVersion = getMarketplaceCompatibilityVersion(kuraPropertyCompatibilityVersion);
-            if (kuraVersion != null) {
-                kuraPropertyCompatibilityVersion = kuraVersion.toString();
-            }
-
-            descriptor.setCurrentKuraVersion(kuraPropertyCompatibilityVersion);
-            checkCompatibility(descriptor, kuraVersion);
-
+            descriptor.setCompatible(marketplacePackageDescriptor.isCompatible());
+            descriptor.setDpUrl(marketplacePackageDescriptor.getDpUrl());
+            descriptor.setMinKuraVersion(marketplacePackageDescriptor.getMinKuraVersion());
+            descriptor.setMaxKuraVersion(marketplacePackageDescriptor.getMaxKuraVersion());
+            descriptor.setCurrentKuraVersion(marketplacePackageDescriptor.getCurrentKuraVersion());
+            descriptor.setNodeId(marketplacePackageDescriptor.getNodeId());
+            descriptor.setUrl(marketplacePackageDescriptor.getUrl());
         } catch (Exception e) {
             logger.warn("failed to get deployment package descriptor from Eclipse Marketplace", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
 
         return descriptor;
-    }
-
-    private Version getMarketplaceCompatibilityVersion(String marketplaceCompatibilityVersion) {
-        try {
-            return new Version(marketplaceCompatibilityVersion);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String getMarketplaceCompatibilityVersionString() throws GwtKuraException {
-        return ServiceLocator.applyToServiceOptionally(SystemService.class,
-                SystemService::getKuraMarketplaceCompatibilityVersion);
-    }
-
-    private void checkCompatibility(GwtMarketplacePackageDescriptor descriptor, Version currentProductVersion) {
-        final String minKuraVersionString = descriptor.getMinKuraVersion();
-        final String maxKuraVersionString = descriptor.getMaxKuraVersion();
-
-        try {
-            boolean haveMinKuraVersion = minKuraVersionString != null && !minKuraVersionString.isEmpty();
-            boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
-
-            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0
-                    || haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
-                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
-            }
-
-            descriptor.setCompatible(haveMinKuraVersion || haveMaxKuraVersion);
-
-        } catch (Exception e) {
-            descriptor.setCompatible(false);
-        }
     }
 
     @Override

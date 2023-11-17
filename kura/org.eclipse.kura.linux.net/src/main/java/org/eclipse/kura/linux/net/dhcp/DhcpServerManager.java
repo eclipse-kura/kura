@@ -13,13 +13,23 @@
 package org.eclipse.kura.linux.net.dhcp;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpLinuxTool;
+import org.eclipse.kura.linux.net.dhcp.server.DhcpdConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.DhcpdLeaseReader;
 import org.eclipse.kura.linux.net.dhcp.server.DhcpdTool;
+import org.eclipse.kura.linux.net.dhcp.server.DnsmasqConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.DnsmasqLeaseReader;
 import org.eclipse.kura.linux.net.dhcp.server.DnsmasqTool;
+import org.eclipse.kura.linux.net.dhcp.server.UdhcpdConfigConverter;
+import org.eclipse.kura.linux.net.dhcp.server.UdhcpdLeaseReader;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +40,7 @@ public class DhcpServerManager {
 
     private static final String FILE_DIR = "/etc/";
     private static final String PID_FILE_DIR = "/var/run/";
+    private static final String LEASES_FILE_DIR = "/var/lib/dhcp/";
     private static DhcpServerTool dhcpServerTool = DhcpServerTool.NONE;
     private final DhcpLinuxTool linuxTool;
 
@@ -74,6 +85,7 @@ public class DhcpServerManager {
         File configFile = new File(DhcpServerManager.getConfigFilename(interfaceName));
         if (configFile.exists()) {
 
+            createLeasesFile(interfaceName);
             CommandStatus status = this.linuxTool.startInterface(interfaceName);
 
             if (status.getExitStatus().isSuccessful()) {
@@ -87,6 +99,14 @@ public class DhcpServerManager {
         return false;
     }
 
+    private void createLeasesFile(String interfaceName) throws KuraIOException {
+        try {
+            FileUtils.touch(new File(DhcpServerManager.getLeasesFilename(interfaceName)));
+        } catch (IOException e) {
+            throw new KuraIOException(e, "Cannot create DHCP server leases file");
+        }
+    }
+
     public boolean disable(String interfaceName) throws KuraException {
         logger.debug("Disable DHCP server for {}", interfaceName);
 
@@ -95,16 +115,16 @@ public class DhcpServerManager {
 
     public static String getConfigFilename(String interfaceName) {
         StringBuilder sb = new StringBuilder(FILE_DIR);
-        if (dhcpServerTool == DhcpServerTool.DHCPD || dhcpServerTool == DhcpServerTool.UDHCPD) {
-            sb.append(dhcpServerTool.getValue());
-            sb.append('-');
-            sb.append(interfaceName);
-            sb.append(".conf");
+        if (dhcpServerTool == DhcpServerTool.NONE) {
+            return sb.toString();
         }
-
         if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
-            sb.append("dnsmasq.d/dnsmasq-" + interfaceName + ".conf");
+            sb.append("dnsmasq.d/");
         }
+        sb.append(dhcpServerTool.getValue());
+        sb.append('-');
+        sb.append(interfaceName);
+        sb.append(".conf");
 
         return sb.toString();
     }
@@ -118,5 +138,45 @@ public class DhcpServerManager {
             sb.append(".pid");
         }
         return sb.toString();
+    }
+
+    public static String getLeasesFilename(String interfaceName) {
+        StringBuilder sb = new StringBuilder(LEASES_FILE_DIR);
+        if (dhcpServerTool == DhcpServerTool.NONE) {
+            return sb.toString();
+        }
+        if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            sb.append(dhcpServerTool.getValue());
+            sb.append(".leases");
+            return sb.toString();
+        }
+        sb.append(dhcpServerTool.getValue());
+        sb.append('-');
+        sb.append(interfaceName);
+        sb.append(".leases");
+
+        return sb.toString();
+    }
+
+    public static Optional<DhcpServerConfigConverter> getConfigConverter() {
+        if (dhcpServerTool == DhcpServerTool.DHCPD) {
+            return Optional.of(new DhcpdConfigConverter());
+        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+            return Optional.of(new UdhcpdConfigConverter());
+        } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            return Optional.of(new DnsmasqConfigConverter());
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<DhcpServerLeaseReader> getLeaseReader() {
+        if (dhcpServerTool == DhcpServerTool.DHCPD) {
+            return Optional.of(new DhcpdLeaseReader());
+        } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
+            return Optional.of(new UdhcpdLeaseReader());
+        } else if (dhcpServerTool == DhcpServerTool.DNSMASQ) {
+            return Optional.of(new DnsmasqLeaseReader());
+        }
+        return Optional.empty();
     }
 }

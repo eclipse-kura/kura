@@ -12,15 +12,20 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.auth.dto;
 
-public class PasswordAuthenticationResponseDTO {
+public class AuthenticationResponseDTO {
 
     private final boolean passwordChangeNeeded;
 
-    public PasswordAuthenticationResponseDTO(final boolean passwordChangeNeeded) {
+    public AuthenticationResponseDTO(final boolean passwordChangeNeeded) {
+        this.passwordChangeNeeded = passwordChangeNeeded;
+    }
+
+    public AuthenticationResponseDTO(final boolean passwordChangeNeeded, final String message) {
         this.passwordChangeNeeded = passwordChangeNeeded;
     }
 
     public boolean isPasswordChangeNeeded() {
         return passwordChangeNeeded;
     }
+
 }

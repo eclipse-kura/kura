@@ -29,9 +29,18 @@ public abstract class AbstractRequestHandlerTest {
 
     protected final Transport transport;
     protected Optional<Response> response = Optional.empty();
+    protected final TransportType transportType;
 
     protected AbstractRequestHandlerTest(final Transport transport) {
         this.transport = transport;
+
+        if (this.transport instanceof MqttTransport) {
+            this.transportType = TransportType.MQTT;
+        } else if (this.transport instanceof RestTransport) {
+            this.transportType = TransportType.REST;
+        } else
+            throw new IllegalArgumentException("Transport type must be a REST transport or a MQTT transport");
+
         this.transport.init();
     }
 
@@ -46,7 +55,10 @@ public abstract class AbstractRequestHandlerTest {
     protected void thenRequestSucceeds() {
         final Response currentResponse = expectResponse();
 
-        assertEquals(true, (currentResponse.getStatus() / 200) == 1);
+        if ((currentResponse.getStatus() / 200) != 1) {
+            fail("expected success status, but was: " + currentResponse.getStatus() + " body: "
+                    + currentResponse.getBody());
+        }
     }
 
     protected void thenResponseCodeIs(final int expectedResponseCode) {
@@ -59,27 +71,28 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected void thenResponseBodyEqualsJson(final String value) {
-        assertEquals(Json.parse(value), Json
-                .parse(expectResponse().getBody()
-                        .orElseThrow(() -> new IllegalStateException("expected response body"))));
+        assertEquals(Json.parse(value), Json.parse(
+                expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected response body"))));
     }
 
     protected void thenResponseBodyIsEmpty() {
         assertEquals(Optional.empty(), expectResponse().getBody());
     }
 
+    protected void thenResponseBodyIsNotEmpty() {
+        assertTrue(expectResponse().getBody().isPresent());
+    }
+
     protected void thenResponseHasCookie(final String name) {
         final CookieManager cookieManager = expectCookieManager();
 
-        assertTrue(cookieManager.getCookieStore().getCookies().stream()
-                .anyMatch(c -> c.getName().equals(name)));
+        assertTrue(cookieManager.getCookieStore().getCookies().stream().anyMatch(c -> c.getName().equals(name)));
     }
 
     protected void thenResponseDoesNotHaveCookie(final String name) {
         final CookieManager cookieManager = expectCookieManager();
 
-        assertTrue(cookieManager.getCookieStore().getCookies().stream()
-                .noneMatch(c -> c.getName().equals(name)));
+        assertTrue(cookieManager.getCookieStore().getCookies().stream().noneMatch(c -> c.getName().equals(name)));
     }
 
     protected CookieManager expectCookieManager() {
@@ -95,9 +108,12 @@ public abstract class AbstractRequestHandlerTest {
     }
 
     protected JsonObject expectJsonResponse() {
-        return Json
-                .parse(expectResponse().getBody()
-                        .orElseThrow(() -> new IllegalStateException("response body is empty")))
+        return Json.parse(
+                expectResponse().getBody().orElseThrow(() -> new IllegalStateException("response body is empty")))
                 .asObject();
+    }
+
+    public TransportType getTransportType() {
+        return this.transportType;
     }
 }

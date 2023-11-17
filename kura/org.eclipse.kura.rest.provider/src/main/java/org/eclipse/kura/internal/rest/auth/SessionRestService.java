@@ -13,7 +13,11 @@
 package org.eclipse.kura.internal.rest.auth;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,13 +35,20 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
-import org.eclipse.kura.internal.rest.auth.dto.PasswordAuthenticationResponseDTO;
+import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
+import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
+import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UsernamePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.XsrfTokenDTO;
 import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.AuthenticationException;
+import org.eclipse.kura.util.validation.PasswordStrengthValidators;
+import org.eclipse.kura.util.validation.Validator;
+import org.eclipse.kura.util.validation.ValidatorOptions;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +56,24 @@ import org.slf4j.LoggerFactory;
 @Path(SessionRestServiceConstants.BASE_PATH)
 public class SessionRestService {
 
+    private static final String AUDIT_FORMAT_STRING = "{} Rest - Failure - {}";
+    private static final String INVALID_SESSION_MESSAGE = "Current session is not valid";
+    private static final String BAD_USERNAME_OR_PASSWORD_MESSAGE = "Authentication failed as username or password not matching";
+    private static final String PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE = "Password change failed as previous password equals new one";
+    private static final String IDENTITY_NOT_IN_ROLE_MESSAGE = "Identity does not have the required permissions";
+
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final UserAdminHelper userAdminHelper;
     private final RestSessionHelper restSessionHelper;
+    private final ConfigurationAdmin configAdmin;
     private RestServiceOptions options;
 
-    public SessionRestService(final UserAdminHelper userAdminHelper, final RestSessionHelper restSessionHelper) {
+    public SessionRestService(final UserAdminHelper userAdminHelper, final RestSessionHelper restSessionHelper,
+            final ConfigurationAdmin configurationAdmin) {
         this.userAdminHelper = userAdminHelper;
         this.restSessionHelper = restSessionHelper;
+        this.configAdmin = configurationAdmin;
     }
 
     public void setOptions(final RestServiceOptions options) {
@@ -64,7 +84,7 @@ public class SessionRestService {
     @Path(SessionRestServiceConstants.LOGIN_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PasswordAuthenticationResponseDTO authenticateWithUsernameAndPassword(
+    public AuthenticationResponseDTO authenticateWithUsernameAndPassword(
             final UsernamePasswordDTO usernamePassword,
             @Context final HttpServletRequest request) {
 
@@ -86,16 +106,15 @@ public class SessionRestService {
             final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request,
                     usernamePassword.getUsername());
 
-            final boolean needsPasswordChange = this.userAdminHelper
-                    .isPasswordChangeRequired(usernamePassword.getUsername());
+            final AuthenticationResponseDTO response = buildAuthenticationResponse(usernamePassword.getUsername());
 
-            if (needsPasswordChange) {
+            if (response.isPasswordChangeNeeded()) {
                 this.restSessionHelper.lockSession(session);
             }
 
             auditLogger.info("{} Rest - Success - Create session via password authentication succeeded", auditContext);
 
-            return new PasswordAuthenticationResponseDTO(needsPasswordChange);
+            return response;
 
         } catch (final AuthenticationException e) {
             handleAuthenticationException(e);
@@ -106,7 +125,7 @@ public class SessionRestService {
     @POST
     @Path(SessionRestServiceConstants.LOGIN_CERTIFICATE_PATH)
     @Produces(MediaType.APPLICATION_JSON)
-    public void authenticateWithCertificate(@Context final HttpServletRequest request,
+    public AuthenticationResponseDTO authenticateWithCertificate(@Context final HttpServletRequest request,
             @Context final ContainerRequestContext requestContext) {
         if (!options.isSessionManagementEnabled() || !options.isCertificateAuthEnabled()) {
             throw new WebApplicationException(Status.NOT_FOUND);
@@ -122,8 +141,11 @@ public class SessionRestService {
             this.restSessionHelper.createNewAuthenticatedSession(request,
                     principal.get().getName());
         } else {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    "Certificate authentication failed");
         }
+
+        return buildAuthenticationResponse(principal.get().getName());
     }
 
     @GET
@@ -137,11 +159,13 @@ public class SessionRestService {
         final Optional<HttpSession> session = this.restSessionHelper.getExistingSession(request);
 
         if (!session.isPresent()) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    INVALID_SESSION_MESSAGE);
         }
 
         if (!this.restSessionHelper.getCurrentPrincipal(requestContext).isPresent()) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    INVALID_SESSION_MESSAGE);
         }
 
         return new XsrfTokenDTO(this.restSessionHelper.getOrCreateXsrfToken(session.get()));
@@ -160,10 +184,15 @@ public class SessionRestService {
                     .flatMap(c -> Optional.ofNullable(c.getName()));
 
             if (!username.isPresent()) {
-                throw new WebApplicationException(Status.UNAUTHORIZED);
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                        INVALID_SESSION_MESSAGE);
             }
 
             this.userAdminHelper.verifyUsernamePassword(username.get(), passwordUpdate.getCurrentPassword());
+
+            final String newPassword = passwordUpdate.getNewPassword();
+
+            validatePasswordStrength(newPassword);
 
             this.userAdminHelper.changeUserPassword(username.get(), passwordUpdate.getNewPassword());
 
@@ -186,7 +215,8 @@ public class SessionRestService {
         }
 
         if (!this.restSessionHelper.getCurrentPrincipal(requestContext).isPresent()) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    INVALID_SESSION_MESSAGE);
         }
 
         this.restSessionHelper.logout(request, response);
@@ -195,28 +225,106 @@ public class SessionRestService {
                 AuditContext.currentOrInternal());
     }
 
+    @GET
+    @Path(SessionRestServiceConstants.CURRENT_IDENTITY)
+    @Produces(MediaType.APPLICATION_JSON)
+    public IdentityInfoDTO getCurrentIdentityInfo(@Context final ContainerRequestContext requestContext,
+            @Context final HttpServletRequest request) {
+        if (!options.isSessionManagementEnabled()) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        final Optional<Principal> currentPrincipal = this.restSessionHelper.getCurrentPrincipal(requestContext);
+
+        if (!currentPrincipal.isPresent()) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    INVALID_SESSION_MESSAGE);
+        }
+
+        final String identityName = currentPrincipal.get().getName();
+        final Set<String> permissions = this.userAdminHelper.getIdentityPermissions(identityName);
+        final boolean needsPasswordChange = this.userAdminHelper
+                .isPasswordChangeRequired(identityName);
+
+        return new IdentityInfoDTO(identityName, needsPasswordChange, permissions);
+    }
+
+    @GET
+    @Path(SessionRestServiceConstants.AUTHENTICATION_INFO)
+    @Produces(MediaType.APPLICATION_JSON)
+    public AuthenticationInfoDTO getAuthenticationMethodInfo() {
+
+        final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();
+        final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
+
+        final Map<String, Object> consoleConfig = ConfigurationAdminHelper
+                .loadConsoleConfigurationProperties(configAdmin);
+
+        final String message = ConfigurationAdminHelper.getLoginMessage(consoleConfig).orElse(null);
+
+        if (!isCertificateAuthenticationEnabled) {
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+        }
+
+        final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
+                .loadHttpServiceConfigurationProperties(configAdmin);
+
+        final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper
+                .getHttpsMutualAuthPorts(httpServiceConfig);
+
+        if (!httpsClientAuthPorts.isEmpty()) {
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, message);
+        } else {
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+        }
+
+    }
+
+    private void validatePasswordStrength(final String newPassword) {
+        final ValidatorOptions validationOptions = new ValidatorOptions(
+                ConfigurationAdminHelper.loadConsoleConfigurationProperties(configAdmin));
+
+        final List<Validator<String>> validators = PasswordStrengthValidators.fromConfig(validationOptions);
+
+        final List<String> errors = new ArrayList<>();
+
+        for (final Validator<String> validator : validators) {
+            validator.validate(newPassword, errors::add);
+
+            if (!errors.isEmpty()) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "The new password does not satisfy password strenght requirements: " + errors.get(0));
+            }
+        }
+    }
+
+    private AuthenticationResponseDTO buildAuthenticationResponse(final String username) {
+        final boolean needsPasswordChange = this.userAdminHelper
+                .isPasswordChangeRequired(username);
+
+        return new AuthenticationResponseDTO(needsPasswordChange);
+    }
+
     private void handleAuthenticationException(final AuthenticationException e) {
         final AuditContext auditContext = AuditContext.currentOrInternal();
 
         switch (e.getReason()) {
             case INCORRECT_PASSWORD:
-                auditLogger.warn("{} Rest - Failure - Authentication failed as username or password not matching",
-                        auditContext);
-                throw new WebApplicationException(Status.UNAUTHORIZED);
-            case PASSWORD_CHANGE_WITH_SAME_PASSWORD:
-                auditLogger.warn("{} Rest - Failure - Password change failed as previous password equals new one",
-                        auditContext);
-                throw new WebApplicationException(Status.BAD_REQUEST);
             case USER_NOT_FOUND:
-                auditLogger.warn("{} Rest - Failure - Identity does not exist",
-                        auditContext);
-                throw new WebApplicationException(Status.UNAUTHORIZED);
+                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, BAD_USERNAME_OR_PASSWORD_MESSAGE);
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                        BAD_USERNAME_OR_PASSWORD_MESSAGE);
+            case PASSWORD_CHANGE_WITH_SAME_PASSWORD:
+                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
             case USER_NOT_IN_ROLE:
-                auditLogger.warn("{} Rest - Failure - Identity does not have the required permissions", auditContext);
-                throw new WebApplicationException(Status.FORBIDDEN);
+                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, IDENTITY_NOT_IN_ROLE_MESSAGE);
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.FORBIDDEN,
+                        IDENTITY_NOT_IN_ROLE_MESSAGE);
             default:
-                throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.INTERNAL_SERVER_ERROR,
+                        "An internal error occurred");
         }
     }
 

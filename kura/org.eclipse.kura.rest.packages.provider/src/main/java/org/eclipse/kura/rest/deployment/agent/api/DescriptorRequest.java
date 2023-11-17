@@ -10,12 +10,23 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.rest.identity.provider.validator;
+package org.eclipse.kura.rest.deployment.agent.api;
 
-public class RegexValidator extends PredicateValidator {
+public class DescriptorRequest implements Validable {
 
-    public RegexValidator(final String pattern, final String message) {
-        super(v -> v.matches(pattern), message);
+    private final String url;
+
+    public DescriptorRequest(String url) {
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    @Override
+    public boolean isValid() {
+        return this.url != null;
     }
 
 }

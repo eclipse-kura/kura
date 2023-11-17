@@ -13,7 +13,7 @@
     
     
       
-        <title>Identity - Eclipse Kura™ Documentation</title>
+        <title>Network Configuration - Eclipse Kura™ Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#rest-identity-v1-api" class="md-skip">
+        <a href="#network-configuration-v1-rest-apis" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Identity
+              Network Configuration
             
           </span>
         </div>
@@ -2806,265 +2806,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Identity
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../rest-identity-api/" class="md-nav__link">
         Identity
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#post-methods" class="md-nav__link">
-    POST methods
-  </a>
-  
-    <nav class="md-nav" aria-label="POST methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#create-user" class="md-nav__link">
-    Create User
-  </a>
-  
-    <nav class="md-nav" aria-label="Create User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request" class="md-nav__link">
-    Request
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-user-by-name" class="md-nav__link">
-    Get User by Name
-  </a>
-  
-    <nav class="md-nav" aria-label="Get User by Name">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_1" class="md-nav__link">
-    Request
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_1" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-methods" class="md-nav__link">
-    GET methods
-  </a>
-  
-    <nav class="md-nav" aria-label="GET methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-defined-permissions" class="md-nav__link">
-    Get defined permissions
-  </a>
-  
-    <nav class="md-nav" aria-label="Get defined permissions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_2" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-users-configuration" class="md-nav__link">
-    Get users configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Get users configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_3" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-password-requirements" class="md-nav__link">
-    Get password requirements
-  </a>
-  
-    <nav class="md-nav" aria-label="Get password requirements">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_4" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#put-methods" class="md-nav__link">
-    PUT methods
-  </a>
-  
-    <nav class="md-nav" aria-label="PUT methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#update-user" class="md-nav__link">
-    Update User
-  </a>
-  
-    <nav class="md-nav" aria-label="Update User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_2" class="md-nav__link">
-    Request
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_5" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-methods" class="md-nav__link">
-    DELETE methods
-  </a>
-  
-    <nav class="md-nav" aria-label="DELETE methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#delete-user" class="md-nav__link">
-    Delete User
-  </a>
-  
-    <nav class="md-nav" aria-label="Delete User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_3" class="md-nav__link">
-    Request
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#responses_6" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3088,11 +2834,141 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../rest-network-configuration-api/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Network Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Network Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#request-definitions" class="md-nav__link">
+    Request definitions
+  </a>
+  
+    <nav class="md-nav" aria-label="Request definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getconfigurablecomponents" class="md-nav__link">
+    GET/configurableComponents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getconfigurablecomponentsconfigurations" class="md-nav__link">
+    GET/configurableComponents/configurations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postconfigurablecomponentsconfigurationsbypid" class="md-nav__link">
+    POST/configurableComponents/configurations/byPid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postconfigurablecomponentsconfigurationsbypid_default" class="md-nav__link">
+    POST/configurableComponents/configurations/byPid/_default
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#putconfigurablecomponentsconfigurations_update" class="md-nav__link">
+    PUT/configurableComponents/configurations/_update
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json-definitions" class="md-nav__link">
+    JSON definitions
+  </a>
+  
+    <nav class="md-nav" aria-label="JSON definitions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#batchfailurereport" class="md-nav__link">
+    BatchFailureReport
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#componentconfigurationlist" class="md-nav__link">
+    ComponentConfigurationList
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genericfailurereport" class="md-nav__link">
+    GenericFailureReport
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pidset" class="md-nav__link">
+    PidSet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updatecomponentconfigurationrequest" class="md-nav__link">
+    UpdateComponentConfigurationRequest
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3256,64 +3132,45 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#post-methods" class="md-nav__link">
-    POST methods
+  <a href="#request-definitions" class="md-nav__link">
+    Request definitions
   </a>
   
-    <nav class="md-nav" aria-label="POST methods">
+    <nav class="md-nav" aria-label="Request definitions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-user" class="md-nav__link">
-    Create User
-  </a>
-  
-    <nav class="md-nav" aria-label="Create User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request" class="md-nav__link">
-    Request
+  <a href="#getconfigurablecomponents" class="md-nav__link">
+    GET/configurableComponents
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#responses" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-user-by-name" class="md-nav__link">
-    Get User by Name
-  </a>
-  
-    <nav class="md-nav" aria-label="Get User by Name">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_1" class="md-nav__link">
-    Request
+  <a href="#getconfigurablecomponentsconfigurations" class="md-nav__link">
+    GET/configurableComponents/configurations
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#responses_1" class="md-nav__link">
-    Responses
+  <a href="#postconfigurablecomponentsconfigurationsbypid" class="md-nav__link">
+    POST/configurableComponents/configurations/byPid
   </a>
   
 </li>
         
-      </ul>
-    </nav>
+          <li class="md-nav__item">
+  <a href="#postconfigurablecomponentsconfigurationsbypid_default" class="md-nav__link">
+    POST/configurableComponents/configurations/byPid/_default
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#putconfigurablecomponentsconfigurations_update" class="md-nav__link">
+    PUT/configurableComponents/configurations/_update
+  </a>
   
 </li>
         
@@ -3323,150 +3180,45 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#get-methods" class="md-nav__link">
-    GET methods
+  <a href="#json-definitions" class="md-nav__link">
+    JSON definitions
   </a>
   
-    <nav class="md-nav" aria-label="GET methods">
+    <nav class="md-nav" aria-label="JSON definitions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#get-defined-permissions" class="md-nav__link">
-    Get defined permissions
-  </a>
-  
-    <nav class="md-nav" aria-label="Get defined permissions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_2" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-users-configuration" class="md-nav__link">
-    Get users configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Get users configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_3" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-password-requirements" class="md-nav__link">
-    Get password requirements
-  </a>
-  
-    <nav class="md-nav" aria-label="Get password requirements">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#responses_4" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#put-methods" class="md-nav__link">
-    PUT methods
-  </a>
-  
-    <nav class="md-nav" aria-label="PUT methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#update-user" class="md-nav__link">
-    Update User
-  </a>
-  
-    <nav class="md-nav" aria-label="Update User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_2" class="md-nav__link">
-    Request
+  <a href="#batchfailurereport" class="md-nav__link">
+    BatchFailureReport
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#responses_5" class="md-nav__link">
-    Responses
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-methods" class="md-nav__link">
-    DELETE methods
-  </a>
-  
-    <nav class="md-nav" aria-label="DELETE methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#delete-user" class="md-nav__link">
-    Delete User
-  </a>
-  
-    <nav class="md-nav" aria-label="Delete User">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#request_3" class="md-nav__link">
-    Request
+  <a href="#componentconfigurationlist" class="md-nav__link">
+    ComponentConfigurationList
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#responses_6" class="md-nav__link">
-    Responses
+  <a href="#genericfailurereport" class="md-nav__link">
+    GenericFailureReport
   </a>
   
 </li>
         
-      </ul>
-    </nav>
+          <li class="md-nav__item">
+  <a href="#pidset" class="md-nav__link">
+    PidSet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updatecomponentconfigurationrequest" class="md-nav__link">
+    UpdateComponentConfigurationRequest
+  </a>
   
 </li>
         
@@ -3489,189 +3241,409 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
 
 
-<h1 id="rest-identity-v1-api">Rest Identity v1 API</h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This API can also be accessed via the RequestHandler with app-id: <code>IDN-V1</code>.</p>
-</div>
-<p>The <code>IdentityRestService</code> APIs provides methods to manage the system identities.
-Unless otherwise specified, identities with <code>rest.identity</code> permissions can access these APIs.</p>
-<h2 id="post-methods">POST methods</h2>
-<h4 id="create-user">Create User</h4>
+<h1 id="network-configuration-v1-rest-apis">Network Configuration V1 REST APIs</h1>
+<p>This section describes the <code>networkConfiguration/v1</code> REST APIs, that allow to retrieve information about the network configuration of the running system. The services <code>pid</code> for which it's possible to obtain and update the configurations are:</p>
 <ul>
-<li>Description: This method allows to create a new user in the system.</li>
-<li>Method: POST</li>
-<li>API PATH: <code>services/identity/v1/identities</code></li>
+<li><code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>: which manages the network configuration of the system, so the network interfaces along with their network configuration (Ip4/Ip6 settings, DHCP, Nat, and so on)</li>
+<li><code>org.eclipse.kura.net.admin.FirewallConfigurationService</code>: which manages the Ip4 firewall configurations (open ports, port forwarding and masquerading for IPv4 protocol)</li>
+<li><code>org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6</code>: which manages the Ip6 firewall configurations (open ports, port forwarding and masquerading for IPv6 protocol)</li>
 </ul>
-<h5 id="request">Request</h5>
+<p>To access these REST APIs, an identity with <code>rest.network.configuration</code> permission assigned is required.</p>
+<ul>
+<li><a href="#request-definitions">Request definitions</a><ul>
+<li><a href="#getconfigurablecomponents">GET/configurableComponents</a></li>
+<li><a href="#getconfigurablecomponentsconfigurations">GET/configurableComponents/configurations</a></li>
+<li><a href="#postconfigurablecomponentsconfigurationsbypid">POST/configurableComponents/configurations/byPid</a></li>
+<li><a href="#postconfigurablecomponentsconfigurationsbypid_default">POST/configurableComponents/configurations/byPid/_default</a></li>
+<li><a href="#putconfigurablecomponentsconfigurations_update">PUT/configurableComponents/configurations/_update</a></li>
+</ul>
+</li>
+<li><a href="#json-definitions">JSON definitions</a><ul>
+<li><a href="#batchfailurereport">BatchFailureReport</a></li>
+<li><a href="#componentconfigurationlist">ComponentConfigurationList</a></li>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+<li><a href="#pidset">PidSet</a></li>
+<li><a href="#updatecomponentconfigurationrequest">UpdateComponentConfigurationRequest</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="request-definitions">Request definitions</h2>
+<h4 id="getconfigurablecomponents">GET/configurableComponents</h4>
+<ul>
+<li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/configurableComponents</code></li>
+<li><strong>description</strong> : Returns the list of the available services that manages the network configurations on the system.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#pidset">PidSet</a></li>
+</ul>
+</li>
+<li><strong>500</strong></li>
+<li><strong>description</strong> : An unexpected internal error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="getconfigurablecomponentsconfigurations">GET/configurableComponents/configurations</h4>
+<ul>
+<li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/configurableComponents/configurations</code></li>
+<li><strong>description</strong> : Returns all of network component configurations available on the system. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#componentconfigurationlist">ComponentConfigurationList</a></li>
+</ul>
+</li>
+<li><strong>500</strong></li>
+<li><strong>description</strong> : An unexpected internal error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="postconfigurablecomponentsconfigurationsbypid">POST/configurableComponents/configurations/byPid</h4>
+<ul>
+<li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/configurableComponents/configurations/byPid</code></li>
+<li><strong>description</strong> : Returns a user selected set of network configurations. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>request body</strong> :<ul>
+<li><a href="#pidset">PidSet</a></li>
+</ul>
+</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded. If the network configuration for a given pid cannot be found, it will not be included in the result.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#componentconfigurationlist">ComponentConfigurationList</a></li>
+</ul>
+</li>
+<li><strong>400</strong></li>
+<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+<li><strong>500</strong></li>
+<li><strong>description</strong> : An unexpected internal error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="postconfigurablecomponentsconfigurationsbypid_default">POST/configurableComponents/configurations/byPid/_default</h4>
+<ul>
+<li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/configurableComponents/configurations/byPid/_default</code></li>
+<li><strong>description</strong> : Returns the default network configuration for a given set of network component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>request body</strong> :<ul>
+<li><a href="#pidset">PidSet</a></li>
+</ul>
+</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded. If the network configuration for a given pid cannot be found, it will not be included in the result.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#componentconfigurationlist">ComponentConfigurationList</a></li>
+</ul>
+</li>
+<li><strong>400</strong></li>
+<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+<li><strong>500</strong></li>
+<li><strong>description</strong> : An unexpected internal error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="putconfigurablecomponentsconfigurations_update">PUT/configurableComponents/configurations/_update</h4>
+<ul>
+<li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/configurableComponents/configurations/_update</code></li>
+<li><strong>description</strong> : Updates a given set of network component configurations. This request can be also used to apply a network configuration snapshot.</li>
+<li><strong>request body</strong> :<ul>
+<li><a href="#updatecomponentconfigurationrequest">UpdateComponentConfigurationRequest</a></li>
+</ul>
+</li>
+<li><strong>responses</strong> :<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded.</li>
+<li><strong>400</strong></li>
+<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+<li><strong>500</strong></li>
+<li><strong>description</strong> : In case of processing errors, the device will attempt to return a detailed error response containing a message describing the failure reason for each operation. The operation ids are the following: <code>update:$pid</code> for component update operations, where <code>$pid</code> is the pid of the instance, and <code>snapshot</code>, for the snapshot creation operation. In case of an unexpected failure, a generic error response will be returned.</li>
+<li>
+<p><strong>response body</strong> :</p>
+<p><strong>Variants</strong>:</p>
+<ul>
+<li><strong>object</strong><ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+<li><strong>object</strong><ul>
+<li><a href="#batchfailurereport">BatchFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="json-definitions">JSON definitions</h2>
+<h4 id="batchfailurereport">BatchFailureReport</h4>
+<p>An object that is returned by requests that involve multiple operations, when at least one operation failed. 
+            This object report an error message for each of the operations that failed. The operations are identified by an id, see request documentation for more details.
+            If an operation is not listed by this object, then the operation succeeded.
+<br><strong>Properties</strong>:</p>
+<ul>
+<li>
+<p><strong>failures</strong>: <code>array</code>
+    The list of operations that failed.</p>
+<ul>
+<li>
+<p>array elements: <code>object</code>
+  An object reporting details about an operation failure.
+  <br><strong>Properties</strong>:</p>
+</li>
+<li>
+<p><strong>id</strong>: <code>string</code>
+      An identifier of the failed operation.</p>
+</li>
+<li><strong>message</strong>: <code>string</code>
+      A message describing the failure.</li>
+</ul>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;passwordAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="s2">&quot;rest.identity&quot;</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;failures&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create:testComponent&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid parameter. pid testComponent already exists&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;create:otherComponent&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid parameter. pid otherComponent already exists&quot;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
 </code></pre></div>
-<h5 id="responses">Responses</h5>
+<h4 id="componentconfigurationlist">ComponentConfigurationList</h4>
+<p>Represents a list of component configurations.
+<br><strong>Properties</strong>:</p>
 <ul>
-<li>200 OK status</li>
-<li>400 Bad Request (Password strenght requirements not satisfied)</li>
-<li>500 Internal Server Error</li>
+<li><strong>configs</strong>: <code>array</code>
+    The component configurations<ul>
+<li>array elements: <code>object</code></li>
+<li><a href="../../../core-services/configuration-service-rest-v2/#componentconfiguration">ComponentConfiguration</a></li>
 </ul>
-<h4 id="get-user-by-name">Get User by Name</h4>
-<ul>
-<li>Description: This method allows to get data about an user in the system. The only considered field is the userName.</li>
-<li>Method: POST</li>
-<li>API PATH: <code>services/identity/v1/identities/byName</code></li>
+</li>
 </ul>
-<h5 id="request_1">Request</h5>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;username&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">            </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">            </span><span class="nt">&quot;definition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                </span><span class="nt">&quot;ad&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.open.ports&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall opened ports.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.open.ports&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">                    </span><span class="p">},</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.port.forwarding&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall port forwarding rules.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.port.forwarding&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">                    </span><span class="p">},</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.nat&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall NAT rules.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.nat&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">                    </span><span class="p">}</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">                </span><span class="p">],</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FirewallConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Firewall Configuration Service&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">                </span><span class="nt">&quot;firewall.open.ports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;22,tcp,0.0.0.0/0,eth0,,,,#;22,tcp,0.0.0.0/0,wlan0,,,,#;443,tcp,0.0.0.0/0,eth0,,,,#;443,tcp,0.0.0.0/0,wlan0,,,,#;4443,tcp,0.0.0.0/0,eth0,,,,#;4443,tcp,0.0.0.0/0,wlan0,,,,#;1450,tcp,0.0.0.0/0,eth0,,,,#;1450,tcp,0.0.0.0/0,wlan0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,0.0.0.0/0,eth0,,,,#;53,udp,0.0.0.0/0,wlan0,,,,#;67,udp,0.0.0.0/0,eth0,,,,#;67,udp,0.0.0.0/0,wlan0,,,,#;8000,tcp,0.0.0.0/0,eth0,,,,#;8000,tcp,0.0.0.0/0,wlan0,,,,#&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="w">                </span><span class="nt">&quot;firewall.port.forwarding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a><span class="w">                </span><span class="nt">&quot;firewall.nat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a><span class="w">                </span><span class="nt">&quot;kura.service.pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a><span class="w">                </span><span class="nt">&quot;service.pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a><span class="w">            </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a><span class="w">            </span><span class="nt">&quot;definition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a><span class="w">                </span><span class="nt">&quot;ad&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.open.ports&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall opened ports.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.open.ports&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a><span class="w">                    </span><span class="p">},</span>
+<a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.port.forwarding&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall port forwarding rules.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.port.forwarding&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a><span class="w">                    </span><span class="p">},</span>
+<a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a><span class="w">                    </span><span class="p">{</span>
+<a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a><span class="w">                        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.nat&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-86" name="__codelineno-1-86" href="#__codelineno-1-86"></a><span class="w">                        </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The list of firewall NAT rules.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-87" name="__codelineno-1-87" href="#__codelineno-1-87"></a><span class="w">                        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;firewall.ipv6.nat&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-88" name="__codelineno-1-88" href="#__codelineno-1-88"></a><span class="w">                        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-89" name="__codelineno-1-89" href="#__codelineno-1-89"></a><span class="w">                        </span><span class="nt">&quot;cardinality&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-90" name="__codelineno-1-90" href="#__codelineno-1-90"></a><span class="w">                        </span><span class="nt">&quot;defaultValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-91" name="__codelineno-1-91" href="#__codelineno-1-91"></a><span class="w">                        </span><span class="nt">&quot;isRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-92" name="__codelineno-1-92" href="#__codelineno-1-92"></a><span class="w">                    </span><span class="p">}</span>
+<a id="__codelineno-1-93" name="__codelineno-1-93" href="#__codelineno-1-93"></a><span class="w">                </span><span class="p">],</span>
+<a id="__codelineno-1-94" name="__codelineno-1-94" href="#__codelineno-1-94"></a><span class="w">                </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-95" name="__codelineno-1-95" href="#__codelineno-1-95"></a><span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Firewall Configuration Service IPV6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-96" name="__codelineno-1-96" href="#__codelineno-1-96"></a><span class="w">                </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span>
+<a id="__codelineno-1-97" name="__codelineno-1-97" href="#__codelineno-1-97"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-1-98" name="__codelineno-1-98" href="#__codelineno-1-98"></a><span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-99" name="__codelineno-1-99" href="#__codelineno-1-99"></a><span class="w">                </span><span class="nt">&quot;firewall.ipv6.port.forwarding&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-100" name="__codelineno-1-100" href="#__codelineno-1-100"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-101" name="__codelineno-1-101" href="#__codelineno-1-101"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-102" name="__codelineno-1-102" href="#__codelineno-1-102"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-103" name="__codelineno-1-103" href="#__codelineno-1-103"></a><span class="w">                </span><span class="nt">&quot;firewall.ipv6.nat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-104" name="__codelineno-1-104" href="#__codelineno-1-104"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-105" name="__codelineno-1-105" href="#__codelineno-1-105"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-106" name="__codelineno-1-106" href="#__codelineno-1-106"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-107" name="__codelineno-1-107" href="#__codelineno-1-107"></a><span class="w">                </span><span class="nt">&quot;firewall.ipv6.open.ports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-108" name="__codelineno-1-108" href="#__codelineno-1-108"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234,tcp,0:0:0:0:0:0:0:0/0,,,,,#&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-109" name="__codelineno-1-109" href="#__codelineno-1-109"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-110" name="__codelineno-1-110" href="#__codelineno-1-110"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-111" name="__codelineno-1-111" href="#__codelineno-1-111"></a><span class="w">                </span><span class="nt">&quot;kura.service.pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-112" name="__codelineno-1-112" href="#__codelineno-1-112"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-113" name="__codelineno-1-113" href="#__codelineno-1-113"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-114" name="__codelineno-1-114" href="#__codelineno-1-114"></a><span class="w">                </span><span class="p">},</span>
+<a id="__codelineno-1-115" name="__codelineno-1-115" href="#__codelineno-1-115"></a><span class="w">                </span><span class="nt">&quot;service.pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-116" name="__codelineno-1-116" href="#__codelineno-1-116"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-117" name="__codelineno-1-117" href="#__codelineno-1-117"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-1-118" name="__codelineno-1-118" href="#__codelineno-1-118"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-1-119" name="__codelineno-1-119" href="#__codelineno-1-119"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-1-120" name="__codelineno-1-120" href="#__codelineno-1-120"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-121" name="__codelineno-1-121" href="#__codelineno-1-121"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-1-122" name="__codelineno-1-122" href="#__codelineno-1-122"></a><span class="p">}</span>
 </code></pre></div>
-<h5 id="responses_1">Responses</h5>
+<h4 id="genericfailurereport">GenericFailureReport</h4>
+<p>An object reporting a failure message.
+<br><strong>Properties</strong>:</p>
+<ul>
+<li><strong>message</strong>: <code>string</code>
+    A message describing the failure.</li>
+</ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kura.user.username&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;passwordAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;An unexpected error occurred.&quot;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span>
 </code></pre></div>
+<h4 id="pidset">PidSet</h4>
+<p>Represents a set of pids or factory pids.
+<br><strong>Properties</strong>:</p>
 <ul>
-<li>200 OK status</li>
-<li>500 Internal Server Error</li>
+<li><strong>pids</strong>: <code>array</code>
+    The set of pids<ul>
+<li>array elements: <code>string</code>
+  The pid</li>
 </ul>
-<h2 id="get-methods">GET methods</h2>
-<h4 id="get-defined-permissions">Get defined permissions</h4>
-<ul>
-<li>Description: This method allows you to get the list of the permissions defined in the system</li>
-<li>Method: GET</li>
-<li>API PATH: <code>services/identity/v1/definedPermissions</code></li>
+</li>
 </ul>
-<p>No specific permission is required to access this resource.</p>
-<h5 id="responses_2">Responses</h5>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="s2">&quot;rest.command&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="s2">&quot;rest.inventory&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="s2">&quot;rest.configuration&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="s2">&quot;rest.tamper.detection&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="s2">&quot;rest.security&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="s2">&quot;kura.cloud.connection.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="s2">&quot;rest.position&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="s2">&quot;kura.packages.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="s2">&quot;kura.device&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="s2">&quot;rest.wires.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">        </span><span class="s2">&quot;kura.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">        </span><span class="s2">&quot;rest.keystores&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">        </span><span class="s2">&quot;rest.assets&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">        </span><span class="s2">&quot;rest.system&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">        </span><span class="s2">&quot;kura.maintenance&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">        </span><span class="s2">&quot;kura.wires.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">        </span><span class="s2">&quot;rest.identity&quot;</span>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="p">}</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;pids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="s2">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="s2">&quot;org.eclipse.kura.net.admin.FirewallConfigurationService&quot;</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="p">]</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </code></pre></div>
+<h4 id="updatecomponentconfigurationrequest">UpdateComponentConfigurationRequest</h4>
+<p>An object that describes a set of configurations that need to be updated.
+<br><strong>Properties</strong>:</p>
 <ul>
-<li>200 OK status</li>
-<li>500 Internal Server Error</li>
+<li><strong>configs</strong>: <code>array</code>
+    The configurations to be updated. The <code>ocd</code> field can be omitted, it will be ignored if specified.<ul>
+<li>array elements: <code>object</code></li>
+<li><a href="../../../core-services/configuration-service-rest-v2/#componentconfiguration">ComponentConfiguration</a></li>
 </ul>
-<h4 id="get-users-configuration">Get users configuration</h4>
-<ul>
-<li>Description: This method allows you to get the list of the users and their configuration on the system.</li>
-<li>Method: GET</li>
-<li>API PATH: <code>services/identity/v1/identities</code></li>
+</li>
+<li><strong>takeSnapshot</strong>: <code>bool</code></li>
+<li><strong>optional</strong> The <code>true</code> value will be used as default if not explicitly specified
+    Defines whether a new snapshot should be created after that the component configurations have been applied.</li>
 </ul>
-<h5 id="responses_3">Responses</h5>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;userConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">            </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">            </span><span class="nt">&quot;passwordAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">            </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">            </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">                </span><span class="s2">&quot;kura.admin&quot;</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">            </span><span class="p">]</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">            </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appadmin&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">            </span><span class="nt">&quot;passwordAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">            </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">            </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">                </span><span class="s2">&quot;kura.cloud.connection.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">                </span><span class="s2">&quot;kura.packages.admin&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">                </span><span class="s2">&quot;kura.wires.admin&quot;</span>
-<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">            </span><span class="p">]</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">            </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">                </span><span class="nt">&quot;firewall.ipv6.open.ports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234,tcp,0:0:0:0:0:0:0:0/0,,,,,#&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">            </span><span class="nt">&quot;pid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">            </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">                </span><span class="nt">&quot;net.interface.eth0.config.ip6.status&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">                    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;netIPv6StatusUnmanaged&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">                </span><span class="p">}</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">            </span><span class="p">}</span>
 <a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="p">}</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">    </span><span class="nt">&quot;takeSnapshot&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="p">}</span>
 </code></pre></div>
-<ul>
-<li>200 OK status</li>
-<li>500 Internal Server Error</li>
-</ul>
-<h4 id="get-password-requirements">Get password requirements</h4>
-<ul>
-<li>Description: This method allows you to get the password requirements.</li>
-<li>Method: GET</li>
-<li>API PATH: <code>services/identity/v1/passwordRequirements</code></li>
-</ul>
-<p>No specific permission is required to access this resource.</p>
-<h5 id="responses_4">Responses</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">&quot;passwordMinimumLength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&quot;passwordRequireDigits&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">&quot;passwordRequireSpecialChars&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nt">&quot;passwordRequireBothCases&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span>
-</code></pre></div>
-<ul>
-<li>200 OK status</li>
-<li>500 Internal Server Error</li>
-</ul>
-<h2 id="put-methods">PUT methods</h2>
-<h4 id="update-user">Update User</h4>
-<ul>
-<li>Description: This method allows to update an existing user in the system.</li>
-<li>Method: PUT</li>
-<li>API PATH: <code>services/identity/v1/identities</code></li>
-</ul>
-<h5 id="request_2">Request</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nt">&quot;passwordAuthEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">        </span><span class="s2">&quot;rest.identity&quot;</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="p">]</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="p">}</span>
-</code></pre></div>
-<h5 id="responses_5">Responses</h5>
-<ul>
-<li>200 OK status</li>
-<li>400 Bad Request (Password strenght requirements not satisfied)</li>
-<li>500 Internal Server Error</li>
-</ul>
-<h2 id="delete-methods">DELETE methods</h2>
-<h4 id="delete-user">Delete User</h4>
-<ul>
-<li>Description: This method allows to delete an existing user in the system. The only considered field is the userName.</li>
-<li>Method: DELETE</li>
-<li>API PATH: <code>services/identity/v1/identities</code></li>
-</ul>
-<h5 id="request_3">Request</h5>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;username&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">}</span>
-</code></pre></div>
-<h5 id="responses_6">Responses</h5>
-<ul>
-<li>200 OK status</li>
-<li>500 Internal Server Error</li>
-</ul>
 
               
             </article>
@@ -3692,7 +3664,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../rest-deploy-api/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deploy" rel="prev">
+        <a href="../rest-inventory-api/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Inventory" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -3701,20 +3673,20 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
               <span class="md-footer__direction">
                 Previous
               </span>
-              Deploy
+              Inventory
             </div>
           </div>
         </a>
       
       
         
-        <a href="../rest-inventory-api/" class="md-footer__link md-footer__link--next" aria-label="Next: Inventory" rel="next">
+        <a href="../rest-position-api/" class="md-footer__link md-footer__link--next" aria-label="Next: Position" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Inventory
+              Position
             </div>
           </div>
           <div class="md-footer__button md-icon">

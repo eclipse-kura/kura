@@ -155,6 +155,7 @@ nav:
         - Deploy: references/rest-apis/rest-deploy-api.md
         - Identity: references/rest-apis/rest-identity-api.md
         - Inventory: references/rest-apis/rest-inventory-api.md
+        - Network Configuration: references/rest-apis/rest-network-configuration-api.md
         - Position: references/rest-apis/rest-position-api.md
         - Security: references/rest-apis/rest-security-api.md
         - Service Listing: references/rest-apis/rest-service-listing-api.md

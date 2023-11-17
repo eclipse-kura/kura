@@ -463,6 +463,7 @@ public class NetworkConfigurationServiceCommon {
         Tad tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.promisc", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_PROMISC, Tscalar.INTEGER);
         tad.setRequired(true);
+        tad.setDefault("-1");
         tocd.addAD(tad);
     }
 

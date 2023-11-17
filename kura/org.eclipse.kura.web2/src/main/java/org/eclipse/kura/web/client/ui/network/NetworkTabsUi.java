@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
@@ -34,7 +33,6 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -94,38 +92,22 @@ public class NetworkTabsUi extends Composite {
      * Initialization
      */
 
-    public NetworkTabsUi(GwtSession session) {
+    public NetworkTabsUi(GwtSession session, final boolean isNet2) {
         initWidget(uiBinder.createAndBindUi(this));
         this.visibleTabs = new LinkedList<>();
         this.session = session;
-        detectIfNet2();
-        initTabs();
+        this.isNet2 = isNet2;
+        initTabs(isNet2);
     }
 
-    private void detectIfNet2() {
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                NetworkTabsUi.this.isNet2 = false;
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                NetworkTabsUi.this.isNet2 = result;
-            }
-        });
-    }
-
-    private void initTabs() {
+    private void initTabs(final boolean isNet2) {
         this.tabsPanel.clear();
         this.visibleTabs.clear();
 
-        initIp4Tab();
+        initIp4Tab(isNet2);
         initIp6Tab();
         initWireless8021xTab();
-        initWirelessTab();
+        initWirelessTab(isNet2);
         initModemTab();
         initModemGpsTab();
         initModemAntennaTab();
@@ -138,9 +120,9 @@ public class NetworkTabsUi extends Composite {
         this.content.add(this.ip4Tab);
     }
 
-    private void initIp4Tab() {
+    private void initIp4Tab(final boolean isNet2) {
         this.ip4TabAnchorItem = new AnchorListItem(MSGS.netIPv4());
-        this.ip4Tab = new TabIp4Ui(this.session, this);
+        this.ip4Tab = new TabIp4Ui(this.session, this, isNet2);
 
         this.ip4TabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.ip4TabAnchorItem);
@@ -162,10 +144,10 @@ public class NetworkTabsUi extends Composite {
         });
     }
 
-    private void initWirelessTab() {
+    private void initWirelessTab(final boolean isNet2) {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
         this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.set8021xTab, this.net8021xTabAnchorItem,
-                this);
+                this, isNet2);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTabAnchorItem);

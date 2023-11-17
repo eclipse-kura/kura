@@ -88,13 +88,14 @@ public class DevicePanelUi extends Composite {
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
 
-        this.containers.setVisible(false); //hidden by default
-        checkIfContainerOrchestratorIsAvaliable();
+        this.containers.setVisible(false); // hidden by default
     }
 
     public void initDevicePanel() {
         this.profilePanel.refresh();
         this.commandPanel.setSession(this.session);
+        this.logPanel.initialize();
+        checkIfContainerOrchestratorIsAvaliable();
     }
 
     public void setSession(GwtSession currentSession) {

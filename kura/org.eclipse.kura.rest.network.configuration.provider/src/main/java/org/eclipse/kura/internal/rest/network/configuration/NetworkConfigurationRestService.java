@@ -78,15 +78,6 @@ public class NetworkConfigurationRestService {
         this.cryptoService = cryptoService;
     }
 
-    /**
-     * GET method.
-     *
-     * Lists the tracked network configurable component Pids
-     *
-     * @return a List of String objects representing the Pids of network factory components
-     *         tracked by the
-     *         {@link ConfigurationService}
-     */
     @GET
     @RolesAllowed("network.configuration")
     @Path("/configurableComponents")
@@ -98,17 +89,6 @@ public class NetworkConfigurationRestService {
         return new PidSet(pids);
     }
 
-    /**
-     * GET method.
-     *
-     * Lists all the network component configurations of all the ConfigurableComponents
-     * tracked by the
-     * {@link ConfigurationService}
-     *
-     * @return a list of {@link ComponentConfigurationDTO} that map all the
-     *         configuration parameters tracked for the
-     *         network configurable components tracked.
-     */
     @GET
     @RolesAllowed("network.configuration")
     @Path("/configurableComponents/configurations")
@@ -117,8 +97,9 @@ public class NetworkConfigurationRestService {
         final List<ComponentConfiguration> ccs = new ArrayList<>();
         try {
             for (String config : NETWORK_CONFIGURATION_PIDS) {
-                if (null != this.configurationService.getComponentConfiguration(config)) {
-                    ccs.add(this.configurationService.getComponentConfiguration(config));
+                ComponentConfiguration configuration = this.configurationService.getComponentConfiguration(config);
+                if (null != configuration) {
+                    ccs.add(configuration);
                 }
             }
         } catch (final Exception e) {
@@ -127,18 +108,6 @@ public class NetworkConfigurationRestService {
         return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, false).replacePasswordsWithPlaceholder();
     }
 
-    /**
-     * POST method.
-     *
-     * Lists the network component configurations of all the network ConfigurableComponents tracked
-     * by the
-     * {@link ConfigurationService} that match the filter specified
-     *
-     * @param filter
-     *            A String representing an OSGi filter
-     * @return a list of {@link ComponentConfigurationDTO}s for the components that
-     *         match the specified filter
-     */
     @POST
     @RolesAllowed("network.configuration")
     @Path("/configurableComponents/configurations/byPid")
@@ -161,16 +130,6 @@ public class NetworkConfigurationRestService {
                 .replacePasswordsWithPlaceholder();
     }
 
-    /**
-     * POST method.
-     *
-     * This method provides the default network Component Configuration for the component identified by
-     * the specified PID in the body request
-     *
-     * @param componentPid
-     * @return The default {@link ComponentConfiguration} or a null object if the
-     *         component is not tracked
-     */
     @POST
     @RolesAllowed("network.configuration")
     @Path("/configurableComponents/configurations/byPid/_default")
@@ -197,13 +156,6 @@ public class NetworkConfigurationRestService {
         return new ComponentConfigurationList(requestResult);
     }
 
-    /**
-     * POST method.
-     *
-     * This method let the user update the configuration of multiple network configurable components
-     *
-     * @param request
-     */
     @PUT
     @RolesAllowed("network.configuration")
     @Path("/configurableComponents/configurations/_update")
@@ -229,14 +181,6 @@ public class NetworkConfigurationRestService {
         return Response.ok().build();
     }
 
-    /**
-     * GET method.
-     *
-     * The method lists all the network FactoryComponents Pids tracked by
-     * {@link ConfigurationService}
-     *
-     * @return a list of String representing the tracked FactoryComponents
-     */
     @GET
     @RolesAllowed("network.configuration")
     @Path("/factoryComponents")
@@ -245,25 +189,6 @@ public class NetworkConfigurationRestService {
         return new PidSet(Collections.emptySet());
     }
 
-    /**
-     * POST method.
-     *
-     * Creates a new network ConfigurableComponent instance by creating a new configuration
-     * from a
-     * Configuration Admin factory.
-     * The {@link FactoryComponentConfigurationDTO} will provide all the information
-     * needed to generate the instance: it
-     * links the factory Pid to be used, the target instance Pid, the properties to
-     * be used when creating the instance
-     * and if the request should be persisted with a snapshot.
-     * In case of a request error, an exception is thrown.
-     *
-     * @param factoryComponentConfiguration
-     *            provides all the parameters needed to
-     *            generate a new instance from a Factory
-     *            Component
-     *
-     */
     @POST
     @RolesAllowed("network.configuration")
     @Path("/factoryComponents")
@@ -291,24 +216,6 @@ public class NetworkConfigurationRestService {
         return Response.ok().build();
     }
 
-    /**
-     * DELETE method.
-     *
-     * For the specified Pid and {@link FactoryComponentDeleteRequest}, the
-     * {@link ConfigurationService} instance
-     * deletes the corresponding network ConfigurableComponent instance.
-     *
-     * @param pid
-     *            A String representing the pid of the
-     *            instance generated by a Factory
-     *            Component that needs to be
-     *            deleted
-     * @param factoryComponentDeleteRequest
-     *            A {@link FactoryComponentDeleteRequest}
-     *            containing additional information to
-     *            ease the process of
-     *            instance delete
-     */
     @DELETE
     @RolesAllowed("network.configuration")
     @Path("/factoryComponents/byPid")
@@ -350,7 +257,6 @@ public class NetworkConfigurationRestService {
     @Consumes(MediaType.APPLICATION_JSON)
     public ComponentConfigurationList getFactoryComponentOcdsByPid(final PidSet factoryPids) {
         factoryPids.validate();
-
         return DTOUtil.toComponentConfigurationList(Collections.emptyList(), this.cryptoService, false);
     }
 

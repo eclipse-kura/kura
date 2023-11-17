@@ -38,7 +38,7 @@ where:
 - `$KURA_USER`: is the Kura username
 - `$KURA_PASS`: is the Kura password
 
-in the log you should find a `JSESSIONID` you'll use in subsequent reqeusts
+in the log you should find a `JSESSIONID` you'll use in subsequent requests
 
 ```
 ...

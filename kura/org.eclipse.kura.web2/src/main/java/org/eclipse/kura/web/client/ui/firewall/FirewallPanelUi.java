@@ -91,7 +91,7 @@ public class FirewallPanelUi extends Composite {
     public FirewallPanelUi() {
 
         initWidget(uiBinder.createAndBindUi(this));
-        detectIfNet2();
+
         this.firewallIntro.add(new Span("<p>" + MSGS.firewallIntro() + "</p>"));
 
         this.openPorts.setText(MSGS.firewallOpenPorts());
@@ -133,6 +133,8 @@ public class FirewallPanelUi extends Composite {
         }
 
         this.openPorts.showTab();
+
+        detectIfNet2();
     }
 
     public boolean isDirty() {

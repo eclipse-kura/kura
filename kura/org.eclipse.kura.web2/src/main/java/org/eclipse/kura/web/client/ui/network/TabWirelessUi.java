@@ -345,7 +345,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     Text unavailableChannelErrorText;
 
     public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, Tab8021xUi wireless8021x,
-            AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs) {
+            AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs, final boolean isNet2) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
@@ -354,7 +354,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.wireless8021x = wireless8021x;
         this.wireless8021xTabAnchorItem = wireless8021xTabAnchorItem;
 
-        detectIfNet2();
+        this.isNet2 = isNet2;
+        changeRadioModeToBand(isNet2);
 
         initForm();
         initHelpButtons();
@@ -512,22 +513,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     // -----Private methods-------//
-
-    private void detectIfNet2() {
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean isNet2) {
-                TabWirelessUi.this.isNet2 = isNet2;
-                changeRadioModeToBand(isNet2);
-            }
-        });
-    }
 
     private void changeRadioModeToBand(boolean isNet2) {
         if (isNet2) {

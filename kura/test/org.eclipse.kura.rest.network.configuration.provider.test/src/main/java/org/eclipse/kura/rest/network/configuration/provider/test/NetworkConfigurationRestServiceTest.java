@@ -55,6 +55,7 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_PUT = "PUT";
+    private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String REST_APP_ID = "networkConfiguration/v1";
 
     private static final String NETWORK_CONF_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
@@ -150,6 +151,64 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
         thenRequestSucceeds();
         thenValueIsUpdated(IP6_FIREWALL_CONF_SERVICE_PID, "firewall.ipv6.open.ports",
                 "1234,tcp,0:0:0:0:0:0:0:0/0,,,,,#");
+    }
+
+    @Test
+    public void shouldReturnEmptyArray() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/factoryComponents");
+
+        thenResponseBodyEqualsJson(RestNetworkConfigurationJson.EMPTY_PIDS_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnNothing() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryComponents",
+                RestNetworkConfigurationJson.EMPTY_CONFIGS_REQUEST);
+
+        thenResponseCodeIs(200);
+    }
+
+    @Test
+    public void shouldReturnInvalidPidResponse() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, "DEL"), "/factoryComponents/byPid",
+                RestNetworkConfigurationJson.INVALID_PID_DELETE_REQUEST);
+
+        thenResponseBodyEqualsJson(RestNetworkConfigurationJson.INVALID_PID_DELETE_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnEmptyConfigsOnGet() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/factoryComponents/ocd");
+
+        thenResponseBodyEqualsJson(RestNetworkConfigurationJson.EMPTY_CONFIGS_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnEmptyConfigsOnPost() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/factoryComponents/ocd/byFactoryPid",
+                RestNetworkConfigurationJson.EMPTY_PIDS_REQUEST);
+
+        thenResponseBodyEqualsJson(RestNetworkConfigurationJson.EMPTY_CONFIGS_RESPONSE);
     }
 
     /*

@@ -43,10 +43,7 @@ nav:
       - Clock Service: core-services/clock-service.md
       - Deployment Service: core-services/deployment-service.md
       - Command Service: core-services/command-service.md
-      - Configuration Service:
-        - Configuration Service: core-services/configuration-service.md
-        - Configuration V1 REST APIs: core-services/configuration-service-rest-v1.md
-        - Configuration V2 REST APIs and CONF-V2 Request Handler: core-services/configuration-service-rest-v2.md
+      - Configuration Service: core-services/configuration-service.md
       - H2Db Service: core-services/h2db-service.md
       - SQLite DB Service: core-services/sqlite-db-service.md
       - Position Service: core-services/position-service.md
@@ -150,6 +147,8 @@ nav:
       - MQTT Namespace: references/mqtt-namespace.md
       - Javadoc: references/javadoc.md
       - REST-APIs:
+        - Configuration V1: references/rest-apis/rest-configuration-service-v1.md
+        - Configuration V2: references/rest-apis/rest-configuration-service-v2.md
         - Cloud Connection: references/rest-apis/rest-cloudconnection-api.md
         - Command: references/rest-apis/rest-command-api.md
         - Deploy: references/rest-apis/rest-deploy-api.md

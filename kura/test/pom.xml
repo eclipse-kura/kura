@@ -929,6 +929,7 @@
         <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
+        <module>org.eclipse.kura.rest.network.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.command.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>

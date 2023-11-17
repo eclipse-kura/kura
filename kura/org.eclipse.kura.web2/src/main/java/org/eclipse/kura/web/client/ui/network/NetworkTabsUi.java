@@ -45,7 +45,7 @@ public class NetworkTabsUi extends Composite {
             .get(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
     private static final String IPV4_STATUS_ENABLED_LAN_MESSAGE = MessageUtils
             .get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
-
+    private static final String IPV6_STATUS_DISABLED_MESSAGE = MessageUtils.get("netIPv6StatusDisabled");
     private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
 
     interface NetworkTabsUiUiBinder extends UiBinder<Widget, NetworkTabsUi> {
@@ -287,6 +287,7 @@ public class NetworkTabsUi extends Composite {
     private void arrangeOptionalTabs() {
         boolean isIpv4EnabledLAN = this.ip4Tab.getStatus().equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
         boolean isIpv4Disabled = this.ip4Tab.getStatus().equals(IPV4_STATUS_DISABLED_MESSAGE);
+        boolean isIpv6Disabled = this.ip6Tab.getStatus().equals(IPV6_STATUS_DISABLED_MESSAGE);
         boolean isWirelessAP = this.wirelessTab.getWirelessMode() != null
                 && this.wirelessTab.getWirelessMode().name().equals(WIFI_ACCESS_POINT);
         boolean isDhcp = this.ip4Tab.isDhcp();
@@ -296,14 +297,14 @@ public class NetworkTabsUi extends Composite {
         InterfaceConfigWrapper wrapper = new InterfaceConfigWrapper(this.netIfConfig);
 
         if (wrapper.isWireless()) {
-            showWirelessTabs(isIpv4Disabled || isUnmanagedSelected());
+            showWirelessTabs((isIpv4Disabled && isIpv6Disabled) || isUnmanagedSelected());
             if (!isWirelessAP) {
                 includeDhcpNat = false;
             }
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
             this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
-            showModemTabs(isIpv4Disabled || isUnmanagedSelected());
+            showModemTabs((isIpv4Disabled && isIpv6Disabled) || isUnmanagedSelected());
         } else {
             showEthernetTabs();
             if (wrapper.isLoopback()) {

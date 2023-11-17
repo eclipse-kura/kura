@@ -355,7 +355,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         });
     }
-    
+
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
             if (this.mtu.isEnabled()) {
@@ -685,7 +685,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         }
 
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
-        
+
         if (this.mtu.getValue() != null) {
             updatedNetIf.setIpv6Mtu(this.mtu.getValue());
         }
@@ -802,7 +802,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 break;
             }
         }
-        
+
         this.mtu.setValue(this.selectedNetIfConfig.get().getIpv6Mtu());
 
         this.tabs.updateTabs();
@@ -812,6 +812,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     @Override
     public void clear() {
         // Not needed
+    }
+
+    public String getStatus() {
+        return this.status.getSelectedValue();
     }
 
 }

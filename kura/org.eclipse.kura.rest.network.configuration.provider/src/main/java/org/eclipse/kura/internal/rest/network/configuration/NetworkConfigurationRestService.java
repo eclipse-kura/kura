@@ -117,7 +117,9 @@ public class NetworkConfigurationRestService {
         final List<ComponentConfiguration> ccs = new ArrayList<>();
         try {
             for (String config : NETWORK_CONFIGURATION_PIDS) {
-                ccs.add(this.configurationService.getComponentConfiguration(config));
+                if (null != this.configurationService.getComponentConfiguration(config)) {
+                    ccs.add(this.configurationService.getComponentConfiguration(config));
+                }
             }
         } catch (final Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -225,16 +227,6 @@ public class NetworkConfigurationRestService {
         }
         failureHandler.checkStatus();
         return Response.ok().build();
-    }
-
-    private boolean isNetworkConfigurationPid(String pid) {
-        boolean result = false;
-        for (String filter : NETWORK_CONFIGURATION_PIDS) {
-            if (pid.equals(filter)) {
-                result = true;
-            }
-        }
-        return result;
     }
 
     /**
@@ -360,5 +352,19 @@ public class NetworkConfigurationRestService {
         factoryPids.validate();
 
         return DTOUtil.toComponentConfigurationList(Collections.emptyList(), this.cryptoService, false);
+    }
+
+    /*
+     * Utils
+     */
+
+    private boolean isNetworkConfigurationPid(String pid) {
+        boolean result = false;
+        for (String filter : NETWORK_CONFIGURATION_PIDS) {
+            if (pid.equals(filter)) {
+                result = true;
+            }
+        }
+        return result;
     }
 }

@@ -155,7 +155,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     IntegerBox priority;
     @UiField
     ListBox configure;
-    
 
     @UiField
     Button renew;
@@ -171,7 +170,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
     @UiField
     FormControlStatic dnsRead;
-    
+
     @UiField
     IntegerBox mtu;
 
@@ -201,11 +200,15 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     @UiField
     HelpButton mtuHelp;
 
-    public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs) {
+    public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs, final boolean isNet2) {
         initWidget(uiBinder.createAndBindUi(this));
         this.tabs = netTabs;
         this.helpTitle.setText(MSGS.netHelpTitle());
-        detectIfNet2();
+
+        this.isNet2 = isNet2;
+
+        initNet2FeaturesOnly(isNet2);
+
         initForm();
         this.dnsRead.setVisible(false);
 
@@ -385,23 +388,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
     // ---------------Private Methods------------
 
-    private void detectIfNet2() {
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                TabIp4Ui.this.isNet2 = false;
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                TabIp4Ui.this.isNet2 = result;
-                initNet2FeaturesOnly(result);
-            }
-        });
-    }
-
     private void initNet2FeaturesOnly(boolean isNet2) {
         this.labelPriority.setVisible(isNet2);
         this.priority.setVisible(isNet2);
@@ -454,7 +440,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         initDnsServersField();
 
         initDHCPLeaseField();
-        
+
         initMtuField();
     }
 
@@ -672,7 +658,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             this.renew.setEnabled(false);
         }
     }
-    
+
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
             TabIp4Ui.this.helpText.clear();
@@ -703,7 +689,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 TabIp4Ui.this.helpMtu.setText("");
             }
         });
-    }    
+    }
 
     private void initStatusField() {
         initStatusValues();
@@ -790,8 +776,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
                 this.mtu.setValue(this.selectedNetIfConfig.getMtu());
             }
-
-
 
             this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());

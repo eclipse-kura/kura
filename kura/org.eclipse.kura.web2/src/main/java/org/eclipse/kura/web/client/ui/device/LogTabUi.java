@@ -30,11 +30,11 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
+import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.Row;
-import org.gwtbootstrap3.client.ui.Form;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -90,6 +90,7 @@ public class LogTabUi extends Composite {
     private final LinkedList<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
+    private boolean initialized = false;
 
     private final String nonce = Integer.toString(Random.nextInt());
 
@@ -159,12 +160,22 @@ public class LogTabUi extends Composite {
         this.logTextArea.setReadOnly(true);
         this.logTextArea.addFocusHandler(focus -> LogTabUi.this.autoFollow = false);
 
-        initLogProviderListBox();
-
         this.showStackTraceCheckbox.setValue(true);
         this.showMoreInfoCheckbox.setValue(false);
         this.showStackTraceCheckbox.addClickHandler(click -> displayLogs());
         this.showMoreInfoCheckbox.addClickHandler(click -> displayLogs());
+
+        this.openNewWindow.addClickHandler(handler -> {
+            Window.open(Window.Location.getHref(), "_blank", "");
+        });
+    }
+
+    public void initialize() {
+        if (initialized) {
+            return;
+        }
+
+        initLogProviderListBox();
 
         LogPollService.subscribe(entries -> {
             if (LogTabUi.this.logs.size() + entries.size() > CACHE_SIZE_LIMIT) {
@@ -177,9 +188,7 @@ public class LogTabUi extends Composite {
             displayLogs();
         });
 
-        this.openNewWindow.addClickHandler(handler -> {
-            Window.open(Window.Location.getHref(), "_blank", "");
-        });
+        initialized = true;
     }
 
     @Override
@@ -233,6 +242,10 @@ public class LogTabUi extends Composite {
                             }
 
                             LogTabUi.this.logProviderListBox.addChangeHandler(changeEvent -> displayLogs());
+
+                            if (isAttached()) {
+                                LogPollService.startLogPolling();
+                            }
                         }
                     }
 

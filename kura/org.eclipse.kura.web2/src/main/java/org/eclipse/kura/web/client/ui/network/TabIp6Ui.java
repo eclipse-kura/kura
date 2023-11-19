@@ -190,6 +190,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         initListBoxes();
         initTextBoxes();
     }
+    
+    public String getStatus() {
+        return this.status.getSelectedItemText();
+    }
 
     private void initLabels() {
         this.labelStatus.setText(MSGS.netIPv6Status());
@@ -225,6 +229,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initStatusField() {
+        this.status.clear();
         this.status.addItem(MessageUtils.get(STATUS_DISABLED), STATUS_DISABLED);
         this.status.addItem(MessageUtils.get(STATUS_LAN), STATUS_LAN);
         this.status.addItem(MessageUtils.get(STATUS_WAN), STATUS_WAN);
@@ -812,10 +817,6 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     @Override
     public void clear() {
         // Not needed
-    }
-
-    public String getStatus() {
-        return this.status.getSelectedValue();
     }
 
 }

@@ -144,7 +144,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final int MAX_SSID_LENGTH = 32;
 
     private final GwtSession session;
-    private final TabIp4Ui tcpTab;
+    private final TabIp4Ui tcp4Tab;
+    private final TabIp6Ui tcp6Tab;
     private final NetworkTabsUi netTabs;
     private final Tab8021xUi wireless8021x;
     private final ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<>();
@@ -156,7 +157,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private boolean ssidInit;
     private boolean isNet2;
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
-    private String tcpStatus;
+    private String tcp4Status;
+    private String tcp6Status;
 
     GwtWifiConfig activeConfig;
     GwtWifiChannelModel previousSelection;
@@ -344,12 +346,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     Text unavailableChannelErrorText;
 
-    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp, Tab8021xUi wireless8021x,
+    public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp4, TabIp6Ui tcp6, Tab8021xUi wireless8021x,
             AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs, final boolean isNet2) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
-        this.tcpTab = tcp;
+        this.tcp4Tab = tcp4;
+        this.tcp6Tab = tcp6;
         this.netTabs = tabs;
         this.wireless8021x = wireless8021x;
         this.wireless8021xTabAnchorItem = wireless8021xTabAnchorItem;
@@ -362,26 +365,38 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         initRegDomErrorModal();
         setPasswordValidation();
 
-        this.tcpTab.status.addChangeHandler(event -> {
-            if (TabWirelessUi.this.selectedNetIfConfig != null) {
-                // set the default values for wireless mode if tcp/ip status was changed
-                String tcpIpStatus = TabWirelessUi.this.tcpTab.getStatus();
-                if (!tcpIpStatus.equals(TabWirelessUi.this.tcpStatus)) {
-                    if (tcpIpStatus.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
-                        TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getStationWifiConfig();
-                    } else {
-                        TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getActiveWifiConfig();
-                    }
+        this.tcp4Tab.status.addChangeHandler(event -> {
+            evalActiveConfig();
 
-                    TabWirelessUi.this.tcpStatus = tcpIpStatus;
-                    TabWirelessUi.this.netTabs.updateTabs();
-                }
-            }
+            update();
+        });
+        
+        this.tcp6Tab.status.addChangeHandler(event -> {
+            evalActiveConfig();
 
             update();
         });
 
         logger.info("Constructor done.");
+    }
+
+    private void evalActiveConfig() {
+        if (TabWirelessUi.this.selectedNetIfConfig != null) {
+            // set the default values for wireless mode if tcp/ip status was changed
+            String tcpIp4Status = TabWirelessUi.this.tcp4Tab.getStatus();
+            String tcpIp6Status = TabWirelessUi.this.tcp6Tab.getStatus();
+            if (!tcpIp4Status.equals(TabWirelessUi.this.tcp4Status) && !tcpIp6Status.equals(TabWirelessUi.this.tcp6Status)) {
+                if (tcpIp4Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) || tcpIp6Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
+                    TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getStationWifiConfig();
+                } else {
+                    TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getActiveWifiConfig();
+                }
+
+                TabWirelessUi.this.tcp4Status = tcpIp4Status;
+                TabWirelessUi.this.tcp6Status = tcpIp6Status;
+                TabWirelessUi.this.netTabs.updateTabs();
+            }
+        }
     }
 
     @UiHandler(value = { "wireless", "ssid", "radio", "security", "password", "verify", "pairwise", "group", "bgscan",
@@ -436,8 +451,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @Override
     public void setNetInterface(GwtNetInterfaceConfig config) {
         setDirty(true);
-        if (this.tcpStatus == null || this.selectedNetIfConfig != config) {
-            this.tcpStatus = this.tcpTab.getStatus();
+        if (this.tcp4Status == null || this.tcp6Status == null || this.selectedNetIfConfig != config) {
+            this.tcp4Status = this.tcp4Tab.getStatus();
+            this.tcp6Status = this.tcp6Tab.getStatus();
         }
         if (config instanceof GwtWifiNetInterfaceConfig) {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
@@ -523,6 +539,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void update() {
         setValues();
+        this.netTabs.updateTabs();
         refreshForm();
         setPasswordValidation();
     }
@@ -644,10 +661,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void refreshForm() {
         logger.info("Start refreshForm");
 
-        String tcpipStatus = this.tcpTab.getStatus();
+        String tcpip4Status = this.tcp4Tab.getStatus();
+        String tcpip6Status = this.tcp6Tab.getStatus();
 
         // Tcp/IP disabled
-        if (tcpipStatus.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name()) && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
             setForm(false);
         } else {
             setForm(true);
@@ -656,7 +674,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 add8021xFromSecurityDropdown();
 
-                if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
+                if (tcpip4Status.equals(IPV4_STATUS_WAN_MESSAGE) || tcpip6Status.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     this.wireless.setEnabled(false);
                 }
                 this.groupVerify.setVisible(false);
@@ -667,7 +685,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 remove8021xFromSecurityDropdown();
 
                 // disable access point when TCP/IP is set to WAN
-                if (tcpipStatus.equals(IPV4_STATUS_WAN_MESSAGE)) {
+                if (tcpip4Status.equals(IPV4_STATUS_WAN_MESSAGE) || tcpip6Status.equals(IPV4_STATUS_WAN_MESSAGE)) {
                     setForm(false);
                 }
 

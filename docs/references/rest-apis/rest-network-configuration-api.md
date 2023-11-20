@@ -109,6 +109,104 @@ To access these REST APIs, an identity with `rest.network.configuration` permiss
           * **object**
             * [BatchFailureReport](#batchfailurereport)
 
+!!! warning
+    `factoryComponents` endopoints are available in the current version of Kura for future compatibility. Currently, as of Kura 5.4.0, there are no network related components that are factory components.
+
+    The endopoints that should return a list of pids will always return an empty array, while those that should create, delete or update a component will always return a 500 error.
+
+#### GET/factoryComponents
+  * **REST API path** : `/services/networkConfiguration/v1/factoryComponents`
+  * **description** : Returns the ids of the network component factories available on the device.
+  * **responses** :
+    * **200**
+      * **description** : The factory pid set.
+      * **response body** :
+        * [PidSet](#pidset)
+    * **500**
+      * **description** : An unexpected internal error occurred.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+
+#### POST/factoryComponents
+  * **REST API path** : `/services/networkConfiguration/v1/factoryComponents`
+  * **description** : This is a batch request that allows to create one or more network factory component instances and optionally create a new snapshot.
+  * **request body** :
+    * [CreateFactoryComponentConfigurationsRequest](../../core-services/configuration-service-rest-v2.md#createfactorycomponentconfigurationsrequest)
+  * **responses** :
+    * **200**
+      * **description** : The request succeeded.
+    * **400**
+      * **description** : The request body is not valid JSON or it contains invalid parameters.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+    * **500**
+      * **description** : In case of processing errors, the device will attempt to return a detailed error response containing a message describing the failure reason for each operation. The operation ids are the following: `create:$pid` for component creation operations, where `$pid` is the pid of the instance, and `snapshot`, for the snapshot creation operation. In case of an unexpected failure, a generic error response will be returned.
+
+      * **response body** :
+        
+        **Variants**:
+          
+          * **object**
+            * [GenericFailureReport](#genericfailurereport)
+          * **object**
+            * [BatchFailureReport](#batchfailurereport)
+
+#### DEL/factoryComponents/byPid
+  * **REST API path** : `/services/networkConfiguration/v1/factoryComponents/byPid`
+  * **description** : This is a batch request that allows to delete one or more network factory component instances and optionally create a new snapshot.
+  * **request body** :
+    * [DeleteFactoryComponentConfigurationsRequest](../../core-services/configuration-service-rest-v2.md#deletefactorycomponentconfigurationsrequest)
+  * **responses** :
+    * **200**
+      * **description** : The request succeeded.
+    * **400**
+      * **description** : The request body is not valid JSON or it contains invalid parameters.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+    * **500**
+      * **description** : In case of processing errors, the device will attempt to return a detailed error response containing a message describing the failure reason for each operation. The operation ids are the following: `delete:$pid` for component delete operations, where `$pid` is the pid of the instance, and `snapshot`, for the snapshot creation operation. In case of an unexpected failure, a generic error response will be returned.
+
+      * **response body** :
+        
+        **Variants**:
+          
+          * **object**
+            * [GenericFailureReport](#genericfailurereport)
+          * **object**
+            * [BatchFailureReport](#batchfailurereport)
+
+#### GET/factoryComponents/ocd
+  * **REST API path** : `/services/networkConfiguration/v1/factoryComponents/ocd`
+  * **description** : Returns the OCD of the network components created by the factories available on the device without the need of creating an instance. This request returns the information related to all available network factories.
+  * **responses** :
+    * **200**
+      * **description** : The request succeeded. The `pid` property of the received configurations will report the factory pid, the `ocd` field will contain the definition, the `properties` field will not be present.
+      * **response body** :
+        * [ComponentConfigurationList](#componentconfigurationlist)
+    * **500**
+      * **description** : An unexpected internal error occurred.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+
+#### POST/factoryComponents/ocd/byFactoryPid
+  * **REST API path** : `/services/networkConfiguration/v1/factoryComponents/ocd/byFactoryPid`
+  * **description** : Returns the OCD of the components created by the factories available on the device without the need of creating an instance. This request returns the information related to a user selected set of factories.
+  * **request body** :
+    * [PidSet](#pidset)
+  * **responses** :
+    * **200**
+      * **description** : The request succeeded. The `pid` property of the received configurations will report the factory pid, the `ocd` field will contain the definition, the `properties` field will not be present. If the OCD for a given factory pid cannot be found, it will not be included in the result.
+      * **response body** :
+        * [ComponentConfigurationList](#componentconfigurationlist)
+    * **400**
+      * **description** : The request body is not valid JSON or it contains invalid parameters.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+    * **500**
+      * **description** : An unexpected internal error occurred.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+
 
 ## JSON definitions
 

@@ -385,7 +385,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             // set the default values for wireless mode if tcp/ip status was changed
             String tcpIp4Status = TabWirelessUi.this.tcp4Tab.getStatus();
             String tcpIp6Status = TabWirelessUi.this.tcp6Tab.getStatus();
-            if (!tcpIp4Status.equals(TabWirelessUi.this.tcp4Status) && !tcpIp6Status.equals(TabWirelessUi.this.tcp6Status)) {
+            boolean isStatusChanged = !tcpIp4Status.equals(TabWirelessUi.this.tcp4Status)
+                    || !tcpIp6Status.equals(TabWirelessUi.this.tcp6Status);
+
+            if (isStatusChanged) {
                 if (tcpIp4Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) || tcpIp6Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
                     TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getStationWifiConfig();
                 } else {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,10 @@ public enum GwtNetIfStatus implements Serializable, IsSerializable {
     netIPv4StatusUnmanaged("Unmanaged"),
     netIPv4StatusL2Only("L2Only"),
     netIPv4StatusEnabledLAN("LAN"),
-    netIPv4StatusEnabledWAN("WAN");
+    netIPv4StatusEnabledWAN("WAN"),
+    netIPv6StatusDisabled("Disabled"),
+    netIPv6StatusEnabledLAN("LAN"),
+    netIPv6StatusEnabledWAN("WAN");
 
     private String status;
 

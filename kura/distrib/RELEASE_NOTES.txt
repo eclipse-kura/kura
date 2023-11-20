@@ -5,6 +5,12 @@ This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduc
 
 
 Features:
+  * 0f8b6de7cc - [rest.network.configuration.provider] Added factoryComponents APIs [backport release-5.4.0] (#4998) (github-actions[bot])
+  * ae0b70a31d - [rest.network.configuration.provider] new rest api for network configuration management (#4915) [backport release-5.4.0] (#4992) (nicolatimeus)
+  * fa7852a74f - [rest.cloudconnection.provider] Cloud Connections REST Api [backport release-5.4.0] (#4980) (Salvatore Coppola)
+  * 7f41aa0b2d - [rest.packages.provider] add endpoint for Package Descriptor retrieval [backport release-5.4.0] (#4968) (Mattia Dal Ben)
+  * dc9fb8be6a - Session REST API improvements [backport release-5.4.0] (#4953) (github-actions[bot])
+  * 69ffcf4f15 - [web2] IPv6 Network on Status tab [backport release-5.4.0] (#4952) (github-actions[bot])
   * 17814c7cfe - dynamic ram assignment when over 1GB (#4921) (G_Ivo)
   * aed5f19fe4 - [linux.net] Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)
   * 17538d578b - [rest.identity.provider] Added new Identity rest APIs and Request Handler  (#4878) (Salvatore Coppola)
@@ -71,6 +77,15 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 8dc9032be0 - wireless tab and cellular tab will show up when only ipv6 is enabled [backport release-5.4.0] (#5001) (github-actions[bot])
+  * 04cf8614c2 - Fixed web ui access for identity with limited permissions [backport release-5.4.0] (#4989) (github-actions[bot])
+  * a6d6321580 - wire record query unbind error [backport release-5.4.0] (#4985) (github-actions[bot])
+  * 27cb24063b - metatype typo in container orchestrator [backport release-5.4.0] (#4982) (github-actions[bot])
+  * 2815ab7584 - Disable REST basic and legacy certificate auth by default [backport release-5.4.0] (#4976) (github-actions[bot])
+  * 0a6d418d4c - [core.cloud] Set min value to command timeout metatype [backport release-5.4.0] (#4971) (github-actions[bot])
+  * 637cbace90 - Return login banner message before authentication [backport release-5.4.0] (#4973) (github-actions[bot])
+  * 0d64223d03 - changed bind-interfaces with bind-dynamic [backport release-5.4.0] (#4960) (github-actions[bot])
+  * 34d8993312 - Allow any authenticated identity to access security/v1/debug-enabled [backport release-5.4.0] (#4951) (github-actions[bot])
   * 7fe29dcd28 - Pass null for Context method arguments in JaxRsRequestHandlerProxy (#4935) (nicolatimeus)
   * 6da1ed929d - [web2] Prevent refresh of IPv6 tabs with old networking (#4914) (Pierantonio Merlino)
   * c9c25c02d9 - Updated the cacerts.ks with the latest Eclipse certificate (#4923) (Matteo Maiero)
@@ -228,6 +243,27 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 8dc9032be0 - fix: wireless tab and cellular tab will show up when only ipv6 is enabled [backport release-5.4.0] (#5001) (github-actions[bot])
+  * 0f8b6de7cc - feat(rest.network.configuration.provider): Added factoryComponents APIs [backport release-5.4.0] (#4998) (github-actions[bot])
+  * ae0b70a31d - feat(rest.network.configuration.provider): new rest api for network configuration management (#4915) [backport release-5.4.0] (#4992) (nicolatimeus)
+  * 73ba7e37b6 - docs: Added entry in release notes for dnsmasq (#4991) (Pierantonio Merlino)
+  * 04cf8614c2 - fix: Fixed web ui access for identity with limited permissions [backport release-5.4.0] (#4989) (github-actions[bot])
+  * a2741e18c0 - chore: Updated known issues related to Bookworm and Wi-Fi (#4990) (Matteo Maiero)
+  * aec3c37bf2 - chore: Added rest.network.configuration boilerplate [backport release-5.4.0] (#4987) (github-actions[bot])
+  * 9a2f397c27 - chore: Added known issue related to CAP_SYS_BOOT (#4984) (Matteo Maiero)
+  * a6d6321580 - fix: wire record query unbind error [backport release-5.4.0] (#4985) (github-actions[bot])
+  * 27cb24063b - fix: metatype typo in container orchestrator [backport release-5.4.0] (#4982) (github-actions[bot])
+  * fa7852a74f - feat(rest.cloudconnection.provider): Cloud Connections REST Api [backport release-5.4.0] (#4980) (Salvatore Coppola)
+  * 2815ab7584 - fix: Disable REST basic and legacy certificate auth by default [backport release-5.4.0] (#4976) (github-actions[bot])
+  * 0a6d418d4c - fix(core.cloud): Set min value to command timeout metatype [backport release-5.4.0] (#4971) (github-actions[bot])
+  * 637cbace90 - fix: Return login banner message before authentication [backport release-5.4.0] (#4973) (github-actions[bot])
+  * 7f41aa0b2d - feat(rest.packages.provider): add endpoint for Package Descriptor retrieval [backport release-5.4.0] (#4968) (Mattia Dal Ben)
+  * 0d64223d03 - fix: changed bind-interfaces with bind-dynamic [backport release-5.4.0] (#4960) (github-actions[bot])
+  * dc9fb8be6a - feat: Session REST API improvements [backport release-5.4.0] (#4953) (github-actions[bot])
+  * 69ffcf4f15 - feat(web2): IPv6 Network on Status tab [backport release-5.4.0] (#4952) (github-actions[bot])
+  * 34d8993312 - fix: Allow any authenticated identity to access security/v1/debug-enabled [backport release-5.4.0] (#4951) (github-actions[bot])
+  * 9fd918c660 - chore: add Kura 5.4.0 release notes (#4946) (github-actions[bot])
+  * c85c7729f2 - chore: automated uptick to 5.4.0 (#4941) (github-actions[bot])
   * 17814c7cfe - feat: dynamic ram assignment when over 1GB (#4921) (G_Ivo)
   * ca23c485d0 - build(deps): update jetty dependencies from 9.4.51.v20230217 to 9.4.53.v20231009 (#4940) (Marcello Rinaldo Martina)
   * aed5f19fe4 - feat(linux.net): Add a Dhcp Server lease file for interface (#4905) (Pierantonio Merlino)

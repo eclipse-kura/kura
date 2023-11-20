@@ -1017,71 +1017,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
   
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_5" type="checkbox" id="__nav_4_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_4_5">
-          Configuration Service
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Configuration Service" data-md-level="2">
-        <label class="md-nav__title" for="__nav_4_5">
-          <span class="md-nav__icon md-icon"></span>
-          Configuration Service
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
     <li class="md-nav__item">
       <a href="../../core-services/configuration-service/" class="md-nav__link">
         Configuration Service
       </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../core-services/configuration-service-rest-v1/" class="md-nav__link">
-        Configuration V1 REST APIs
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../core-services/configuration-service-rest-v2/" class="md-nav__link">
-        Configuration V2 REST APIs and CONF-V2 Request Handler
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -2839,6 +2778,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-configuration-service-v1/" class="md-nav__link">
+        Configuration V1
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/rest-apis/rest-configuration-service-v2/" class="md-nav__link">
+        Configuration V2
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../references/rest-apis/rest-cloudconnection-api/" class="md-nav__link">
         Cloud Connection
       </a>
@@ -3141,7 +3108,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>Starting from Kura 5.1, the snapshot can be downloaded in two formats:</p>
 <ul>
 <li><strong>XML</strong>: The original XML snapshot format.</li>
-<li><strong>JSON</strong>: The JSON format used by the <a href="../../core-services/configuration-service-rest-v2/">Configuration v2 REST APIs and CONF-V2 request handler</a>. For example the downloaded snapshot can be used as is as a body for the <a href="../../core-services/configuration-service-rest-v2/">PUT/configurableComponents/configurations/_update</a> request. The <code>takeSnapshot</code> parameter specified by the CONF-V2 request is missing from the downloaded JSON file, if that parameter is not specified, a new snapshot will be created by default.</li>
+<li><strong>JSON</strong>: The JSON format used by the <a href="../../references/rest-apis/rest-configuration-service-v2/">Configuration v2 REST APIs and CONF-V2 request handler</a>. For example the downloaded snapshot can be used as is as a body for the <a href="../../references/rest-apis/rest-configuration-service-v2/">PUT/configurableComponents/configurations/_update</a> request. The <code>takeSnapshot</code> parameter specified by the CONF-V2 request is missing from the downloaded JSON file, if that parameter is not specified, a new snapshot will be created by default.</li>
 </ul>
 <p>Pressing the <strong>Download</strong> button will trigger a dialog that allows choosing the desired format.</p>
 <p><img alt="" src="../images/snapshotsDownload.png" /></p>

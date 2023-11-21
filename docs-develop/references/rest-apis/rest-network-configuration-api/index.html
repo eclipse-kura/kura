@@ -3293,6 +3293,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="#postconfigurablecomponentsconfigurationsbypid">POST/configurableComponents/configurations/byPid</a></li>
 <li><a href="#postconfigurablecomponentsconfigurationsbypid_default">POST/configurableComponents/configurations/byPid/_default</a></li>
 <li><a href="#putconfigurablecomponentsconfigurations_update">PUT/configurableComponents/configurations/_update</a></li>
+<li><a href="#getfactorycomponents">GET/factoryComponents</a></li>
+<li><a href="#postfactorycomponents">POST/factoryComponents</a></li>
+<li><a href="#delfactorycomponentsbypid">DEL/factoryComponents/byPid</a></li>
+<li><a href="#getfactorycomponentsocd">GET/factoryComponents/ocd</a></li>
+<li><a href="#postfactorycomponentsocdbyfactorypid">POST/factoryComponents/ocd/byFactoryPid</a></li>
 </ul>
 </li>
 <li><a href="#json-definitions">JSON definitions</a><ul>
@@ -3501,7 +3506,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/factoryComponents</code></li>
 <li><strong>description</strong> : This is a batch request that allows to create one or more network factory component instances and optionally create a new snapshot.</li>
 <li><strong>request body</strong> :<ul>
-<li><a href="../../core-services/configuration-service-rest-v2.md#createfactorycomponentconfigurationsrequest">CreateFactoryComponentConfigurationsRequest</a></li>
+<li><a href="../rest-configuration-service-v2/#createfactorycomponentconfigurationsrequest">CreateFactoryComponentConfigurationsRequest</a></li>
 </ul>
 </li>
 <li><strong>responses</strong> :<ul>
@@ -3549,7 +3554,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>REST API path</strong> : <code>/services/networkConfiguration/v1/factoryComponents/byPid</code></li>
 <li><strong>description</strong> : This is a batch request that allows to delete one or more network factory component instances and optionally create a new snapshot.</li>
 <li><strong>request body</strong> :<ul>
-<li><a href="../../core-services/configuration-service-rest-v2.md#deletefactorycomponentconfigurationsrequest">DeleteFactoryComponentConfigurationsRequest</a></li>
+<li><a href="../rest-configuration-service-v2/#deletefactorycomponentconfigurationsrequest">DeleteFactoryComponentConfigurationsRequest</a></li>
 </ul>
 </li>
 <li><strong>responses</strong> :<ul>
@@ -3691,7 +3696,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>configs</strong>: <code>array</code>
     The component configurations<ul>
 <li>array elements: <code>object</code></li>
-<li><a href="../../core-services/configuration-service-rest-v2.md#componentconfiguration">ComponentConfiguration</a></li>
+<li><a href="../rest-configuration-service-v2/#componentconfiguration">ComponentConfiguration</a></li>
 </ul>
 </li>
 </ul>
@@ -3855,7 +3860,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>configs</strong>: <code>array</code>
     The configurations to be updated. The <code>ocd</code> field can be omitted, it will be ignored if specified.<ul>
 <li>array elements: <code>object</code></li>
-<li><a href="../../core-services/configuration-service-rest-v2.md#componentconfiguration">ComponentConfiguration</a></li>
+<li><a href="../rest-configuration-service-v2/#componentconfiguration">ComponentConfiguration</a></li>
 </ul>
 </li>
 <li><strong>takeSnapshot</strong>: <code>bool</code></li>

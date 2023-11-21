@@ -86,6 +86,11 @@ public class SecurityRestService {
     @Path("/security-policy-fingerprint/reload")
     @Produces(MediaType.APPLICATION_JSON)
     public Response reloadSecurityPolicyFingerprint() {
+
+        if (this.security == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
         try {
             logger.debug(DEBUG_MESSSAGE, "reloadSecurityPolicyFingerprint");
             this.security.reloadSecurityPolicyFingerprint();

@@ -87,10 +87,6 @@ public class SecurityRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response reloadSecurityPolicyFingerprint() {
 
-        if (this.security == null) {
-            return Response.status(Status.NOT_FOUND).build();
-        }
-
         try {
             logger.debug(DEBUG_MESSSAGE, "reloadSecurityPolicyFingerprint");
             this.security.reloadSecurityPolicyFingerprint();

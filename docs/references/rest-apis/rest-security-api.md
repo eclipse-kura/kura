@@ -2,6 +2,7 @@
 !!! note
 
     This API can also be accessed via the RequestHandler with app-id: `SEC-V1`.
+    The standard Kura distribution doesn't provide a [SecurityService](https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/security/SecurityService.html) implementation required by this API.
 
 
 The `SecurityRestService` APIs provides methods to manage the system security.
@@ -18,7 +19,7 @@ Identities with `rest.security` permissions can access these APIs.
 ##### Responses
 
 - 200 OK status
-- 500 Internal Server Error
+- 500 Internal Server Error (also returned when no `SecurityService` implementation is provided)
 
 #### Reload command line fingerprint
 
@@ -29,11 +30,14 @@ Identities with `rest.security` permissions can access these APIs.
 ##### Responses
 
 - 200 OK status
-- 500 Internal Server Error
+- 500 Internal Server Error (also returned when no `SecurityService` implementation is provided)
 
 ## GET methods
 
-#### Debug enabled
+#### Debug enabled 
+!!! note
+
+    Access to this resource doesn't require the `rest.security` permission.
 
 - Description: This method allows you to check whether debug mode is enabled in the system.
 - Method: GET
@@ -47,4 +51,4 @@ Identities with `rest.security` permissions can access these APIs.
     "enabled":true
 }
 ```
-- 500 Internal Server Error
+- 500 Internal Server Error (also returned when no `SecurityService` implementation is provided)

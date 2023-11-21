@@ -14,6 +14,11 @@ To access these REST APIs, an identity with `rest.network.configuration` permiss
     - [POST/configurableComponents/configurations/byPid](#postconfigurablecomponentsconfigurationsbypid)
     - [POST/configurableComponents/configurations/byPid/_default](#postconfigurablecomponentsconfigurationsbypid_default)
     - [PUT/configurableComponents/configurations/_update](#putconfigurablecomponentsconfigurations_update)
+    - [GET/factoryComponents](#getfactorycomponents)
+    - [POST/factoryComponents](#postfactorycomponents)
+    - [DEL/factoryComponents/byPid](#delfactorycomponentsbypid)
+    - [GET/factoryComponents/ocd](#getfactorycomponentsocd)
+    - [POST/factoryComponents/ocd/byFactoryPid](#postfactorycomponentsocdbyfactorypid)
 - [JSON definitions](#json-definitions)
     - [BatchFailureReport](#batchfailurereport)
     - [ComponentConfigurationList](#componentconfigurationlist)
@@ -129,7 +134,7 @@ To access these REST APIs, an identity with `rest.network.configuration` permiss
   * **REST API path** : `/services/networkConfiguration/v1/factoryComponents`
   * **description** : This is a batch request that allows to create one or more network factory component instances and optionally create a new snapshot.
   * **request body** :
-    * [CreateFactoryComponentConfigurationsRequest](../../core-services/configuration-service-rest-v2.md#createfactorycomponentconfigurationsrequest)
+    * [CreateFactoryComponentConfigurationsRequest](./rest-configuration-service-v2.md#createfactorycomponentconfigurationsrequest)
   * **responses** :
     * **200**
         * **description** : The request succeeded.
@@ -151,7 +156,7 @@ To access these REST APIs, an identity with `rest.network.configuration` permiss
   * **REST API path** : `/services/networkConfiguration/v1/factoryComponents/byPid`
   * **description** : This is a batch request that allows to delete one or more network factory component instances and optionally create a new snapshot.
   * **request body** :
-    * [DeleteFactoryComponentConfigurationsRequest](../../core-services/configuration-service-rest-v2.md#deletefactorycomponentconfigurationsrequest)
+    * [DeleteFactoryComponentConfigurationsRequest](./rest-configuration-service-v2.md#deletefactorycomponentconfigurationsrequest)
   * **responses** :
     * **200**
         * **description** : The request succeeded.
@@ -242,7 +247,7 @@ Represents a list of component configurations.
 * **configs**: `array`
     The component configurations
     * array elements: `object`
-      * [ComponentConfiguration](../../core-services/configuration-service-rest-v2.md#componentconfiguration)
+      * [ComponentConfiguration](./rest-configuration-service-v2.md#componentconfiguration)
 
 ```json
 {
@@ -408,7 +413,7 @@ An object that describes a set of configurations that need to be updated.
 * **configs**: `array`
     The configurations to be updated. The `ocd` field can be omitted, it will be ignored if specified.
     * array elements: `object`
-      * [ComponentConfiguration](../../core-services/configuration-service-rest-v2.md#componentconfiguration)
+      * [ComponentConfiguration](./rest-configuration-service-v2.md#componentconfiguration)
 * **takeSnapshot**: `bool`
   * **optional** The `true` value will be used as default if not explicitly specified
     Defines whether a new snapshot should be created after that the component configurations have been applied.

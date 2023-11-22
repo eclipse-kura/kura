@@ -394,7 +394,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         // get Docker Containers
         if (this.containerOrchestrationService != null) {
             try {
-                logger.info("Creating docker invenetory");
+                logger.info("Creating docker inventory");
                 List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService
                         .listContainerDescriptors();
                 containers.stream().forEach(
@@ -410,7 +410,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         // get Container Images
         if (this.containerOrchestrationService != null) {
             try {
-                logger.info("Creating container images invenetory");
+                logger.info("Creating container images inventory");
                 List<ImageInstanceDescriptor> images = this.containerOrchestrationService
                         .listImageInstanceDescriptors();
                 images.stream().forEach(image -> inventory.add(new SystemResourceInfo(image.getImageName(),

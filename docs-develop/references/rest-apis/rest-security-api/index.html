@@ -3192,6 +3192,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This API can also be accessed via the RequestHandler with app-id: <code>SEC-V1</code>.</p>
+<p>This REST API requires a <a href="https://download.eclipse.org/kura/docs/api/5.4.0/apidocs/org/eclipse/kura/security/SecurityService.html">SecurityService</a> implementation to be registered on the framework, which is not provided by the standard Kura distribution.</p>
 </div>
 <p>The <code>SecurityRestService</code> APIs provides methods to manage the system security.
 Identities with <code>rest.security</code> permissions can access these APIs.</p>
@@ -3205,7 +3206,7 @@ Identities with <code>rest.security</code> permissions can access these APIs.</p
 <h5 id="responses">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>500 Internal Server Error</li>
+<li>500 Internal Server Error (also returned when no <code>SecurityService</code> implementation is available)</li>
 </ul>
 <h4 id="reload-command-line-fingerprint">Reload command line fingerprint</h4>
 <ul>
@@ -3216,10 +3217,14 @@ Identities with <code>rest.security</code> permissions can access these APIs.</p
 <h5 id="responses_1">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>500 Internal Server Error</li>
+<li>500 Internal Server Error (also returned when no <code>SecurityService</code> implementation is available)</li>
 </ul>
 <h2 id="get-methods">GET methods</h2>
 <h4 id="debug-enabled">Debug enabled</h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Access to this resource doesn't require the <code>rest.security</code> permission.</p>
+</div>
 <ul>
 <li>Description: This method allows you to check whether debug mode is enabled in the system.</li>
 <li>Method: GET</li>
@@ -3232,7 +3237,7 @@ Identities with <code>rest.security</code> permissions can access these APIs.</p
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="kc">true</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span>
 </code></pre></div></li>
-<li>500 Internal Server Error</li>
+<li>500 Internal Server Error (also returned when no <code>SecurityService</code> implementation is available)</li>
 </ul>
 
               

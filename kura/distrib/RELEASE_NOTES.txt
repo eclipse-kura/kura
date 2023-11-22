@@ -77,6 +77,8 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * f7d55c4f53 - [distrib] Added missing rest permissions for rest.security, rest.system and rest.cloudconnection in snapshot_0.xml files. [backport release-5.4.0] (#5011) (github-actions[bot])
+  * 9500e244f3 - Added guava new dependency to dev-env start script [backport release-5.4.0] (#5010) (github-actions[bot])
   * 8dc9032be0 - wireless tab and cellular tab will show up when only ipv6 is enabled [backport release-5.4.0] (#5001) (github-actions[bot])
   * 04cf8614c2 - Fixed web ui access for identity with limited permissions [backport release-5.4.0] (#4989) (github-actions[bot])
   * a6d6321580 - wire record query unbind error [backport release-5.4.0] (#4985) (github-actions[bot])
@@ -243,6 +245,10 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * f7d55c4f53 - fix(distrib): Added missing rest permissions for rest.security, rest.system and rest.cloudconnection in snapshot_0.xml files. [backport release-5.4.0] (#5011) (github-actions[bot])
+  * 9500e244f3 - fix: Added guava new dependency to dev-env start script [backport release-5.4.0] (#5010) (github-actions[bot])
+  * 40a8972f1e - chore: fix release notes automation issue (#5005) (Mattia Dal Ben)
+  * a287c6238e - chore: update Kura 5.4.0 release notes (#5003) (github-actions[bot])
   * 8dc9032be0 - fix: wireless tab and cellular tab will show up when only ipv6 is enabled [backport release-5.4.0] (#5001) (github-actions[bot])
   * 0f8b6de7cc - feat(rest.network.configuration.provider): Added factoryComponents APIs [backport release-5.4.0] (#4998) (github-actions[bot])
   * ae0b70a31d - feat(rest.network.configuration.provider): new rest api for network configuration management (#4915) [backport release-5.4.0] (#4992) (nicolatimeus)

@@ -33,7 +33,7 @@
 
     <reference interface="org.osgi.service.useradmin.UserAdmin"
                bind="bindUserAdmin"
-               cardinality="0..1"
+               cardinality="1..1"
                name="UserAdmin"
                policy="static"/>
 

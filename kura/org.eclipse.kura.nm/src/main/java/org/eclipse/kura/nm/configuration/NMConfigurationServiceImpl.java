@@ -38,7 +38,6 @@ import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
-import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -509,8 +508,9 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 try {
                     dhcpServerConfigWriter.writeConfiguration();
                     this.dhcpServerMonitor.putDhcpServerInterfaceConfiguration(interfaceName, true);
-                    this.dhcpServerMonitor.disable(); // Side effect: we rely on the monitor bringing the server back up
-                                                      // so that the configuration can change take effect
+                    this.dhcpServerMonitor.disable(interfaceName); // Side effect: we rely on the monitor bringing the
+                                                                   // server back up so that the configuration can
+                                                                   // change take effect
 
                 } catch (UnknownHostException | KuraException e) {
                     logger.error("Failed to write DHCP Server configuration", e);

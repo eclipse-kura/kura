@@ -20,5 +20,5 @@
    </service>
    <reference bind="setNetworkStatusService" cardinality="1..1" interface="org.eclipse.kura.net.status.NetworkStatusService" name="NetworkStatusService" policy="static"/>
    <reference bind="setRequestHandlerRegistry" cardinality="0..n" interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry" name="RequestHandlerRegistry" policy="dynamic" unbind="unsetRequestHandlerRegistry"/>
-   <reference bind="setUserAdmin" cardinality="0..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="dynamic"/>
+   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
 </scr:component>

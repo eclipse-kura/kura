@@ -47,6 +47,7 @@ public class IdentityService {
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
 
     private static final String KURA_NEED_PASSWORD_CHANGE_PROPERTY = "kura.need.password.change";
+    private static final String PASSWORD_PROPERTY = "kura.password";
 
     private final UserAdminHelper userAdminHelper;
     private final ConfigurationService configurationService;
@@ -112,8 +113,7 @@ public class IdentityService {
 
     private UserDTO initUserConfig(final User user) {
 
-        final boolean isPasswordEnabled = user.getCredentials()
-                .get(KURA_NEED_PASSWORD_CHANGE_PROPERTY) instanceof String;
+        final boolean isPasswordEnabled = user.getCredentials().get(PASSWORD_PROPERTY) instanceof String;
         final boolean isPasswordChangeRequired = Objects.equals("true",
                 user.getProperties().get(KURA_NEED_PASSWORD_CHANGE_PROPERTY));
 
@@ -201,13 +201,13 @@ public class IdentityService {
                 if (password != null) {
                     validateUserPassword(password);
                     try {
-                        credentials.put(KURA_NEED_PASSWORD_CHANGE_PROPERTY, this.cryptoService.sha256Hash(password));
+                        credentials.put(PASSWORD_PROPERTY, this.cryptoService.sha256Hash(password));
                     } catch (final Exception e) {
                         throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
                     }
                 }
             } else {
-                credentials.remove(KURA_NEED_PASSWORD_CHANGE_PROPERTY);
+                credentials.remove(PASSWORD_PROPERTY);
             }
         }
 

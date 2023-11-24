@@ -203,4 +203,5 @@ No specific permission is required to access this resource.
 ##### Responses
 
 - 200 OK status
+- 404 if `userName` is not found
 - 500 Internal Server Error

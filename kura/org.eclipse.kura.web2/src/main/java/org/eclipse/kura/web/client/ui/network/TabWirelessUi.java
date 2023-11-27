@@ -1734,7 +1734,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private GwtWifiRadioMode radioValueToRadioMode(String radioValue) {
 
         for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-            if (mode.name().equals(radioValue)) {
+            String modeName = this.isNet2 ? mode.name() : MessageUtils.get(mode.name());
+            if (modeName.equals(radioValue)) {
                 return mode;
             }
         }

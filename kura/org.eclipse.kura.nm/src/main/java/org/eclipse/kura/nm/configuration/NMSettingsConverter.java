@@ -190,7 +190,9 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
-            logger.error("Unable to find or decode Client Certificate");
+            logger.error("Unable to decode Client Certificate");
+        } catch (ClassCastException e) {
+            logger.error("Unable to find Client Certificate");
         }
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",

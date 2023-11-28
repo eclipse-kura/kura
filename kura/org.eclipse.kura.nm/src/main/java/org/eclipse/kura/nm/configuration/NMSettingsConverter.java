@@ -204,7 +204,7 @@ public class NMSettingsConverter {
                 logger.error("Unable to find or decode Private Key");
             }
         } catch (ClassCastException e) {
-            logger.error("Unable to find Client Certificate");
+            logger.error("Unable to find Private Key");
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,

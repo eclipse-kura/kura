@@ -477,6 +477,11 @@ public class Tab8021xUi extends Composite implements NetworkTab {
                 this.formgroupPassword.setValidationState(ValidationState.ERROR);
                 return false;
             }
+
+            if (this.keystorePid.getValue().isEmpty() && !this.caCertName.getValue().isEmpty()) {
+                this.identityKeystorePid.setValidationState(ValidationState.ERROR);
+                return false;
+            }
         }
 
         return true;
@@ -523,7 +528,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         switch (Gwt8021xEap.valueOf(this.eap.getSelectedValue())) {
         case PEAP:
         case TTLS:
-            this.keystorePid.setEnabled(false);
             setInnerAuthTo(Gwt8021xInnerAuth.MSCHAPV2);
             this.publicPrivateKeyPairName.setEnabled(false);
             break;

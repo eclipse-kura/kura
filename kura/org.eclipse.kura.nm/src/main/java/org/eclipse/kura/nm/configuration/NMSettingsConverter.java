@@ -190,16 +190,21 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
-            logger.error("Unable to find or decode Client Certificate");
+            logger.error("Unable to decode Client Certificate");
+        } catch (ClassCastException e) {
+            logger.error("Unable to find Client Certificate");
         }
 
-        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
-                deviceId);
-
-        if (privateKey.getEncoded() != null) {
-            settings.put("private-key", new Variant<>(privateKey.getEncoded()));
-        } else {
-            logger.error("Unable to find or decode Private Key");
+        try {
+            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                    deviceId);
+            if (privateKey.getEncoded() != null) {
+                settings.put("private-key", new Variant<>(privateKey.getEncoded()));
+            } else {
+                logger.error("Unable to find or decode Private Key");
+            }
+        } catch (ClassCastException e) {
+            logger.error("Unable to find Private Key");
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
@@ -306,7 +311,7 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId, 
+    public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId,
             SemanticVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
@@ -404,9 +409,9 @@ public class NMSettingsConverter {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
         }
 
-        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);        
+        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
         if (nmVersion.isGreaterEqualThan("1.40")) {
-            //ipv6.mtu only supported in NetworkManager 1.40 and above
+            // ipv6.mtu only supported in NetworkManager 1.40 and above
             mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
         } else {
             logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
@@ -440,7 +445,7 @@ public class NMSettingsConverter {
 
         Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
         mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
-        
+
         return settings;
     }
 
@@ -536,7 +541,7 @@ public class NMSettingsConverter {
 
         Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
         mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
-        
+
         return settings;
     }
 
@@ -572,12 +577,12 @@ public class NMSettingsConverter {
         settings.put("egress-priority-map", new Variant<>(egressMap.orElse(new ArrayList<>()), listType));
         return settings;
     }
-    
+
     public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
         Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
         mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
-        return settings;        
+        return settings;
     }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,

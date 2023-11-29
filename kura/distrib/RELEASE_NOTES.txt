@@ -77,6 +77,9 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * f881dde54e - added catch to exception to prevent failure when keystores don't exist [backport release-5.4.0] (#5031) (github-actions[bot])
+  * 564a513ad1 - unhide keystore field and add error correction that prevents ca-cert being filled and keystore being null [backport release-5.4.0] (#5032) (github-actions[bot])
+  * cd573c6df1 - [web2] Fixed network radio mode value passing in the old networking. [backport release-5.4.0] (#5028) (github-actions[bot])
   * f2b7cc1280 - [rest.identity] fixed passswordAuthEnabled property [backport release-5.4.0] (#5021) (github-actions[bot])
   * f69f68a827 - enforced mandatory UserAdmin static reference on rest bundles that create permissions [backport release-5.4.0] (#5015) (github-actions[bot])
   * 3d904092b6 - [nm] load dhcp server configuration after change [backport release-5.4.0] (#5019) (github-actions[bot])
@@ -248,6 +251,10 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * f881dde54e - fix: added catch to exception to prevent failure when keystores don't exist [backport release-5.4.0] (#5031) (github-actions[bot])
+  * 564a513ad1 - fix: unhide keystore field and add error correction that prevents ca-cert being filled and keystore being null [backport release-5.4.0] (#5032) (github-actions[bot])
+  * cd573c6df1 - fix(web2): Fixed network radio mode value passing in the old networking. [backport release-5.4.0] (#5028) (github-actions[bot])
+  * fd4615de3d - chore: add Kura 5.4.0 release notes (#5024) (github-actions[bot])
   * f2b7cc1280 - fix(rest.identity): fixed passswordAuthEnabled property [backport release-5.4.0] (#5021) (github-actions[bot])
   * f69f68a827 - fix: enforced mandatory UserAdmin static reference on rest bundles that create permissions [backport release-5.4.0] (#5015) (github-actions[bot])
   * 3d904092b6 - fix(nm): load dhcp server configuration after change [backport release-5.4.0] (#5019) (github-actions[bot])

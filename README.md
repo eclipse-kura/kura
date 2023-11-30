@@ -160,6 +160,26 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 After this command runs, images can be found in your preferred container engine image list.
 
 ### Eclipse IDE
+
+> **Note**<br>
+>To make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines
+>```xml
+><?xml version="1.0" encoding="UTF-8"?>
+><lifecycleMappingMetadata>
+>    <lifecycleMappingFilters>
+>        <lifecycleMappingFilter>
+>            <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+>            <versionRange>[2.1.2,)</versionRange>
+>            <packagingTypes>
+>                <packagingType>eclipse-test-plugin</packagingType>
+>                <packagingType>eclipse-plugin</packagingType>
+>                <packagingType>eclipse-feature</packagingType>
+>            </packagingTypes>
+>        </lifecycleMappingFilter>
+>    </lifecycleMappingFilters>
+></lifecycleMappingMetadata>
+>```
+
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](https://eclipse.github.io/kura/docs-develop/java-application-development/development-environment-setup). Here you'll find a brief explaination of the required steps.
 
 To correctly setup the environment, proceed as follows:

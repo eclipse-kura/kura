@@ -161,7 +161,7 @@ After this command runs, images can be found in your preferred container engine 
 
 ### Eclipse IDE
 
-> **Note**<br>
+> [!WARNING]
 >To make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines
 >```xml
 ><?xml version="1.0" encoding="UTF-8"?>

@@ -162,7 +162,7 @@ After this command runs, images can be found in your preferred container engine 
 ### Eclipse IDE
 
 > [!WARNING]
-> To make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
+> If you DON'T use Oomph Setup, to make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
 >
 > You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
 >

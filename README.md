@@ -162,7 +162,9 @@ After this command runs, images can be found in your preferred container engine 
 ### Eclipse IDE
 
 > [!WARNING]
->To make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines
+>To make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace. </br>
+>You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata. <br/>
+> After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
 >```xml
 ><?xml version="1.0" encoding="UTF-8"?>
 ><lifecycleMappingMetadata>

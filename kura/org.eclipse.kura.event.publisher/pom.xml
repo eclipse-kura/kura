@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.eclipse.kura.event.publisher</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura</artifactId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
     
     <properties>

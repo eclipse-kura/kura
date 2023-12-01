@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.container.orchestration.provider.test
 Bundle-SymbolicName: org.eclipse.kura.container.orchestration.provider.test
-Bundle-Version: 1.3.0.qualifier
+Bundle-Version: 1.4.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.container.orchestration.provider
 Automatic-Module-Name: org.eclipse.kura.container.orchestration.provider.test

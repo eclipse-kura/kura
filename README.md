@@ -7,16 +7,11 @@ Eclipse Kura™
 
 <div align="center">
 
-![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)
-![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)
+[![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)](https://github.com/eclipse/kura/tags)
+[![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)](https://github.com/eclipse/kura/blob/develop/LICENSE)
 
-![GitHub Issues](https://img.shields.io/github/issues-raw/eclipse/kura?label=Open%20Issues)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/eclipse/kura?label=Pull%20Requests&color=blue)
-![GitHub Contributors](https://img.shields.io/github/contributors/eclipse/kura?label=Contributors)
-![GitHub Forks](https://img.shields.io/github/forks/eclipse/kura?label=Forks)
-
-![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)
-![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins) <br/>
+[![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/job/develop/)
+[![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/) <br/>
   
 </div>
 

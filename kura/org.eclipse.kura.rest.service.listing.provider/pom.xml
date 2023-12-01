@@ -33,11 +33,4 @@
     <packaging>eclipse-plugin</packaging>
     <version>1.1.0-SNAPSHOT</version>
     
-    <dependencies>
-    	<dependency>
-    		<groupId>org.eclipse.kura</groupId>
-    		<artifactId>org.eclipse.kura.api</artifactId>
-    		<version>2.6.0-SNAPSHOT</version>
-    	</dependency>
-    </dependencies>
 </project>

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura</artifactId>
-        <version>5.4.0</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -31,6 +31,6 @@
 
     <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     
 </project>

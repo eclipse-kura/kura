@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>test</artifactId>
-        <version>5.4.0</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.configuration.change.manager.test</artifactId>

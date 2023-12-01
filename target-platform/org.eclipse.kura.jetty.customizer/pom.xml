@@ -19,11 +19,11 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.4.0</version>
+        <version>5.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.jetty.customizer</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <properties>

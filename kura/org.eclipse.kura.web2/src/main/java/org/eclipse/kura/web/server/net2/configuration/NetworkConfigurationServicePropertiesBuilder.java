@@ -114,9 +114,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
         if (isManual && isWan) {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
         }
-
-        this.properties.setIp4Mtu(this.ifname,
-                Objects.nonNull(this.gwtConfig.getMtu()) ? this.gwtConfig.getMtu() : DEFAULT_MTU);
+        
+        this.properties.setIp4Mtu(this.ifname, Objects.nonNull(this.gwtConfig.getMtu()) ? 
+        		this.gwtConfig.getMtu() : DEFAULT_MTU);
     }
 
     private void setIpv6Properties() {
@@ -157,8 +157,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
         }
 
-        this.properties.setIp6Mtu(this.ifname,
-                Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
+        this.properties.setIp6Mtu(this.ifname, Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? 
+                this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
     }
 
     private void setIpv4DhcpClientProperties() {

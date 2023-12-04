@@ -65,6 +65,16 @@ public class DhcpServerMonitor {
         this.dhcpServerInterfaceConfiguration.clear();
     }
 
+    public void disable(String interfaceName) {
+        try {
+            if (this.dhcpServerManager.isRunning(interfaceName)) {
+                stopDhcpServer(interfaceName);
+            }
+        } catch (KuraException e) {
+            logger.warn("Failed to stop DHCP server for the interface " + interfaceName, e);
+        }
+    }
+
     private void monitor() {
         this.dhcpServerInterfaceConfiguration.entrySet().forEach(entry -> {
             String interfaceName = entry.getKey();

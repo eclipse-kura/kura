@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.deployment.agent.test
 Bundle-SymbolicName: org.eclipse.kura.deployment.agent.test;singleton:=true
-Bundle-Version: 5.4.0.qualifier
+Bundle-Version: 5.5.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Fragment-Host: org.eclipse.kura.deployment.agent
@@ -17,3 +17,6 @@ Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.osgi.framework;version="1.7",
  org.osgi.service.event;version="1.3.1"
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/mockserver-client-java-no-dependencies.jar,
+ lib/mockserver-netty-no-dependencies.jar,
+ .

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.kura.example.wire.logic.multiport.provider;singleton:=true
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.5.0.qualifier
 Bundle-Name: Logical Operators for Wires
 Bundle-Category: Kura Wires
 Bundle-Vendor: Eclipse Kura

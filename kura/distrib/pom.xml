@@ -25,7 +25,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>5.4.0-SNAPSHOT</version>
+    <version>5.5.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -595,8 +595,18 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.cloudconnection.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.configuration.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.configuration.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.network.configuration.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.network.configuration.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -827,7 +837,9 @@
                                 <move file="target/plugins/org.eclipse.kura.network.threat.manager.jar" tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.keystore.jar" tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.log.filesystem.provider.jar" tofile="target/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.cloudconnection.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.cloudconnection.provider_${org.eclipse.kura.rest.cloudconnection.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.network.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.inventory.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.command.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.command.provider_${org.eclipse.kura.rest.command.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.packages.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.packages.provider_${org.eclipse.kura.rest.packages.provider.version}.jar" />
@@ -2544,7 +2556,9 @@
                                         <!-- Add REST bundles-->
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.cloudconnection.provider_${org.eclipse.kura.rest.cloudconnection.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.inventory.provider_${org.eclipse.kura.rest.inventory.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.command.provider_${org.eclipse.kura.rest.command.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.packages.provider_${org.eclipse.kura.rest.packages.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />

@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.deployment.agent
 Bundle-SymbolicName: org.eclipse.kura.deployment.agent;singleton:=true
-Bundle-Version: 1.4.0.qualifier
+Bundle-Version: 1.5.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
-Export-Package: org.eclipse.kura.deployment.agent; version="1.0.0"
+Export-Package: org.eclipse.kura.deployment.agent; version="1.1.0"
 Import-Package: javax.net.ssl,
  org.apache.commons.io;version="1.4.9999",
  org.apache.commons.lang3;version="[3.0,4.0)",

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
@@ -25,8 +24,6 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
-import org.eclipse.kura.web.shared.service.GwtNetworkService;
-import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.NavbarNav;
 import org.gwtbootstrap3.client.ui.PanelBody;
@@ -34,7 +31,6 @@ import org.gwtbootstrap3.client.ui.PanelBody;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -47,13 +43,14 @@ public class NetworkTabsUi extends Composite {
             .get(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
     private static final String IPV4_STATUS_ENABLED_LAN_MESSAGE = MessageUtils
             .get(GwtNetIfStatus.netIPv4StatusEnabledLAN.name());
+    private static final String IPV6_STATUS_DISABLED_MESSAGE = MessageUtils
+            .get(GwtNetIfStatus.netIPv6StatusDisabled.name());
 
     private static NetworkTabsUiUiBinder uiBinder = GWT.create(NetworkTabsUiUiBinder.class);
 
     interface NetworkTabsUiUiBinder extends UiBinder<Widget, NetworkTabsUi> {
     }
 
-    private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
     private static final Messages MSGS = GWT.create(Messages.class);
 
     private boolean isNet2 = false;
@@ -94,38 +91,22 @@ public class NetworkTabsUi extends Composite {
      * Initialization
      */
 
-    public NetworkTabsUi(GwtSession session) {
+    public NetworkTabsUi(GwtSession session, final boolean isNet2) {
         initWidget(uiBinder.createAndBindUi(this));
         this.visibleTabs = new LinkedList<>();
         this.session = session;
-        detectIfNet2();
-        initTabs();
+        this.isNet2 = isNet2;
+        initTabs(isNet2);
     }
 
-    private void detectIfNet2() {
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                NetworkTabsUi.this.isNet2 = false;
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                NetworkTabsUi.this.isNet2 = result;
-            }
-        });
-    }
-
-    private void initTabs() {
+    private void initTabs(final boolean isNet2) {
         this.tabsPanel.clear();
         this.visibleTabs.clear();
 
-        initIp4Tab();
+        initIp4Tab(isNet2);
         initIp6Tab();
         initWireless8021xTab();
-        initWirelessTab();
+        initWirelessTab(isNet2);
         initModemTab();
         initModemGpsTab();
         initModemAntennaTab();
@@ -138,9 +119,9 @@ public class NetworkTabsUi extends Composite {
         this.content.add(this.ip4Tab);
     }
 
-    private void initIp4Tab() {
+    private void initIp4Tab(final boolean isNet2) {
         this.ip4TabAnchorItem = new AnchorListItem(MSGS.netIPv4());
-        this.ip4Tab = new TabIp4Ui(this.session, this);
+        this.ip4Tab = new TabIp4Ui(this.session, this, isNet2);
 
         this.ip4TabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.ip4TabAnchorItem);
@@ -162,10 +143,10 @@ public class NetworkTabsUi extends Composite {
         });
     }
 
-    private void initWirelessTab() {
+    private void initWirelessTab(final boolean isNet2) {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
-        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.set8021xTab, this.net8021xTabAnchorItem,
-                this);
+        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.ip6Tab, this.set8021xTab,
+                this.net8021xTabAnchorItem, this, isNet2);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTabAnchorItem);
@@ -305,6 +286,7 @@ public class NetworkTabsUi extends Composite {
     private void arrangeOptionalTabs() {
         boolean isIpv4EnabledLAN = this.ip4Tab.getStatus().equals(IPV4_STATUS_ENABLED_LAN_MESSAGE);
         boolean isIpv4Disabled = this.ip4Tab.getStatus().equals(IPV4_STATUS_DISABLED_MESSAGE);
+        boolean isIpv6Disabled = this.ip6Tab.getStatus().equals(IPV6_STATUS_DISABLED_MESSAGE);
         boolean isWirelessAP = this.wirelessTab.getWirelessMode() != null
                 && this.wirelessTab.getWirelessMode().name().equals(WIFI_ACCESS_POINT);
         boolean isDhcp = this.ip4Tab.isDhcp();
@@ -314,14 +296,14 @@ public class NetworkTabsUi extends Composite {
         InterfaceConfigWrapper wrapper = new InterfaceConfigWrapper(this.netIfConfig);
 
         if (wrapper.isWireless()) {
-            showWirelessTabs(isIpv4Disabled || isUnmanagedSelected());
+            showWirelessTabs(isIPInterfacesDisabled(isIpv4Disabled, isIpv6Disabled) || isUnmanagedSelected());
             if (!isWirelessAP) {
                 includeDhcpNat = false;
             }
         } else if (wrapper.isModem()) {
             includeDhcpNat = false;
             this.modemGpsTabAnchorItem.setEnabled(wrapper.isGpsSupported() && !isUnmanagedSelected());
-            showModemTabs(isIpv4Disabled || isUnmanagedSelected());
+            showModemTabs(isIPInterfacesDisabled(isIpv4Disabled, isIpv6Disabled) || isUnmanagedSelected());
         } else {
             showEthernetTabs();
             if (wrapper.isLoopback()) {
@@ -334,9 +316,13 @@ public class NetworkTabsUi extends Composite {
         this.dhcp4NatTabAnchorItem.setEnabled(includeDhcpNat);
         this.ip6TabAnchorItem.setEnabled(!isUnmanagedSelected());
 
-        if (isIpv4Disabled || isUnmanagedSelected()) {
+        if (isIPInterfacesDisabled(isIpv4Disabled, isIpv6Disabled) || isUnmanagedSelected()) {
             removeOptionalTabs();
         }
+    }
+
+    private boolean isIPInterfacesDisabled(boolean isIpv4Disabled, boolean isIpv6Disabled) {
+        return isIpv4Disabled && isIpv6Disabled;
     }
 
     private void showWirelessTabs(boolean interfaceNotEnabled) {
@@ -430,11 +416,7 @@ public class NetworkTabsUi extends Composite {
      */
 
     public boolean isDirty() {
-        if (this.visibleTabs.contains(this.ip4TabAnchorItem) && this.ip4Tab.isDirty()) {
-            return true;
-        }
-
-        if (this.visibleTabs.contains(this.ip6TabAnchorItem) && this.ip6Tab.isDirty()) {
+        if ((this.visibleTabs.contains(this.ip4TabAnchorItem) && this.ip4Tab.isDirty()) || (this.visibleTabs.contains(this.ip6TabAnchorItem) && this.ip6Tab.isDirty())) {
             return true;
         }
 
@@ -558,11 +540,7 @@ public class NetworkTabsUi extends Composite {
             return false;
         }
 
-        if (this.visibleTabs.contains(this.wirelessTabAnchorItem) && !this.wirelessTab.isValid()) {
-            return false;
-        }
-
-        if (this.visibleTabs.contains(this.modemTabAnchorItem) && !this.modemTab.isValid()) {
+        if ((this.visibleTabs.contains(this.wirelessTabAnchorItem) && !this.wirelessTab.isValid()) || (this.visibleTabs.contains(this.modemTabAnchorItem) && !this.modemTab.isValid())) {
             return false;
         }
 
@@ -622,18 +600,18 @@ public class NetworkTabsUi extends Composite {
 
     class InterfaceConfigWrapper {
 
-        private GwtNetInterfaceConfig config;
+        private final GwtNetInterfaceConfig config;
 
         public InterfaceConfigWrapper(GwtNetInterfaceConfig config) {
             this.config = config;
         }
 
         public boolean isWireless() {
-            return (this.config instanceof GwtWifiNetInterfaceConfig);
+            return this.config instanceof GwtWifiNetInterfaceConfig;
         }
 
         public boolean isModem() {
-            return (this.config instanceof GwtModemInterfaceConfig);
+            return this.config instanceof GwtModemInterfaceConfig;
         }
 
         public boolean isGpsSupported() {

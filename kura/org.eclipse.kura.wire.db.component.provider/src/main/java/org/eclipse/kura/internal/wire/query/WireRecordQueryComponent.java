@@ -74,6 +74,12 @@ public class WireRecordQueryComponent implements WireEmitter, WireReceiver, Conf
 
         logger.debug("Updating Wire Record Query component... Done");
     }
+    
+    protected void deactivate() {
+        logger.debug("Deactivating Wire Record Query Component...");
+
+        logger.debug("Deactivating Wire Record Query Component... Done");
+    }
 
     @Override
     public void consumersConnected(final Wire[] wires) {

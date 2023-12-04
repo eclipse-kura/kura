@@ -42,6 +42,7 @@
         <setEntry value="com.eclipsesource.jaxrs.publisher@default:default"/>
         <setEntry value="com.google.gson@default:default"/>
         <setEntry value="com.google.guava@default:default"/>
+        <setEntry value="com.google.guava.failureaccess@default:default"/>
         <setEntry value="com.google.protobuf@default:default"/>
         <setEntry value="com.gwt.user@default:default"/>
         <setEntry value="com.h2database@default:default"/>
@@ -149,9 +150,12 @@
         <setEntry value="org.eclipse.kura.localization@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.cloudconnection.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.network.configuration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.identity.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.inventory.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.rest.identity.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.command.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.position.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>

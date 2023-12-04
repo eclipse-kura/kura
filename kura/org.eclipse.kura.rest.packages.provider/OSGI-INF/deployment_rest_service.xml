@@ -30,7 +30,7 @@
        bind="setDeploymentAdmin"
        policy="static"/>
    <reference name="UserAdmin"
-       cardinality="0..1"
+       cardinality="1..1"
        interface="org.osgi.service.useradmin.UserAdmin"
        bind="setUserAdmin"
        policy="static"/>

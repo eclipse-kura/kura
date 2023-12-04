@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.4.0-SNAPSHOT</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>p2-repo-common</artifactId>
     <packaging>pom</packaging>
@@ -36,7 +36,7 @@
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>libsocket-can-osgi</artifactId>
-                    <version>1.2.0-SNAPSHOT</version>
+                    <version>1.3.0-SNAPSHOT</version>
                 </dependency>
             </dependencies>
             <build>

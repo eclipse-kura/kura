@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -190,6 +190,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         initListBoxes();
         initTextBoxes();
     }
+    
+    public String getStatus() {
+        return this.status.getSelectedItemText();
+    }
 
     private void initLabels() {
         this.labelStatus.setText(MSGS.netIPv6Status());
@@ -225,6 +229,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     }
 
     private void initStatusField() {
+        this.status.clear();
         this.status.addItem(MessageUtils.get(STATUS_DISABLED), STATUS_DISABLED);
         this.status.addItem(MessageUtils.get(STATUS_LAN), STATUS_LAN);
         this.status.addItem(MessageUtils.get(STATUS_WAN), STATUS_WAN);
@@ -355,7 +360,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             }
         });
     }
-    
+
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
             if (this.mtu.isEnabled()) {
@@ -685,7 +690,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         }
 
         updatedNetIf.setIpv6Privacy(this.privacy.getSelectedValue());
-        
+
         if (this.mtu.getValue() != null) {
             updatedNetIf.setIpv6Mtu(this.mtu.getValue());
         }
@@ -802,7 +807,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 break;
             }
         }
-        
+
         this.mtu.setValue(this.selectedNetIfConfig.get().getIpv6Mtu());
 
         this.tabs.updateTabs();

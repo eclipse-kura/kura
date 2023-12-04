@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -337,7 +337,7 @@
                 <esf:value>[{"name":"kura.user.admin","credentials":{"kura.password":"jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg="},"properties":{"kura.need.password.change":"true"}},{"name":"kura.user.appadmin","credentials":{"kura.password":"3hPckF8Zc+IF3pVineBvck3zJERUl8itosySULE1hpM="},"properties":{"kura.need.password.change":"true"}}]</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="groups.config" type="String">
-                <esf:value>[{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.device"},{"name":"kura.permission.kura.maintenance"},{"name":"kura.permission.kura.packages.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.wires.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.rest.assets"},{"name":"kura.permission.rest.command"},{"name":"kura.permission.rest.configuration"},{"name":"kura.permission.rest.identity"},{"name":"kura.permission.rest.inventory"},{"name":"kura.permission.rest.keystores"},{"name":"kura.permission.rest.position"},{"name":"kura.permission.rest.system"},{"name":"kura.permission.rest.tamper.detection"},{"name":"kura.permission.rest.wires.admin"}]</esf:value>
+                <esf:value>[{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.device"},{"name":"kura.permission.kura.maintenance"},{"name":"kura.permission.kura.packages.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.wires.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.rest.assets"},{"name":"kura.permission.rest.cloudconnection"},{"name":"kura.permission.rest.command"},{"name":"kura.permission.rest.configuration"},{"name":"kura.permission.rest.deploy"},{"name":"kura.permission.rest.identity"},{"name":"kura.permission.rest.inventory"},{"name":"kura.permission.rest.keystores"},{"name":"kura.permission.rest.position"},{"name":"kura.permission.rest.security"},{"name":"kura.permission.rest.system"},{"name":"kura.permission.rest.tamper.detection"},{"name":"kura.permission.rest.wires.admin"}]</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
@@ -370,6 +370,22 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider-1636726365743-8</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.internal.rest.provider.RestService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="auth.basic.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="auth.certificate.stateless.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>org.eclipse.kura.internal.rest.provider.RestService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.internal.rest.provider.RestService</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

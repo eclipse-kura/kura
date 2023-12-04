@@ -1,67 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
-  
-    This program and the accompanying materials are made
-    available under the terms of the Eclipse Public License 2.0
-    which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
+
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
+
+SPDX-License-Identifier: EPL-2.0
+
+Contributors:
+Eurotech
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.kura</groupId>
-        <artifactId>test</artifactId>
-        <version>5.4.0-SNAPSHOT</version>
-    </parent>
+<parent>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>test</artifactId>
+    <version>5.5.0-SNAPSHOT</version>
+</parent>
 
-    <artifactId>org.eclipse.kura.deployment.agent.test</artifactId>
-    <packaging>eclipse-test-plugin</packaging>
+<artifactId>org.eclipse.kura.deployment.agent.test</artifactId>
+<packaging>eclipse-test-plugin</packaging>
 
-    <properties>
-        <kura.basedir>${project.basedir}/../..</kura.basedir>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    </properties>
+<properties>
+    <kura.basedir>${project.basedir}/../..</kura.basedir>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <mockserver.version>5.15.0</mockserver.version>
+</properties>
 
-    <build>
-        <plugins>
-			<plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compiletests</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
-            	<artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
-            </plugin>
-		</plugins>
-    </build>
+<dependencies>
+    <dependency>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-client-java-no-dependencies</artifactId>
+        <version>${mockserver.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.mock-server</groupId>
+        <artifactId>mockserver-netty-no-dependencies</artifactId>
+        <version>${mockserver.version}</version>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <phase>generate-sources</phase>
+                    <configuration>
+                        <outputDirectory>${project.basedir}/lib</outputDirectory>
+                        <stripVersion>true</stripVersion>
+                        <artifactItems>
+                            <artifactItem>
+                                <groupId>org.mock-server</groupId>
+                                <artifactId>mockserver-client-java-no-dependencies</artifactId>
+                                <version>${mockserver.version}</version>
+                            </artifactItem>
+                            <artifactItem>
+                                <groupId>org.mock-server</groupId>
+                                <artifactId>mockserver-netty-no-dependencies</artifactId>
+                                <version>${mockserver.version}</version>
+                            </artifactItem>
+                        </artifactItems>
+                    </configuration>
+                    <goals>
+                        <goal>copy</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>compiletests</id>
+                    <phase>test-compile</phase>
+                    <goals>
+                        <goal>testCompile</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+        </plugin>
+    </plugins>
+</build>
 </project>

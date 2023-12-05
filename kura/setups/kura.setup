@@ -92,12 +92,17 @@
         optional="true"/>
     <requirement
         name="org.sonatype.tycho.m2e.feature.feature.group" />
+    <requirement
+        name="com.basistech.m2e.code.quality.checkstyle.feature.feature.group" />
     <repository
         url="https://download.eclipse.org/eclemma/releases/3.1.6/" />
     <repository
         url="https://eclipse-uc.sonarlint.org/" />
     <repository
         url="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/" />
+    <repository
+        url="https://m2e-code-quality.github.io/m2e-code-quality-p2-site/" />
+ 
     <description>Install the tools needed in the IDE to work with the source code for ${scope.project.label}</description>
   </setupTask>
   <setupTask

@@ -15,11 +15,24 @@ Eclipse Kura™
   
 </div>
 
-**Eclipse Kura**, from [the maori word for tank/container](https://maoridictionary.co.nz/search/?keywords=kura), is an OSGi-based Application Framework for M2M Service Gateways
+**Eclipse Kura Is Your Edge Data Collection Companion**
+Eclipse Kura is a versatile software framework designed to supercharge your edge devices, turning them into data-collecting powerhouses. With an intuitive web interface, Eclipse Kura streamlines the process of configuring your gateway, connecting sensors, and IoT devices to seamlessly collect, process, and send data to the cloud.
+ 
+Eclipse Kura runs on an edge gateway, which can be anything from a small SBC(single-board computer) like a Raspberry Pi, or a powerful high-performance computer.
 
-Kura aims at offering a Java/OSGi-based container for M2M applications running in service gateways. Kura provides or, when available, aggregates open source implementations for the most common services needed by M2M applications. Kura components are designed as configurable OSGi Declarative Service exposing service API and raising events. While several Kura components are in pure Java, others are invoked through JNI and have a dependency on the Linux operating system.
-
-For more information, see the [Eclipse project proposal](http://www.eclipse.org/proposals/technology.kura/).
+**Simplify Your Tasks with Eclipse-Kura**
+**Kura-Services:** Provision and set up features to run on your gateway, such as an MQTT broker.
+**Kura-Networking:** Manage Network connectivity, including 
+**Kura-Wires:** Design data flows and data processing streams effortlessly with a drag-and-drop visual editor.
+**Kura-Cloud-Connectors:** Extendable cloud connector system. 
+**Kura-Drivers:** Extendable service that handles reading data off of external devices.
+**Kura-Snapshots:** Securely store and re-apply gateway settings for convenience.
+**Kura-Security**: Easily and safely store your secrets.
+**Kura-Container-Orchestrator**: Manage Docker or Podman containers on your gateway for ultimate flexibility.
+**Kura-AI-Infrence**: Run Nvidia Triton Models on the edge.
+ 
+**I have used Eclipse-Kura to make a small-scale Edge deployment, how do I scale now?**
+If you want to scale, and manage many instances of Eclipse-Kura, check out Eclipse-Kapua. Eclipse-Kapua is a Eclipse-Kura compatible cloud command and control service that allows you to aggregate data and configure many Eclipse-Kura devices. 
 
 Documentation
 -------------------

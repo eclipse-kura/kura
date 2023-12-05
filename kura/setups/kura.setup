@@ -1,3 +1,17 @@
+<!--
+
+    Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+
+-->
 <?xml version="1.0" encoding="UTF-8"?>
 <setup:Project
     xmi:version="2.0"
@@ -91,9 +105,9 @@
         name="org.sonarlint.eclipse.feature.feature.group"
         optional="true"/>
     <requirement
-        name="org.sonatype.tycho.m2e.feature.feature.group" />
+        name="org.sonatype.tycho.m2e.feature" />
     <requirement
-        name="com.basistech.m2e.code.quality.checkstyle.feature.feature.group" />
+        name="com.basistech.m2e.code.quality.checkstyle.feature" />
     <repository
         url="https://download.eclipse.org/eclemma/releases/3.1.6/" />
     <repository

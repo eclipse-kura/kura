@@ -91,9 +91,9 @@
         name="org.sonarlint.eclipse.feature.feature.group"
         optional="true"/>
     <requirement
-        name="org.sonatype.tycho.m2e.feature" />
+        name="org.sonatype.tycho.m2e.feature.feature.group" />
     <requirement
-        name="com.basistech.m2e.code.quality.checkstyle.feature" />
+        name="com.basistech.m2e.code.quality.checkstyle.feature.feature.group" />
     <repository
         url="https://download.eclipse.org/eclemma/releases/3.1.6/" />
     <repository

@@ -162,27 +162,32 @@ After this command runs, images can be found in your preferred container engine 
 ### Eclipse IDE
 
 > [!WARNING]
-> If you DON'T use Oomph Setup, to make Kura work with newer versions of Eclipse, modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
+> If you DON'T use Oomph Setup, to make Kura work with newer versions of Eclipse you need to make the following changes in your workspace configuration:
+> 1. Modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
 >
-> You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
+>    You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
 >
-> After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
->```xml
-><?xml version="1.0" encoding="UTF-8"?>
-><lifecycleMappingMetadata>
->    <lifecycleMappingFilters>
->        <lifecycleMappingFilter>
->            <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
->            <versionRange>[2.1.2,)</versionRange>
->            <packagingTypes>
->                <packagingType>eclipse-test-plugin</packagingType>
->                <packagingType>eclipse-plugin</packagingType>
->                <packagingType>eclipse-feature</packagingType>
->            </packagingTypes>
->        </lifecycleMappingFilter>
->    </lifecycleMappingFilters>
-></lifecycleMappingMetadata>
->```
+>    After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
+>    ```xml
+>    <?xml version="1.0" encoding="UTF-8"?>
+>    <lifecycleMappingMetadata>
+>        <lifecycleMappingFilters>
+>            <lifecycleMappingFilter>
+>                <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+>                <versionRange>[2.1.2,)</versionRange>
+>                <packagingTypes>
+>                    <packagingType>eclipse-test-plugin</packagingType>
+>                    <packagingType>eclipse-plugin</packagingType>
+>                    <packagingType>eclipse-feature</packagingType>
+>                </packagingTypes>
+>            </lifecycleMappingFilter>
+>        </lifecycleMappingFilters>
+>    </lifecycleMappingMetadata>
+>    ```
+> 2. Install the `eclipse-tycho` plugin using the following repository: [m2eclipse-tycho](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/).
+>    You can install it in the menu Help -> Install new software... -> Paste the repository url in the Work with: -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
+>
+>    Then restart Eclipse. 
 
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](https://eclipse.github.io/kura/docs-develop/java-application-development/development-environment-setup). Here you'll find a brief explaination of the required steps.
 

@@ -36,7 +36,6 @@ Before installing Eclipse, you should choose directory locations for the Eclipse
       Once Eclipse is installed and workspaces are created, they should never be moved to another location in the file system. <br /> 
     - There may be multiple installs of Eclipse (of different or similar versions), and single instances of each install can be run simultaneously; but there should never be more that one instance of a specific install running at the same time (to avoid corruption to the Eclipse environment). <br /> 
     - Each workspace should be used with only one Eclipse install. You should avoid opening the workspace from more than one installation of Eclipse. <br /> 
-    - For the purposes of this guide, only a single Eclipse installation will be covered.
 
 Download the current distribution of Eclipse for your OS from [Eclipse official website](https://www.eclipse.org/downloads/packages/). Choose the **Eclipse IDE for Eclipse Committers**.
 
@@ -71,6 +70,32 @@ Otherwise, select an existing workspace and click **OK**.  After Eclipse is runn
 After the new workspace opens, click the Workbench icon to display the development environment.
 
 ![Workspace](./images/development-environment-setup/image4.png)
+
+!!! info
+    Additional workspace configuration:
+    
+    - In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
+      You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
+      After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
+      ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <lifecycleMappingMetadata>
+          <lifecycleMappingFilters>
+              <lifecycleMappingFilter>
+                  <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+                  <versionRange>[2.1.2,)</versionRange>
+                  <packagingTypes>
+                      <packagingType>eclipse-test-plugin</packagingType>
+                      <packagingType>eclipse-plugin</packagingType>
+                      <packagingType>eclipse-feature</packagingType>
+                  </packagingTypes>
+              </lifecycleMappingFilter>
+          </lifecycleMappingFilters>
+      </lifecycleMappingMetadata>
+      ```
+    - Install the `eclipse-tycho` plugin following this steps:
+        1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
+        2. Then restart Eclipse. 
 
 ### Importing the Kura User Workspace
 

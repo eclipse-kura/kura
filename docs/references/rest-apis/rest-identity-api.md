@@ -196,7 +196,7 @@ No specific permission is required to access this resource.
 ##### Request
 ```JSON
 {
-    "userName": "username",
+    "userName": "username"
 }
 ```
 

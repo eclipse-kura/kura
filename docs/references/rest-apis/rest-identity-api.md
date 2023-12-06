@@ -58,6 +58,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```
 
 - 200 OK status
+- 404 `userName` does not exist
 - 500 Internal Server Error
 
 ## GET methods
@@ -203,5 +204,5 @@ No specific permission is required to access this resource.
 ##### Responses
 
 - 200 OK status
-- 404 if `userName` is not found
+- 404 `userName` does not exist
 - 500 Internal Server Error

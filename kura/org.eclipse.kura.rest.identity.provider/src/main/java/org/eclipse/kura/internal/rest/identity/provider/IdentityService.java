@@ -23,12 +23,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.FallibleConsumer;
 import org.eclipse.kura.util.validation.PasswordStrengthValidators;
@@ -77,18 +81,24 @@ public class IdentityService {
         }
     }
 
-    public void deleteUser(String userName) {
-        this.userAdminHelper.deleteUser(userName);
+    public void deleteUser(String userName) throws WebApplicationException {
+
+        if (this.userAdminHelper.getUser(userName).isPresent()) {
+            this.userAdminHelper.deleteUser(userName);
+        } else {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
+        }
+
     }
 
-    public UserDTO getUser(String userName) throws KuraException {
+    public UserDTO getUser(String userName) throws WebApplicationException {
         Optional<User> user = this.userAdminHelper.getUser(userName);
         if (user.isPresent()) {
             UserDTO userFound = initUserConfig(user.get());
             fillPermissions(Collections.singletonMap(user.get().getName(), userFound));
             return userFound;
         } else {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, IDENTITY + userName + " not found");
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
         }
     }
 

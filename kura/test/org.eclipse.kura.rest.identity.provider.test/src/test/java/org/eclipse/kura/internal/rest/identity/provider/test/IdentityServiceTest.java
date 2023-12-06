@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -119,7 +121,7 @@ public class IdentityServiceTest {
     private void whenGettingUser(String username) {
         try {
             this.user = this.identityService.getUser(username);
-        } catch (KuraException e) {
+        } catch (WebApplicationException e) {
             this.occurredException = e;
         }
     }

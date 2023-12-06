@@ -1,33 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
     <booleanAttribute key="append.args" value="true"/>
-    <booleanAttribute key="automaticAdd" value="true"/>
+    <booleanAttribute key="automaticAdd" value="false"/>
     <booleanAttribute key="automaticValidate" value="false"/>
     <stringAttribute key="bootstrap" value=""/>
     <stringAttribute key="checked" value="[NONE]"/>
-    <booleanAttribute key="clearConfig" value="true"/>
-    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/Kura_Emulator"/>
+    <booleanAttribute key="clearConfig" value="false"/>
+    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/EclipseKuraEmulator"/>
     <booleanAttribute key="default" value="true"/>
     <booleanAttribute key="default_auto_start" value="true"/>
     <intAttribute key="default_start_level" value="4"/>
-    <setAttribute key="deselected_workspace_bundles">
-        <setEntry value="org.eclipse.kura.example.beacon"/>
-        <setEntry value="org.eclipse.kura.example.beacon.scanner"/>
-        <setEntry value="org.eclipse.kura.example.ble.tisensortag"/>
-        <setEntry value="org.eclipse.kura.example.ble.tisensortag.dbus"/>
-        <setEntry value="org.eclipse.kura.example.camel.publisher"/>
-        <setEntry value="org.eclipse.kura.example.eddystone.advertiser"/>
-        <setEntry value="org.eclipse.kura.example.eddystone.scanner"/>
-        <setEntry value="org.eclipse.kura.example.ibeacon.advertiser"/>
-        <setEntry value="org.eclipse.kura.example.ibeacon.scanner"/>
-        <setEntry value="org.eclipse.kura.example.publisher"/>
-    </setAttribute>
+    <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="includeOptional" value="true"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="false"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dkura.have.net.admin=false -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true  -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${workspace_loc}/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/data/dpa.properties -Dlog4j.configurationFile=file:${workspace_loc}/org.eclipse.kura.emulator/src/main/resources/log4j.xml -Dkura.data=${workspace_loc}/kura/data -Dkura.snapshots=${workspace_loc}/kura/user/snapshots -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dkura.have.net.admin=false -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties -Dlog4j.configurationFile=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml -Dkura.data=${workspace_loc}/kura/data -Dkura.snapshots=${workspace_loc}/kura/user/snapshots -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <booleanAttribute key="pde.generated.config" value="true"/>
     <stringAttribute key="pde.version" value="3.3"/>
@@ -41,10 +32,12 @@
         <setEntry value="com.eclipsesource.jaxrs.provider.security@default:default"/>
         <setEntry value="com.eclipsesource.jaxrs.publisher@default:default"/>
         <setEntry value="com.google.gson@default:default"/>
+        <setEntry value="com.google.guava.failureaccess@default:default"/>
         <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.google.protobuf@default:default"/>
         <setEntry value="com.gwt.user@default:default"/>
         <setEntry value="com.h2database@default:default"/>
+        <setEntry value="com.zaxxer.HikariCP@default:default"/>
         <setEntry value="io.netty.buffer@default:default"/>
         <setEntry value="io.netty.codec-http@default:default"/>
         <setEntry value="io.netty.codec-mqtt@default:default"/>
@@ -54,12 +47,11 @@
         <setEntry value="io.netty.resolver@default:default"/>
         <setEntry value="io.netty.transport-native-epoll@default:default"/>
         <setEntry value="io.netty.transport-native-kqueue@default:default"/>
-        <setEntry value="io.netty.transport-classes-epoll@default:default"/>
-        <setEntry value="io.netty.transport-classes-kqueue@default:default"/>
         <setEntry value="io.netty.transport-native-unix-common@default:default"/>
         <setEntry value="io.netty.transport@default:default"/>
         <setEntry value="javax.servlet@default:default"/>
         <setEntry value="jcl.over.slf4j@default:default"/>
+        <setEntry value="log4j2-api-config@default:false"/>
         <setEntry value="minimal-json@default:default"/>
         <setEntry value="org.apache.activemq.artemis-mqtt-protocol@default:default"/>
         <setEntry value="org.apache.activemq.artemis-native@default:default"/>
@@ -69,11 +61,11 @@
         <setEntry value="org.apache.camel.camel-stream@default:default"/>
         <setEntry value="org.apache.commons.beanutils@default:default"/>
         <setEntry value="org.apache.commons.collections@default:default"/>
+        <setEntry value="org.apache.commons.commons-fileupload@default:default"/>
         <setEntry value="org.apache.commons.commons-io@default:default"/>
         <setEntry value="org.apache.commons.commons-net@default:default"/>
         <setEntry value="org.apache.commons.csv@default:default"/>
         <setEntry value="org.apache.commons.exec@default:default"/>
-        <setEntry value="org.apache.commons.commons-fileupload@default:default"/>
         <setEntry value="org.apache.commons.lang3@default:default"/>
         <setEntry value="org.apache.felix.dependencymanager@default:default"/>
         <setEntry value="org.apache.felix.deploymentadmin@default:default"/>
@@ -85,10 +77,10 @@
         <setEntry value="org.apache.geronimo.specs.geronimo-jms_2.0_spec@default:default"/>
         <setEntry value="org.apache.geronimo.specs.geronimo-json_1.0_spec@default:default"/>
         <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
-        <setEntry value="log4j2-api-config@default:false"/>
         <setEntry value="org.apache.logging.log4j.api@default:default"/>
         <setEntry value="org.apache.logging.log4j.core@default:default"/>
         <setEntry value="org.apache.logging.log4j.slf4j-impl@default:default"/>
+        <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
         <setEntry value="org.eclipse.equinox.cm@default:default"/>
         <setEntry value="org.eclipse.equinox.common@2:true"/>
         <setEntry value="org.eclipse.equinox.console@default:default"/>
@@ -108,6 +100,21 @@
         <setEntry value="org.eclipse.jetty.servlet@default:default"/>
         <setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
         <setEntry value="org.eclipse.jetty.util@default:default"/>
+        <setEntry value="org.eclipse.kura.camel.sun.misc@default:false"/>
+        <setEntry value="org.eclipse.kura.jetty.customizer@default:false"/>
+        <setEntry value="org.eclipse.kura.sun.misc@default:false"/>
+        <setEntry value="org.eclipse.osgi.services@default:default"/>
+        <setEntry value="org.eclipse.osgi.util@default:default"/>
+        <setEntry value="org.eclipse.osgi@-1:true"/>
+        <setEntry value="org.eclipse.soda.dk.comm@default:default"/>
+        <setEntry value="org.jboss.logging.jboss-logging@default:default"/>
+        <setEntry value="org.knowhowlab.osgi.monitoradmin@default:default"/>
+        <setEntry value="org.quartz-scheduler.quartz@default:default"/>
+        <setEntry value="org.usb4java@default:default"/>
+        <setEntry value="slf4j.api@default:default"/>
+        <setEntry value="usb4java-javax@default:default"/>
+    </setAttribute>
+    <setAttribute key="selected_workspace_bundles">
         <setEntry value="org.eclipse.kura.api@default:default"/>
         <setEntry value="org.eclipse.kura.asset.cloudlet.provider@default:default"/>
         <setEntry value="org.eclipse.kura.asset.helper.provider@default:default"/>
@@ -116,7 +123,6 @@
         <setEntry value="org.eclipse.kura.broker.artemis.simple.mqtt@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.xml@default:default"/>
         <setEntry value="org.eclipse.kura.camel.cloud.factory@default:default"/>
-        <setEntry value="org.eclipse.kura.camel.sun.misc@default:false"/>
         <setEntry value="org.eclipse.kura.camel.xml@2:default"/>
         <setEntry value="org.eclipse.kura.camel@default:default"/>
         <setEntry value="org.eclipse.kura.core.certificates@default:default"/>
@@ -140,54 +146,31 @@
         <setEntry value="org.eclipse.kura.emulator.position@default:default"/>
         <setEntry value="org.eclipse.kura.emulator.usb@default:default"/>
         <setEntry value="org.eclipse.kura.emulator.watchdog@default:default"/>
+        <setEntry value="org.eclipse.kura.emulator@default:true"/>
         <setEntry value="org.eclipse.kura.http.server.manager@default:default"/>
-        <setEntry value="org.eclipse.kura.jetty.customizer@default:false"/>
         <setEntry value="org.eclipse.kura.json.marshaller.unmarshaller.provider@default:default"/>
         <setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
         <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
         <setEntry value="org.eclipse.kura.localization@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.cloudconnection.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.network.configuration.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.identity.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.inventory.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.command.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.position.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.sun.misc@default:false"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>
         <setEntry value="org.eclipse.kura.util@default:default"/>
         <setEntry value="org.eclipse.kura.web2@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.conditional.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.h2db.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.helper.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.wire.script.filter.provider@default:default"/>
         <setEntry value="org.eclipse.kura.xml.marshaller.unmarshaller.provider@2:default"/>
-        <setEntry value="org.eclipse.osgi.services@default:default"/>
-        <setEntry value="org.eclipse.osgi.util@default:default"/>
-        <setEntry value="org.eclipse.osgi@-1:true"/>
-        <setEntry value="org.eclipse.soda.dk.comm@default:default"/>
-        <setEntry value="org.jboss.logging.jboss-logging@default:default"/>
-        <setEntry value="org.knowhowlab.osgi.monitoradmin@default:default"/>
-        <setEntry value="org.usb4java@default:default"/>
-        <setEntry value="slf4j.api@default:default"/>
-        <setEntry value="usb4java-javax@default:default"/>
-        <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
-        <setEntry value="com.zaxxer.HikariCP@default:default"/>
-        <setEntry value="org.quartz-scheduler.quartz@default:default"/>
-    </setAttribute>
-    <setAttribute key="selected_workspace_bundles">
-        <setEntry value="org.eclipse.kura.demo.heater@default:default"/>
-        <setEntry value="org.eclipse.kura.emulator@default:true"/>
-        <setEntry value="org.eclipse.kura.example.camel.aggregation@2:default"/>
-        <setEntry value="org.eclipse.kura.example.camel.quickstart@2:default"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
-    <stringAttribute key="timestamp" value="1360341874060"/>
+    <stringAttribute key="timestamp" value="1449054439069"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>
     <booleanAttribute key="useDefaultConfigArea" value="true"/>

@@ -3117,33 +3117,49 @@ following steps:</p>
 </code></pre></div>
 </li>
 <li>
-<p>It could happen that <code>wlan</code> interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>rfkill list
+<p>For a correct configuration of the Wlan interface, it is necessary to set the <strong>Locale</strong> and the <strong>WLAN Country</strong> through the <code>raspi-config</code> command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo raspi-config
 </code></pre></div>
-<p>and unblock it with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo rfkill unblock wlan
-</code></pre></div>
-</li>
-<li>
-<p>Set the right Wi-Fi regulatory domain based on your current world region following the instructions <a href="https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop">here</a>. In case of problems, you could try to edit the <code>/etc/default/crda</code> adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-1 alpha-2</a> code of your region</p>
+<p><img alt="raspi-config menu" src="../images/raspi-config.png" /></p>
+<p>From the raspi-config main menu select <code>Localisation Options</code>:</p>
+<p><img alt="raspi-config menu" src="../images/raspi-localisation-menu.png" /></p>
+<p>Then modify the <strong>Locale</strong> and <strong>WLAN Country</strong> with with the proper settings for your location. For example, an user located in Italy could set the values as the ones in the table:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 Locale</td>
+<td>it_IT.UTF-8 UTF-8</td>
+</tr>
+<tr>
+<td>L4 WLAN Country</td>
+<td>IT Italy</td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>Reboot the Raspberry Pi with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
 <p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>admin
 </code></pre></div>
 <p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>admin
 </code></pre></div>
 </li>
 </ol>

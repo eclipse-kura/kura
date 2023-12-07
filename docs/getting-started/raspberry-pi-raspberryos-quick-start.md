@@ -84,10 +84,9 @@ following steps:
 
     From the raspi-config main menu select `Localisation Options`:
 
-
     ![raspi-config menu](./images/raspi-localisation-menu.png)
 
-    Then modify the following settings with the value in the table:
+    Then modify the **Locale** and **WLAN Country** with with the proper settings for your location. For example, an user located in Italy could set the values as the ones in the table:
 
     | Setting         	| Value             	|
     |-----------------	|-------------------	|

@@ -32,7 +32,7 @@ Eclipse Kura™ runs on an edge gateway, which can be anything from a small SBC(
 * **Kura™ AI Inference**: Run Nvidia Triton Models on the edge.
  
 ## I have used Eclipse Kura™ to make a small-scale Edge deployment, how do I scale now?
-If you want to scale, and manage many instances of Eclipse Kura™, check out Eclipse Kapua. Eclipse Kapua is a Eclipse Kura™ compatible cloud command and control service that allows you to aggregate data and configure many Eclipse Kura™ devices. 
+If you want to scale, and manage many instances of Eclipse Kura™, check out [**Eclipse Kapua™**](https://github.com/eclipse/kapua). [Eclipse Kapua™](https://github.com/eclipse/kapua) is a Eclipse Kura™ compatible cloud command and control service that allows you to aggregate data and configure many Eclipse Kura™ devices. 
 
 Documentation
 -------------------

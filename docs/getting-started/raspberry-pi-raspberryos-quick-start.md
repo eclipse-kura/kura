@@ -74,21 +74,26 @@ following steps:
     sudo apt-get install ./kura_<version>_raspberry-pi_installer.deb
     ```
 
-6. It could happen that `wlan` interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:
+6. For a correct configuration of the Wlan interface, it is necessary to set the **Locale** and the **WLAN Country** through the `raspi-config` command:
 
     ```
-    rfkill list
+    sudo raspi-config
     ```
 
-    and unblock it with:
+    ![raspi-config menu](./images/raspi-config.png)
 
-    ```
-    sudo rfkill unblock wlan
-    ```
+    From the raspi-config main menu select `Localisation Options`:
 
-7. Set the right Wi-Fi regulatory domain based on your current world region following the instructions [here](https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop). In case of problems, you could try to edit the `/etc/default/crda` adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region
+    ![raspi-config menu](./images/raspi-localisation-menu.png)
 
-8. Reboot the Raspberry Pi with:
+    Then modify the **Locale** and **WLAN Country** with with the proper settings for your location. For example, an user located in Italy could set the values as the ones in the table:
+
+    | Setting         	| Value             	|
+    |-----------------	|-------------------	|
+    | L1 Locale       	| it_IT.UTF-8 UTF-8 	|
+    | L4 WLAN Country 	| IT Italy          	|
+
+7. Reboot the Raspberry Pi with:
 
     ```
     sudo reboot
@@ -96,7 +101,7 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
-9. Kura setups a local web ui that is available using a browser via:
+8. Kura setups a local web ui that is available using a browser via:
 
     ```
     https://<device-ip>

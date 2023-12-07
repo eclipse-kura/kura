@@ -335,6 +335,7 @@ public class NetworkTabsUi extends Composite {
         insertTab(this.wirelessTabAnchorItem);
         if (this.isNet2) {
             insertTab(this.net8021xTabAnchorItem);
+            this.net8021xTabAnchorItem.setEnabled(!interfaceNotEnabled);
         }
 
         insertTab(this.dhcp4NatTabAnchorItem);

@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.rest.identity.provider.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -186,6 +187,24 @@ public class IdentityServiceTest {
         thenPasswordValidationIs(false);
     }
 
+    @Test
+    public void shouldThrowExceptionWhenDeletingNonExistingUser() {
+        givenIdentityService();
+
+        whenDeleting("NonExistingUser");
+
+        thenExceptionOccurred(KuraException.class);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingNonExistingUser() {
+        givenIdentityService();
+
+        whenGettingUser("NonExistingUser");
+
+        thenExceptionOccurred(KuraException.class);
+    }
+
     private void whenValidatingPassword(String password) {
         try {
             this.identityService.validateUserPassword(password);
@@ -328,6 +347,11 @@ public class IdentityServiceTest {
         }
 
         assertNull(errorMessage, this.occurredException);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedExceptionClass) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedExceptionClass.getName(), this.occurredException.getClass().getName());
     }
 
     public static class PermissionRole implements Group {

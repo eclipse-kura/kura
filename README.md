@@ -16,7 +16,7 @@ Eclipse Kura™
 </div>
 
 ## What is Eclipse Kura™?
-From [the maori word for tank/container](https://maoridictionary.co.nz/search/?keywords=kura), Eclipse Kura™ is a versatile software framework designed to supercharge your edge devices. With an intuitive web interface, Eclipse Kura™ streamlines the process of configuring your gateway, connecting sensors, and IoT devices to seamlessly collect, process, and send data to the cloud.
+From [the maori word for tank/container](https://maoridictionary.co.nz/search/?keywords=kura), Eclipse Kura™ is a versatile software framework designed to supercharge your edge devices. With an intuitive web interface, Eclipse Kura™ streamlines the process of configuring your gateway, connecting sensors, and IoT devices to seamlessly collect, process, and send data to the cloud. Eclipse Kura™ provides an extensible Java API for developing custom plugins within the framework. Additionally, it offers a REST API, enabling the use of Eclipse Kura™ as a backend service in your application.
  
 Eclipse Kura™ runs on an edge gateway, which can be anything from a small SBC(single-board computer) like a Raspberry Pi, or a powerful high-performance computer.
 

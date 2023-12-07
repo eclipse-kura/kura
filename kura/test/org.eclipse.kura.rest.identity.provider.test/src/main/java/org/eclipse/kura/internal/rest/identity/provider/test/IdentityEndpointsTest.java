@@ -81,6 +81,10 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
             IdentityEndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
 
+    private static final String EXPECTED_NON_EXISTING_USER_RESPONSE = new Scanner(
+            IdentityEndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
+
     private static Set<UserDTO> userConfigs;
 
     private static ServiceRegistration<IdentityService> identityServiceRegistration;
@@ -176,6 +180,28 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson(EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnNonExistingUserDeleteResponse() throws KuraException {
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+                "{\"userName\":\"nonExistingUser\"}");
+
+        thenResponseCodeIs(404);
+        thenResponseBodyEqualsJson(EXPECTED_NON_EXISTING_USER_RESPONSE);
+    }
+
+    @Test
+    public void shouldReturnNonExistingUserPostResponse() throws KuraException {
+        givenIdentityService();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName",
+                "{\"userName\":\"nonExistingUser\"}");
+
+        thenResponseCodeIs(404);
+        thenResponseBodyEqualsJson(EXPECTED_NON_EXISTING_USER_RESPONSE);
     }
 
     private void givenUser(UserDTO userParam) {

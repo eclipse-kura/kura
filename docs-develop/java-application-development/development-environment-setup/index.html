@@ -3250,7 +3250,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   Once Eclipse is installed and workspaces are created, they should never be moved to another location in the file system. <br /> </li>
 <li>There may be multiple installs of Eclipse (of different or similar versions), and single instances of each install can be run simultaneously; but there should never be more that one instance of a specific install running at the same time (to avoid corruption to the Eclipse environment). <br /> </li>
 <li>Each workspace should be used with only one Eclipse install. You should avoid opening the workspace from more than one installation of Eclipse. <br /> </li>
-<li>For the purposes of this guide, only a single Eclipse installation will be covered.</li>
 </ul>
 </div>
 <p>Download the current distribution of Eclipse for your OS from <a href="https://www.eclipse.org/downloads/packages/">Eclipse official website</a>. Choose the <strong>Eclipse IDE for Eclipse Committers</strong>.</p>
@@ -3276,6 +3275,35 @@ This installation will be different depending on the operating system.</p>
 <p><img alt="Workspace Launcher" src="../images/development-environment-setup/image3.png" /></p>
 <p>After the new workspace opens, click the Workbench icon to display the development environment.</p>
 <p><img alt="Workspace" src="../images/development-environment-setup/image4.png" /></p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Additional workspace configuration:</p>
+<ul>
+<li>In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the <code>lifecycle-mapping-metadata.xml</code> in Kura workspace.
+  You can find the file in the Windows -&gt; Preferences -&gt; Maven -&gt; Lifecycle Mappings -&gt; Open workspace lifecycle mappings metadata.
+  After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
+</code></pre></div></li>
+<li>Install the <code>eclipse-tycho</code> plugin following this steps:<ol>
+<li>Menu Help -&gt; Install new software... -&gt; Paste the <a href="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/">m2eclipse-tycho repository URL</a> in the <code>Work with:</code> text field -&gt; expand the category and select the <code>Tycho Project Configurators Feature</code> and proceed with the installation.</li>
+<li>Then restart Eclipse. </li>
+</ol>
+</li>
+</ul>
+</div>
 <h3 id="importing-the-kura-user-workspace">Importing the Kura User Workspace</h3>
 <p>To set up your Kura project workspace, you will need to download the Kura User Workspace archive from <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura Download Page</a>.</p>
 <p>From the Eclipse File menu, select the <strong>Import</strong> option.  In the Import dialog box, expand the <strong>General</strong> heading, select <strong>Existing Projects into Workspace</strong>, and then click <strong>Next</strong>.</p>
@@ -3339,7 +3367,7 @@ Download the latest Eclipse Installer appropriate for your platform from <a href
 <p>The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. the CAN bundle.</p>
 <h4 id="run-the-eclipse-kura-emulator">Run the Eclipse Kura Emulator</h4>
 <p>To start the Eclipse Kura emulator, select the "Eclipse Kura Emulator.launch" profile from "Other Projects" -&gt; "setups" -&gt; "launchers" and open it with "Run as" -&gt; "Run Configurations...". Then click on the "Arguments" tab and update the "VM arguments" as follows to adapt the paths to the folder structure created by the Oomph installer:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-Dkura.have.net.admin<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Dorg.osgi.framework.storage<span class="o">=</span>/tmp/osgi/framework_storage<span class="w"> </span>-Dosgi.clean<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Dosgi.noShutdown<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Declipse.ignoreApp<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Dorg.eclipse.kura.mode<span class="o">=</span>emulator<span class="w"> </span>-Dkura.configuration<span class="o">=</span>file:<span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties<span class="w"> </span>-Ddpa.configuration<span class="o">=</span>/tmp/kura/dpa.properties<span class="w"> </span>-Dlog4j.configurationFile<span class="o">=</span>file:<span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml<span class="w"> </span>-Dkura.data<span class="o">=</span><span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/kura/data<span class="w"> </span>-Dkura.snapshots<span class="o">=</span><span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/kura/user/snapshots<span class="w"> </span>-Dorg.eclipse.equinox.http.jetty.customizer.class<span class="o">=</span>org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>-Dkura.have.net.admin<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Dorg.osgi.framework.storage<span class="o">=</span>/tmp/osgi/framework_storage<span class="w"> </span>-Dosgi.clean<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Dosgi.noShutdown<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Declipse.ignoreApp<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Dorg.eclipse.kura.mode<span class="o">=</span>emulator<span class="w"> </span>-Dkura.configuration<span class="o">=</span>file:<span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties<span class="w"> </span>-Ddpa.configuration<span class="o">=</span>/tmp/kura/dpa.properties<span class="w"> </span>-Dlog4j.configurationFile<span class="o">=</span>file:<span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml<span class="w"> </span>-Dkura.data<span class="o">=</span><span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/kura/data<span class="w"> </span>-Dkura.snapshots<span class="o">=</span><span class="si">${</span><span class="nv">workspace_loc</span><span class="si">}</span>/kura/user/snapshots<span class="w"> </span>-Dorg.eclipse.equinox.http.jetty.customizer.class<span class="o">=</span>org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
 </code></pre></div>
 <p><img alt="Vm arguments" src="../images/development-environment-setup/image12.png" /></p>
 <p>The Eclipse Kura Web UI will be available at the following URL: http://127.0.0.1:8080 with username and password <strong>admin</strong>.</p>

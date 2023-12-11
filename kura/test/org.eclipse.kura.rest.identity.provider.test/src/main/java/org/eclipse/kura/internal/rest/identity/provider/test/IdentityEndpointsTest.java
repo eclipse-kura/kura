@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.test;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
@@ -83,7 +85,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String EXPECTED_NON_EXISTING_USER_RESPONSE = new Scanner(
             IdentityEndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
-                    .useDelimiter("\\A").next().replace(" ", "");
+                    .useDelimiter("\\A").next();
 
     private static Set<UserDTO> userConfigs;
 
@@ -187,7 +189,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
-                "{\"userName\":\"nonExistingUser\"}");
+                gson.toJson(new UserDTO("nonExistingUser", null, false, false)));
 
         thenResponseCodeIs(404);
         thenResponseBodyEqualsJson(EXPECTED_NON_EXISTING_USER_RESPONSE);
@@ -198,7 +200,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         givenIdentityService();
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName",
-                "{\"userName\":\"nonExistingUser\"}");
+                gson.toJson(new UserDTO("nonExistingUser", null, false, false)));
 
         thenResponseCodeIs(404);
         thenResponseBodyEqualsJson(EXPECTED_NON_EXISTING_USER_RESPONSE);
@@ -226,7 +228,14 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
 
             when(identityServiceMock.getUser("testuser"))
                     .thenReturn(new UserDTO("testuser", Collections.emptySet(), true, false));
+
         }
+
+        when(identityServiceMock.getUser("nonExistingUser"))
+                .thenThrow(new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist"));
+
+        doThrow(new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist")).when(identityServiceMock)
+                .deleteUser("nonExistingUser");
 
         when(identityServiceMock.getValidatorOptions()).thenReturn(new ValidatorOptions(8, false, false, false));
     }

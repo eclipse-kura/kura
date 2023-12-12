@@ -1,183 +1,157 @@
 # Development Environment Setup
 
-This document describes how to set up the development environment for Kura, which consists of the following components:
+In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 
-* JVM (Java JDK SE 8)
-
-* Eclipse IDE
-
-* Kura Workspace setup
-
-The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 !!! info
     The local emulation of Kura code is only supported in Linux and Mac, not in Windows.
 
-## JVM Installation
+This document will cover the use of Eclipse Oomph installer which is the easiest way to install and configure the Eclipse IDE to start developing on Kura.
 
-Download and install JDK SE 8 from the following links as appropriate for your OS.
+The setup requires three basic steps:
 
-For Windows and Linux users, the JDK can be downloaded from the following link: [Java SE 8 Downloads](https://adoptium.net/temurin/releases/?version=8).  Use the latest version of Java SE Development Kit and download the version appropriate for your system.
+1. Requirements installation
+2. Eclipse Oomph setup
+3. Kura maven build
 
-For additional information regarding the installation of Java 8 on all supported operating systems, see [JDK 8 and JRE 8 Installation Guide](https://adoptium.net/installation).
+## Requirements
 
+Before building Kura, you need to have the following programs installed in your system:
 
-## Eclipse IDE
+- JDK 1.8 (or JDK 17)
+- Maven 3.5.x (or greater)
 
-The Eclipse IDE is an open source development tool that consists of an integrated development environment (IDE) and a plug-in system for managing extensions.
+Recommended additional software:
 
-### Installing Eclipse
+- Git
 
-Before installing Eclipse, you should choose directory locations for the Eclipse install and its workspaces.
+#### Installing Prerequisites in Mac OS 
 
-!!! info
-    The following points should be kept in mind regarding Eclipse installs and workspaces:
+To install Java 8, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot).
 
-    - The directory location of the Eclipse workspaces should be chosen carefully. 
-      Once Eclipse is installed and workspaces are created, they should never be moved to another location in the file system. <br /> 
-    - There may be multiple installs of Eclipse (of different or similar versions), and single instances of each install can be run simultaneously; but there should never be more that one instance of a specific install running at the same time (to avoid corruption to the Eclipse environment). <br /> 
-    - Each workspace should be used with only one Eclipse install. You should avoid opening the workspace from more than one installation of Eclipse. <br /> 
+Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
+```bash
+sudo tar -xzf <archive-name>.tar.gz
+```
+The tar archive can be deleted afterwards.
 
-Download the current distribution of Eclipse for your OS from [Eclipse official website](https://www.eclipse.org/downloads/packages/). Choose the **Eclipse IDE for Eclipse Committers**.
+Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:
+```bash
+# Adoptium JDK 8
+export JAVA_8_HOME=/Library/Java/JavaVirtualMachines/<archive-name>/Contents/Home
+alias java8='export JAVA_HOME=$JAVA_8_HOME'
+java8 
+```
+Reload the terminal and run `java -version` to make sure it is installed correctly.
 
-The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an **eclipse\installs** directory. The Eclipse executable will then be found in the **eclipse\installs\eclipse** directory.  
-This installation will be different depending on the operating system.
-
-![Eclipse Install Folder](./images/development-environment-setup/image1.png)
-
-Because there may potentially be future Eclipse installs extracted into this location, before doing anything else, rename the directory, such as **eclipse\installs\juno1\\**.
-!!! warning
-    Once you begin using this Eclipse install, it should NOT be moved or renamed.
-
-![Eclipse Install Folder 2](./images/development-environment-setup/image2.png)
-
-## Workspaces
-
-### Creating an Eclipse Workspace
-
-Run Eclipse by clicking its executable in the install directory.
-
-When Eclipse is run for the first time, a workspace needs to be created.  A single workspace will contain all the Java code/projects/bundles, Eclipse configuration parameters, and other relevant files for a specific business-level product.  If the **Use this as the default** option is selected, the designated workspace becomes the default each time you run Eclipse.
-
-If a workspace has not already been defined, or if you are creating a different workspace for another development project, enter a new workspace name.  The workspace should be named appropriate to the project/product being developed.
-
-!!! warning
-    Once you begin using a particular workspace, it should NOT be moved or renamed at any time.
-
-Otherwise, select an existing workspace and click **OK**.  After Eclipse is running, you can select the Eclipse menu **File | Switch Workspace | Other** to create or open a different workspace.
-
-![Workspace Launcher](./images/development-environment-setup/image3.png)
-
-After the new workspace opens, click the Workbench icon to display the development environment.
-
-![Workspace](./images/development-environment-setup/image4.png)
-
-!!! info
-    Additional workspace configuration:
-    
-    - In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
-      You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
-      After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
-      ```xml
-      <?xml version="1.0" encoding="UTF-8"?>
-      <lifecycleMappingMetadata>
-          <lifecycleMappingFilters>
-              <lifecycleMappingFilter>
-                  <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
-                  <versionRange>[2.1.2,)</versionRange>
-                  <packagingTypes>
-                      <packagingType>eclipse-test-plugin</packagingType>
-                      <packagingType>eclipse-plugin</packagingType>
-                      <packagingType>eclipse-feature</packagingType>
-                  </packagingTypes>
-              </lifecycleMappingFilter>
-          </lifecycleMappingFilters>
-      </lifecycleMappingMetadata>
-      ```
-    - Install the `eclipse-tycho` plugin following this steps:
-        1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
-        2. Then restart Eclipse. 
-
-### Importing the Kura User Workspace
-
-To set up your Kura project workspace, you will need to download the Kura User Workspace archive from [Eclipse Kura Download Page](https://eclipse.dev/kura/downloads.php).
-
-From the Eclipse File menu, select the **Import** option.  In the Import dialog box, expand the **General** heading, select **Existing Projects into Workspace**, and then click **Next**.
-
-Now click the **Select archive file** option button and browse to the archive file, such as *user_workspace_archive_<version>.zip*.
-
-![Import Project](./images/development-environment-setup/image5.png)
-
-Finally, click **Finish** to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:
-
-* org.eclipse.kura.api – the core Kura API.
-
-* org.eclipse.kura.demo.heater – an example project that you can use as a starting point for creating your own bundle.
-
-* org.eclipse.kura.emulator – the emulator project for running Kura within Eclipse (Linux/Mac only).
-
-* target-definition – a set of required bundles that are dependencies of the APIs and Kura.
-
-    ![Import Project](./images/development-environment-setup/image6.png)
-
-Eclipse will also report some errors at this point.  See the next section to resolve those errors.
-
-### Workspace Setup
-This section will guide the users to configure the development workspace environment. 
-
-#### JRE Configuration
-The latest Eclipse IDEs require and configure, by default, a Java 11 environment.
-In order to be able to leverage and develop using the new workspace for Kura, the user will be required to perform a one-time operation to specify to the IDE a Java 8 JDK.
-Opening the Eclipse preferences and selecting the Installed JREs in the Java section, the user has to select an installed Java 8 instance. 
-
-![Set JDK 8](./images/development-environment-setup/image7.png)
-
-After applying the configuration change, the user will be prompted to align also the compiler options. To do so, selecting the Compiler entry in the Java section, the user has to select 1.8 from the list of available Java versions.
-
-![Set Compiler 8](./images/development-environment-setup/image8.png)
-
-After applying the changes, the user will be prompted to recompile the environment.
-
-#### Target Definition Setup
-Click the arrow next to the **target-definition** project in the workspace and double-click **kura-equinox_<version>.target** to open it.
-
-![Target Definition Setup](./images/development-environment-setup/image9.png)
-
-In the Target Definition window, click the link **Set as Target Platform**.  Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Kura-based applications for your target platform.
-
-### Eclipse Oomph installer
-
-The Eclipse Oomph installer is an easy way to install and configure the Eclipse IDE to start developing on Kura.
-Download the latest Eclipse Installer appropriate for your platform from [Eclipse Downloads](https://www.eclipse.org/downloads/eclipse-packages/)
-
-* Start the Eclipse Installer
-* Switch to advanced mode (in simple mode you cannot add a custom installer)
-* Select "Eclipse IDE for Eclipse Committers", select the latest "Product Version" and select a Java 11+ VM. Then click the Next button.
-
-    ![Eclipse Installer](./images/development-environment-setup/image10.png)
-
-* Select "Eclipse Kura" project under the "Eclipse Projects" menu. If it isn't available, add a new installer that you can find [here]( https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup) under the "Github Projects" menu. Then click the Next button.
-
-    ![Kura Oomph](./images/development-environment-setup/image11.png)
-
-* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). 
-* Set the `JRE 1.8 location` value to the installed local jdk-8 VM. Then click the Next button.
-* Leave all Bootstrap Tasks selected and press the Finish button.
-* Accept the licenses and unsigned content.
-* Wait for the installation to finish, a few additional plugins will be installed.
-* At first startup Eclipse IDE will checkout the code and perform a full build.
-
-The result will be an Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors.
-
-The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. the CAN bundle.
-
-#### Run the Eclipse Kura Emulator
-
-To start the Eclipse Kura emulator, select the "Eclipse Kura Emulator.launch" profile from "Other Projects" -> "setups" -> "launchers" and open it with "Run as" -> "Run Configurations...". Then click on the "Arguments" tab and update the "VM arguments" as follows to adapt the paths to the folder structure created by the Oomph installer:
-
-``` shell
--Dkura.have.net.admin=false -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties -Dlog4j.configurationFile=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml -Dkura.data=${workspace_loc}/kura/data -Dkura.snapshots=${workspace_loc}/kura/user/snapshots -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
+Using [Brew](https://brew.sh/) you can easily install Maven from the command line:
+```bash
+brew install maven@3.5
+```
+Run `mvn -version` to ensure that Maven has been added to the PATH. If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
+```bash
+export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
 ```
 
-![Vm arguments](./images/development-environment-setup/image12.png)
+#### Installing Prerequisites in Linux
 
-The Eclipse Kura Web UI will be available at the following URL: http://127.0.0.1:8080 with username and password **admin**.
+For Java
+```bash
+sudo apt install openjdk-8-jdk
+```
+
+For Maven   
+
+You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install 3.5.x version or greater.
+
+### Eclipse Oomph setup
+
+Download the latest Eclipse Installer appropriate for your platform from the [Eclipse Downloads page](https://www.eclipse.org/downloads/packages/installer) and start it.
+
+![](./images/IMG-12-12-2023-15-08-06.png)
+
+Switch to "Advanced Mode" (top right hamburger menu) and select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version 2023-03 or newer.
+
+![](./images/IMG-12-12-2023-15-10-20.png)
+
+![](./images/IMG-12-12-2023-15-11-01.png)
+
+Select the Eclipse Kura installer from the list. If this is not available, add a new installer from [https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup](https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup), then check and press the "Next" button.
+
+![](./images/IMG-12-12-2023-15-11-34.png)
+
+- Select the "Developer Type":
+  - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
+  - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework (for the purpose of this document we'll use this option)
+- Set the JRE 1.8 location value to the installed local jdk-8 VM
+- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled.
+
+If you plan to contribute to Eclipse Kura you might want to [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo). For the purpose of this tutorial we'll work with a fictional fork for the username `user`. To clone the repo use the link appropriate for your fork, in our case it will be: ``
+
+Keep in mind that the "Root install folder" is where the Eclipse executable will be installed and the Kura sources will be downloaded (in the `git` subfolder).
+
+![](./images/IMG-12-12-2023-15-12-18.png)
+
+Press Next, leave all Bootstrap Tasks selected and press the Finish button
+
+![](./images/IMG-12-12-2023-15-17-29.png)
+
+Accept all the licenses and wait for the installation to finish. 
+
+![](./images/IMG-12-12-2023-15-28-02.png)
+
+At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets
+
+![](./images/IMG-12-12-2023-15-30-42.png)
+
+![](./images/IMG-12-12-2023-15-31-13.png)
+
+When the tasks are completed go to into the Package Explorer and Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window:
+
+![](./images/IMG-12-12-2023-16-31-38.png)
+
+![](./images/IMG-12-12-2023-16-32-11.png)
+
+### Kura maven build
+
+Navigate to the `git` folder created within the Eclipse workspace (`~/iot-kura-workspace` in the example above) and build the target platform:
+
+```bash
+mvn -f target-platform/pom.xml clean install
+```
+
+Then build the core components:
+
+```bash
+mvn -f kura/pom.xml clean install
+```
+
+Build the examples (optional):
+
+```bash
+mvn -f kura/examples/pom.xml clean install
+```
+
+Build the target profiles:
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -DbuildAll
+```
+
+!!! Note
+    You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Praspberry-pi-armhf`).
+
+#### Build scripts
+
+Alternatively you can use the build scripts available in the root directory.
+
+```bash
+./build-all.sh
+```
+
+or
+
+```bash
+./build-menu.sh
+```
+
+and select the profiles you want to build.

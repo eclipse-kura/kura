@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client.ui.network;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -142,10 +143,22 @@ public class NetworkTabsUi extends Composite {
             NetworkTabsUi.this.content.add(NetworkTabsUi.this.ip6Tab);
         });
     }
+    
+    private void initWireless8021xTab() {
+        this.net8021xTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless8021x());
+        this.set8021xTab = new Tab8021xUi(this.session, this, this.ip4Tab, this.ip6Tab);
+
+        this.net8021xTabAnchorItem.addClickHandler(event -> {
+            setSelected(NetworkTabsUi.this.net8021xTabAnchorItem);
+            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.set8021xTab;
+            NetworkTabsUi.this.content.clear();
+            NetworkTabsUi.this.content.add(NetworkTabsUi.this.set8021xTab);
+        });
+    }
 
     private void initWirelessTab(final boolean isNet2) {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
-        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.ip6Tab, this.set8021xTab,
+        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.ip6Tab,
                 this.net8021xTabAnchorItem, this, isNet2);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
@@ -153,18 +166,6 @@ public class NetworkTabsUi extends Composite {
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.wirelessTab;
             NetworkTabsUi.this.content.clear();
             NetworkTabsUi.this.content.add(NetworkTabsUi.this.wirelessTab);
-        });
-    }
-
-    private void initWireless8021xTab() {
-        this.net8021xTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless8021x());
-        this.set8021xTab = new Tab8021xUi(this.session, this);
-
-        this.net8021xTabAnchorItem.addClickHandler(event -> {
-            setSelected(NetworkTabsUi.this.net8021xTabAnchorItem);
-            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.set8021xTab;
-            NetworkTabsUi.this.content.clear();
-            NetworkTabsUi.this.content.add(NetworkTabsUi.this.set8021xTab);
         });
     }
 
@@ -334,8 +335,10 @@ public class NetworkTabsUi extends Composite {
 
         insertTab(this.wirelessTabAnchorItem);
         if (this.isNet2) {
+            if(interfaceNotEnabled) {
+                this.net8021xTabAnchorItem.setEnabled(false);
+            }
             insertTab(this.net8021xTabAnchorItem);
-            this.net8021xTabAnchorItem.setEnabled(!interfaceNotEnabled);
         }
 
         insertTab(this.dhcp4NatTabAnchorItem);

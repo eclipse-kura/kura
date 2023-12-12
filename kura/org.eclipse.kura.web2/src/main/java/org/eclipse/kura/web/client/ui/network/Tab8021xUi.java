@@ -18,8 +18,6 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
 import org.eclipse.kura.web.client.util.HelpButton;
-import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.shared.model.Gwt8021xConfig;
 import org.eclipse.kura.web.shared.model.Gwt8021xEap;
 import org.eclipse.kura.web.shared.model.Gwt8021xInnerAuth;
@@ -27,21 +25,20 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
+import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.client.ui.html.Text;
-import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.FormGroup;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class Tab8021xUi extends Composite implements NetworkTab {
 
@@ -52,10 +49,15 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     interface Tab8021xUiUiBinder extends UiBinder<Widget, Tab8021xUi> {
     }
 
+    private static final Logger logger = Logger.getLogger(Tab8021xUi.class.getSimpleName());
+
     private final NetworkTabsUi netTabs;
 
     Gwt8021xConfig activeConfig;
     GwtSession currentSession;
+
+    private final TabIp4Ui tcp4Tab;
+    private final TabIp6Ui tcp6Tab;
 
     private boolean dirty;
 
@@ -152,11 +154,13 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     @UiField
     FormGroup identityPublicPrivateKeyPairName;
 
-    public Tab8021xUi(GwtSession currentSession, NetworkTabsUi tabs) {
+    public Tab8021xUi(GwtSession currentSession, NetworkTabsUi tabs, TabIp4Ui tcp4, TabIp6Ui tcp6) {
         initWidget(uiBinder.createAndBindUi(this));
 
         this.currentSession = currentSession;
         this.netTabs = tabs;
+        this.tcp4Tab = tcp4;
+        this.tcp6Tab = tcp6;
 
         initLabels();
         initHelpButtons();
@@ -164,16 +168,20 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         initTextBoxes();
 
         this.buttonTestPassword.setVisible(false);
+
+        this.tcp4Tab.status.addChangeHandler(event -> update());
+
+        this.tcp6Tab.status.addChangeHandler(event -> update());
     }
 
     private void initLabels() {
-        labelEap.setText(MSGS.net8021xEap());
-        labelInnerAuth.setText(MSGS.net8021xInnerAuth());
-        labelUsername.setText(MSGS.net8021xUsername());
-        labelPassword.setText(MSGS.net8021xPassword());
-        labelKeystorePid.setText(MSGS.net8021xKeystorePid());
-        labelCaCertName.setText(MSGS.net8021xCaCert());
-        labelPublicPrivateKeyPairName.setText(MSGS.net8021xPublicPrivateKeyPair());
+        this.labelEap.setText(MSGS.net8021xEap());
+        this.labelInnerAuth.setText(MSGS.net8021xInnerAuth());
+        this.labelUsername.setText(MSGS.net8021xUsername());
+        this.labelPassword.setText(MSGS.net8021xPassword());
+        this.labelKeystorePid.setText(MSGS.net8021xKeystorePid());
+        this.labelCaCertName.setText(MSGS.net8021xCaCert());
+        this.labelPublicPrivateKeyPairName.setText(MSGS.net8021xPublicPrivateKeyPair());
     }
 
     private void initHelpButtons() {
@@ -214,7 +222,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.eap.addChangeHandler(event -> {
             setDirty(true);
-            this.netTabs.updateTabs();
             refreshForm();
             resetValidations();
         });
@@ -235,7 +242,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         this.innerAuth.addChangeHandler(event -> {
             setDirty(true);
-            this.netTabs.updateTabs();
             refreshForm();
             resetValidations();
         });
@@ -320,9 +326,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.caCertName.setAllowBlank(true);
         this.caCertName.addMouseOutHandler(event -> resetHelpText());
 
-        this.caCertName.addChangeHandler(event -> {
-            setDirty(true);
-        });
+        this.caCertName.addChangeHandler(event -> setDirty(true));
     }
 
     private void initPrivateKeyNameTextBox() {
@@ -348,6 +352,14 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
     }
 
+    private void update() {
+        logger.info("update");
+        setValues();
+        refreshForm();
+        this.netTabs.updateTabs();
+        logger.info("update... done");
+    }
+
     private void resetValidations() {
         this.formgroupIdentityUsername.setValidationState(ValidationState.NONE);
         this.formgroupPassword.setValidationState(ValidationState.NONE);
@@ -370,6 +382,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void reset() {
+        logger.info("reset");
         for (int i = 0; i < this.eap.getItemCount(); i++) {
             if (this.eap.getSelectedItemText().equals(Gwt8021xEap.TTLS.name())) {
                 this.eap.setSelectedIndex(i);
@@ -390,6 +403,8 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.keystorePid.setValue("");
         this.caCertName.setValue("");
         this.publicPrivateKeyPairName.setValue("");
+        update();
+        logger.info("reset... done");
     }
 
     private void setValues() {
@@ -414,7 +429,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.keystorePid.setValue(this.activeConfig.getKeystorePid());
         this.caCertName.setValue(this.activeConfig.getCaCertName());
         this.publicPrivateKeyPairName.setValue(this.activeConfig.getPublicPrivateKeyPairName());
-
     }
 
     @Override
@@ -431,9 +445,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
             if (this.activeConfig == null) {
                 reset();
             } else {
-                setValues();
-                refreshForm();
-                this.netTabs.updateTabs();
+                update();
             }
         }
     }
@@ -445,9 +457,9 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        boolean isTLS = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TLS);
-        boolean isPEAP = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.PEAP);
-        boolean isTTLS = (Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TTLS);
+        boolean isTLS = Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TLS;
+        boolean isPEAP = Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.PEAP;
+        boolean isTTLS = Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TTLS;
 
         if (isTLS) {
 

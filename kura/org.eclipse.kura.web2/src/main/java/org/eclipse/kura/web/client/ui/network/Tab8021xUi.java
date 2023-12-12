@@ -49,8 +49,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     interface Tab8021xUiUiBinder extends UiBinder<Widget, Tab8021xUi> {
     }
 
-    private static final Logger logger = Logger.getLogger(Tab8021xUi.class.getSimpleName());
-
     private final NetworkTabsUi netTabs;
 
     Gwt8021xConfig activeConfig;
@@ -353,11 +351,9 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void update() {
-        logger.info("update");
         setValues();
         refreshForm();
         this.netTabs.updateTabs();
-        logger.info("update... done");
     }
 
     private void resetValidations() {
@@ -382,7 +378,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     }
 
     private void reset() {
-        logger.info("reset");
         for (int i = 0; i < this.eap.getItemCount(); i++) {
             if (this.eap.getSelectedItemText().equals(Gwt8021xEap.TTLS.name())) {
                 this.eap.setSelectedIndex(i);
@@ -404,7 +399,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.caCertName.setValue("");
         this.publicPrivateKeyPairName.setValue("");
         update();
-        logger.info("reset... done");
     }
 
     private void setValues() {

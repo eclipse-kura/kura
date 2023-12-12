@@ -67,17 +67,17 @@ You can follow the tutorial from the official [Maven](http://maven.apache.org/in
 
 Download the latest Eclipse Installer appropriate for your platform from the [Eclipse Downloads page](https://www.eclipse.org/downloads/packages/installer) and start it.
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-08-06.png)
+![](./images/development-environment-setup/image-0.png)
 
 Switch to "Advanced Mode" (top right hamburger menu) and select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version 2023-03 or newer.
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-10-20.png)
+![](./images/development-environment-setup/image-1.png)
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-11-01.png)
+![](./images/development-environment-setup/image-2.png)
 
 Select the Eclipse Kura installer from the list. If this is not available, add a new installer from [https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup](https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup), then check and press the "Next" button.
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-11-34.png)
+![](./images/development-environment-setup/image-3.png)
 
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
@@ -89,27 +89,27 @@ If you plan to contribute to Eclipse Kura you might want to [create a fork](http
 
 Keep in mind that the "Root install folder" is where the Eclipse executable will be installed and the Kura sources will be downloaded (in the `git` subfolder).
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-12-18.png)
+![](./images/development-environment-setup/image-4.png)
 
 Press Next, leave all Bootstrap Tasks selected and press the Finish button
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-17-29.png)
+![](./images/development-environment-setup/image-5.png)
 
 Accept all the licenses and wait for the installation to finish. 
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-28-02.png)
+![](./images/development-environment-setup/image-6.png)
 
 At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-30-42.png)
+![](./images/development-environment-setup/image-7.png)
 
-![](./images/development-environment-setup/IMG-12-12-2023-15-31-13.png)
+![](./images/development-environment-setup/image-8.png)
 
 When the tasks are completed go to into the Package Explorer and Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window:
 
-![](./images/development-environment-setup/IMG-12-12-2023-16-31-38.png)
+![](./images/development-environment-setup/image-9.png)
 
-![](./images/development-environment-setup/IMG-12-12-2023-16-32-11.png)
+![](./images/development-environment-setup/image-10.png)
 
 ### Kura maven build
 

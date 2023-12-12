@@ -20,7 +20,7 @@ From [the maori word for tank/container](https://maoridictionary.co.nz/search/?k
  
 Eclipse Kura™ runs on an edge gateway, which can be anything from a small SBC(single-board computer) like a Raspberry Pi, or a powerful high-performance computer.
 
-## What can Eclipse Kura™ do for me?
+### What can Eclipse Kura™ do for me?
 * **Kura™ Services:** Provision and set up features to run on your gateway, such as an MQTT broker.
 * **Kura™ Networking:** Manage Network connectivity, including 
 * **Kura™ Wires:** Design data flows and data processing streams effortlessly with a drag-and-drop visual editor.

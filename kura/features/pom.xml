@@ -6,11 +6,11 @@
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+     SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
      Red Hat Inc
 
 -->
@@ -65,6 +65,7 @@
         <module>org.eclipse.kura.ai.triton.server</module>
         <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
+        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
     </modules>
 
     <profiles>

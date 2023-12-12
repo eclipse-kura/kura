@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+      SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+               name="org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory">
+
+    <implementation class="org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory"/>
+
+    <reference interface="org.eclipse.kura.configuration.ConfigurationService"
+               bind="setConfigurationService"
+               cardinality="1..1"
+               name="ConfigurationService"
+               policy="static"/>
+
+    <service>
+        <provide interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
+    </service>
+
+    <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint[-optionalSuffix]"/>
+    <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\-[a-zA-Z0-9]+)?$"/>
+    <property name="service.pid" type="String" value="org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory"/>
+</scr:component>

@@ -33,7 +33,7 @@ Eclipse Kura™ runs on an edge gateway, which can be anything from a small SBC(
 * **Kura™ Plugins**: Add and Extend the framework by adding your own Services, and Drivers.
 * **Kura™ REST Service**: Embed the framework as a backend in your own edge applications.
  
-## I have used Eclipse Kura™ to make a small-scale Edge deployment, how do I scale now?
+### I have used Eclipse Kura™ to make a small-scale Edge deployment, how do I scale now?
 If you want to scale, and manage many instances of Eclipse Kura™, check out [**Eclipse Kapua™**](https://github.com/eclipse/kapua). [Eclipse Kapua™](https://github.com/eclipse/kapua) is a Eclipse Kura™ compatible cloud command and control service that allows you to aggregate data and configure many Eclipse Kura™ devices. 
 
 Documentation

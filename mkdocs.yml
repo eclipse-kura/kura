@@ -119,8 +119,8 @@ nav:
       - Wire Service V1 REST APIs and MQTT Request Handler: kura-wires/wire-service-rest-v1.md
       - References: kura-wires/wire-service-references.md
     - Java Application Development:
-      - Development Environment Setup: java-application-development/development-environment-setup.md
-      - Kura Workspace Setup: java-application-development/kura-workspace-setup.md
+      - Kura Development Environment Setup: java-application-development/development-environment-setup.md
+      - Add-ons Development Environment Setup: java-application-development/kura-workspace-setup.md
       - Hello World Application: java-application-development/hello-world-application.md
       - Deploy and Debug Applications: java-application-development/deploy-and-debug-applications.md
       - Remote Debugging on Target Platform: java-application-development/remote-debugging-on-target-platform.md

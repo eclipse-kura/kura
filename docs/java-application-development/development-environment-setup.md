@@ -1,6 +1,8 @@
 # Development Environment Setup
 
-In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
+In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. If, instead you want to develop applications or bundles running on Kura refer to the [Kura Workspace setup guide](./kura-workspace-setup.md).
+
+The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 
 !!! info
     The local emulation of Kura code is only supported in Linux and Mac, not in Windows.

@@ -33,7 +33,7 @@ public final class TypeConverter implements TypeConverters {
     private static final WireRecord[] EMPTY_RECORDS = new WireRecord[0];
 
     @Converter
-    public static KuraPayload fromMap(final Map<String, ?> data) {
+    public KuraPayload fromMap(final Map<String, ?> data) {
         if (data == null) {
             return null;
         }
@@ -49,22 +49,22 @@ public final class TypeConverter implements TypeConverters {
     }
 
     @Converter
-    public static WireRecord[] recordsFromEnvelope(final WireEnvelope envelope) {
+    public WireRecord[] recordsFromEnvelope(final WireEnvelope envelope) {
         return recordsFromList(envelope.getRecords());
     }
 
     @Converter
-    public static WireRecord[] recordsFromRecord(final WireRecord record) {
-        return new WireRecord[] { record };
+    public WireRecord[] recordsFromRecord(final WireRecord wireRecord) {
+        return new WireRecord[] { wireRecord };
     }
 
     @Converter
-    public static WireRecord[] recordsFromList(final List<WireRecord> records) {
-        return records.toArray(new WireRecord[records.size()]);
+    public WireRecord[] recordsFromList(final List<WireRecord> wireRecords) {
+        return wireRecords.toArray(new WireRecord[wireRecords.size()]);
     }
 
     @Converter
-    public static WireRecord[] recordsFromMap(final Map<?, ?> map) {
+    public WireRecord[] recordsFromMap(final Map<?, ?> map) {
 
         if (map.isEmpty()) {
             return EMPTY_RECORDS;
@@ -89,11 +89,11 @@ public final class TypeConverter implements TypeConverters {
     }
 
     @Converter
-    public static Map<?, ?> mapFromRecord(final WireRecord record) {
+    public Map<Object, Object> mapFromRecord(final WireRecord wireRecord) {
 
-        final Map<Object, Object> result = new HashMap<>(record.getProperties().size());
+        final Map<Object, Object> result = new HashMap<>(wireRecord.getProperties().size());
 
-        for (final Map.Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
+        for (final Map.Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
             result.put(entry.getKey(), entry.getValue().getValue());
         }
 
@@ -102,12 +102,12 @@ public final class TypeConverter implements TypeConverters {
     }
 
     @Converter
-    public static Map<?, ?> mapFromRecords(final WireRecord[] records) {
+    public static Map<Object, Object> mapFromRecords(final WireRecord[] wireRecords) {
 
         final Map<Object, Object> result = new HashMap<>();
 
-        for (final WireRecord record : records) {
-            for (final Map.Entry<String, TypedValue<?>> entry : record.getProperties().entrySet()) {
+        for (final WireRecord wireRecord : wireRecords) {
+            for (final Map.Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
                 result.put(entry.getKey(), entry.getValue().getValue());
             }
         }

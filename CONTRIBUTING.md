@@ -63,6 +63,10 @@ You do this by adding the `-s` flag when you make the commit(s), e.g.
 
 You can find all the details in the [Contributing via Git](http://wiki.eclipse.org/Development_Resources/Contributing_via_Git) document on the Eclipse web site.
 
+#### Development Model
+
+Development on Kura™ follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
+
 #### Stale PR policy
 
 To avoid piling up too many Issues and Pull Requests we enabled a Github Action that takes care of automatically closing stale Issues/Pull Request.

@@ -187,7 +187,8 @@ Build Kura™ as per [our instructions](https://github.com/eclipse/kura#build-ku
 mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 ```
 
-> *Note*: this build step requires 'docker' to be a executable command on your system. For Instance, if you are using podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
+> [!NOTE]
+This build step requires 'docker' to be a executable command on your system. For Instance, if you are using Podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
 
 After this command runs, images can be found in your preferred container engine image list.
 

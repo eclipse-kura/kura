@@ -46,7 +46,7 @@ Documentation
 
 Additionally, we provide two channels for reporting any issue you find with the project
 - [**Github Issues**](https://github.com/eclipse/kura/issues): for bug reporting.
-- [**Github Discussions**](https://github.com/eclipse/kura/discussions): for receiving feedback, making new proposals and generally talking about the project.
+- [**Github Discussions**](https://github.com/eclipse/kura/discussions): for receiving feedback, asking questions, making new proposals and generally talking about the project.
 
 Install
 -------

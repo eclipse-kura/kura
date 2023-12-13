@@ -191,7 +191,7 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 > [!NOTE]
 This build step requires 'docker' to be a executable command on your system. For Instance, if you are using Podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
 
-After this command runs, images can be found in your preferred container engine image list.
+After this command completes, images can be found in your preferred container engine image list.
 
 IDE Setups
 ----------

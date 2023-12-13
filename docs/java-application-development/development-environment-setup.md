@@ -84,10 +84,10 @@ Select the Eclipse Kura installer from the list. If this is not available, add a
 - Select the "Developer Type":
     - **"User"**: if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
     - **"Developer"**: if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework (for the purpose of this document we'll use this option)
-- Set the JRE 1.8 location value to the installed local jdk-8 VM
-- Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled.
+- Set the `JRE 1.8 location` value to the installed local jdk-8 VM
+- Update Eclipse Kura Git repository username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled.
 
-If you plan to contribute to Eclipse Kura you might want to [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo). For the purpose of this tutorial we'll work with a fictional fork for the username `user`. To clone the repo use the link appropriate for your fork, in our case it will be: ``
+If you plan to contribute to Eclipse Kura you might want to [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo), see our [contributing guide](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md) for further informations. For the purpose of this tutorial we'll work with a fictional fork for the username `user`. To clone the repo use the link appropriate for your fork, in our case it will be: `https://github.com/user/kura.git`
 
 Keep in mind that the "Root install folder" is where the Eclipse executable will be installed and the Kura sources will be downloaded (in the `git` subfolder).
 

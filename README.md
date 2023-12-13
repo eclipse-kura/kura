@@ -53,11 +53,11 @@ Install
 
 Eclipse Kura™ is compatible with Java 8 and Java 17.
 
-## Target Gateways Installers
+### Target Gateways Installers
 Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
 Take a look at [our documentation](https://eclipse.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.
 
-## Docker Image
+### Docker Image
 Eclipse Kura™ is also available as a [Docker container](https://hub.docker.com/r/eclipse/kura/).
 
 Build

@@ -20,14 +20,6 @@ For Windows and Linux users, the JDK can be downloaded from the following link: 
 
 For additional information regarding the installation of Java 8 on all supported operating systems, see [JDK 8 and JRE 8 Installation Guide](https://adoptium.net/installation).
 
-## Eclipse Oomph installer (recommended)
-
-The Eclipse Oomph installer is an easy way to install and configure the Eclipse IDE to start developing on Kura.
-
-Download the latest Eclipse Installer appropriate for your platform from [Eclipse Downloads](https://www.eclipse.org/downloads/eclipse-packages/) and follow the same steps reported in the [development environment setup guide](./development-environment-setup.md) with one notable difference: when asked to select the "Developer Type" select the **"User"** option.
-
-## Manual Eclipse installation (alternative)
-
 ### Installing Eclipse IDE
 
 Before installing Eclipse, you should choose directory locations for the Eclipse install and its workspaces.

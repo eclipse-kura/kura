@@ -173,10 +173,10 @@ After this command runs, images can be found in your preferred container engine 
 IDE Setups
 ----------
 
-We currently support two setups for Kura development:
+We currently support two setups for Kura™ development:
 
-- [**Kura Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Kura project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Kura source code on your workstation.
-- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Kura. It will install only the APIs and the examples and is best suited for developing Kura add-ons.
+- [**Kura™ Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Kura™ source code on your workstation.
+- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Kura™. It will install only the APIs and the examples and is best suited for developing Kura™ add-ons.
 
 Contributing
 ------------

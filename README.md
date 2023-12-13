@@ -48,29 +48,24 @@ Additionally, we provide two channels for reporting any issue you find with the 
 - [**Github Issues**](https://github.com/eclipse/kura/issues): for bug reporting.
 - [**Github Discussions**](https://github.com/eclipse/kura/discussions): for receiving feedback, making new proposals and generally talking about the project.
 
-System Requirements
--------------------
+Install
+-------
 
-Eclipse Kura™ is compatible with Java 8 (`Bundle-RequiredExecutionEnvironment: JavaSE-1.8`) and OSGi R6.
+Eclipse Kura™ is compatible with Java 8 and Java 17.
 
+## Target Gateways Installers
+Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
+Take a look at [our documentation](https://eclipse.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.
 
-Development Model
------------------
-Development on Kura™ follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
+## Docker Image
+Eclipse Kura™ is also available as a [Docker container](https://hub.docker.com/r/eclipse/kura/).
 
-
-Getting Started
------------------
-
-Development for Kura™ can be done in Eclipse IDE using the Kura™ Development Environment, in a gateway or in a Docker container.
-
-## Development Environment
-
-### Supported Development Platforms
-The Eclipse Installer based setup works for the main used platforms like Linux, Mac OS and Windows.
+Build
+-----
 
 ### Prerequisites
-Before installing Kura™, you need to have the following programs installed in your system
+
+In order to be able to build Kura™ on your development machine, you need to have the following programs installed in your system:
 * JDK 1.8
 * Maven 3.5.x
 
@@ -163,57 +158,27 @@ and select the profiles you want to build.
 
 ### Building Eclipse Kura™ Containers
 
-The kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux ```kura-alpine-x86_64```, and another on Ubi8 ```kura-ubi8-x86_64```.
+The kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux `kura-alpine-x86_64`, and another on Ubi8 `kura-ubi8-x86_64`.
 
 Build Kura™ as per [our instructions](https://github.com/eclipse/kura#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
 ```
+
 > *Note*: this build step requires 'docker' to be a executable command on your system. For Instance, if you are using podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
 
 After this command runs, images can be found in your preferred container engine image list.
 
-### Eclipse IDE
-The simplest way to start developing on Eclipse Kura™ is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](https://eclipse.github.io/kura/docs-develop/java-application-development/development-environment-setup). Here you'll find a brief explaination of the required steps.
+IDE Setups
+----------
 
-To correctly setup the environment, proceed as follows:
-- Install a jdk-8 distribution like [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=8) for your specific CPU architecture and OS.
-- Start the Eclipse Installer
-- Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be the version **2023-03 or newer**.
-- Select the Eclipse Kura™ installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
-- Select the "Developer Type":
-  - "User": if you want to develop applications or bundles running on Kura™, select this option. It will install only the APIs and the examples.
-  - "Developer" : if you are a framework developer, select this option. It will download and configure the Eclipse Kura™ framework.
-- Update Eclipse Kura™ Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
-- Set the `JRE 1.8 location` value to the installed local jdk-8 VM
-- Leave all Bootstrap Tasks selected and press the Finish button
-- Accept all the licenses and wait for the installation to finish
-At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets
-- When the tasks are completed. In the IDE open (double click) Target Platform > Target-Definition > Kura™ Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window
+We currently support two setups for Kura development:
 
-Now you are ready to develop on Eclipse Kura™.
+- [**Kura Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Kura project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Kura source code on your workstation.
+- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Kura. It will install only the APIs and the examples and is best suited for developing Kura add-ons.
 
-To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
-
-### Known Issues
-Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura™ emulator.
-
-The full build of Kura™ is only supported for Linux and Mac Os based systems.
-
-Currently the maven build on Windows requires to disable the tests and will fail when it tries to create the installers for the target platforms.
-
-## Contributing
+Contributing
+------------
 
 Contributing to Eclipse Kura™ is fun and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
-
-
-## Target Gateways Installers
-Eclipse Kura™ provides pre-built installers for common development boards.
-Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
-
-
-## Docker Image
-Eclipse Kura™ is available also as a [Docker container](https://hub.docker.com/r/eclipse/kura/)
-To easily run, use: `docker run -d -p 443:443 -t eclipse/kura`.

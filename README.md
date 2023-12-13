@@ -181,7 +181,7 @@ and select the profiles you want to build.
 
 The kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux `kura-alpine-x86_64`, and another on Ubi8 `kura-ubi8-x86_64`.
 
-Build Kura™ as per [our instructions](#build-kura™). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
+Build Kura™ as per [our instructions](#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers

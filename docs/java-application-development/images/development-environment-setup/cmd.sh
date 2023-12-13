@@ -1,0 +1,11 @@
+mv image-0.png devenvsetup-0.png
+mv image-1.png devenvsetup-1.png
+mv image-10.png devenvsetup-10.png
+mv image-2.png devenvsetup-2.png
+mv image-3.png devenvsetup-3.png
+mv image-4.png devenvsetup-4.png
+mv image-5.png devenvsetup-5.png
+mv image-6.png devenvsetup-6.png
+mv image-7.png devenvsetup-7.png
+mv image-8.png devenvsetup-8.png
+mv image-9.png devenvsetup-9.png

@@ -1,14 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Red Hat Inc and others
- * 
+ * Copyright (c) 2011, 2023 Red Hat Inc and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Red Hat Inc
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.camel.internal.camelcloud;
 
@@ -28,16 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.function.IntSupplier;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
-import org.apache.camel.StartupListener;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultShutdownStrategy;
 import org.apache.camel.spi.ShutdownStrategy;
@@ -302,20 +299,10 @@ public class CamelCloudClient implements CloudClient {
          * "starting" mode when the "onCamelContextStarted" method is called.
          */
         try {
-            this.camelContext.addStartupListener(new StartupListener() {
-
-                @Override
-                public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
-                    CamelCloudClient.this.executorService.submit(new Callable<Void>() {
-
-                        @Override
-                        public Void call() throws Exception {
-                            doSubscribe(isControl, deviceId, topic, qos);
-                            return null;
-                        }
-                    });
-                }
-            });
+            this.camelContext.addStartupListener((context, alreadyStarted) -> CamelCloudClient.this.executorService.submit(() -> {
+                doSubscribe(isControl, deviceId, topic, qos);
+                return null;
+            }));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.SUBSCRIPTION_ERROR, e, buildTopicName(deviceId, topic));
         }
@@ -331,25 +318,21 @@ public class CamelCloudClient implements CloudClient {
 
                 @Override
                 public void configure() throws Exception {
-                    from(target(internalQueue)).routeId(internalQueue).process(new Processor() {
-
-                        @Override
-                        public void process(Exchange exchange) throws Exception {
-                            logger.debug("Processing: {}", exchange);
-                            for (CloudClientListener listener : CamelCloudClient.this.cloudClientListeners) {
-                                logger.debug("\t{}", listener);
-                                Object body = exchange.getIn().getBody();
-                                KuraPayload payload;
-                                if (body instanceof KuraPayload) {
-                                    payload = (KuraPayload) body;
-                                } else {
-                                    payload = new KuraPayload();
-                                    payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
-                                }
-                                String deviceId = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
-                                int qos = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
-                                listener.onMessageArrived(deviceId, "camel", payload, qos, true);
+                    from(target(internalQueue)).routeId(internalQueue).process(exchange -> {
+                        logger.debug("Processing: {}", exchange);
+                        for (CloudClientListener listener : CamelCloudClient.this.cloudClientListeners) {
+                            logger.debug("\t{}", listener);
+                            Object body = exchange.getIn().getBody();
+                            KuraPayload payload;
+                            if (body instanceof KuraPayload) {
+                                payload = (KuraPayload) body;
+                            } else {
+                                payload = new KuraPayload();
+                                payload.setBody(getContext().getTypeConverter().convertTo(byte[].class, body));
                             }
+                            String deviceId1 = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_DEVICEID, String.class);
+                            int qos1 = exchange.getIn().getHeader(CAMEL_KURA_CLOUD_QOS, 0, int.class);
+                            listener.onMessageArrived(deviceId1, "camel", payload, qos1, true);
                         }
                     });
                 }

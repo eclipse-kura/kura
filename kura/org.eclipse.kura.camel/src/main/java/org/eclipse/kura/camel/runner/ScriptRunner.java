@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Red Hat Inc and others
+ * Copyright (c) 2016, 2023 Red Hat Inc and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Red Hat Inc
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.camel.runner;
 
@@ -29,8 +30,9 @@ import javax.script.ScriptException;
  * so that at least the standard "JavaScript" language works inside of OSGi.
  * <br>
  * In order to execute a script use:
+ * 
  * <pre>
- * ScriptRunner runner = ScriptRunner.create(ServiceClass.class.getClassLoader(), "JavaScript", "callFooBar();" );
+ * ScriptRunner runner = ScriptRunner.create(ServiceClass.class.getClassLoader(), "JavaScript", "callFooBar();");
  * runner.run();
  * </pre>
  */

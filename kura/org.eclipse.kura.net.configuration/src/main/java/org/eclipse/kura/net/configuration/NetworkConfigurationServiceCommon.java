@@ -342,6 +342,7 @@ public class NetworkConfigurationServiceCommon {
         addTypeDefinition(tocd, ifaceName);
         addMtuDefinition(tocd, ifaceName);
         addAutoconnectDefinition(tocd, ifaceName);
+        addPromiscDefinition(tocd, ifaceName);
 
         addIp4InterfaceCommonDefinition(tocd, ifaceName);
         addIp6InterfaceCommonDefinition(tocd, ifaceName);
@@ -455,6 +456,14 @@ public class NetworkConfigurationServiceCommon {
         Tad tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.mtu", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_MTU, Tscalar.INTEGER);
         tad.setRequired(true);
+        tocd.addAD(tad);
+    }
+    
+    private static void addPromiscDefinition(Tocd tocd, String ifaceName) {
+        Tad tad = buildAttributeDefinition(String.format(PREFIX + "%s.config.promisc", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_PROMISC, Tscalar.INTEGER);
+        tad.setRequired(true);
+        tad.setDefault("-1");
         tocd.addAD(tad);
     }
 

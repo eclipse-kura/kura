@@ -451,7 +451,7 @@ public class NetworkConfigurationServiceImplTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(130, ads.size());
+        assertEquals(133, ads.size());
 
         int adsConfigured = 0;
         for (AD ad : ads) {

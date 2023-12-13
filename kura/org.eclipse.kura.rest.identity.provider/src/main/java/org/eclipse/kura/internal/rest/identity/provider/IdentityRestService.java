@@ -22,7 +22,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -138,6 +141,12 @@ public class IdentityRestService {
         try {
             logger.debug(DEBUG_MESSAGE, "getUser");
             return this.identityService.getUser(userName.getUserName());
+        } catch (KuraException e) {
+            if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
+            } else {
+                throw DefaultExceptionHandler.toWebApplicationException(e);
+            }
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -152,6 +161,12 @@ public class IdentityRestService {
         try {
             logger.debug(DEBUG_MESSAGE, "deleteUser");
             this.identityService.deleteUser(userName.getUserName());
+        } catch (KuraException e) {
+            if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
+            } else {
+                throw DefaultExceptionHandler.toWebApplicationException(e);
+            }
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

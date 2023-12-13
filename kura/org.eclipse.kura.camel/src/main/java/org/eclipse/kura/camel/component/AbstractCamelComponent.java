@@ -21,6 +21,7 @@ import org.eclipse.kura.camel.runner.CamelRunner;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.camel.runner.ContextFactory;
 import org.eclipse.kura.camel.runner.ContextLifecycleListener;
+import org.eclipse.kura.camel.type.TypeConverter;
 import org.eclipse.kura.util.base.StringUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -60,6 +61,7 @@ public abstract class AbstractCamelComponent {
         // create and configure
 
         final Builder builder = new CamelRunner.Builder(getBundleContext());
+        builder.addTypeConverter(new TypeConverter());
         builder.contextFactory(getContextFactory());
         builder.disableJmx(Boolean.getBoolean(PROP_DISABLE_JMX));
         builder.addBeforeStart(this::beforeStart);

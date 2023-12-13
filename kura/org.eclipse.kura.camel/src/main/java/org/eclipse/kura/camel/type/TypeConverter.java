@@ -20,18 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Converter;
+import org.apache.camel.TypeConverters;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireRecord;
 
 @Converter
-public final class TypeConverter {
+public final class TypeConverter implements TypeConverters {
 
     private static final WireRecord[] EMPTY_RECORDS = new WireRecord[0];
-
-    private TypeConverter() {
-    }
 
     @Converter
     public static KuraPayload fromMap(final Map<String, ?> data) {

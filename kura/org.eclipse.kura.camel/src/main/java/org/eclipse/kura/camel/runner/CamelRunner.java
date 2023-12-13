@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Route;
+import org.apache.camel.TypeConverters;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
 import org.apache.camel.core.osgi.OsgiServiceRegistry;
@@ -45,6 +46,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.eclipse.kura.camel.type.TypeConverter;
 
 /**
  * A lifecycle manager for running a CamelContext
@@ -127,6 +130,8 @@ public class CamelRunner {
 
         private final List<ContextLifecycleListener> lifecycleListeners;
 
+        private final List<TypeConverters> typeConverters;
+
         private boolean disableJmx = true;
 
         private int shutdownTimeout = 5;
@@ -146,6 +151,7 @@ public class CamelRunner {
             this.dependencies = new LinkedList<>();
             this.beforeStarts = new LinkedList<>();
             this.lifecycleListeners = new LinkedList<>();
+            this.typeConverters = new LinkedList<>();
         }
 
         public Builder(final Builder other) {
@@ -157,6 +163,7 @@ public class CamelRunner {
             this.dependencies = new LinkedList<>(other.dependencies);
             this.beforeStarts = new LinkedList<>(other.beforeStarts);
             this.lifecycleListeners = new LinkedList<>(other.lifecycleListeners);
+            this.typeConverters = new LinkedList<>(other.typeConverters);
             this.disableJmx = other.disableJmx;
             this.shutdownTimeout = other.shutdownTimeout;
         }
@@ -379,6 +386,22 @@ public class CamelRunner {
         }
 
         /**
+         * Add a custom type converter.
+         * 
+         * @param typeConverter
+         *            The type converter to add
+         * @return
+         */
+
+        public Builder addTypeConverter(final TypeConverters typeConverter) {
+            Objects.requireNonNull(typeConverter);
+
+            this.typeConverters.add(typeConverter);
+
+            return this;
+        }
+
+        /**
          * Build the actual CamelRunner instance based on the current configuration of the builder instance
          * <p>
          * Modifications which will be made to the builder after the {@link #build()} method was called will
@@ -403,7 +426,7 @@ public class CamelRunner {
                 });
             }
             return new CamelRunner(this.registryFactory, this.contextFactory, beforeStartsTemp, this.lifecycleListeners,
-                    dependenciesTemp);
+                    this.typeConverters, dependenciesTemp);
         }
     }
 
@@ -412,6 +435,7 @@ public class CamelRunner {
     private final List<BeforeStart> beforeStarts;
     private final List<ContextLifecycleListener> lifecycleListeners;
     private final List<ServiceDependency<?, CamelContext>> dependencies;
+    private final List<TypeConverters> typeConverters;
 
     private CamelContext context;
     private RoutesProvider routes = EmptyRoutesProvider.INSTANCE;
@@ -419,12 +443,13 @@ public class CamelRunner {
 
     private CamelRunner(final RegistryFactory registryFactory, final ContextFactory contextFactory,
             final List<BeforeStart> beforeStarts, final List<ContextLifecycleListener> lifecycleListeners,
-            final List<ServiceDependency<?, CamelContext>> dependencies) {
+            List<TypeConverters> typeConverters, final List<ServiceDependency<?, CamelContext>> dependencies) {
         this.registryFactory = registryFactory;
         this.contextFactory = contextFactory;
         this.beforeStarts = beforeStarts;
         this.lifecycleListeners = lifecycleListeners;
         this.dependencies = dependencies;
+        this.typeConverters = typeConverters;
     }
 
     private Registry createRegistry() {
@@ -493,6 +518,11 @@ public class CamelRunner {
         final Registry registry = createRegistry();
 
         final CamelContext camelContext = createContext(registry);
+
+        for (TypeConverters typeConverter : this.typeConverters) {
+            camelContext.getTypeConverterRegistry().addTypeConverters(typeConverter);
+        }
+
         beforeStart(camelContext);
 
         for (final ServiceDependency.Handle<CamelContext> dep : dependencies) {

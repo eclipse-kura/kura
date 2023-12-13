@@ -20,6 +20,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.kura.camel.runner.CamelRunner;
 import org.eclipse.kura.camel.runner.CamelRunner.Builder;
 import org.eclipse.kura.camel.runner.ContextFactory;
+import org.eclipse.kura.camel.type.TypeConverter;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -58,6 +59,7 @@ public abstract class AbstractJavaCamelComponent extends RouteBuilder implements
         // create and configure
 
         final Builder builder = new CamelRunner.Builder();
+        builder.addTypeConverter(new TypeConverter());
         builder.contextFactory(getContextFactory());
         builder.disableJmx(getBoolean(PROP_DISABLE_JMX));
         builder.addBeforeStart(camelContext -> {

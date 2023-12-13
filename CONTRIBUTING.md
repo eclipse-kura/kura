@@ -65,7 +65,7 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 
 #### Development Model
 
-Development on Kura™ follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
+Development on Eclipse Kura™ follows a [variant of the gitflow model](https://github.com/eclipse/kura/wiki/New-Kura-Git-Workflow).  Development is made on the [develop branch](/eclipse/kura/tree/develop). The master branch is not used anymore.
 
 #### Stale PR policy
 

@@ -65,7 +65,7 @@ Build
 
 ### Prerequisites
 
-In order to be able to build Kura™ on your development machine, you need to have the following programs installed in your system:
+In order to be able to build Eclipse Kura™ on your development machine, you need to have the following programs installed in your system:
 * JDK 1.8
 * Maven 3.5.x
 
@@ -127,9 +127,9 @@ You can follow the tutorial from the official [Maven](http://maven.apache.org/in
 
 </details>
 
-### Build Kura™
+### Build Eclipse Kura™
 
-Change to the new directory and clone the Kura™ repo:
+Change to the new directory and clone the Eclipse Kura™ repo:
 
 ```bash
 git clone -b develop https://github.com/eclipse/kura.git
@@ -180,9 +180,9 @@ and select the profiles you want to build.
 
 ### Building Eclipse Kura™ Containers
 
-The kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux `kura-alpine-x86_64`, and another on Ubi8 `kura-ubi8-x86_64`.
+The Eclipse Kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux `kura-alpine-x86_64`, and another on Ubi8 `kura-ubi8-x86_64`.
 
-Build Kura™ as per [our instructions](#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
+Build Eclipse Kura™ as per [our instructions](#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
@@ -196,10 +196,10 @@ After this command runs, images can be found in your preferred container engine 
 IDE Setups
 ----------
 
-We currently support two setups for Kura™ development:
+We currently support two setups for Eclipse Kura™ development:
 
-- [**Kura™ Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Kura™ source code on your workstation.
-- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Kura™. It will install only the APIs and the examples and is best suited for developing Kura™ add-ons.
+- [**Eclipse Kura™ Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Eclipse Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Eclipse Kura™ source code on your workstation.
+- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and the examples and is best suited for developing Eclipse Kura™ add-ons.
 
 Contributing
 ------------

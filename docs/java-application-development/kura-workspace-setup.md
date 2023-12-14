@@ -4,7 +4,7 @@ This document describes how to set up the Eclipse Kura workspace development env
 
 - JVM (Java JDK SE 8)
 - Eclipse IDE
-- Kura Workspace
+- Eclipse Kura Workspace
 
 **This setup will allow you to develop applications or bundles running on Eclipse Kura. It will install only the APIs and the examples.** If you want to contribute to the Eclipse Kura project follow [this guide](./development-environment-setup.md) instead.
 

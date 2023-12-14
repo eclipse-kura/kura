@@ -16,7 +16,7 @@ The Eclipse Kura development environment may be installed on Windows, Linux, or 
 
 Download and install JDK SE 8 from the following links as appropriate for your OS.
 
-For Windows and Linux users, the JDK can be downloaded from the following link: [Java SE 8 Downloads](https://adoptium.net/temurin/releases/?version=8).  Use the latest version of Java SE Development Kit and download the version appropriate for your system.
+For Windows and Linux users, the JDK can be downloaded from the following link: [Java SE 8 Downloads](https://adoptium.net/temurin/releases/?version=8).  Use the latest version of the Java SE Development Kit and download the version appropriate for your system.
 
 For additional information regarding the installation of Java 8 on all supported operating systems, see [JDK 8 and JRE 8 Installation Guide](https://adoptium.net/installation).
 

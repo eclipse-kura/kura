@@ -2918,6 +2918,12 @@
                                             <version>${org.eclipse.kura.db.sqlite.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId>
+                                            <version>${org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.feature.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </configuration>

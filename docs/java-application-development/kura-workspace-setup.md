@@ -6,7 +6,7 @@ This document describes how to set up the Eclipse Kura workspace development env
 - Eclipse IDE
 - Kura Workspace
 
-**This setup will allow you to develop applications or bundles running on Kura. It will install only the APIs and the examples.** If you want to contribute to the Eclipse Kura project follow [this guide](./development-environment-setup.md) instead.
+**This setup will allow you to develop applications or bundles running on Eclipse Kura. It will install only the APIs and the examples.** If you want to contribute to the Eclipse Kura project follow [this guide](./development-environment-setup.md) instead.
 
 The Eclipse Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 !!! info

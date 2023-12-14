@@ -260,6 +260,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         shutdownAutoConnectStrategy();
+        stopConnectionTask();
 
         final String oldDbServicePid = this.dataServiceOptions.getDbServiceInstancePid();
 

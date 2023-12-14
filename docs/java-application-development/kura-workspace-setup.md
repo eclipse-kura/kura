@@ -6,11 +6,11 @@ This document describes how to set up the Kura workspace development environment
 - Eclipse IDE
 - Kura Workspace
 
-**This setup will allow you to develop applications or bundles running on Kura. It will install only the APIs and the examples.** If you want to contribute to the Kura project follow [this guide](./development-environment-setup.md) instead.
+**This setup will allow you to develop applications or bundles running on Kura. It will install only the APIs and the examples.** If you want to contribute to the Eclipse Kura project follow [this guide](./development-environment-setup.md) instead.
 
-The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
+The Eclipse Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 !!! info
-    The local emulation of Kura code is only supported in Linux and Mac, not in Windows.
+    The local emulation of Eclipse Kura code is only supported in Linux and Mac, not in Windows.
 
 ## JVM Installation
 
@@ -69,7 +69,7 @@ After the new workspace opens, click the Workbench icon to display the developme
 !!! info
     Additional workspace configuration:
     
-    - In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Kura workspace.
+    - In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Eclipse Kura workspace.
       You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
       After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
       ```xml
@@ -92,9 +92,9 @@ After the new workspace opens, click the Workbench icon to display the developme
         1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
         2. Then restart Eclipse. 
 
-### Importing the Kura User Workspace
+### Importing the Eclipse Kura User Workspace
 
-To set up your Kura project workspace, you will need to download the Kura User Workspace archive from [Eclipse Kura Download Page](https://eclipse.dev/kura/downloads.php).
+To set up your Eclipse Kura project workspace, you will need to download the Eclipse Kura User Workspace archive from [Eclipse Kura Download Page](https://eclipse.dev/kura/downloads.php).
 
 From the Eclipse File menu, select the **Import** option.  In the Import dialog box, expand the **General** heading, select **Existing Projects into Workspace**, and then click **Next**.
 
@@ -104,13 +104,13 @@ Now click the **Select archive file** option button and browse to the archive fi
 
 Finally, click **Finish** to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:
 
-* org.eclipse.kura.api – the core Kura API.
+* org.eclipse.kura.api – the core Eclipse Kura API.
 
 * org.eclipse.kura.demo.heater – an example project that you can use as a starting point for creating your own bundle.
 
-* org.eclipse.kura.emulator – the emulator project for running Kura within Eclipse (Linux/Mac only).
+* org.eclipse.kura.emulator – the emulator project for running Eclipse Kura within Eclipse (Linux/Mac only).
 
-* target-definition – a set of required bundles that are dependencies of the APIs and Kura.
+* target-definition – a set of required bundles that are dependencies of the APIs and Eclipse Kura.
 
     ![Import Project](./images/development-environment-setup/image6.png)
 
@@ -121,7 +121,7 @@ This section will guide the users to configure the development workspace environ
 
 #### JRE Configuration
 The latest Eclipse IDEs require and configure, by default, a Java 11 environment.
-In order to be able to leverage and develop using the new workspace for Kura, the user will be required to perform a one-time operation to specify to the IDE a Java 8 JDK.
+In order to be able to leverage and develop using the new workspace for Eclipse Kura, the user will be required to perform a one-time operation to specify to the IDE a Java 8 JDK.
 Opening the Eclipse preferences and selecting the Installed JREs in the Java section, the user has to select an installed Java 8 instance. 
 
 ![Set JDK 8](./images/development-environment-setup/image7.png)
@@ -137,7 +137,7 @@ Click the arrow next to the **target-definition** project in the workspace and d
 
 ![Target Definition Setup](./images/development-environment-setup/image9.png)
 
-In the Target Definition window, click the link **Set as Target Platform**.  Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Kura-based applications for your target platform.
+In the Target Definition window, click the link **Set as Target Platform**.  Doing so will reset the target platform, rebuild the Eclipse Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Eclipse Kura-based applications for your target platform.
 
 #### Run the Eclipse Kura Emulator
 

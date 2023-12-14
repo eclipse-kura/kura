@@ -1,23 +1,23 @@
 # Development Environment Setup
 
-In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. If, instead you want to develop applications or bundles running on Kura refer to the [Kura Workspace setup guide](./kura-workspace-setup.md).
+In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. If, instead you want to develop applications or bundles running on Eclipse Kura refer to the [Eclipse Kura Workspace setup guide](./kura-workspace-setup.md).
 
-The Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
+The Eclipse Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.
 
 !!! info
-    The local emulation of Kura code is only supported in Linux and Mac, not in Windows.
+    The local emulation of Eclipse Kura code is only supported in Linux and Mac, not in Windows.
 
-This document will cover the use of Eclipse Oomph installer which is the easiest way to install and configure the Eclipse IDE to start contributing to Kura.
+This document will cover the use of Eclipse Oomph installer which is the easiest way to install and configure the Eclipse IDE to start contributing to Eclipse Kura.
 
 The setup requires three basic steps:
 
 1. Requirements installation
 2. Eclipse Oomph setup
-3. Kura maven build
+3. Eclipse Kura maven build
 
 ## Requirements
 
-Before building Kura, you need to have the following programs installed in your system:
+Before building Eclipse Kura, you need to have the following programs installed in your system:
 
 - JDK 1.8 (or JDK 17)
 - Maven 3.5.x (or greater)
@@ -84,14 +84,14 @@ Select the Eclipse Kura installer from the list. If this is not available, add a
 **Variables setup**
 
 - Select the "Developer Type":
-    - **"User"**: if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
+    - **"User"**: if you want to develop applications or bundles running on Eclipse Kura, select this option. It will install only the APIs and the examples.
     - **"Developer"**: if you are a framework developer, select this option. It will download and configure the Eclipse Kura framework (for the purpose of this document we'll use this option)
 - Set the `JRE 1.8 location` value to the installed local jdk-8 VM
 - Update Eclipse Kura Git repository username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled.
 
 If you plan to contribute to Eclipse Kura you might want to [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo), see our [contributing guide](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md) for further informations. For the purpose of this tutorial we'll work with a fictional fork for the username `user`. To clone the repo use the link appropriate for your fork, in our case it will be: `https://github.com/user/kura.git`
 
-Keep in mind that the "Root install folder" is where the Eclipse executable will be installed and the Kura sources will be downloaded (in the `git` subfolder).
+Keep in mind that the "Root install folder" is where the Eclipse executable will be installed and the Eclipse Kura sources will be downloaded (in the `git` subfolder).
 
 ![](./images/development-environment-setup/devenvsetup-4.png)
 
@@ -115,7 +115,7 @@ When the tasks are completed go to into the Package Explorer and Target Platform
 
 ![](./images/development-environment-setup/devenvsetup-10.png)
 
-### Kura maven build
+### Eclipse Kura maven build
 
 Navigate to the `git` folder created within the Eclipse workspace (`~/iot-kura-workspace` in the example above) and build the target platform:
 

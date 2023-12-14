@@ -1,6 +1,6 @@
 # Kura Workspace Setup
 
-This document describes how to set up the Kura workspace development environment, which consists of the following components:
+This document describes how to set up the Eclipse Kura workspace development environment, which consists of the following components:
 
 - JVM (Java JDK SE 8)
 - Eclipse IDE

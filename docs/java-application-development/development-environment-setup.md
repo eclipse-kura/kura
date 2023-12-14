@@ -109,7 +109,7 @@ At first startup Eclipse IDE will checkout the code, perform a full build and co
 
 ![](./images/development-environment-setup/devenvsetup-8.png)
 
-When the tasks are completed go to into the Package Explorer and Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window:
+When the tasks are completed, go to into the Package Explorer and Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window:
 
 ![](./images/development-environment-setup/devenvsetup-9.png)
 

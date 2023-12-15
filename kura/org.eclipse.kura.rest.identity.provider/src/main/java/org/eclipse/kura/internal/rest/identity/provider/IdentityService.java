@@ -77,8 +77,14 @@ public class IdentityService {
         }
     }
 
-    public void deleteUser(String userName) {
-        this.userAdminHelper.deleteUser(userName);
+    public void deleteUser(String userName) throws KuraException {
+
+        if (this.userAdminHelper.getUser(userName).isPresent()) {
+            this.userAdminHelper.deleteUser(userName);
+        } else {
+            throw new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist");
+        }
+
     }
 
     public UserDTO getUser(String userName) throws KuraException {
@@ -88,7 +94,7 @@ public class IdentityService {
             fillPermissions(Collections.singletonMap(user.get().getName(), userFound));
             return userFound;
         } else {
-            throw new KuraException(KuraErrorCode.NOT_FOUND, IDENTITY + userName + " not found");
+            throw new KuraException(KuraErrorCode.NOT_FOUND, "Identity does not exist");
         }
     }
 

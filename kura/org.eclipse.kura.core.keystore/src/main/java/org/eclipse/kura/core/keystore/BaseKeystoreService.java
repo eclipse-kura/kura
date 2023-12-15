@@ -106,6 +106,10 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
 
     private CRLManagerOptions crlManagerOptions;
 
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -275,6 +279,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
                     generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
         } catch (GeneralSecurityException | OperatorCreationException e) {
+            logger.error("Error occured. Exception: {}.", e.getClass());
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
     }

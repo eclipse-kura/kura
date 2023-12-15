@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2023 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+      SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+               activate="activate"
+               deactivate="deactivate"
+               modified="update"
+               configuration-policy="require"
+               enabled="true"
+               immediate="false"
+               name="org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint">
+
+    <implementation class="org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint"/>
+
+    <service>
+        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+        <provide interface="org.eclipse.kura.cloudconnection.CloudConnectionManager"/>
+        <provide interface="org.eclipse.kura.cloudconnection.CloudEndpoint"/>
+    </service>
+
+    <reference interface="org.eclipse.kura.data.DataService"
+               name="DataService" 
+               policy="static" 
+               cardinality="1..1" 
+               bind="setDataService"/>
+
+    <reference interface="org.osgi.service.event.EventAdmin"
+               name="EventAdmin"
+               policy="static"
+               cardinality="1..1"
+               bind="setEventAdmin"/>
+
+    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+    <property name="kura.ui.factory.hide" type="Boolean" value="true"/>
+
+</scr:component>

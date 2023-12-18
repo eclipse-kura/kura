@@ -568,6 +568,7 @@ public class NetworkTabsUi extends Composite {
         if ((this.visibleTabs.contains(this.wirelessTabAnchorItem) && !this.wirelessTab.isValid())
                 || (this.visibleTabs.contains(this.modemTabAnchorItem) && !this.modemTab.isValid())) {
             errorTab(this.wirelessTabAnchorItem);
+            errorTab(this.modemTabAnchorItem);
             return false;
         }
 

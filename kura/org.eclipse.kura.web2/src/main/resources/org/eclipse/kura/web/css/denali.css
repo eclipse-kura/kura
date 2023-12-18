@@ -79,7 +79,6 @@ body {
 
 .panel:not(.help-panel):not(.network-interfaces-panel):not(.packages-dropzone-message), .panel-header:not(.help-panel) {
 	border: none !important;
-	border-radius: 0 !important;
 	box-shadow: none !important;
 }
 
@@ -185,11 +184,10 @@ table {
 .btn-group {
 	margin-bottom: 0.2cm;
 	margin-top: 0.2cm;
-	border-radius: 0;
 }
 
 * {
-	border-radius: 0 !important;
+	border-radius: 0.4rem!important
 }
 
 .well ul, .well .panel {
@@ -561,7 +559,6 @@ Sidenav START
 }
 
 .sidenav .nav a {
-	border-radius: 0;
 	border-left: solid 0.1cm rgb(245, 245, 245);
 	color: #2860A6;
 }
@@ -886,8 +883,6 @@ img.x-tree3-node-icon {
 	bottom: 0;
 	left: 10px;
 	right: 10px;
-	-moz-border-radius: 100px/10px;
-	border-radius: 100px/10px;
 }
 
 .composer:after {
@@ -1092,7 +1087,6 @@ Packages panel dropzone START
     border-color: white !important;
     font-size: 1cm;
     padding: 0.5cm;
-    border-radius: 0.4cm !important;
     color:  white;
 }
 

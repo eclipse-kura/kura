@@ -534,7 +534,7 @@ public class NetworkTabsUi extends Composite {
     public boolean isValid() {
 
         clearErrorTab(this.ip4TabAnchorItem);
-        clearErrorTab(this.ip4TabAnchorItem);
+        clearErrorTab(this.ip6TabAnchorItem);
         clearErrorTab(this.hardwareTabAnchorItem);
         clearErrorTab(this.dhcp4NatTabAnchorItem);
         clearErrorTab(this.wirelessTabAnchorItem);

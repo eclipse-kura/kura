@@ -532,6 +532,17 @@ public class NetworkTabsUi extends Composite {
     }
 
     public boolean isValid() {
+
+        clearErrorTab(this.ip4TabAnchorItem);
+        clearErrorTab(this.ip4TabAnchorItem);
+        clearErrorTab(this.hardwareTabAnchorItem);
+        clearErrorTab(this.dhcp4NatTabAnchorItem);
+        clearErrorTab(this.wirelessTabAnchorItem);
+        clearErrorTab(this.modemTabAnchorItem);
+        clearErrorTab(this.modemGpsTabAnchorItem);
+        clearErrorTab(this.modemAntennaTabAnchorItem);
+        clearErrorTab(this.net8021xTabAnchorItem);
+
         if (this.visibleTabs.contains(this.ip4TabAnchorItem) && !this.ip4Tab.isValid()) {
             errorTab(this.ip4TabAnchorItem);
             return false;
@@ -577,16 +588,6 @@ public class NetworkTabsUi extends Composite {
             errorTab(this.net8021xTabAnchorItem);
             return false;
         }
-
-        clearErrorTab(this.ip4TabAnchorItem);
-        clearErrorTab(this.ip4TabAnchorItem);
-        clearErrorTab(this.hardwareTabAnchorItem);
-        clearErrorTab(this.dhcp4NatTabAnchorItem);
-        clearErrorTab(this.wirelessTabAnchorItem);
-        clearErrorTab(this.modemTabAnchorItem);
-        clearErrorTab(this.modemGpsTabAnchorItem);
-        clearErrorTab(this.modemAntennaTabAnchorItem);
-        clearErrorTab(this.net8021xTabAnchorItem);
 
         return true;
     }

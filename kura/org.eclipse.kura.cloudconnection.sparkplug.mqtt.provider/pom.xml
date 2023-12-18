@@ -30,6 +30,19 @@
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.basedir}/../test/org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.exclusions>**/protobuf/*</sonar.coverage.exclusions>
     </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-checkstyle-plugin</artifactId>
+               <configuration>
+                   <excludes>**/protobuf/*</excludes>
+               </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

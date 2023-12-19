@@ -31,6 +31,7 @@
             ${project.basedir}/../test/org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>**/protobuf/*</sonar.coverage.exclusions>
+        <sonar.exclusions>**/protobuf/*</sonar.exclusions>
     </properties>
     
     <build>

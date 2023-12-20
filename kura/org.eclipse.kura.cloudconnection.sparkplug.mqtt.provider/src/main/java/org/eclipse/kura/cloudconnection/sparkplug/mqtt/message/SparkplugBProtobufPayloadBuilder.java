@@ -15,9 +15,9 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.protobuf.SparkplugBProto.DataType;
-import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.protobuf.SparkplugBProto.Payload;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
 
 import com.google.protobuf.ByteString;
 

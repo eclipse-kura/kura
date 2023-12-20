@@ -37,7 +37,7 @@
         <com.digitalpetri.netty.netty-channel-fsm.version>0.8</com.digitalpetri.netty.netty-channel-fsm.version>
         <com.digitalpetri.fsm.strict-machine.version>0.6</com.digitalpetri.fsm.strict-machine.version>
         <com.google.guava.failureaccess.version>1.0</com.google.guava.failureaccess.version>
-        <org.bouncycastle.version>1.74</org.bouncycastle.version>
+        <org.bouncycastle.version>1.77</org.bouncycastle.version>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 

@@ -17,9 +17,9 @@
 
 syntax = "proto2";
 
-package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.protobuf;
+package org.eclipse.tahu.protobuf;
 
-option java_package         = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.protobuf";
+option java_package         = "org.eclipse.tahu.protobuf";
 option java_outer_classname = "SparkplugBProto";
 
 enum DataType {

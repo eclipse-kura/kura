@@ -139,10 +139,6 @@ public class SparkplugBProtobufPayloadBuilder {
         return this.withMetric(name, value.getValue(), sparkplugDataType, timestamp);
     }
 
-    public <T> SparkplugBProtobufPayloadBuilder withMetric(String name, TypedValue<T> value) {
-        return this.withMetric(name, value, new Date().getTime());
-    }
-
     public SparkplugBProtobufPayloadBuilder withBdSeq(long bdSeq, long timestamp) {
         Payload.Metric.Builder bdSeqMetric = Payload.Metric.newBuilder();
         bdSeqMetric.setName(BDSEQ_METRIC_NAME);

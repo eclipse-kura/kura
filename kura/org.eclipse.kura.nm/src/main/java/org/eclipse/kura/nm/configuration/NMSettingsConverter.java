@@ -200,13 +200,8 @@ public class NMSettingsConverter {
         try {
             PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                     deviceId);
-            byte[] derPrivateKey = privateKey.getEncoded();
-            if (derPrivateKey != null) {
-                // Convert DER to PEM
-                String pemPrivateKey = "-----BEGIN PRIVATE KEY-----\n"
-                        + DatatypeConverter.printBase64Binary(derPrivateKey).replaceAll("(.{64})", "$1\n") + "\n-----END PRIVATE KEY-----\n";
-                logger.info("Private Key: {}", pemPrivateKey);
-                settings.put("private-key", new Variant<>(pemPrivateKey.getBytes(StandardCharsets.UTF_8)));
+            if (privateKey.getEncoded() != null) {
+                settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
             } else {
                 logger.error("Unable to find or decode Private Key");
             }
@@ -792,6 +787,13 @@ public class NMSettingsConverter {
             throw new IllegalArgumentException(String
                     .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
+    }
+
+    private static byte[] convertToPem(byte[] derKey) {
+        String pem = "-----BEGIN CERTIFICATE-----\n"
+                + DatatypeConverter.printBase64Binary(derKey).replaceAll("(.{64})", "$1\n")
+                + "\n-----END CERTIFICATE-----\n";
+        return pem.getBytes(StandardCharsets.UTF_8);
     }
 
 }

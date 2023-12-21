@@ -85,7 +85,6 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <!--<source>${project.build.directory}/generated-sources/protobuf/java</source>-->
                                 <source>${project.basedir}/generated-sources/src/main/java</source>
                             </sources>
                         </configuration>

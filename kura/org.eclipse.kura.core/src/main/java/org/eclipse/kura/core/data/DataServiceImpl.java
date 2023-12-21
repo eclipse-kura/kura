@@ -1130,7 +1130,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     @Override
     public void startConnectionTask() {
-        startConnectionMonitorTask();
+        if (!this.dataTransportService.isConnected()) {
+            startConnectionMonitorTask();
+        }
     }
 
     @Override

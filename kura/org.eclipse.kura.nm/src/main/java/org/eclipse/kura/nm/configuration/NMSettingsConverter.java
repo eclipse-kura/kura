@@ -200,12 +200,17 @@ public class NMSettingsConverter {
         try {
             PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                     deviceId);
-            // Convert DER to PEM
-            String pemPrivateKey = "-----BEGIN PRIVATE KEY-----\n"
-                    + DatatypeConverter.printBase64Binary(privateKey.getEncoded()) + "\n-----END PRIVATE KEY-----\n";
-            settings.put("private-key", new Variant<>(pemPrivateKey.getBytes(StandardCharsets.UTF_8)));
-        } catch (ClassCastException | IllegalArgumentException e) {
-            logger.error("Unable to find or decode Private Key");
+            byte[] derPrivateKey = privateKey.getEncoded();
+            if (derPrivateKey != null) {
+                // Convert DER to PEM
+                String pemPrivateKey = "-----BEGIN PRIVATE KEY-----\n"
+                        + DatatypeConverter.printBase64Binary(derPrivateKey) + "\n-----END PRIVATE KEY-----\n";
+                settings.put("private-key", new Variant<>(pemPrivateKey.getBytes(StandardCharsets.UTF_8)));
+            } else {
+                logger.error("Unable to find or decode Private Key");
+            }
+        } catch (ClassCastException e) {
+            logger.error("Unable to find Private Key");
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,

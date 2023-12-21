@@ -795,5 +795,4 @@ public class NMSettingsConverter {
                 + "\n-----END CERTIFICATE-----\n";
         return pem.getBytes(StandardCharsets.UTF_8);
     }
-
 }

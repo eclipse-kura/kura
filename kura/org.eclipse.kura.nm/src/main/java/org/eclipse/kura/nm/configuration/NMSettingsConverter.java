@@ -204,7 +204,8 @@ public class NMSettingsConverter {
             if (derPrivateKey != null) {
                 // Convert DER to PEM
                 String pemPrivateKey = "-----BEGIN PRIVATE KEY-----\n"
-                        + DatatypeConverter.printBase64Binary(derPrivateKey) + "\n-----END PRIVATE KEY-----\n";
+                        + DatatypeConverter.printBase64Binary(derPrivateKey).replaceAll("(.{64})", "$1\n") + "\n-----END PRIVATE KEY-----\n";
+                logger.info("Private Key: {}", pemPrivateKey);
                 settings.put("private-key", new Variant<>(pemPrivateKey.getBytes(StandardCharsets.UTF_8)));
             } else {
                 logger.error("Unable to find or decode Private Key");

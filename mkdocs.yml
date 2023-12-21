@@ -75,6 +75,7 @@ nav:
         - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
         - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
         - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
+      - Eclipse Sparkplug Cloud Connector: cloud-platform/kura-sparkplug.md
     - Connect Field Devices:
       - Drivers, Assets and Channels: connect-field-devices/driver-and-assets.md
       - Asset implementation: connect-field-devices/asset-implemetation.md

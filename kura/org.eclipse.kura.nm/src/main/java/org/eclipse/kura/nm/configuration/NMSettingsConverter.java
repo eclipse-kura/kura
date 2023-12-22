@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.Kura8021xEAP;
 import org.eclipse.kura.nm.Kura8021xInnerAuth;
@@ -199,7 +201,7 @@ public class NMSettingsConverter {
             PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                     deviceId);
             if (privateKey.getEncoded() != null) {
-                settings.put("private-key", new Variant<>(privateKey.getEncoded()));
+                settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
             } else {
                 logger.error("Unable to find or decode Private Key");
             }
@@ -787,4 +789,10 @@ public class NMSettingsConverter {
         }
     }
 
+    private static byte[] convertToPem(byte[] derKey) {
+        String pem = "-----BEGIN PRIVATE KEY-----\n"
+                + DatatypeConverter.printBase64Binary(derKey).replaceAll("(.{64})", "$1\n")
+                + "\n-----END PRIVATE KEY-----\n";
+        return pem.getBytes(StandardCharsets.UTF_8);
+    }
 }

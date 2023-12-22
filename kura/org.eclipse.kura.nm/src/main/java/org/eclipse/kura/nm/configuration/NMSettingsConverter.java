@@ -790,9 +790,9 @@ public class NMSettingsConverter {
     }
 
     private static byte[] convertToPem(byte[] derKey) {
-        String pem = "-----BEGIN CERTIFICATE-----\n"
+        String pem = "-----BEGIN PRIVATE KEY-----\n"
                 + DatatypeConverter.printBase64Binary(derKey).replaceAll("(.{64})", "$1\n")
-                + "\n-----END CERTIFICATE-----\n";
+                + "\n-----END PRIVATE KEY-----\n";
         return pem.getBytes(StandardCharsets.UTF_8);
     }
 }

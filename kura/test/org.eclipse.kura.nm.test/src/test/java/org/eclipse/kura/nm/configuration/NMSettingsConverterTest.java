@@ -663,7 +663,8 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        thenResultingMapContainsBytes("private-key", "binary private key");
+        thenResultingMapContainsBytes("private-key",
+                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
         thenResultingMapContains("private-key-password", "secure-password");
 
     }

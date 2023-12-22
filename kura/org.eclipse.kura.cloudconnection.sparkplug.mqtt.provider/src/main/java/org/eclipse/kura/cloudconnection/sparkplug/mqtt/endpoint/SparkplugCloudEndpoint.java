@@ -28,10 +28,12 @@ import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
+import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -53,6 +55,7 @@ public class SparkplugCloudEndpoint
 
     private DataService dataService;
     private EventAdmin eventAdmin;
+    private SparkplugDataTransport dataTransport;
 
     public void setDataService(DataService dataService) {
         this.dataService = dataService;
@@ -60,6 +63,14 @@ public class SparkplugCloudEndpoint
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
+    }
+
+    public void setDataTransportService(DataTransportService dataTransport) {
+        if (dataTransport instanceof SparkplugDataTransport) {
+            this.dataTransport = (SparkplugDataTransport) dataTransport;
+        } else {
+            throw new IllegalStateException("The bound DataTransport reference is not a SparkplugDataTransport");
+        }
     }
 
     public void activate(Map<String, Object> properties) {

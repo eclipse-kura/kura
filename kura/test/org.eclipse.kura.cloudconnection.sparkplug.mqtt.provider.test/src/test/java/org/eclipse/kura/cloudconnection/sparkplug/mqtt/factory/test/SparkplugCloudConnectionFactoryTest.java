@@ -67,6 +67,8 @@ public class SparkplugCloudConnectionFactoryTest {
                         "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService-test)")
                     .withProperty(CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
                         "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
+                    .withProperty("DataTransportService.target",
+                        "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport-test)")
                     .build(),
                 false);
         thenFactoryComponentIsCreated(
@@ -96,6 +98,8 @@ public class SparkplugCloudConnectionFactoryTest {
                         "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.data.SparkplugDataService)")
                     .withProperty(CloudConnectionFactory.KURA_CLOUD_CONNECTION_FACTORY_PID,
                         "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory")
+                    .withProperty("DataTransportService.target",
+                            "(kura.service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport)")
                     .build(),
                 false);
         thenFactoryComponentIsCreated(

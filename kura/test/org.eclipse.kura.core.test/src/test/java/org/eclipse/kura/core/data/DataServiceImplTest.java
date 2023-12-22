@@ -162,9 +162,10 @@ public class DataServiceImplTest {
     public void shouldNotDisconnectOnConfigChange() throws KuraStoreException {
         givenDataService();
         givenMessageStoreProvider();
-        givenDataTrasportServiceConnected();
+        givenDataTrasportServiceDisconnected();
         givenConfigurationProperty("connect.auto-on-startup", true);
         givenIsActive();
+        givenDataTrasportServiceConnected();
 
         whenConfigurationIsChanged("enable.recovery.on.connection.failure", true);
 

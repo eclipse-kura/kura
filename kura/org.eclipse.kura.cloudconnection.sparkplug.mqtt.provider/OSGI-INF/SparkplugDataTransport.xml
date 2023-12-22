@@ -28,6 +28,11 @@
         <provide interface="org.eclipse.kura.data.DataTransportService"/>
         <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
     </service>
+    
+    <reference name="DataTransportListener"
+               policy="dynamic"
+               cardinality="0..n"
+               interface="org.eclipse.kura.data.DataTransportListener"/>
 
     <property name="kura.ui.service.hide" type="Boolean" value="true"/>
     <property name="kura.ui.factory.hide" type="Boolean" value="true"/>

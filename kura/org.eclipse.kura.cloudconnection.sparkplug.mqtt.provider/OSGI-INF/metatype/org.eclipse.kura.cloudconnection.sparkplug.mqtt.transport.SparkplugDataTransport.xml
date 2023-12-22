@@ -19,6 +19,61 @@
          name="SparkplugDataTransport"
          description="Data Transport layer configuration.">
 
+         <Icon resource="MqttDataTransport" size="32"/>
+
+         <AD id="server.uris"
+             name="Server URIs"
+             type="String"
+             cardinality="0"
+             required="true"
+             default="tcp://broker1-url:1883"
+             description="List of space-separated URLs of the MQTT brokers to connect to.
+                          When an attempt to connect is initiated the client will start with the
+                          first server in the list and work through the list until a connection
+                          is established with a server. If a connection cannot be made to any of
+                          the servers then the connect attempt fails.
+                          Supported types of connection are tcp: and ssl:."/>
+
+         <AD id="client.id"
+             name="Client ID"
+             type="String"
+             cardinality="0" 
+             required="true"
+             default="client" 
+             description="Client identifier to be used when connecting to the MQTT broker."/>
+
+         <AD id="username"
+             name="Username"
+             type="String"
+             cardinality="0"
+             required="false"
+             default="" 
+             description="Username to be used when connecting to the MQTT broker."/>
+
+         <AD id="password"
+             name="Password"
+             type="Password"
+             cardinality="0" 
+             required="false"
+             default=""
+             description="Password to be used when connecting to the MQTT broker."/>
+
+         <AD id="keep.alive"
+             name="Keep Alive Interval"
+             type="Integer"
+             cardinality="0"
+             required="true"
+             default="60"
+             description="Frequency in seconds for the periodic MQTT PING message."/>
+
+         <AD id="connection.timeout"
+             name="Connection Timeout"
+             type="Integer"
+             cardinality="0"
+             required="true"
+             default="30"
+             description="Timeout used for all interactions with the MQTT broker."/>
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport"

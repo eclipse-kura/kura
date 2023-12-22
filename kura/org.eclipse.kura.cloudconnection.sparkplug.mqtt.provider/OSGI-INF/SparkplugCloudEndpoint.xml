@@ -42,6 +42,12 @@
                cardinality="1..1"
                bind="setEventAdmin"/>
 
+    <reference interface="org.eclipse.kura.data.DataTransportService"
+               name="DataTransportService"
+               policy="static"
+               cardinality="1..1"
+               bind="setDataTransportService"/>
+
     <property name="kura.ui.service.hide" type="Boolean" value="true"/>
     <property name="kura.ui.factory.hide" type="Boolean" value="true"/>
 

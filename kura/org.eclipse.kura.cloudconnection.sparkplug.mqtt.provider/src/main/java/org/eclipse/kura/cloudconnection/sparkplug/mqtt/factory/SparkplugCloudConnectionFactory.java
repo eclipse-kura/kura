@@ -70,6 +70,8 @@ public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
         cloudEndpointProperties.put(DATA_SERVICE_REFERENCE_NAME,
                 String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
         cloudEndpointProperties.put(KURA_CLOUD_CONNECTION_FACTORY_PID, FACTORY_PID);
+        cloudEndpointProperties.put(DATA_TRANSPORT_SERVICE_REFERENCE_NAME,
+                String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
         this.configurationService.createFactoryConfiguration(CLOUD_ENDPOINT_FACTORY_PID, pid, cloudEndpointProperties,
                 false);

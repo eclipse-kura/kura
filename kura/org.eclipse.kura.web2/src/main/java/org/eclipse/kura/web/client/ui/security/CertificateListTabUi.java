@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -176,6 +176,15 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         };
         this.certificatesGrid.addColumn(col1, MSGS.certificateAlias());
         col1.setSortable(true);
+
+        TextColumn<GwtKeystoreEntry> col1bis = new TextColumn<GwtKeystoreEntry>() {
+
+            @Override
+            public String getValue(GwtKeystoreEntry object) {
+                return String.join(" ", object.getDistinguishedNames());
+            }
+        };
+        this.certificatesGrid.addColumn(col1bis, MSGS.certificateDNs());
 
         TextColumn<GwtKeystoreEntry> col2 = new TextColumn<GwtKeystoreEntry>() {
 

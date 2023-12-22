@@ -32,6 +32,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.certificate.KuraCertificateEntry;
+import org.eclipse.kura.core.keystore.util.CertificateUtil;
 import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -153,6 +154,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                     Date validityStartDate = null;
                     Date validityEndDate = null;
 
+                    List<String> dNs = new ArrayList<>();
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
 
@@ -166,6 +168,18 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                                 validityStartDate = ((X509Certificate) leaf).getNotBefore();
                                 validityEndDate = ((X509Certificate) leaf).getNotAfter();
                             }
+
+                            for (int i = 0; i < chain.length; i++) {
+                                String index = String.format("[%d]: ", i);
+                                if (chain.length == 1) {
+                                    index = "";
+                                }
+                                Certificate cert = chain[i];
+                                if (cert instanceof X509Certificate) {
+                                    X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
+                                    dNs.add(index + x509Cert.getSubjectX500Principal().getName());
+                                }
+                            }
                         }
                     } else if (e.getValue() instanceof TrustedCertificateEntry) {
                         kind = Kind.TRUSTED_CERT;
@@ -175,6 +189,9 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         if (cert instanceof X509Certificate) {
                             validityStartDate = ((X509Certificate) cert).getNotBefore();
                             validityEndDate = ((X509Certificate) cert).getNotAfter();
+
+                            X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
+                            dNs.add(x509Cert.getSubjectX500Principal().getName());
                         }
                     } else if (e.getValue() instanceof SecretKeyEntry) {
                         kind = Kind.SECRET_KEY;
@@ -182,11 +199,11 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         continue;
                     }
 
-                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind, validityStartDate,
+                    result.add(new GwtKeystoreEntry(e.getKey(), dNs, (String) kuraServicePid, kind, validityStartDate,
                             validityEndDate));
                 }
             } catch (KuraException keystoreException) {
-                logger.error("Error while accessing keystore file of Keystore Service {}: {}", (String) kuraServicePid,
+                logger.error("Error while accessing keystore file of Keystore Service {}: {}", kuraServicePid,
                         keystoreException.getMessage(), keystoreException);
             } finally {
                 context.ungetService(ref);

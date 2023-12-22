@@ -17,11 +17,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +48,7 @@ import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
+import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
 import org.eclipse.kura.watchdog.WatchdogService;
@@ -53,6 +57,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.verification.VerificationMode;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
@@ -60,6 +65,7 @@ public class DataServiceImplTest {
 
     private DataServiceImpl dataServiceImpl;
     private DataTransportService dataTransportServiceMock;
+    private CloudConnectionStatusService ccssMock;
     private Map<String, Object> properties;
     private Optional<Exception> exception = Optional.empty();
     private final MessageStoreProvider messageStoreProvider = Mockito.mock(MessageStoreProvider.class);
@@ -151,6 +157,21 @@ public class DataServiceImplTest {
         thenNoExceptionIsTrown();
         thenMessageIsStored(0, "foo", new byte[4], 0, false, 9);
     }
+    
+    @Test
+    public void shouldNotDisconnectOnConfigChange() throws KuraStoreException {
+        givenDataService();
+        givenMessageStoreProvider();
+        givenDataTrasportServiceDisconnected();
+        givenConfigurationProperty("connect.auto-on-startup", true);
+        givenIsActive();
+        givenDataTrasportServiceConnected();
+
+        whenConfigurationIsChanged("enable.recovery.on.connection.failure", true);
+
+        thenDataTrasportStaysConnected();
+        thenCloudConnectionStatusServiceIsNotChanged();
+    }
 
     @Test
     public void shouldNotStoreMessagesWithPayloadSizeGreaterThanConfiguredThreshold() throws KuraStoreException {
@@ -225,7 +246,7 @@ public class DataServiceImplTest {
             DataServiceOptions dataServiceOptions = new DataServiceOptions(Collections.emptyMap());
             MessageStoreProvider messageStoreProviderMock = mock(MessageStoreProvider.class);
             MessageStore messageStoreMock = mock(MessageStore.class);
-            CloudConnectionStatusService ccssMock = mock(CloudConnectionStatusService.class);
+            this.ccssMock = mock(CloudConnectionStatusService.class);
             WatchdogService watchdogServiceMock = mock(WatchdogService.class);
             initMockMessageStore(messageStoreProviderMock, messageStoreMock);
             TestUtil.setFieldValue(this.dataServiceImpl, "dataServiceOptions", dataServiceOptions);
@@ -236,6 +257,11 @@ public class DataServiceImplTest {
             fail(e.getMessage());
         }
 
+    }
+    
+    private void whenConfigurationIsChanged(final String key, final Object value) {
+        this.properties.put(key, value);
+        this.dataServiceImpl.updated(properties);
     }
 
     private void whenMessageIsPublished(final String topic, final byte[] payload, final int qos, final boolean retain,
@@ -266,7 +292,19 @@ public class DataServiceImplTest {
             fail();
         }
     }
+    
+    private void thenDataTrasportStaysConnected() {
+        try {
+            verify(this.dataTransportServiceMock, times(0)).connect();
+        } catch (KuraConnectException e) {
+            fail();
+        }
+    }
 
+    private void thenCloudConnectionStatusServiceIsNotChanged() {
+        verify(this.ccssMock, times(1)).updateStatus(any(CloudConnectionStatusComponent.class), eq(CloudConnectionStatusEnum.SLOW_BLINKING));
+    }
+    
     private void thenStartConnectionTaskIsInvoked() {
         verify(this.dataServiceImpl, times(2)).startConnectionTask();
     }

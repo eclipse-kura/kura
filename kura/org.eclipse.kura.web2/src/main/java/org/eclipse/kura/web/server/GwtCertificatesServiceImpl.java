@@ -155,6 +155,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                     Date validityEndDate = null;
 
                     List<String> distinguishedNames = new ArrayList<>();
+                    
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
 
@@ -177,7 +178,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                                 Certificate cert = chain[i];
                                 if (cert instanceof X509Certificate) {
                                     X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
-                                    dNs.add(index + x509Cert.getSubjectX500Principal().getName());
+                                    distinguishedNames.add(index + x509Cert.getSubjectX500Principal().getName());
                                 }
                             }
                         }
@@ -191,7 +192,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                             validityEndDate = ((X509Certificate) cert).getNotAfter();
 
                             X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
-                            dNs.add(x509Cert.getSubjectX500Principal().getName());
+                            distinguishedNames.add(x509Cert.getSubjectX500Principal().getName());
                         }
                     } else if (e.getValue() instanceof SecretKeyEntry) {
                         kind = Kind.SECRET_KEY;
@@ -199,7 +200,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         continue;
                     }
 
-                    result.add(new GwtKeystoreEntry(e.getKey(), dNs, (String) kuraServicePid, kind, validityStartDate,
+                    result.add(new GwtKeystoreEntry(e.getKey(), distinguishedNames, (String) kuraServicePid, kind, validityStartDate,
                             validityEndDate));
                 }
             } catch (KuraException keystoreException) {

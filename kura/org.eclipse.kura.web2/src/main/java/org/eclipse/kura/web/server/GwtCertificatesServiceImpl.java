@@ -154,7 +154,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                     Date validityStartDate = null;
                     Date validityEndDate = null;
 
-                    List<String> dNs = new ArrayList<>();
+                    List<String> distinguishedNames = new ArrayList<>();
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
 

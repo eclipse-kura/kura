@@ -53,6 +53,7 @@ import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.Gwt8021xConfig;
 import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
@@ -773,6 +774,11 @@ public final class GwtServerUtil {
                 if (gwtStationWifiConfig != null) {
                     gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
+                Gwt8021xConfig gwt8021xConfig = wifiConfig.get8021xConfig();
+                if (gwt8021xConfig != null) {
+                    gwt8021xConfig.setPassword(PASSWORD_PLACEHOLDER);
+                }
+                
             } else if (netConfig instanceof GwtModemInterfaceConfig) {
                 GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
                 modemConfig.setPassword(PASSWORD_PLACEHOLDER);

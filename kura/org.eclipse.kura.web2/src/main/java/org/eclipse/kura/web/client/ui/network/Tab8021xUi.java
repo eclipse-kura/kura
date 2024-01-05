@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.util.logging.Logger;
-
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
 import org.eclipse.kura.web.client.util.HelpButton;
@@ -159,6 +157,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.netTabs = tabs;
         this.tcp4Tab = tcp4;
         this.tcp6Tab = tcp6;
+        this.helpTitle.setText(MSGS.netHelpTitle());
 
         initLabels();
         initHelpButtons();
@@ -455,42 +454,47 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         boolean isPEAP = Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.PEAP;
         boolean isTTLS = Gwt8021xEap.valueOf(this.eap.getSelectedValue()) == Gwt8021xEap.TTLS;
 
+        boolean result = true;
+
         if (isTLS) {
 
-            if (this.username.getValue().isEmpty()) {
+            if (isNonEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
-                return false;
             }
 
-            if (this.keystorePid.getValue().isEmpty()) {
+            if (isNonEmptyString(this.keystorePid)) {
                 this.identityKeystorePid.setValidationState(ValidationState.ERROR);
-                return false;
+                result = false;
             }
 
-            if (this.publicPrivateKeyPairName.getValue().isEmpty()) {
+            if (isNonEmptyString(this.publicPrivateKeyPairName)) {
                 this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
-                return false;
+                result = false;
             }
         }
 
         if (isPEAP || isTTLS) {
-            if (this.username.getValue().isEmpty()) {
+            if (isNonEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
-                return false;
+                result = false;
             }
 
-            if (this.password.getValue().isEmpty()) {
+            if (this.password.getValue() == null || this.password.getValue().trim().isEmpty()) {
                 this.formgroupPassword.setValidationState(ValidationState.ERROR);
-                return false;
+                result = false;
             }
 
-            if (this.keystorePid.getValue().isEmpty() && !this.caCertName.getValue().isEmpty()) {
+            if (isNonEmptyString(this.keystorePid) && !isNonEmptyString(this.caCertName)) {
                 this.identityKeystorePid.setValidationState(ValidationState.ERROR);
-                return false;
+                result = false;
             }
         }
 
-        return true;
+        return result;
+    }
+
+    private boolean isNonEmptyString(TextBox value) {
+        return value.getValue() == null || value.getValue().trim().isEmpty();
     }
 
     @Override

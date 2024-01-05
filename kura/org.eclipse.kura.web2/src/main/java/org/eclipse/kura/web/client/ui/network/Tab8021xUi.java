@@ -230,18 +230,10 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         }
 
         this.innerAuth.addMouseOverHandler(event -> {
-            if (this.innerAuth.isEnabled()) {
-                setHelpText(MSGS.net8021xInnerAuthHelp());
-            }
+            setHelpText(MSGS.net8021xInnerAuthHelp());
         });
 
         this.innerAuth.addMouseOutHandler(event -> resetHelpText());
-
-        this.innerAuth.addChangeHandler(event -> {
-            setDirty(true);
-            refreshForm();
-            resetValidations();
-        });
     }
 
     private void initUsernameTextBox() {
@@ -279,6 +271,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {
+            setDirty(true);
 
             if (!this.password.validate() && this.password.isEnabled()) {
                 this.formgroupPassword.setValidationState(ValidationState.ERROR);
@@ -538,6 +531,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         switch (Gwt8021xEap.valueOf(this.eap.getSelectedValue())) {
         case PEAP:
         case TTLS:
+            this.innerAuth.setEnabled(false);
             setInnerAuthTo(Gwt8021xInnerAuth.MSCHAPV2);
             this.publicPrivateKeyPairName.setEnabled(false);
             break;

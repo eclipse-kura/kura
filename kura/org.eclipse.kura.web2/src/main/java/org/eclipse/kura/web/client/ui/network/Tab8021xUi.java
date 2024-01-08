@@ -453,6 +453,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
             if (isNonEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
+                result = false;
             }
 
             if (isNonEmptyString(this.keystorePid)) {

@@ -124,11 +124,11 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16242
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16243
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16244
-* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.71, Apache-2.0, approved, #2665
-* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.71, MIT, approved, #2662
-* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.71, MIT AND LicenseRef-scancode-ocb-open-source-2013, approved, #2666
-* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.71, MIT, approved, #2664
-* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.71, MIT, approved, #2663
+* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.77, Apache-2.0, approved, #11594
+* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.77, MIT, approved, #11593
+* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.77, MIT AND CC0-1.0, approved, #11595
+* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.77, MIT, approved, #11702
+* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.77, MIT, approved, #11596
 * maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty

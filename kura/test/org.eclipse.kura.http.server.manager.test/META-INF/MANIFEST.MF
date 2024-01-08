@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.1.0"
-Import-Package: org.bouncycastle.asn1.x500;version="1.68.0",
+Import-Package: org.bouncycastle.asn1.x500;version="1.77.0",
  org.eclipse.kura;version="1.6.0",
  org.eclipse.kura.configuration;version="1.2.0",
  org.eclipse.kura.core.testutil.event;version="[1.0,2.0)",

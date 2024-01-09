@@ -106,15 +106,6 @@
                                 <b:TextArea b:id="dns" ui:field="dns" />
                                 <b:FormControlStatic b:id="dnsRead" ui:field="dnsRead" />
                             </b:FormGroup>
-
-                            <b:FormGroup ui:field="groupMtu">
-                                <b:FormLabel for="mtu" ui:field="labelMtu"></b:FormLabel>
-                                <util:HelpButton ui:field="mtuHelp" />
-                                <b:HelpBlock color="red" ui:field="helpMtu" />
-                                <g:FlowPanel>
-                                    <b:IntegerBox b:id="mtu" ui:field="mtu" />
-                                </g:FlowPanel>
-                            </b:FormGroup>
                         </b:FieldSet>
                     </b:Form>
                 </g:ScrollPanel>

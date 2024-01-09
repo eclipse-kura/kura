@@ -84,7 +84,6 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP4_NETMASK = "net.interface.%s.config.ip4.prefix";
     private static final String NET_INTERFACE_CONFIG_IP4_GATEWAY = "net.interface.%s.config.ip4.gateway";
     private static final String NET_INTERFACE_CONFIG_IP4_DNS_SERVERS = "net.interface.%s.config.ip4.dnsServers";
-    private static final String NET_INTERFACE_CONFIG_IP4_MTU = "net.interface.%s.config.ip4.mtu";
 
     public Optional<String> getIp4Status(String ifname) {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
@@ -146,15 +145,6 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname), dnsServers);
     }
     
-    public Optional<Integer> getIp4Mtu(String ifName) {
-    	return Optional.ofNullable(
-                (Integer) properties.get(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName)));
-    }
-
-    public void setIp4Mtu(String ifName, int mtu) {
-    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), mtu);
-    }
-
     /*
      * IPv6 properties
      */
@@ -168,7 +158,6 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP6_NETMASK = "net.interface.%s.config.ip6.prefix";
     private static final String NET_INTERFACE_CONFIG_IP6_GATEWAY = "net.interface.%s.config.ip6.gateway";
     private static final String NET_INTERFACE_CONFIG_IP6_DNS_SERVERS = "net.interface.%s.config.ip6.dnsServers";
-    private static final String NET_INTERFACE_CONFIG_IP6_MTU = "net.interface.%s.config.ip6.mtu";
     
     public Optional<String> getIp6Status(String ifname) {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_STATUS, ifname)));
@@ -250,18 +239,6 @@ public class NetworkConfigurationServiceProperties {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_DNS_SERVERS, ifname), dnsServers);
     }
     
-    public Optional<Integer> getIp6Mtu(String ifname) {
-        if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname))) {
-            Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname));
-            return Optional.ofNullable(mtu);
-        }
-        return Optional.empty();
-    }
-
-    public void setIp6Mtu(String ifname, Integer mtu) {
-    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname), mtu);
-    }
-
     /*
      * IPv4 DHCP Server properties
      */
@@ -908,6 +885,46 @@ public class NetworkConfigurationServiceProperties {
     public String get8021xPublicPrivateKeyPairName(String ifname) {
         return (String) this.properties
                 .get(String.format(NET_INTERFACE_CONFIG_8021X_PUBLIC_PRIVATE_KEY_PAIR_NAME, ifname));
+    }
+    
+    /**
+     * Advanced properties
+     */
+    private static final String NET_INTERFACE_CONFIG_IP4_MTU = "net.interface.%s.config.ip4.mtu";
+    private static final String NET_INTERFACE_CONFIG_IP6_MTU = "net.interface.%s.config.ip6.mtu";
+    private static final String NET_INTERFACE_CONFIG_PROMISC_MODE = "net.interface.%s.config.promisc";
+    
+    public Optional<Integer> getIp4Mtu(String ifName) {
+    	return Optional.ofNullable(
+                (Integer) properties.get(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName)));
+    }
+
+    public void setIp4Mtu(String ifName, int mtu) {
+    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), mtu);
+    }
+    
+    public Optional<Integer> getIp6Mtu(String ifname) {
+        if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname))) {
+            Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname));
+            return Optional.ofNullable(mtu);
+        }
+        return Optional.empty();
+    }
+
+    public void setIp6Mtu(String ifname, Integer mtu) {
+    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname), mtu);
+    }
+    
+    public Optional<Integer> getPromisc(String ifname) {
+        if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname))) {
+            Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname));
+            return Optional.ofNullable(mtu);
+        }
+        return Optional.empty();
+    }
+
+    public void setPromisc(String ifname, Integer promisc) {
+    	this.properties.put(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname), promisc);
     }
 
     /**

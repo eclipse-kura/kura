@@ -395,6 +395,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
     public void setIpv6Mtu(Integer mtu) {
     	set("ipv6.mtu", mtu);
     }
+    
+    public Integer getPromisc() {
+        return get("promisc");
+    }
+
+    public void setPromisc(Integer promisc) {
+        set("promisc", promisc);
+    }
 
     @Override
     public boolean equals(Object o) {

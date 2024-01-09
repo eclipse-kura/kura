@@ -313,10 +313,19 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
 
         this.caCertName.addBlurHandler(e -> this.caCertName.validate());
-        this.caCertName.setAllowBlank(true);
+        this.caCertName.setAllowBlank(false);
         this.caCertName.addMouseOutHandler(event -> resetHelpText());
 
-        this.caCertName.addChangeHandler(event -> setDirty(true));
+        this.keystorePid.addChangeHandler(event -> {
+            setDirty(true);
+
+            if (this.keystorePid.getValue().isEmpty() && this.keystorePid.isEnabled()) {
+                this.identityCaCertName.setValidationState(ValidationState.ERROR);
+            } else {
+                this.identityCaCertName.setValidationState(ValidationState.NONE);
+            }
+
+        });
     }
 
     private void initPrivateKeyNameTextBox() {
@@ -461,7 +470,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
                 result = false;
             }
 
-            if (isNonEmptyString(this.publicPrivateKeyPairName)) {
+            if (isNonEmptyString(this.publicPrivateKeyPairName) && !isNonEmptyString(caCertName)) {
                 this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
                 result = false;
             }

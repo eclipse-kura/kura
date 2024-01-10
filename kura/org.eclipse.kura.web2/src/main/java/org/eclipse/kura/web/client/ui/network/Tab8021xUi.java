@@ -458,19 +458,23 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         boolean result = true;
 
-        if (isTLS) {
+        if (isEmptyString(this.keystorePid)) {
+            this.identityKeystorePid.setValidationState(ValidationState.ERROR);
+            result = false;
+        }
 
+        if (isEmptyString(this.caCertName)) {
+            this.identityCaCertName.setValidationState(ValidationState.ERROR);
+            result = false;
+        }
+
+        if (isTLS) {
             if (isEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
                 result = false;
             }
 
-            if (isEmptyString(this.keystorePid)) {
-                this.identityKeystorePid.setValidationState(ValidationState.ERROR);
-                result = false;
-            }
-
-            if (isEmptyString(this.publicPrivateKeyPairName) && !isEmptyString(caCertName)) {
+            if (isEmptyString(this.publicPrivateKeyPairName)) {
                 this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
                 result = false;
             }
@@ -484,11 +488,6 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
             if (this.password.getValue() == null || this.password.getValue().trim().isEmpty()) {
                 this.formgroupPassword.setValidationState(ValidationState.ERROR);
-                result = false;
-            }
-
-            if (isEmptyString(this.keystorePid) && !isEmptyString(this.caCertName)) {
-                this.identityKeystorePid.setValidationState(ValidationState.ERROR);
                 result = false;
             }
         }

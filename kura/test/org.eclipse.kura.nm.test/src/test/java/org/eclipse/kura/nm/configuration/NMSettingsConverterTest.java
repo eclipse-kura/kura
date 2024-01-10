@@ -545,6 +545,9 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -555,10 +558,10 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
-        thenResultingMapNotContains("anonymous-identity");
-        thenResultingMapNotContains("ca-cert");
-        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
 
+        thenResultingMapNotContains("anonymous-identity");
     }
 
     @Test
@@ -592,6 +595,9 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapPeap");
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
@@ -600,12 +606,13 @@ public class NMSettingsConverterTest {
         thenNoExceptionOccurred();
 
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
-        thenResultingMapNotContains("anonymous-identity");
-        thenResultingMapNotContains("ca-cert");
-        thenResultingMapNotContains("ca-cert-password");
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
+        thenResultingMapContainsBytes("ca-cert", "binary ca cert");
+        thenResultingMapContains("ca-cert-password", "secure-password");
+
+        thenResultingMapNotContains("anonymous-identity");
     }
 
     @Test
@@ -669,6 +676,72 @@ public class NMSettingsConverterTest {
                 "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
         thenResultingMapContains("private-key-password", "secure-password");
 
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowWithTlsAndMissingCACertificate() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    public void build8021xSettingsShouldThrowWithTlsAndMissingClientCertificate() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    public void build8021xSettingsShouldThrowWithTlsAndWrongTypeClientCertificate() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name", new Password("wrong-type-of-client-cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    public void build8021xSettingsShouldThrowWithTlsAndMissingPrivateKey() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test

@@ -15,11 +15,14 @@ package org.eclipse.kura.nm.configuration;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -30,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
@@ -55,9 +59,7 @@ public class NMSettingsConverterTest {
     NetworkProperties networkProperties;
     Connection mockedConnection;
 
-    Boolean hasNoSuchElementExceptionBeenThrown = false;
-    Boolean hasAnIllegalArgumentExceptionThrown = false;
-    Boolean hasAGenericExecptionBeenThrown = false;
+    private Exception occurredException;
     SemanticVersion nmVersion = SemanticVersion.parse("1.40");
 
     private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays
@@ -68,28 +70,28 @@ public class NMSettingsConverterTest {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
     public void buildIpv4SettingsShouldThrowWhenGivenEmptyMap() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
     public void build80211WirelessSettingsShouldThrowErrorWhenGivenEmptyMap() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
     public void build80211WirelessSecuritySettingsShouldThrowWhenGivenEmptyMap() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -99,7 +101,7 @@ public class NMSettingsConverterTest {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -109,7 +111,7 @@ public class NMSettingsConverterTest {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -240,7 +242,7 @@ public class NMSettingsConverterTest {
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -409,7 +411,7 @@ public class NMSettingsConverterTest {
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -422,7 +424,7 @@ public class NMSettingsConverterTest {
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -437,7 +439,7 @@ public class NMSettingsConverterTest {
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -452,12 +454,12 @@ public class NMSettingsConverterTest {
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", this.nmVersion);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
-    
+
     @Test
     public void buildIpv6SettingsShouldHaveMtuWhenSupported() {
-    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip6.mtu", 2345);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -468,10 +470,10 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("mtu", new UInt32(2345));
     }
-    
+
     @Test
     public void buildIpv6SettingsShouldNotHaveMtuWhenNotSupported() {
-    	givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
+        givenMapWith("net.interface.wlan0.config.ip6.address.method", "netIPv6MethodAuto");
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip6.mtu", 3456);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -482,27 +484,27 @@ public class NMSettingsConverterTest {
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapNotContains("mtu");
     }
-    
+
     @Test
     public void buildEthernetSettingsShouldHavePromiscWhenSupported() {
-    	givenMapWith("net.interface.eth0.config.promisc", -1);
-    	givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenMapWith("net.interface.eth0.config.promisc", -1);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         givenNetworkManagerVersion("1.32");
-        
+
         whenBuildEthernetSettingsIsRunWith(networkProperties, "eth0", nmVersion);
-        
+
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapContains("accept-all-mac-addresses", -1);
     }
-    
-    @Test    
+
+    @Test
     public void buildEthernetSettingsShouldNotHavePromiscWhenNotSupported() {
-    	givenMapWith("net.interface.eth0.config.promisc", 1);
-    	givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+        givenMapWith("net.interface.eth0.config.promisc", 1);
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
         givenNetworkManagerVersion("1.31");
-        
+
         whenBuildEthernetSettingsIsRunWith(networkProperties, "eth0", nmVersion);
-        
+
         thenNoExceptionsHaveBeenThrown();
         thenResultingMapNotContains("accept-all-mac-addresses");
     }
@@ -513,7 +515,7 @@ public class NMSettingsConverterTest {
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -523,7 +525,7 @@ public class NMSettingsConverterTest {
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -534,7 +536,7 @@ public class NMSettingsConverterTest {
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -637,7 +639,7 @@ public class NMSettingsConverterTest {
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -716,7 +718,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -766,7 +768,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -931,7 +933,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -946,7 +948,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1019,7 +1021,7 @@ public class NMSettingsConverterTest {
 
         whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1028,7 +1030,7 @@ public class NMSettingsConverterTest {
 
         whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1163,7 +1165,7 @@ public class NMSettingsConverterTest {
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1209,7 +1211,7 @@ public class NMSettingsConverterTest {
 
         whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1219,7 +1221,7 @@ public class NMSettingsConverterTest {
 
         whenBuildVlanSettingsIsRunWith(this.networkProperties, "eth0.30");
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1244,7 +1246,7 @@ public class NMSettingsConverterTest {
     public void buildConnectionSettingsShouldWorkWithUnsupported() {
         whenBuildConnectionSettings(Optional.empty(), "modem0", NMDeviceType.NM_DEVICE_TYPE_ADSL);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1277,7 +1279,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1288,7 +1290,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1568,7 +1570,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1693,7 +1695,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1709,7 +1711,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1725,7 +1727,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1751,7 +1753,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1777,7 +1779,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1803,7 +1805,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -1815,7 +1817,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1827,7 +1829,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -1853,7 +1855,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2087,7 +2089,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2179,7 +2181,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2196,7 +2198,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2240,7 +2242,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2267,7 +2269,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2294,7 +2296,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2306,7 +2308,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2318,7 +2320,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2347,7 +2349,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2622,7 +2624,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenIllegalArgumentExceptionThrown();
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -2739,7 +2741,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2761,7 +2763,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "eth0", "eth0",
                 NMDeviceType.NM_DEVICE_TYPE_ETHERNET);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2816,7 +2818,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2848,7 +2850,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -2880,7 +2882,7 @@ public class NMSettingsConverterTest {
         whenBuildSettingsIsRunWith(this.networkProperties, Optional.empty(), "wlan0", "wlan0",
                 NMDeviceType.NM_DEVICE_TYPE_WIFI);
 
-        thenNoSuchElementExceptionThrown();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     /*
@@ -2909,7 +2911,7 @@ public class NMSettingsConverterTest {
         Mockito.when(this.mockedConnection.GetSettings()).thenReturn(this.internalComparatorAllSettingsMap);
 
     }
-    
+
     public void givenNetworkManagerVersion(String nmVersion) {
         this.nmVersion = SemanticVersion.parse(nmVersion);
     }
@@ -2928,132 +2930,88 @@ public class NMSettingsConverterTest {
         try {
             this.resultAllSettingsMap = NMSettingsConverter.buildSettings(properties, oldConnection, deviceId, iface,
                     deviceType, this.nmVersion);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuildIpv4SettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildIpv4Settings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuildIpv6SettingsIsRunWith(NetworkProperties props, String iface, SemanticVersion nmVersion) {
         try {
             this.resultMap = NMSettingsConverter.buildIpv6Settings(props, iface, nmVersion);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuild8021xSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build8021xSettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuild80211WirelessSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuildConnectionSettings(Optional<Connection> connection, String iface, NMDeviceType deviceType) {
         try {
             this.resultMap = NMSettingsConverter.buildConnectionSettings(connection, iface, deviceType);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     public void whenBuild80211WirelessSecuritySettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.build80211WirelessSecuritySettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     private void whenBuildGsmSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildGsmSettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     private void whenBuildPPPSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildPPPSettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
     private void whenBuildVlanSettingsIsRunWith(NetworkProperties props, String iface) {
         try {
             this.resultMap = NMSettingsConverter.buildVlanSettings(props, iface);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
-    
+
     private void whenBuildEthernetSettingsIsRunWith(NetworkProperties props, String iface, SemanticVersion nmVersion) {
         try {
             this.resultMap = NMSettingsConverter.buildEthernetSettings(props, iface, nmVersion);
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
-        } catch (IllegalArgumentException e) {
-            this.hasAnIllegalArgumentExceptionThrown = true;
         } catch (Exception e) {
-            this.hasAGenericExecptionBeenThrown = true;
+            this.occurredException = e;
         }
     }
 
@@ -3099,18 +3057,22 @@ public class NMSettingsConverterTest {
                 new String((byte[]) this.resultAllSettingsMap.get(key).get(subKey).getValue(), StandardCharsets.UTF_8));
     }
 
-    public void thenNoSuchElementExceptionThrown() {
-        assertTrue(this.hasNoSuchElementExceptionBeenThrown);
-    }
-
-    public void thenIllegalArgumentExceptionThrown() {
-        assertTrue(this.hasAnIllegalArgumentExceptionThrown);
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
     public void thenNoExceptionsHaveBeenThrown() {
-        assertFalse(this.hasNoSuchElementExceptionBeenThrown);
-        assertFalse(this.hasAGenericExecptionBeenThrown);
-        assertFalse(this.hasAnIllegalArgumentExceptionThrown);
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
     }
 
     /*

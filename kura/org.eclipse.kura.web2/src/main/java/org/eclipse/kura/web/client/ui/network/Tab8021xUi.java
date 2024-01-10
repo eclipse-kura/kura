@@ -316,10 +316,10 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         this.caCertName.setAllowBlank(false);
         this.caCertName.addMouseOutHandler(event -> resetHelpText());
 
-        this.keystorePid.addChangeHandler(event -> {
+        this.caCertName.addChangeHandler(event -> {
             setDirty(true);
 
-            if (this.keystorePid.getValue().isEmpty() && this.keystorePid.isEnabled()) {
+            if (this.caCertName.getValue().isEmpty() && this.caCertName.isEnabled()) {
                 this.identityCaCertName.setValidationState(ValidationState.ERROR);
             } else {
                 this.identityCaCertName.setValidationState(ValidationState.NONE);

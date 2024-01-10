@@ -48,19 +48,18 @@ import org.mockito.Mockito;
 
 public class NMSettingsConverterTest {
 
-    Map<String, Variant<?>> internalComparatorMap = new HashMap<>();
-    Map<String, Variant<?>> resultMap;
+    private Map<String, Variant<?>> resultMap;
 
-    Map<String, Map<String, Variant<?>>> internalComparatorAllSettingsMap = new HashMap<>();
-    Map<String, Map<String, Variant<?>>> resultAllSettingsMap = new HashMap<>();
+    private Map<String, Map<String, Variant<?>>> internalComparatorAllSettingsMap = new HashMap<>();
+    private Map<String, Map<String, Variant<?>>> resultAllSettingsMap = new HashMap<>();
 
-    Map<String, Object> internetNetworkPropertiesInstanciationMap = new HashMap<>();
+    private Map<String, Object> internetNetworkPropertiesInstanciationMap = new HashMap<>();
 
-    NetworkProperties networkProperties;
-    Connection mockedConnection;
+    private NetworkProperties networkProperties;
+    private Connection mockedConnection;
 
     private Exception occurredException;
-    SemanticVersion nmVersion = SemanticVersion.parse("1.40");
+    private SemanticVersion nmVersion = SemanticVersion.parse("1.40");
 
     private static final List<Byte> IP6_BYTE_ARRAY_ADDRESS = Arrays
             .asList(new Byte[] { 32, 1, 72, 96, 72, 96, 0, 0, 0, 0, 0, 0, 0, 0, -120, 68 });

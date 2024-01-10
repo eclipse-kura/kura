@@ -63,15 +63,15 @@ following steps:
 4. Download the Kura package with:
 
     ```
-    wget http://download.eclipse.org/kura/releases/<version>/kura_<version>_raspberry-pi_installer.deb
+    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_generic-<arch>_installer.deb
     ```
 
-    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.1.0).
+    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture 
 
 5. Install Kura with: 
 
     ```
-    sudo apt-get install ./kura_<version>_raspberry-pi_installer.deb
+    sudo apt-get install ./kura-<kura-version>_generic-<arch>_installer.deb
     ```
 
 6. For a correct configuration of the Wlan interface, it is necessary to set the **Locale** and the **WLAN Country** through the `raspi-config` command:
@@ -93,7 +93,45 @@ following steps:
     | L1 Locale       	| it_IT.UTF-8 UTF-8 	|
     | L4 WLAN Country 	| IT Italy          	|
 
-7. Reboot the Raspberry Pi with:
+7. (Optional) Configure the GPIO replacing the content of the file `/opt/eclise/kura/framework/jdk.dio.properties` with the following text:
+
+    ```
+    0 = deviceType: gpio.GPIOPin, pinNumber:0, name:GPIO0
+    1 = deviceType: gpio.GPIOPin, pinNumber:1, name:GPIO1
+    2 = deviceType: gpio.GPIOPin, pinNumber:2, name:GPI02
+    3 = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3
+    4 = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
+    5 = deviceType: gpio.GPIOPin, pinNumber:5, name:GPIO5
+    6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO6
+    7 = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7
+    8 = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8
+    9 = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
+    10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
+    11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
+    12 = deviceType: gpio.GPIOPin, pinNumber:12, name:GPIO12
+    13 = deviceType: gpio.GPIOPin, pinNumber:13, name:GPIO13
+    14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14
+    15 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO15
+    16 = deviceType: gpio.GPIOPin, pinNumber:16, name:GPIO16
+    17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
+    18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18
+    19 = deviceType: gpio.GPIOPin, pinNumber:19, name:GPIO19
+    20 = deviceType: gpio.GPIOPin, pinNumber:20, name:GPIO20
+    21 = deviceType: gpio.GPIOPin, pinNumber:21, name:GPIO21
+    22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
+    23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23
+    24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24
+    25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25
+    26 = deviceType: gpio.GPIOPin, pinNumber:26, name:GPIO26
+    27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
+
+    gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+    uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
+    ```
+
+    You can check your GPIO device configuration executing the command `pinout`
+
+8. Reboot the Raspberry Pi with:
 
     ```
     sudo reboot
@@ -101,7 +139,7 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
-8. Kura setups a local web ui that is available using a browser via:
+9. Kura setups a local web ui that is available using a browser via:
 
     ```
     https://<device-ip>
@@ -111,15 +149,6 @@ following steps:
 
     ![Proceed trusting the source](./images/untrusted_cert.png)
 
-    Once trusted the source, the user will be redirected to a login page where the default **username** is:
-
-    ```
-    admin
-    ```
-
-    and the default **password** is:
-
-    ```
-    admin
-    ```
-
+    Once trusted the source, the user will be redirected to a login page where the following credentianls:
+    **username**: `admin`
+    **password**: `admin`

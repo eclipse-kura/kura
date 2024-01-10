@@ -194,21 +194,17 @@ public class NMSettingsConverter {
             Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
-        } catch (CertificateEncodingException | ClassCastException e) {
+        } catch (CertificateEncodingException e) {
             throw new NoSuchElementException(
-                    String.format("Unable to find or decode Client Certificate for interface \"%s\"", deviceId));
+                    String.format("Unable to decode Client Certificate for interface \"%s\"", deviceId));
         }
 
-        try {
-            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
-                    deviceId);
-            if (privateKey.getEncoded() != null) {
-                settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
-            } else {
-                throw new NoSuchElementException("Unable to find or decode Private Key");
-            }
-        } catch (ClassCastException e) {
-            throw new NoSuchElementException("Unable to find Private Key");
+        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                deviceId);
+        if (privateKey.getEncoded() != null) {
+            settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
+        } else {
+            throw new NoSuchElementException("Unable to decode Private Key");
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
@@ -229,9 +225,9 @@ public class NMSettingsConverter {
         try {
             Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
             settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
-        } catch (CertificateEncodingException | ClassCastException e) {
+        } catch (CertificateEncodingException e) {
             throw new NoSuchElementException(
-                    String.format("Unable to find or decode CA Certificate for interface %s", deviceId));
+                    String.format("Unable to decode CA Certificate for interface %s", deviceId));
         }
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,

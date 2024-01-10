@@ -46,6 +46,12 @@ public class NetworkProperties {
             throw new NoSuchElementException(String.format("The \"%s\" key contains a null value.", formattedKey));
         }
 
+        if (!clazz.isAssignableFrom(rawValue.getClass())) {
+            throw new IllegalArgumentException(
+                    String.format("The \"%s\" key contains a value of incompatible type \"%s\" (desired type: \"%s\").",
+                            formattedKey, rawValue.getClass().getName(), clazz.getName()));
+        }
+
         if (clazz == String.class || clazz == Password.class) {
             String value = "";
 
@@ -75,6 +81,12 @@ public class NetworkProperties {
         Object rawValue = this.properties.get(formattedKey);
         if (Objects.isNull(rawValue)) {
             return Optional.empty();
+        }
+
+        if (!clazz.isAssignableFrom(rawValue.getClass())) {
+            throw new IllegalArgumentException(
+                    String.format("The \"%s\" key contains a value of incompatible type \"%s\" (desired type: \"%s\").",
+                            formattedKey, rawValue.getClass().getName(), clazz.getName()));
         }
 
         if (clazz == String.class || clazz == Password.class) {

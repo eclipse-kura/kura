@@ -121,6 +121,22 @@ public class NetworkPropertiesTest {
     }
 
     @Test
+    public void getShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Password", Password.class);
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void getShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Key", Boolean.class);
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
     public void getShouldWorkWithEmptyStringKey() {
         givenMapWith("", "Empty String Test");
         givenNetworkPropertiesBuiltWith(this.properties);
@@ -226,6 +242,22 @@ public class NetworkPropertiesTest {
         whenGetOptIsCalledWith("testKeyNull", String.class);
         thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.empty());
+    }
+
+    @Test
+    public void getOptShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Password", Password.class);
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void getOptShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Key", Boolean.class);
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test

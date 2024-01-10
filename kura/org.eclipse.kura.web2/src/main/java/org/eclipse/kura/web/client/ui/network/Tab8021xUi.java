@@ -460,24 +460,24 @@ public class Tab8021xUi extends Composite implements NetworkTab {
 
         if (isTLS) {
 
-            if (isNonEmptyString(this.username)) {
+            if (isEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
                 result = false;
             }
 
-            if (isNonEmptyString(this.keystorePid)) {
+            if (isEmptyString(this.keystorePid)) {
                 this.identityKeystorePid.setValidationState(ValidationState.ERROR);
                 result = false;
             }
 
-            if (isNonEmptyString(this.publicPrivateKeyPairName) && !isNonEmptyString(caCertName)) {
+            if (isEmptyString(this.publicPrivateKeyPairName) && !isEmptyString(caCertName)) {
                 this.identityPublicPrivateKeyPairName.setValidationState(ValidationState.ERROR);
                 result = false;
             }
         }
 
         if (isPEAP || isTTLS) {
-            if (isNonEmptyString(this.username)) {
+            if (isEmptyString(this.username)) {
                 this.formgroupIdentityUsername.setValidationState(ValidationState.ERROR);
                 result = false;
             }
@@ -487,7 +487,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
                 result = false;
             }
 
-            if (isNonEmptyString(this.keystorePid) && !isNonEmptyString(this.caCertName)) {
+            if (isEmptyString(this.keystorePid) && !isEmptyString(this.caCertName)) {
                 this.identityKeystorePid.setValidationState(ValidationState.ERROR);
                 result = false;
             }
@@ -496,7 +496,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         return result;
     }
 
-    private boolean isNonEmptyString(TextBox value) {
+    private boolean isEmptyString(TextBox value) {
         return value.getValue() == null || value.getValue().trim().isEmpty();
     }
 

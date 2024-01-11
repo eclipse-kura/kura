@@ -194,21 +194,15 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
-            logger.error("Unable to decode Client Certificate");
-        } catch (ClassCastException e) {
-            logger.error("Unable to find Client Certificate");
+            logger.error("Unable to decode Client Certificate for interface \"{}\"", deviceId);
         }
 
-        try {
-            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
-                    deviceId);
-            if (privateKey.getEncoded() != null) {
-                settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
-            } else {
-                logger.error("Unable to find or decode Private Key");
-            }
-        } catch (ClassCastException e) {
-            logger.error("Unable to find Private Key");
+        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                deviceId);
+        if (privateKey.getEncoded() != null) {
+            settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
+        } else {
+            logger.error("Unable to decode Private Key for interface \"{}\"", deviceId);
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
@@ -227,12 +221,15 @@ public class NMSettingsConverter {
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
         anonymousIdentity.ifPresent(value -> settings.put("anonymous-identity", new Variant<>(value)));
 
-        try {
-            Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
-            settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
-        } catch (Exception e) {
-            logger.warn(String.format("Unable to find or decode CA Certificate for interface %s", deviceId));
-        }
+        Optional<Certificate> caCert = props.getOpt(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name",
+                deviceId);
+        caCert.ifPresent(value -> {
+            try {
+                settings.put("ca-cert", new Variant<>(value.getEncoded()));
+            } catch (CertificateEncodingException | IllegalArgumentException e) {
+                logger.warn("Unable to decode CA Certificate for interface \"{}\", caused by: ", deviceId, e);
+            }
+        });
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);

@@ -347,11 +347,11 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
 
         for (String key : keyCertStrings) {
-            if (!modifiedProps.containsKey(key) || modifiedProps.get(key) == null || modifiedProps.get(key) == "") {
+            Object value = modifiedProps.get(key);
+            if (Objects.isNull(value) || value.toString().isEmpty()) {
                 continue;
             }
 
-            Object value = modifiedProps.get(key);
             try {
                 String valueString = value.toString();
                 if (isCertificate(key)) {

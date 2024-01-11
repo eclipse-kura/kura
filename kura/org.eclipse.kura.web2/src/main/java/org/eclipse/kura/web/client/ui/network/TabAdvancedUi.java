@@ -112,14 +112,14 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     }
 
     private void initLabels() {
-        this.labelMtu.setText(MSGS.netIPv4Mtu());
-        this.labelIp6Mtu.setText(MSGS.netIPv6Mtu());
+        this.labelMtu.setText(MSGS.netAdvIPv4Mtu());
+        this.labelIp6Mtu.setText(MSGS.netAdvIPv6Mtu());
         this.labelPromisc.setText(MSGS.netAdvPromisc());
     }
 
     private void initHelpButtons() {
-        this.helpButtonMtu.setHelpText(MSGS.netIPv4ToolTipMtu());
-        this.helpButtonIp6Mtu.setHelpText(MSGS.netIPv6ToolTipMtu());
+        this.helpButtonMtu.setHelpText(MSGS.netAdvIPv4ToolTipMtu());
+        this.helpButtonIp6Mtu.setHelpText(MSGS.netAdvIPv6ToolTipMtu());
         this.helpButtonPromisc.setHelpText(MSGS.netAdvToolTipPromisc());
     }
 
@@ -158,7 +158,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
             this.helpText.clear();
-            this.helpText.add(new Span(MSGS.netIPv4ToolTipMtu()));
+            this.helpText.add(new Span(MSGS.netAdvIPv4ToolTipMtu()));
         });
         this.mtu.addMouseOutHandler(event -> resetHelpText());
         this.mtu.addValueChangeHandler(valChangeEvent -> {
@@ -180,7 +180,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
                 this.wrongInputMtu.setText("");
             } else {
                 this.groupMtu.setValidationState(ValidationState.ERROR);
-                this.wrongInputMtu.setText(MSGS.netIPv4InvalidMtu());
+                this.wrongInputMtu.setText(MSGS.netAdvIPv4InvalidMtu());
             }
         });
     }
@@ -188,7 +188,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     private void initIp6MtuField() {
         this.ip6Mtu.addMouseOverHandler(event -> {
             if (this.ip6Mtu.isEnabled()) {
-                setHelpText(MSGS.netIPv6ToolTipMtu());
+                setHelpText(MSGS.netAdvIPv6ToolTipMtu());
             }
         });
         this.ip6Mtu.addMouseOutHandler(event -> resetHelpText());
@@ -208,11 +208,11 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
             }
 
             if (isValidValue) {
-                this.groupMtu.setValidationState(ValidationState.NONE);
-                this.wrongInputMtu.setText("");
+                this.groupIp6Mtu.setValidationState(ValidationState.NONE);
+                this.wrongInputIp6Mtu.setText("");
             } else {
-                this.groupMtu.setValidationState(ValidationState.ERROR);
-                this.wrongInputMtu.setText(MSGS.netIPv6InvalidMtu());
+                this.groupIp6Mtu.setValidationState(ValidationState.ERROR);
+                this.wrongInputIp6Mtu.setText(MSGS.netAdvIPv6InvalidMtu());
             }
         });
     }

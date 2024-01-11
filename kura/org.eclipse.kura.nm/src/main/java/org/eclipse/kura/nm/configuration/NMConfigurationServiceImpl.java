@@ -348,7 +348,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
         for (String key : keyCertStrings) {
             Object value = modifiedProps.get(key);
-            if (Objects.isNull(value) || value.toString().isEmpty()) {
+            if (Objects.isNull(value) || !(value instanceof String) || value.toString().isEmpty()) {
                 continue;
             }
 

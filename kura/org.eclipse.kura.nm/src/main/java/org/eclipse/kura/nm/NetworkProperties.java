@@ -47,7 +47,7 @@ public class NetworkProperties {
         }
 
         if (!clazz.isAssignableFrom(rawValue.getClass())) {
-            // Criteria: there's no such element in the map that matches the requested type(clazz)
+            // Criteria: there's no such element in the map that matches the requested type (clazz)
             throw new NoSuchElementException(
                     String.format("The \"%s\" key contains a value of type \"%s\" (requested type: \"%s\").",
                             formattedKey, rawValue.getClass().getName(), clazz.getName()));

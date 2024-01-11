@@ -347,7 +347,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         final List<String> keyCertStrings = Arrays.asList(clientCertString, caCertString, privateKeyString);
 
         for (String key : keyCertStrings) {
-            if (!modifiedProps.containsKey(key)) {
+            if (!modifiedProps.containsKey(key) || modifiedProps.get(key) == null || modifiedProps.get(key) == "") {
                 continue;
             }
 

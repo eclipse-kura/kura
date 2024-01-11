@@ -125,7 +125,7 @@ public class NetworkPropertiesTest {
         givenMapWith("Wrong-Type-Password", new String(""));
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("Wrong-Type-Password", Password.class);
-        thenExceptionOccurred(IllegalArgumentException.class);
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class NetworkPropertiesTest {
         givenMapWith("Wrong-Type-Key", new Float(5.5));
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("Wrong-Type-Key", Boolean.class);
-        thenExceptionOccurred(IllegalArgumentException.class);
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -249,7 +249,8 @@ public class NetworkPropertiesTest {
         givenMapWith("Wrong-Type-Password", new String(""));
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptIsCalledWith("Wrong-Type-Password", Password.class);
-        thenExceptionOccurred(IllegalArgumentException.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
     }
 
     @Test
@@ -257,7 +258,8 @@ public class NetworkPropertiesTest {
         givenMapWith("Wrong-Type-Key", new Float(5.5));
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptIsCalledWith("Wrong-Type-Key", Boolean.class);
-        thenExceptionOccurred(IllegalArgumentException.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
     }
 
     @Test

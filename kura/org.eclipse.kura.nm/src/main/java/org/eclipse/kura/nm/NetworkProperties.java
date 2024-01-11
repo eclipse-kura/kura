@@ -47,8 +47,9 @@ public class NetworkProperties {
         }
 
         if (!clazz.isAssignableFrom(rawValue.getClass())) {
-            throw new IllegalArgumentException(
-                    String.format("The \"%s\" key contains a value of incompatible type \"%s\" (desired type: \"%s\").",
+            // Criteria: there's no such element in the map that matches the requested type(clazz)
+            throw new NoSuchElementException(
+                    String.format("The \"%s\" key contains a value of type \"%s\" (requested type: \"%s\").",
                             formattedKey, rawValue.getClass().getName(), clazz.getName()));
         }
 
@@ -84,9 +85,8 @@ public class NetworkProperties {
         }
 
         if (!clazz.isAssignableFrom(rawValue.getClass())) {
-            throw new IllegalArgumentException(
-                    String.format("The \"%s\" key contains a value of incompatible type \"%s\" (desired type: \"%s\").",
-                            formattedKey, rawValue.getClass().getName(), clazz.getName()));
+            // Criteria: there's no such element in the map that matches the requested type (clazz)
+            return Optional.empty();
         }
 
         if (clazz == String.class || clazz == Password.class) {

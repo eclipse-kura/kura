@@ -361,7 +361,6 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
                 }
             } catch (KuraException e) {
                 logger.error("Unable to decode key/certificate {} from keystore.", key, e);
-                modifiedProps.put(key, value);
             }
         }
     }

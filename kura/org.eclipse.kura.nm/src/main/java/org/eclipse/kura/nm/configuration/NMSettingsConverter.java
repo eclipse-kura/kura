@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -118,11 +118,13 @@ public class NMSettingsConverter {
             newConnectionSettings.put("ppp", pppSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_VLAN) {
             Map<String, Variant<?>> vlanSettingsMap = buildVlanSettings(properties, deviceId);
-            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId, nmVersion);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId,
+                    nmVersion);
             newConnectionSettings.put("vlan", vlanSettingsMap);
             newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         } else if (deviceType == NMDeviceType.NM_DEVICE_TYPE_ETHERNET) {
-            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId, nmVersion);
+            Map<String, Variant<?>> ethSettingsMap = NMSettingsConverter.buildEthernetSettings(properties, deviceId,
+                    nmVersion);
             newConnectionSettings.put(NM_SETTINGS_ETHERNET, ethSettingsMap);
         }
 
@@ -192,21 +194,15 @@ public class NMSettingsConverter {
                     deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
-            logger.error("Unable to decode Client Certificate");
-        } catch (ClassCastException e) {
-            logger.error("Unable to find Client Certificate");
+            logger.error("Unable to decode Client Certificate for interface \"{}\"", deviceId);
         }
 
-        try {
-            PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
-                    deviceId);
-            if (privateKey.getEncoded() != null) {
-                settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
-            } else {
-                logger.error("Unable to find or decode Private Key");
-            }
-        } catch (ClassCastException e) {
-            logger.error("Unable to find Private Key");
+        PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
+                deviceId);
+        if (privateKey.getEncoded() != null) {
+            settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
+        } else {
+            logger.error("Unable to decode Private Key for interface \"{}\"", deviceId);
         }
 
         Optional<Password> privateKeyPassword = props.getOpt(Password.class,
@@ -223,19 +219,20 @@ public class NMSettingsConverter {
 
         Optional<String> anonymousIdentity = props.getOpt(String.class,
                 "net.interface.%s.config.802-1x.anonymous-identity", deviceId);
-
         anonymousIdentity.ifPresent(value -> settings.put("anonymous-identity", new Variant<>(value)));
 
-        try {
-            Certificate caCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name", deviceId);
-            settings.put("ca-cert", new Variant<>(caCert.getEncoded()));
-        } catch (Exception e) {
-            logger.error(String.format("Unable to find or decode CA Certificate for interface %s", deviceId));
-        }
+        Optional<Certificate> caCert = props.getOpt(Certificate.class, "net.interface.%s.config.802-1x.ca-cert-name",
+                deviceId);
+        caCert.ifPresent(value -> {
+            try {
+                settings.put("ca-cert", new Variant<>(value.getEncoded()));
+            } catch (CertificateEncodingException | IllegalArgumentException e) {
+                logger.warn("Unable to decode CA Certificate for interface \"{}\", caused by: ", deviceId, e);
+            }
+        });
 
         Optional<Password> caCertPassword = props.getOpt(Password.class,
                 "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
-
         caCertPassword.ifPresent(value -> settings.put("ca-cert-password", new Variant<>(value.toString())));
     }
 
@@ -580,20 +577,22 @@ public class NMSettingsConverter {
         return settings;
     }
 
-    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId, SemanticVersion nmVersion) {
+    public static Map<String, Variant<?>> buildEthernetSettings(NetworkProperties props, String deviceId,
+            SemanticVersion nmVersion) {
         Map<String, Variant<?>> settings = new HashMap<>();
         Optional<Integer> mtu = props.getOpt(Integer.class, KURA_PROPS_IPV4_MTU, deviceId);
         mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
-        
+
         Optional<Integer> promisc = props.getOpt(Integer.class, "net.interface.%s.config.promisc", deviceId);
         if (nmVersion.isGreaterEqualThan("1.32")) {
-            //ethernet.accept-all-mac-addresses only supported in NetworkManager 1.32 and above
+            // ethernet.accept-all-mac-addresses only supported in NetworkManager 1.32 and above
             promisc.ifPresent(value -> settings.put("accept-all-mac-addresses", new Variant<>(value)));
         } else {
-            promisc.ifPresent(value -> 
-                logger.warn("Ignoring parameter accept-all-mac-addresses [{}]: NetworkManager 1.32 or above is required", value));
+            promisc.ifPresent(value -> logger.warn(
+                    "Ignoring parameter accept-all-mac-addresses [{}]: NetworkManager 1.32 or above is required",
+                    value));
         }
-        return settings;        
+        return settings;
     }
 
     public static Map<String, Variant<?>> buildConnectionSettings(Optional<Connection> connection, String iface,

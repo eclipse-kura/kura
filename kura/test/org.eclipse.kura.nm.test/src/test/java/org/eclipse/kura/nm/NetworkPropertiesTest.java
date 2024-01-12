@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,18 @@
 package org.eclipse.kura.nm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
@@ -42,13 +45,12 @@ public class NetworkPropertiesTest {
     private List<String> stringListResult;
     private Map<String, Object> resultMap;
 
-    private Boolean hasNullPointExceptionBeenThrown = false;
-    private Boolean hasNoSuchElementExceptionBeenThrown = false;
+    private Exception occurredException;
 
     @Test
     public void constructorShouldThrowWithNullMap() {
         givenNetworkPropertiesBuiltWith(null);
-        thenANullPointerExceptionOccured();
+        thenExceptionOccurred(NullPointerException.class);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKey1", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("testKey1", String.class);
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -99,7 +101,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKey1", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("testKey1-nonExistant", String.class);
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -107,7 +109,7 @@ public class NetworkPropertiesTest {
         givenMapWith("Empty-String", "");
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("Empty-String", String.class);
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -115,7 +117,23 @@ public class NetworkPropertiesTest {
         givenMapWith("Empty-Password", new Password(""));
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetIsCalledWith("Empty-Password", Password.class);
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
+    public void getShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Password", Password.class);
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
+    public void getShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Key", Boolean.class);
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -227,6 +245,24 @@ public class NetworkPropertiesTest {
     }
 
     @Test
+    public void getOptShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Password", Password.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
+    }
+
+    @Test
+    public void getOptShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Key", Boolean.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
+    }
+
+    @Test
     public void getOptShouldWorkWithEmptyKey() {
         givenMapWith("", "test value");
         givenMapWith("testKey1", "testString1");
@@ -282,7 +318,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKey-comma-seperated", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetStringListIsCalledWith("testKey-comma-seperated");
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -290,7 +326,7 @@ public class NetworkPropertiesTest {
         givenMapWith("testKey-comma-seperated", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetStringListIsCalledWith("testKey-comma-seperated-not-existant");
-        thenANoSuchElementExceptionOccured();
+        thenExceptionOccurred(NoSuchElementException.class);
     }
 
     @Test
@@ -366,14 +402,10 @@ public class NetworkPropertiesTest {
     }
 
     public void givenNetworkPropertiesBuiltWith(Map<String, Object> properties) {
-
         try {
             this.netProps = new NetworkProperties(properties);
-
-        } catch (NullPointerException e) {
-            this.hasNullPointExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
@@ -404,42 +436,32 @@ public class NetworkPropertiesTest {
                 throw new IllegalArgumentException("Data type is not supported with this Test");
             }
 
-        } catch (NullPointerException e) {
-            this.hasNullPointExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
     public void whenGetOptIsCalledWith(String key, Class<?> clazz) {
         try {
             this.optResult = this.netProps.getOpt(clazz, key, "");
-        } catch (NullPointerException e) {
-            this.hasNullPointExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
     public void whenGetStringListIsCalledWith(String key) {
         try {
             this.stringListResult = this.netProps.getStringList(key, "");
-
-        } catch (NullPointerException e) {
-            this.hasNullPointExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
     public void whenGetOptStringListIsCalledWith(String key) {
         try {
             this.optResult = this.netProps.getOptStringList(key, "");
-
-        } catch (NullPointerException e) {
-            this.hasNullPointExceptionBeenThrown = true;
-        } catch (NoSuchElementException e) {
-            this.hasNoSuchElementExceptionBeenThrown = true;
+        } catch (Exception e) {
+            this.occurredException = e;
         }
     }
 
@@ -492,17 +514,22 @@ public class NetworkPropertiesTest {
         }
     }
 
-    public void thenANullPointerExceptionOccured() {
-        assertTrue(this.hasNullPointExceptionBeenThrown);
-    }
-
-    public void thenANoSuchElementExceptionOccured() {
-        assertTrue(this.hasNoSuchElementExceptionBeenThrown);
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
     public void thenNoExceptionsOccured() {
-        assertFalse(this.hasNullPointExceptionBeenThrown);
-        assertFalse(this.hasNoSuchElementExceptionBeenThrown);
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
     }
 
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,30 @@
          description="Data Transport layer configuration.">
 
          <Icon resource="MqttDataTransport" size="32"/>
+         
+         <AD id="group.id"
+            name="Sparkplug Group ID"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="group"
+            description="Sparkplug Group identifier to which this Sparkplug Edge Node belongs."/>
+
+        <AD id="node.id"
+            name="Sparkplug Edge Node ID"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="node"
+            description="Sparkplug Edge Node identifier to use for this Cloud Connection."/>
+
+        <AD id="primary.host.application.id"
+            name="Sparkplug Primary Host Application ID"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Sparkplug Primary Host Application to associate with this Sparkplug Edge Node."/>
 
          <AD id="server.uris"
              name="Server URIs"
@@ -27,12 +51,10 @@
              cardinality="0"
              required="true"
              default="tcp://broker1-url:1883"
-             description="List of space-separated URLs of the MQTT brokers to connect to.
-                          When an attempt to connect is initiated the client will start with the
-                          first server in the list and work through the list until a connection
-                          is established with a server. If a connection cannot be made to any of
-                          the servers then the connect attempt fails.
-                          Supported types of connection are tcp: and ssl:."/>
+             description="List of space-separated URIs of the MQTT brokers to connect to.
+                          Supported types of connection are tcp: and ssl:. URIs must not end with /.
+                          If a primary.host.application.id has been set, the client will cycle
+                          over the list until a Primary Host Application becomes online."/>
 
          <AD id="client.id"
              name="Client ID"

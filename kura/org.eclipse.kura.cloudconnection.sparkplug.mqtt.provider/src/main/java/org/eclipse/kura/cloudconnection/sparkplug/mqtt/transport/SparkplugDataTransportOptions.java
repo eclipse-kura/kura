@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -23,6 +25,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class SparkplugDataTransportOptions {
 
+    public static final String KEY_GROUP_ID = "group.id";
+    public static final String KEY_NODE_ID = "node.id";
+    public static final String KEY_PRIMARY_HOST_APPLICATION_ID = "primary.host.application.id";
     public static final String KEY_SERVER_URIS = "server.uris";
     public static final String KEY_CLIENT_ID = "client.id";
     public static final String KEY_USERNAME = "username";
@@ -30,11 +35,19 @@ public class SparkplugDataTransportOptions {
     public static final String KEY_KEEP_ALIVE = "keep.alive";
     public static final String KEY_CONNECTION_TIMEOUT = "connection.timeout";
 
+    private String groupId;
+    private String nodeId;
+    private Optional<String> primaryHostApplicationId = Optional.empty();
+    private List<String> servers = new ArrayList<>();
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     private String clientId;
 
     public SparkplugDataTransportOptions(Map<String, Object> properties) throws KuraException {
-        String servers = getString(KEY_SERVER_URIS, properties).orElseThrow(getKuraException(KEY_SERVER_URIS));
+        this.groupId = (String) properties.getOrDefault(KEY_GROUP_ID, "group");
+        this.nodeId = (String) properties.getOrDefault(KEY_NODE_ID, "node");
+        this.primaryHostApplicationId = getOptionalString(properties.get(KEY_PRIMARY_HOST_APPLICATION_ID));
+
+        setServers(getString(KEY_SERVER_URIS, properties).orElseThrow(getKuraException(KEY_SERVER_URIS)));
         String clientIdentifier = getString(KEY_CLIENT_ID, properties).orElseThrow(getKuraException(KEY_CLIENT_ID));
         
         if (servers.isEmpty()) {
@@ -50,7 +63,7 @@ public class SparkplugDataTransportOptions {
         Optional<Integer> connectionTimeout = getInteger(KEY_CONNECTION_TIMEOUT, properties);
         Optional<Integer> keepAlive = getInteger(KEY_KEEP_ALIVE, properties);
 
-        this.connectionOptions.setServerURIs(getServerURIs(servers));
+
         this.clientId = clientIdentifier;
 
         if (username.isPresent()) {
@@ -73,6 +86,22 @@ public class SparkplugDataTransportOptions {
         this.connectionOptions.setAutomaticReconnect(false);
     }
 
+    public String getGroupId() {
+        return this.groupId;
+    }
+
+    public String getNodeId() {
+        return this.nodeId;
+    }
+
+    public Optional<String> getPrimaryHostApplicationId() {
+        return this.primaryHostApplicationId;
+    }
+
+    public List<String> getServers() {
+        return this.servers;
+    }
+
     public MqttConnectOptions getMqttConnectOptions() {
         return this.connectionOptions;
     }
@@ -89,8 +118,15 @@ public class SparkplugDataTransportOptions {
         return this.connectionOptions.getConnectionTimeout() * 1000L;
     }
 
-    public String getPrimaryServerURI() {
-        return this.connectionOptions.getServerURIs()[0];
+    private Optional<String> getOptionalString(Object value) {
+        if (value instanceof String) {
+            String result = ((String) value).trim();
+            if (!result.isEmpty()) {
+                return Optional.of(result);
+            }
+        }
+
+        return Optional.empty();
     }
 
     private Optional<String> getString(String key, Map<String, Object> map) {
@@ -110,15 +146,16 @@ public class SparkplugDataTransportOptions {
                 "The property " + propertyName + " is null or empty");
     }
 
-    private String[] getServerURIs(String spaceSeparatedservers) throws KuraException {
-        String[] servers = spaceSeparatedservers.split(" ");
-        for (String server : servers) {
+    private void setServers(String spaceSeparatedservers) throws KuraException {
+        String[] uris = spaceSeparatedservers.split(" ");
+        for (String server : uris) {
             if (server.endsWith("/") || server.isEmpty()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                         "Server URI cannot be empty, or end with '/', or contain a path");
             }
+
+            this.servers.add(server);
         }
-        return servers;
     }
 
 }

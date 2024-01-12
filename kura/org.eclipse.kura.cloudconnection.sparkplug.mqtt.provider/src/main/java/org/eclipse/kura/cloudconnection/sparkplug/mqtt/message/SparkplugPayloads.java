@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,19 @@
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class SparkplugPayloads {
+
+    public static final String NODE_CONTROL_REBIRTH_METRIC_NAME = "Node Control/Rebirth";
 
     private SparkplugPayloads() {
     }
@@ -29,25 +37,39 @@ public class SparkplugPayloads {
     public static byte[] getNodeBirthPayload(long bdSeq, long seq) {
         long timestamp = new Date().getTime();
 
-        Payload.Builder protoMsg = Payload.newBuilder();
+        SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
+        payloadBuilder.withBdSeq(bdSeq, timestamp);
+        payloadBuilder.withMetric(NODE_CONTROL_REBIRTH_METRIC_NAME, false, DataType.Boolean, timestamp);
+        payloadBuilder.withSeq(seq);
+        payloadBuilder.withTimestamp(timestamp);
 
-        Payload.Metric.Builder bdSeqMetric = Payload.Metric.newBuilder();
-        bdSeqMetric.setName("bdSeq");
-        bdSeqMetric.setLongValue(bdSeq);
-        bdSeqMetric.setDatatype(DataType.Int64.getNumber());
-        bdSeqMetric.setTimestamp(timestamp);
-        protoMsg.addMetrics(bdSeqMetric.build());
+        return payloadBuilder.build();
+    }
 
-        Payload.Metric.Builder rebirthMetric = Payload.Metric.newBuilder();
-        rebirthMetric.setName("Node Control/Rebirth");
-        rebirthMetric.setBooleanValue(false);
-        rebirthMetric.setDatatype(DataType.Boolean_VALUE);
-        protoMsg.addMetrics(rebirthMetric.build());
+    public static byte[] getDeviceBirthPayload(long seq, Map<String, TypedValue<?>> metrics) {
+        long timestamp = new Date().getTime();
 
-        protoMsg.setSeq(seq);
-        protoMsg.setTimestamp(timestamp);
+        SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
+        for (Entry<String, TypedValue<?>> metricEntry : metrics.entrySet()) {
+            payloadBuilder.withMetric(metricEntry.getKey(), metricEntry.getValue(), timestamp);
+        }
 
-        return protoMsg.build().toByteArray();
+        payloadBuilder.withSeq(seq);
+        payloadBuilder.withTimestamp(timestamp);
+
+        return payloadBuilder.build();
+    }
+
+    public static boolean getBooleanMetric(String metricName, byte[] rawPayload)
+            throws InvalidProtocolBufferException, NoSuchFieldException {
+        Payload payload = Payload.parseFrom(rawPayload);
+        for (Metric metric : payload.getMetricsList()) {
+            if (metric.getName().equals(metricName)) {
+                return metric.getBooleanValue();
+            }
+        }
+        
+        throw new NoSuchFieldException("Metric " + metricName + " not found in payload");
     }
 
 }

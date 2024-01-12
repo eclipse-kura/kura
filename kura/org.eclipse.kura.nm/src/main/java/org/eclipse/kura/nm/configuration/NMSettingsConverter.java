@@ -318,8 +318,7 @@ public class NMSettingsConverter {
             SemanticVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
-        // property is not set, it assumes
-        // it is disabled.
+        // property is not set, it assumes it is disabled.
 
         Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
                 .fromString(props.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));

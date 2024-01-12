@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -667,7 +667,99 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("private-key",
                 "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
         thenResultingMapContains("private-key-password", "secure-password");
+    }
 
+    @Test
+    public void build8021xSettingsShouldThrowWithTlsWithNullPrivateKey() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", null);
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
+    public void build8021xSettingsShouldThrowWithTlsWithWrongTypePrivateKey() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                buildMockedCertificateWithCert("binary ca cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", "");
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithTlsWithNullCACert() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name", null);
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionOccurred();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
+        thenResultingMapContains("identity", "username@email.com");
+        thenResultingMapContainsBytes("client-cert", "binary client cert");
+        thenResultingMapContainsBytes("private-key",
+                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
+        thenResultingMapContains("private-key-password", "secure-password");
+
+        thenResultingMapNotContains("phase2-auth");
+        thenResultingMapNotContains("ca-cert");
+    }
+
+    @Test
+    public void build8021xSettingsShouldWorkWithTlsWithWrongTypeCACert() {
+        givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
+        givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthNone");
+        givenMapWith("net.interface.wlan0.config.802-1x.identity", "username@email.com");
+        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
+                new Password("When I grow up I want to be a certificate"));
+        givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
+                buildMockedCertificateWithCert("binary client cert"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
+                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionOccurred();
+
+        thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
+        thenResultingMapContains("identity", "username@email.com");
+        thenResultingMapContainsBytes("client-cert", "binary client cert");
+        thenResultingMapContainsBytes("private-key",
+                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
+        thenResultingMapContains("private-key-password", "secure-password");
+
+        thenResultingMapNotContains("phase2-auth");
+        thenResultingMapNotContains("ca-cert");
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,13 @@ public class NetworkProperties {
             throw new NoSuchElementException(String.format("The \"%s\" key contains a null value.", formattedKey));
         }
 
+        if (!clazz.isAssignableFrom(rawValue.getClass())) {
+            // Criteria: there's no such element in the map that matches the requested type (clazz)
+            throw new NoSuchElementException(
+                    String.format("The \"%s\" key contains a value of type \"%s\" (requested type: \"%s\").",
+                            formattedKey, rawValue.getClass().getName(), clazz.getName()));
+        }
+
         if (clazz == String.class || clazz == Password.class) {
             String value = "";
 
@@ -74,6 +81,11 @@ public class NetworkProperties {
 
         Object rawValue = this.properties.get(formattedKey);
         if (Objects.isNull(rawValue)) {
+            return Optional.empty();
+        }
+
+        if (!clazz.isAssignableFrom(rawValue.getClass())) {
+            // Criteria: there's no such element in the map that matches the requested type (clazz)
             return Optional.empty();
         }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -121,6 +121,22 @@ public class NetworkPropertiesTest {
     }
 
     @Test
+    public void getShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Password", Password.class);
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
+    public void getShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetIsCalledWith("Wrong-Type-Key", Boolean.class);
+        thenExceptionOccurred(NoSuchElementException.class);
+    }
+
+    @Test
     public void getShouldWorkWithEmptyStringKey() {
         givenMapWith("", "Empty String Test");
         givenNetworkPropertiesBuiltWith(this.properties);
@@ -224,6 +240,24 @@ public class NetworkPropertiesTest {
         givenMapWith("testKeyNull", null);
         givenNetworkPropertiesBuiltWith(this.properties);
         whenGetOptIsCalledWith("testKeyNull", String.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
+    }
+
+    @Test
+    public void getOptShouldThrowWithTypePassword() {
+        givenMapWith("Wrong-Type-Password", new String(""));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Password", Password.class);
+        thenNoExceptionsOccured();
+        thenOptionalResultEquals(Optional.empty());
+    }
+
+    @Test
+    public void getOptShouldThrowWithWrongType() {
+        givenMapWith("Wrong-Type-Key", new Float(5.5));
+        givenNetworkPropertiesBuiltWith(this.properties);
+        whenGetOptIsCalledWith("Wrong-Type-Key", Boolean.class);
         thenNoExceptionsOccured();
         thenOptionalResultEquals(Optional.empty());
     }

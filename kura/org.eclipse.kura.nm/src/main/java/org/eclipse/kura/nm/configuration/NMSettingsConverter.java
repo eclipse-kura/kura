@@ -204,14 +204,7 @@ public class NMSettingsConverter {
         } else {
             logger.error("Unable to decode Private Key for interface \"{}\"", deviceId);
         }
-
-        Optional<Password> privateKeyPassword = props.getOpt(Password.class,
-                "net.interface.%s.config.802-1x.private-key-password", deviceId);
-
-        privateKeyPassword.ifPresent(value -> settings.put("private-key-password", new Variant<>(value.toString())));
-
         settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NOT_REQUIRED));
-
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
@@ -230,10 +223,6 @@ public class NMSettingsConverter {
                 logger.warn("Unable to decode CA Certificate for interface \"{}\", caused by: ", deviceId, e);
             }
         });
-
-        Optional<Password> caCertPassword = props.getOpt(Password.class,
-                "net.interface.%s.config.802-1x.ca-cert-password", deviceId);
-        caCertPassword.ifPresent(value -> settings.put("ca-cert-password", new Variant<>(value.toString())));
     }
 
     private static void create8021xMschapV2(NetworkProperties props, String deviceId,

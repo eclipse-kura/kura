@@ -567,7 +567,6 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
                 buildMockedCertificateWithCert("binary ca cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -580,10 +579,10 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
-        thenResultingMapContains("ca-cert-password", "secure-password");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
 
+        thenResultingMapNotContains("ca-cert-password");
     }
 
     @Test
@@ -599,12 +598,13 @@ public class NMSettingsConverterTest {
         thenNoExceptionOccurred();
 
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
-        thenResultingMapNotContains("anonymous-identity");
-        thenResultingMapNotContains("ca-cert");
-        thenResultingMapNotContains("ca-cert-password");
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
+
+        thenResultingMapNotContains("anonymous-identity");
+        thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("ca-cert-password");
     }
 
     @Test
@@ -613,7 +613,6 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
                 buildMockedCertificateWithCert("binary ca cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.innerAuth", "Kura8021xInnerAuthMschapv2");
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
@@ -626,10 +625,11 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "peap" }).getValue());
         thenResultingMapContains("anonymous-identity", "anonymous-identity-test-var");
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
-        thenResultingMapContains("ca-cert-password", "secure-password");
         thenResultingMapContains("phase2-auth", "mschapv2");
         thenResultingMapContains("identity", "example-user-name");
         thenResultingMapContains("password", "secure-test-password-123!@#");
+
+        thenResultingMapNotContains("ca-cert-password");
     }
 
     @Test
@@ -652,7 +652,6 @@ public class NMSettingsConverterTest {
                 buildMockedCertificateWithCert("binary client cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
                 buildMockedPrivateKeyWithKey("binary private key"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -666,7 +665,10 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContainsBytes("private-key",
                 "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
-        thenResultingMapContains("private-key-password", "secure-password");
+
+        thenResultingMapNotContains("private-key-password");
+        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapNotContains("client-cert-password");
     }
 
     @Test
@@ -679,7 +681,6 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
                 buildMockedCertificateWithCert("binary client cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", null);
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -697,7 +698,6 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
                 buildMockedCertificateWithCert("binary client cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", "");
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -715,7 +715,6 @@ public class NMSettingsConverterTest {
                 buildMockedCertificateWithCert("binary client cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
                 buildMockedPrivateKeyWithKey("binary private key"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -727,10 +726,12 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContainsBytes("private-key",
                 "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
-        thenResultingMapContains("private-key-password", "secure-password");
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("private-key-password");
+        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapNotContains("client-cert-password");
     }
 
     @Test
@@ -744,7 +745,6 @@ public class NMSettingsConverterTest {
                 buildMockedCertificateWithCert("binary client cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
                 buildMockedPrivateKeyWithKey("binary private key"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-password", new Password("secure-password"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -756,10 +756,12 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContainsBytes("private-key",
                 "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
-        thenResultingMapContains("private-key-password", "secure-password");
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
+        thenResultingMapNotContains("private-key-password");
+        thenResultingMapNotContains("ca-cert-password");
+        thenResultingMapNotContains("client-cert-password");
     }
 
     @Test
@@ -1447,7 +1449,6 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.anonymous-identity", "anonymous-identity-test-var");
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name",
                 buildMockedCertificateWithCert("binary ca cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-password", new Password("secure-password"));
         givenMapWith("net.interface.wlan0.config.802-1x.identity", "example-user-name");
         givenMapWith("net.interface.wlan0.config.802-1x.password", new Password("secure-test-password-123!@#"));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
@@ -1472,9 +1473,10 @@ public class NMSettingsConverterTest {
         thenResultingBuildAllMapContains("802-1x", "phase2-auth", "mschapv2");
         thenResultingBuildAllMapContains("802-1x", "anonymous-identity", "anonymous-identity-test-var");
         thenResultingBuildAllMapContainsBytes("802-1x", "ca-cert", "binary ca cert");
-        thenResultingBuildAllMapContains("802-1x", "ca-cert-password", "secure-password");
         thenResultingBuildAllMapContains("802-1x", "identity", "example-user-name");
         thenResultingBuildAllMapContains("802-1x", "password", "secure-test-password-123!@#");
+
+        thenResultingBuildAllMapNotContains("802-1x", "ca-cert-password");
     }
 
     @Test

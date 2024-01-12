@@ -6,8 +6,8 @@ The `org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider` package provides 
 
 ## Introduction to Eclipse Sparkplug
 
-!!! note ""
-    From [Eclipse Sparkplug](https://sparkplug.eclipse.org/about/faq/): *Sparkplug is an open software specification that provides MQTT clients the framework to seamlessly integrate data from their applications, sensors, devices, and gateways within the MQTT Infrastructure. It is specifically designed for use in Industrial Internet of Things (IIoT) architectures to ensure a high level of reliability and interoperability.*
+!!! quote "from [Eclipse Sparkplug](https://sparkplug.eclipse.org/about/faq/)"
+    *Sparkplug is an open software specification that provides MQTT clients the framework to seamlessly integrate data from their applications, sensors, devices, and gateways within the MQTT Infrastructure. It is specifically designed for use in Industrial Internet of Things (IIoT) architectures to ensure a high level of reliability and interoperability.*
 
 The specification aims fulfill the following 3 goals:
 
@@ -34,6 +34,9 @@ The main principles upon which the Specification is based on can be summarized a
 3. *Continuos Session Awareness*: Host Applications are aware of the state of the Edge Nodes, and Edge Nodes are aware of the state of the Host Applications. This continuos session awareness is achieved by the means of birth and death certificates and state messages (continue the reading to find out more) and is the key to allow reporting by exception.
 4. *Birth and Death certificates*: these messages represent the state of Edge Nodes and Devices (online/offline + data that will be reported). The birth messages are always the first ones that are sent from the Edge Node, and the delivery of death certificates is ensured through the [MQTT Will message](https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/), even if the connection is lost ungracefully. The birth messages always contain all the metrics that the Device or Edge Node will ever report on. If a new metric is added or a metric gets removed, then a new session needs to be estabilished.
 5. *Connection Persistence*: with the mechanisms above, the connection does not need to be persistent. For example, an Edge Node that disconnects gracefully with a MQTT DISCONNECT packet will not be seen as "dead" from the host application because no death certificate has been triggered (Will messages are sent only on failures). Hence, the Edge Node can implement a logic where it remains connected only during the timeframe needed for sending the new data.
+    
+    !!! warning
+        This Cloud Connection maintains a persistent connection to the MQTT server.
 
 ### Eclipse Sparkplug Topic Namespace
 
@@ -69,11 +72,11 @@ This introduction will focus more on the Edge Node and Device, as they are of mo
 
 The session estabilishment procedure ensures the Edge Node to be subscribed to command-type messages for receiveing commands from the Host Application.
 
-An Edge Node can (optionally, but incouraged) specify to be aware of a primary host application state and, in such case, it needs to subscribe to the relative state messages. The Edge Node will send the birth certificate (and thus completing the session init procedure) only after receiving the state message denoting the Primary Host Application is online. After connection, if the Edge Node receives a state message denoting the Primary Host Application is offline, it must restart the session estabilishment procedure.
+An Edge Node can (optionally, but incouraged) specify to be aware of a primary host application state and, in such case, it needs to subscribe to the relative STATE messages. The Edge Node will send the birth certificate (and thus completing the session init procedure) only after receiving the STATE message denoting the Primary Host Application is online. After connection, if the Edge Node receives a STATE message denoting the Primary Host Application is offline, it must restart the session estabilishment procedure.
 
-On connection, the Edge Node sets a [MQTT Will message](https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/) containing a death certificate. Doing so, if the MQTT broker does not receive any communication within the **Keep Alive** period (client lost connection), it will send the Edge Node death certificate on all subscribers. A birth/death sequence number `bdSeq` is maintained in the Edge Node to match birth with death messages in the Host Application. Each `bdSeq` in the death message is matched with the corresponding `bdSeq` of the previous birth message. This allows the Host Application tracking the state of the Edge Nodes and mark not up-to-date metrics as **STALE**.
+On connection, the Edge Node sets a [MQTT Will message](https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/) containing a NDEATH certificate. Doing so, if the MQTT broker does not receive any communication within the **Keep Alive** period (client lost connection), it will send the Edge Node NDEATH certificate on all subscribers. A birth/death sequence number `bdSeq` is maintained in the Edge Node to match NBIRTH with NDEATH messages in the Host Application. Each `bdSeq` in the NDEATH message is matched with the corresponding `bdSeq` of the previous NBIRTH message. This allows the Host Application tracking the state of the Edge Nodes and mark not up-to-date metrics as **STALE**.
 
-A Device can send a device birth message after a Edge Node birth has been sent. The birth message contains all the metrics that the device will ever report on. If a new metric is added or an existing one removed, then the Device session needs to be re-estabilished. If the Edge Node looses the connection to some of its Devices, then it needs to send a Device death certificate on his behalf. The data-consuming Host Application will then mark that particular Device as offline and mark its metrics as STALE. Once the session is estabilished, the Device can publish the changed metrics using the DDATA message type.
+A Device can send a device DBIRTH message after a Edge Node NBIRTH has been sent. The DBIRTH message contains all the metrics that the device will ever report on. If a new metric is added or an existing one removed, then the Device session needs to be re-estabilished. If the Edge Node looses the connection to some of its Devices, then it needs to send a Device DDEATH certificate on his behalf. The data-consuming Host Application will then mark that particular Device as offline and mark its metrics as STALE. Once the session is estabilished, the Device can publish the changed metrics using the DDATA message type.
 
 #### Multiple MQTT Server Topologies
 
@@ -100,19 +103,13 @@ The `DataService` layer used in this component is the `org.eclipse.kura.data.Dat
 
 ### Data Transport Layer Configuration
 
-The Data Transport layer allows configuring the underlying [Eclipse Paho MQTT client](https://eclipse.dev/paho/files/javadoc/index.html) and supports MQTT v3.1.1.
+The Sparkplug Data Transport layer bridges the incoming requests to the underlying [Eclipse Paho MQTT v3.1.1](https://eclipse.dev/paho/files/javadoc/index.html) client following the Sparkplug specification. In particular, the Data Transport Layer ensures the following.
+
+- **[Edge Node Sparkplug Session Estabilishment](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#edge-node-session-establishment)**: the *Edge Node* (this Cloud Connection) estabilishes a new Sparkplug session upon connection. An optional **Primary Host Application ID** can be specified (see picture below) to make the Cloud Connection wait until the Primary Host Application is online before publishing NBIRTH and DBIRTH messages.
+- **[Edge Node Sparkplug Session Termination](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#edge-node-session-termination)**: upon disconnection, the *Edge Node* follows the required specification statements. In particular, multiple space-separated **Server URIs** can be specified in the component's configuration (see picture below). When a **Primary Host Application ID** is defined and it receives a STATE message denoting that the configured primary application is offline, then reconnection attempts are made cycling through the **Server URIs** list. When the last server fails to connect, then the traversal is restarted from the start of the list.
+- **[Edge Node NCMD handler](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#commands)**: upon reception of a valid NCMD message, the Transport layer checks if it contains a **Node Control/Rebirth** metric, and, if set to `true`, restarts the session estabilishment procedure without sending an MQTT CONNECT packet (client connection is not closed, only BIRTH messages are re-sent).
 
 ![](./images/sparkplugDataTransport.png)
-
-Upon connection, a Will MQTT message is sent to broker with QoS 1 and retain set to `false` as per Sparkplug specifications:
-
-- `[tck-id-message-flow-edge-node-birth-publish-connect]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message-topic]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message-payload]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message-payload-bdSeq]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message-qos]`
-- `[tck-id-message-flow-edge-node-birth-publish-will-message-will-retained]`
 
 
 

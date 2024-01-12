@@ -29,6 +29,13 @@ import java.util.Optional;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.bouncycastle.openssl.PKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.util.io.pem.PemGenerationException;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.Kura8021xEAP;
 import org.eclipse.kura.nm.Kura8021xInnerAuth;
@@ -201,15 +208,22 @@ public class NMSettingsConverter {
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                 deviceId);
-        final String privateKeyPassword = "temporary-password"; // TODO: remove this temporary password
-        byte[] encryptedPrivateKey = encryptAndConvertPrivateKey(privateKey, privateKeyPassword);
+        final String privateKeyPassword = "temporary-password"; // WIP: remove this temporary password
+        byte[] encryptedPrivateKey;
+        try {
+            encryptedPrivateKey = encryptAndConvertPrivateKey(privateKey, privateKeyPassword);
+        } catch (OperatorCreationException | PemGenerationException e) {
+            logger.error("Something went wrong during private key encryption, bailing out. Caused by: ", e);
+            return;
+        }
 
         settings.put("private-key", new Variant<>(encryptedPrivateKey));
         settings.put("private-key-password", new Variant<>(privateKeyPassword));
         settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NONE));
     }
 
-    private static byte[] encryptAndConvertPrivateKey(PrivateKey privateKey, String privateKeyPassword) {
+    private static byte[] encryptAndConvertPrivateKey(PrivateKey privateKey, String privateKeyPassword)
+            throws OperatorCreationException, PemGenerationException {
         // Assumption: the private key is encoded in PKCS#8 DER format
         //
         // The private key is encoded in PKCS#8 DER format. The DER format is a binary
@@ -219,13 +233,18 @@ public class NMSettingsConverter {
         if (privateKey.getEncoded() == null) {
             throw new NoSuchElementException(String.format("Unable to decode Private Key"));
         }
-        byte[] privateKeyBytes = privateKey.getEncoded();
 
         // Ecrypt the private key using the provided password, leveraging BouncyCastle library
         // TODO
+        JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
+                PKCS8Generator.PBE_SHA1_3DES);
+        encryptorBuilder.setPasssword(privateKeyPassword.toCharArray());
+        OutputEncryptor oe = encryptorBuilder.build();
+        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
+        PemObject obj = gen.generate();
 
-        byte[] pemPrivateKeyBytes = convertToPem(privateKeyBytes);
-        return pemPrivateKeyBytes; // TODO: return encrypted private key
+        // byte[] pemPrivateKeyBytes = convertToPem(privateKeyBytes); WIP: Convert to PEM once we're sure this works
+        return obj.getContent(); // WIP: return encrypted private key
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,

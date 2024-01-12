@@ -248,7 +248,7 @@ public class NMSettingsConverter {
         // Encrypt the private key using the provided password, leveraging BouncyCastle library
         JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
                 PKCS8Generator.PBE_SHA1_3DES);
-        encryptorBuilder.setPasssword(privateKeyPassword.toCharArray());
+        encryptorBuilder.setPassword(privateKeyPassword.toCharArray());
         OutputEncryptor oe = encryptorBuilder.build();
         JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
 

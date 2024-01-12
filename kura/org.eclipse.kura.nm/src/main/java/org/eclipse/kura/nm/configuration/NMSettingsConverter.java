@@ -222,22 +222,6 @@ public class NMSettingsConverter {
         }
     }
 
-    private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
-            throws OperatorCreationException, PemGenerationException {
-        // Assumption: the private key is encoded in PKCS#8 DER format
-        if (privateKey.getEncoded() == null) {
-            throw new NoSuchElementException("Unable to decode Private Key");
-        }
-
-        JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
-                PKCS8Generator.PBE_SHA1_3DES);
-        encryptorBuilder.setPassword(privateKeyPassword.toCharArray());
-        OutputEncryptor oe = encryptorBuilder.build();
-        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
-
-        return gen.generate().getContent();
-    }
-
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
             Map<String, Variant<?>> settings) {
 
@@ -806,6 +790,22 @@ public class NMSettingsConverter {
             throw new IllegalArgumentException(String
                     .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
+    }
+
+    private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
+            throws OperatorCreationException, PemGenerationException {
+        // Assumption: the private key is encoded in PKCS#8 DER format
+        if (privateKey.getEncoded() == null) {
+            throw new NoSuchElementException("Unable to decode Private Key");
+        }
+
+        JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
+                PKCS8Generator.PBE_SHA1_3DES);
+        encryptorBuilder.setPassword(privateKeyPassword.toCharArray());
+        OutputEncryptor oe = encryptorBuilder.build();
+        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
+
+        return gen.generate().getContent();
     }
 
     private static byte[] convertToPem(byte[] derKey) {

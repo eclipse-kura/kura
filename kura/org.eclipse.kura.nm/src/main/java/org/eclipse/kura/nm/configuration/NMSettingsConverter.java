@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.xml.bind.DatatypeConverter;
@@ -73,6 +74,7 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
 
     private static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
+    private static final UInt32 NM_SECRET_FLAGS_NONE = new UInt32(0);
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -199,12 +201,31 @@ public class NMSettingsConverter {
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                 deviceId);
-        if (privateKey.getEncoded() != null) {
-            settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
-        } else {
-            logger.error("Unable to decode Private Key for interface \"{}\"", deviceId);
+        final String privateKeyPassword = "temporary-password"; // TODO: remove this temporary password
+        byte[] encryptedPrivateKey = encryptAndConvertPrivateKey(privateKey, privateKeyPassword);
+
+        settings.put("private-key", new Variant<>(encryptedPrivateKey));
+        settings.put("private-key-password", new Variant<>(privateKeyPassword));
+        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NONE));
+    }
+
+    private static byte[] encryptAndConvertPrivateKey(PrivateKey privateKey, String privateKeyPassword) {
+        // Assumption: the private key is encoded in PKCS#8 DER format
+        //
+        // The private key is encoded in PKCS#8 DER format. The DER format is a binary
+        // format, so it is not possible to store it in a String. Therefore, the DER
+        // format is converted to PEM format, which is a text format. The PEM format
+        // is then encrypted using the provided password.
+        if (privateKey.getEncoded() == null) {
+            throw new NoSuchElementException(String.format("Unable to decode Private Key"));
         }
-        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NOT_REQUIRED));
+        byte[] privateKeyBytes = privateKey.getEncoded();
+
+        // Ecrypt the private key using the provided password, leveraging BouncyCastle library
+        // TODO
+
+        byte[] pemPrivateKeyBytes = convertToPem(privateKeyBytes);
+        return pemPrivateKeyBytes; // TODO: return encrypted private key
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,

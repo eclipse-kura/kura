@@ -38,7 +38,6 @@ import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.util.io.pem.PemGenerationException;
-import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.Kura8021xEAP;
 import org.eclipse.kura.nm.Kura8021xInnerAuth;
@@ -221,7 +220,7 @@ public class NMSettingsConverter {
         }
         byte[] encryptedPrivateKey;
         try {
-            encryptedPrivateKey = encryptAndConvertPrivateKey(privateKey, privateKeyPassword);
+            encryptedPrivateKey = convertToPem(encryptPrivateKey(privateKey, privateKeyPassword));
         } catch (OperatorCreationException | PemGenerationException e) {
             logger.error("Something went wrong during private key encryption, bailing out. Caused by: ", e);
             return;
@@ -234,7 +233,7 @@ public class NMSettingsConverter {
         settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NONE));
     }
 
-    private static byte[] encryptAndConvertPrivateKey(PrivateKey privateKey, String privateKeyPassword)
+    private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
             throws OperatorCreationException, PemGenerationException {
         // Assumption: the private key is encoded in PKCS#8 DER format
         //
@@ -252,10 +251,8 @@ public class NMSettingsConverter {
         encryptorBuilder.setPasssword(privateKeyPassword.toCharArray());
         OutputEncryptor oe = encryptorBuilder.build();
         JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
-        PemObject obj = gen.generate();
 
-        // byte[] pemPrivateKeyBytes = convertToPem(privateKeyBytes); WIP: Convert to PEM once we're sure this works
-        return convertToPem(obj.getContent()); // WIP: return encrypted private key
+        return gen.generate().getContent();
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,

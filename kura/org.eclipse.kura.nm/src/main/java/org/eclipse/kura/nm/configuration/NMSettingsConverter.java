@@ -23,6 +23,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,7 +213,8 @@ public class NMSettingsConverter {
                 deviceId);
         String privateKeyPassword;
         try {
-            privateKeyPassword = MessageDigest.getInstance("SHA-256").digest(privateKey.getEncoded()).toString();
+            byte[] privateKeyPasswordBytes = MessageDigest.getInstance("SHA-256").digest(privateKey.getEncoded());
+            privateKeyPassword = Base64.getEncoder().encodeToString(privateKeyPasswordBytes);
         } catch (NoSuchAlgorithmException e) {
             logger.error("Something went wrong while computing SHA-256 of private key, bailing out. Caused by: ", e);
             return;
@@ -224,6 +226,8 @@ public class NMSettingsConverter {
             logger.error("Something went wrong during private key encryption, bailing out. Caused by: ", e);
             return;
         }
+
+        logger.info("DEBUG - Password content \"{}\"", privateKeyPassword); // DEBUG
 
         settings.put("private-key", new Variant<>(encryptedPrivateKey));
         settings.put("private-key-password", new Variant<>(privateKeyPassword));
@@ -242,8 +246,7 @@ public class NMSettingsConverter {
             throw new NoSuchElementException(String.format("Unable to decode Private Key"));
         }
 
-        // Ecrypt the private key using the provided password, leveraging BouncyCastle library
-        // TODO
+        // Encrypt the private key using the provided password, leveraging BouncyCastle library
         JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
                 PKCS8Generator.PBE_SHA1_3DES);
         encryptorBuilder.setPasssword(privateKeyPassword.toCharArray());

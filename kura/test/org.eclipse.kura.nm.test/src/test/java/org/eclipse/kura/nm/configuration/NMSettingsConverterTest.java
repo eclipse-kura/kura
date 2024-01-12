@@ -1475,6 +1475,8 @@ public class NMSettingsConverterTest {
         thenResultingBuildAllMapContainsBytes("802-1x", "ca-cert", "binary ca cert");
         thenResultingBuildAllMapContains("802-1x", "identity", "example-user-name");
         thenResultingBuildAllMapContains("802-1x", "password", "secure-test-password-123!@#");
+
+        thenResultingBuildAllMapNotContains("802-1x", "ca-cert-password");
     }
 
     @Test

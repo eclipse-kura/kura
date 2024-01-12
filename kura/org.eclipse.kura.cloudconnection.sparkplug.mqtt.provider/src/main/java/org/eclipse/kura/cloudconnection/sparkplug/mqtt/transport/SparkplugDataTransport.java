@@ -16,9 +16,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
@@ -46,7 +46,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private SparkplugDataTransportOptions options;
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
 
-    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private ArrivedMessageHandler messageHandler;
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue = new LinkedBlockingDeque<>();
 

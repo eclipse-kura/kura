@@ -16,6 +16,8 @@ package org.eclipse.kura.nm.configuration;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -208,7 +210,13 @@ public class NMSettingsConverter {
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                 deviceId);
-        final String privateKeyPassword = "temporary-password"; // WIP: remove this temporary password
+        String privateKeyPassword;
+        try {
+            privateKeyPassword = MessageDigest.getInstance("SHA-256").digest(privateKey.getEncoded()).toString();
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Something went wrong while computing SHA-256 of private key, bailing out. Caused by: ", e);
+            return;
+        }
         byte[] encryptedPrivateKey;
         try {
             encryptedPrivateKey = encryptAndConvertPrivateKey(privateKey, privateKeyPassword);

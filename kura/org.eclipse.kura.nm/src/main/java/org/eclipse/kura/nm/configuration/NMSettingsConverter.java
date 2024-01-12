@@ -244,7 +244,7 @@ public class NMSettingsConverter {
         PemObject obj = gen.generate();
 
         // byte[] pemPrivateKeyBytes = convertToPem(privateKeyBytes); WIP: Convert to PEM once we're sure this works
-        return obj.getContent(); // WIP: return encrypted private key
+        return convertToPem(obj.getContent()); // WIP: return encrypted private key
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
@@ -818,9 +818,9 @@ public class NMSettingsConverter {
     }
 
     private static byte[] convertToPem(byte[] derKey) {
-        String pem = "-----BEGIN PRIVATE KEY-----\n"
+        String pem = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
                 + DatatypeConverter.printBase64Binary(derKey).replaceAll("(.{64})", "$1\n")
-                + "\n-----END PRIVATE KEY-----\n";
+                + "\n-----END ENCRYPTED PRIVATE KEY-----\n";
         return pem.getBytes(StandardCharsets.UTF_8);
     }
 }

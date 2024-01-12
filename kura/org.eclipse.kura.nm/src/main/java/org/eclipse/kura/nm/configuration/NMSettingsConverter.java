@@ -82,9 +82,6 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
     private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
 
-    private static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
-    private static final UInt32 NM_SECRET_FLAGS_NONE = new UInt32(0);
-
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
     }
@@ -226,11 +223,8 @@ public class NMSettingsConverter {
             return;
         }
 
-        logger.info("DEBUG - Password content \"{}\"", privateKeyPassword); // DEBUG
-
         settings.put("private-key", new Variant<>(encryptedPrivateKey));
         settings.put("private-key-password", new Variant<>(privateKeyPassword));
-        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NONE));
     }
 
     private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
@@ -242,7 +236,7 @@ public class NMSettingsConverter {
         // format is converted to PEM format, which is a text format. The PEM format
         // is then encrypted using the provided password.
         if (privateKey.getEncoded() == null) {
-            throw new NoSuchElementException(String.format("Unable to decode Private Key"));
+            throw new NoSuchElementException("Unable to decode Private Key");
         }
 
         // Encrypt the private key using the provided password, leveraging BouncyCastle library

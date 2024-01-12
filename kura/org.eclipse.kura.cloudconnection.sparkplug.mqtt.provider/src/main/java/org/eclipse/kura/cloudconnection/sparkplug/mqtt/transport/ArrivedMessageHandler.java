@@ -41,11 +41,15 @@ public class ArrivedMessageHandler implements Runnable {
     private long lastStateTimestamp = 0;
 
     public ArrivedMessageHandler(LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue,
-            SparkplugMqttClient transport, Set<DataTransportListener> listeners, String groupId, String nodeId,
-            Optional<String> primaryHostId) {
+            Set<DataTransportListener> listeners) {
         this.arrivedMessagesQueue = arrivedMessagesQueue;
-        this.client = transport;
         this.listeners = listeners;
+    }
+
+    public synchronized void update(SparkplugMqttClient client, String groupId, String nodeId,
+            Optional<String> primaryHostId) {
+        logger.debug("Updating message handler");
+        this.client = client;
         this.groupId = groupId;
         this.nodeId = nodeId;
         this.primaryHostId = primaryHostId;
@@ -56,10 +60,8 @@ public class ArrivedMessageHandler implements Runnable {
         logger.debug("Starting arrived messages queue consumer");
 
         try {
-            ArrivedMessage msg;
-            while ((msg = this.arrivedMessagesQueue.take()) != null) {
-                logger.debug("Processing arrived message with topic '{}' from queue. Elements remaining: {}",
-                        msg.getTopic(), this.arrivedMessagesQueue.size());
+            while (!Thread.interrupted()) {
+                ArrivedMessage msg = this.arrivedMessagesQueue.take();
 
                 handleArrivedMessage(msg.getTopic(), msg.getMessage());
             }
@@ -71,6 +73,9 @@ public class ArrivedMessageHandler implements Runnable {
     }
 
     private synchronized void handleArrivedMessage(String topic, MqttMessage message) {
+        logger.debug("Processing arrived message with topic '{}' from queue. Elements remaining: {}", topic,
+                this.arrivedMessagesQueue.size());
+
         boolean isValidStateMessage = this.primaryHostId.isPresent()
                 && topic.equals(SparkplugTopics.getStateTopic(this.primaryHostId.get()));
         boolean isValidNcmdMessage = topic
@@ -102,7 +107,7 @@ public class ArrivedMessageHandler implements Runnable {
         if (this.lastStateTimestamp <= timestamp) {
             this.lastStateTimestamp = timestamp;
 
-            if (isOnline) {
+            if (isOnline && !this.client.isSessionEstabilished()) {
                 logger.info("Primary Host Application is online");
                 this.client.confirmSession();
             } else {

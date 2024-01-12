@@ -94,31 +94,34 @@ public class SparkplugMqttClient {
         }
     }
 
-    public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
+    public void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
         try {
             logger.info("Terminating Sparkplug Edge Node session");
-
             this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
 
-            sendEdgeNodeDeath();
+            synchronized (this) {
+                sendEdgeNodeDeath();
 
-            if (shouldDisconnectClient) {
-                disconnectClient(quiesceTimeout);
+                if (shouldDisconnectClient) {
+                    disconnectClient(quiesceTimeout);
+                }
+
+                this.isSessionEstabilished = false;
             }
 
-            this.isSessionEstabilished = false;
-
             this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
-
             logger.info("Sparkplug Edge Node session terminated");
         } catch (MqttException e) {
             logger.error("Error terminating Sparkplug Edge Node session", e);
         }
     }
 
-    public synchronized void confirmSession() {
-        this.sendEdgeNodeBirth();
-        this.isSessionEstabilished = true;
+    public void confirmSession() {
+        synchronized (this) {
+            this.sendEdgeNodeBirth();
+            this.isSessionEstabilished = true;
+        }
+
         this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
         logger.info("Sparkplug Edge Node session estabilished");
     }
@@ -194,6 +197,14 @@ public class SparkplugMqttClient {
     private void newClientConnection() throws MqttException {
         this.bdSeqCounter.next();
         setWillMessage();
+
+        try {
+            long randomDelay = (long) Math.floor(Math.random() * 5000);
+            logger.debug("Randomly delaying connect by {} ms", randomDelay);
+            Thread.sleep(randomDelay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         this.client = new MqttAsyncClient(getNextServer(), this.clientId, new MemoryPersistence());
         this.client.setCallback(this.callback);

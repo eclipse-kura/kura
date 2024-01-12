@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
@@ -48,23 +47,26 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-    private Future<?> messageHandlerFuture;
+    private ArrivedMessageHandler messageHandler;
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue = new LinkedBlockingDeque<>();
 
     /*
      * Activation APIs
      */
 
-    public synchronized void activate(Map<String, Object> properties) {
+    public void activate(Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
+
+        this.messageHandler = new ArrivedMessageHandler(this.arrivedMessagesQueue, dataTransportListeners);
+        this.executorService.submit(this.messageHandler);
 
         update(properties);
 
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
-    public synchronized void update(Map<String, Object> properties) {
+    public void update(Map<String, Object> properties) {
         logger.info("{} - Updating", this.kuraServicePid);
 
         boolean wasConnected = isConnected();
@@ -93,7 +95,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
-    public synchronized void deactivate() {
+    public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 
         if (isConnected()) {
@@ -110,7 +112,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
      */
 
     @Override
-    public synchronized void connect() throws KuraConnectException {
+    public void connect() throws KuraConnectException {
         if (isConnected()) {
             throw new IllegalStateException("MQTT client is already connected");
         }
@@ -122,7 +124,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             this.client.confirmSession();
         }
 
-        startMessageHandlerTask();
+        this.messageHandler.update(this.client, this.options.getGroupId(), this.options.getNodeId(),
+                this.options.getPrimaryHostApplicationId());
     }
 
     @Override
@@ -151,9 +154,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     }
 
     @Override
-    public synchronized void disconnect(long quiesceTimeout) {
-        stopMessageHandlerTask();
-
+    public void disconnect(long quiesceTimeout) {
         if (isConnected()) {
             this.client.terminateSession(true, quiesceTimeout);
         } else {
@@ -162,21 +163,21 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     }
 
     @Override
-    public synchronized void subscribe(String topic, int qos) throws KuraException {
+    public void subscribe(String topic, int qos) throws KuraException {
         checkConnected();
 
         this.client.subscribe(topic, qos);
     }
 
     @Override
-    public synchronized void unsubscribe(String topic) throws KuraException {
+    public void unsubscribe(String topic) throws KuraException {
         checkConnected();
 
         this.client.unsubscribe(topic);
     }
 
     @Override
-    public synchronized DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
+    public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
             throws KuraException {
         checkConnected();
 
@@ -190,13 +191,13 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     }
 
     @Override
-    public synchronized void addDataTransportListener(DataTransportListener listener) {
+    public void addDataTransportListener(DataTransportListener listener) {
         logger.debug("{} - Adding DataTransportListener {}", this.kuraServicePid, listener.getClass().getName());
         this.dataTransportListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeDataTransportListener(DataTransportListener listener) {
+    public void removeDataTransportListener(DataTransportListener listener) {
         logger.debug("{} - Removing DataTransportListener {}", this.kuraServicePid, listener.getClass().getName());
         this.dataTransportListeners.remove(listener);
     }
@@ -206,13 +207,13 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
      */
 
     @Override
-    public synchronized void connectionLost(Throwable arg0) {
+    public void connectionLost(Throwable arg0) {
         logger.info("{} - Connection lost", this.kuraServicePid);
         this.dataTransportListeners.forEach(listener -> callSafely(listener::onConnectionLost, arg0));
     }
 
     @Override
-    public synchronized void deliveryComplete(IMqttDeliveryToken deliveryToken) {
+    public void deliveryComplete(IMqttDeliveryToken deliveryToken) {
         try {
             if (deliveryToken.getMessage().getQos() > 0) {
                 DataTransportToken dataTransportToken = new DataTransportToken(deliveryToken.getMessageId(),
@@ -227,7 +228,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     }
 
     @Override
-    public synchronized void messageArrived(String topic, MqttMessage message) {
+    public void messageArrived(String topic, MqttMessage message) {
         logger.debug("{} - Message arrived on topic {} with QoS {}", this.kuraServicePid, topic, message.getQos());
 
         this.arrivedMessagesQueue.add(new ArrivedMessage(topic, message));
@@ -240,26 +241,6 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private void checkConnected() throws KuraNotConnectedException {
         if (!isConnected()) {
             throw new KuraNotConnectedException("MQTT client is not connected");
-        }
-    }
-
-    private void startMessageHandlerTask() {
-        stopMessageHandlerTask();
-
-        this.messageHandlerFuture = this.executorService.submit(new ArrivedMessageHandler(this.arrivedMessagesQueue,
-                this.client, this.dataTransportListeners, this.options.getGroupId(), this.options.getNodeId(),
-                this.options.getPrimaryHostApplicationId()));
-    }
-
-    private void stopMessageHandlerTask() {
-        logger.debug("{} - Stop requested for message handler task", this.kuraServicePid);
-
-        if (Objects.nonNull(this.messageHandlerFuture)) {
-            try {
-                this.messageHandlerFuture.cancel(true);
-            } catch (Exception e) {
-                logger.error("{} - Error stopping message handler task", this.kuraServicePid, e);
-            }
         }
     }
 

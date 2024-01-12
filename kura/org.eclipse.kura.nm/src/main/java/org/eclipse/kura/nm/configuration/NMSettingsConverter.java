@@ -225,16 +225,10 @@ public class NMSettingsConverter {
     private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
             throws OperatorCreationException, PemGenerationException {
         // Assumption: the private key is encoded in PKCS#8 DER format
-        //
-        // The private key is encoded in PKCS#8 DER format. The DER format is a binary
-        // format, so it is not possible to store it in a String. Therefore, the DER
-        // format is converted to PEM format, which is a text format. The PEM format
-        // is then encrypted using the provided password.
         if (privateKey.getEncoded() == null) {
             throw new NoSuchElementException("Unable to decode Private Key");
         }
 
-        // Encrypt the private key using the provided password, leveraging BouncyCastle library
         JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
                 PKCS8Generator.PBE_SHA1_3DES);
         encryptorBuilder.setPassword(privateKeyPassword.toCharArray());

@@ -197,9 +197,9 @@ public class NMSettingsConverter {
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
 
+        Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
+                deviceId);
         try {
-            Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
-                    deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
             logger.error("Unable to decode Client Certificate for interface \"{}\"", deviceId);
@@ -207,24 +207,19 @@ public class NMSettingsConverter {
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                 deviceId);
-        String privateKeyPassword;
         try {
+            // The private key is encrypted using the SHA-256 of the private key itself as password
             byte[] privateKeyPasswordBytes = MessageDigest.getInstance("SHA-256").digest(privateKey.getEncoded());
-            privateKeyPassword = Base64.getEncoder().encodeToString(privateKeyPasswordBytes);
+            String privateKeyPassword = Base64.getEncoder().encodeToString(privateKeyPasswordBytes);
+            settings.put("private-key-password", new Variant<>(privateKeyPassword));
+
+            byte[] encryptedPrivateKey = convertToPem(encryptPrivateKey(privateKey, privateKeyPassword));
+            settings.put("private-key", new Variant<>(encryptedPrivateKey));
         } catch (NoSuchAlgorithmException e) {
             logger.error("Something went wrong while computing SHA-256 of private key, bailing out. Caused by: ", e);
-            return;
-        }
-        byte[] encryptedPrivateKey;
-        try {
-            encryptedPrivateKey = convertToPem(encryptPrivateKey(privateKey, privateKeyPassword));
         } catch (OperatorCreationException | PemGenerationException e) {
             logger.error("Something went wrong during private key encryption, bailing out. Caused by: ", e);
-            return;
         }
-
-        settings.put("private-key", new Variant<>(encryptedPrivateKey));
-        settings.put("private-key-password", new Variant<>(privateKeyPassword));
     }
 
     private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)

@@ -164,9 +164,9 @@ The NBIRTH message sent by this cloud connection will contain the following syst
 
 Prerequisites:
 
-- Java JDK 11
-- Yarn 1.22.19
-- Node.js 19.1.0
+- [Java JDK](https://openjdk.org/projects/jdk/11/) 11+
+- [Yarn](https://yarnpkg.com) 1.22.19+
+- [Node.js](https://nodejs.org/en) 19.1.0+
 
 ### Build and install HiveMQ Sparkplug TCK extension and webconsole
 

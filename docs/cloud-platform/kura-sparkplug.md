@@ -180,7 +180,7 @@ yarn install
 
 ### Setup HiveMQ Community Edition MQTT broker
 
-1. Download [HiveMQ Community Edition](https://www.hivemq.com/download/) MQTT broker and unzip to `hivemq`
+1. Download [HiveMQ Community Edition](https://github.com/hivemq/hivemq-community-edition#quick-start) MQTT broker and unzip to `hivemq`
 2. Copy the previously build `eclipse-sparkplug/sparkplug/tck/build/hivemq-extension/sparkplug-tck-3.0.0-rc1.zip` to the HiveMQ `hivemq/extensions` directory and unzip. The target directory structure should be as follows:
     ```
     extensions/

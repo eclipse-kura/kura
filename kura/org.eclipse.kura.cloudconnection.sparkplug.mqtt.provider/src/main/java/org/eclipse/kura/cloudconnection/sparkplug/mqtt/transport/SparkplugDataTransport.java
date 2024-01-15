@@ -46,7 +46,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private SparkplugDataTransportOptions options;
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService executorService;
     private ArrivedMessageHandler messageHandler;
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue = new LinkedBlockingDeque<>();
 
@@ -57,9 +57,6 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void activate(Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
-
-        this.messageHandler = new ArrivedMessageHandler(this.arrivedMessagesQueue, dataTransportListeners);
-        this.executorService.submit(this.messageHandler);
 
         update(properties);
 
@@ -102,7 +99,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             disconnect(0);
         }
 
-        this.executorService.shutdownNow();
+        stopMessageHandlerTask();
 
         logger.info("{} - Deactivated", this.kuraServicePid);
     }
@@ -124,8 +121,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             this.client.confirmSession();
         }
 
-        this.messageHandler.update(this.client, this.options.getGroupId(), this.options.getNodeId(),
-                this.options.getPrimaryHostApplicationId());
+        startMessageHandlerTask();
     }
 
     @Override
@@ -155,6 +151,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
     @Override
     public void disconnect(long quiesceTimeout) {
+        stopMessageHandlerTask();
+
         if (isConnected()) {
             this.client.terminateSession(true, quiesceTimeout);
         } else {
@@ -257,6 +255,22 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             f.accept(argument);
         } catch (Exception e) {
             logger.error("An error occured in listener {}", f.getClass().getName(), e);
+        }
+    }
+
+    private void startMessageHandlerTask() {
+        stopMessageHandlerTask();
+
+        this.executorService = Executors.newSingleThreadExecutor();
+        this.messageHandler = new ArrivedMessageHandler(this.arrivedMessagesQueue, this.dataTransportListeners,
+                this.client, this.options.getGroupId(), this.options.getNodeId(),
+                this.options.getPrimaryHostApplicationId());
+        this.executorService.submit(this.messageHandler);
+    }
+
+    private void stopMessageHandlerTask() {
+        if (Objects.nonNull(this.executorService)) {
+            this.executorService.shutdownNow();
         }
     }
 

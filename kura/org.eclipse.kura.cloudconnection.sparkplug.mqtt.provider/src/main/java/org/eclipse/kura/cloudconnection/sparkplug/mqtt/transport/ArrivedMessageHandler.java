@@ -33,22 +33,18 @@ public class ArrivedMessageHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ArrivedMessageHandler.class);
 
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue;
-    private SparkplugMqttClient client;
     private Set<DataTransportListener> listeners;
+    private SparkplugMqttClient client;
     private String groupId;
     private String nodeId;
     private Optional<String> primaryHostId;
     private long lastStateTimestamp = 0;
 
     public ArrivedMessageHandler(LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue,
-            Set<DataTransportListener> listeners) {
+            Set<DataTransportListener> listeners, SparkplugMqttClient client, String groupId, String nodeId,
+            Optional<String> primaryHostId) {
         this.arrivedMessagesQueue = arrivedMessagesQueue;
         this.listeners = listeners;
-    }
-
-    public synchronized void update(SparkplugMqttClient client, String groupId, String nodeId,
-            Optional<String> primaryHostId) {
-        logger.debug("Updating message handler");
         this.client = client;
         this.groupId = groupId;
         this.nodeId = nodeId;
@@ -66,10 +62,9 @@ public class ArrivedMessageHandler implements Runnable {
                 handleArrivedMessage(msg.getTopic(), msg.getMessage());
             }
         } catch (InterruptedException e) {
+            logger.debug("Stopped arrived messages queue consumer");
             Thread.currentThread().interrupt();
         }
-
-        logger.debug("Stopped arrived messages queue consumer");
     }
 
     private synchronized void handleArrivedMessage(String topic, MqttMessage message) {

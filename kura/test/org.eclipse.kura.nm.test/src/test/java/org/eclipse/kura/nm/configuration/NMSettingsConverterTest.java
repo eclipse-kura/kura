@@ -677,7 +677,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
                 "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("ca-cert-password");
@@ -737,7 +737,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
                 "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("phase2-auth");
@@ -766,7 +766,7 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
                 "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("phase2-auth");
@@ -3179,7 +3179,7 @@ public class NMSettingsConverterTest {
         assertNull(errorMessage, this.occurredException);
     }
 
-    private void thenResultingBuildAllMapContainsEncrypted(String key, String expectedPemPrivateKey,
+    private void thenResultingMapContainsEncrypted(String key, String expectedPemPrivateKey,
             String privateKeyPassword) {
         byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
         byte[] decryptedKey = null;

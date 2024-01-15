@@ -677,8 +677,8 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
-                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
         thenResultingMapNotContains("ca-cert-password");
         thenResultingMapNotContains("client-cert-password");
@@ -737,8 +737,8 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
-                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
@@ -766,8 +766,8 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        thenResultingMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
-                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
@@ -3179,24 +3179,24 @@ public class NMSettingsConverterTest {
         assertNull(errorMessage, this.occurredException);
     }
 
-    private void thenResultingMapContainsEncrypted(String key, String expectedPemPrivateKey,
-            String privateKeyPassword) {
+    private void thenResultingMapContainsEncryptedPrivateKey(String key, String expectedPrivateKeyPassword,
+            String expectedPemPrivateKeyContent) {
         byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
         byte[] decryptedKey = null;
 
-        PBEKeySpec pbeSpec = new PBEKeySpec(privateKeyPassword.toCharArray());
+        PBEKeySpec pbeSpec = new PBEKeySpec(expectedPrivateKeyPassword.toCharArray());
         try {
-            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(convertToDer(encryptedKey));
-            SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
-            SecretKey secret = skf.generateSecret(pbeSpec);
-            PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            decryptedKey = kf.generatePrivate(keySpec).getEncoded();
+            EncryptedPrivateKeyInfo privateKeyInfo = new EncryptedPrivateKeyInfo(convertToDer(encryptedKey));
+            SecretKeyFactory secretKeyFact = SecretKeyFactory.getInstance(privateKeyInfo.getAlgName());
+            SecretKey secret = secretKeyFact.generateSecret(pbeSpec);
+            PKCS8EncodedKeySpec keySpec = privateKeyInfo.getKeySpec(secret);
+            KeyFactory keyFact = KeyFactory.getInstance("RSA");
+            decryptedKey = keyFact.generatePrivate(keySpec).getEncoded();
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
             fail("Failed to decrypt private key, caused by: " + e.getMessage());
         }
 
-        assertEquals(expectedPemPrivateKey, Base64.getEncoder().encodeToString(decryptedKey));
+        assertEquals(expectedPemPrivateKeyContent, Base64.getEncoder().encodeToString(decryptedKey));
     }
 
     private byte[] convertToDer(byte[] privateKeyPem) {

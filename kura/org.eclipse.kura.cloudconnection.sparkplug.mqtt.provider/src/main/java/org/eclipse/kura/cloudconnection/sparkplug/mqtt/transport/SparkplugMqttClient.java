@@ -49,7 +49,14 @@ public class SparkplugMqttClient {
 
     private MqttAsyncClient client;
     private BdSeqCounter bdSeqCounter = new BdSeqCounter();
-    private boolean isSessionEstabilished = false;
+
+    private enum SessionStatus {
+        TERMINATED,
+        ESTABILISHING,
+        ESTABILISHED
+    }
+
+    private SessionStatus sessionStatus = SessionStatus.TERMINATED;
 
     public SparkplugMqttClient(SparkplugDataTransportOptions options, MqttCallback callback,
             Set<DataTransportListener> listeners) {
@@ -64,6 +71,8 @@ public class SparkplugMqttClient {
         this.nodeId = options.getNodeId();
         this.primaryHostId = options.getPrimaryHostApplicationId();
         this.connectionTimeoutMs = options.getConnectionTimeoutMs();
+
+        logger.info("Sparkplug MQTT client updated, bdSeq is reset");
     }
 
     public synchronized boolean isConnected() {
@@ -71,55 +80,59 @@ public class SparkplugMqttClient {
     }
 
     public synchronized boolean isSessionEstabilished() {
-        return this.isSessionEstabilished;
+        return this.sessionStatus == SessionStatus.ESTABILISHED;
     }
 
     public synchronized void estabilishSession(boolean shouldConnectClient) {
-        logger.info("Estabilishing Sparkplug Edge Node session");
+        if (this.sessionStatus == SessionStatus.TERMINATED) {
+            try {
+                doStateTransition(SessionStatus.TERMINATED, SessionStatus.ESTABILISHING);
 
-        try {
-            this.isSessionEstabilished = false;
+                if (shouldConnectClient) {
+                    newClientConnection();
+                }
 
-            if (shouldConnectClient) {
-                newClientConnection();
+                subscribe(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId), 1);
+
+                if (this.primaryHostId.isPresent()) {
+                    subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
+                }
+            } catch (MqttException e) {
+                logger.error("Error estabilishing Sparkplug Edge Node session", e);
             }
-
-            subscribe(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId), 1);
-
-            if (this.primaryHostId.isPresent()) {
-                subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
-            }
-        } catch (MqttException e) {
-            logger.error("Error estabilishing Sparkplug Edge Node session", e);
+        } else {
+            logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHING);
         }
     }
 
-    public void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
-        try {
-            logger.info("Terminating Sparkplug Edge Node session");
-            this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
+    public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
+        if (this.sessionStatus == SessionStatus.ESTABILISHED) {
+            try {
+                this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
 
-            synchronized (this) {
                 sendEdgeNodeDeath();
 
                 if (shouldDisconnectClient) {
                     disconnectClient(quiesceTimeout);
                 }
 
-                this.isSessionEstabilished = false;
-            }
+                doStateTransition(SessionStatus.ESTABILISHED, SessionStatus.TERMINATED);
 
-            this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
-            logger.info("Sparkplug Edge Node session terminated");
-        } catch (MqttException e) {
-            logger.error("Error terminating Sparkplug Edge Node session", e);
+                this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
+            } catch (MqttException e) {
+                logger.error("Error terminating Sparkplug Edge Node session", e);
+            }
+        } else {
+            logInvalidStateTransition(this.sessionStatus, SessionStatus.TERMINATED);
         }
     }
 
-    public void confirmSession() {
-        synchronized (this) {
+    public synchronized void confirmSession() {
+        if (this.sessionStatus == SessionStatus.ESTABILISHING) {
             this.sendEdgeNodeBirth();
-            this.isSessionEstabilished = true;
+            doStateTransition(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
+        } else {
+            logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHED);
         }
 
         this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
@@ -220,6 +233,15 @@ public class SparkplugMqttClient {
         token.waitForCompletion(this.connectionTimeoutMs);
 
         logger.debug("Client disconnected");
+    }
+
+    private void doStateTransition(SessionStatus from, SessionStatus to) {
+        logger.info("Sparkplug Session: {} -> {}", from, to);
+        this.sessionStatus = to;
+    }
+
+    private void logInvalidStateTransition(SessionStatus from, SessionStatus to) {
+        logger.warn("Invalid state transition {} -> {}, ignoring request", from, to);
     }
 
 }

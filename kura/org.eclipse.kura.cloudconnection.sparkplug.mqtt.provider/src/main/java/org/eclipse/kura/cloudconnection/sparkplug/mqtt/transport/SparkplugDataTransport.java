@@ -47,7 +47,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
 
     private ExecutorService executorService;
-    private ArrivedMessageHandler messageHandler;
+    private ArrivedMessageDispatcher messageHandler;
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue = new LinkedBlockingDeque<>();
 
     /*
@@ -262,7 +262,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         stopMessageHandlerTask();
 
         this.executorService = Executors.newSingleThreadExecutor();
-        this.messageHandler = new ArrivedMessageHandler(this.arrivedMessagesQueue, this.dataTransportListeners,
+        this.messageHandler = new ArrivedMessageDispatcher(this.arrivedMessagesQueue, this.dataTransportListeners,
                 this.client, this.options.getGroupId(), this.options.getNodeId(),
                 this.options.getPrimaryHostApplicationId());
         this.executorService.submit(this.messageHandler);

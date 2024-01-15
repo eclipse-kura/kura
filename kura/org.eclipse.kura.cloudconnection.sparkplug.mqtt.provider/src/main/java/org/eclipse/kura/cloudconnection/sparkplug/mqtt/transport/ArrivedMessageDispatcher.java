@@ -28,9 +28,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class ArrivedMessageHandler implements Runnable {
+public class ArrivedMessageDispatcher implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ArrivedMessageHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ArrivedMessageDispatcher.class);
 
     private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue;
     private Set<DataTransportListener> listeners;
@@ -40,7 +40,7 @@ public class ArrivedMessageHandler implements Runnable {
     private Optional<String> primaryHostId;
     private long lastStateTimestamp = 0;
 
-    public ArrivedMessageHandler(LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue,
+    public ArrivedMessageDispatcher(LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue,
             Set<DataTransportListener> listeners, SparkplugMqttClient client, String groupId, String nodeId,
             Optional<String> primaryHostId) {
         this.arrivedMessagesQueue = arrivedMessagesQueue;
@@ -59,7 +59,7 @@ public class ArrivedMessageHandler implements Runnable {
             while (!Thread.interrupted()) {
                 ArrivedMessage msg = this.arrivedMessagesQueue.take();
 
-                handleArrivedMessage(msg.getTopic(), msg.getMessage());
+                dispatchArrivedMessage(msg.getTopic(), msg.getMessage());
             }
         } catch (InterruptedException e) {
             logger.debug("Stopped arrived messages queue consumer");
@@ -67,7 +67,7 @@ public class ArrivedMessageHandler implements Runnable {
         }
     }
 
-    private synchronized void handleArrivedMessage(String topic, MqttMessage message) {
+    private synchronized void dispatchArrivedMessage(String topic, MqttMessage message) {
         logger.debug("Processing arrived message with topic '{}' from queue. Elements remaining: {}", topic,
                 this.arrivedMessagesQueue.size());
 
@@ -77,22 +77,15 @@ public class ArrivedMessageHandler implements Runnable {
                 .equals(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId));
 
         if (isValidStateMessage) {
-            handleStateMessage(message.getPayload());
+            dispatchStateMessage(message.getPayload());
         } else if (isValidNcmdMessage) {
-            handleRebirthMessage(message.getPayload());
+            dispatchRebirthMessage(message.getPayload());
         } else {
-            this.listeners.forEach(listener -> {
-                try {
-                    logger.debug("Forwarding to listeners");
-                    listener.onMessageArrived(topic, message.getPayload(), message.getQos(), message.isRetained());
-                } catch (Exception e) {
-                    logger.error("Error processing onMessageArrived for listener {}", listener.getClass().getName(), e);
-                }
-            });
+            dispatchMessageToListeners(topic, message.getPayload(), message.getQos(), message.isRetained());
         }
     }
 
-    private void handleStateMessage(byte[] payload) {
+    private void dispatchStateMessage(byte[] payload) {
         logger.debug("Handling STATE message");
 
         JsonElement json = JsonParser.parseString(new String(payload, StandardCharsets.UTF_8));
@@ -115,7 +108,7 @@ public class ArrivedMessageHandler implements Runnable {
         }
     }
 
-    private void handleRebirthMessage(byte[] payload) {
+    private void dispatchRebirthMessage(byte[] payload) {
         logger.debug("Handling NCMD message");
 
         try {
@@ -133,6 +126,17 @@ public class ArrivedMessageHandler implements Runnable {
         } catch (NoSuchFieldException e) {
             logger.debug("NMCD message ignored, it does not contain any Node Control/Rebirth metric");
         }
+    }
+
+    private void dispatchMessageToListeners(String topic, byte[] payload, int qos, boolean isRetained) {
+        this.listeners.forEach(listener -> {
+            try {
+                logger.debug("Forwarding to listeners");
+                listener.onMessageArrived(topic, payload, qos, isRetained);
+            } catch (Exception e) {
+                logger.error("Error processing onMessageArrived for listener {}", listener.getClass().getName(), e);
+            }
+        });
     }
 
 }

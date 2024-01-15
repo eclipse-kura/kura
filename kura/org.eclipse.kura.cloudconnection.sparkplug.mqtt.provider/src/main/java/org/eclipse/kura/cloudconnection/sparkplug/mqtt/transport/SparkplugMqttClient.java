@@ -131,12 +131,11 @@ public class SparkplugMqttClient {
         if (this.sessionStatus == SessionStatus.ESTABILISHING) {
             this.sendEdgeNodeBirth();
             doStateTransition(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
+            this.listeners
+                    .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
         } else {
             logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHED);
         }
-
-        this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
-        logger.info("Sparkplug Edge Node session estabilished");
     }
 
     public synchronized IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean isRetained) {

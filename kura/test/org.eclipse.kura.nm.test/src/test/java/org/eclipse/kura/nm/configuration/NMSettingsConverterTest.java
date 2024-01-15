@@ -21,12 +21,18 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
@@ -37,9 +43,14 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -666,12 +677,40 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
-        // thenResultingMapContainsBytes("private-key",
-        // "-----BEGIN ENCRYPTED PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END ENCRYPTED PRIVATE KEY-----\n");
-        // WIP
+        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("ca-cert-password");
         thenResultingMapNotContains("client-cert-password");
+    }
+
+    private void thenResultingBuildAllMapContainsEncrypted(String key, String expectedPemPrivateKey,
+            String privateKeyPassword) {
+        byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
+        byte[] decryptedKey = null;
+
+        String encryptedKeyString = new String(encryptedKey, StandardCharsets.UTF_8);
+        // Convert to DER format
+        String encryptedKeyStringContent = encryptedKeyString.replace("\n", "")
+                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
+                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
+        byte[] base64DecodedEncryptedKeyContent = Base64.getDecoder().decode(encryptedKeyStringContent.getBytes());
+
+        PBEKeySpec pbeSpec = new PBEKeySpec(privateKeyPassword.toCharArray());
+        try {
+            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(base64DecodedEncryptedKeyContent);
+            SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
+            SecretKey secret = skf.generateSecret(pbeSpec);
+            PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            decryptedKey = kf.generatePrivate(keySpec).getEncoded();
+
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
+            fail("Failed to decrypt private key, caused by: " + e.getMessage());
+
+        }
+
+        assertEquals(expectedPemPrivateKey, Base64.getEncoder().encodeToString(decryptedKey));
     }
 
     @Test

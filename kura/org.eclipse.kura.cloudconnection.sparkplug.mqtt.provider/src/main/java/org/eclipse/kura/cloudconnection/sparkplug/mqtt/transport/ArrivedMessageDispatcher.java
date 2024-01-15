@@ -81,7 +81,7 @@ public class ArrivedMessageDispatcher implements Runnable {
         } else if (isValidNcmdMessage) {
             dispatchRebirthMessage(message.getPayload());
         } else {
-            dispatchMessageToListeners(topic, message.getPayload(), message.getQos(), message.isRetained());
+            dispatchGenericMessage(topic, message.getPayload(), message.getQos(), message.isRetained());
         }
     }
 
@@ -128,7 +128,7 @@ public class ArrivedMessageDispatcher implements Runnable {
         }
     }
 
-    private void dispatchMessageToListeners(String topic, byte[] payload, int qos, boolean isRetained) {
+    private void dispatchGenericMessage(String topic, byte[] payload, int qos, boolean isRetained) {
         this.listeners.forEach(listener -> {
             try {
                 logger.debug("Forwarding to listeners");

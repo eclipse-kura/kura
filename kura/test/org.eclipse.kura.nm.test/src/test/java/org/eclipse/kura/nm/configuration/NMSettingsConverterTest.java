@@ -684,35 +684,6 @@ public class NMSettingsConverterTest {
         thenResultingMapNotContains("client-cert-password");
     }
 
-    private void thenResultingBuildAllMapContainsEncrypted(String key, String expectedPemPrivateKey,
-            String privateKeyPassword) {
-        byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
-        byte[] decryptedKey = null;
-
-        String encryptedKeyString = new String(encryptedKey, StandardCharsets.UTF_8);
-        // Convert to DER format
-        String encryptedKeyStringContent = encryptedKeyString.replace("\n", "")
-                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
-                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
-        byte[] base64DecodedEncryptedKeyContent = Base64.getDecoder().decode(encryptedKeyStringContent.getBytes());
-
-        PBEKeySpec pbeSpec = new PBEKeySpec(privateKeyPassword.toCharArray());
-        try {
-            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(base64DecodedEncryptedKeyContent);
-            SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
-            SecretKey secret = skf.generateSecret(pbeSpec);
-            PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            decryptedKey = kf.generatePrivate(keySpec).getEncoded();
-
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
-            fail("Failed to decrypt private key, caused by: " + e.getMessage());
-
-        }
-
-        assertEquals(expectedPemPrivateKey, Base64.getEncoder().encodeToString(decryptedKey));
-    }
-
     @Test
     public void build8021xSettingsShouldThrowWithTlsWithNullPrivateKey() {
         givenMapWith("net.interface.wlan0.config.802-1x.eap", "Kura8021xEapTls");
@@ -765,9 +736,9 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        // thenResultingMapContainsBytes("private-key",
-        // "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n"); WIP
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
@@ -794,9 +765,9 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        // thenResultingMapContainsBytes("private-key",
-        // "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
         thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingBuildAllMapContainsEncrypted("private-key", PEM_PRIVATE_KEY,
+                "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
@@ -3195,7 +3166,7 @@ public class NMSettingsConverterTest {
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
-    public void thenNoExceptionOccurred() {
+    private void thenNoExceptionOccurred() {
         String errorMessage = "Empty message";
         if (Objects.nonNull(this.occurredException)) {
             StringWriter sw = new StringWriter();
@@ -3206,6 +3177,35 @@ public class NMSettingsConverterTest {
         }
 
         assertNull(errorMessage, this.occurredException);
+    }
+
+    private void thenResultingBuildAllMapContainsEncrypted(String key, String expectedPemPrivateKey,
+            String privateKeyPassword) {
+        byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
+        byte[] decryptedKey = null;
+
+        String encryptedKeyString = new String(encryptedKey, StandardCharsets.UTF_8);
+        // Convert to DER format
+        String encryptedKeyStringContent = encryptedKeyString.replace("\n", "")
+                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
+                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
+        byte[] base64DecodedEncryptedKeyContent = Base64.getDecoder().decode(encryptedKeyStringContent.getBytes());
+
+        PBEKeySpec pbeSpec = new PBEKeySpec(privateKeyPassword.toCharArray());
+        try {
+            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(base64DecodedEncryptedKeyContent);
+            SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
+            SecretKey secret = skf.generateSecret(pbeSpec);
+            PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            decryptedKey = kf.generatePrivate(keySpec).getEncoded();
+
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
+            fail("Failed to decrypt private key, caused by: " + e.getMessage());
+
+        }
+
+        assertEquals(expectedPemPrivateKey, Base64.getEncoder().encodeToString(decryptedKey));
     }
 
     /*

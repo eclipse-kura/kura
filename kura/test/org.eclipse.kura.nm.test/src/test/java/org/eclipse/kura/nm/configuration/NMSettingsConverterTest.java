@@ -3184,28 +3184,27 @@ public class NMSettingsConverterTest {
         byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
         byte[] decryptedKey = null;
 
-        String encryptedKeyString = new String(encryptedKey, StandardCharsets.UTF_8);
-        // Convert to DER format
-        String encryptedKeyStringContent = encryptedKeyString.replace("\n", "")
-                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
-                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
-        byte[] base64DecodedEncryptedKeyContent = Base64.getDecoder().decode(encryptedKeyStringContent.getBytes());
-
         PBEKeySpec pbeSpec = new PBEKeySpec(privateKeyPassword.toCharArray());
         try {
-            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(base64DecodedEncryptedKeyContent);
+            EncryptedPrivateKeyInfo pkinfo = new EncryptedPrivateKeyInfo(convertToDer(encryptedKey));
             SecretKeyFactory skf = SecretKeyFactory.getInstance(pkinfo.getAlgName());
             SecretKey secret = skf.generateSecret(pbeSpec);
             PKCS8EncodedKeySpec keySpec = pkinfo.getKeySpec(secret);
             KeyFactory kf = KeyFactory.getInstance("RSA");
             decryptedKey = kf.generatePrivate(keySpec).getEncoded();
-
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
             fail("Failed to decrypt private key, caused by: " + e.getMessage());
-
         }
 
         assertEquals(expectedPemPrivateKey, Base64.getEncoder().encodeToString(decryptedKey));
+    }
+
+    private byte[] convertToDer(byte[] privateKeyPem) {
+        String privateKeyString = new String(privateKeyPem, StandardCharsets.UTF_8);
+        String privateKeyStringContent = privateKeyString.replace("\n", "")
+                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
+                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
+        return Base64.getDecoder().decode(privateKeyStringContent.getBytes());
     }
 
     /*

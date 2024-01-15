@@ -28,6 +28,8 @@ import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -35,6 +37,8 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.listener.DataServiceListener;
+import org.eclipse.kura.type.StringValue;
+import org.eclipse.kura.type.TypedValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -172,10 +176,30 @@ public class SparkplugCloudEndpoint
     @Override
     public void onConnectionEstablished() {
         logger.debug("{} - Connection estabilished", this.kuraServicePid);
+
+        sendExampleDeviceBirth();
+
         this.cloudConnectionListeners.forEach(listener -> callSafely(listener::onConnectionEstablished));
         postConnectionChangeEvent(true);
 
         // TO DO: init subscriptions
+    }
+
+    private void sendExampleDeviceBirth() {
+        try {
+            this.dataService.subscribe(SparkplugTopics.getDeviceCommandTopic("g1", "n1", "d1"), 1);
+
+            Map<String, TypedValue<?>> metrics = new HashMap<>();
+            TypedValue<String> value = new StringValue("test.value");
+            metrics.put("test.key", value);
+
+            String topic = SparkplugTopics.getDeviceBirthTopic("g1", "n1", "d1");
+            byte[] payload = SparkplugPayloads.getDeviceBirthPayload(1, metrics);
+
+            this.dataService.publish(topic, payload, 0, false, 7);
+        } catch (KuraException e) {
+            logger.error("Error in example", e);
+        }
     }
 
     @Override

@@ -95,14 +95,12 @@ public class ArrivedMessageDispatcher implements Runnable {
         if (this.lastStateTimestamp <= timestamp) {
             this.lastStateTimestamp = timestamp;
 
-            if (isOnline && !this.client.isSessionEstabilished()) {
+            if (isOnline) {
                 logger.info("Primary Host Application is online");
                 this.client.confirmSession();
             } else {
                 logger.info("Primary Host Application is offline");
-                if (this.client.isSessionEstabilished()) {
-                    this.client.terminateSession(true, 0);
-                }
+                this.client.terminateSession(true, 0);
                 this.client.estabilishSession(true);
             }
         }
@@ -115,7 +113,7 @@ public class ArrivedMessageDispatcher implements Runnable {
             boolean nodeRebirth = SparkplugPayloads.getBooleanMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME,
                     payload);
 
-            if (nodeRebirth && this.client.isSessionEstabilished()) {
+            if (nodeRebirth) {
                 logger.debug("{} requested", SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME);
 
                 this.client.terminateSession(false, 0);

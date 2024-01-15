@@ -50,7 +50,7 @@ public class SparkplugMqttClient {
     private MqttAsyncClient client;
     private BdSeqCounter bdSeqCounter = new BdSeqCounter();
 
-    private enum SessionStatus {
+    public enum SessionStatus {
         TERMINATED,
         ESTABILISHING,
         ESTABILISHED
@@ -79,14 +79,10 @@ public class SparkplugMqttClient {
         return Objects.nonNull(this.client) && this.client.isConnected();
     }
 
-    public synchronized boolean isSessionEstabilished() {
-        return this.sessionStatus == SessionStatus.ESTABILISHED;
-    }
-
     public synchronized void estabilishSession(boolean shouldConnectClient) {
         if (this.sessionStatus == SessionStatus.TERMINATED) {
             try {
-                doStateTransition(SessionStatus.TERMINATED, SessionStatus.ESTABILISHING);
+                updateSessionStatus(SessionStatus.TERMINATED, SessionStatus.ESTABILISHING);
 
                 if (shouldConnectClient) {
                     newClientConnection();
@@ -106,17 +102,19 @@ public class SparkplugMqttClient {
     }
 
     public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
-        if (this.sessionStatus == SessionStatus.ESTABILISHED) {
+        if (this.sessionStatus == SessionStatus.ESTABILISHED || this.sessionStatus == SessionStatus.ESTABILISHING) {
             try {
                 this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
 
-                sendEdgeNodeDeath();
+                if (this.sessionStatus == SessionStatus.ESTABILISHED) {
+                    sendEdgeNodeDeath();
+                }
 
                 if (shouldDisconnectClient) {
                     disconnectClient(quiesceTimeout);
                 }
 
-                doStateTransition(SessionStatus.ESTABILISHED, SessionStatus.TERMINATED);
+                updateSessionStatus(this.sessionStatus, SessionStatus.TERMINATED);
 
                 this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
             } catch (MqttException e) {
@@ -130,7 +128,7 @@ public class SparkplugMqttClient {
     public synchronized void confirmSession() {
         if (this.sessionStatus == SessionStatus.ESTABILISHING) {
             this.sendEdgeNodeBirth();
-            doStateTransition(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
+            updateSessionStatus(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
             this.listeners
                     .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
         } else {
@@ -182,7 +180,7 @@ public class SparkplugMqttClient {
             server = this.serversIterator.next();
         }
 
-        logger.debug("Selecting next server {} from {}", server, this.servers);
+        logger.info("Selecting next server {} from {}", server, this.servers);
         return server;
     }
 
@@ -234,7 +232,7 @@ public class SparkplugMqttClient {
         logger.debug("Client disconnected");
     }
 
-    private void doStateTransition(SessionStatus from, SessionStatus to) {
+    private void updateSessionStatus(SessionStatus from, SessionStatus to) {
         logger.info("Sparkplug Session: {} -> {}", from, to);
         this.sessionStatus = to;
     }

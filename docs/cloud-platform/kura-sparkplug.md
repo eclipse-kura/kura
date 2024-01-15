@@ -91,6 +91,7 @@ At any point in time, an Edge Node can be connected to at most one MQTT server. 
 - [Eclipse Sparkplug FAQ](https://sparkplug.eclipse.org/about/faq/)
 
 
+
 ## Cloud Connection Configuration
 
 ### Cloud Endpoint Layer Configuration
@@ -157,3 +158,75 @@ DoubleArray
 
 The NBIRTH message sent by this cloud connection will contain the following system-wise metrics, that are fetched from Kura's [`SystemService`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/system/SystemService.java). In particular, only the properties returned by [`SystemService.getProperties`](https://github.com/eclipse/kura/blob/9480be5b39bbd3901102e82ba047bd4e91260999/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/system/SystemService.java#L473) are added as Sparkplug Metrics in the birth payload with Sparkplug Data Types defined as in mapping [above](#supported-sparkplug-data-types).
 
+
+
+## How to setup Eclipse Sparkplug Test Compatibility Kit (TCK)
+
+Prerequisites:
+
+- Java JDK 11
+- Yarn 1.22.19
+- Node.js 19.1.0
+
+### Build and install HiveMQ Sparkplug TCK extension and webconsole
+
+```bash
+git clone eclipse-sparkplug/sparkplug
+cd sparkplug/tck
+./gradlew build
+cd webconsole
+yarn install
+```
+
+### Setup HiveMQ Community Edition MQTT broker
+
+1. Download [HiveMQ Community Edition](https://www.hivemq.com/download/) MQTT broker and unzip to `hivemq`
+2. Copy the previously build `eclipse-sparkplug/sparkplug/tck/build/hivemq-extension/sparkplug-tck-3.0.0-rc1.zip` to the HiveMQ `hivemq/extensions` directory and unzip. The target directory structure should be as follows:
+    ```
+    extensions/
+        sparkplug-tck/
+            hivemq-extension.xml
+            sparkplug-tck-3.0.1-SNAPSHOT.jar
+    ```
+3. Add a websocket listener to HiveMQ editing the `hivemq/conf/config.xml`:
+    ```xml
+    <hivemq>
+        <listeners>
+            <tcp-listener>
+                <port>1883</port>
+                <bind-address>0.0.0.0</bind-address>
+            </tcp-listener>
+            <websocket-listener>
+                <port>8000</port>
+                <bind-address>0.0.0.0</bind-address>
+                <path>/mqtt</path>
+                <name>my-websocket-listener</name>
+                <subprotocols>
+                    <subprotocol>mqttv3.1</subprotocol>
+                    <subprotocol>mqtt</subprotocol>
+                </subprotocols>
+                <allow-extensions>true</allow-extensions>
+            </websocket-listener>
+        </listeners>
+        <anonymous-usage-statistics>
+            <enabled>true</enabled>
+        </anonymous-usage-statistics>
+    </hivemq>
+    ```
+
+### Run tests
+
+1. Start the HiveMQ broker:
+    ```bash
+    hivemq/bin/run.sh
+    ```
+2. Start the webconsole for the TCK:
+    ```bash
+    cd sparkplug/tck/webconsole
+    yarn start
+    ```
+3. Access the webconsole at [`http://localhost:3000`](http://localhost:3000) and connect the test client to the broker using the "Set Default Values" feature
+    ![](./images/sparkplugTckMqttConfig.png)
+4. Some tests require a Primary Host Application ID to be defined. Before switching to the "Edge Node" profile set the Primary Host Application ID as in picture below
+    ![](./images/sparkplugTckHostSetup.png)
+5. Tests results will be available under `hivemq/SparkplugTCKResults.log`

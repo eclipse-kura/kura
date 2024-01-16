@@ -92,11 +92,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 
-        if (isConnected()) {
-            disconnect(0);
-        }
-
-        stopExecutorService();
+        disconnect(0);
 
         logger.info("{} - Deactivated", this.kuraServicePid);
     }
@@ -113,8 +109,13 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
         this.client.estabilishSession(true);
 
+        if (this.options.getPrimaryHostApplicationId().isPresent()) {
+            this.client.confirmSession();
+        }
+
         stopExecutorService();
         this.executorService = Executors.newSingleThreadExecutor();
+        logger.debug("{} - Initialized message dispatcher executor", this.kuraServicePid);
     }
 
     @Override
@@ -217,10 +218,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void messageArrived(String topic, MqttMessage message) {
         logger.debug("{} - Message arrived on topic {} with QoS {}", this.kuraServicePid, topic, message.getQos());
 
-        this.executorService.submit(() -> {
-            this.dataTransportListeners.forEach(listener -> listener.onMessageArrived(topic, message.getPayload(),
-                    message.getQos(), message.isRetained()));
-        });
+        this.executorService.submit(() -> this.dataTransportListeners.forEach(listener -> listener
+                .onMessageArrived(topic, message.getPayload(), message.getQos(), message.isRetained())));
         this.executorService.submit(this.client.getMessageDispatcher(topic, message));
     }
 

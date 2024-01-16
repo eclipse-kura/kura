@@ -99,8 +99,6 @@ public class SparkplugMqttClient {
 
                 if (this.primaryHostId.isPresent()) {
                     subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
-                } else {
-                    confirmSession();
                 }
             } catch (MqttException e) {
                 this.sessionStatus = SessionStatus.TERMINATED;

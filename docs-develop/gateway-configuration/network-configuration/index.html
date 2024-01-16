@@ -597,6 +597,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#8021x-properties" class="md-nav__link">
+    802.1x properties
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3293,6 +3300,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#8021x-properties" class="md-nav__link">
+    802.1x properties
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3949,6 +3963,58 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.vlan.flags</code></td>
 <td>String</td>
 <td>Configuration flags, between 0 and 15, default 1 (Optional)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8021x-properties">802.1x properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.eap</code></td>
+<td>String</td>
+<td>The EAP method to be used when authenticating to the network with 802.1x. Supported methods: "<em>Kura8021xEapTls</em>", "<em>Kura8021xEapPeap</em>", "<em>Kura8021xEapTtls</em>".</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.innerAuth</code></td>
+<td>String</td>
+<td>Specifies the "phase 2" inner authentication method when an EAP method that uses an inner TLS tunnel is specified in the "eap" property. Supported methods: "<em>Kura8021xInnerAuthNone</em>", "<em>Kura8021xInnerAuthMschapv2</em>".</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.identity</code></td>
+<td>String</td>
+<td>Identity string for EAP authentication methods. Typically the user's user or login name.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.password</code></td>
+<td>String</td>
+<td>Password used for EAP authentication methods.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.client-cert-name</code></td>
+<td>String</td>
+<td>Name referring to the corresponding Kura keystore entry containing the client certificate if used by the EAP method specified in the "eap" property. Typically is set to the same name as the <code>net.interface.&lt;interface&gt;.config.802-1x.private-key-name</code> when using EAP-TLS.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.private-key-name</code></td>
+<td>String</td>
+<td>Name referring to the corresponding Kura keystore entry containing the private key when the "eap" property is set to "Kura8021xEapTls". Typically is set to the same name as the <code>net.interface.&lt;interface&gt;.config.802-1x.client-cert-name</code>.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.ca-cert-name</code></td>
+<td>String</td>
+<td>Name referring to the corresponding Kura keystore entry containing the CA certificate if used by the EAP method specified in the "eap" property. This parameter is optional but this allows man-in-the-middle attacks and is <strong>NOT recommended</strong>.</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.anonymous-identity</code></td>
+<td>String</td>
+<td>Anonymous identity string for EAP authentication methods. Used as the unencrypted identity with EAP types that support different tunneled identity like EAP-TTLS (Optional)</td>
 </tr>
 </tbody>
 </table>

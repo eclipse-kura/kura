@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
+import org.bouncycastle.asn1.ASN1IA5String;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -79,7 +79,7 @@ public class CRLUtil {
 
                 for (final GeneralName name : generalNames) {
                     if (name.getTagNo() == GeneralName.uniformResourceIdentifier) {
-                        final String uriString = DERIA5String.getInstance(name.getName()).getString();
+                        final String uriString = ASN1IA5String.getInstance(name.getName()).getString();
                         parseURI(uriString).ifPresent(result::add);
                     }
                 }

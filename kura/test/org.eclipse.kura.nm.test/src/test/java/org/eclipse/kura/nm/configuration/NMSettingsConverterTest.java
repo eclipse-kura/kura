@@ -3182,21 +3182,22 @@ public class NMSettingsConverterTest {
     private void thenResultingMapContainsEncryptedPrivateKey(String key, String expectedPrivateKeyPassword,
             String expectedPemPrivateKeyContent) {
         byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
-        byte[] decryptedKey = null;
+        byte[] decryptedKey = decryptKey(convertToDer(encryptedKey), expectedPrivateKeyPassword);
+        assertEquals(expectedPemPrivateKeyContent, Base64.getEncoder().encodeToString(decryptedKey));
+    }
 
+    private byte[] decryptKey(byte[] encryptedKey, String expectedPrivateKeyPassword) {
         PBEKeySpec pbeSpec = new PBEKeySpec(expectedPrivateKeyPassword.toCharArray());
         try {
-            EncryptedPrivateKeyInfo privateKeyInfo = new EncryptedPrivateKeyInfo(convertToDer(encryptedKey));
+            EncryptedPrivateKeyInfo privateKeyInfo = new EncryptedPrivateKeyInfo(encryptedKey);
             SecretKeyFactory secretKeyFact = SecretKeyFactory.getInstance(privateKeyInfo.getAlgName());
             SecretKey secret = secretKeyFact.generateSecret(pbeSpec);
             PKCS8EncodedKeySpec keySpec = privateKeyInfo.getKeySpec(secret);
             KeyFactory keyFact = KeyFactory.getInstance("RSA");
-            decryptedKey = keyFact.generatePrivate(keySpec).getEncoded();
+            return keyFact.generatePrivate(keySpec).getEncoded();
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
-            fail("Failed to decrypt private key, caused by: " + e.getMessage());
+            throw new RuntimeException(e);
         }
-
-        assertEquals(expectedPemPrivateKeyContent, Base64.getEncoder().encodeToString(decryptedKey));
     }
 
     private byte[] convertToDer(byte[] privateKeyPem) {

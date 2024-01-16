@@ -12,23 +12,21 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class BdSeqCounter {
 
-    private AtomicInteger currentBdSeq = new AtomicInteger();
-    private AtomicInteger nextBdSeq = new AtomicInteger();
+    private int currentBdSeq = 0;
+    private int nextBdSeq = 0;
 
-    public void next() {
-        if (this.nextBdSeq.get() > 255) {
-            this.nextBdSeq.set(0);
+    public synchronized void next() {
+        if (this.nextBdSeq > 255) {
+            this.nextBdSeq = 0;
         }
 
-        this.currentBdSeq.set(this.nextBdSeq.getAndIncrement());
+        this.currentBdSeq = this.nextBdSeq++;
     }
 
-    public int getCurrent() {
-        return this.currentBdSeq.get();
+    public synchronized int getCurrent() {
+        return this.currentBdSeq;
     }
 
 }

@@ -108,7 +108,7 @@ public class SparkplugDataTransportOptions {
     }
 
     private int getMandatoryInt(String key, Map<String, Object> map) throws KuraException {
-        int value = (int) map.get(key);
+        Integer value = (Integer) map.get(key);
 
         if (Objects.isNull(value)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, key + " cannot be null");

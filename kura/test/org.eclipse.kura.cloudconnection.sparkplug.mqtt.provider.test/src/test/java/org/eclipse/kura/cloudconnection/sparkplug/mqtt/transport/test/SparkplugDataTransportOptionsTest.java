@@ -13,18 +13,23 @@
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransportOptions;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -42,7 +47,7 @@ public class SparkplugDataTransportOptionsTest {
     public static class ServerUrisParameterFailTest extends Steps {
 
         @Parameters
-        public static Collection<String> uris() {
+        public static Collection<String> params() {
             List<String> data = new LinkedList<>();
             data.add(null);
             data.add("");
@@ -70,38 +75,10 @@ public class SparkplugDataTransportOptionsTest {
     }
 
     @RunWith(Parameterized.class)
-    public static class ClientIdParameterFailTest extends Steps {
-
-        @Parameters
-        public static Collection<String> uris() {
-            List<String> data = new LinkedList<>();
-            data.add(null);
-            data.add("");
-            return data;
-        }
-
-        private String clientId;
-
-        public ClientIdParameterFailTest(String param) {
-            this.clientId = param;
-        }
-
-        @Test
-        public void shouldThrowKuraExceptionOnWrongClientId() {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, this.clientId);
-
-            whenOptionsCreated();
-
-            thenExceptionOccurred(KuraException.class);
-        }
-    }
-
-    @RunWith(Parameterized.class)
     public static class ServerUrisParameterTest extends Steps {
 
         @Parameters
-        public static Collection<String> uris() {
+        public static Collection<String> params() {
             List<String> data = new LinkedList<>();
             data.add("tcp://broker:1883");
             data.add("tcp://broker1:1883 tcp://broker2:1883");
@@ -120,29 +97,103 @@ public class SparkplugDataTransportOptionsTest {
             givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
             givenOptionsCreated();
 
-            whenGetPrimaryServerURI();
+            whenGetServers();
 
-            thenReturnedStringEquals(this.serverUris.split(" ")[0]);
+            thenReturnedServersContains(this.serverUris.split(" "));
         }
+    }
+
+    @RunWith(Parameterized.class)
+    public static class MandatoryPropertiesTest extends Steps {
+
+        @Parameters
+        public static Collection<Object[]> params() {
+            Collection<Object[]> data = new LinkedList<>();
+
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_GROUP_ID, null });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_GROUP_ID, "" });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_NODE_ID, null });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_NODE_ID, "" });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CLIENT_ID, null });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CLIENT_ID, "" });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_KEEP_ALIVE, null });
+            data.add(new Object[] { SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, null });
+
+            return data;
+        }
+
+        private String testKey;
+        private Object testValue;
+
+        public MandatoryPropertiesTest(String key, Object value) {
+            this.testKey = key;
+            this.testValue = value;
+        }
+
+        @Test
+        public void shouldThrowKuraExceptionOnNullMandatoryProperty() {
+            givenProperty((String) this.testKey, this.testValue);
+
+            whenOptionsCreated();
+
+            thenExceptionOccurred(KuraException.class);
+        }
+
     }
 
     public static class GettersTest extends Steps {
 
         @Test
+        public void shouldReturnCorrectGroupId() throws KuraException {
+            givenProperty(SparkplugDataTransportOptions.KEY_GROUP_ID, "g1");
+            givenOptionsCreated();
+
+            whenGetGroupId();
+
+            thenReturnedStringEquals("g1");
+        }
+
+        @Test
+        public void shouldReturnCorrectNodeId() throws KuraException {
+            givenProperty(SparkplugDataTransportOptions.KEY_NODE_ID, "n1");
+            givenOptionsCreated();
+
+            whenGetNodeId();
+
+            thenReturnedStringEquals("n1");
+        }
+
+        @Test
+        public void shouldReturnCorrectPrimaryHostApplicationId() throws KuraException {
+            givenProperty(SparkplugDataTransportOptions.KEY_PRIMARY_HOST_APPLICATION_ID, "h1");
+            givenOptionsCreated();
+
+            whenGetPrimaryHostApplicationId();
+
+            thenRetunedPrimaryHostApplicationIs("h1");
+        }
+
+        @Test
+        public void shouldReturnEmptyPrimaryHostApplicationId() throws KuraException {
+            givenOptionsCreated();
+
+            whenGetPrimaryHostApplicationId();
+
+            thenRetunedPrimaryHostApplicationIdIsEmpty();
+        }
+
+        @Test
         public void shouldReturnCorrectClientId() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
+            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test.client");
             givenOptionsCreated();
 
             whenGetClientId();
 
-            thenReturnedStringEquals("test");
+            thenReturnedStringEquals("test.client");
         }
 
         @Test
         public void shouldReturnCorrectUsername() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
             givenProperty(SparkplugDataTransportOptions.KEY_USERNAME, "user");
             givenOptionsCreated();
 
@@ -153,14 +204,12 @@ public class SparkplugDataTransportOptionsTest {
 
         @Test
         public void shouldReturnCorrectConnectionTimeoutMs() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
-            givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 2);
+            givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 30);
             givenOptionsCreated();
 
             whenGetConnectionTimeoutMs();
 
-            thenReturnedLongEquals(2000);
+            thenReturnedLongEquals(30000L);
         }
     }
 
@@ -168,8 +217,6 @@ public class SparkplugDataTransportOptionsTest {
 
         @Test
         public void shouldReturnCorrectPassword() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
             givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, new Password("secret"));
             givenOptionsCreated();
 
@@ -179,15 +226,61 @@ public class SparkplugDataTransportOptionsTest {
         }
 
         @Test
+        public void shouldNotSetPasswordWhenEmpty() throws KuraException {
+            givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, new Password(""));
+            givenOptionsCreated();
+
+            whenGetMqttConnectOptions();
+
+            thenMqttConnectOptionsNotSetsPassword();
+        }
+
+        @Test
+        public void shouldNotSetUsernameAndPassword() throws KuraException {
+            givenOptionsCreated();
+
+            whenGetMqttConnectOptions();
+
+            thenMqttConnectOptionsNotSetsUsername();
+            thenMqttConnectOptionsNotSetsPassword();
+        }
+
+        @Test
         public void shouldReturnCorrectKeepAlive() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
-            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test");
             givenProperty(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, 12);
             givenOptionsCreated();
 
             whenGetMqttConnectOptions();
 
             thenMqttConnectOptionsContainsKeepAlive(12);
+        }
+
+        @Test
+        public void shouldReturnCorrectConnectionTimeout() throws KuraException {
+            givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 20);
+            givenOptionsCreated();
+
+            whenGetMqttConnectOptions();
+
+            thenMqttConnectOptionsContainsConnectionTimeout(20);
+        }
+
+        @Test
+        public void shouldSetCleanSessionTrue() throws KuraException {
+            givenOptionsCreated();
+
+            whenGetMqttConnectOptions();
+
+            thenMqttConnectOptionsHasCleanSessionEnabled();
+        }
+
+        @Test
+        public void shouldSetAutoReconnectFalse() throws KuraException {
+            givenOptionsCreated();
+
+            whenGetMqttConnectOptions();
+
+            thenMqttConnectOptionsHasAutoReconnectDisabled();
         }
 
     }
@@ -202,8 +295,20 @@ public class SparkplugDataTransportOptionsTest {
         private Map<String, Object> properties = new HashMap<>();
         private Exception occurredException;
         private String returnedString;
+        private List<String> returnedServers = new LinkedList<>();
+        private Optional<String> returnedPrimaryHostApplicationId = Optional.empty();
         private long returnedLong;
         private MqttConnectOptions mqttConnectOptions;
+
+        @Before
+        public void defaults() {
+            givenProperty(SparkplugDataTransportOptions.KEY_GROUP_ID, "g1");
+            givenProperty(SparkplugDataTransportOptions.KEY_NODE_ID, "n1");
+            givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
+            givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test.client");
+            givenProperty(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, 60);
+            givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 30);
+        }
 
         /*
          * Given
@@ -229,8 +334,20 @@ public class SparkplugDataTransportOptionsTest {
             }
         }
 
-        void whenGetPrimaryServerURI() {
-            this.returnedString = this.options.getPrimaryServerURI();
+        void whenGetGroupId() {
+            this.returnedString = this.options.getGroupId();
+        }
+
+        void whenGetNodeId() {
+            this.returnedString = this.options.getNodeId();
+        }
+
+        void whenGetPrimaryHostApplicationId() {
+            this.returnedPrimaryHostApplicationId = this.options.getPrimaryHostApplicationId();
+        }
+
+        void whenGetServers() {
+            this.returnedServers = this.options.getServers();
         }
 
         void whenGetClientId() {
@@ -266,12 +383,47 @@ public class SparkplugDataTransportOptionsTest {
             assertEquals(expectedLong, this.returnedLong);
         }
 
+        void thenReturnedServersContains(String[] expectedServers) {
+            for (String expectedServer : expectedServers) {
+                assertTrue(this.returnedServers.contains(expectedServer));
+            }
+        }
+
+        void thenRetunedPrimaryHostApplicationIdIsEmpty() {
+            assertFalse(this.returnedPrimaryHostApplicationId.isPresent());
+        }
+
+        void thenRetunedPrimaryHostApplicationIs(String expectedPrimaryHostApplicationId) {
+            assertTrue(this.returnedPrimaryHostApplicationId.isPresent());
+            assertEquals(expectedPrimaryHostApplicationId, this.returnedPrimaryHostApplicationId.get());
+        }
+
         void thenMqttConnectOptionsContainsPassword(String expectedPassword) {
             assertEquals(expectedPassword, new String(this.mqttConnectOptions.getPassword()));
         }
 
         void thenMqttConnectOptionsContainsKeepAlive(int expectedKeepAlive) {
             assertEquals(expectedKeepAlive, this.mqttConnectOptions.getKeepAliveInterval());
+        }
+
+        void thenMqttConnectOptionsNotSetsUsername() {
+            assertNull(this.mqttConnectOptions.getUserName());
+        }
+
+        void thenMqttConnectOptionsNotSetsPassword() {
+            assertNull(this.mqttConnectOptions.getPassword());
+        }
+
+        void thenMqttConnectOptionsHasCleanSessionEnabled() {
+            assertTrue(this.mqttConnectOptions.isCleanSession());
+        }
+
+        void thenMqttConnectOptionsHasAutoReconnectDisabled() {
+            assertFalse(this.mqttConnectOptions.isAutomaticReconnect());
+        }
+
+        void thenMqttConnectOptionsContainsConnectionTimeout(int expectedConnectionTimeout) {
+            assertEquals(expectedConnectionTimeout, this.mqttConnectOptions.getConnectionTimeout());
         }
     }
 

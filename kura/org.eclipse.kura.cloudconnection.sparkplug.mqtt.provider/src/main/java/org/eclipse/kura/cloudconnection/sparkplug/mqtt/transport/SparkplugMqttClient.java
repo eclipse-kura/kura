@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
@@ -85,7 +86,7 @@ public class SparkplugMqttClient {
         return this.sessionStatus == SessionStatus.ESTABILISHED;
     }
 
-    public synchronized void estabilishSession(boolean shouldConnectClient) {
+    public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
         if (this.sessionStatus == SessionStatus.TERMINATED) {
             try {
                 updateSessionStatus(SessionStatus.TERMINATED, SessionStatus.ESTABILISHING);
@@ -102,8 +103,8 @@ public class SparkplugMqttClient {
                     confirmSession();
                 }
             } catch (MqttException e) {
-                logger.error("Error estabilishing Sparkplug Edge Node session", e);
                 this.sessionStatus = SessionStatus.TERMINATED;
+                throw new KuraConnectException(e);
             }
         } else {
             logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHING);
@@ -124,7 +125,6 @@ public class SparkplugMqttClient {
                 }
 
                 updateSessionStatus(this.sessionStatus, SessionStatus.TERMINATED);
-
                 this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
             } catch (MqttException e) {
                 logger.error("Error terminating Sparkplug Edge Node session", e);
@@ -263,14 +263,18 @@ public class SparkplugMqttClient {
                 && topic.equals(SparkplugTopics.getStateTopic(this.primaryHostId.get()));
         boolean isValidNcmdMessage = topic.equals(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId));
 
-        if (isValidStateMessage) {
-            dispatchStateMessage(message.getPayload());
-        } else if (isValidNcmdMessage) {
-            dispatchNcmdMessage(message.getPayload());
+        try {
+            if (isValidStateMessage) {
+                dispatchStateMessage(message.getPayload());
+            } else if (isValidNcmdMessage) {
+                dispatchNcmdMessage(message.getPayload());
+            }
+        } catch (Exception e) {
+            logger.error("Error dispatching arrived message", e);
         }
     }
 
-    private void dispatchStateMessage(byte[] payload) {
+    private void dispatchStateMessage(byte[] payload) throws KuraConnectException {
         logger.debug("Handling STATE message");
 
         JsonElement json = JsonParser.parseString(new String(payload, StandardCharsets.UTF_8));
@@ -291,7 +295,7 @@ public class SparkplugMqttClient {
         }
     }
 
-    private void dispatchNcmdMessage(byte[] payload) {
+    private void dispatchNcmdMessage(byte[] payload) throws KuraConnectException {
         logger.debug("Handling NCMD message");
 
         try {

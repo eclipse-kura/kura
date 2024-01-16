@@ -74,6 +74,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         try {
             this.options = new SparkplugDataTransportOptions(properties);
             this.sessionId = getBrokerUrl() + "-" + getClientId();
+            this.client = new SparkplugMqttClient(this.options, this, this.dataTransportListeners);
 
             if (wasConnected) {
                 connect();
@@ -110,7 +111,6 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             throw new IllegalStateException("MQTT client is already connected");
         }
 
-        this.client = new SparkplugMqttClient(this.options, this, this.dataTransportListeners);
         this.client.estabilishSession(true);
 
         stopExecutorService();

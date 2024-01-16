@@ -15,6 +15,7 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -79,11 +80,17 @@ public class SparkplugMqttClient {
         this.primaryHostId = options.getPrimaryHostApplicationId();
         this.connectionTimeoutMs = options.getConnectionTimeoutMs();
 
-        logger.info("Sparkplug MQTT client updated, bdSeq is reset");
+        logger.info(
+                "Sparkplug MQTT client updated" + "\n\tServers: {}" + "\n\tClient ID: {}" + "\n\tGroup ID: {}"
+                        + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}"
+                        + "\n\tbdSeq: {}",
+                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs,
+                this.bdSeqCounter.getCurrent());
     }
 
     public synchronized boolean isSessionEstabilished() {
-        return this.sessionStatus == SessionStatus.ESTABILISHED;
+        return this.sessionStatus == SessionStatus.ESTABILISHED && Objects.nonNull(this.client)
+                && this.client.isConnected();
     }
 
     public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
@@ -99,6 +106,8 @@ public class SparkplugMqttClient {
 
                 if (this.primaryHostId.isPresent()) {
                     subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
+                } else {
+                    confirmSession();
                 }
             } catch (MqttException e) {
                 this.sessionStatus = SessionStatus.TERMINATED;
@@ -134,7 +143,7 @@ public class SparkplugMqttClient {
 
     public synchronized void confirmSession() {
         if (this.sessionStatus == SessionStatus.ESTABILISHING) {
-            this.sendEdgeNodeBirth();
+            sendEdgeNodeBirth();
             updateSessionStatus(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
             this.listeners
                     .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));

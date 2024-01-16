@@ -109,10 +109,6 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
         this.client.estabilishSession(true);
 
-        if (this.options.getPrimaryHostApplicationId().isPresent()) {
-            this.client.confirmSession();
-        }
-
         stopExecutorService();
         this.executorService = Executors.newSingleThreadExecutor();
         logger.debug("{} - Initialized message dispatcher executor", this.kuraServicePid);
@@ -197,6 +193,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void connectionLost(Throwable arg0) {
         logger.info("{} - Connection lost", this.kuraServicePid);
         this.dataTransportListeners.forEach(listener -> callSafely(listener::onConnectionLost, arg0));
+
     }
 
     @Override

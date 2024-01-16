@@ -14,19 +14,18 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
 public class BdSeqCounter {
 
-    private int currentBdSeq = 0;
-    private int nextBdSeq = 0;
+    private int bdSeq = 0;
 
     public synchronized void next() {
-        if (this.nextBdSeq > 255) {
-            this.nextBdSeq = 0;
+        if (this.bdSeq == 255) {
+            this.bdSeq = 0;
+        } else {
+            this.bdSeq = this.bdSeq + 1;
         }
-
-        this.currentBdSeq = this.nextBdSeq++;
     }
 
     public synchronized int getCurrent() {
-        return this.currentBdSeq;
+        return this.bdSeq;
     }
 
 }

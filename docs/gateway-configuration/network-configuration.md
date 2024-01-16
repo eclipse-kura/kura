@@ -216,6 +216,19 @@ Name                                                  | Type     | Description
 `net.interface.<interface>.config.vlan.egress`        | String   | Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)
 `net.interface.<interface>.config.vlan.flags`         | String   | Configuration flags, between 0 and 15, default 1 (Optional)
 
+### 802.1x properties
+
+Name                                                         | Type     | Description
+-------------------------------------------------------------|----------|------------------------------------------
+`net.interface.<interface>.config.802-1x.eap`                | String   | The EAP method to be used when authenticating to the network with 802.1x. Supported methods: "_Kura8021xEapTls_", "_Kura8021xEapPeap_", "_Kura8021xEapTtls_".
+`net.interface.<interface>.config.802-1x.innerAuth`          | String   | Specifies the "phase 2" inner authentication method when an EAP method that uses an inner TLS tunnel is specified in the "eap" property. Supported methods: "_Kura8021xInnerAuthNone_", "_Kura8021xInnerAuthMschapv2_".
+`net.interface.<interface>.config.802-1x.identity`           | String   | Identity string for EAP authentication methods. Typically the user's user or login name.
+`net.interface.<interface>.config.802-1x.password`           | String   | Password used for EAP authentication methods.
+`net.interface.<interface>.config.802-1x.client-cert-name`   | String   | Name referring to the corresponding Kura keystore entry containing the client certificate if used by the EAP method specified in the "eap" property.
+`net.interface.<interface>.config.802-1x.private-key-name`   | String   | Name referring to the corresponding Kura keystore entry containing the private key when the "eap" property is set to "Kura8021xEapTls".
+`net.interface.<interface>.config.802-1x.ca-cert-name`       | String   | Name referring to the corresponding Kura keystore entry containing the CA certificate if used by the EAP method specified in the "eap" property. This parameter is optional but this allows man-in-the-middle attacks and is **NOT recommended**.
+`net.interface.<interface>.config.802-1x.anonymous-identity` | String   | Anonymous identity string for EAP authentication methods. Used as the unencrypted identity with EAP types that support different tunneled identity like EAP-TTLS (Optional)
+
 ## Network Configuration recipes
 
 This section presents some snapshot examples to perform basic operations on networking. The snippets can be modified adapting them to the required configuration (i.e. changing the interface name in the property to be applied).

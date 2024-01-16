@@ -16,18 +16,28 @@ package org.eclipse.kura.nm.configuration;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.bouncycastle.openssl.PKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.nm.Kura8021xEAP;
 import org.eclipse.kura.nm.Kura8021xInnerAuth;
@@ -71,8 +81,6 @@ public class NMSettingsConverter {
     private static final String KURA_PROPS_KEY_WIFI_MODE = "net.interface.%s.config.wifi.mode";
     private static final String KURA_PROPS_KEY_WIFI_SECURITY_TYPE = "net.interface.%s.config.wifi.%s.securityType";
     private static final String KURA_PROPS_IPV4_MTU = "net.interface.%s.config.ip4.mtu";
-
-    private static final UInt32 NM_SECRET_FLAGS_NOT_REQUIRED = new UInt32(4);
 
     private NMSettingsConverter() {
         throw new IllegalStateException("Utility class");
@@ -189,9 +197,9 @@ public class NMSettingsConverter {
         String identity = props.get(String.class, "net.interface.%s.config.802-1x.identity", deviceId);
         settings.put("identity", new Variant<>(identity));
 
+        Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
+                deviceId);
         try {
-            Certificate clientCert = props.get(Certificate.class, "net.interface.%s.config.802-1x.client-cert-name",
-                    deviceId);
             settings.put("client-cert", new Variant<>(clientCert.getEncoded()));
         } catch (CertificateEncodingException e) {
             logger.error("Unable to decode Client Certificate for interface \"{}\"", deviceId);
@@ -199,12 +207,19 @@ public class NMSettingsConverter {
 
         PrivateKey privateKey = props.get(PrivateKey.class, "net.interface.%s.config.802-1x.private-key-name",
                 deviceId);
-        if (privateKey.getEncoded() != null) {
-            settings.put("private-key", new Variant<>(convertToPem(privateKey.getEncoded())));
-        } else {
-            logger.error("Unable to decode Private Key for interface \"{}\"", deviceId);
+        try {
+            // The private key is encrypted using the SHA-256 of the private key itself as password
+            byte[] privateKeyPasswordBytes = MessageDigest.getInstance("SHA-256").digest(privateKey.getEncoded());
+            String privateKeyPassword = Base64.getEncoder().encodeToString(privateKeyPasswordBytes);
+            settings.put("private-key-password", new Variant<>(privateKeyPassword));
+
+            byte[] encryptedPrivateKey = convertToPem(encryptPrivateKey(privateKey, privateKeyPassword));
+            settings.put("private-key", new Variant<>(encryptedPrivateKey));
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Something went wrong while computing SHA-256 of private key, bailing out. Caused by: ", e);
+        } catch (OperatorCreationException | PemGenerationException e) {
+            logger.error("Something went wrong during private key encryption, bailing out. Caused by: ", e);
         }
-        settings.put("private-key-password-flags", new Variant<>(NM_SECRET_FLAGS_NOT_REQUIRED));
     }
 
     private static void create8021xOptionalCaCertAndAnonIdentity(NetworkProperties props, String deviceId,
@@ -303,8 +318,7 @@ public class NMSettingsConverter {
             SemanticVersion nmVersion) {
 
         // buildIpv6Settings doesn't support Unmanaged status. Therefore if ip6.status
-        // property is not set, it assumes
-        // it is disabled.
+        // property is not set, it assumes it is disabled.
 
         Optional<KuraIpStatus> ip6OptStatus = KuraIpStatus
                 .fromString(props.getOpt(String.class, "net.interface.%s.config.ip6.status", deviceId));
@@ -777,10 +791,26 @@ public class NMSettingsConverter {
         }
     }
 
+    private static byte[] encryptPrivateKey(PrivateKey privateKey, String privateKeyPassword)
+            throws OperatorCreationException, PemGenerationException {
+        // Assumption: the private key is encoded in PKCS#8 DER format
+        if (privateKey.getEncoded() == null) {
+            throw new NoSuchElementException("Unable to decode Private Key");
+        }
+
+        JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = new JceOpenSSLPKCS8EncryptorBuilder(
+                PKCS8Generator.PBE_SHA1_3DES);
+        encryptorBuilder.setPassword(privateKeyPassword.toCharArray());
+        OutputEncryptor oe = encryptorBuilder.build();
+        JcaPKCS8Generator gen = new JcaPKCS8Generator(privateKey, oe);
+
+        return gen.generate().getContent();
+    }
+
     private static byte[] convertToPem(byte[] derKey) {
-        String pem = "-----BEGIN PRIVATE KEY-----\n"
+        String pem = "-----BEGIN ENCRYPTED PRIVATE KEY-----\n"
                 + DatatypeConverter.printBase64Binary(derKey).replaceAll("(.{64})", "$1\n")
-                + "\n-----END PRIVATE KEY-----\n";
+                + "\n-----END ENCRYPTED PRIVATE KEY-----\n";
         return pem.getBytes(StandardCharsets.UTF_8);
     }
 }

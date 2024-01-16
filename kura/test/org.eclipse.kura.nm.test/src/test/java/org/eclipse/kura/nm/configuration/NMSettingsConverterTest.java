@@ -21,13 +21,20 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +43,14 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.NetworkProperties;
+import org.eclipse.kura.nm.SemanticVersion;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
@@ -47,6 +59,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class NMSettingsConverterTest {
+
+    private final static String PEM_PRIVATE_KEY = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDFWXYxR1zfnzpeO1771SosgCRhzyANqqxH600iLajJww+o1QeKR5n08INKBBNRRW6bCJpPNA5XNLl9ucnu/Bl2CIZ/NeAyFHtau+8kYrkT5wp/g2FCKIPqNAOUik2N7rEPB6FPm0FTWjlBUz2qRIQ7Szdqbw6ZXgK2Zn15MPb+CLjum2biqv1YPxaFnrPhHO2APVSu+xYEB90byFgGWEfL8qY+BAycVmNxPzq4C3LRdJwvCUvsMhcnNhpN0ZHg0ujAFEeQLZXm3SXZGvAQat5IAZLHxIQbUSeJjt1H2yWwkxrNoSMpwOGyAiUTiPAKwpfT2ab1cJZXILWF1+QmNC3tAgMBAAECggEABCT7CHMqDiU9y9KANl1HIfwc1PWk6OSQykndKtLmOvdUx+kcVTdoJoLpfT6l7dawLl/Xj3ILePLXP3ST6jjRVYpl+l9opPjO09kV5feCQ7kNP+ovknzYzkC/EhSsoEbAWqGbjET2Gll+MAIsdhbVAi5mhA3Nb4caNgHIyxsTMXHidl/BwaxkLyv4RWOiPxQPA1XFCTGX9b3KcIDte8hRvEuK7mD6V6VKMm0ArxJgJXtOQ/dhH4Jhra/RH3Y3NjszgP2OW18z71/Yeud18ykNNgzrX2EkXAYXulfa9O4Yfi/k3TttP3QxItbRD+VetZCvQj3jHaG1Ly3dJRGhC2xaOQKBgQD+R7g8FHxjihpJt3bSZNClftRl3bY/4jRV7MBXNC7XA9zj3zNp5R6JCV9PAI5CyY1lhOq+pHfDggufcQZlSC6h4n6b0rj+b2vxbNBy8efQUDtgQw7QfunPGYs+OHPpNK7JGYUezbIw0PV7ahxiD6ncG6DibnNInEeyBC5AJ803LwKBgQDGryr1wOE15Q/lH+XPPf+cclDC/vKpp3Fm4btzSWrOyQWh+yxKGd5dmeRk0h2cDp92jOAHNjLVA0ejvcQUIwew+DYRnXJe/YDvOijFWW+LDRdm/oPcqtjzrfFd1ROQRSeEB0R/BF4m1EDcLligs3N3pWiBEWs/HYdJuIRhK2PlowKBgDh4AOgGvKD2WGQqhA6xKMy3379Hf2OsfmbejtBO3GAPkYxhUu+fXCqelDXdL7qRO/9hhygTKi2WwbIEzaDMaN62h9te7opCgDw7KAd+xTYzuxvjiHSw2oeNaqjErKkLdA1gx3lRwNKqdPmVVPxJ8jTZRd9DHALyAdH8r7C7pg0tAoGBAJIc1/cK9ZRw9BOINbUG3yfqWcJNQ5/IZ/lFIFlUMJwJ8X6B/Lwx8fnb5r7OVsAhcNv6Ffa3wQIt+01LjRtR96IJp5mktCtvOpazqrAXaZRU+FTh748khZAO52YeANkkQj8yKQlP6P2dMmW6H6tuzQe8OPJSIRC1YnywmYnsIvcJAoGAHLoik8+9ej4zcFnO2xTve6cvEym/sISnlE5GLC2sYomG6cxDnMq4DWL3tVBbBnOCkany+p0oWuhSGsbnEWVDHvA3Wo3uuY7NdL3iTPhIHbZ+0AkgjHT99LYZHr4lhTJP8XU6UKT15aDJyljvRFuWrcHKrQ18VSiIwOQoQzbAVAc=";
 
     private Map<String, Variant<?>> resultMap;
 
@@ -650,8 +664,7 @@ public class NMSettingsConverterTest {
                 buildMockedCertificateWithCert("binary ca cert"));
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
                 buildMockedCertificateWithCert("binary client cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
-                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", buildMockPrivateKeyWith(PEM_PRIVATE_KEY));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -663,10 +676,10 @@ public class NMSettingsConverterTest {
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("ca-cert", "binary ca cert");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        thenResultingMapContainsBytes("private-key",
-                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
+        thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
-        thenResultingMapNotContains("private-key-password");
         thenResultingMapNotContains("ca-cert-password");
         thenResultingMapNotContains("client-cert-password");
     }
@@ -713,8 +726,7 @@ public class NMSettingsConverterTest {
         givenMapWith("net.interface.wlan0.config.802-1x.ca-cert-name", null);
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
                 buildMockedCertificateWithCert("binary client cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
-                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", buildMockPrivateKeyWith(PEM_PRIVATE_KEY));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -724,12 +736,12 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        thenResultingMapContainsBytes("private-key",
-                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
+        thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
-        thenResultingMapNotContains("private-key-password");
         thenResultingMapNotContains("ca-cert-password");
         thenResultingMapNotContains("client-cert-password");
     }
@@ -743,8 +755,7 @@ public class NMSettingsConverterTest {
                 new Password("When I grow up I want to be a certificate"));
         givenMapWith("net.interface.wlan0.config.802-1x.client-cert-name",
                 buildMockedCertificateWithCert("binary client cert"));
-        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name",
-                buildMockedPrivateKeyWithKey("binary private key"));
+        givenMapWith("net.interface.wlan0.config.802-1x.private-key-name", buildMockPrivateKeyWith(PEM_PRIVATE_KEY));
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuild8021xSettingsIsRunWith(this.networkProperties, "wlan0");
@@ -754,12 +765,12 @@ public class NMSettingsConverterTest {
         thenResultingMapContainsArray("eap", new Variant<>(new String[] { "tls" }).getValue());
         thenResultingMapContains("identity", "username@email.com");
         thenResultingMapContainsBytes("client-cert", "binary client cert");
-        thenResultingMapContainsBytes("private-key",
-                "-----BEGIN PRIVATE KEY-----\nYmluYXJ5IHByaXZhdGUga2V5\n-----END PRIVATE KEY-----\n");
+        thenResultingMapContains("private-key-password", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=");
+        thenResultingMapContainsEncryptedPrivateKey("private-key", "sOPM6ph9zBENU0rrOiZhIAk8wn26W8qj0r+DBVu6Zbk=",
+                PEM_PRIVATE_KEY);
 
         thenResultingMapNotContains("phase2-auth");
         thenResultingMapNotContains("ca-cert");
-        thenResultingMapNotContains("private-key-password");
         thenResultingMapNotContains("ca-cert-password");
         thenResultingMapNotContains("client-cert-password");
     }
@@ -3155,7 +3166,7 @@ public class NMSettingsConverterTest {
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
-    public void thenNoExceptionOccurred() {
+    private void thenNoExceptionOccurred() {
         String errorMessage = "Empty message";
         if (Objects.nonNull(this.occurredException)) {
             StringWriter sw = new StringWriter();
@@ -3166,6 +3177,35 @@ public class NMSettingsConverterTest {
         }
 
         assertNull(errorMessage, this.occurredException);
+    }
+
+    private void thenResultingMapContainsEncryptedPrivateKey(String key, String expectedPrivateKeyPassword,
+            String expectedPemPrivateKeyContent) {
+        byte[] encryptedKey = (byte[]) this.resultMap.get(key).getValue();
+        byte[] decryptedKey = decryptKey(convertToDer(encryptedKey), expectedPrivateKeyPassword);
+        assertEquals(expectedPemPrivateKeyContent, Base64.getEncoder().encodeToString(decryptedKey));
+    }
+
+    private byte[] decryptKey(byte[] encryptedKey, String expectedPrivateKeyPassword) {
+        PBEKeySpec pbeSpec = new PBEKeySpec(expectedPrivateKeyPassword.toCharArray());
+        try {
+            EncryptedPrivateKeyInfo privateKeyInfo = new EncryptedPrivateKeyInfo(encryptedKey);
+            SecretKeyFactory secretKeyFact = SecretKeyFactory.getInstance(privateKeyInfo.getAlgName());
+            SecretKey secret = secretKeyFact.generateSecret(pbeSpec);
+            PKCS8EncodedKeySpec keySpec = privateKeyInfo.getKeySpec(secret);
+            KeyFactory keyFact = KeyFactory.getInstance("RSA");
+            return keyFact.generatePrivate(keySpec).getEncoded();
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private byte[] convertToDer(byte[] privateKeyPem) {
+        String privateKeyString = new String(privateKeyPem, StandardCharsets.UTF_8);
+        String privateKeyStringContent = privateKeyString.replace("\n", "")
+                .replace("-----BEGIN ENCRYPTED PRIVATE KEY-----", "")
+                .replace("-----END ENCRYPTED PRIVATE KEY-----", "");
+        return Base64.getDecoder().decode(privateKeyStringContent.getBytes());
     }
 
     /*
@@ -3196,9 +3236,11 @@ public class NMSettingsConverterTest {
         return cert;
     }
 
-    public PrivateKey buildMockedPrivateKeyWithKey(String keyBytes) {
+    public PrivateKey buildMockPrivateKeyWith(String privateKeyPEM) {
+        byte[] decoded = Base64.getDecoder().decode(privateKeyPEM);
+
         PrivateKey key = mock(PrivateKey.class);
-        when(key.getEncoded()).thenReturn(keyBytes.getBytes());
+        when(key.getEncoded()).thenReturn(decoded);
 
         return key;
     }

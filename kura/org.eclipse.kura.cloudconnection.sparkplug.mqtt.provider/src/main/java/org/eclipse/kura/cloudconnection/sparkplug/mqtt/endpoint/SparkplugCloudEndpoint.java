@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,12 +30,10 @@ import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
-import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
-import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
@@ -59,7 +57,6 @@ public class SparkplugCloudEndpoint
 
     private DataService dataService;
     private EventAdmin eventAdmin;
-    private SparkplugDataTransport dataTransport;
 
     public void setDataService(DataService dataService) {
         this.dataService = dataService;
@@ -67,14 +64,6 @@ public class SparkplugCloudEndpoint
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
-    }
-
-    public void setDataTransportService(DataTransportService dataTransport) {
-        if (dataTransport instanceof SparkplugDataTransport) {
-            this.dataTransport = (SparkplugDataTransport) dataTransport;
-        } else {
-            throw new IllegalStateException("The bound DataTransport reference is not a SparkplugDataTransport");
-        }
     }
 
     public void activate(Map<String, Object> properties) {

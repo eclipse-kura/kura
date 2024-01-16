@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
@@ -45,10 +44,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private SparkplugMqttClient client;
     private SparkplugDataTransportOptions options;
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
-
     private ExecutorService executorService;
-    private ArrivedMessageDispatcher messageHandler;
-    private LinkedBlockingDeque<ArrivedMessage> arrivedMessagesQueue = new LinkedBlockingDeque<>();
 
     /*
      * Activation APIs
@@ -99,7 +95,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             disconnect(0);
         }
 
-        stopMessageHandlerTask();
+        stopExecutorService();
 
         logger.info("{} - Deactivated", this.kuraServicePid);
     }
@@ -117,16 +113,13 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         this.client = new SparkplugMqttClient(this.options, this, this.dataTransportListeners);
         this.client.estabilishSession(true);
 
-        if (!this.options.getPrimaryHostApplicationId().isPresent()) {
-            this.client.confirmSession();
-        }
-
-        startMessageHandlerTask();
+        stopExecutorService();
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     @Override
     public boolean isConnected() {
-        return Objects.nonNull(this.client) && this.client.isConnected();
+        return Objects.nonNull(this.client) && this.client.isSessionEstabilished();
     }
 
     @Override
@@ -151,13 +144,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
     @Override
     public void disconnect(long quiesceTimeout) {
-        stopMessageHandlerTask();
-
-        if (isConnected()) {
-            this.client.terminateSession(true, quiesceTimeout);
-        } else {
-            logger.info("{} - Already disconnected", this.kuraServicePid);
-        }
+        stopExecutorService();
+        this.client.terminateSession(true, quiesceTimeout);
     }
 
     @Override
@@ -229,7 +217,11 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void messageArrived(String topic, MqttMessage message) {
         logger.debug("{} - Message arrived on topic {} with QoS {}", this.kuraServicePid, topic, message.getQos());
 
-        this.arrivedMessagesQueue.add(new ArrivedMessage(topic, message));
+        this.executorService.submit(() -> {
+            this.dataTransportListeners.forEach(listener -> listener.onMessageArrived(topic, message.getPayload(),
+                    message.getQos(), message.isRetained()));
+        });
+        this.executorService.submit(this.client.getMessageDispatcher(topic, message));
     }
 
     /*
@@ -258,18 +250,9 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         }
     }
 
-    private void startMessageHandlerTask() {
-        stopMessageHandlerTask();
-
-        this.executorService = Executors.newSingleThreadExecutor();
-        this.messageHandler = new ArrivedMessageDispatcher(this.arrivedMessagesQueue, this.dataTransportListeners,
-                this.client, this.options.getGroupId(), this.options.getNodeId(),
-                this.options.getPrimaryHostApplicationId());
-        this.executorService.submit(this.messageHandler);
-    }
-
-    private void stopMessageHandlerTask() {
+    private void stopExecutorService() {
         if (Objects.nonNull(this.executorService)) {
+            logger.debug("{} - Shutting down message dispatcher executor", this.kuraServicePid);
             this.executorService.shutdownNow();
         }
     }

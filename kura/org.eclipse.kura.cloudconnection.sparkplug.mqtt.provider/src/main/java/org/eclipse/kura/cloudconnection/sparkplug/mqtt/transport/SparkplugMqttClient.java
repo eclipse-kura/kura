@@ -12,9 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,9 +27,14 @@ import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class SparkplugMqttClient {
 
@@ -49,6 +54,7 @@ public class SparkplugMqttClient {
 
     private MqttAsyncClient client;
     private BdSeqCounter bdSeqCounter = new BdSeqCounter();
+    private long lastStateTimestamp = 0;
 
     public enum SessionStatus {
         TERMINATED,
@@ -75,8 +81,8 @@ public class SparkplugMqttClient {
         logger.info("Sparkplug MQTT client updated, bdSeq is reset");
     }
 
-    public synchronized boolean isConnected() {
-        return Objects.nonNull(this.client) && this.client.isConnected();
+    public synchronized boolean isSessionEstabilished() {
+        return this.sessionStatus == SessionStatus.ESTABILISHED;
     }
 
     public synchronized void estabilishSession(boolean shouldConnectClient) {
@@ -92,9 +98,12 @@ public class SparkplugMqttClient {
 
                 if (this.primaryHostId.isPresent()) {
                     subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
+                } else {
+                    confirmSession();
                 }
             } catch (MqttException e) {
                 logger.error("Error estabilishing Sparkplug Edge Node session", e);
+                this.sessionStatus = SessionStatus.TERMINATED;
             }
         } else {
             logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHING);
@@ -167,9 +176,17 @@ public class SparkplugMqttClient {
         }
     }
 
-    public String getConnectedServer() {
-        return isConnected() ? this.client.getCurrentServerURI() : this.servers.toString();
+    public synchronized String getConnectedServer() {
+        return isSessionEstabilished() ? this.client.getCurrentServerURI() : this.servers.toString();
     }
+
+    public synchronized Runnable getMessageDispatcher(String topic, MqttMessage message) {
+        return () -> dispatchMessage(topic, message);
+    }
+
+    /*
+     * Private methods
+     */
 
     private String getNextServer() {
         String server;
@@ -239,6 +256,59 @@ public class SparkplugMqttClient {
 
     private void logInvalidStateTransition(SessionStatus from, SessionStatus to) {
         logger.warn("Invalid state transition {} -> {}, ignoring request", from, to);
+    }
+
+    private synchronized void dispatchMessage(String topic, MqttMessage message) {
+        boolean isValidStateMessage = this.primaryHostId.isPresent()
+                && topic.equals(SparkplugTopics.getStateTopic(this.primaryHostId.get()));
+        boolean isValidNcmdMessage = topic.equals(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId));
+
+        if (isValidStateMessage) {
+            dispatchStateMessage(message.getPayload());
+        } else if (isValidNcmdMessage) {
+            dispatchNcmdMessage(message.getPayload());
+        }
+    }
+
+    private void dispatchStateMessage(byte[] payload) {
+        logger.debug("Handling STATE message");
+
+        JsonElement json = JsonParser.parseString(new String(payload, StandardCharsets.UTF_8));
+        boolean isOnline = json.getAsJsonObject().get("online").getAsBoolean();
+        long timestamp = json.getAsJsonObject().get("timestamp").getAsLong();
+
+        if (this.lastStateTimestamp <= timestamp) {
+            this.lastStateTimestamp = timestamp;
+
+            if (isOnline) {
+                logger.info("Primary Host Application is online");
+                confirmSession();
+            } else {
+                logger.info("Primary Host Application is offline");
+                terminateSession(true, 0);
+                estabilishSession(true);
+            }
+        }
+    }
+
+    private void dispatchNcmdMessage(byte[] payload) {
+        logger.debug("Handling NCMD message");
+
+        try {
+            boolean nodeRebirth = SparkplugPayloads.getBooleanMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME,
+                    payload);
+
+            if (nodeRebirth) {
+                logger.debug("{} requested", SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME);
+
+                terminateSession(false, 0);
+                estabilishSession(false);
+            }
+        } catch (InvalidProtocolBufferException e) {
+            logger.error("Error processing payload for NCMD message", e);
+        } catch (NoSuchFieldException e) {
+            logger.debug("NMCD message ignored, it does not contain any Node Control/Rebirth metric");
+        }
     }
 
 }

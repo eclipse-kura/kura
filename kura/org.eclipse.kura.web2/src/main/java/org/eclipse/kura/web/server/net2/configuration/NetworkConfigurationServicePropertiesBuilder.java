@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.configuration;
 
@@ -36,6 +37,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private static final Integer DEFAULT_WAN_PRIORITY = -1;
     private static final Integer DEFAULT_MTU = 0;
+    private static final Integer DEFAULT_PROMISC = -1;
 
     private final GwtNetInterfaceConfig gwtConfig;
     private final NetworkConfigurationServiceProperties properties;
@@ -76,6 +78,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
         // Manage GPS independently of device ip status
         setModemGpsProperties();
 
+        setAdvancedProperties();
+
         return this.properties.getProperties();
     }
 
@@ -115,8 +119,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setIp4Gateway(this.ifname, this.gwtConfig.getGateway());
         }
 
-        this.properties.setIp4Mtu(this.ifname,
-                Objects.nonNull(this.gwtConfig.getMtu()) ? this.gwtConfig.getMtu() : DEFAULT_MTU);
     }
 
     private void setIpv6Properties() {
@@ -156,9 +158,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setIp6AddressGenMode(this.ifname, this.gwtConfig.getIpv6AutoconfigurationMode());
             this.properties.setIp6Privacy(this.ifname, this.gwtConfig.getIpv6Privacy());
         }
-
-        this.properties.setIp6Mtu(this.ifname,
-                Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
     }
 
     private void setIpv4DhcpClientProperties() {
@@ -420,6 +419,15 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
             this.properties.setModemGpsEnabled(this.ifname, gwtModemConfig.isGpsEnabled());
         }
+    }
+
+    private void setAdvancedProperties() {
+        this.properties.setIp4Mtu(this.ifname,
+                Objects.nonNull(this.gwtConfig.getMtu()) ? this.gwtConfig.getMtu() : DEFAULT_MTU);
+        this.properties.setIp6Mtu(this.ifname,
+                Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
+        this.properties.setPromisc(this.ifname,
+        		Objects.nonNull(this.gwtConfig.getPromisc()) ? this.gwtConfig.getPromisc() : DEFAULT_PROMISC);
     }
 
     private static GwtNetInterfaceConfig getConfigsAndStatuses(String ifName) throws GwtKuraException, KuraException {

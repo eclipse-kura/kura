@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.web.server.net2.configuration;
 
@@ -34,6 +35,7 @@ public class GwtNetInterfaceConfigBuilder {
     private static final String NA = "N/A";
     private static final Integer DEFAULT_WAN_PRIORITY = -1;
     private static final Integer DEFAULT_MTU = 0;
+    private static final Integer DEFAULT_PROMISC = -1;
 
     private final NetworkConfigurationServiceProperties properties;
     private GwtNetInterfaceConfig gwtConfig;
@@ -69,6 +71,7 @@ public class GwtNetInterfaceConfigBuilder {
         setWifiProperties();
         setModemProperties();
         set8021xProperties();
+        setAdvancedProperties();
 
         return this.gwtConfig;
     }
@@ -123,9 +126,6 @@ public class GwtNetInterfaceConfigBuilder {
         this.gwtConfig.setSubnetMask(this.properties.getIp4Netmask(this.ifName));
         this.gwtConfig.setGateway(this.properties.getIp4Gateway(this.ifName));
         this.gwtConfig.setDnsServers(this.properties.getIp4DnsServers(this.ifName));
-
-        Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
-        this.gwtConfig.setMtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv6Properties() {
@@ -165,9 +165,6 @@ public class GwtNetInterfaceConfigBuilder {
         if (privacy.isPresent()) {
             this.gwtConfig.setIpv6Privacy(privacy.get());
         }
-
-        Optional<Integer> mtu = this.properties.getIp6Mtu(this.ifName);
-        this.gwtConfig.setIpv6Mtu(mtu.orElse(DEFAULT_MTU));
     }
 
     private void setIpv4DhcpClientProperties() {
@@ -352,6 +349,17 @@ public class GwtNetInterfaceConfigBuilder {
         gwt8021xConfig.setCaCertName(this.properties.get8021xCaCertName(this.ifName));
         gwt8021xConfig.setPublicPrivateKeyPairName(this.properties.get8021xPublicPrivateKeyPairName(this.ifName));
 
+    }
+
+    private void setAdvancedProperties() {
+    	Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
+        this.gwtConfig.setMtu(mtu.orElse(DEFAULT_MTU));
+        
+        Optional<Integer> ip6mtu = this.properties.getIp6Mtu(this.ifName);
+        this.gwtConfig.setIpv6Mtu(ip6mtu.orElse(DEFAULT_MTU));
+        
+        Optional<Integer> promisc = this.properties.getPromisc(this.ifName);
+        this.gwtConfig.setPromisc(promisc.orElse(DEFAULT_PROMISC));
     }
 
 }

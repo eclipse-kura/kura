@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Eurotech
+ *  Areti
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
@@ -70,6 +71,7 @@ public class NetworkTabsUi extends Composite {
     AnchorListItem modemGpsTabAnchorItem;
     AnchorListItem modemAntennaTabAnchorItem;
     AnchorListItem hardwareTabAnchorItem;
+    AnchorListItem advancedTabAnchorItem;
     List<AnchorListItem> visibleTabs;
 
     NetworkTab selectedTab;
@@ -82,6 +84,7 @@ public class NetworkTabsUi extends Composite {
     TabModemUi modemTab;
     TabModemGpsUi modemGpsTab;
     TabModemAntennaUi modemAntennaTab;
+    TabAdvancedUi advancedTab;
 
     GwtNetInterfaceConfig netIfConfig;
     NetworkButtonBarUi buttons;
@@ -118,6 +121,7 @@ public class NetworkTabsUi extends Composite {
         initModemAntennaTab();
         initDhcp4NatTab();
         initHardwareTab();
+        initAdvancedTab();
 
         setSelected(this.ip4TabAnchorItem);
         this.selectedTab = this.ip4Tab;
@@ -234,6 +238,18 @@ public class NetworkTabsUi extends Composite {
         });
     }
 
+    private void initAdvancedTab() {
+        this.advancedTabAnchorItem = new AnchorListItem(MSGS.netAdvanced());
+        this.advancedTab = new TabAdvancedUi(this.session, this);
+
+        this.advancedTabAnchorItem.addClickHandler(event -> {
+            setSelected(NetworkTabsUi.this.advancedTabAnchorItem);
+            NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.advancedTab;
+            NetworkTabsUi.this.content.clear();
+            NetworkTabsUi.this.content.add(NetworkTabsUi.this.advancedTab);
+        });
+    }
+
     public void setButtons(NetworkButtonBarUi buttons) {
         this.buttons = buttons;
     }
@@ -258,6 +274,7 @@ public class NetworkTabsUi extends Composite {
         this.modemGpsTab.setNetInterface(selection);
         this.modemAntennaTab.setNetInterface(selection);
         this.hardwareTab.setNetInterface(selection);
+        this.advancedTab.setNetInterface(selection);
 
         updateTabs();
         refreshAllVisibleTabs();
@@ -270,6 +287,7 @@ public class NetworkTabsUi extends Composite {
 
         if (this.isNet2) {
             insertTab(this.ip6TabAnchorItem);
+            insertTab(this.advancedTabAnchorItem);
         }
 
         arrangeOptionalTabs();
@@ -287,6 +305,7 @@ public class NetworkTabsUi extends Composite {
         removeTab(this.modemGpsTabAnchorItem);
         removeTab(this.modemAntennaTabAnchorItem);
         removeTab(this.hardwareTabAnchorItem);
+        removeTab(this.advancedTabAnchorItem);
     }
 
     private void arrangeOptionalTabs() {
@@ -418,6 +437,9 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
             this.set8021xTab.refresh();
         }
+        if(this.visibleTabs.contains(this.advancedTabAnchorItem)) {
+        	this.advancedTab.refresh();
+        }
     }
 
     /*
@@ -457,6 +479,10 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem) && this.set8021xTab.isDirty()) {
             return true;
         }
+        
+        if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTab.isDirty()) {
+            return true;
+        }
 
         return false;
     }
@@ -471,6 +497,7 @@ public class NetworkTabsUi extends Composite {
         this.modemTab.setDirty(isDirty);
         this.modemGpsTab.setDirty(isDirty);
         this.modemAntennaTab.setDirty(isDirty);
+        this.advancedTab.setDirty(isDirty);
     }
 
     public void refresh() {
@@ -483,6 +510,7 @@ public class NetworkTabsUi extends Composite {
         this.modemTab.refresh();
         this.modemGpsTab.refresh();
         this.modemAntennaTab.refresh();
+        this.advancedTab.refresh();
     }
 
     public GwtNetInterfaceConfig getUpdatedInterface() {
@@ -523,6 +551,9 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
             this.set8021xTab.getUpdatedNetInterface(updatedNetIf);
         }
+        if (this.visibleTabs.contains(this.advancedTabAnchorItem)) {
+        	this.advancedTab.getUpdatedNetInterface(updatedNetIf);
+        }
 
         return updatedNetIf;
     }
@@ -542,6 +573,7 @@ public class NetworkTabsUi extends Composite {
         clearErrorTab(this.modemGpsTabAnchorItem);
         clearErrorTab(this.modemAntennaTabAnchorItem);
         clearErrorTab(this.net8021xTabAnchorItem);
+        clearErrorTab(this.advancedTabAnchorItem);
 
         if (this.visibleTabs.contains(this.ip4TabAnchorItem) && !this.ip4Tab.isValid()) {
             errorTab(this.ip4TabAnchorItem);
@@ -589,6 +621,12 @@ public class NetworkTabsUi extends Composite {
             errorTab(this.net8021xTabAnchorItem);
             return false;
         }
+        
+        if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTabAnchorItem.isEnabled()
+                && !this.advancedTab.isValid()) {
+            errorTab(this.advancedTabAnchorItem);
+            return false;
+        }
 
         return true;
     }
@@ -634,6 +672,7 @@ public class NetworkTabsUi extends Composite {
         this.modemTabAnchorItem.setActive(false);
         this.modemGpsTabAnchorItem.setActive(false);
         this.modemAntennaTabAnchorItem.setActive(false);
+        this.advancedTabAnchorItem.setActive(false);
         item.setActive(true);
     }
 

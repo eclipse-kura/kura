@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -394,6 +394,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
 
     public void setIpv6Mtu(Integer mtu) {
     	set("ipv6.mtu", mtu);
+    }
+    
+    public Integer getPromisc() {
+        return get("promisc");
+    }
+
+    public void setPromisc(Integer promisc) {
+        set("promisc", promisc);
     }
 
     @Override

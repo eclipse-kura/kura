@@ -13,6 +13,7 @@
 package org.eclipse.kura.wire.ai.component.provider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -44,7 +46,8 @@ public class TensorListAdapter {
     /**
      *
      * @param descriptors
-     *            the list of {@link TensorDescriptor} to use in this instance
+     *                    the list of {@link TensorDescriptor} to use in this
+     *                    instance
      * @return the {@link TensorListAdapter} with the descriptors set
      */
     public static TensorListAdapter givenDescriptors(List<TensorDescriptor> descriptors) {
@@ -58,12 +61,16 @@ public class TensorListAdapter {
     /**
      *
      * @param wireRecord
-     * @return a list of {@link Tensor}, one for each property in the {@code wireRecord}.
+     * @return a list of {@link Tensor}, one for each property in the
+     *         {@code wireRecord}.
      *         <p>
-     *         Each created {@link Tensor} will contain a data list of length 1 if the type is BOOLEAN, DOUBLE, FLOAT,
-     *         INTEGER, LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
+     *         Each created {@link Tensor} will contain a data list of length 1 if
+     *         the type is BOOLEAN, DOUBLE, FLOAT,
+     *         INTEGER, LONG, STRING. In case of BYTE_ARRAY the list is equal to the
+     *         length of the array.
      * @throws KuraException
-     *             if no descriptor matches the record name or the type is not a {@link org.eclipse.kura.type.DataType}
+     *                       if no descriptor matches the record name or the type is
+     *                       not a {@link org.eclipse.kura.type.DataType}
      */
     public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraException {
         List<Tensor> output = new LinkedList<>();
@@ -80,13 +87,17 @@ public class TensorListAdapter {
     /**
      *
      * @param tensors
-     *            the list of {@link Tensor} to convert to a list of {@link WireRecord}.
-     *            <p>
-     *            Each {@link Tensor} must contain a data list of size 1 if the type is BOOLEAN, DOUBLE, FLOAT, INTEGER,
-     *            LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
+     *                the list of {@link Tensor} to convert to a list of
+     *                {@link WireRecord}.
+     *                <p>
+     *                Each {@link Tensor} must contain a data list of size 1 if the
+     *                type is BOOLEAN, DOUBLE, FLOAT, INTEGER,
+     *                LONG, STRING. In case of BYTE_ARRAY the list is equal to the
+     *                length of the array.
      * @return a list {@link WireRecord}, one for each tensor
      * @throws KuraIOException
-     *             if one of the tensors does not respect the input requirements described above
+     *                         if one of the tensors does not respect the input
+     *                         requirements described above
      */
     public List<WireRecord> fromTensorList(List<Tensor> tensors) throws KuraIOException {
 
@@ -137,47 +148,62 @@ public class TensorListAdapter {
             throws KuraIOException {
         Object value = typedValue.getValue();
         switch (typedValue.getType()) {
-        case BOOLEAN:
-            List<Boolean> boolData = new ArrayList<>();
-            boolData.add((Boolean) value);
+            case BOOLEAN:
+                List<Boolean> boolData = new ArrayList<>();
+                boolData.add((Boolean) value);
 
-            return new Tensor(Boolean.class, descriptor, boolData);
-        case BYTE_ARRAY:
-            byte[] byteArrayValue = (byte[]) value;
+                return new Tensor(Boolean.class, descriptor, boolData);
+            case BYTE_ARRAY:
+//            byte[] byteArrayValue = (byte[]) value;
+//
+//            List<Byte> byteArrayData = new ArrayList<>();
+//            for (byte b : byteArrayValue) {
+//                byteArrayData.add(b);
+//            }
+                // 90ms
 
-            List<Byte> byteArrayData = new ArrayList<>();
-            for (byte b : byteArrayValue) {
-                byteArrayData.add(b);
-            }
+//                byte[] byteArrayValue = (byte[]) value;
+//                Byte[] byteArrayObject = new Byte[byteArrayValue.length];
+//                Arrays.setAll(byteArrayObject, i -> byteArrayValue[i]);
+//                List<Byte> byteArrayData = Arrays.asList(byteArrayObject);
+//                // 40ms
 
-            return new Tensor(Byte.class, descriptor, byteArrayData);
-        case DOUBLE:
-            List<Double> doubleData = new ArrayList<>();
-            doubleData.add((Double) value);
+//                byte[] byteArrayValue = (byte[]) value;
+//                List<Byte> byteArrayData = IntStream.range(0, byteArrayValue.length).mapToObj(i -> byteArrayValue[i])
+//                        .collect(Collectors.toList());
+                // 160ms
 
-            return new Tensor(Double.class, descriptor, doubleData);
-        case FLOAT:
-            List<Float> floatData = new ArrayList<>();
-            floatData.add((Float) value);
+                List<Byte> byteArrayData = Arrays.asList(ArrayUtils.toObject((byte[]) value));
+                // 40ms
 
-            return new Tensor(Float.class, descriptor, floatData);
-        case INTEGER:
-            List<Integer> intData = new ArrayList<>();
-            intData.add((Integer) value);
+                return new Tensor(Byte.class, descriptor, byteArrayData);
+            case DOUBLE:
+                List<Double> doubleData = new ArrayList<>();
+                doubleData.add((Double) value);
 
-            return new Tensor(Integer.class, descriptor, intData);
-        case LONG:
-            List<Long> longData = new ArrayList<>();
-            longData.add((Long) value);
+                return new Tensor(Double.class, descriptor, doubleData);
+            case FLOAT:
+                List<Float> floatData = new ArrayList<>();
+                floatData.add((Float) value);
 
-            return new Tensor(Long.class, descriptor, longData);
-        case STRING:
-            List<String> stringData = new ArrayList<>();
-            stringData.add((String) value);
+                return new Tensor(Float.class, descriptor, floatData);
+            case INTEGER:
+                List<Integer> intData = new ArrayList<>();
+                intData.add((Integer) value);
 
-            return new Tensor(String.class, descriptor, stringData);
-        default:
-            throw new KuraIOException("Unable to create Tensor: unsupported type.");
+                return new Tensor(Integer.class, descriptor, intData);
+            case LONG:
+                List<Long> longData = new ArrayList<>();
+                longData.add((Long) value);
+
+                return new Tensor(Long.class, descriptor, longData);
+            case STRING:
+                List<String> stringData = new ArrayList<>();
+                stringData.add((String) value);
+
+                return new Tensor(String.class, descriptor, stringData);
+            default:
+                throw new KuraIOException("Unable to create Tensor: unsupported type.");
         }
     }
 

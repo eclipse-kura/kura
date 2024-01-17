@@ -168,7 +168,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     }
 
     private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraException {
-        if (this.inferenceEngineService.isModelLoaded(modelName)) {
+        if (!this.inferenceEngineService.isModelLoaded(modelName)) {
             this.inferenceEngineService.loadModel(modelName, Optional.empty());
         }
 
@@ -183,7 +183,10 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     private Optional<List<WireRecord>> inferenceProcess(WireRecord wireRecord) throws KuraException {
         if (this.inferenceEngineService != null && this.inferenceEngineService.isEngineReady()) {
 
+            long start = System.currentTimeMillis();
             loadModelInfos();
+            long stop = System.currentTimeMillis();
+            logger.info("Model loaded in {} ms", stop - start);
 
             List<Tensor> tensors;
             List<WireRecord> result = new LinkedList<>();
@@ -192,11 +195,17 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
                 tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs()).fromWireRecord(wireRecord);
                 tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
             } else {
+                start = System.currentTimeMillis();
                 tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
                         .fromWireRecord(wireRecord);
+                stop = System.currentTimeMillis();
+                logger.info("Tensor created in {} ms", stop - start);
             }
 
+            start = System.currentTimeMillis();
             tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
+            stop = System.currentTimeMillis();
+            logger.info("Inference run in {} ms", stop - start);
 
             if (this.infoPost.isPresent()) {
                 tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);

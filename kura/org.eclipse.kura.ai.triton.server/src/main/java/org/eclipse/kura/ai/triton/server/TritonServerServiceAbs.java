@@ -378,7 +378,12 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             modelInfo.getOutputs().forEach(
                     outputDescriptor -> inferRequest.addOutputs(createRequestedOutputBuilder(outputDescriptor)));
 
+            long start = System.currentTimeMillis();
             ModelInferResponse inferResponse = this.grpcStub.modelInfer(inferRequest.build());
+            long stop = System.currentTimeMillis();
+            logger.info("gRPC Inference run in {} ms", stop - start);
+
+//            ModelInferResponse inferResponse = this.grpcStub.modelInfer(inferRequest.build());
 
             inferenceResults = createOutputInferenceData(inferResponse);
         } catch (StatusRuntimeException | IllegalArgumentException e) {
@@ -411,17 +416,17 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         Map<String, Object> parameters = new HashMap<>();
         inferParameters.forEach((key, value) -> {
             switch (value.getParameterChoiceCase()) {
-            case BOOL_PARAM:
-                parameters.put(key, value.getBoolParam());
-                break;
-            case INT64_PARAM:
-                parameters.put(key, value.getInt64Param());
-                break;
-            case STRING_PARAM:
-                parameters.put(key, value.getStringParam());
-                break;
-            default:
-                throw new IllegalArgumentException("Parameter value type unrecognized.");
+                case BOOL_PARAM:
+                    parameters.put(key, value.getBoolParam());
+                    break;
+                case INT64_PARAM:
+                    parameters.put(key, value.getInt64Param());
+                    break;
+                case STRING_PARAM:
+                    parameters.put(key, value.getStringParam());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Parameter value type unrecognized.");
             }
         });
         return parameters;
@@ -442,44 +447,44 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         InferTensorContents.Builder inputDataBuilder = InferTensorContents.newBuilder();
         DataType modelInputType = DataType.valueOf(input.getDescriptor().getType());
         switch (modelInputType) {
-        case BOOL:
-            addDataTypeInputData(input, Boolean.class, inputDataBuilder::addAllBoolContents);
-            break;
-        case UINT8:
-            addUint8InputData(input, inputDataBuilder);
-            break;
-        case INT8:
-            addInt8InputData(input, inputDataBuilder);
-            break;
-        case UINT16:
-            addUint16InputData(input, inputDataBuilder);
-            break;
-        case INT16:
-            addInt16InputData(input, inputDataBuilder);
-            break;
-        case UINT32:
-            addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllUintContents);
-            break;
-        case INT32:
-            addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllIntContents);
-            break;
-        case UINT64:
-            addDataTypeInputData(input, Long.class, inputDataBuilder::addAllUint64Contents);
-            break;
-        case INT64:
-            addDataTypeInputData(input, Long.class, inputDataBuilder::addAllInt64Contents);
-            break;
-        case FP32:
-            addDataTypeInputData(input, Float.class, inputDataBuilder::addAllFp32Contents);
-            break;
-        case FP64:
-            addDataTypeInputData(input, Double.class, inputDataBuilder::addAllFp64Contents);
-            break;
-        case BYTES:
-            addBytesInputData(input, inputDataBuilder);
-            break;
-        default:
-            throw new IllegalArgumentException("Date type " + modelInputType + " not supported");
+            case BOOL:
+                addDataTypeInputData(input, Boolean.class, inputDataBuilder::addAllBoolContents);
+                break;
+            case UINT8:
+                addUint8InputData(input, inputDataBuilder);
+                break;
+            case INT8:
+                addInt8InputData(input, inputDataBuilder);
+                break;
+            case UINT16:
+                addUint16InputData(input, inputDataBuilder);
+                break;
+            case INT16:
+                addInt16InputData(input, inputDataBuilder);
+                break;
+            case UINT32:
+                addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllUintContents);
+                break;
+            case INT32:
+                addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllIntContents);
+                break;
+            case UINT64:
+                addDataTypeInputData(input, Long.class, inputDataBuilder::addAllUint64Contents);
+                break;
+            case INT64:
+                addDataTypeInputData(input, Long.class, inputDataBuilder::addAllInt64Contents);
+                break;
+            case FP32:
+                addDataTypeInputData(input, Float.class, inputDataBuilder::addAllFp32Contents);
+                break;
+            case FP64:
+                addDataTypeInputData(input, Double.class, inputDataBuilder::addAllFp64Contents);
+                break;
+            case BYTES:
+                addBytesInputData(input, inputDataBuilder);
+                break;
+            default:
+                throw new IllegalArgumentException("Date type " + modelInputType + " not supported");
         }
 
         ModelInferRequest.InferInputTensor.Builder inputBuilder = ModelInferRequest.InferInputTensor.newBuilder();
@@ -596,52 +601,56 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
                 TensorDescriptor outputDescriptor = outputDescriptorBuilder.build();
 
                 switch (outputType) {
-                case BOOL:
-                    List<Boolean> booleanList = bufferToBooleanList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
-                    results.add(new Tensor(Boolean.class, outputDescriptor, booleanList));
-                    break;
-                case UINT8:
-                case INT8:
-                    List<Byte> byteList = bufferToByteList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
-                    results.add(new Tensor(Byte.class, outputDescriptor, byteList));
-                    break;
-                case UINT16:
-                case INT16:
-                    List<Short> shortList = bufferToShortList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asShortBuffer());
-                    results.add(new Tensor(Short.class, outputDescriptor, shortList));
-                    break;
-                case UINT32:
-                case INT32:
-                    List<Integer> integerList = bufferToIntList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asIntBuffer());
-                    results.add(new Tensor(Integer.class, outputDescriptor, integerList));
-                    break;
-                case UINT64:
-                case INT64:
-                    List<Long> longList = bufferToLongList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asLongBuffer());
-                    results.add(new Tensor(Long.class, outputDescriptor, longList));
-                    break;
-                case FP32:
-                    List<Float> floatList = bufferToFloatList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer());
-                    results.add(new Tensor(Float.class, outputDescriptor, floatList));
-                    break;
-                case FP64:
-                    List<Double> doubleList = bufferToDoubleList(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asDoubleBuffer());
-                    results.add(new Tensor(Double.class, outputDescriptor, doubleList));
-                    break;
-                case BYTES:
-                    List<Byte> bytesList = bufferToBytes(
-                            byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
-                    results.add(new Tensor(Byte.class, outputDescriptor, bytesList));
-                    break;
-                default:
-                    throw new IllegalArgumentException("Date type " + outputType + " not supported");
+                    case BOOL:
+                        List<Boolean> booleanList = bufferToBooleanList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
+                        results.add(new Tensor(Boolean.class, outputDescriptor, booleanList));
+                        break;
+                    case UINT8:
+                    case INT8:
+                        List<Byte> byteList = bufferToByteList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
+                        results.add(new Tensor(Byte.class, outputDescriptor, byteList));
+                        break;
+                    case UINT16:
+                    case INT16:
+                        List<Short> shortList = bufferToShortList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN)
+                                        .asShortBuffer());
+                        results.add(new Tensor(Short.class, outputDescriptor, shortList));
+                        break;
+                    case UINT32:
+                    case INT32:
+                        List<Integer> integerList = bufferToIntList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN).asIntBuffer());
+                        results.add(new Tensor(Integer.class, outputDescriptor, integerList));
+                        break;
+                    case UINT64:
+                    case INT64:
+                        List<Long> longList = bufferToLongList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN)
+                                        .asLongBuffer());
+                        results.add(new Tensor(Long.class, outputDescriptor, longList));
+                        break;
+                    case FP32:
+                        List<Float> floatList = bufferToFloatList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN)
+                                        .asFloatBuffer());
+                        results.add(new Tensor(Float.class, outputDescriptor, floatList));
+                        break;
+                    case FP64:
+                        List<Double> doubleList = bufferToDoubleList(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN)
+                                        .asDoubleBuffer());
+                        results.add(new Tensor(Double.class, outputDescriptor, doubleList));
+                        break;
+                    case BYTES:
+                        List<Byte> bytesList = bufferToBytes(
+                                byteStringResponse.asReadOnlyByteBuffer().order(ByteOrder.LITTLE_ENDIAN));
+                        results.add(new Tensor(Byte.class, outputDescriptor, bytesList));
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Date type " + outputType + " not supported");
                 }
             }
         }

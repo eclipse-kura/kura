@@ -25,12 +25,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransportOptions;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +83,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
         whenConnect();
 
-        thenListenerNotifiedOnConnectionEstabilished();
+        thenListenerNotifiedOnConnectionEstabilished(1);
         thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
     }
 
@@ -101,7 +104,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
         whenPrimaryHostReportsState("h1", true, new Date().getTime());
 
-        thenListenerNotifiedOnConnectionEstabilished();
+        thenListenerNotifiedOnConnectionEstabilished(1);
         thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
     }
 
@@ -142,6 +145,18 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     @Test
+    public void shouldIgnoreStateMessagesFromOtherPrimaryHost() throws Exception {
+        givenUpdated("g1", "n1", "h1", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+        givenPrimaryHostReportsState("h1", true, new Date().getTime());
+
+        whenPrimaryHostReportsState("h2", false, new Date().getTime());
+
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
     public void shouldDisconnectCleanWithDeathCertificate() throws Exception {
         givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
         givenConnected();
@@ -153,9 +168,18 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
     }
 
-    // @Test
-    public void shouldTriggerRebirthWhenNcmdMessageArrives() throws Exception {
+    @Test
+    public void shouldRestabilishSessionWhenRebirthRequestArrives() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
 
+        whenPrimaryHostRequestsRebirth("g1", "n1", true, new Date().getTime());
+
+        thenListenerNotifiedOnDisconnecting();
+        thenListenerNotifiedOnDisconnected();
+        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
+        thenListenerNotifiedOnConnectionEstabilished(2);
+        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
     }
 
     /*
@@ -217,6 +241,17 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         sparkplugDataTransport.disconnect(quiesceTimeout);
     }
 
+    private void whenPrimaryHostRequestsRebirth(String groupId, String nodeId, boolean isRebirthRequested,
+            long timestamp) throws MqttException {
+        SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
+        payloadBuilder.withMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME, isRebirthRequested,
+                DataType.Boolean,
+                timestamp);
+        payloadBuilder.withTimestamp(timestamp);
+
+        client.publish(SparkplugTopics.getNodeCommandTopic(groupId, nodeId), payloadBuilder.build(), 0, false);
+    }
+
     /*
      * Then
      */
@@ -226,8 +261,8 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
-    private void thenListenerNotifiedOnConnectionEstabilished() {
-        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onConnectionEstablished(true);
+    private void thenListenerNotifiedOnConnectionEstabilished(int expectedTimes) {
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(expectedTimes)).onConnectionEstablished(true);
     }
 
     private void thenListenerNotNotifiedOnConnectionEstabilished() {

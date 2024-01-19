@@ -13,7 +13,9 @@
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -182,6 +184,54 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
     }
 
+    @Test
+    public void shouldIgnoreRebirthWhenDifferentNode() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenPrimaryHostRequestsRebirth("g1", "n2", true, new Date().getTime());
+
+        thenListenerNotifiedOnConnectionEstabilished(1);
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
+    public void shouldIgnoreRebirthWhenDifferentGroup() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenPrimaryHostRequestsRebirth("g2", "n1", true, new Date().getTime());
+
+        thenListenerNotifiedOnConnectionEstabilished(1);
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
+    public void shouldIgnoreRebirthWhenMetricIsFalse() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenPrimaryHostRequestsRebirth("g1", "n1", false, new Date().getTime());
+
+        thenListenerNotifiedOnConnectionEstabilished(1);
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
+    public void shouldForwardSTATEandNCMDmessagesToListeners() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenPrimaryHostReportsState("h1", false, new Date().getTime());
+        whenPrimaryHostRequestsRebirth("g1", "n1", false, new Date().getTime());
+
+        thenListenerNotifiedOnMessageArrived("spBv1.0/g1/NCMD/n1");
+        thenListenerNotifiedOnMessageArrived("spBv1.0/STATE/h1");
+    }
+
     /*
      * Steps
      */
@@ -256,11 +306,6 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
      * Then
      */
 
-    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
-        assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
-    }
-
     private void thenListenerNotifiedOnConnectionEstabilished(int expectedTimes) {
         verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(expectedTimes)).onConnectionEstablished(true);
     }
@@ -283,6 +328,11 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
     private void thenListenerNotNotifiedOnDisconnected() {
         verify(this.listener, never()).onDisconnected();
+    }
+
+    private void thenListenerNotifiedOnMessageArrived(String topic) {
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onMessageArrived(eq(topic),
+                any(byte[].class), anyInt(), anyBoolean());
     }
 
     private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained)

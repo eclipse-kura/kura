@@ -74,11 +74,9 @@
                         <b:FormGroup>
                             <b:FormLabel for="certificateInput"
                                 text="{msgs.settingsPublicCertLabel}" />
-                            <g:InlineHTML><br /></g:InlineHTML>
-                            <b:Label text="Warning" type="WARNING"/>
-                            <b.html:Span text=" {msgs.settingsPublicCertWarning}" />
                             <b:TextArea b:id="certificateInput"
-                                addStyleNames="{style.center-panel}"
+                                addStyleNames="{style.center-panel}" 
+                                placeholder="{msgs.settingsPublicCertWarning}"
                                 ui:field="certificateInput" />
                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>

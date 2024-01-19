@@ -82,14 +82,6 @@ following steps:
 
     ![Proceed trusting the source](./images/untrusted_cert.png)
 
-    Once trusted the source, the user will be redirected to a login page where the default **username** is:
-
-    ```
-    admin
-    ```
-
-    and the default **password** is:
-
-    ```
-    admin
-    ```
+    Once trusted the source, the user will be redirected to a login page where the following credentianls:
+    **username**: `admin`
+    **password**: `admin`

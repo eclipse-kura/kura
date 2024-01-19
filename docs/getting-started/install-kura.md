@@ -8,9 +8,9 @@ Kura is provided using a DEB Linux package. Visit the [Kura download page](https
 
 Several installers can be found on such page, and they fall into one of the following categories:
 
-1. specific device profiles, like `kura_5.3.0_raspberry-pi-armhf_installer.deb` (identified with the device name in the [downloads](https://www.eclipse.org/kura/downloads.php) page);
-2. generic profiles, like `kura-5.3.0_generic-arm32_installer.deb`; and
-3. profiles with suffix **nn**, like `kura_5.3.0_raspberry-pi-nn_installer.deb`
+1. specific device profiles, like `kura_5.5.0_nvidia-jetson-nano_installer.deb`` (identified with the device name in the [downloads](https://www.eclipse.org/kura/downloads.php) page);
+2. generic profiles, like `kura-5.5.0_generic-arm32_installer.deb`; and
+3. profiles with suffix **nn**, like `kura_5.5.0_nvidia-jetson-nano-nn_installer.deb`
 
 Profiles of types (1) and (2) ship a Kura version with networking functionalities. In particular, the installers of kind (1) use **Kura Networking** for leveraging network interface configurations and are made for a specific device.
 
@@ -101,7 +101,7 @@ Kura generic has been tested on the following devices and provides full configur
 
 | Device | Architecture | OS |
 | - | - | - |
-| **Raspberry Pi 3/4** | *arm32* | Raspbian "Bullseye" |
+| **Raspberry Pi 3/4** | *arm32* | Raspbian "Bookworm" |
 | **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
 | **Intel Up²** | *x86_64* | Ubuntu 20.04 |
 | **NVIDIA Jetson Nano&trade;** | *arm64* | Ubuntu 20.04 |

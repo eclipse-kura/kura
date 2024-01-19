@@ -2,16 +2,16 @@
 
 <!--
 
-    Copyright (c) 2020 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
 
 -->
 
@@ -19,24 +19,24 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
-	<ui:with field="msgs"
-		type="org.eclipse.kura.web.client.messages.Messages" />
+    <ui:with field="msgs"
+        type="org.eclipse.kura.web.client.messages.Messages" />
 
     <ui:style>
     .important {
-    	font-weight: bold;
+        font-weight: bold;
     }
     
     .center-panel {
-    	height: 100%;
+        height: 100%;
     }
     
     .small-text {
-    	font-size: 0.90em;
+        font-size: 0.90em;
     }
     
     #storageAlias {
-    	text-transform: lowercase;
+        text-transform: lowercase;
     }
     </ui:style>
 
@@ -48,12 +48,12 @@
 
                 <b:Form ui:field="httpsServerCertsForm">
                     <b:FieldSet>
-                    	<b:FormGroup>
+                        <b:FormGroup>
                             <b:FormLabel for="pidListBox"
                                 text="{msgs.settingsKeyStorePidLabel}" />
                             <b:ListBox b:id="pidListBox" ui:field="pidListBox" />
                         </b:FormGroup>
-                    
+
                         <b:FormGroup>
                             <b:FormLabel for="storageAliasInput"
                                 text="{msgs.settingsStorageAliasLabel}" />
@@ -75,7 +75,8 @@
                             <b:FormLabel for="certificateInput"
                                 text="{msgs.settingsPublicCertLabel}" />
                             <b:TextArea b:id="certificateInput"
-                                addStyleNames="{style.center-panel}"
+                                addStyleNames="{style.center-panel}" 
+                                placeholder="{msgs.settingsPublicCertWarning}"
                                 ui:field="certificateInput" />
                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>

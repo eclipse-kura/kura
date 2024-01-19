@@ -3076,7 +3076,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 Raspberry Pi.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura download page</a></p>
+<p>This quickstart will install the version of Kura with the administrative web UI and network configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura download page</a></p>
 </div>
 <p>This quickstart has been tested using the latest Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the SD card through <a href="https://www.raspberrypi.com/software/">Raspberry Pi Imager</a>.</p>
 <p>The official images can be also found on the <a href="https://ubuntu.com/download/raspberry-pi">Project Page</a>. Further information on the Ubuntu installation for Raspberry Pi can be found <a href="https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi">here</a>.</p>
@@ -3119,13 +3119,13 @@ following steps:</p>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb
 </code></pre></div>
-<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.2.0).</p>
+<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.5.0) and <code>&lt;arch&gt;</code> with your device architecture </p>
 </li>
 <li>
 <p>Install Kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install ./kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install ./kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb
 </code></pre></div>
 <p>All the required dependencies will be downloaded and installed.</p>
 </li>
@@ -3133,23 +3133,55 @@ following steps:</p>
 <p>Set the right Wi-Fi regulatory domain based on your current world region editing the <code>/etc/default/crda</code> and adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-1 alpha-2</a> code of your region.</p>
 </li>
 <li>
+<p>(Optional) Configure the GPIO replacing the content of the file <code>/opt/eclise/kura/framework/jdk.dio.properties</code> with the following text:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>0 = deviceType: gpio.GPIOPin, pinNumber:0, name:GPIO0
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>1 = deviceType: gpio.GPIOPin, pinNumber:1, name:GPIO1
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>2 = deviceType: gpio.GPIOPin, pinNumber:2, name:GPI02
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>3 = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>4 = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>5 = deviceType: gpio.GPIOPin, pinNumber:5, name:GPIO5
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO6
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>7 = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>8 = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>9 = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>12 = deviceType: gpio.GPIOPin, pinNumber:12, name:GPIO12
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>13 = deviceType: gpio.GPIOPin, pinNumber:13, name:GPIO13
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>15 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO15
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>16 = deviceType: gpio.GPIOPin, pinNumber:16, name:GPIO16
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>19 = deviceType: gpio.GPIOPin, pinNumber:19, name:GPIO19
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>20 = deviceType: gpio.GPIOPin, pinNumber:20, name:GPIO20
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>21 = deviceType: gpio.GPIOPin, pinNumber:21, name:GPIO21
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>26 = deviceType: gpio.GPIOPin, pinNumber:26, name:GPIO26
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a>gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a>uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
+</code></pre></div>
+</li>
+<li>
 <p>Reboot the Raspberry Pi with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with a self signed certificate, select <code>Accept the risk and continue</code>:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
-<p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>admin
-</code></pre></div>
-<p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>admin
-</code></pre></div>
+<p>Once trusted the source, the user will be redirected to a login page where the following credentianls:
+<strong>username</strong>: <code>admin</code>
+<strong>password</strong>: <code>admin</code></p>
 </li>
 </ol>
 

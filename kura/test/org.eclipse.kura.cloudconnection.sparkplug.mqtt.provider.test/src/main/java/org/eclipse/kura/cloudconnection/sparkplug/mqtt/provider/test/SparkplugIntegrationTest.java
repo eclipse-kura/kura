@@ -15,7 +15,6 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +31,7 @@ import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -72,9 +72,11 @@ public class SparkplugIntegrationTest {
     }
 
     @BeforeClass
-    public static void setup() {
+    public static void initialize() {
         try {
-            dependenciesLatch.await(30, TimeUnit.SECONDS);
+            if (!dependenciesLatch.await(30, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Test dependencies not satisfied");
+            }
 
             startMqttBroker();
             createSparkplugCloudConnection();
@@ -90,7 +92,8 @@ public class SparkplugIntegrationTest {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws MqttException {
+        client.disconnect();
         stopBroker();
     }
 
@@ -101,7 +104,7 @@ public class SparkplugIntegrationTest {
         assertNotNull(sparkplugDataTransport);
     }
 
-    private static void startMqttBroker() throws Exception {
+    public static void startMqttBroker() throws Exception {
         IResourceLoader classpathLoader = new ClasspathResourceLoader();
         IConfig classPathConfig = new ResourceLoaderConfig(classpathLoader);
 
@@ -112,8 +115,7 @@ public class SparkplugIntegrationTest {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stopBroker()));
     }
 
-    private static void stopBroker() {
-        logger.info("Stopping moquette MQTT broker...");
+    public static void stopBroker() {
         mqttBroker.stopServer();
         logger.info("Moquette MQTT broker stopped");
     }
@@ -135,13 +137,11 @@ public class SparkplugIntegrationTest {
     }
 
     private static void connectDefaultPahoClient() throws Exception {
-        if (Objects.isNull(client)) {
-            client = new MqttClient("tcp://localhost:1883", "sparkplug.it.test", new MemoryPersistence());
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            client.connect(options);
-        }
+        client = new MqttClient("tcp://localhost:1883", "sparkplug.it.test", new MemoryPersistence());
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(false);
+        options.setCleanSession(true);
+        client.connect(options);
     }
 
     private static <T> T trackService(Class<T> clazz, String pid)

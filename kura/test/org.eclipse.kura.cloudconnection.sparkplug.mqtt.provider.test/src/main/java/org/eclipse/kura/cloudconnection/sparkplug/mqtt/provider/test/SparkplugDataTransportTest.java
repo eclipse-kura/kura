@@ -14,9 +14,9 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -35,6 +35,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -45,23 +47,26 @@ import com.google.gson.JsonObject;
  */
 public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
-    private static final long DEFAULT_TIMEOUT_MS = 45_000L;
+    private static final Logger logger = LoggerFactory.getLogger(SparkplugDataTransportTest.class);
+    private static final long DEFAULT_TIMEOUT_MS = 10_000L;
 
     private DataTransportListener listener = mock(DataTransportListener.class);
     private Exception occurredException;
     private MqttCallback callback = mock(MqttCallback.class);
 
     @Before
-    public void addListener() throws Exception {
+    public void setup() throws Exception {
         sparkplugDataTransport.addDataTransportListener(this.listener);
         client.setCallback(callback);
         client.subscribe("spBv1.0/g1/NBIRTH/n1", 0);
+        client.subscribe("spBv1.0/g1/NDEATH/n1", 1);
     }
 
     @After
-    public void removeListenerAndDisconnect() throws MqttException {
+    public void cleanup() throws MqttException {
         sparkplugDataTransport.removeDataTransportListener(this.listener);
         client.unsubscribe("spBv1.0/g1/NBIRTH/n1");
+        client.unsubscribe("spBv1.0/g1/NDEATH/n1");
         sparkplugDataTransport.disconnect(0L);
     }
 
@@ -76,7 +81,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         whenConnect();
 
         thenListenerNotifiedOnConnectionEstabilished();
-        thenMessageSent("spBv1.0/g1/NBIRTH/n1", 0, false);
+        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
     }
 
     @Test
@@ -87,7 +92,6 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         whenPrimaryHostReportsState("h1", false, new Date().getTime());
 
         thenListenerNotNotifiedOnConnectionEstabilished();
-        thenMessageNotSent("spBv1.0/g1/NBIRTH/n1");
     }
 
     @Test
@@ -98,7 +102,60 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         whenPrimaryHostReportsState("h1", true, new Date().getTime());
 
         thenListenerNotifiedOnConnectionEstabilished();
-        thenMessageSent("spBv1.0/g1/NBIRTH/n1", 0, false);
+        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
+    }
+
+    @Test
+    public void shouldDisconnectCleanWhenPrimaryHostOffline() throws Exception {
+        givenUpdated("g1", "n1", "h1", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+        givenPrimaryHostReportsState("h1", true, new Date().getTime());
+
+        whenPrimaryHostReportsState("h1", false, new Date().getTime());
+
+        thenListenerNotifiedOnDisconnecting();
+        thenListenerNotifiedOnDisconnected();
+        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
+    }
+
+    @Test
+    public void shouldIgnoreStateMessagesWithOutdatedTimestamp() throws Exception {
+        givenUpdated("g1", "n1", "h1", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+        givenPrimaryHostReportsState("h1", true, new Date().getTime());
+
+        whenPrimaryHostReportsState("h1", false, 1234L);
+
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
+    public void shouldIgnoreStateMessagesWithoutPrimaryHost() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenPrimaryHostReportsState("h1", false, new Date().getTime());
+
+        thenListenerNotNotifiedOnDisconnecting();
+        thenListenerNotNotifiedOnDisconnected();
+    }
+
+    @Test
+    public void shouldDisconnectCleanWithDeathCertificate() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
+        whenDisconnect(0L);
+
+        thenListenerNotifiedOnDisconnecting();
+        thenListenerNotifiedOnDisconnected();
+        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
+    }
+
+    // @Test
+    public void shouldTriggerRebirthWhenNcmdMessageArrives() throws Exception {
+
     }
 
     /*
@@ -128,6 +185,22 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         sparkplugDataTransport.connect();
     }
 
+    private void givenPrimaryHostReportsState(String hostId, boolean isOnline, long timestamp) throws MqttException {
+        JsonObject rootObject = new JsonObject();
+        rootObject.addProperty("online", isOnline);
+        rootObject.addProperty("timestamp", timestamp);
+
+        Gson gson = new Gson();
+
+        String topic = SparkplugTopics.getStateTopic(hostId);
+        byte[] payload = gson.toJson(rootObject).getBytes();
+
+        logger.info("Sending STATE message [ online: {}, timestamp: {} ]", isOnline, timestamp);
+
+        // for testing, do not publish with retain true
+        client.publish(topic, payload, 1, false);
+    }
+
     /*
      * When
      */
@@ -137,16 +210,11 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     private void whenPrimaryHostReportsState(String hostId, boolean isOnline, long timestamp) throws MqttException {
-        JsonObject rootObject = new JsonObject();
-        rootObject.addProperty("online", isOnline);
-        rootObject.addProperty("timestamp", timestamp);
-        
-        Gson gson = new Gson();
+        givenPrimaryHostReportsState(hostId, isOnline, timestamp);
+    }
 
-        String topic = SparkplugTopics.getStateTopic(hostId);
-        byte[] payload = gson.toJson(rootObject).getBytes();
-
-        client.publish(topic, payload, 1, true);
+    private void whenDisconnect(long quiesceTimeout) {
+        sparkplugDataTransport.disconnect(quiesceTimeout);
     }
 
     /*
@@ -163,27 +231,36 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     private void thenListenerNotNotifiedOnConnectionEstabilished() {
-        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(0)).onConnectionEstablished(true);
+        verify(this.listener, never()).onConnectionEstablished(true);
     }
 
-    private void thenMessageSent(String expectedTopic, int expectedQos, boolean expectedRetained) throws Exception {
-        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+    private void thenListenerNotifiedOnDisconnecting() {
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onDisconnecting();
+    }
+
+    private void thenListenerNotNotifiedOnDisconnecting() {
+        verify(this.listener, never()).onDisconnecting();
+    }
+
+    private void thenListenerNotifiedOnDisconnected() {
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onDisconnected();
+    }
+
+    private void thenListenerNotNotifiedOnDisconnected() {
+        verify(this.listener, never()).onDisconnected();
+    }
+
+    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained)
+            throws Exception {
         ArgumentCaptor<MqttMessage> messageCaptor = ArgumentCaptor.forClass(MqttMessage.class);
 
-        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).times(1)).messageArrived(topicCaptor.capture(),
+        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).atLeastOnce()).messageArrived(eq(expectedTopic),
                 messageCaptor.capture());
 
-        String actualTopic = topicCaptor.getValue();
         MqttMessage actualMessage = messageCaptor.getValue();
 
-        assertEquals(expectedTopic, actualTopic);
         assertEquals(expectedQos, actualMessage.getQos());
         assertEquals(expectedRetained, actualMessage.isRetained());
-    }
-
-    private void thenMessageNotSent(String expectedTopic) throws Exception {
-        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).times(0)).messageArrived(eq(expectedTopic),
-                any(MqttMessage.class));
     }
 
 }

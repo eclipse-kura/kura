@@ -112,6 +112,8 @@ The Sparkplug Data Transport layer bridges the incoming requests to the underlyi
 
 ![](./images/sparkplugDataTransport.png)
 
+The Sparkplug Data Transport layer is configured to wait for a random period of time between 0sec and 5sec before each connection attempt. This is to ensure that, on large deployments, the target MQTT servers and Host Applications will dilute session estabilishment requests by some margin. This behavior is not part of the Sparkplug specification.
+
 
 
 ## Sparkplug Implementation Details

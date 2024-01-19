@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.kura.KuraConnectException;
@@ -57,6 +58,7 @@ public class SparkplugMqttClient {
     private MqttAsyncClient client;
     private BdSeqCounter bdSeqCounter = new BdSeqCounter();
     private long lastStateTimestamp = 0;
+    private Random randomDelayGenerator = new Random();
 
     public enum SessionStatus {
         TERMINATED,
@@ -233,8 +235,8 @@ public class SparkplugMqttClient {
         setWillMessage();
 
         try {
-            long randomDelay = (long) Math.floor(Math.random() * 5000);
-            logger.debug("Randomly delaying connect by {} ms", randomDelay);
+            long randomDelay = this.randomDelayGenerator.nextInt(5000);
+            logger.info("Randomly delaying connect by {} ms", randomDelay);
             Thread.sleep(randomDelay);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

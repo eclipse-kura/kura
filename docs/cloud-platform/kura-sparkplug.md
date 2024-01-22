@@ -1,6 +1,6 @@
-# Eclipse Sparkplug Cloud Connector
+# Eclipse Sparkplug&reg; Cloud Connector
 
-The `org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider` package provides a Eclipse Kura Cloud Connection that implements the [Eclipse Sparkplug v3.0.0 specification](https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf).
+The `org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider` package provides a Eclipse Kura Cloud Connection that implements the [Eclipse Sparkplug&reg; v3.0.0 specification](https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf).
 
 
 

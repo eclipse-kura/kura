@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
+import org.eclipse.kura.data.DataService;
 import org.junit.Test;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -28,6 +29,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
 
     private CloudConnectionListener listener = mock(CloudConnectionListener.class);
     private EventAdmin eventAdmin = mock(EventAdmin.class);
+    private DataService dataService = mock(DataService.class);
 
     /*
      * Scenarios
@@ -36,6 +38,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotifyOnConnectionEstabilishedAndPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
 
         whenOnConnectionEstabilished();
@@ -47,6 +50,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotNotifyOnConnectionEstabilishedButShouldPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
         givenUnregisterCloudConnectionListener(this.listener);
 
@@ -59,6 +63,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotifyOnDisconnectedAndPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
 
         whenOnDisconnected();
@@ -70,6 +75,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotNotifyOnDisconnectedButShouldPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
         givenUnregisterCloudConnectionListener(this.listener);
 
@@ -82,6 +88,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotifyOnConnectionLostAndPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
 
         whenOnConnectionLost();
@@ -93,6 +100,7 @@ public class ConnectionStatusCallbackTest extends StepsCollection {
     @Test
     public void shouldNotNotifyOnConnectionLostButShouldPostEvent() {
         givenEventAdmin(this.eventAdmin);
+        givenDataService(this.dataService);
         givenCloudConnectionListener(this.listener);
         givenUnregisterCloudConnectionListener(this.listener);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -41,12 +41,6 @@
                policy="static"
                cardinality="1..1"
                bind="setEventAdmin"/>
-
-    <reference interface="org.eclipse.kura.data.DataTransportService"
-               name="DataTransportService"
-               policy="static"
-               cardinality="1..1"
-               bind="setDataTransportService"/>
 
     <property name="kura.ui.service.hide" type="Boolean" value="true"/>
     <property name="kura.ui.factory.hide" type="Boolean" value="true"/>

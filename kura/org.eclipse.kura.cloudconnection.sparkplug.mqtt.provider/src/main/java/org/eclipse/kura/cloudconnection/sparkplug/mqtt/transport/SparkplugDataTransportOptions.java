@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,9 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -23,6 +25,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class SparkplugDataTransportOptions {
 
+    public static final String KEY_GROUP_ID = "group.id";
+    public static final String KEY_NODE_ID = "node.id";
+    public static final String KEY_PRIMARY_HOST_APPLICATION_ID = "primary.host.application.id";
     public static final String KEY_SERVER_URIS = "server.uris";
     public static final String KEY_CLIENT_ID = "client.id";
     public static final String KEY_USERNAME = "username";
@@ -30,47 +35,50 @@ public class SparkplugDataTransportOptions {
     public static final String KEY_KEEP_ALIVE = "keep.alive";
     public static final String KEY_CONNECTION_TIMEOUT = "connection.timeout";
 
+    private String groupId;
+    private String nodeId;
+    private Optional<String> primaryHostApplicationId = Optional.empty();
+    private List<String> servers = new ArrayList<>();
     private MqttConnectOptions connectionOptions = new MqttConnectOptions();
     private String clientId;
 
     public SparkplugDataTransportOptions(Map<String, Object> properties) throws KuraException {
-        String servers = getString(KEY_SERVER_URIS, properties).orElseThrow(getKuraException(KEY_SERVER_URIS));
-        String clientIdentifier = getString(KEY_CLIENT_ID, properties).orElseThrow(getKuraException(KEY_CLIENT_ID));
-        
-        if (servers.isEmpty()) {
-            throw getKuraException(KEY_SERVER_URIS).get();
-        }
+        this.groupId = getMandatoryString(KEY_GROUP_ID, properties);
+        this.nodeId = getMandatoryString(KEY_NODE_ID, properties);
+        this.primaryHostApplicationId = getOptionalString(KEY_PRIMARY_HOST_APPLICATION_ID, properties);
+        this.servers = getServersList(KEY_SERVER_URIS, properties);
+        this.clientId = getMandatoryString(KEY_CLIENT_ID, properties);
 
-        if (clientIdentifier.isEmpty()) {
-            throw getKuraException(KEY_CLIENT_ID).get();
-        }
-
-        Optional<String> username = getString(KEY_USERNAME, properties);
-        Optional<Password> password = getPassword(KEY_PASSWORD, properties);
-        Optional<Integer> connectionTimeout = getInteger(KEY_CONNECTION_TIMEOUT, properties);
-        Optional<Integer> keepAlive = getInteger(KEY_KEEP_ALIVE, properties);
-
-        this.connectionOptions.setServerURIs(getServerURIs(servers));
-        this.clientId = clientIdentifier;
-
+        Optional<String> username = getOptionalString(KEY_USERNAME, properties);
+        Optional<Password> password = getOptionalPassword(KEY_PASSWORD, properties);
         if (username.isPresent()) {
             this.connectionOptions.setUserName(username.get());
         }
-
         if (password.isPresent()) {
             this.connectionOptions.setPassword(password.get().getPassword());
         }
 
-        if (connectionTimeout.isPresent()) {
-            this.connectionOptions.setConnectionTimeout(connectionTimeout.get());
-        }
-
-        if (keepAlive.isPresent()) {
-            this.connectionOptions.setKeepAliveInterval(keepAlive.get());
-        }
+        this.connectionOptions.setKeepAliveInterval(getMandatoryInt(KEY_KEEP_ALIVE, properties));
+        this.connectionOptions.setConnectionTimeout(getMandatoryInt(KEY_CONNECTION_TIMEOUT, properties));
 
         this.connectionOptions.setCleanSession(true);
         this.connectionOptions.setAutomaticReconnect(false);
+    }
+
+    public String getGroupId() {
+        return this.groupId;
+    }
+
+    public String getNodeId() {
+        return this.nodeId;
+    }
+
+    public Optional<String> getPrimaryHostApplicationId() {
+        return this.primaryHostApplicationId;
+    }
+
+    public List<String> getServers() {
+        return this.servers;
     }
 
     public MqttConnectOptions getMqttConnectOptions() {
@@ -89,36 +97,66 @@ public class SparkplugDataTransportOptions {
         return this.connectionOptions.getConnectionTimeout() * 1000L;
     }
 
-    public String getPrimaryServerURI() {
-        return this.connectionOptions.getServerURIs()[0];
+    private String getMandatoryString(String key, Map<String, Object> map) throws KuraException {
+        String value = (String) map.get(key);
+
+        if (Objects.isNull(value) || value.isEmpty()) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, key + " cannot be empty or null");
+        }
+
+        return value;
     }
 
-    private Optional<String> getString(String key, Map<String, Object> map) {
-        return Optional.ofNullable((String) map.get(key));
+    private int getMandatoryInt(String key, Map<String, Object> map) throws KuraException {
+        Integer value = (Integer) map.get(key);
+
+        if (Objects.isNull(value)) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, key + " cannot be null");
+        }
+        
+        return value;
     }
 
-    private Optional<Password> getPassword(String key, Map<String, Object> map) {
-        return Optional.ofNullable((Password) map.get(key));
+    private Optional<String> getOptionalString(String key, Map<String, Object> map) {
+        String value = (String) map.get(key);
+
+        if (Objects.isNull(value) || value.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(value);
+        }
     }
 
-    private Optional<Integer> getInteger(String key, Map<String, Object> map) {
-        return Optional.ofNullable((Integer) map.get(key));
+    private Optional<Password> getOptionalPassword(String key, Map<String, Object> map) {
+        Password value = (Password) map.get(key);
+
+        if (Objects.isNull(value) || value.getPassword().length == 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(value);
+        }
     }
 
-    private Supplier<KuraException> getKuraException(String propertyName) {
-        return () -> new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                "The property " + propertyName + " is null or empty");
-    }
+    private List<String> getServersList(String key, Map<String, Object> map) throws KuraException {
+        String spaceSeparatedList = (String) map.get(key);
 
-    private String[] getServerURIs(String spaceSeparatedservers) throws KuraException {
-        String[] servers = spaceSeparatedservers.split(" ");
-        for (String server : servers) {
+        if (Objects.isNull(spaceSeparatedList) || spaceSeparatedList.isEmpty()) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, key + " cannot be empty or null");
+        }
+
+        List<String> result = new ArrayList<>();
+
+        String[] uris = spaceSeparatedList.split(" ");
+        for (String server : uris) {
             if (server.endsWith("/") || server.isEmpty()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        "Server URI cannot be empty, or end with '/', or contain a path");
+                        key + " items cannot be empty, or end with '/', or contain a path");
             }
+
+            result.add(server);
         }
-        return servers;
+
+        return result;
     }
 
 }

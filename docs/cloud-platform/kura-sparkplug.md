@@ -158,7 +158,7 @@ DoubleArray
 
 #### Edge Node Birth Message Metrics
 
-The NBIRTH message sent by this cloud connection will contain the following system-wise metrics, that are fetched from Kura's [`SystemService`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/system/SystemService.java). In particular, only the properties returned by [`SystemService.getProperties`](https://github.com/eclipse/kura/blob/9480be5b39bbd3901102e82ba047bd4e91260999/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/system/SystemService.java#L473) are added as Sparkplug Metrics in the birth payload with Sparkplug Data Types defined as in mapping [above](#supported-sparkplug-data-types).
+The NBIRTH message sent by this cloud connection will not contain any metrics, except for the mandatory ones required by the specification.
 
 
 

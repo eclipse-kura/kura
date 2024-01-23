@@ -26,7 +26,6 @@ The **TCP/IP** tab contains the following configuration parameters:
 - **Gateway** - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)
 - **DNS Servers** - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.
 - **Search Domains** - Not implemented.
-- **MTU** - defines the Maximum Trasmission unit for IPv4 traffic on the selected interface, a value of 0 or empty delegates the MTU definition to the link layer.
 
 If the network interface is *Enabled for LAN* and manually configured (i.e., not a DHCP client), the **DHCP & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
@@ -106,6 +105,7 @@ Name                                             | Type     | Description
 `net.interface.<interface>.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM, VLAN and LOOPBACK
 `net.interface.<interface>.config.wifi.mode`   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
 `net.interface.<interface>.config.nat.enabled` | Boolean  | Enable the NAT feature
+`net.interface.<interface>.config.promisc` | Integer  | Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)
 
 ### IPv4 properties
 

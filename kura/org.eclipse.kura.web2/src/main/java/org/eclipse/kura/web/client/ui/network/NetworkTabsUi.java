@@ -287,11 +287,13 @@ public class NetworkTabsUi extends Composite {
 
         if (this.isNet2) {
             insertTab(this.ip6TabAnchorItem);
-            insertTab(this.advancedTabAnchorItem);
         }
 
         arrangeOptionalTabs();
 
+        if (this.isNet2) {
+            insertTab(this.advancedTabAnchorItem);
+        }
         insertTab(this.hardwareTabAnchorItem);
     }
 

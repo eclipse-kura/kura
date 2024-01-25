@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
@@ -46,20 +45,6 @@ public class SparkplugPayloads {
         return payloadBuilder.build();
     }
 
-    public static byte[] getDeviceBirthPayload(long seq, Map<String, TypedValue<?>> metrics) {
-        long timestamp = new Date().getTime();
-
-        SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
-        for (Entry<String, TypedValue<?>> metricEntry : metrics.entrySet()) {
-            payloadBuilder.withMetric(metricEntry.getKey(), metricEntry.getValue(), timestamp);
-        }
-
-        payloadBuilder.withSeq(seq);
-        payloadBuilder.withTimestamp(timestamp);
-
-        return payloadBuilder.build();
-    }
-
     public static boolean getBooleanMetric(String metricName, byte[] rawPayload)
             throws InvalidProtocolBufferException, NoSuchFieldException {
         Payload payload = Payload.parseFrom(rawPayload);
@@ -70,6 +55,21 @@ public class SparkplugPayloads {
         }
         
         throw new NoSuchFieldException("Metric " + metricName + " not found in payload");
+    }
+
+    public static byte[] getSparkplugDevicePayload(long seq, Map<String, Object> metrics) {
+        long timestamp = new Date().getTime();
+        
+        SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
+
+        for (Entry<String, Object> metric : metrics.entrySet()) {
+            payloadBuilder.withMetric(metric.getKey(), metric.getValue(), timestamp);
+        }
+
+        payloadBuilder.withSeq(seq);
+        payloadBuilder.withTimestamp(timestamp);
+
+        return payloadBuilder.build();
     }
 
 }

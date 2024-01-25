@@ -24,13 +24,6 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
-import org.eclipse.kura.type.BooleanValue;
-import org.eclipse.kura.type.ByteArrayValue;
-import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.FloatValue;
-import org.eclipse.kura.type.IntegerValue;
-import org.eclipse.kura.type.StringValue;
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
@@ -48,7 +41,7 @@ public class SparkplugBProtobufPayloadBuilderTest {
      */
 
     @RunWith(Parameterized.class)
-    public static class SupportedDataTypesTest extends Steps {
+    public static class MetricBuilderWithDataTypeTest extends Steps {
 
         @Parameters
         public static Collection<Object[]> parameters() {
@@ -73,7 +66,7 @@ public class SparkplugBProtobufPayloadBuilderTest {
         private DataType type;
         private long timestamp;
 
-        public SupportedDataTypesTest(Object name, Object value, Object type, Object timestamp) {
+        public MetricBuilderWithDataTypeTest(Object name, Object value, Object type, Object timestamp) {
             this.name = (String) name;
             this.value = value;
             this.type = (DataType) type;
@@ -83,6 +76,47 @@ public class SparkplugBProtobufPayloadBuilderTest {
         @Test
         public void shouldCorrectlySetMetricValue() {
             givenMetric(this.name, this.value, this.type, this.timestamp);
+
+            whenBuildPayload();
+
+            thenPayloadContainsMetric(this.name, this.value);
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    public static class MetricBuilderWithoutDataTypeTest extends Steps {
+
+        @Parameters
+        public static Collection<Object[]> parameters() {
+            return Arrays.asList(new Object[][] {
+                    { "name", true, 1L },
+                    { "name", "hello".getBytes(), 1L },
+                    { "name", (double) 12, 1L },
+                    { "name", (float) 12, 1L },
+                    { "name", (byte) 0, 1L },
+                    { "name", (short) 12, 1L },
+                    { "name", (int) 12, 1L },
+                    { "name", (long) 12L, 1L },
+                    { "name", "string", 1L },
+                    { "name", new Date(), 1L },
+                    { "name", BigInteger.valueOf(12L), 1L }
+                    });
+        }
+
+        private String name;
+        private Object value;
+        private long timestamp;
+
+        public MetricBuilderWithoutDataTypeTest(Object name, Object value, Object timestamp) {
+            this.name = (String) name;
+            this.value = value;
+            this.timestamp = (long) timestamp;
+        }
+
+        @Test
+        public void shouldCorrectlySetMetricValue() {
+            givenMetric(this.name, this.value, this.timestamp);
 
             whenBuildPayload();
 
@@ -160,39 +194,6 @@ public class SparkplugBProtobufPayloadBuilderTest {
 
     }
 
-    @RunWith(Parameterized.class)
-    public static class TypedValuesMappingTest extends Steps {
-
-        @Parameters
-        public static Collection<Object[]> parameters() {
-            return Arrays.asList(new Object[][] { { "name", new BooleanValue(true), 1L },
-                    { "name", new ByteArrayValue("test".getBytes()), 1L }, { "name", new FloatValue(1.12f), 1L },
-                    { "name", new DoubleValue((double) 12), 1L }, { "name", new IntegerValue(11), 1L },
-                    { "name", new StringValue("a string"), 1L }
-            });
-        }
-
-        private String name;
-        private TypedValue<?> value;
-        private long timestamp;
-
-        public TypedValuesMappingTest(Object name, Object value, Object timestamp) {
-            this.name = (String) name;
-            this.value = (TypedValue<?>) value;
-            this.timestamp = (long) timestamp;
-        }
-
-        @Test
-        public void shouldCorrectlySetMetricValue() {
-            givenMetricWithTypedValue(this.name, this.value, this.timestamp);
-
-            whenBuildPayload();
-
-            thenPayloadContainsMetric(this.name, this.value.getValue());
-        }
-
-    }
-
     /*
      * Steps
      */
@@ -211,7 +212,7 @@ public class SparkplugBProtobufPayloadBuilderTest {
             this.builder = new SparkplugBProtobufPayloadBuilder().withMetric(name, value, type, timestamp);
         }
 
-        <T> void givenMetricWithTypedValue(String name, TypedValue<T> value, long timestamp) {
+        void givenMetric(String name, Object value, long timestamp) {
             this.builder = new SparkplugBProtobufPayloadBuilder().withMetric(name, value, timestamp);
         }
 

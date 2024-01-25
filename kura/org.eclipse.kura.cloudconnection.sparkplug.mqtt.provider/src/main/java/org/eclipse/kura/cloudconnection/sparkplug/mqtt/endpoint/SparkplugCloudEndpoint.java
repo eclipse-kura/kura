@@ -20,7 +20,9 @@ import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.cloud.CloudConnectionEstablishedEvent;
 import org.eclipse.kura.cloud.CloudConnectionLostEvent;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
@@ -28,6 +30,8 @@ import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
@@ -35,8 +39,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
-import org.eclipse.kura.type.StringValue;
-import org.eclipse.kura.type.TypedValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -45,11 +47,15 @@ import org.slf4j.LoggerFactory;
 public class SparkplugCloudEndpoint
         implements ConfigurableComponent, CloudEndpoint, CloudConnectionManager, DataServiceListener {
 
+    public static final String PLACEHOLDER_GROUP_ID = "placeholder.group.id";
+    public static final String PLACEHOLDER_NODE_ID = "placeholder.node.id";
+
     private static final Logger logger = LoggerFactory.getLogger(SparkplugCloudEndpoint.class);
 
     private Set<CloudConnectionListener> cloudConnectionListeners = new HashSet<>();
     private Set<CloudDeliveryListener> cloudDeliveryListeners = new HashSet<>();
     private String kuraServicePid;
+    private SeqCounter seqCounter = new SeqCounter();
 
     /*
      * Activation APIs
@@ -85,6 +91,12 @@ public class SparkplugCloudEndpoint
     public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 
+        try {
+            disconnect();
+        } catch (KuraDisconnectException e) {
+            logger.info("{} - Error disconnecting", this.kuraServicePid, e);
+        }
+
         logger.info("{} - Deactivated", this.kuraServicePid);
     }
 
@@ -94,8 +106,46 @@ public class SparkplugCloudEndpoint
 
     @Override
     public String publish(KuraMessage message) throws KuraException {
-        // TODO Auto-generated method stub
+        Map<String, Object> messageProperties = message.getProperties();
+        if (!messageProperties.containsKey(SparkplugDevice.KEY_MESSAGE_TYPE)
+                || !messageProperties.containsKey(SparkplugDevice.KEY_DEVICE_ID)) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    "KuraMessage has a missing property between message.type and device.id");
+        }
+
+        SparkplugMessageType type = (SparkplugMessageType) messageProperties.get(SparkplugDevice.KEY_MESSAGE_TYPE);
+        String deviceId = (String) messageProperties.get(SparkplugDevice.KEY_DEVICE_ID);
+
+        logger.debug("{} - Sending message with seq: {}", this.kuraServicePid, this.seqCounter.getCurrent());
+        byte[] sparkplugPayload = SparkplugPayloads.getSparkplugDevicePayload(this.seqCounter.getCurrent(),
+                message.getPayload().metrics());
+
+        this.seqCounter.next();
+
+        if (type == SparkplugMessageType.DBIRTH) {
+            return publishInternal(
+                    SparkplugTopics.getDeviceBirthTopic(PLACEHOLDER_GROUP_ID, PLACEHOLDER_NODE_ID, deviceId),
+                    sparkplugPayload, 0, false, 0);
+        }
+
+        if (type == SparkplugMessageType.DDATA) {
+            return publishInternal(
+                    SparkplugTopics.getDeviceDataTopic(PLACEHOLDER_GROUP_ID, PLACEHOLDER_NODE_ID, deviceId),
+                    sparkplugPayload, 0, false, 7);
+        }
+
         return null;
+    }
+
+    private String publishInternal(String topic, byte[] payload, int qos, boolean retain, int priority)
+            throws KuraStoreException {
+        int id = this.dataService.publish(topic, payload, qos, retain, priority);
+
+        if (qos == 0) {
+            return null;
+        }
+
+        return String.valueOf(id);
     }
 
     @Override
@@ -166,29 +216,12 @@ public class SparkplugCloudEndpoint
     public void onConnectionEstablished() {
         logger.debug("{} - Connection estabilished", this.kuraServicePid);
 
-        sendExampleDeviceBirth();
-
         this.cloudConnectionListeners.forEach(listener -> callSafely(listener::onConnectionEstablished));
         postConnectionChangeEvent(true);
 
+        this.seqCounter = new SeqCounter();
+
         // TO DO: init subscriptions
-    }
-
-    private void sendExampleDeviceBirth() {
-        try {
-            this.dataService.subscribe(SparkplugTopics.getDeviceCommandTopic("g1", "n1", "d1"), 1);
-
-            Map<String, TypedValue<?>> metrics = new HashMap<>();
-            TypedValue<String> value = new StringValue("test.value");
-            metrics.put("test.key", value);
-
-            String topic = SparkplugTopics.getDeviceBirthTopic("g1", "n1", "d1");
-            byte[] payload = SparkplugPayloads.getDeviceBirthPayload(1, metrics);
-
-            this.dataService.publish(topic, payload, 0, false, 7);
-        } catch (KuraException e) {
-            logger.error("Error in example", e);
-        }
     }
 
     @Override

@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataTransportService;
@@ -160,9 +161,12 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     }
 
     @Override
-    public DataTransportToken publish(String topic, byte[] payload, int qos, boolean retain)
+    public DataTransportToken publish(String completeTopic, byte[] payload, int qos, boolean retain)
             throws KuraException {
         checkConnected();
+
+        String topic = completeTopic.replace(SparkplugCloudEndpoint.PLACEHOLDER_GROUP_ID, this.options.getGroupId())
+                .replace(SparkplugCloudEndpoint.PLACEHOLDER_NODE_ID, this.options.getNodeId());
 
         IMqttDeliveryToken deliveryToken = this.client.publish(topic, payload, qos, retain);
 

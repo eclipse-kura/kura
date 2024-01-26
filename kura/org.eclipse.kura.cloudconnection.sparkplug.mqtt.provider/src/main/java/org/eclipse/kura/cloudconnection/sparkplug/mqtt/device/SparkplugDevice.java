@@ -54,6 +54,7 @@ public class SparkplugDevice
 
     public static final String KEY_MESSAGE_TYPE = "message.type";
     public static final String KEY_DEVICE_ID = "device.id";
+    public static final String KEY_TIMESTAMP = "timestamp";
 
     private String deviceId;
     private BundleContext bundleContext;
@@ -155,6 +156,8 @@ public class SparkplugDevice
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DDATA);
         }
 
+        newMessageProperties.put(KEY_TIMESTAMP, getKuraOrCurrentTimestamp(message.getPayload()));
+
         return this.sparkplugCloudEndpoint.get().publish(new KuraMessage(newPayload, newMessageProperties));
     }
 
@@ -248,12 +251,12 @@ public class SparkplugDevice
             kuraMetrics.put("kura.position.timestamp", position.getTimestamp());
         }
 
-        Date timestamp = payload.getTimestamp();
-        if (Objects.nonNull(timestamp)) {
-            kuraMetrics.put("kura.timestamp", timestamp.getTime());
-        }
-
         return kuraMetrics;
+    }
+
+    private long getKuraOrCurrentTimestamp(final KuraPayload kuraPayload) {
+        Date kuraTimestamp = kuraPayload.getTimestamp();
+        return kuraTimestamp != null ? kuraTimestamp.getTime() : new Date().getTime();
     }
 
 }

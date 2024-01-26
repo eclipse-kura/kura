@@ -57,9 +57,7 @@ public class SparkplugPayloads {
         throw new NoSuchFieldException("Metric " + metricName + " not found in payload");
     }
 
-    public static byte[] getSparkplugDevicePayload(long seq, Map<String, Object> metrics) {
-        long timestamp = new Date().getTime();
-        
+    public static byte[] getSparkplugDevicePayload(long seq, Map<String, Object> metrics, long timestamp) {
         SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
 
         for (Entry<String, Object> metric : metrics.entrySet()) {

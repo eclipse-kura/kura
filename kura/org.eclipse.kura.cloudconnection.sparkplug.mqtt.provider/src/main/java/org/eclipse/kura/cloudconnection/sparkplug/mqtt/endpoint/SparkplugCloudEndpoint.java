@@ -117,8 +117,10 @@ public class SparkplugCloudEndpoint
         String deviceId = (String) messageProperties.get(SparkplugDevice.KEY_DEVICE_ID);
 
         logger.debug("{} - Sending message with seq: {}", this.kuraServicePid, this.seqCounter.getCurrent());
+
+        long timestamp = (long) message.getProperties().get(SparkplugDevice.KEY_TIMESTAMP);
         byte[] sparkplugPayload = SparkplugPayloads.getSparkplugDevicePayload(this.seqCounter.getCurrent(),
-                message.getPayload().metrics());
+                message.getPayload().metrics(), timestamp);
 
         this.seqCounter.next();
 

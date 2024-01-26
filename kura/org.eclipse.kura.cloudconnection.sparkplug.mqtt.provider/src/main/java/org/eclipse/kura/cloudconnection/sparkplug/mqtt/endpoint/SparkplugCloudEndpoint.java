@@ -105,7 +105,7 @@ public class SparkplugCloudEndpoint
      */
 
     @Override
-    public String publish(KuraMessage message) throws KuraException {
+    public String publish(final KuraMessage message) throws KuraException {
         Map<String, Object> messageProperties = message.getProperties();
         if (!messageProperties.containsKey(SparkplugDevice.KEY_MESSAGE_TYPE)
                 || !messageProperties.containsKey(SparkplugDevice.KEY_DEVICE_ID)) {
@@ -118,9 +118,8 @@ public class SparkplugCloudEndpoint
 
         logger.debug("{} - Sending message with seq: {}", this.kuraServicePid, this.seqCounter.getCurrent());
 
-        long timestamp = (long) message.getProperties().get(SparkplugDevice.KEY_TIMESTAMP);
         byte[] sparkplugPayload = SparkplugPayloads.getSparkplugDevicePayload(this.seqCounter.getCurrent(),
-                message.getPayload().metrics(), timestamp);
+                message.getPayload());
 
         this.seqCounter.next();
 

@@ -13,9 +13,11 @@
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
+import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
@@ -57,11 +59,33 @@ public class SparkplugPayloads {
         throw new NoSuchFieldException("Metric " + metricName + " not found in payload");
     }
 
-    public static byte[] getSparkplugDevicePayload(long seq, Map<String, Object> metrics, long timestamp) {
+    public static byte[] getSparkplugDevicePayload(final long seq, final KuraPayload kuraPayload) {
         SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
 
-        for (Entry<String, Object> metric : metrics.entrySet()) {
+        byte[] payloadBody = kuraPayload.getBody();
+        if (Objects.nonNull(payloadBody)) {
+            payloadBuilder.withBody(payloadBody);
+        }
+
+        Date kuraTimestamp = kuraPayload.getTimestamp();
+        long timestamp = Objects.nonNull(kuraTimestamp) ? kuraTimestamp.getTime() : new Date().getTime();
+        payloadBuilder.withTimestamp(timestamp);
+
+        for (Entry<String, Object> metric : kuraPayload.metrics().entrySet()) {
             payloadBuilder.withMetric(metric.getKey(), metric.getValue(), timestamp);
+        }
+
+        KuraPosition position = kuraPayload.getPosition();
+        if (Objects.nonNull(position)) {
+            payloadBuilder.withMetric("kura.position.altitude", position.getAltitude(), timestamp);
+            payloadBuilder.withMetric("kura.position.heading", position.getHeading(), timestamp);
+            payloadBuilder.withMetric("kura.position.latitude", position.getLatitude(), timestamp);
+            payloadBuilder.withMetric("kura.position.longitude", position.getLongitude(), timestamp);
+            payloadBuilder.withMetric("kura.position.precision", position.getPrecision(), timestamp);
+            payloadBuilder.withMetric("kura.position.satellites", position.getSatellites(), timestamp);
+            payloadBuilder.withMetric("kura.position.speed", position.getSpeed(), timestamp);
+            payloadBuilder.withMetric("kura.position.status", position.getStatus(), timestamp);
+            payloadBuilder.withMetric("kura.position.timestamp", position.getTimestamp(), timestamp);
         }
 
         payloadBuilder.withSeq(seq);

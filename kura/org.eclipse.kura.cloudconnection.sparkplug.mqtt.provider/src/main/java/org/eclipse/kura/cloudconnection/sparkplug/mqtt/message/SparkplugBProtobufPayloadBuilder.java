@@ -176,6 +176,11 @@ public class SparkplugBProtobufPayloadBuilder {
         return this;
     }
 
+    public SparkplugBProtobufPayloadBuilder withBody(byte[] body) {
+        this.payloadBuilder.setBody(ByteString.copyFrom(body));
+        return this;
+    }
+
     public Payload buildPayload() {
         return this.payloadBuilder.build();
     }

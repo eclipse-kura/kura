@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.device;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +34,6 @@ import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEn
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraPosition;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -54,7 +52,6 @@ public class SparkplugDevice
 
     public static final String KEY_MESSAGE_TYPE = "message.type";
     public static final String KEY_DEVICE_ID = "device.id";
-    public static final String KEY_TIMESTAMP = "timestamp";
 
     private String deviceId;
     private BundleContext bundleContext;
@@ -142,21 +139,16 @@ public class SparkplugDevice
         }
 
         KuraPayload newPayload = new KuraPayload();
-        Map<String, Object> newMetrics = convertKuraPayloadInMetrics(message.getPayload());
-        newMetrics.forEach(newPayload::addMetric);
-
         Map<String, Object> newMessageProperties = new HashMap<>();
         newMessageProperties.put(KEY_DEVICE_ID, this.deviceId);
 
-        if (this.deviceMetrics.isEmpty() || !this.deviceMetrics.equals(newMetrics.keySet())) {
-            this.deviceMetrics = newMetrics.keySet();
+        if (this.deviceMetrics.isEmpty() || !this.deviceMetrics.equals(message.getPayload().metricNames())) {
+            this.deviceMetrics = message.getPayload().metricNames();
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DBIRTH);
             logger.info("Sparkplug Device {} - Metrics set changed, publishing DBIRTH", this.deviceId);
         } else {
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DDATA);
         }
-
-        newMessageProperties.put(KEY_TIMESTAMP, getKuraOrCurrentTimestamp(message.getPayload()));
 
         return this.sparkplugCloudEndpoint.get().publish(new KuraMessage(newPayload, newMessageProperties));
     }
@@ -228,35 +220,6 @@ public class SparkplugDevice
                 CloudConnectionManager service) {
             // Not needed
         }
-    }
-
-    private Map<String, Object> convertKuraPayloadInMetrics(KuraPayload payload) {
-        Map<String, Object> kuraMetrics = new HashMap<>(payload.metrics());
-
-        byte[] payloadBody = payload.getBody();
-        if (Objects.nonNull(payloadBody)) {
-            kuraMetrics.put("kura.body", payloadBody);
-        }
-
-        KuraPosition position = payload.getPosition();
-        if (Objects.nonNull(position)) {
-            kuraMetrics.put("kura.position.altitude", position.getAltitude());
-            kuraMetrics.put("kura.position.heading", position.getHeading());
-            kuraMetrics.put("kura.position.latitude", position.getLatitude());
-            kuraMetrics.put("kura.position.longitude", position.getLongitude());
-            kuraMetrics.put("kura.position.precision", position.getPrecision());
-            kuraMetrics.put("kura.position.satellites", position.getSatellites());
-            kuraMetrics.put("kura.position.speed", position.getSpeed());
-            kuraMetrics.put("kura.position.status", position.getStatus());
-            kuraMetrics.put("kura.position.timestamp", position.getTimestamp());
-        }
-
-        return kuraMetrics;
-    }
-
-    private long getKuraOrCurrentTimestamp(final KuraPayload kuraPayload) {
-        Date kuraTimestamp = kuraPayload.getTimestamp();
-        return kuraTimestamp != null ? kuraTimestamp.getTime() : new Date().getTime();
     }
 
 }

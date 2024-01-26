@@ -64,15 +64,15 @@ public class SparkplugCloudEndpoint
     private DataService dataService;
     private EventAdmin eventAdmin;
 
-    public void setDataService(DataService dataService) {
+    public void setDataService(final DataService dataService) {
         this.dataService = dataService;
     }
 
-    public void setEventAdmin(EventAdmin eventAdmin) {
+    public void setEventAdmin(final EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
 
-    public void activate(Map<String, Object> properties) {
+    public void activate(final Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
 
@@ -82,7 +82,7 @@ public class SparkplugCloudEndpoint
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
-    public void update(Map<String, Object> properties) {
+    public void update(final Map<String, Object> properties) {
         logger.info("{} - Updating", this.kuraServicePid);
 
         logger.info("{} - Updated", this.kuraServicePid);

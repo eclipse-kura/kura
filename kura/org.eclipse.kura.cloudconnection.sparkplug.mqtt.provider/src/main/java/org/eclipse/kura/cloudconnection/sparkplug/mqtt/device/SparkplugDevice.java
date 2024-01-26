@@ -33,7 +33,6 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.message.KuraPayload;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -55,18 +54,18 @@ public class SparkplugDevice
 
     private String deviceId;
     private BundleContext bundleContext;
-    private Optional<SparkplugCloudEndpoint> sparkplugCloudEndpoint = Optional.empty();
     private ServiceTracker<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTracker;
-    private Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
-    private Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
-    private ExecutorService callbackDispatcher = Executors.newCachedThreadPool();
+    private Optional<SparkplugCloudEndpoint> sparkplugCloudEndpoint = Optional.empty();
+    private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
+    private final Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
+    private final ExecutorService callbackDispatcher = Executors.newCachedThreadPool();
     private Set<String> deviceMetrics = new HashSet<>();
 
     /*
      * ConfigurableComponent APIs
      */
 
-    public void activate(ComponentContext componentContext, Map<String, Object> properties)
+    public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
         this.bundleContext = componentContext.getBundleContext();
 
@@ -76,7 +75,7 @@ public class SparkplugDevice
         String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
                 CloudConnectionManager.class.getName(), selectedCloudEndpointPid);
 
-        Filter filter = this.bundleContext.createFilter(filterString);
+        final Filter filter = this.bundleContext.createFilter(filterString);
         this.cloudConnectionManagerTracker = new ServiceTracker<>(this.bundleContext, filter,
                 new CloudConnectionManagerTrackerCustomizer());
         this.cloudConnectionManagerTracker.open();
@@ -84,7 +83,7 @@ public class SparkplugDevice
         update(properties);
     }
 
-    public void update(Map<String, Object> properties) {
+    public void update(final Map<String, Object> properties) {
         this.deviceId = (String) properties.get(KEY_DEVICE_ID);
         if (Objects.isNull(this.deviceId) || this.deviceId.trim().length() == 0) {
             throw new IllegalArgumentException("Property '" + KEY_DEVICE_ID + "' cannot be null or empty");
@@ -133,13 +132,12 @@ public class SparkplugDevice
      */
 
     @Override
-    public String publish(KuraMessage message) throws KuraException {
+    public String publish(final KuraMessage message) throws KuraException {
         if (!this.sparkplugCloudEndpoint.isPresent()) {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Missing SparkplugCloudEndpoint reference");
         }
 
-        KuraPayload newPayload = new KuraPayload();
-        Map<String, Object> newMessageProperties = new HashMap<>();
+        final Map<String, Object> newMessageProperties = new HashMap<>();
         newMessageProperties.put(KEY_DEVICE_ID, this.deviceId);
 
         if (this.deviceMetrics.isEmpty() || !this.deviceMetrics.equals(message.getPayload().metricNames())) {
@@ -150,26 +148,26 @@ public class SparkplugDevice
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DDATA);
         }
 
-        return this.sparkplugCloudEndpoint.get().publish(new KuraMessage(newPayload, newMessageProperties));
+        return this.sparkplugCloudEndpoint.get().publish(new KuraMessage(message.getPayload(), newMessageProperties));
     }
 
     @Override
-    public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
+    public void registerCloudConnectionListener(final CloudConnectionListener cloudConnectionListener) {
         this.cloudConnectionListeners.add(cloudConnectionListener);
     }
 
     @Override
-    public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
+    public void unregisterCloudConnectionListener(final CloudConnectionListener cloudConnectionListener) {
         this.cloudConnectionListeners.remove(cloudConnectionListener);
     }
 
     @Override
-    public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+    public void registerCloudDeliveryListener(final CloudDeliveryListener cloudDeliveryListener) {
         this.cloudDeliveryListeners.add(cloudDeliveryListener);
     }
 
     @Override
-    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
+    public void unregisterCloudDeliveryListener(final CloudDeliveryListener cloudDeliveryListener) {
         this.cloudDeliveryListeners.remove(cloudDeliveryListener);
     }
 
@@ -178,7 +176,7 @@ public class SparkplugDevice
      */
 
     @Override
-    public void onMessageConfirmed(String messageId) {
+    public void onMessageConfirmed(final String messageId) {
         this.cloudDeliveryListeners
                 .forEach(listener -> this.callbackDispatcher.execute(() -> listener.onMessageConfirmed(messageId)));
     }
@@ -216,8 +214,8 @@ public class SparkplugDevice
         }
 
         @Override
-        public void modifiedService(ServiceReference<CloudConnectionManager> reference,
-                CloudConnectionManager service) {
+        public void modifiedService(final ServiceReference<CloudConnectionManager> reference,
+                final CloudConnectionManager service) {
             // Not needed
         }
     }

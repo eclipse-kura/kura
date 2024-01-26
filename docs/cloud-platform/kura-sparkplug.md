@@ -128,7 +128,7 @@ The payload of the sent `DDATA` message will be encoded using the [Sparkplug Pro
     | `Date` | `DateTime` |
     | `BigInteger` | `UInt64` |
 
-    All other Java types are coerced to the [`Unknown`](https://github.com/eclipse/tahu/blob/2fc0e5c6e46c7a264664bed7e5f4da8790d46f44/sparkplug_b/sparkplug_b.proto#L29) Sparkplug datatype.
+    All other Java types will cause the application to throw an `UnsupportedOperationException`.
 
 - [`KuraPayload.getBody()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L120), if non null, will be copied into the **body** of the [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload)
 

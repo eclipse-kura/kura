@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,17 @@
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
@@ -41,126 +43,71 @@ public class SparkplugBProtobufPayloadBuilderTest {
      */
 
     @RunWith(Parameterized.class)
-    public static class MetricBuilderWithDataTypeTest extends Steps {
+    public static class TypeMapperTest extends Steps {
 
         @Parameters
-        public static Collection<Object[]> parameters() {
-            return Arrays.asList(new Object[][] {
-                    { "name", true, DataType.Boolean, 1L }, { "name", "hello".getBytes(), DataType.Bytes, 1L },
-                    { "name", new Double(12), DataType.Double, 1L },
-                    { "name", 1.1f, DataType.Float, 1L },
-                    { "name", (byte) 8, DataType.Int8, 1L },
-                    { "name", (short) 16, DataType.Int16, 1L },
-                    { "name", 32, DataType.Int32, 1L },
-                    { "name", 64L, DataType.Int64, 1L },
-                    { "name", "a string", DataType.String, 1L }, { "name", "a string", DataType.Text, 1L },
-                    { "name", "a string", DataType.UUID, 1L },
-                    { "name", new Date(), DataType.DateTime, 1L },
-                    { "name", (short) 8, DataType.UInt8, 1L }, { "name", 16, DataType.UInt16, 1L },
-                    { "name", 32L, DataType.UInt32, 1L }, { "name", BigInteger.valueOf(64L), DataType.UInt64, 1L }
-            });
+        public static Collection<TypeMapperTestCase> parameters() {
+            long timestamp = new Date().getTime();
+
+            List<TypeMapperTestCase> supportedTypes = Arrays.asList(
+                    new TypeMapperTestCase("metric.boolean", false, timestamp, DataType.Boolean),
+                    new TypeMapperTestCase("metric.bytes", "somebytes".getBytes(), timestamp, DataType.Bytes),
+                    new TypeMapperTestCase("metric.double", (double) 11.2, timestamp, DataType.Double),
+                    new TypeMapperTestCase("metric.float", (float) 99.1, timestamp, DataType.Float),
+                    new TypeMapperTestCase("metric.int8", 1, timestamp, DataType.Int8),
+                    new TypeMapperTestCase("metric.int16", 16, timestamp, DataType.Int16),
+                    new TypeMapperTestCase("metric.int32", 32, timestamp, DataType.Int32),
+                    new TypeMapperTestCase("metric.int64", 64L, timestamp, DataType.Int64),
+                    new TypeMapperTestCase("metric.uint8", 8, timestamp, DataType.UInt8),
+                    new TypeMapperTestCase("metric.uint16", 16, timestamp, DataType.UInt16),
+                    new TypeMapperTestCase("metric.uint32", 322L, timestamp, DataType.UInt32),
+                    new TypeMapperTestCase("metric.uint64", 9999L, timestamp, DataType.UInt64),
+                    new TypeMapperTestCase("metric.string", "a string", timestamp, DataType.String),
+                    new TypeMapperTestCase("metric.text", "a text", timestamp, DataType.Text),
+                    new TypeMapperTestCase("metric.uuid", "a uuid", timestamp, DataType.UUID));
+
+            Object randomData = new Object();
+            Exception ex = new UnsupportedOperationException();
+            List<TypeMapperTestCase> unsupportedTypes = Arrays.asList(
+                    new TypeMapperTestCase("metric.dataset", randomData, timestamp, DataType.DataSet, ex),
+                    new TypeMapperTestCase("metric.template", randomData, timestamp, DataType.Template, ex),
+                    new TypeMapperTestCase("metric.propertyset", randomData, timestamp, DataType.PropertySet, ex),
+                    new TypeMapperTestCase("metric.propertysetlist", randomData, timestamp, DataType.PropertySetList,
+                            ex),
+                    new TypeMapperTestCase("metric.file", randomData, timestamp, DataType.File, ex),
+                    new TypeMapperTestCase("metric.booleanarray", randomData, timestamp, DataType.BooleanArray, ex),
+                    new TypeMapperTestCase("metric.datetimearray", randomData, timestamp, DataType.DateTimeArray, ex),
+                    new TypeMapperTestCase("metric.unit8array", randomData, timestamp, DataType.UInt8Array, ex),
+                    new TypeMapperTestCase("metric.uint64array", randomData, timestamp, DataType.UInt64Array, ex),
+                    new TypeMapperTestCase("metric.uint32array", randomData, timestamp, DataType.UInt32Array, ex),
+                    new TypeMapperTestCase("metric.uint16array", randomData, timestamp, DataType.UInt16Array, ex),
+                    new TypeMapperTestCase("metric.stringarray", randomData, timestamp, DataType.StringArray, ex),
+                    new TypeMapperTestCase("metric.int8array", randomData, timestamp, DataType.Int8Array, ex),
+                    new TypeMapperTestCase("metric.int64array", randomData, timestamp, DataType.Int64Array, ex),
+                    new TypeMapperTestCase("metric.int32array", randomData, timestamp, DataType.Int32Array, ex),
+                    new TypeMapperTestCase("metric.int16array", randomData, timestamp, DataType.Int16Array, ex),
+                    new TypeMapperTestCase("metric.floatarray", randomData, timestamp, DataType.FloatArray, ex),
+                    new TypeMapperTestCase("metric.doubleArray", randomData, timestamp, DataType.DoubleArray, ex),
+                    new TypeMapperTestCase("metric.unknown", randomData, timestamp, DataType.Unknown, ex));
+
+            return Stream.concat(supportedTypes.stream(), unsupportedTypes.stream()).collect(Collectors.toList());
         }
 
-        private String name;
-        private Object value;
-        private DataType type;
-        private long timestamp;
+        private TypeMapperTestCase testCase;
 
-        public MetricBuilderWithDataTypeTest(Object name, Object value, Object type, Object timestamp) {
-            this.name = (String) name;
-            this.value = value;
-            this.type = (DataType) type;
-            this.timestamp = (long) timestamp;
+        public TypeMapperTest(TypeMapperTestCase testCase) {
+            this.testCase = testCase;
         }
 
         @Test
-        public void shouldCorrectlySetMetricValue() {
-            givenMetric(this.name, this.value, this.type, this.timestamp);
-
+        public void shouldBuildMetric() {
+            givenMetric(this.testCase.getName(), this.testCase.getValue(), this.testCase.getTimestamp());
+            
             whenBuildPayload();
-
-            thenPayloadContainsMetric(this.name, this.value);
+            
+            thenPayloadContainsMetric(this.testCase.getName(), this.testCase.getValue(), this.testCase.getTimestamp(),
+                    this.testCase.getExpectedDataType(), this.testCase.getExpectedException());
         }
-
-    }
-
-    @RunWith(Parameterized.class)
-    public static class MetricBuilderWithoutDataTypeTest extends Steps {
-
-        @Parameters
-        public static Collection<Object[]> parameters() {
-            return Arrays.asList(new Object[][] {
-                    { "name", true, 1L },
-                    { "name", "hello".getBytes(), 1L },
-                    { "name", (double) 12, 1L },
-                    { "name", (float) 12, 1L },
-                    { "name", (byte) 0, 1L },
-                    { "name", (short) 12, 1L },
-                    { "name", (int) 12, 1L },
-                    { "name", (long) 12L, 1L },
-                    { "name", "string", 1L },
-                    { "name", new Date(), 1L },
-                    { "name", BigInteger.valueOf(12L), 1L }
-                    });
-        }
-
-        private String name;
-        private Object value;
-        private long timestamp;
-
-        public MetricBuilderWithoutDataTypeTest(Object name, Object value, Object timestamp) {
-            this.name = (String) name;
-            this.value = value;
-            this.timestamp = (long) timestamp;
-        }
-
-        @Test
-        public void shouldCorrectlySetMetricValue() {
-            givenMetric(this.name, this.value, this.timestamp);
-
-            whenBuildPayload();
-
-            thenPayloadContainsMetric(this.name, this.value);
-        }
-
-    }
-
-    @RunWith(Parameterized.class)
-    public static class UnsupportedDataTypesTest extends Steps {
-
-        @Parameters
-        public static Collection<Object[]> parameters() {
-            return Arrays.asList(new Object[][] { { "name", true, DataType.DataSet, 1L },
-                    { "name", true, DataType.Template, 1L }, { "name", true, DataType.PropertySet, 1L },
-                    { "name", true, DataType.PropertySetList, 1L }, { "name", true, DataType.File, 1L },
-                    { "name", true, DataType.BooleanArray, 1L }, { "name", true, DataType.DateTimeArray, 1L },
-                    { "name", true, DataType.UInt8Array, 1L }, { "name", true, DataType.UInt64Array, 1L },
-                    { "name", true, DataType.UInt32Array, 1L }, { "name", true, DataType.UInt16Array, 1L },
-                    { "name", true, DataType.StringArray, 1L }, { "name", true, DataType.Int8Array, 1L },
-                    { "name", true, DataType.Int64Array, 1L }, { "name", true, DataType.Int32Array, 1L },
-                    { "name", true, DataType.Int16Array, 1L }, { "name", true, DataType.FloatArray, 1L },
-                    { "name", true, DataType.DoubleArray, 1L }, { "name", true, DataType.Unknown, 1L } });
-        }
-
-        private String name;
-        private Object value;
-        private DataType type;
-        private long timestamp;
-
-        public UnsupportedDataTypesTest(Object name, Object value, Object type, Object timestamp) {
-            this.name = (String) name;
-            this.value = value;
-            this.type = (DataType) type;
-            this.timestamp = (long) timestamp;
-        }
-
-        @Test
-        public void shouldCorrectlySetMetricValue() {
-            whenGivenMetric(this.name, this.value, this.type, this.timestamp);
-
-            thenExceptionOccurred(UnsupportedOperationException.class);
-        }
-
     }
 
     public static class SparkplugPropertiesTest extends Steps {
@@ -171,7 +118,7 @@ public class SparkplugBProtobufPayloadBuilderTest {
             
             whenBuildPayload();
             
-            thenPayloadContainsMetric("bdSeq", 12L);
+            thenPayloadContainsMetric("bdSeq", 12L, 120L, DataType.Int64, Optional.empty());
         }
 
         @Test
@@ -192,6 +139,15 @@ public class SparkplugBProtobufPayloadBuilderTest {
             thenTimestampEquals(13123L);
         }
 
+        @Test
+        public void shouldReturnCorrectBody() {
+            givenBody("example.body".getBytes());
+
+            whenBuildPayload();
+
+            thenBodyEquals("example.body".getBytes());
+        }
+
     }
 
     /*
@@ -208,12 +164,12 @@ public class SparkplugBProtobufPayloadBuilderTest {
          * Given
          */
 
-        void givenMetric(String name, Object value, DataType type, long timestamp) {
-            this.builder = new SparkplugBProtobufPayloadBuilder().withMetric(name, value, type, timestamp);
-        }
-
         void givenMetric(String name, Object value, long timestamp) {
-            this.builder = new SparkplugBProtobufPayloadBuilder().withMetric(name, value, timestamp);
+            try {
+                this.builder = new SparkplugBProtobufPayloadBuilder().withMetric(name, value, timestamp);
+            } catch (Exception e) {
+                this.occurredException = e;
+            }
         }
 
         void givenBdSeq(long bdSeq, long timestamp) {
@@ -228,19 +184,17 @@ public class SparkplugBProtobufPayloadBuilderTest {
             this.builder = new SparkplugBProtobufPayloadBuilder().withTimestamp(timestamp);
         }
 
+        void givenBody(byte[] body) {
+            this.builder = new SparkplugBProtobufPayloadBuilder().withBody(body);
+        }
+
         /*
          * When
          */
 
         void whenBuildPayload() {
-            this.payload = this.builder.buildPayload();
-        }
-
-        void whenGivenMetric(String name, Object value, DataType type, long timestamp) {
-            try {
-                givenMetric(name, value, type, timestamp);
-            } catch (Exception e) {
-                this.occurredException = e;
+            if (Objects.isNull(this.occurredException)) {
+                this.payload = this.builder.buildPayload();
             }
         }
 
@@ -248,57 +202,83 @@ public class SparkplugBProtobufPayloadBuilderTest {
          * Then
          */
 
-        void thenPayloadContainsMetric(String name, Object expectedValue) {
-            Metric metric = this.payload.getMetricsList().stream().filter(m -> m.getName().equals(name))
-                    .collect(Collectors.toList()).get(0);
+        void thenPayloadContainsMetric(String expectedName, Object expectedValue, long expectedTimestamp,
+                DataType expectedDataType, Optional<Exception> expectedException) {
+            if (expectedException.isPresent()) {
+                thenExceptionOccurred(expectedException.get().getClass());
+            } else {
+                Metric metric = this.payload.getMetricsList().stream().filter(m -> m.getName().equals(expectedName))
+                        .collect(Collectors.toList()).get(0);
 
-            switch (metric.getValueCase()) {
-            case BOOLEAN_VALUE:
-                assertEquals((Boolean) expectedValue, metric.getBooleanValue());
-                break;
-            case BYTES_VALUE:
-                assertTrue(Arrays.equals((byte[]) expectedValue, metric.getBytesValue().toByteArray()));
-                break;
-            case DOUBLE_VALUE:
-                assertEquals((Double) expectedValue, (Double) metric.getDoubleValue());
-                break;
-            case FLOAT_VALUE:
-                assertEquals((Float) expectedValue, (Float) metric.getFloatValue());
-                break;
-            case INT_VALUE:
-                if (expectedValue instanceof Byte) {
-                    assertEquals(Byte.toUnsignedInt((byte) expectedValue), metric.getIntValue());
-                } else if (expectedValue instanceof Short) {
-                    assertEquals(Short.toUnsignedInt((short) expectedValue), metric.getIntValue());
-                } else {
-                    assertEquals((int) expectedValue, metric.getIntValue());
-                }
-                break;
-            case LONG_VALUE:
-                if (expectedValue instanceof BigInteger) {
-                    assertEquals(((BigInteger) expectedValue).longValue(), metric.getLongValue());
-                } else if (expectedValue instanceof Date) {
-                    assertEquals(((Date) expectedValue).getTime(), metric.getLongValue());
-                } else {
-                    assertEquals((Long) expectedValue, (Long) metric.getLongValue());
-                }
-                break;
-            case STRING_VALUE:
-                assertEquals((String) expectedValue, metric.getStringValue());
-                break;
-            case DATASET_VALUE:
-            case EXTENSION_VALUE:
-            case TEMPLATE_VALUE:
-            case VALUE_NOT_SET:
-            default:
-                assertFalse("The set value is not supported", false);
-                break;
+                Object actualValue = null;
 
+                switch (expectedDataType) {
+                case Boolean:
+                    actualValue = metric.getBooleanValue();
+                    break;
+                case Bytes:
+                    actualValue = metric.getBytesValue().toByteArray();
+                    break;
+                case DateTime:
+                case Int64:
+                case UInt32:
+                case UInt64:
+                    actualValue = metric.getLongValue();
+                    break;
+                case Double:
+                    actualValue = metric.getDoubleValue();
+                    break;
+                case Int8:
+                case Int16:
+                case Int32:
+                case UInt8:
+                case UInt16:
+                    actualValue = metric.getIntValue();
+                    break;
+                case Float:
+                    actualValue = metric.getFloatValue();
+                    break;
+                case String:
+                case Text:
+                case UUID:
+                    actualValue = metric.getStringValue();
+                    break;
+                case File:
+                case DataSet:
+                case DateTimeArray:
+                case Int16Array:
+                case Int32Array:
+                case Int64Array:
+                case Int8Array:
+                case PropertySet:
+                case PropertySetList:
+                case StringArray:
+                case Template:
+                case UInt16Array:
+                case FloatArray:
+                case UInt32Array:
+                case UInt64Array:
+                case DoubleArray:
+                case UInt8Array:
+                case BooleanArray:
+                case Unknown:
+                default:
+                    break;
+                }
+
+                assertEquals(expectedName, metric.getName());
+                assertEquals(expectedTimestamp, metric.getTimestamp());
+
+                if (actualValue instanceof byte[]) {
+                    assertTrue(Arrays.equals((byte[]) expectedValue, (byte[]) actualValue));
+                } else {
+                    assertEquals(expectedValue, actualValue);
+                }
             }
         }
 
         <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
-            assertNotNull(this.occurredException);
+            assertNotNull("No exception thrown", this.occurredException);
             assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
         }
 
@@ -308,6 +288,10 @@ public class SparkplugBProtobufPayloadBuilderTest {
 
         void thenTimestampEquals(long expectedTimestamp) {
             assertEquals(expectedTimestamp, this.payload.getTimestamp());
+        }
+
+        void thenBodyEquals(byte[] expectedBody) {
+            assertTrue(Arrays.equals(expectedBody, this.payload.getBody().toByteArray()));
         }
     }
 

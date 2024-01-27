@@ -1,6 +1,6 @@
 # Advanced Network Settings
 
-For devices configured to use [NetworkManager](https://networkmanager.dev), it is possible to configure multiple VLAN interfaces. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
+For devices using Kura built on a Generic Profile, it is possible to to fine tune network traffic settings. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
 
 The Advanced configuration tab is designed for users who seek a higher level of control and customization over their network experience. Whether you are an IT professional, network administrator, or enthusiast looking to fine-tune specific aspects of your network, this tab provides access to advanced parameters like Maximum Transmission Unit (MTU) and Promiscuous Mode. Adjusting these settings allows for optimized performance in unique network environments, troubleshooting capabilities, and enhanced security monitoring. Please exercise caution when modifying these settings, ensuring that you have a clear understanding of their implications on your network's behavior.
 
@@ -18,6 +18,8 @@ The Advanced tab allow configuration of:
 	
 ## Advanced Configuration
 
+![Advanced Tab](./images/network-advanced.png)
+
 The **Advanced** tab contains the following configuration parameters:
 
 - **IPv4 MTU** - defines the Maximum Trasmission unit for IPv4 traffic on the selected interface, a value of 0 or empty delegates the MTU definition to the link layer.
@@ -27,6 +29,6 @@ The **Advanced** tab contains the following configuration parameters:
     The MTU value for a VLAN is limited by the configured MTU of its parent interface as an upper bound.
     
 - **Promiscuous Mode** - enable promiscuous mode for the selected interface; Requires NetworkManager 1.32 or above.
-    - System default
+    - System default - This delegates to the underlying OS setting. In most cases the system default equates to _Disabled_
     - Enabled
     - Disabled

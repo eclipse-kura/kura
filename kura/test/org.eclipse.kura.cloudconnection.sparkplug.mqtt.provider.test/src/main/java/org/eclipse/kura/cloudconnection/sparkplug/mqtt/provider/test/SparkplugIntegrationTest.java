@@ -50,12 +50,12 @@ public class SparkplugIntegrationTest {
     private static final Logger logger = LoggerFactory.getLogger(SparkplugIntegrationTest.class);
 
     private static final String SPARKPLUG_FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
-    private static final String CLOUD_ENDPOINT_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
-    private static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
+    static final String CLOUD_ENDPOINT_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
+    static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
 
-    private static ConfigurationService configurationService;
     private static CountDownLatch dependenciesLatch = new CountDownLatch(1);
 
+    static ConfigurationService configurationService;
     static SparkplugCloudEndpoint sparkplugCloudEndpoint;
     static SparkplugDataTransport sparkplugDataTransport;
     static MqttClient client;
@@ -120,6 +120,12 @@ public class SparkplugIntegrationTest {
         logger.info("Moquette MQTT broker stopped");
     }
 
+    public static <T> T trackService(Class<T> clazz, String pid)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return (T) ServiceUtil.trackService(clazz, Optional.of(String.format("(kura.service.pid=%s)", pid))).get(30,
+                TimeUnit.SECONDS);
+    }
+
     private static void createSparkplugCloudConnection()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException {
         if (!configurationService.getConfigurableComponentPids().contains(SPARKPLUG_FACTORY_PID)) {
@@ -142,12 +148,6 @@ public class SparkplugIntegrationTest {
         options.setAutomaticReconnect(false);
         options.setCleanSession(true);
         client.connect(options);
-    }
-
-    private static <T> T trackService(Class<T> clazz, String pid)
-            throws InterruptedException, ExecutionException, TimeoutException {
-        return (T) ServiceUtil.trackService(clazz, Optional.of(String.format("(kura.service.pid=%s)", pid))).get(30,
-                TimeUnit.SECONDS);
     }
 
 }

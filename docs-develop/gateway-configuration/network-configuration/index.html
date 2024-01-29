@@ -764,6 +764,20 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-advanced/" class="md-nav__link">
+        Advanced Settings
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -3431,7 +3445,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <li><strong>Gateway</strong> - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)</li>
 <li><strong>DNS Servers</strong> - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.</li>
 <li><strong>Search Domains</strong> - Not implemented.</li>
-<li><strong>MTU</strong> - defines the Maximum Trasmission unit for IPv4 traffic on the selected interface, a value of 0 or empty delegates the MTU definition to the link layer.</li>
 </ul>
 <p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
 <h3 id="more-details-about-the-not-managed-interface-status">More details about the Not Managed interface Status</h3>
@@ -3536,6 +3549,11 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.nat.enabled</code></td>
 <td>Boolean</td>
 <td>Enable the NAT feature</td>
+</tr>
+<tr>
+<td><code>net.interface.&lt;interface&gt;.config.promisc</code></td>
+<td>Integer</td>
+<td>Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)</td>
 </tr>
 </tbody>
 </table>

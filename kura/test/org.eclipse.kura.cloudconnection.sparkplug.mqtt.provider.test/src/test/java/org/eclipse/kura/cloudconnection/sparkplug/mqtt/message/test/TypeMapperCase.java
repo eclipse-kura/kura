@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 
-class TypeMapperTestCase {
+class TypeMapperCase {
 
     private String name;
     private Object value;
@@ -24,14 +24,14 @@ class TypeMapperTestCase {
     private DataType expectedDataType;
     private Exception expectedException;
 
-    public TypeMapperTestCase(String name, Object value, long timestamp, DataType expectedDataType) {
+    public TypeMapperCase(String name, Object value, long timestamp, DataType expectedDataType) {
         this.name = name;
         this.value = value;
         this.timestamp = timestamp;
         this.expectedDataType = expectedDataType;
     }
 
-    public TypeMapperTestCase(String name, Object value, long timestamp, DataType expectedDataType, Exception expectedException) {
+    public TypeMapperCase(String name, Object value, long timestamp, DataType expectedDataType, Exception expectedException) {
         this(name, value, timestamp, expectedDataType);
         this.expectedException = expectedException;
     }

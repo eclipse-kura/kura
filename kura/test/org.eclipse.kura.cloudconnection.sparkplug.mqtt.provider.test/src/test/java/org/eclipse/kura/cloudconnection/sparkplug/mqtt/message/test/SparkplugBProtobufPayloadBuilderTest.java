@@ -46,56 +46,56 @@ public class SparkplugBProtobufPayloadBuilderTest {
     public static class TypeMapperTest extends Steps {
 
         @Parameters
-        public static Collection<TypeMapperTestCase> parameters() {
+        public static Collection<TypeMapperCase> parameters() {
             long timestamp = new Date().getTime();
 
-            List<TypeMapperTestCase> supportedTypes = Arrays.asList(
-                    new TypeMapperTestCase("metric.boolean", false, timestamp, DataType.Boolean),
-                    new TypeMapperTestCase("metric.bytes", "somebytes".getBytes(), timestamp, DataType.Bytes),
-                    new TypeMapperTestCase("metric.double", (double) 11.2, timestamp, DataType.Double),
-                    new TypeMapperTestCase("metric.float", (float) 99.1, timestamp, DataType.Float),
-                    new TypeMapperTestCase("metric.int8", 1, timestamp, DataType.Int8),
-                    new TypeMapperTestCase("metric.int16", 16, timestamp, DataType.Int16),
-                    new TypeMapperTestCase("metric.int32", 32, timestamp, DataType.Int32),
-                    new TypeMapperTestCase("metric.int64", 64L, timestamp, DataType.Int64),
-                    new TypeMapperTestCase("metric.uint8", 8, timestamp, DataType.UInt8),
-                    new TypeMapperTestCase("metric.uint16", 16, timestamp, DataType.UInt16),
-                    new TypeMapperTestCase("metric.uint32", 322L, timestamp, DataType.UInt32),
-                    new TypeMapperTestCase("metric.uint64", 9999L, timestamp, DataType.UInt64),
-                    new TypeMapperTestCase("metric.string", "a string", timestamp, DataType.String),
-                    new TypeMapperTestCase("metric.text", "a text", timestamp, DataType.Text),
-                    new TypeMapperTestCase("metric.uuid", "a uuid", timestamp, DataType.UUID));
+            List<TypeMapperCase> supportedTypes = Arrays.asList(
+                    new TypeMapperCase("metric.boolean", false, timestamp, DataType.Boolean),
+                    new TypeMapperCase("metric.bytes", "somebytes".getBytes(), timestamp, DataType.Bytes),
+                    new TypeMapperCase("metric.double", (double) 11.2, timestamp, DataType.Double),
+                    new TypeMapperCase("metric.float", (float) 99.1, timestamp, DataType.Float),
+                    new TypeMapperCase("metric.int8", 1, timestamp, DataType.Int8),
+                    new TypeMapperCase("metric.int16", 16, timestamp, DataType.Int16),
+                    new TypeMapperCase("metric.int32", 32, timestamp, DataType.Int32),
+                    new TypeMapperCase("metric.int64", 64L, timestamp, DataType.Int64),
+                    new TypeMapperCase("metric.uint8", 8, timestamp, DataType.UInt8),
+                    new TypeMapperCase("metric.uint16", 16, timestamp, DataType.UInt16),
+                    new TypeMapperCase("metric.uint32", 322L, timestamp, DataType.UInt32),
+                    new TypeMapperCase("metric.uint64", 9999L, timestamp, DataType.UInt64),
+                    new TypeMapperCase("metric.string", "a string", timestamp, DataType.String),
+                    new TypeMapperCase("metric.text", "a text", timestamp, DataType.Text),
+                    new TypeMapperCase("metric.uuid", "a uuid", timestamp, DataType.UUID));
 
             Object randomData = new Object();
             Exception ex = new UnsupportedOperationException();
-            List<TypeMapperTestCase> unsupportedTypes = Arrays.asList(
-                    new TypeMapperTestCase("metric.dataset", randomData, timestamp, DataType.DataSet, ex),
-                    new TypeMapperTestCase("metric.template", randomData, timestamp, DataType.Template, ex),
-                    new TypeMapperTestCase("metric.propertyset", randomData, timestamp, DataType.PropertySet, ex),
-                    new TypeMapperTestCase("metric.propertysetlist", randomData, timestamp, DataType.PropertySetList,
+            List<TypeMapperCase> unsupportedTypes = Arrays.asList(
+                    new TypeMapperCase("metric.dataset", randomData, timestamp, DataType.DataSet, ex),
+                    new TypeMapperCase("metric.template", randomData, timestamp, DataType.Template, ex),
+                    new TypeMapperCase("metric.propertyset", randomData, timestamp, DataType.PropertySet, ex),
+                    new TypeMapperCase("metric.propertysetlist", randomData, timestamp, DataType.PropertySetList,
                             ex),
-                    new TypeMapperTestCase("metric.file", randomData, timestamp, DataType.File, ex),
-                    new TypeMapperTestCase("metric.booleanarray", randomData, timestamp, DataType.BooleanArray, ex),
-                    new TypeMapperTestCase("metric.datetimearray", randomData, timestamp, DataType.DateTimeArray, ex),
-                    new TypeMapperTestCase("metric.unit8array", randomData, timestamp, DataType.UInt8Array, ex),
-                    new TypeMapperTestCase("metric.uint64array", randomData, timestamp, DataType.UInt64Array, ex),
-                    new TypeMapperTestCase("metric.uint32array", randomData, timestamp, DataType.UInt32Array, ex),
-                    new TypeMapperTestCase("metric.uint16array", randomData, timestamp, DataType.UInt16Array, ex),
-                    new TypeMapperTestCase("metric.stringarray", randomData, timestamp, DataType.StringArray, ex),
-                    new TypeMapperTestCase("metric.int8array", randomData, timestamp, DataType.Int8Array, ex),
-                    new TypeMapperTestCase("metric.int64array", randomData, timestamp, DataType.Int64Array, ex),
-                    new TypeMapperTestCase("metric.int32array", randomData, timestamp, DataType.Int32Array, ex),
-                    new TypeMapperTestCase("metric.int16array", randomData, timestamp, DataType.Int16Array, ex),
-                    new TypeMapperTestCase("metric.floatarray", randomData, timestamp, DataType.FloatArray, ex),
-                    new TypeMapperTestCase("metric.doubleArray", randomData, timestamp, DataType.DoubleArray, ex),
-                    new TypeMapperTestCase("metric.unknown", randomData, timestamp, DataType.Unknown, ex));
+                    new TypeMapperCase("metric.file", randomData, timestamp, DataType.File, ex),
+                    new TypeMapperCase("metric.booleanarray", randomData, timestamp, DataType.BooleanArray, ex),
+                    new TypeMapperCase("metric.datetimearray", randomData, timestamp, DataType.DateTimeArray, ex),
+                    new TypeMapperCase("metric.unit8array", randomData, timestamp, DataType.UInt8Array, ex),
+                    new TypeMapperCase("metric.uint64array", randomData, timestamp, DataType.UInt64Array, ex),
+                    new TypeMapperCase("metric.uint32array", randomData, timestamp, DataType.UInt32Array, ex),
+                    new TypeMapperCase("metric.uint16array", randomData, timestamp, DataType.UInt16Array, ex),
+                    new TypeMapperCase("metric.stringarray", randomData, timestamp, DataType.StringArray, ex),
+                    new TypeMapperCase("metric.int8array", randomData, timestamp, DataType.Int8Array, ex),
+                    new TypeMapperCase("metric.int64array", randomData, timestamp, DataType.Int64Array, ex),
+                    new TypeMapperCase("metric.int32array", randomData, timestamp, DataType.Int32Array, ex),
+                    new TypeMapperCase("metric.int16array", randomData, timestamp, DataType.Int16Array, ex),
+                    new TypeMapperCase("metric.floatarray", randomData, timestamp, DataType.FloatArray, ex),
+                    new TypeMapperCase("metric.doubleArray", randomData, timestamp, DataType.DoubleArray, ex),
+                    new TypeMapperCase("metric.unknown", randomData, timestamp, DataType.Unknown, ex));
 
             return Stream.concat(supportedTypes.stream(), unsupportedTypes.stream()).collect(Collectors.toList());
         }
 
-        private TypeMapperTestCase testCase;
+        private TypeMapperCase testCase;
 
-        public TypeMapperTest(TypeMapperTestCase testCase) {
+        public TypeMapperTest(TypeMapperCase testCase) {
             this.testCase = testCase;
         }
 

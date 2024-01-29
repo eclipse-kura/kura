@@ -120,33 +120,33 @@ The payload of the sent `DDATA` message will be encoded using the [Sparkplug Pro
 
     | Java Type | Sparkplug Type |
     | - | - |
-    | `Boolean` | `Boolean` |
-    | `byte[]` | `Bytes` |
-    | `Double` | `Double` |
-    | `Float` | `Float` |
-    | `Byte` | `Int8` |
-    | `Short` | `Int16` |
-    | `Integer` | `Int32` |
-    | `Long` | `Int64` |
-    | `String` | `String` |
-    | `Date` | `DateTime` |
-    | `BigInteger` | `UInt64` |
+    | `Boolean` | `DataType.Boolean` |
+    | `byte[]` | `DataType.Bytes` |
+    | `Double` | `DataType.Double` |
+    | `Float` | `DataType.Float` |
+    | `Byte` | `DataType.Int8` |
+    | `Short` | `DataType.Int16` |
+    | `Integer` | `DataType.Int32` |
+    | `Long` | `DataType.Int64` |
+    | `String` | `DataType.String` |
+    | `Date` | `DataType.DateTime` |
+    | `BigInteger` | `DataType.UInt64` |
 
     All other Java types will cause the application to throw an Exception.
 
 - [`KuraPayload.getBody()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L120), if non null, will be copied into the **body** of the [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload)
 
-- [`KuraPayload.getPosition()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L84), if non  null, will be used to create the following metrics from the [`KuraPosition`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPosition.java#L28) object:
+- [`KuraPayload.getPosition()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L84), if non  null, will be used to create the following metrics from the [`KuraPosition`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPosition.java#L28) object (with the corresponding Sparkplug data types):
 
-    - **kura.position.altitude**
-    - **kura.position.heading**
-    - **kura.position.latitude**
-    - **kura.position.longitude**
-    - **kura.position.precision**
-    - **kura.position.satellites**
-    - **kura.position.status**
-    - **kura.position.speed**
-    - **kura.position.timestamp**
+    - **kura.position.altitude**: `DataType.Double`
+    - **kura.position.heading**: `DataType.Double`
+    - **kura.position.latitude**: `DataType.Double`
+    - **kura.position.longitude**: `DataType.Double`
+    - **kura.position.precision**: `DataType.Double`
+    - **kura.position.satellites**: `DataType.Int32`
+    - **kura.position.status** `DataType.Int32`
+    - **kura.position.speed**: `DataType.Double`
+    - **kura.position.timestamp**: `DataType.DateTime`
 
 - [`KuraPayload.getTimestamp()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76), if non null, will be used as the timestamp metric of the Sparkplug payload
 

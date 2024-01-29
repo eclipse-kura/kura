@@ -85,6 +85,9 @@ public class SparkplugCloudEndpoint
     public void update(final Map<String, Object> properties) {
         logger.info("{} - Updating", this.kuraServicePid);
 
+        this.seqCounter = new SeqCounter();
+        logger.debug("{} - seq number reset to {}", this.kuraServicePid, this.seqCounter.getCurrent());
+
         logger.info("{} - Updated", this.kuraServicePid);
     }
 

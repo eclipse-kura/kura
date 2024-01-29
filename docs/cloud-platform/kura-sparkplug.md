@@ -106,7 +106,11 @@ Each [`CloudPublisher`](https://github.com/eclipse/kura/blob/develop/kura/org.ec
 
 The parameter specified as `device.id` will dictate the Sparkplug device identifier used to publish messages from this cloud publisher. A device `DBIRTH` message is sent from this publisher when the first publish occurs or when a the set of published metrics is changed. Subsequent publishings will be done on the Sparkplug topic to publish device data (`DDATA` message type).
 
-The Sparkplug Device implemented by this publisher does not send any device death messages (`DDEATH` message type) and does not use any Sparkplug aliases for metrics.
+The Sparkplug Device implemented by this publisher **does not implement** the following standard optional specifications:
+
+- [`tck-id-operational-behavior-device-ddeath`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-termination): Device death messages (`DDEATH` message type) since the usual way to publish data from the Wire Graph using a WireAsset attached to a CloudPublisher has no implementation for reporting error states (see [`WireAsset.onWireReceive`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.wire.component.provider/src/main/java/org/eclipse/kura/internal/wire/asset/WireAsset.java#L247))
+- [`tck-id-payloads-alias-uniqueness`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric): Sparkplug aliases for metrics
+- [`tck-id-message-flow-device-dcmd-subscribe`](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-establishment): writing to outputs, hence it will not subscribe to device command messages (`DCMD` message type)
 
 ##### Sparkplug Device Payload
 

@@ -77,21 +77,28 @@ public class SparkplugPayloads {
 
         KuraPosition position = kuraPayload.getPosition();
         if (Objects.nonNull(position)) {
-            payloadBuilder.withMetric("kura.position.altitude", position.getAltitude(), timestamp);
-            payloadBuilder.withMetric("kura.position.heading", position.getHeading(), timestamp);
-            payloadBuilder.withMetric("kura.position.latitude", position.getLatitude(), timestamp);
-            payloadBuilder.withMetric("kura.position.longitude", position.getLongitude(), timestamp);
-            payloadBuilder.withMetric("kura.position.precision", position.getPrecision(), timestamp);
-            payloadBuilder.withMetric("kura.position.satellites", position.getSatellites(), timestamp);
-            payloadBuilder.withMetric("kura.position.speed", position.getSpeed(), timestamp);
-            payloadBuilder.withMetric("kura.position.status", position.getStatus(), timestamp);
-            payloadBuilder.withMetric("kura.position.timestamp", position.getTimestamp(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.altitude", position.getAltitude(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.latitude", position.getLatitude(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.longitude", position.getLongitude(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.heading", position.getHeading(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.precision", position.getPrecision(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.satellites", position.getSatellites(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.speed", position.getSpeed(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.status", position.getStatus(), timestamp);
+            addMetricIfNonNull(payloadBuilder, "kura.position.timestamp", position.getTimestamp(), timestamp);
         }
 
         payloadBuilder.withSeq(seq);
         payloadBuilder.withTimestamp(timestamp);
 
         return payloadBuilder.build();
+    }
+
+    private static void addMetricIfNonNull(SparkplugBProtobufPayloadBuilder payloadBuilder, String name, Object value,
+            long timestamp) {
+        if (Objects.nonNull(value)) {
+            payloadBuilder.withMetric(name, value, timestamp);
+        }
     }
 
 }

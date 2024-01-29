@@ -1,6 +1,6 @@
 # Advanced Network Settings
 
-For devices using Kura built on a Generic Profile, it is possible to to fine tune network traffic settings. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
+For devices running Kura installed using a Generic Profile, it is possible to to fine tune network traffic settings. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
 
 The Advanced configuration tab is designed for users who seek a higher level of control and customization over their network experience. Whether you are an IT professional, network administrator, or enthusiast looking to fine-tune specific aspects of your network, this tab provides access to advanced parameters like Maximum Transmission Unit (MTU) and Promiscuous Mode. Adjusting these settings allows for optimized performance in unique network environments, troubleshooting capabilities, and enhanced security monitoring. Please exercise caution when modifying these settings, ensuring that you have a clear understanding of their implications on your network's behavior.
 

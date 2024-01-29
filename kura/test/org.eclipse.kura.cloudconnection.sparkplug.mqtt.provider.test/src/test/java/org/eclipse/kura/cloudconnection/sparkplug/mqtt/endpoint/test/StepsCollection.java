@@ -87,8 +87,8 @@ public class StepsCollection {
         }
     }
 
-    void whenUpdate(Map<String, Object> properties) {
-        this.endpoint.update(properties);
+    void whenUpdate() {
+        this.endpoint.update();
     }
 
     void whenIsConnected() {

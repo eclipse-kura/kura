@@ -77,12 +77,12 @@ public class SparkplugCloudEndpoint
         logger.info("{} - Activating", this.kuraServicePid);
 
         this.dataService.addDataServiceListener(this);
-        update(properties);
+        update();
 
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
-    public void update(final Map<String, Object> properties) {
+    public void update() {
         logger.info("{} - Updating", this.kuraServicePid);
 
         this.seqCounter = new SeqCounter();

@@ -17,10 +17,14 @@ import java.util.Date;
 
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.ByteString;
 
 public class SparkplugBProtobufPayloadBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(SparkplugBProtobufPayloadBuilder.class);
 
     public static final String BDSEQ_METRIC_NAME = "bdSeq";
 
@@ -72,6 +76,9 @@ public class SparkplugBProtobufPayloadBuilder {
         if (value instanceof BigInteger) {
             sparkplugDataType = DataType.UInt64;
         }
+
+        logger.debug("Converting Java Type: {} to Sparkplug.DataType: {}", value.getClass().getName(),
+                sparkplugDataType);
 
         return this.withMetric(name, value, sparkplugDataType, timestamp);
     }

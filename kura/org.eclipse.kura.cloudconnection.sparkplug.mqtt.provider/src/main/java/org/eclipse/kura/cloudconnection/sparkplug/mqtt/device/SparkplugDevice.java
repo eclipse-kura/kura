@@ -132,7 +132,7 @@ public class SparkplugDevice
      */
 
     @Override
-    public String publish(final KuraMessage message) throws KuraException {
+    public synchronized String publish(final KuraMessage message) throws KuraException {
         if (!this.sparkplugCloudEndpoint.isPresent()) {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Missing SparkplugCloudEndpoint reference");
         }
@@ -141,7 +141,8 @@ public class SparkplugDevice
         newMessageProperties.put(KEY_DEVICE_ID, this.deviceId);
 
         if (this.deviceMetrics.isEmpty() || !this.deviceMetrics.equals(message.getPayload().metricNames())) {
-            this.deviceMetrics = message.getPayload().metricNames();
+            this.deviceMetrics.clear();
+            this.deviceMetrics.addAll(message.getPayload().metricNames());
             newMessageProperties.put(KEY_MESSAGE_TYPE, SparkplugMessageType.DBIRTH);
             logger.info("Sparkplug Device {} - Metrics set changed, publishing DBIRTH", this.deviceId);
         } else {

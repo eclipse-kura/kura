@@ -15,6 +15,8 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -22,8 +24,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
+import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -52,12 +57,14 @@ public class SparkplugIntegrationTest {
     private static final String SPARKPLUG_FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
     static final String CLOUD_ENDPOINT_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint";
     static final String DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport";
+    static final String SPARKPLUG_DEVICE_PID = "test.device";
 
     private static CountDownLatch dependenciesLatch = new CountDownLatch(1);
 
     static ConfigurationService configurationService;
     static SparkplugCloudEndpoint sparkplugCloudEndpoint;
     static SparkplugDataTransport sparkplugDataTransport;
+    static SparkplugDevice sparkplugDevice;
     static MqttClient client;
     static Server mqttBroker;
 
@@ -81,6 +88,7 @@ public class SparkplugIntegrationTest {
             startMqttBroker();
             createSparkplugCloudConnection();
             connectDefaultPahoClient();
+            createSparkplugDevice();
 
             logger.info("Test environment successfully setup");
         } catch (InterruptedException e) {
@@ -139,6 +147,20 @@ public class SparkplugIntegrationTest {
                     DATA_TRANSPORT_SERVICE_PID);
 
             logger.info("Got references for Sparkplug CloudEndpoint and DataTransportService");
+        }
+    }
+
+    private static void createSparkplugDevice()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException {
+        if (!configurationService.getConfigurableComponentPids().contains(SPARKPLUG_DEVICE_PID)) {
+            final Map<String, Object> properties = new HashMap<>();
+            properties.put(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), CLOUD_ENDPOINT_PID);
+            properties.put(SparkplugDevice.KEY_DEVICE_ID, "d1");
+
+            configurationService.createFactoryConfiguration(
+                    "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice", SPARKPLUG_DEVICE_PID,
+                    properties, false);
+            sparkplugDevice = (SparkplugDevice) trackService(CloudPublisher.class, SPARKPLUG_DEVICE_PID);
         }
     }
 

@@ -100,13 +100,13 @@ The cloud endpoint layer allows to attach [`CloudPublisher`](https://github.com/
 
 #### Sparkplug Device
 
-Each [`CloudPublisher`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.java) attached to this cloud connection acts as a **Sparkplug Device**. The configuration for it is shown in the picture below.
+Each [`CloudPublisher`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.java) attached to this cloud connection acts as a **Sparkplug Device**. The corresponding configuration is shown in the picture below.
 
 ![](./images/sparkplugCloudPublisher.png)
 
-The parameter specified as `device.id` will dictate the Sparkplug device identifier used to publish messages from this cloud publisher. A device `DBIRTH` message is sent from this publisher when the first publish occurs or when a the set of published metrics is changed. Subsequent publishings will be done on the Sparkplug topic to publish device data (`DDATA` message type).
+The parameter specified as `device.id` will dictate the Sparkplug device identifier used to publish messages from this cloud publisher. A device `DBIRTH` message is immediately sent from this publisher when the first publish occurs or when a the set of published metrics is changed. The subsequent messages will be published as Sparkplug device data (`DDATA` message type).
 
-The Sparkplug Device implemented by this publisher **does not implement** the following standard optional specifications:
+The Sparkplug Device implemented by this publisher **does not support** the following features (optional in the Eclipse Sparkplug specification):
 
 - [`tck-id-operational-behavior-device-ddeath`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-termination): Device death messages (`DDEATH` message type) since the usual way to publish data from the Wire Graph using a WireAsset attached to a CloudPublisher has no implementation for reporting error states (see [`WireAsset.onWireReceive`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.wire.component.provider/src/main/java/org/eclipse/kura/internal/wire/asset/WireAsset.java#L247))
 - [`tck-id-payloads-alias-uniqueness`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric): Sparkplug aliases for metrics
@@ -136,7 +136,7 @@ The payload of the sent `DDATA` message will be encoded using the [Sparkplug Pro
 
 - [`KuraPayload.getBody()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L120), if non null, will be copied into the **body** of the [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload)
 
-- [`KuraPayload.getPosition()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L84), if non  null, will be used to create the following metrics from the [`KuraPosition`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPosition.java#L28) object is the value in there is not null (with the corresponding Sparkplug data types):
+- [`KuraPayload.getPosition()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L84), if not null, will be used to create the following metrics from the [`KuraPosition`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPosition.java#L28) object, if the value in there is not null (with the corresponding Sparkplug data types):
 
     - **kura.position.altitude**: `DataType.Double`
     - **kura.position.heading**: `DataType.Double`
@@ -148,7 +148,7 @@ The payload of the sent `DDATA` message will be encoded using the [Sparkplug Pro
     - **kura.position.speed**: `DataType.Double`
     - **kura.position.timestamp**: `DataType.DateTime`
 
-- [`KuraPayload.getTimestamp()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76), if non null, will be used as the timestamp metric of the Sparkplug payload
+- [`KuraPayload.getTimestamp()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76), if not null, it will be used as the timestamp metric of the Sparkplug payload
 
 ### Data Service Layer Configuration
 

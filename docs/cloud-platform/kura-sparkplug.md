@@ -96,7 +96,59 @@ At any point in time, an Edge Node can be connected to at most one MQTT server. 
 
 ### Cloud Endpoint Layer Configuration
 
-WIP
+The cloud endpoint layer allows to attach [`CloudPublisher`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.java)s and [`CloudSubscriber`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/subscriber/CloudSubscriber.java)s to publish/subscribe messages on Sparkplug topics.
+
+#### Sparkplug Device
+
+Each [`CloudPublisher`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/publisher/CloudPublisher.java) attached to this cloud connection acts as a **Sparkplug Device**. The corresponding configuration is shown in the picture below.
+
+![](./images/sparkplugCloudPublisher.png)
+
+The parameter specified as `device.id` will dictate the Sparkplug device identifier used to publish messages from this cloud publisher. A device `DBIRTH` message is immediately sent from this publisher when the first publish occurs or when a the set of published metrics is changed. The subsequent messages will be published as Sparkplug device data (`DDATA` message type).
+
+The Sparkplug Device implemented by this publisher **does not support** the following features (optional in the Eclipse Sparkplug specification):
+
+- [`tck-id-operational-behavior-device-ddeath`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-termination): Device death messages (`DDEATH` message type) since the usual way to publish data from the Wire Graph using a WireAsset attached to a CloudPublisher has no implementation for reporting error states (see [`WireAsset.onWireReceive`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.wire.component.provider/src/main/java/org/eclipse/kura/internal/wire/asset/WireAsset.java#L247))
+- [`tck-id-payloads-alias-uniqueness`](https://github.com/eclipse-sparkplug/sparkplug/blob/2f1320982deb473d942e55f6432bf07aac0166db/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric): Sparkplug aliases for metrics
+- [`tck-id-message-flow-device-dcmd-subscribe`](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-establishment): writing to outputs, hence it will not subscribe to device command messages (`DCMD` message type)
+
+##### Sparkplug Device Payload
+
+The payload of the sent `DDATA` message will be encoded using the [Sparkplug Protobuf definition](https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto) converting the [`KuraPayload`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java) into [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) as follows:
+
+- Metrics from [`KuraPayload.metric()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L116) become [Sparkplug metrics](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric). Only the **name**, **timestamp**, **datatype** and **value** components are added. The timestamp is set to the publishing instant. The datatype is inferred from the Java type as follows:
+
+    | Java Type | Sparkplug Type |
+    | - | - |
+    | `Boolean` | `DataType.Boolean` |
+    | `byte[]` | `DataType.Bytes` |
+    | `Double` | `DataType.Double` |
+    | `Float` | `DataType.Float` |
+    | `Byte` | `DataType.Int8` |
+    | `Short` | `DataType.Int16` |
+    | `Integer` | `DataType.Int32` |
+    | `Long` | `DataType.Int64` |
+    | `String` | `DataType.String` |
+    | `Date` | `DataType.DateTime` |
+    | `BigInteger` | `DataType.UInt64` |
+
+    All other Java types will cause the application to throw an Exception.
+
+- [`KuraPayload.getBody()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L120), if non null, will be copied into the **body** of the [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload)
+
+- [`KuraPayload.getPosition()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L84), if not null, will be used to create the following metrics from the [`KuraPosition`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPosition.java#L28) object, if the value in there is not null (with the corresponding Sparkplug data types):
+
+    - **kura.position.altitude**: `DataType.Double`
+    - **kura.position.heading**: `DataType.Double`
+    - **kura.position.latitude**: `DataType.Double`
+    - **kura.position.longitude**: `DataType.Double`
+    - **kura.position.precision**: `DataType.Double`
+    - **kura.position.satellites**: `DataType.Int32`
+    - **kura.position.status** `DataType.Int32`
+    - **kura.position.speed**: `DataType.Double`
+    - **kura.position.timestamp**: `DataType.DateTime`
+
+- [`KuraPayload.getTimestamp()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76), if not null, it will be used as the timestamp metric of the Sparkplug payload
 
 ### Data Service Layer Configuration
 
@@ -118,6 +170,7 @@ The Sparkplug Data Transport layer is configured to wait for a random period of 
 
 ## Sparkplug Implementation Details
 
-### Edge Node Birth Message Metrics
+### Edge Node
 
-The NBIRTH message sent by this cloud connection will not contain any metrics, except for the mandatory ones required by the specification.
+- The NBIRTH message sent by this cloud connection will not contain any metrics, except for the mandatory ones required by the specification.
+- This cloud connection does not send any NDATA messages in its default implementation.

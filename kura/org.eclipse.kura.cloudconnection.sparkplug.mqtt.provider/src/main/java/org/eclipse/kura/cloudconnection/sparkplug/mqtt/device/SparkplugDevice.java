@@ -53,12 +53,11 @@ public class SparkplugDevice
     public static final String KEY_DEVICE_ID = "device.id";
 
     private String deviceId;
-    private BundleContext bundleContext;
     private ServiceTracker<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTracker;
     private Optional<SparkplugCloudEndpoint> sparkplugCloudEndpoint = Optional.empty();
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
     private final Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
-    private final ExecutorService callbackDispatcher = Executors.newCachedThreadPool();
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
     private Set<String> deviceMetrics = new HashSet<>();
 
     /*
@@ -67,18 +66,18 @@ public class SparkplugDevice
 
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
-        this.bundleContext = componentContext.getBundleContext();
-
         String selectedCloudEndpointPid = (String) properties
                 .get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
 
         String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
                 CloudConnectionManager.class.getName(), selectedCloudEndpointPid);
 
-        final Filter filter = this.bundleContext.createFilter(filterString);
-        this.cloudConnectionManagerTracker = new ServiceTracker<>(this.bundleContext, filter,
-                new CloudConnectionManagerTrackerCustomizer());
-        this.cloudConnectionManagerTracker.open();
+        final BundleContext context = componentContext.getBundleContext();
+        final Filter filter = context.createFilter(filterString);
+        this.cloudConnectionManagerTracker = new ServiceTracker<>(context, filter,
+                new CloudConnectionManagerTrackerCustomizer(context));
+
+        this.executorService.submit(() -> this.cloudConnectionManagerTracker.open());
 
         update(properties);
     }
@@ -101,6 +100,9 @@ public class SparkplugDevice
             this.cloudConnectionManagerTracker.close();
         }
 
+        logger.debug("Sparkplug Device {} - Shutting down executor service", this.deviceId);
+        this.executorService.shutdownNow();
+
         logger.info("Sparkplug Device {} - Deactivated", this.deviceId);
     }
 
@@ -111,20 +113,20 @@ public class SparkplugDevice
     @Override
     public void onDisconnected() {
         this.deviceMetrics.clear();
-        this.cloudConnectionListeners.forEach(listener -> this.callbackDispatcher.execute(listener::onDisconnected));
+        this.cloudConnectionListeners.forEach(listener -> this.executorService.execute(listener::onDisconnected));
     }
 
     @Override
     public void onConnectionLost() {
         this.deviceMetrics.clear();
-        this.cloudConnectionListeners.forEach(listener -> this.callbackDispatcher.execute(listener::onConnectionLost));
+        this.cloudConnectionListeners.forEach(listener -> this.executorService.execute(listener::onConnectionLost));
     }
 
     @Override
     public void onConnectionEstablished() {
         this.deviceMetrics.clear();
         this.cloudConnectionListeners
-                .forEach(listener -> this.callbackDispatcher.execute(listener::onConnectionEstablished));
+                .forEach(listener -> this.executorService.execute(listener::onConnectionEstablished));
     }
 
     /*
@@ -179,46 +181,63 @@ public class SparkplugDevice
     @Override
     public void onMessageConfirmed(final String messageId) {
         this.cloudDeliveryListeners
-                .forEach(listener -> this.callbackDispatcher.execute(() -> listener.onMessageConfirmed(messageId)));
+                .forEach(listener -> this.executorService.execute(() -> listener.onMessageConfirmed(messageId)));
     }
 
     /*
      * Utils
      */
 
+    synchronized void setSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
+        this.sparkplugCloudEndpoint = Optional.of(endpoint);
+        this.sparkplugCloudEndpoint.get().registerCloudConnectionListener(this);
+        this.sparkplugCloudEndpoint.get().registerCloudDeliveryListener(this);
+    }
+
+    synchronized void unsetSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
+        if (this.sparkplugCloudEndpoint.isPresent() && this.sparkplugCloudEndpoint.get() == endpoint) {
+            this.sparkplugCloudEndpoint.get().unregisterCloudConnectionListener(this);
+            this.sparkplugCloudEndpoint.get().unregisterCloudDeliveryListener(this);
+            this.sparkplugCloudEndpoint = Optional.empty();
+        }
+    }
+
     private class CloudConnectionManagerTrackerCustomizer
             implements ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager> {
 
+        private final BundleContext context;
+
+        public CloudConnectionManagerTrackerCustomizer(BundleContext context) {
+            this.context = context;
+        }
+
         @Override
-        public CloudConnectionManager addingService(final ServiceReference<CloudConnectionManager> reference) {
-            CloudConnectionManager cloudConnectionManager = SparkplugDevice.this.bundleContext.getService(reference);
+        public synchronized CloudConnectionManager addingService(
+                final ServiceReference<CloudConnectionManager> reference) {
+            CloudConnectionManager cloudConnectionManager = this.context.getService(reference);
 
             if (cloudConnectionManager instanceof SparkplugCloudEndpoint) {
-                SparkplugDevice.this.sparkplugCloudEndpoint = Optional
-                        .of((SparkplugCloudEndpoint) cloudConnectionManager);
-                SparkplugDevice.this.sparkplugCloudEndpoint.get().registerCloudConnectionListener(SparkplugDevice.this);
-                SparkplugDevice.this.sparkplugCloudEndpoint.get().registerCloudDeliveryListener(SparkplugDevice.this);
+                setSparkplugCloudEndpoint((SparkplugCloudEndpoint) cloudConnectionManager);
                 return cloudConnectionManager;
             } else {
-                SparkplugDevice.this.bundleContext.ungetService(reference);
+                this.context.ungetService(reference);
             }
 
             return null;
         }
 
         @Override
-        public void removedService(final ServiceReference<CloudConnectionManager> reference,
+        public synchronized void removedService(final ServiceReference<CloudConnectionManager> reference,
                 final CloudConnectionManager service) {
-            SparkplugDevice.this.sparkplugCloudEndpoint.get().unregisterCloudConnectionListener(SparkplugDevice.this);
-            SparkplugDevice.this.sparkplugCloudEndpoint.get().unregisterCloudDeliveryListener(SparkplugDevice.this);
-            SparkplugDevice.this.sparkplugCloudEndpoint = Optional.empty();
+            unsetSparkplugCloudEndpoint((SparkplugCloudEndpoint) service);
         }
 
         @Override
-        public void modifiedService(final ServiceReference<CloudConnectionManager> reference,
+        public synchronized void modifiedService(final ServiceReference<CloudConnectionManager> reference,
                 final CloudConnectionManager service) {
             // Not needed
         }
+
     }
 
 }

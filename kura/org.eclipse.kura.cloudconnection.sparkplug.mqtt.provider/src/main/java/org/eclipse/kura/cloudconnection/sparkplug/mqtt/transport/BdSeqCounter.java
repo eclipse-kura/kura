@@ -14,7 +14,7 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
 public class BdSeqCounter {
 
-    private int bdSeq = 0;
+    private int bdSeq = -1; // first invocation of next should return 0
 
     public synchronized void next() {
         if (this.bdSeq == 255) {

@@ -12,10 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugBProtobufPayloadBuilder;
@@ -36,15 +37,17 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.eclipse.tahu.protobuf.SparkplugBProto.Payload.Metric;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Payloads are already tested in unit tests, not verifying them here
@@ -85,7 +88,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         whenConnect();
 
         thenListenerNotifiedOnConnectionEstabilished(1);
-        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
+        thenMessageDeliveredOnce("spBv1.0/g1/NBIRTH/n1", 0, false, 0L);
     }
 
     @Test
@@ -106,7 +109,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         whenPrimaryHostReportsState("h1", true, new Date().getTime());
 
         thenListenerNotifiedOnConnectionEstabilished(1);
-        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
+        thenMessageDeliveredOnce("spBv1.0/g1/NBIRTH/n1", 0, false, 0L);
     }
 
     @Test
@@ -119,7 +122,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
         thenListenerNotifiedOnDisconnecting();
         thenListenerNotifiedOnDisconnected();
-        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
+        thenMessageDeliveredOnce("spBv1.0/g1/NDEATH/n1", 0, false, 0L);
     }
 
     @Test
@@ -166,7 +169,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
         thenListenerNotifiedOnDisconnecting();
         thenListenerNotifiedOnDisconnected();
-        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
+        thenMessageDeliveredOnce("spBv1.0/g1/NDEATH/n1", 0, false, 0L);
     }
 
     @Test
@@ -178,9 +181,9 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
         thenListenerNotifiedOnDisconnecting();
         thenListenerNotifiedOnDisconnected();
-        thenMessageDelivered("spBv1.0/g1/NDEATH/n1", 0, false);
         thenListenerNotifiedOnConnectionEstabilished(2);
-        thenMessageDelivered("spBv1.0/g1/NBIRTH/n1", 0, false);
+        thenMessageDeliveredOnce("spBv1.0/g1/NDEATH/n1", 0, false, 0L);
+        thenMessageDeliveredTwice("spBv1.0/g1/NBIRTH/n1", 0, false, 0L);
     }
 
     @Test
@@ -231,6 +234,30 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         thenListenerNotifiedOnMessageArrived("spBv1.0/STATE/h1");
     }
 
+    @Test
+    public void shouldIncrementBdSeqOnSuccessfulReconnection() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+        givenDisconnect(0L);
+
+        whenConnect();
+
+        thenMessageDeliveredOnce("spBv1.0/g1/NBIRTH/n1", 0, false, 0L);
+        thenMessageDeliveredOnce("spBv1.0/g1/NDEATH/n1", 0, false, 0L);
+        thenMessageDeliveredOnce("spBv1.0/g1/NBIRTH/n1", 0, false, 1L);
+    }
+
+    @Test
+    public void shouldNotIncrementBdSeqOnUnsuccessfulConnection() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://wrong.url:1883", "test.device", "mqtt", 60, 30);
+        givenConnectedAdmitToFail();
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+
+        whenConnect();
+
+        thenMessageDeliveredOnce("spBv1.0/g1/NBIRTH/n1", 0, false, 0L);
+    }
+
     /*
      * Steps
      */
@@ -258,6 +285,13 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         sparkplugDataTransport.connect();
     }
 
+    private void givenConnectedAdmitToFail() {
+        try {
+            givenConnected();
+        } catch (Exception e) {
+        }
+    }
+
     private void givenPrimaryHostReportsState(String hostId, boolean isOnline, long timestamp) throws MqttException {
         JsonObject rootObject = new JsonObject();
         rootObject.addProperty("online", isOnline);
@@ -274,6 +308,10 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         client.publish(topic, payload, 1, false);
     }
 
+    private void givenDisconnect(long quiesceTimeout) {
+        sparkplugDataTransport.disconnect(quiesceTimeout);
+    }
+
     /*
      * When
      */
@@ -287,7 +325,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     private void whenDisconnect(long quiesceTimeout) {
-        sparkplugDataTransport.disconnect(quiesceTimeout);
+        givenDisconnect(quiesceTimeout);
     }
 
     private void whenPrimaryHostRequestsRebirth(String groupId, String nodeId, boolean isRebirthRequested,
@@ -334,17 +372,52 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
                 any(byte[].class), anyInt(), anyBoolean());
     }
 
-    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained)
-            throws Exception {
-        ArgumentCaptor<MqttMessage> messageCaptor = ArgumentCaptor.forClass(MqttMessage.class);
+    private void thenMessageDeliveredOnce(String expectedTopic, int expectedQos, boolean expectedRetained,
+            long expectedBdSeq) throws Exception {
+        thenMessageDelivered(expectedTopic, expectedQos, expectedRetained, expectedBdSeq, 1);
+    }
 
-        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).atLeastOnce()).messageArrived(eq(expectedTopic),
-                messageCaptor.capture());
+    private void thenMessageDeliveredTwice(String expectedTopic, int expectedQos, boolean expectedRetained,
+            long expectedBdSeq) throws Exception {
+        thenMessageDelivered(expectedTopic, expectedQos, expectedRetained, expectedBdSeq, 2);
+    }
 
-        MqttMessage actualMessage = messageCaptor.getValue();
+    private void thenMessageDelivered(String expectedTopic, int expectedQos, boolean expectedRetained,
+            long expectedBdSeq, int expectedTimes) throws Exception {
+        verify(this.callback, timeout(DEFAULT_TIMEOUT_MS).times(expectedTimes)).messageArrived(eq(expectedTopic),
+                argThat((MqttMessage message) -> isMessageMatching(message, expectedQos, expectedRetained,
+                        expectedBdSeq)));
+    }
 
-        assertEquals(expectedQos, actualMessage.getQos());
-        assertEquals(expectedRetained, actualMessage.isRetained());
+    private static boolean isMessageMatching(MqttMessage message, int expectedQos, boolean expectedRetained,
+            long expectedBdSeq) {
+        if (message.getQos() != expectedQos) {
+            return false;
+        }
+
+        if (message.isRetained() != expectedRetained) {
+            return false;
+        }
+
+        try {
+            Payload receivedPayload = Payload.parseFrom(message.getPayload());
+
+            Optional<Metric> bdSeqMetric = receivedPayload.getMetricsList().stream()
+                    .filter(metric -> metric.getName().equals(SparkplugBProtobufPayloadBuilder.BDSEQ_METRIC_NAME))
+                    .findFirst();
+
+            if (!bdSeqMetric.isPresent()) {
+                return false;
+            }
+
+            if (bdSeqMetric.get().getLongValue() != expectedBdSeq) {
+                return false;
+            }
+
+            return true;
+        } catch (InvalidProtocolBufferException e) {
+            return false;
+        }
     }
 
 }

@@ -84,10 +84,8 @@ public class SparkplugMqttClient {
 
         logger.info(
                 "Sparkplug MQTT client updated" + "\n\tServers: {}" + "\n\tClient ID: {}" + "\n\tGroup ID: {}"
-                        + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}"
-                        + "\n\tbdSeq: {}",
-                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs,
-                this.bdSeqCounter.getCurrent());
+                        + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}",
+                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs);
     }
 
     public synchronized boolean isSessionEstabilished() {
@@ -113,6 +111,7 @@ public class SparkplugMqttClient {
                 }
             } catch (MqttException e) {
                 this.sessionStatus = SessionStatus.TERMINATED;
+                this.bdSeqCounter = new BdSeqCounter();
                 throw new KuraConnectException(e);
             }
         } else {
@@ -233,6 +232,7 @@ public class SparkplugMqttClient {
     private void newClientConnection() throws MqttException {
         this.bdSeqCounter.next();
         setWillMessage();
+        logger.debug("bdSeq: {}", this.bdSeqCounter.getCurrent());
 
         try {
             long randomDelay = this.randomDelayGenerator.nextInt(5000);

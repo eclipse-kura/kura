@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,17 +15,73 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.tahu.protobuf.SparkplugBProto.DataType;
 import org.eclipse.tahu.protobuf.SparkplugBProto.Payload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.ByteString;
 
 public class SparkplugBProtobufPayloadBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(SparkplugBProtobufPayloadBuilder.class);
+
     public static final String BDSEQ_METRIC_NAME = "bdSeq";
 
     private Payload.Builder payloadBuilder = Payload.newBuilder();
+
+    public SparkplugBProtobufPayloadBuilder withMetric(String name, Object value, long timestamp) {
+        DataType sparkplugDataType = DataType.Unknown;
+
+        if (value instanceof Boolean) {
+            sparkplugDataType = DataType.Boolean;
+        }
+
+        if (value instanceof byte[]) {
+            sparkplugDataType = DataType.Bytes;
+        }
+
+        if (value instanceof Double) {
+            sparkplugDataType = DataType.Double;
+        }
+
+        if (value instanceof Float) {
+            sparkplugDataType = DataType.Float;
+        }
+
+        if (value instanceof Byte) {
+            sparkplugDataType = DataType.Int8;
+        }
+
+        if (value instanceof Short) {
+            sparkplugDataType = DataType.Int16;
+        }
+
+        if (value instanceof Integer) {
+            sparkplugDataType = DataType.Int32;
+        }
+
+        if (value instanceof Long) {
+            sparkplugDataType = DataType.Int64;
+        }
+
+        if (value instanceof String) {
+            sparkplugDataType = DataType.String;
+        }
+
+        if (value instanceof Date) {
+            sparkplugDataType = DataType.DateTime;
+        }
+
+        if (value instanceof BigInteger) {
+            sparkplugDataType = DataType.UInt64;
+        }
+
+        logger.debug("Converting Java Type: {} to Sparkplug.DataType: {}", value.getClass().getName(),
+                sparkplugDataType);
+
+        return this.withMetric(name, value, sparkplugDataType, timestamp);
+    }
 
     public SparkplugBProtobufPayloadBuilder withMetric(String name, Object value, DataType dataType, long timestamp) {
         Payload.Metric.Builder metricBuilder = Payload.Metric.newBuilder();
@@ -106,39 +162,6 @@ public class SparkplugBProtobufPayloadBuilder {
         return this;
     }
 
-    public <T> SparkplugBProtobufPayloadBuilder withMetric(String name, TypedValue<T> value, long timestamp) {
-        DataType sparkplugDataType;
-
-        switch (value.getType()) {
-        case BOOLEAN:
-            sparkplugDataType = DataType.Boolean;
-            break;
-        case BYTE_ARRAY:
-            sparkplugDataType = DataType.Bytes;
-            break;
-        case DOUBLE:
-            sparkplugDataType = DataType.Double;
-            break;
-        case FLOAT:
-            sparkplugDataType = DataType.Float;
-            break;
-        case INTEGER:
-            sparkplugDataType = DataType.Int32;
-            break;
-        case LONG:
-            sparkplugDataType = DataType.Int64;
-            break;
-        case STRING:
-            sparkplugDataType = DataType.String;
-            break;
-        default:
-            sparkplugDataType = DataType.Unknown;
-            break;
-        }
-
-        return this.withMetric(name, value.getValue(), sparkplugDataType, timestamp);
-    }
-
     public SparkplugBProtobufPayloadBuilder withBdSeq(long bdSeq, long timestamp) {
         Payload.Metric.Builder bdSeqMetric = Payload.Metric.newBuilder();
         bdSeqMetric.setName(BDSEQ_METRIC_NAME);
@@ -157,6 +180,11 @@ public class SparkplugBProtobufPayloadBuilder {
 
     public SparkplugBProtobufPayloadBuilder withTimestamp(long timestamp) {
         this.payloadBuilder.setTimestamp(timestamp);
+        return this;
+    }
+
+    public SparkplugBProtobufPayloadBuilder withBody(byte[] body) {
+        this.payloadBuilder.setBody(ByteString.copyFrom(body));
         return this;
     }
 

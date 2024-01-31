@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2024 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+      SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+
+    <OCD id="org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice"
+         name="SparkplugDevice"
+         description="Sparkplug Device configuration. This Cloud Publisher sends a device birth message (DBIRTH message type)
+                      when the first publish occurs or when the set of published metrics is changed.
+                      After a DBIRTH message, this Cloud Publisher will send device data messages (DDATA message type).">
+
+         <AD id="device.id"
+             name="Sparkplug Device ID"
+             type="String"
+             cardinality="0"
+             required="true"
+             default="device"
+             description="Sparkplug Device identifier, needs to be unique under the same Sparkplug Edge Node ID."/>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice"
+               factoryPid="org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice">
+        <Object ocdref="org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice"/>
+    </Designate>
+</MetaData>

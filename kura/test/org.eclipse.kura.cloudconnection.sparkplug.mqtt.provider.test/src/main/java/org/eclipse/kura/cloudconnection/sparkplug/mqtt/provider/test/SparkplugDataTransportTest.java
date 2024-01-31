@@ -56,7 +56,6 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     private static final long DEFAULT_TIMEOUT_MS = 10_000L;
 
     private DataTransportListener listener = mock(DataTransportListener.class);
-    private Exception occurredException;
     private MqttCallback callback = mock(MqttCallback.class);
 
     @Before

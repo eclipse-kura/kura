@@ -23,39 +23,50 @@ public class SparkplugTopics {
     // Edge Node topics
 
     public static String getNodeBirthTopic(String groupId, String nodeId) {
-        return String.format("%s/%s/NBIRTH/%s", NAMESPACE, groupId, nodeId);
+        return getTopic(groupId, SparkplugMessageType.NBIRTH.toString(), nodeId);
     }
 
     public static String getNodeDeathTopic(String groupId, String nodeId) {
-        return String.format("%s/%s/NDEATH/%s", NAMESPACE, groupId, nodeId);
+        return getTopic(groupId, SparkplugMessageType.NDEATH.toString(), nodeId);
     }
 
     public static String getNodeCommandTopic(String groupId, String nodeId) {
-        return String.format("%s/%s/NCMD/%s", NAMESPACE, groupId, nodeId);
+        return getTopic(groupId, SparkplugMessageType.NCMD.toString(), nodeId);
     }
 
     // Device topics
 
     public static String getDeviceBirthTopic(String groupId, String nodeId, String deviceId) {
-        return String.format("%s/%s/DBIRTH/%s/%s", NAMESPACE, groupId, nodeId, deviceId);
+        return getTopic(groupId, SparkplugMessageType.DBIRTH.toString(), nodeId, deviceId);
     }
 
     public static String getDeviceDeathTopic(String groupId, String nodeId, String deviceId) {
-        return String.format("%s/%s/DDEATH/%s/%s", NAMESPACE, groupId, nodeId, deviceId);
+        return getTopic(groupId, SparkplugMessageType.DDEATH.toString(), nodeId, deviceId);
     }
 
     public static String getDeviceDataTopic(String groupId, String nodeId, String deviceId) {
-        return String.format("%s/%s/DDATA/%s/%s", NAMESPACE, groupId, nodeId, deviceId);
+        return getTopic(groupId, SparkplugMessageType.DDATA.toString(), nodeId, deviceId);
     }
 
     public static String getDeviceCommandTopic(String groupId, String nodeId, String deviceId) {
-        return String.format("%s/%s/DCMD/%s/%s", NAMESPACE, groupId, nodeId, deviceId);
+        return getTopic(groupId, SparkplugMessageType.DCMD.toString(), nodeId, deviceId);
     }
 
     // Host Application topics
 
     public static String getStateTopic(String hostId) {
-        return String.format("%s/STATE/%s", NAMESPACE, hostId);
+        return getTopic(SparkplugMessageType.STATE.toString(), hostId);
+    }
+
+    private static String getTopic(String... args) {
+        StringBuilder topicBuilder = new StringBuilder(NAMESPACE);
+
+        for (String arg : args) {
+            topicBuilder.append("/");
+            topicBuilder.append(arg);
+        }
+
+        return topicBuilder.toString();
     }
 
 }

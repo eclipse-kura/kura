@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,9 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +29,7 @@ import org.osgi.service.event.EventAdmin;
 public class StepsCollection {
 
     SparkplugCloudEndpoint endpoint = new SparkplugCloudEndpoint();
+    private Exception occurredException;
 
     /*
      * Given
@@ -54,6 +58,10 @@ public class StepsCollection {
     void givenUnregisterCloudDeliveryListener(CloudDeliveryListener listener) {
         this.endpoint.unregisterCloudDeliveryListener(listener);
     }
+    
+    void givenActivated(Map<String, Object> properties) {
+        this.endpoint.activate(properties);
+    }
 
     /*
      * When
@@ -72,7 +80,15 @@ public class StepsCollection {
     }
 
     void whenActivate(Map<String, Object> properties) {
-        this.endpoint.activate(properties);
+        try {
+            givenActivated(properties);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    void whenUpdate() {
+        this.endpoint.update();
     }
 
     void whenIsConnected() {
@@ -91,9 +107,23 @@ public class StepsCollection {
         this.endpoint.onMessageConfirmed(messageId, topic);
     }
 
+    void whenDeactivate() {
+        try {
+            this.endpoint.deactivate();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+
+    }
+
     /*
      * Then
      */
+
+    <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+    }
 
     /*
      * Utilities

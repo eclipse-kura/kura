@@ -252,8 +252,10 @@ public class SparkplugMqttClient {
     }
 
     private void disconnectClient(long quiesceTimeout) throws MqttException {
-        IMqttToken token = this.client.disconnect(quiesceTimeout);
-        token.waitForCompletion(this.connectionTimeoutMs);
+        if (this.client.isConnected()) {
+            IMqttToken token = this.client.disconnect(quiesceTimeout);
+            token.waitForCompletion(this.connectionTimeoutMs);
+        }
 
         logger.debug("Client disconnected");
     }
@@ -264,7 +266,7 @@ public class SparkplugMqttClient {
     }
 
     private void logInvalidStateTransition(SessionStatus from, SessionStatus to) {
-        logger.warn("Invalid state transition {} -> {}, ignoring request", from, to);
+        logger.debug("Invalid state transition {} -> {}, ignoring request", from, to);
     }
 
     private synchronized void dispatchMessage(String topic, MqttMessage message) {

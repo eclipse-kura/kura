@@ -85,7 +85,7 @@ public class SparkplugDevice
 
     public void update(final Map<String, Object> properties) {
         this.deviceId = (String) properties.get(KEY_DEVICE_ID);
-        if (Objects.isNull(this.deviceId) || this.deviceId.trim().length() == 0) {
+        if (Objects.isNull(this.deviceId) || this.deviceId.trim().isEmpty()) {
             throw new IllegalArgumentException("Property '" + KEY_DEVICE_ID + "' cannot be null or empty");
         }
 

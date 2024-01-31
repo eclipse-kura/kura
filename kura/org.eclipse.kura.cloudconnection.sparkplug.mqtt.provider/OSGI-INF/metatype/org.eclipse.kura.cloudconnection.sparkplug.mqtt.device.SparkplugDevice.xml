@@ -18,8 +18,8 @@
     <OCD id="org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice"
          name="SparkplugDevice"
          description="Sparkplug Device configuration. This Cloud Publisher sends a device birth message (DBIRTH message type)
-                      when the first publish occurs or when a the set of published metrics is changed.
-                      This type of Cloud Publisher will send device data messages (DDATA message type) after the DBIRTH.">
+                      when the first publish occurs or when the set of published metrics is changed.
+                      After a DBIRTH message, this Cloud Publisher will send device data messages (DDATA message type).">
 
          <AD id="device.id"
              name="Sparkplug Device ID"

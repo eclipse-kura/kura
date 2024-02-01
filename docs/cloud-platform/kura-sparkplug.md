@@ -166,6 +166,8 @@ The Sparkplug Data Transport layer bridges the incoming requests to the underlyi
 
 The Sparkplug Data Transport layer is configured to wait for a random period of time between 0sec and 5sec before each connection attempt. This is to ensure that, on large deployments, the target MQTT servers and Host Applications will dilute session estabilishment requests by some margin. This behavior is not part of the Sparkplug specification.
 
+This cloud connection supports SSL connections to the connecting broker. The option **SslManagerService.target** allows, as an OSGi target filter, to specify the pid of the [`SslManagerService`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/ssl/SslManagerService.java) instance to use for creating SSL connections for broker URIs that use the `ssl://` protocol. The [default socket factory](https://docs.oracle.com/javase/8/docs/api/javax/net/SocketFactory.html#getDefault--) is used otherwise.
+
 
 
 ## Sparkplug Implementation Details

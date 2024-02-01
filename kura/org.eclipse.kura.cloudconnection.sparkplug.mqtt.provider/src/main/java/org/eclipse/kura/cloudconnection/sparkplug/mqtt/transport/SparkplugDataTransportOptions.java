@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 public class SparkplugDataTransportOptions {
@@ -35,14 +36,15 @@ public class SparkplugDataTransportOptions {
     public static final String KEY_KEEP_ALIVE = "keep.alive";
     public static final String KEY_CONNECTION_TIMEOUT = "connection.timeout";
 
-    private String groupId;
-    private String nodeId;
-    private Optional<String> primaryHostApplicationId = Optional.empty();
-    private List<String> servers = new ArrayList<>();
-    private MqttConnectOptions connectionOptions = new MqttConnectOptions();
-    private String clientId;
+    private final String groupId;
+    private final String nodeId;
+    private final Optional<String> primaryHostApplicationId;
+    private final List<String> servers;
+    private final MqttConnectOptions connectionOptions = new MqttConnectOptions();
+    private final String clientId;
 
-    public SparkplugDataTransportOptions(Map<String, Object> properties) throws KuraException {
+    public SparkplugDataTransportOptions(final Map<String, Object> properties, final CryptoService cryptoService)
+            throws KuraException {        
         this.groupId = getMandatoryString(KEY_GROUP_ID, properties);
         this.nodeId = getMandatoryString(KEY_NODE_ID, properties);
         this.primaryHostApplicationId = getOptionalString(KEY_PRIMARY_HOST_APPLICATION_ID, properties);
@@ -55,7 +57,7 @@ public class SparkplugDataTransportOptions {
             this.connectionOptions.setUserName(username.get());
         }
         if (password.isPresent()) {
-            this.connectionOptions.setPassword(password.get().getPassword());
+            this.connectionOptions.setPassword(cryptoService.decryptAes(password.get().getPassword()));
         }
 
         this.connectionOptions.setKeepAliveInterval(getMandatoryInt(KEY_KEEP_ALIVE, properties));
@@ -128,12 +130,12 @@ public class SparkplugDataTransportOptions {
     }
 
     private Optional<Password> getOptionalPassword(String key, Map<String, Object> map) {
-        Password value = (Password) map.get(key);
+        String value = (String) map.get(key);
 
-        if (Objects.isNull(value) || value.getPassword().length == 0) {
+        if (Objects.isNull(value) || value.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(value);
+            return Optional.of(new Password(value));
         }
     }
 

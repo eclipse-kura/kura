@@ -26,9 +26,11 @@ import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -46,12 +48,30 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private SparkplugDataTransportOptions options;
     private Set<DataTransportListener> dataTransportListeners = new HashSet<>();
     private ExecutorService executorService;
+    private SslManagerService sslManagerService;
+    private CryptoService cryptoService;
 
     /*
      * Activation APIs
      */
 
-    public void activate(Map<String, Object> properties) {
+    public synchronized void setSslManagerService(SslManagerService sslManagerService) {
+        this.sslManagerService = sslManagerService;
+        update();
+    }
+
+    public synchronized void unsetSslManagerService(SslManagerService sslManagerService) {
+        if (this.sslManagerService == sslManagerService) {
+            this.sslManagerService = null;
+            update();
+        }
+    }
+
+    public synchronized void setCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
+    public synchronized void activate(Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
 
@@ -60,42 +80,54 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
-    public void update(Map<String, Object> properties) {
-        logger.info("{} - Updating", this.kuraServicePid);
-
-        boolean wasConnected = isConnected();
-
-        this.dataTransportListeners
-                .forEach(listener -> callSafely(listener::onConfigurationUpdating, wasConnected));
-
-        if (wasConnected) {
-            disconnect(0);
-        }
-
+    public synchronized void update(Map<String, Object> properties) {
         try {
-            this.options = new SparkplugDataTransportOptions(properties);
-            this.sessionId = getBrokerUrl() + "-" + getClientId();
-            this.client = new SparkplugMqttClient(this.options, this, this.dataTransportListeners);
-
-            if (wasConnected) {
-                connect();
-            }
+            this.options = new SparkplugDataTransportOptions(properties, this.cryptoService);
+            update();
         } catch (KuraException ke) {
             logger.error("{} - Error in configuration properties", this.kuraServicePid, ke);
         }
-
-        this.dataTransportListeners
-                .forEach(listener -> callSafely(listener::onConfigurationUpdated, wasConnected));
-
-        logger.info("{} - Updated", this.kuraServicePid);
     }
 
-    public void deactivate() {
+    public synchronized void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 
         disconnect(0);
 
         logger.info("{} - Deactivated", this.kuraServicePid);
+    }
+
+    private void update() {
+        if (Objects.nonNull(this.options)) {
+            logger.info("{} - Updating", this.kuraServicePid);
+
+            boolean wasConnected = isConnected();
+
+            this.dataTransportListeners
+                    .forEach(listener -> callSafely(listener::onConfigurationUpdating, wasConnected));
+
+            try {
+                applyConfiguration(wasConnected);
+            } catch (KuraConnectException ke) {
+                logger.error("{} - Error reconnecting after configuration update", this.kuraServicePid, ke);
+            }
+        }
+    }
+
+    private void applyConfiguration(boolean wasConnected) throws KuraConnectException {
+        if (wasConnected) {
+            disconnect(0);
+        }
+
+        this.sessionId = getBrokerUrl() + "-" + getClientId();
+        this.client = new SparkplugMqttClient(this.options, this, this.dataTransportListeners, this.sslManagerService);
+
+        if (wasConnected) {
+            connect();
+        }
+
+        this.dataTransportListeners.forEach(listener -> callSafely(listener::onConfigurationUpdated, wasConnected));
+        logger.info("{} - Updated", this.kuraServicePid);
     }
 
     /*
@@ -143,7 +175,9 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     @Override
     public void disconnect(long quiesceTimeout) {
         stopExecutorService();
-        this.client.terminateSession(true, quiesceTimeout);
+        if (Objects.nonNull(this.client)) {
+            this.client.terminateSession(true, quiesceTimeout);
+        }
     }
 
     @Override

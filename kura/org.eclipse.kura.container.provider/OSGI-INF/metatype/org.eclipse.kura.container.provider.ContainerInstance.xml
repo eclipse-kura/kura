@@ -123,6 +123,15 @@
             type="String" cardinality="1"
             required="false" default="" />
             
+        <AD id="container.runtime"
+            name="Runtime"
+            description="Specify the runtime the container can use."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
+            
         <AD id="container.networkMode" 
             name="Networking Mode"
             description="Used to specify what networking mode the container will use. Possible Drivers: bridge, none, container:{container id}, host. Note: This field is case-sensitive." type="String" cardinality="0"

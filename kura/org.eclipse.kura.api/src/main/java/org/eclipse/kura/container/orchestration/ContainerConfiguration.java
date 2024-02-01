@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -56,6 +56,7 @@ public class ContainerConfiguration {
     private Optional<Long> memory;
     private Optional<Float> cpus;
     private Optional<String> gpus;
+    private Optional<String> runtime;
 
     private ContainerConfiguration() {
     }
@@ -96,7 +97,8 @@ public class ContainerConfiguration {
      *
      * @return
      *
-     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes the network
+     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes
+     *             the network
      *             protocol with the port mapping.
      */
     @Deprecated
@@ -110,7 +112,8 @@ public class ContainerConfiguration {
      *
      * @return
      *
-     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes the network
+     * @deprecated since 2.5. Please use {@link getContainerPorts} as it includes
+     *             the network
      *             protocol with the port mapping.
      */
     @Deprecated
@@ -291,6 +294,16 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Return the runtime option to be assigned to the container.
+     *
+     * @return
+     * @since 2.7
+     */
+    public Optional<String> getRuntime() {
+        return this.runtime;
+    }
+
+    /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
@@ -304,7 +317,7 @@ public class ContainerConfiguration {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
                 this.containerLoggingType, this.containerName, this.containerPorts, this.containerPrivileged,
                 this.containerVolumes, this.cpus, this.entryPoint, this.gpus, this.imageConfig, this.isFrameworkManaged,
-                this.memory, this.networkConfiguration, this.containerRestartOnFailure);
+                this.memory, this.networkConfiguration, this.containerRestartOnFailure, this.runtime);
     }
 
     @Override
@@ -329,7 +342,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
                 && Objects.equals(this.memory, other.memory)
                 && Objects.equals(this.networkConfiguration, other.networkConfiguration)
-                && Objects.equals(this.containerRestartOnFailure, other.containerRestartOnFailure);
+                && Objects.equals(this.containerRestartOnFailure, other.containerRestartOnFailure)
+                && Objects.equals(this.runtime, other.runtime);
     }
 
     public static final class ContainerConfigurationBuilder {
@@ -352,6 +366,7 @@ public class ContainerConfiguration {
         private Optional<Long> memory = Optional.empty();
         private Optional<Float> cpus = Optional.empty();
         private Optional<String> gpus = Optional.empty();
+        private Optional<String> runtime = Optional.empty();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -381,7 +396,8 @@ public class ContainerConfiguration {
          * number of elements in this list is the same
          * as the number of elements set with {@link setInternalPorts}.
          *
-         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for network
+         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for
+         *             network
          *             protocol to be specified in a port mapping.
          */
         @Deprecated
@@ -398,7 +414,8 @@ public class ContainerConfiguration {
          * Ensure that the number of elements in this list is the same as
          * the number of elements set with {@link setExternalPorts}.
          *
-         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for network
+         * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for
+         *             network
          *             protocol to be specified in a port mapping.
          *
          */
@@ -524,6 +541,14 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * @since 2.7
+         */
+        public ContainerConfigurationBuilder setRuntime(Optional<String> runtime) {
+            this.runtime = runtime;
+            return this;
+        }
+
         public ContainerConfiguration build() {
 
             if (this.containerPorts.isEmpty()) {
@@ -553,6 +578,7 @@ public class ContainerConfiguration {
             result.memory = this.memory;
             result.cpus = this.cpus;
             result.gpus = this.gpus;
+            result.runtime = this.runtime;
 
             return result;
         }

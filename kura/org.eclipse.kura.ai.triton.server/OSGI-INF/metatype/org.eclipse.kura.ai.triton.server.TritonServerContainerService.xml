@@ -110,6 +110,24 @@
             default="">
         </AD>
 
+        <AD id="container.runtime"
+            name="Runtime"
+            description="Specify the runtime the Triton container can use."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
+        
+        <AD id="devices"
+            name="Devices"
+            description="Specify the devices the Triton container can use."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
+        
         <AD id="timeout"
             name="Timeout (in seconds) for time consuming tasks"
             type="Integer"

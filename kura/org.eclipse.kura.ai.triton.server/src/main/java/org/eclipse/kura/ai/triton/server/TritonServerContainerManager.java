@@ -237,6 +237,8 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         builder.setMemory(this.options.getContainerMemory());
         builder.setCpus(this.options.getContainerCpus());
         builder.setGpus(this.options.getContainerGpus());
+        builder.setRuntime(this.options.getContainerRuntime());
+        builder.setDeviceList(this.options.getDevices());
 
         if (this.options.isModelEncryptionPasswordSet()) {
             builder.setVolumes(Collections.singletonMap(this.decryptionFolderPath, TRITON_INTERNAL_MODEL_REPO));

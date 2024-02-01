@@ -13,6 +13,7 @@
 package org.eclipse.kura.ai.triton.server;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ public class TritonServerServiceOptions {
     private static final String CONTAINER_MEMORY = "container.memory";
     private static final String CONTAINER_CPUS = "container.cpus";
     private static final String CONTAINER_GPUS = "container.gpus";
+    private static final String CONTAINER_RUNTIME = "container.runtime";
     private static final String PROPERTY_ADDRESS = "server.address";
     private static final String PROPERTY_PORTS = "server.ports";
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PATH = "local.model.repository.path";
@@ -43,6 +45,7 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
     private static final String PROPERTY_MAX_GRPC_MESSAGE_SIZE = "grpc.max.size";
+    private static final String PROPERTY_DEVICES = "devices";
     private final Map<String, Object> properties;
 
     private static final int RETRY_INTERVAL = 500; // ms
@@ -58,6 +61,8 @@ public class TritonServerServiceOptions {
     private final Optional<Long> containerMemory;
     private final Optional<Float> containerCpus;
     private final Optional<String> containerGpus;
+    private final Optional<String> containerRuntime;
+    private final List<String> devices;
 
     public TritonServerServiceOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -122,9 +127,23 @@ public class TritonServerServiceOptions {
 
         final Object propertyContainerGpus = properties.get(CONTAINER_GPUS);
         if (propertyContainerGpus instanceof String) {
-            this.containerGpus = parseGpusString(Optional.of((String) propertyContainerGpus));
+            this.containerGpus = parseOptionalString(Optional.of((String) propertyContainerGpus));
         } else {
             this.containerGpus = Optional.empty();
+        }
+
+        final Object propertyContainerRuntime = properties.get(CONTAINER_RUNTIME);
+        if (propertyContainerGpus instanceof String) {
+            this.containerRuntime = parseOptionalString(Optional.of((String) propertyContainerRuntime));
+        } else {
+            this.containerRuntime = Optional.empty();
+        }
+
+        final Object propertyDevices = properties.get(PROPERTY_DEVICES);
+        if (propertyDevices instanceof String) {
+            this.devices = parseDevices((String) propertyDevices);
+        } else {
+            this.devices = new ArrayList<>();
         }
 
     }
@@ -224,6 +243,14 @@ public class TritonServerServiceOptions {
         return this.containerGpus;
     }
 
+    public Optional<String> getContainerRuntime() {
+        return this.containerRuntime;
+    }
+
+    public List<String> getDevices() {
+        return this.devices;
+    }
+
     private String getStringProperty(String propertyName) {
         String stringProperty = "";
         final Object stringPropertyObj = this.properties.get(propertyName);
@@ -238,20 +265,20 @@ public class TritonServerServiceOptions {
             String stringValue = value.get().trim();
             long result = 0;
             switch (stringValue.charAt(stringValue.length() - 1)) {
-            case 'b':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
-                break;
-            case 'k':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
-                break;
-            case 'm':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
-                break;
-            case 'g':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
-                break;
-            default:
-                result = Long.parseLong(stringValue);
+                case 'b':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                    break;
+                case 'k':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                    break;
+                case 'm':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                    break;
+                case 'g':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                    break;
+                default:
+                    result = Long.parseLong(stringValue);
             }
             return Optional.of(result);
         } else {
@@ -259,11 +286,19 @@ public class TritonServerServiceOptions {
         }
     }
 
-    private Optional<String> parseGpusString(Optional<String> gpus) {
-        if (gpus.isPresent() && gpus.get().isEmpty()) {
+    private Optional<String> parseOptionalString(Optional<String> optionalString) {
+        if (optionalString.isPresent() && optionalString.get().isEmpty()) {
             return Optional.empty();
         } else {
-            return gpus;
+            return optionalString;
+        }
+    }
+
+    private List<String> parseDevices(String devicesString) {
+        if (isNull(devicesString) || devicesString.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return Arrays.asList(devicesString.trim().split(","));
         }
     }
 

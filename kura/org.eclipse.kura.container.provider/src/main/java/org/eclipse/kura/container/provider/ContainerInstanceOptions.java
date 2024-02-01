@@ -66,6 +66,7 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_MEMORY = new Property<>("container.memory", "");
     private static final Property<Float> CONTAINER_CPUS = new Property<>("container.cpus", 1F);
     private static final Property<String> CONTAINER_GPUS = new Property<>("container.gpus", "all");
+    private static final Property<String> CONTAINER_RUNTIME = new Property<>("container.runtime", "");
 
     private boolean enabled;
     private final String image;
@@ -93,6 +94,7 @@ public class ContainerInstanceOptions {
     private final Optional<Long> containerMemory;
     private final Optional<Float> containerCpus;
     private final Optional<String> containerGpus;
+    private final Optional<String> containerRuntime;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -124,7 +126,8 @@ public class ContainerInstanceOptions {
         this.restartOnFailure = CONTAINER_RESTART_FAILURE.get(properties);
         this.containerMemory = parseMemoryString(CONTAINER_MEMORY.getOptional(properties));
         this.containerCpus = CONTAINER_CPUS.getOptional(properties);
-        this.containerGpus = parseGpusString(CONTAINER_GPUS.getOptional(properties));
+        this.containerGpus = parseOptionalString(CONTAINER_GPUS.getOptional(properties));
+        this.containerRuntime = parseOptionalString(CONTAINER_RUNTIME.getOptional(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -197,20 +200,20 @@ public class ContainerInstanceOptions {
             String stringValue = value.get().trim();
             long result = 0;
             switch (stringValue.charAt(stringValue.length() - 1)) {
-            case 'b':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
-                break;
-            case 'k':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
-                break;
-            case 'm':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
-                break;
-            case 'g':
-                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
-                break;
-            default:
-                result = Long.parseLong(stringValue);
+                case 'b':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                    break;
+                case 'k':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                    break;
+                case 'm':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                    break;
+                case 'g':
+                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                    break;
+                default:
+                    result = Long.parseLong(stringValue);
             }
             return Optional.of(result);
         } else {
@@ -218,11 +221,11 @@ public class ContainerInstanceOptions {
         }
     }
 
-    private Optional<String> parseGpusString(Optional<String> gpus) {
-        if (gpus.isPresent() && gpus.get().isEmpty()) {
+    private Optional<String> parseOptionalString(Optional<String> optionalString) {
+        if (optionalString.isPresent() && optionalString.get().isEmpty()) {
             return Optional.empty();
         } else {
-            return gpus;
+            return optionalString;
         }
     }
 
@@ -328,6 +331,10 @@ public class ContainerInstanceOptions {
         return this.containerGpus;
     }
 
+    public Optional<String> getRuntime() {
+        return this.containerRuntime;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -358,7 +365,7 @@ public class ContainerInstanceOptions {
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
                 .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
                 .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
-                .build();
+                .setRuntime(getRuntime()).build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -380,15 +387,15 @@ public class ContainerInstanceOptions {
             for (String portToken : ports.trim().replace(" ", "").split(",")) {
                 if (portToken.split(":").length > 1) {
                     switch (portToken.split(":")[1].toUpperCase().trim()) {
-                    case "UDP":
-                        tempArray.add(PortInternetProtocol.UDP);
-                        break;
-                    case "SCTP":
-                        tempArray.add(PortInternetProtocol.SCTP);
-                        break;
-                    default:
-                        tempArray.add(PortInternetProtocol.TCP);
-                        break;
+                        case "UDP":
+                            tempArray.add(PortInternetProtocol.UDP);
+                            break;
+                        case "SCTP":
+                            tempArray.add(PortInternetProtocol.SCTP);
+                            break;
+                        default:
+                            tempArray.add(PortInternetProtocol.TCP);
+                            break;
                     }
                 } else {
                     // if setting is not used add TCP by default.
@@ -406,7 +413,7 @@ public class ContainerInstanceOptions {
                 containerLoggerType, containerLoggingParameters, containerMemory, containerName,
                 containerNetworkingMode, containerPortProtocol, containerVolumeString, containerVolumes, enabled,
                 externalPorts, image, imageDownloadTimeout, imageTag, internalPorts, maxDownloadRetries, privilegedMode,
-                registryPassword, registryURL, registryUsername, restartOnFailure, retryInterval);
+                registryPassword, registryURL, registryUsername, restartOnFailure, retryInterval, containerRuntime);
     }
 
     @Override
@@ -440,7 +447,8 @@ public class ContainerInstanceOptions {
                 && privilegedMode == other.privilegedMode && Objects.equals(registryPassword, other.registryPassword)
                 && Objects.equals(registryURL, other.registryURL)
                 && Objects.equals(registryUsername, other.registryUsername)
-                && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval;
+                && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval
+                && Objects.equals(containerRuntime, other.containerRuntime);
     }
 
 }

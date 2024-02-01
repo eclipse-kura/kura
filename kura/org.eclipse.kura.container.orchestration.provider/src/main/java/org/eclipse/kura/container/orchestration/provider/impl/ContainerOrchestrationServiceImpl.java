@@ -237,20 +237,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private ContainerState convertDockerStateToFrameworkState(String dockerState) {
 
         switch (dockerState.trim()) {
-        case "created":
-            return ContainerState.INSTALLED;
-        case "restarting":
-            return ContainerState.INSTALLED;
-        case "running":
-            return ContainerState.ACTIVE;
-        case "paused":
-            return ContainerState.STOPPING;
-        case "exited":
-            return ContainerState.STOPPING;
-        case "dead":
-            return ContainerState.FAILED;
-        default:
-            return ContainerState.INSTALLED;
+            case "created":
+                return ContainerState.INSTALLED;
+            case "restarting":
+                return ContainerState.INSTALLED;
+            case "running":
+                return ContainerState.ACTIVE;
+            case "paused":
+                return ContainerState.STOPPING;
+            case "exited":
+                return ContainerState.STOPPING;
+            case "dead":
+                return ContainerState.FAILED;
+            default:
+                return ContainerState.INSTALLED;
         }
     }
 
@@ -476,6 +476,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerGpusConfigurationHandler(containerDescription, configuration);
 
+            configuration = containerRuntimeConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
@@ -498,48 +500,48 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             HostConfig configuration) {
         LoggingType lt;
         switch (containerDescription.getContainerLoggingType().toUpperCase().trim()) {
-        case "NONE":
-            lt = LoggingType.NONE;
-            break;
-        case "LOCAL":
-            lt = LoggingType.LOCAL;
-            break;
-        case "ETWLOGS":
-            lt = LoggingType.ETWLOGS;
-            break;
-        case "JSON_FILE":
-            lt = LoggingType.JSON_FILE;
-            break;
-        case "SYSLOG":
-            lt = LoggingType.SYSLOG;
-            break;
-        case "JOURNALD":
-            lt = LoggingType.JOURNALD;
-            break;
-        case "GELF":
-            lt = LoggingType.GELF;
-            break;
-        case "FLUENTD":
-            lt = LoggingType.FLUENTD;
-            break;
-        case "AWSLOGS":
-            lt = LoggingType.AWSLOGS;
-            break;
-        case "DB":
-            lt = LoggingType.DB;
-            break;
-        case "SPLUNK":
-            lt = LoggingType.SPLUNK;
-            break;
-        case "GCPLOGS":
-            lt = LoggingType.GCPLOGS;
-            break;
-        case "LOKI":
-            lt = LoggingType.LOKI;
-            break;
-        default:
-            lt = LoggingType.DEFAULT;
-            break;
+            case "NONE":
+                lt = LoggingType.NONE;
+                break;
+            case "LOCAL":
+                lt = LoggingType.LOCAL;
+                break;
+            case "ETWLOGS":
+                lt = LoggingType.ETWLOGS;
+                break;
+            case "JSON_FILE":
+                lt = LoggingType.JSON_FILE;
+                break;
+            case "SYSLOG":
+                lt = LoggingType.SYSLOG;
+                break;
+            case "JOURNALD":
+                lt = LoggingType.JOURNALD;
+                break;
+            case "GELF":
+                lt = LoggingType.GELF;
+                break;
+            case "FLUENTD":
+                lt = LoggingType.FLUENTD;
+                break;
+            case "AWSLOGS":
+                lt = LoggingType.AWSLOGS;
+                break;
+            case "DB":
+                lt = LoggingType.DB;
+                break;
+            case "SPLUNK":
+                lt = LoggingType.SPLUNK;
+                break;
+            case "GCPLOGS":
+                lt = LoggingType.GCPLOGS;
+                break;
+            case "LOKI":
+                lt = LoggingType.LOKI;
+                break;
+            default:
+                lt = LoggingType.DEFAULT;
+                break;
         }
 
         LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
@@ -598,6 +600,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
+    private HostConfig containerRuntimeConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        Optional<String> runtime = containerDescription.getRuntime();
+        runtime.ifPresent(runtimeOption -> configuration.withRuntime(runtimeOption));
+
+        return configuration;
+    }
+
     private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
             HostConfig commandBuilder) {
 
@@ -614,15 +625,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 InternetProtocol ipPro;
 
                 switch (port.getInternetProtocol()) {
-                case UDP:
-                    ipPro = InternetProtocol.UDP;
-                    break;
-                case SCTP:
-                    ipPro = InternetProtocol.SCTP;
-                    break;
-                default:
-                    ipPro = InternetProtocol.TCP;
-                    break;
+                    case UDP:
+                        ipPro = InternetProtocol.UDP;
+                        break;
+                    case SCTP:
+                        ipPro = InternetProtocol.SCTP;
+                        break;
+                    default:
+                        ipPro = InternetProtocol.TCP;
+                        break;
                 }
 
                 ExposedPort tempExposedPort = new ExposedPort(port.getInternalPort(), ipPro);

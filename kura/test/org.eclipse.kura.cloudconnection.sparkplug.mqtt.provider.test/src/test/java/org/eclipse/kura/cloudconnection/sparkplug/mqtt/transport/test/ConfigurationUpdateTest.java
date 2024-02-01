@@ -52,7 +52,7 @@ public class ConfigurationUpdateTest {
 
     @Test
     public void shouldUpdateConfigurationOnSetSslManager() {
-        givenUpdated();
+        givenUpdated("tcp://localhost:1883", "g1", "n1", "", "test.client", 30, 60);
 
         whenSetSslManagerService();
 
@@ -69,7 +69,7 @@ public class ConfigurationUpdateTest {
     @Test
     public void shouldUpdateConfigurationOnUnsetSslManager() {
         givenSetSslManagerService();
-        givenUpdated();
+        givenUpdated("tcp://localhost:1883", "g1", "n1", "", "test.client", 30, 60);
 
         whenUnsetSslManagerService();
 
@@ -91,15 +91,16 @@ public class ConfigurationUpdateTest {
      * Given
      */
 
-    private void givenUpdated() {
+    private void givenUpdated(String servers, String groupId, String nodeId, String primaryHostId, String clientId,
+            int connectionTimeout, int keepAlive) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test.client");
-        properties.put(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 30);
-        properties.put(SparkplugDataTransportOptions.KEY_GROUP_ID, "g1");
-        properties.put(SparkplugDataTransportOptions.KEY_NODE_ID, "n1");
-        properties.put(SparkplugDataTransportOptions.KEY_PRIMARY_HOST_APPLICATION_ID, "");
-        properties.put(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://localhost:1883");
-        properties.put(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, 60);
+        properties.put(SparkplugDataTransportOptions.KEY_CLIENT_ID, clientId);
+        properties.put(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, connectionTimeout);
+        properties.put(SparkplugDataTransportOptions.KEY_GROUP_ID, groupId);
+        properties.put(SparkplugDataTransportOptions.KEY_NODE_ID, nodeId);
+        properties.put(SparkplugDataTransportOptions.KEY_PRIMARY_HOST_APPLICATION_ID, primaryHostId);
+        properties.put(SparkplugDataTransportOptions.KEY_SERVER_URIS, servers);
+        properties.put(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, keepAlive);
 
         this.transport.update(properties);
     }

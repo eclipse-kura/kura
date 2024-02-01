@@ -17,6 +17,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +30,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransportOptions;
-import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.junit.Before;
 import org.junit.Test;
@@ -217,7 +220,7 @@ public class SparkplugDataTransportOptionsTest {
 
         @Test
         public void shouldReturnCorrectPassword() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, new Password("secret"));
+            givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, "secret");
             givenOptionsCreated();
 
             whenGetMqttConnectOptions();
@@ -227,7 +230,7 @@ public class SparkplugDataTransportOptionsTest {
 
         @Test
         public void shouldNotSetPasswordWhenEmpty() throws KuraException {
-            givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, new Password(""));
+            givenProperty(SparkplugDataTransportOptions.KEY_PASSWORD, "");
             givenOptionsCreated();
 
             whenGetMqttConnectOptions();
@@ -299,15 +302,19 @@ public class SparkplugDataTransportOptionsTest {
         private Optional<String> returnedPrimaryHostApplicationId = Optional.empty();
         private long returnedLong;
         private MqttConnectOptions mqttConnectOptions;
+        private CryptoService cryptoServiceMock;
 
         @Before
-        public void defaults() {
+        public void defaults() throws KuraException {
             givenProperty(SparkplugDataTransportOptions.KEY_GROUP_ID, "g1");
             givenProperty(SparkplugDataTransportOptions.KEY_NODE_ID, "n1");
             givenProperty(SparkplugDataTransportOptions.KEY_SERVER_URIS, "tcp://broker:1883");
             givenProperty(SparkplugDataTransportOptions.KEY_CLIENT_ID, "test.client");
             givenProperty(SparkplugDataTransportOptions.KEY_KEEP_ALIVE, 60);
             givenProperty(SparkplugDataTransportOptions.KEY_CONNECTION_TIMEOUT, 30);
+            this.cryptoServiceMock = mock(CryptoService.class);
+            doAnswer(invocation -> (char[]) invocation.getArgument(0)).when(cryptoServiceMock)
+                    .decryptAes(any(char[].class));
         }
 
         /*
@@ -319,7 +326,7 @@ public class SparkplugDataTransportOptionsTest {
         }
 
         void givenOptionsCreated() throws KuraException {
-            this.options = new SparkplugDataTransportOptions(this.properties);
+            this.options = new SparkplugDataTransportOptions(this.properties, this.cryptoServiceMock);
         }
 
         /*

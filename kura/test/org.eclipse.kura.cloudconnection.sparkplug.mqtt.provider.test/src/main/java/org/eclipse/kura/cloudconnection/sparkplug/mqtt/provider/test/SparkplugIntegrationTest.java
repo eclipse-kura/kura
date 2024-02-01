@@ -14,6 +14,7 @@ package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTr
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -146,6 +148,8 @@ public class SparkplugIntegrationTest {
             sparkplugDataTransport = (SparkplugDataTransport) trackService(DataTransportService.class,
                     DATA_TRANSPORT_SERVICE_PID);
 
+            deactivateSsl();
+
             logger.info("Got references for Sparkplug CloudEndpoint and DataTransportService");
         }
     }
@@ -170,6 +174,12 @@ public class SparkplugIntegrationTest {
         options.setAutomaticReconnect(false);
         options.setCleanSession(true);
         client.connect(options);
+    }
+
+    private static void deactivateSsl() {
+        SslManagerService sslService = mock(SslManagerService.class);
+        sparkplugDataTransport.setSslManagerService(sslService);
+        sparkplugDataTransport.unsetSslManagerService(sslService);
     }
 
 }

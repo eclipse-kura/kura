@@ -12,7 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -20,10 +22,13 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
+import javax.net.SocketFactory;
+
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
+import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -60,6 +65,8 @@ public class SparkplugMqttClient {
     private long lastStateTimestamp = 0;
     private Random randomDelayGenerator = new Random();
 
+    private SslManagerService sslManagerService;
+
     public enum SessionStatus {
         TERMINATED,
         ESTABILISHING,
@@ -69,7 +76,7 @@ public class SparkplugMqttClient {
     private SessionStatus sessionStatus = SessionStatus.TERMINATED;
 
     public SparkplugMqttClient(SparkplugDataTransportOptions options, MqttCallback callback,
-            Set<DataTransportListener> listeners) {
+            Set<DataTransportListener> listeners, SslManagerService sslManagerService) {
         this.servers = options.getServers();
         this.serversIterator = this.servers.iterator();
         this.clientId = options.getClientId();
@@ -82,12 +89,12 @@ public class SparkplugMqttClient {
         this.primaryHostId = options.getPrimaryHostApplicationId();
         this.connectionTimeoutMs = options.getConnectionTimeoutMs();
 
+        this.sslManagerService = sslManagerService;
+
         logger.info(
                 "Sparkplug MQTT client updated" + "\n\tServers: {}" + "\n\tClient ID: {}" + "\n\tGroup ID: {}"
-                        + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}"
-                        + "\n\tbdSeq: {}",
-                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs,
-                this.bdSeqCounter.getCurrent());
+                        + "\n\tNode ID: {}" + "\n\tPrimary Host Application ID: {}" + "\n\tConnection Timeout (ms): {}",
+                this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs);
     }
 
     public synchronized boolean isSessionEstabilished() {
@@ -111,8 +118,9 @@ public class SparkplugMqttClient {
                 } else {
                     confirmSession();
                 }
-            } catch (MqttException e) {
+            } catch (MqttException | GeneralSecurityException | IOException e) {
                 this.sessionStatus = SessionStatus.TERMINATED;
+                this.bdSeqCounter = new BdSeqCounter();
                 throw new KuraConnectException(e);
             }
         } else {
@@ -197,7 +205,7 @@ public class SparkplugMqttClient {
      * Private methods
      */
 
-    private String getNextServer() {
+    private String getNextServer() throws GeneralSecurityException, IOException {
         String server;
         if (this.serversIterator.hasNext()) {
             server = this.serversIterator.next();
@@ -206,8 +214,18 @@ public class SparkplugMqttClient {
             server = this.serversIterator.next();
         }
 
+        setSocketFactory(server);
+
         logger.info("Selecting next server {} from {}", server, this.servers);
         return server;
+    }
+
+    private void setSocketFactory(String server) throws GeneralSecurityException, IOException {
+        if (server.startsWith("ssl")) {
+            this.options.setSocketFactory(this.sslManagerService.getSSLSocketFactory());
+        } else {
+            this.options.setSocketFactory(SocketFactory.getDefault());
+        }
     }
 
     private void setWillMessage() {
@@ -230,9 +248,10 @@ public class SparkplugMqttClient {
         logger.debug("Published Edge Node DEATH with bdSeq {}", this.bdSeqCounter.getCurrent());
     }
 
-    private void newClientConnection() throws MqttException {
+    private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
         this.bdSeqCounter.next();
         setWillMessage();
+        logger.debug("bdSeq: {}", this.bdSeqCounter.getCurrent());
 
         try {
             long randomDelay = this.randomDelayGenerator.nextInt(5000);

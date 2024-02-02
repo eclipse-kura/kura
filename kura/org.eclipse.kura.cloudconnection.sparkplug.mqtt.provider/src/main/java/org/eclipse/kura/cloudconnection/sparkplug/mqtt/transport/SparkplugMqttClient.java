@@ -67,13 +67,214 @@ public class SparkplugMqttClient {
 
     private SslManagerService sslManagerService;
 
-    public enum SessionStatus {
-        TERMINATED,
-        ESTABILISHING,
-        ESTABILISHED
+    private SessionStatus sessionStatus = new Terminated();
+
+    /*
+     * State management
+     */
+
+    private abstract class SessionStatus {
+
+        public abstract SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException;
+
+        public abstract SessionStatus terminateSession(boolean shouldDisconnectClient, long quiesceTimeout);
+
+        public abstract SessionStatus confirmSession();
+
+        SessionStatus toEstabilishing(boolean shouldConnectClient) throws KuraConnectException {
+            try {
+                if (shouldConnectClient) {
+                    newClientConnection();
+                }
+
+                subscribe(SparkplugTopics.getNodeCommandTopic(SparkplugMqttClient.this.groupId,
+                        SparkplugMqttClient.this.nodeId), 1);
+
+                if (SparkplugMqttClient.this.primaryHostId.isPresent()) {
+                    subscribe(SparkplugTopics.getStateTopic(SparkplugMqttClient.this.primaryHostId.get()), 1);
+                } else {
+                    return toEstabilished();
+                }
+            } catch (MqttException | GeneralSecurityException | IOException e) {
+                SparkplugMqttClient.this.bdSeqCounter = new BdSeqCounter();
+                throw new KuraConnectException(e);
+            }
+
+            return new Estabilishing();
+        }
+
+        SessionStatus toTerminated(boolean shouldDisconnectClient, long quiesceTimeout) {
+            try {
+                SparkplugMqttClient.this.listeners
+                        .forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
+
+                if (SparkplugMqttClient.this.sessionStatus instanceof Estabilished) {
+                    sendEdgeNodeDeath();
+                }
+
+                if (shouldDisconnectClient) {
+                    disconnectClient(quiesceTimeout);
+                }
+
+                SparkplugMqttClient.this.listeners
+                        .forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
+            } catch (MqttException e) {
+                logger.error("Error terminating Sparkplug Edge Node session", e);
+                return SparkplugMqttClient.this.sessionStatus;
+            }
+
+            return new Terminated();
+        }
+
+        SessionStatus toEstabilished() {
+            sendEdgeNodeBirth();
+            SparkplugMqttClient.this.listeners
+                    .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
+            return new Estabilished();
+        }
+
+        private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
+            SparkplugMqttClient.this.bdSeqCounter.next();
+            setWillMessage();
+            logger.debug("bdSeq: {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
+
+            try {
+                long randomDelay = SparkplugMqttClient.this.randomDelayGenerator.nextInt(5000);
+                logger.info("Randomly delaying connect by {} ms", randomDelay);
+                Thread.sleep(randomDelay);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            SparkplugMqttClient.this.client = new MqttAsyncClient(getNextServer(), SparkplugMqttClient.this.clientId,
+                    new MemoryPersistence());
+            SparkplugMqttClient.this.client.setCallback(SparkplugMqttClient.this.callback);
+
+            IMqttToken token = SparkplugMqttClient.this.client.connect(SparkplugMqttClient.this.options);
+            token.waitForCompletion(SparkplugMqttClient.this.connectionTimeoutMs);
+
+            logger.debug("Client connected");
+        }
+
+        private void disconnectClient(long quiesceTimeout) throws MqttException {
+            if (SparkplugMqttClient.this.client.isConnected()) {
+                IMqttToken token = SparkplugMqttClient.this.client.disconnect(quiesceTimeout);
+                token.waitForCompletion(SparkplugMqttClient.this.connectionTimeoutMs);
+            }
+
+            logger.debug("Client disconnected");
+        }
+
+        private void setWillMessage() {
+            String topic = SparkplugTopics.getNodeDeathTopic(SparkplugMqttClient.this.groupId,
+                    SparkplugMqttClient.this.nodeId);
+            byte[] payload = SparkplugPayloads.getNodeDeathPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent());
+            SparkplugMqttClient.this.options.setWill(topic, payload, 1, false);
+        }
+
+        private void sendEdgeNodeBirth() {
+            String topic = SparkplugTopics.getNodeBirthTopic(SparkplugMqttClient.this.groupId,
+                    SparkplugMqttClient.this.nodeId);
+            byte[] payload = SparkplugPayloads.getNodeBirthPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent(),
+                    0);
+            publish(topic, payload, 0, false);
+            logger.debug("Published Edge Node BIRTH with bdSeq {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
+        }
+
+        private void sendEdgeNodeDeath() {
+            String topic = SparkplugTopics.getNodeDeathTopic(SparkplugMqttClient.this.groupId,
+                    SparkplugMqttClient.this.nodeId);
+            byte[] payload = SparkplugPayloads.getNodeDeathPayload(SparkplugMqttClient.this.bdSeqCounter.getCurrent());
+            publish(topic, payload, 0, false);
+            logger.debug("Published Edge Node DEATH with bdSeq {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
+        }
+
+        private String getNextServer() throws GeneralSecurityException, IOException {
+            String server;
+            if (SparkplugMqttClient.this.serversIterator.hasNext()) {
+                server = SparkplugMqttClient.this.serversIterator.next();
+            } else {
+                SparkplugMqttClient.this.serversIterator = SparkplugMqttClient.this.servers.iterator();
+                server = SparkplugMqttClient.this.serversIterator.next();
+            }
+
+            setSocketFactory(server);
+
+            logger.info("Selecting next server {} from {}", server, SparkplugMqttClient.this.servers);
+            return server;
+        }
+
+        private void setSocketFactory(String server) throws GeneralSecurityException, IOException {
+            if (server.startsWith("ssl")) {
+                SparkplugMqttClient.this.options
+                        .setSocketFactory(SparkplugMqttClient.this.sslManagerService.getSSLSocketFactory());
+            } else {
+                SparkplugMqttClient.this.options.setSocketFactory(SocketFactory.getDefault());
+            }
+        }
+
     }
 
-    private SessionStatus sessionStatus = SessionStatus.TERMINATED;
+    private class Terminated extends SessionStatus {
+
+        @Override
+        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+            return toEstabilishing(shouldConnectClient);
+        }
+
+        @Override
+        public SessionStatus terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
+            return this;
+        }
+
+        @Override
+        public SessionStatus confirmSession() {
+            return this;
+        }
+
+    }
+
+    private class Estabilishing extends SessionStatus {
+
+        @Override
+        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+            return this;
+        }
+
+        @Override
+        public SessionStatus terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
+            return toTerminated(shouldDisconnectClient, quiesceTimeout);
+        }
+
+        @Override
+        public SessionStatus confirmSession() {
+            return toEstabilished();
+        }
+
+    }
+
+    private class Estabilished extends SessionStatus {
+
+        @Override
+        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+            return this;
+        }
+
+        @Override
+        public SessionStatus terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
+            return toTerminated(shouldDisconnectClient, quiesceTimeout);
+        }
+
+        @Override
+        public SessionStatus confirmSession() {
+            return toEstabilished();
+        }
+
+    }
+
+    /*
+     * Public methods
+     */
 
     public SparkplugMqttClient(SparkplugDataTransportOptions options, MqttCallback callback,
             Set<DataTransportListener> listeners, SslManagerService sslManagerService) {
@@ -98,68 +299,27 @@ public class SparkplugMqttClient {
     }
 
     public synchronized boolean isSessionEstabilished() {
-        return this.sessionStatus == SessionStatus.ESTABILISHED && Objects.nonNull(this.client)
+        return this.sessionStatus instanceof Estabilished && Objects.nonNull(this.client)
                 && this.client.isConnected();
     }
 
-    public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
-        if (this.sessionStatus == SessionStatus.TERMINATED) {
-            try {
-                updateSessionStatus(SessionStatus.TERMINATED, SessionStatus.ESTABILISHING);
-
-                if (shouldConnectClient) {
-                    newClientConnection();
-                }
-
-                subscribe(SparkplugTopics.getNodeCommandTopic(this.groupId, this.nodeId), 1);
-
-                if (this.primaryHostId.isPresent()) {
-                    subscribe(SparkplugTopics.getStateTopic(this.primaryHostId.get()), 1);
-                } else {
-                    confirmSession();
-                }
-            } catch (MqttException | GeneralSecurityException | IOException e) {
-                this.sessionStatus = SessionStatus.TERMINATED;
-                this.bdSeqCounter = new BdSeqCounter();
-                throw new KuraConnectException(e);
-            }
-        } else {
-            logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHING);
-        }
+    public synchronized void handleConnectionLost() {
+        doSessionTransition(new Terminated());
     }
 
+    public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+        logger.debug("Requested session estabilishment");
+        doSessionTransition(this.sessionStatus.estabilishSession(shouldConnectClient));
+    }
+    
     public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {
-        if (this.sessionStatus == SessionStatus.ESTABILISHED || this.sessionStatus == SessionStatus.ESTABILISHING) {
-            try {
-                this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
-
-                if (this.sessionStatus == SessionStatus.ESTABILISHED) {
-                    sendEdgeNodeDeath();
-                }
-
-                if (shouldDisconnectClient) {
-                    disconnectClient(quiesceTimeout);
-                }
-
-                updateSessionStatus(this.sessionStatus, SessionStatus.TERMINATED);
-                this.listeners.forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
-            } catch (MqttException e) {
-                logger.error("Error terminating Sparkplug Edge Node session", e);
-            }
-        } else {
-            logInvalidStateTransition(this.sessionStatus, SessionStatus.TERMINATED);
-        }
+        logger.debug("Requested session termination");
+        doSessionTransition(this.sessionStatus.terminateSession(shouldDisconnectClient, quiesceTimeout));
     }
 
     public synchronized void confirmSession() {
-        if (this.sessionStatus == SessionStatus.ESTABILISHING) {
-            sendEdgeNodeBirth();
-            updateSessionStatus(SessionStatus.ESTABILISHING, SessionStatus.ESTABILISHED);
-            this.listeners
-                    .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
-        } else {
-            logInvalidStateTransition(this.sessionStatus, SessionStatus.ESTABILISHED);
-        }
+        logger.debug("Requested session confirmation");
+        doSessionTransition(this.sessionStatus.confirmSession());
     }
 
     public synchronized IMqttDeliveryToken publish(String topic, byte[] payload, int qos, boolean isRetained) {
@@ -205,87 +365,14 @@ public class SparkplugMqttClient {
      * Private methods
      */
 
-    private String getNextServer() throws GeneralSecurityException, IOException {
-        String server;
-        if (this.serversIterator.hasNext()) {
-            server = this.serversIterator.next();
-        } else {
-            this.serversIterator = this.servers.iterator();
-            server = this.serversIterator.next();
+    private void doSessionTransition(SessionStatus newStatus) {
+        String from = this.sessionStatus.getClass().getSimpleName();
+        String to = newStatus.getClass().getSimpleName();
+
+        if (!from.equals(to)) {
+            logger.info("Sparkplug session: {} -> {}", from, to);
+            this.sessionStatus = newStatus;
         }
-
-        setSocketFactory(server);
-
-        logger.info("Selecting next server {} from {}", server, this.servers);
-        return server;
-    }
-
-    private void setSocketFactory(String server) throws GeneralSecurityException, IOException {
-        if (server.startsWith("ssl")) {
-            this.options.setSocketFactory(this.sslManagerService.getSSLSocketFactory());
-        } else {
-            this.options.setSocketFactory(SocketFactory.getDefault());
-        }
-    }
-
-    private void setWillMessage() {
-        String topic = SparkplugTopics.getNodeDeathTopic(this.groupId, this.nodeId);
-        byte[] payload = SparkplugPayloads.getNodeDeathPayload(this.bdSeqCounter.getCurrent());
-        this.options.setWill(topic, payload, 1, false);
-    }
-
-    private void sendEdgeNodeBirth() {
-        String topic = SparkplugTopics.getNodeBirthTopic(this.groupId, this.nodeId);
-        byte[] payload = SparkplugPayloads.getNodeBirthPayload(this.bdSeqCounter.getCurrent(), 0);
-        publish(topic, payload, 0, false);
-        logger.debug("Published Edge Node BIRTH with bdSeq {}", this.bdSeqCounter.getCurrent());
-    }
-
-    private void sendEdgeNodeDeath() {
-        String topic = SparkplugTopics.getNodeDeathTopic(this.groupId, this.nodeId);
-        byte[] payload = SparkplugPayloads.getNodeDeathPayload(this.bdSeqCounter.getCurrent());
-        publish(topic, payload, 0, false);
-        logger.debug("Published Edge Node DEATH with bdSeq {}", this.bdSeqCounter.getCurrent());
-    }
-
-    private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
-        this.bdSeqCounter.next();
-        setWillMessage();
-        logger.debug("bdSeq: {}", this.bdSeqCounter.getCurrent());
-
-        try {
-            long randomDelay = this.randomDelayGenerator.nextInt(5000);
-            logger.info("Randomly delaying connect by {} ms", randomDelay);
-            Thread.sleep(randomDelay);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        this.client = new MqttAsyncClient(getNextServer(), this.clientId, new MemoryPersistence());
-        this.client.setCallback(this.callback);
-
-        IMqttToken token = this.client.connect(this.options);
-        token.waitForCompletion(this.connectionTimeoutMs);
-
-        logger.debug("Client connected");
-    }
-
-    private void disconnectClient(long quiesceTimeout) throws MqttException {
-        if (this.client.isConnected()) {
-            IMqttToken token = this.client.disconnect(quiesceTimeout);
-            token.waitForCompletion(this.connectionTimeoutMs);
-        }
-
-        logger.debug("Client disconnected");
-    }
-
-    private void updateSessionStatus(SessionStatus from, SessionStatus to) {
-        logger.info("Sparkplug Session: {} -> {}", from, to);
-        this.sessionStatus = to;
-    }
-
-    private void logInvalidStateTransition(SessionStatus from, SessionStatus to) {
-        logger.debug("Invalid state transition {} -> {}, ignoring request", from, to);
     }
 
     private synchronized void dispatchMessage(String topic, MqttMessage message) {

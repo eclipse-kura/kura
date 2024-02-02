@@ -230,8 +230,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     @Override
     public void connectionLost(Throwable arg0) {
         logger.info("{} - Connection lost", this.kuraServicePid);
+        this.client.handleConnectionLost();
         this.dataTransportListeners.forEach(listener -> callSafely(listener::onConnectionLost, arg0));
-
     }
 
     @Override

@@ -75,7 +75,7 @@ public class SparkplugMqttClient {
 
     private abstract class SessionStatus {
 
-        public abstract SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException;
+        public abstract SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException;
 
         public abstract SessionStatus terminateSession(boolean shouldDisconnectClient, long quiesceTimeout);
 
@@ -218,7 +218,7 @@ public class SparkplugMqttClient {
     private class Terminated extends SessionStatus {
 
         @Override
-        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+        public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
             return toEstabilishing(shouldConnectClient);
         }
 
@@ -237,7 +237,7 @@ public class SparkplugMqttClient {
     private class Estabilishing extends SessionStatus {
 
         @Override
-        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+        public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
             return this;
         }
 
@@ -256,7 +256,7 @@ public class SparkplugMqttClient {
     private class Estabilished extends SessionStatus {
 
         @Override
-        public SessionStatus estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
+        public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
             return this;
         }
 
@@ -309,7 +309,7 @@ public class SparkplugMqttClient {
 
     public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
         logger.debug("Requested session estabilishment");
-        doSessionTransition(this.sessionStatus.estabilishSession(shouldConnectClient));
+        doSessionTransition(this.sessionStatus.establishSession(shouldConnectClient));
     }
     
     public synchronized void terminateSession(boolean shouldDisconnectClient, long quiesceTimeout) {

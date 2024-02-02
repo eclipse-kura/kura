@@ -81,7 +81,7 @@ public class SparkplugMqttClient {
 
         public abstract SessionStatus confirmSession();
 
-        SessionStatus toEstabilishing(boolean shouldConnectClient) throws KuraConnectException {
+        SessionStatus toEstablishing(boolean shouldConnectClient) throws KuraConnectException {
             try {
                 if (shouldConnectClient) {
                     newClientConnection();
@@ -93,14 +93,14 @@ public class SparkplugMqttClient {
                 if (SparkplugMqttClient.this.primaryHostId.isPresent()) {
                     subscribe(SparkplugTopics.getStateTopic(SparkplugMqttClient.this.primaryHostId.get()), 1);
                 } else {
-                    return toEstabilished();
+                    return toEstablished();
                 }
             } catch (MqttException | GeneralSecurityException | IOException e) {
                 SparkplugMqttClient.this.bdSeqCounter = new BdSeqCounter();
                 throw new KuraConnectException(e);
             }
 
-            return new Estabilishing();
+            return new Establishing();
         }
 
         SessionStatus toTerminated(boolean shouldDisconnectClient, long quiesceTimeout) {
@@ -108,7 +108,7 @@ public class SparkplugMqttClient {
                 SparkplugMqttClient.this.listeners
                         .forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
 
-                if (SparkplugMqttClient.this.sessionStatus instanceof Estabilished) {
+                if (SparkplugMqttClient.this.sessionStatus instanceof Established) {
                     sendEdgeNodeDeath();
                 }
 
@@ -126,11 +126,11 @@ public class SparkplugMqttClient {
             return new Terminated();
         }
 
-        SessionStatus toEstabilished() {
+        SessionStatus toEstablished() {
             sendEdgeNodeBirth();
             SparkplugMqttClient.this.listeners
                     .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
-            return new Estabilished();
+            return new Established();
         }
 
         private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
@@ -219,7 +219,7 @@ public class SparkplugMqttClient {
 
         @Override
         public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
-            return toEstabilishing(shouldConnectClient);
+            return toEstablishing(shouldConnectClient);
         }
 
         @Override
@@ -234,7 +234,7 @@ public class SparkplugMqttClient {
 
     }
 
-    private class Estabilishing extends SessionStatus {
+    private class Establishing extends SessionStatus {
 
         @Override
         public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
@@ -248,12 +248,12 @@ public class SparkplugMqttClient {
 
         @Override
         public SessionStatus confirmSession() {
-            return toEstabilished();
+            return toEstablished();
         }
 
     }
 
-    private class Estabilished extends SessionStatus {
+    private class Established extends SessionStatus {
 
         @Override
         public SessionStatus establishSession(boolean shouldConnectClient) throws KuraConnectException {
@@ -267,7 +267,7 @@ public class SparkplugMqttClient {
 
         @Override
         public SessionStatus confirmSession() {
-            return toEstabilished();
+            return toEstablished();
         }
 
     }
@@ -298,8 +298,8 @@ public class SparkplugMqttClient {
                 this.servers, this.clientId, this.groupId, this.nodeId, this.primaryHostId, this.connectionTimeoutMs);
     }
 
-    public synchronized boolean isSessionEstabilished() {
-        return this.sessionStatus instanceof Estabilished && Objects.nonNull(this.client)
+    public synchronized boolean isSessionEstablished() {
+        return this.sessionStatus instanceof Established && Objects.nonNull(this.client)
                 && this.client.isConnected();
     }
 
@@ -307,8 +307,8 @@ public class SparkplugMqttClient {
         doSessionTransition(new Terminated());
     }
 
-    public synchronized void estabilishSession(boolean shouldConnectClient) throws KuraConnectException {
-        logger.debug("Requested session estabilishment");
+    public synchronized void establishSession(boolean shouldConnectClient) throws KuraConnectException {
+        logger.debug("Requested session establishment");
         doSessionTransition(this.sessionStatus.establishSession(shouldConnectClient));
     }
     
@@ -354,7 +354,7 @@ public class SparkplugMqttClient {
     }
 
     public synchronized String getConnectedServer() {
-        return isSessionEstabilished() ? this.client.getCurrentServerURI() : this.servers.toString();
+        return isSessionEstablished() ? this.client.getCurrentServerURI() : this.servers.toString();
     }
 
     public synchronized Runnable getMessageDispatcher(String topic, MqttMessage message) {
@@ -407,7 +407,7 @@ public class SparkplugMqttClient {
             } else {
                 logger.info("Primary Host Application is offline");
                 terminateSession(true, 0);
-                estabilishSession(true);
+                establishSession(true);
             }
         }
     }
@@ -423,7 +423,7 @@ public class SparkplugMqttClient {
                 logger.debug("{} requested", SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME);
 
                 terminateSession(false, 0);
-                estabilishSession(false);
+                establishSession(false);
             }
         } catch (InvalidProtocolBufferException e) {
             logger.error("Error processing payload for NCMD message", e);

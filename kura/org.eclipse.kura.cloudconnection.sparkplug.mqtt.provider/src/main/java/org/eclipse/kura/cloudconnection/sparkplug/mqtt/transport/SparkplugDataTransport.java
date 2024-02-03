@@ -140,7 +140,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             throw new IllegalStateException("MQTT client is already connected");
         }
 
-        this.client.estabilishSession(true);
+        this.client.establishSession(true);
 
         stopExecutorService();
         this.executorService = Executors.newSingleThreadExecutor();
@@ -149,7 +149,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
 
     @Override
     public boolean isConnected() {
-        return Objects.nonNull(this.client) && this.client.isSessionEstabilished();
+        return Objects.nonNull(this.client) && this.client.isSessionEstablished();
     }
 
     @Override
@@ -230,8 +230,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     @Override
     public void connectionLost(Throwable arg0) {
         logger.info("{} - Connection lost", this.kuraServicePid);
+        this.client.handleConnectionLost();
         this.dataTransportListeners.forEach(listener -> callSafely(listener::onConnectionLost, arg0));
-
     }
 
     @Override

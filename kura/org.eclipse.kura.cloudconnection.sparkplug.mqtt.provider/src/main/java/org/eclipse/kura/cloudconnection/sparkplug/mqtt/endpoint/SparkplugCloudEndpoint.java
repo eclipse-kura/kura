@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
@@ -34,6 +33,7 @@ import org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.InvocationUtils;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -220,7 +220,8 @@ public class SparkplugCloudEndpoint
     public void onConnectionEstablished() {
         logger.debug("{} - Connection estabilished", this.kuraServicePid);
 
-        this.cloudConnectionListeners.forEach(listener -> callSafely(listener::onConnectionEstablished));
+        this.cloudConnectionListeners
+                .forEach(listener -> InvocationUtils.callSafely(listener::onConnectionEstablished));
         postConnectionChangeEvent(true);
 
         this.seqCounter = new SeqCounter();
@@ -236,14 +237,14 @@ public class SparkplugCloudEndpoint
     @Override
     public void onDisconnected() {
         logger.debug("{} - Disconnected", this.kuraServicePid);
-        this.cloudConnectionListeners.forEach(listener -> callSafely(listener::onDisconnected));
+        this.cloudConnectionListeners.forEach(listener -> InvocationUtils.callSafely(listener::onDisconnected));
         postConnectionChangeEvent(false);
     }
 
     @Override
     public void onConnectionLost(Throwable cause) {
         logger.debug("{} - Connection lost", this.kuraServicePid);
-        this.cloudConnectionListeners.forEach(listener -> callSafely(listener::onConnectionLost));
+        this.cloudConnectionListeners.forEach(listener -> InvocationUtils.callSafely(listener::onConnectionLost));
         postConnectionChangeEvent(false);
     }
 
@@ -262,7 +263,8 @@ public class SparkplugCloudEndpoint
     public void onMessageConfirmed(int messageId, String topic) {
         logger.debug("{} - Message with ID {} confirmed", this.kuraServicePid, messageId);
         this.cloudDeliveryListeners
-                .forEach(listener -> callSafely(listener::onMessageConfirmed, String.valueOf(messageId)));
+                .forEach(listener -> InvocationUtils.callSafely(listener::onMessageConfirmed,
+                        String.valueOf(messageId)));
     }
 
     /*
@@ -279,22 +281,6 @@ public class SparkplugCloudEndpoint
                 : new CloudConnectionLostEvent(eventProperties);
 
         this.eventAdmin.postEvent(event);
-    }
-
-    private void callSafely(Runnable f) {
-        try {
-            f.run();
-        } catch (Exception e) {
-            logger.warn("{} - An error occured in listener {}", this.kuraServicePid, f.getClass().getName(), e);
-        }
-    }
-
-    private <T> void callSafely(Consumer<T> f, T argument) {
-        try {
-            f.accept(argument);
-        } catch (Exception e) {
-            logger.error("{} - An error occured in listener {}", this.kuraServicePid, f.getClass().getName(), e);
-        }
     }
 
 }

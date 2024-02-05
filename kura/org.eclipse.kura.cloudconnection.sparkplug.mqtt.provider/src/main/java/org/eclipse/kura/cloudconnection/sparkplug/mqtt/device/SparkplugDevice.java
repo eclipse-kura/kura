@@ -25,22 +25,17 @@ import java.util.concurrent.Executors;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
-import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.InvocationUtils;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.SparkplugCloudEndpointTracker;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +48,7 @@ public class SparkplugDevice
     public static final String KEY_DEVICE_ID = "device.id";
 
     private String deviceId;
-    private ServiceTracker<CloudConnectionManager, CloudConnectionManager> cloudConnectionManagerTracker;
+    private SparkplugCloudEndpointTracker endpointTracker;
     private Optional<SparkplugCloudEndpoint> sparkplugCloudEndpoint = Optional.empty();
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
     private final Set<CloudDeliveryListener> cloudDeliveryListeners = new CopyOnWriteArraySet<>();
@@ -66,18 +61,12 @@ public class SparkplugDevice
 
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
-        String selectedCloudEndpointPid = (String) properties
+        String endpointPid = (String) properties
                 .get(CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value());
 
-        String filterString = String.format("(&(%s=%s)(kura.service.pid=%s))", Constants.OBJECTCLASS,
-                CloudConnectionManager.class.getName(), selectedCloudEndpointPid);
-
-        final BundleContext context = componentContext.getBundleContext();
-        final Filter filter = context.createFilter(filterString);
-        this.cloudConnectionManagerTracker = new ServiceTracker<>(context, filter,
-                new CloudConnectionManagerTrackerCustomizer(context));
-
-        this.executorService.submit(() -> this.cloudConnectionManagerTracker.open());
+        this.endpointTracker = new SparkplugCloudEndpointTracker(componentContext.getBundleContext(),
+                this::setSparkplugCloudEndpoint, this::unsetSparkplugCloudEndpoint, endpointPid);
+        this.endpointTracker.startEndpointTracker();
 
         update(properties);
     }
@@ -96,9 +85,7 @@ public class SparkplugDevice
     public void deactivate() {
         logger.info("Sparkplug Device {} - Deactivating", this.deviceId);
 
-        if (Objects.nonNull(this.cloudConnectionManagerTracker)) {
-            this.cloudConnectionManagerTracker.close();
-        }
+        this.endpointTracker.stopEndpointTracker();
 
         logger.debug("Sparkplug Device {} - Shutting down executor service", this.deviceId);
         this.executorService.shutdownNow();
@@ -180,64 +167,26 @@ public class SparkplugDevice
 
     @Override
     public void onMessageConfirmed(final String messageId) {
-        this.cloudDeliveryListeners
-                .forEach(listener -> this.executorService.execute(() -> listener.onMessageConfirmed(messageId)));
+        this.cloudDeliveryListeners.forEach(listener -> this.executorService
+                .execute(() -> InvocationUtils.callSafely(listener::onMessageConfirmed, messageId)));
     }
 
     /*
      * Utils
      */
 
-    synchronized void setSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
+    private synchronized void setSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
         this.sparkplugCloudEndpoint = Optional.of(endpoint);
         this.sparkplugCloudEndpoint.get().registerCloudConnectionListener(this);
         this.sparkplugCloudEndpoint.get().registerCloudDeliveryListener(this);
     }
 
-    synchronized void unsetSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
+    private synchronized void unsetSparkplugCloudEndpoint(SparkplugCloudEndpoint endpoint) {
         if (this.sparkplugCloudEndpoint.isPresent() && this.sparkplugCloudEndpoint.get() == endpoint) {
             this.sparkplugCloudEndpoint.get().unregisterCloudConnectionListener(this);
             this.sparkplugCloudEndpoint.get().unregisterCloudDeliveryListener(this);
             this.sparkplugCloudEndpoint = Optional.empty();
         }
-    }
-
-    private class CloudConnectionManagerTrackerCustomizer
-            implements ServiceTrackerCustomizer<CloudConnectionManager, CloudConnectionManager> {
-
-        private final BundleContext context;
-
-        public CloudConnectionManagerTrackerCustomizer(BundleContext context) {
-            this.context = context;
-        }
-
-        @Override
-        public synchronized CloudConnectionManager addingService(
-                final ServiceReference<CloudConnectionManager> reference) {
-            CloudConnectionManager cloudConnectionManager = this.context.getService(reference);
-
-            if (cloudConnectionManager instanceof SparkplugCloudEndpoint) {
-                setSparkplugCloudEndpoint((SparkplugCloudEndpoint) cloudConnectionManager);
-                return cloudConnectionManager;
-            } else {
-                this.context.ungetService(reference);
-            }
-
-            return null;
-        }
-
-        @Override
-        public synchronized void removedService(final ServiceReference<CloudConnectionManager> reference,
-                final CloudConnectionManager service) {
-            unsetSparkplugCloudEndpoint((SparkplugCloudEndpoint) service);
-        }
-
-        @Override
-        public synchronized void modifiedService(final ServiceReference<CloudConnectionManager> reference,
-                final CloudConnectionManager service) {
-            // Not needed
-        }
-
     }
 
 }

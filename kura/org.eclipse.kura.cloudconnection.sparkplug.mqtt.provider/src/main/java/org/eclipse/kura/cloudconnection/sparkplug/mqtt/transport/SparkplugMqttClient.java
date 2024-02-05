@@ -27,6 +27,7 @@ import javax.net.SocketFactory;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.InvocationUtils;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -106,7 +107,7 @@ public class SparkplugMqttClient {
         SessionStatus toTerminated(boolean shouldDisconnectClient, long quiesceTimeout) {
             try {
                 SparkplugMqttClient.this.listeners
-                        .forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnecting));
+                        .forEach(listener -> InvocationUtils.callSafely(listener::onDisconnecting));
 
                 if (SparkplugMqttClient.this.sessionStatus instanceof Established) {
                     sendEdgeNodeDeath();
@@ -117,7 +118,7 @@ public class SparkplugMqttClient {
                 }
 
                 SparkplugMqttClient.this.listeners
-                        .forEach(listener -> SparkplugDataTransport.callSafely(listener::onDisconnected));
+                        .forEach(listener -> InvocationUtils.callSafely(listener::onDisconnected));
             } catch (MqttException e) {
                 logger.error("Error terminating Sparkplug Edge Node session", e);
                 return SparkplugMqttClient.this.sessionStatus;
@@ -129,7 +130,7 @@ public class SparkplugMqttClient {
         SessionStatus toEstablished() {
             sendEdgeNodeBirth();
             SparkplugMqttClient.this.listeners
-                    .forEach(listener -> SparkplugDataTransport.callSafely(listener::onConnectionEstablished, true));
+                    .forEach(listener -> InvocationUtils.callSafely(listener::onConnectionEstablished, true));
             return new Established();
         }
 

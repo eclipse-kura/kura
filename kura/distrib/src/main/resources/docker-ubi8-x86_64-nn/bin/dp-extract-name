@@ -3,13 +3,9 @@
 jar_file="$1"
 property_name="DeploymentPackage-SymbolicName"
 
-# Extract the manifest file from the JAR
 jar xf "$jar_file" META-INF/MANIFEST.MF
-
-# Read the manifest file and extract the value of the specified property
 property_value=$(grep -oP "(?<=^$property_name: ).*" META-INF/MANIFEST.MF)
 
-# Clean up the extracted manifest file
 rm META-INF/MANIFEST.MF
 
 echo "$property_value";

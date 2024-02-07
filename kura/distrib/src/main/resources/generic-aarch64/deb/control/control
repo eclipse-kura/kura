@@ -14,7 +14,7 @@ Package: kura
 Version: [[project.version]]
 Section: misc
 Priority: low
-Depends: openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temurin-17-jdk,
+Depends: openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | temurin-8-jdk,
  setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
  polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,

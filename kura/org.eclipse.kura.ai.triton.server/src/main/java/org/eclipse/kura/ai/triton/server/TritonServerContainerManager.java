@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -251,6 +251,7 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         entrypointOverride.add("tritonserver");
         entrypointOverride.add("--model-repository=" + TRITON_INTERNAL_MODEL_REPO);
         entrypointOverride.add("--model-control-mode=explicit");
+        entrypointOverride.add("--backend-directory=" + this.options.getBackendsPath());
         if (!this.options.getBackendsConfigs().isEmpty()) {
             this.options.getBackendsConfigs().forEach(config -> entrypointOverride.add("--backend-config=" + config));
         }

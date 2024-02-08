@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,15 @@
             description="A comma separated list of inference model names that the server will load.">
         </AD>
 
+        <AD id="local.backends.path"
+            name="Local backends path"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="Specify the path on the filesystem where the backends are stored.">
+         </AD>
+       
         <AD id="local.backends.config"
             name="Optional configuration for the local backends"
             type="String"
@@ -121,7 +130,7 @@
         
         <AD id="devices"
             name="Devices"
-            description="Specify the devices the Triton container can use."
+            description="Specify the devices the Triton container can use as a comma separated list of device paths."
             type="String"
             cardinality="1"
             required="false"

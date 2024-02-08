@@ -296,7 +296,7 @@ public class ContainerConfiguration {
     /**
      * Return the runtime option to be assigned to the container.
      *
-     * @return
+     * @return the optional runtime string used by the container
      * @since 2.7
      */
     public Optional<String> getRuntime() {
@@ -397,8 +397,7 @@ public class ContainerConfiguration {
          * as the number of elements set with {@link setInternalPorts}.
          *
          * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for
-         *             network
-         *             protocol to be specified in a port mapping.
+         *             network protocol to be specified in a port mapping.
          */
         @Deprecated
         public ContainerConfigurationBuilder setExternalPorts(List<Integer> containerPortsExternal) {
@@ -415,8 +414,7 @@ public class ContainerConfiguration {
          * the number of elements set with {@link setExternalPorts}.
          *
          * @deprecated since 2.5. Please use {@link setContainerPorts} as it allows for
-         *             network
-         *             protocol to be specified in a port mapping.
+         *             network protocol to be specified in a port mapping.
          *
          */
         @Deprecated

@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraDisconnectException;
@@ -33,6 +35,7 @@ import org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugMessageType;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugPayloads;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.message.SparkplugTopics;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.InvocationUtils;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -43,6 +46,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class SparkplugCloudEndpoint
         implements ConfigurableComponent, CloudEndpoint, CloudConnectionManager, DataServiceListener {
@@ -56,6 +61,8 @@ public class SparkplugCloudEndpoint
     private Set<CloudDeliveryListener> cloudDeliveryListeners = new HashSet<>();
     private String kuraServicePid;
     private SeqCounter seqCounter = new SeqCounter();
+    private SubscriptionsMap subscriptions = new SubscriptionsMap();
+    private ExecutorService executorService = Executors.newCachedThreadPool();
 
     /*
      * Activation APIs
@@ -99,6 +106,8 @@ public class SparkplugCloudEndpoint
         } catch (KuraDisconnectException e) {
             logger.info("{} - Error disconnecting", this.kuraServicePid, e);
         }
+
+        this.executorService.shutdownNow();
 
         logger.info("{} - Deactivated", this.kuraServicePid);
     }
@@ -155,14 +164,22 @@ public class SparkplugCloudEndpoint
     @Override
     public void registerSubscriber(Map<String, Object> subscriptionProperties,
             CloudSubscriberListener cloudSubscriberListener) {
-        // TODO Auto-generated method stub
+        String topicFilter = (String) subscriptionProperties.get(SparkplugSubscriber.KEY_TOPIC_FILTER);
+        int qos = (int) subscriptionProperties.get(SparkplugSubscriber.KEY_QOS);
 
+        this.subscriptions.add(topicFilter, qos, cloudSubscriberListener);
+        subscribeIfConnected(topicFilter, qos);
+
+        logger.info("{} - Added subscription for {}", this.kuraServicePid,
+                cloudSubscriberListener.getClass().getSimpleName());
     }
 
     @Override
     public void unregisterSubscriber(CloudSubscriberListener cloudSubscriberListener) {
-        // TODO Auto-generated method stub
+        this.subscriptions.remove(cloudSubscriberListener).forEach(this::unsubscribeIfConnected);
 
+        logger.info("{} - Removed subscription for {}", this.kuraServicePid,
+                cloudSubscriberListener.getClass().getSimpleName());
     }
 
     @Override
@@ -226,7 +243,8 @@ public class SparkplugCloudEndpoint
 
         this.seqCounter = new SeqCounter();
 
-        // TO DO: init subscriptions
+        this.subscriptions.getSubscriptionRecords()
+                .forEach(subscription -> subscribeIfConnected(subscription.getTopicFilter(), subscription.getQos()));
     }
 
     @Override
@@ -250,8 +268,18 @@ public class SparkplugCloudEndpoint
 
     @Override
     public void onMessageArrived(String topic, byte[] payload, int qos, boolean retained) {
-        logger.debug("{} - Message arrived, forwarding to registered subscribers", this.kuraServicePid);
-        // TODO
+        logger.debug("{} - Message arrived on topic {}, forwarding to registered subscribers", this.kuraServicePid,
+                topic);
+
+        for (CloudSubscriberListener listener : this.subscriptions.getMatchingListeners(topic, qos)) {
+            try {
+                KuraMessage message = new KuraMessage(SparkplugPayloads.getKuraPayload(payload));
+
+                this.executorService.execute(() -> InvocationUtils.callSafely(listener::onMessageArrived, message));
+            } catch (InvalidProtocolBufferException e) {
+                logger.error("{} - Error parsing received SparkplugPayload to KuraPayload", this.kuraServicePid, e);
+            }
+        }
     }
 
     @Override
@@ -262,9 +290,8 @@ public class SparkplugCloudEndpoint
     @Override
     public void onMessageConfirmed(int messageId, String topic) {
         logger.debug("{} - Message with ID {} confirmed", this.kuraServicePid, messageId);
-        this.cloudDeliveryListeners
-                .forEach(listener -> InvocationUtils.callSafely(listener::onMessageConfirmed,
-                        String.valueOf(messageId)));
+        this.cloudDeliveryListeners.forEach(
+                listener -> InvocationUtils.callSafely(listener::onMessageConfirmed, String.valueOf(messageId)));
     }
 
     /*
@@ -281,6 +308,26 @@ public class SparkplugCloudEndpoint
                 : new CloudConnectionLostEvent(eventProperties);
 
         this.eventAdmin.postEvent(event);
+    }
+
+    private synchronized void subscribeIfConnected(String topicFilter, int qos) {
+        try {
+            if (isConnected()) {
+                this.dataService.subscribe(topicFilter, qos);
+            }
+        } catch (KuraException e) {
+            logger.error("{} - Error subscribing to topic " + topicFilter + " with QoS " + qos, this.kuraServicePid, e);
+        }
+    }
+
+    private synchronized void unsubscribeIfConnected(String topic) {
+        try {
+            if (isConnected()) {
+                this.dataService.unsubscribe(topic);
+            }
+        } catch (KuraException e) {
+            logger.error("{} - Error unsubscribing from topic {}", this.kuraServicePid, topic);
+        }
     }
 
 }

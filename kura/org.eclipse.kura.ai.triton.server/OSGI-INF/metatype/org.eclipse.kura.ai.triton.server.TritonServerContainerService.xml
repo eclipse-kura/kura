@@ -77,7 +77,7 @@
             name="Local backends path"
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
             default=""
             description="Specify the path on the filesystem where the backends are stored.">
          </AD>

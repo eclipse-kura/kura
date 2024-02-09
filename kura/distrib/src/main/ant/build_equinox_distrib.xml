@@ -378,7 +378,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+IgnoreUnrecognizedVMOptions \
         ${OPEN_MODULE_OPTIONS} \
         --add-modules=ALL-SYSTEM \
-        -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n \
+        -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=n \
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \

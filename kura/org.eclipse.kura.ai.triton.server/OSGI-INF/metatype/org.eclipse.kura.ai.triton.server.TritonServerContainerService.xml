@@ -112,7 +112,7 @@
 
         <AD id="container.gpus"
             name="GPUs"
-            description="Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty."
+            description="Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty. If the Nvidia Container Runtime is used, leave the field empty."
             type="String"
             cardinality="1"
             required="false"
@@ -121,7 +121,7 @@
 
         <AD id="container.runtime"
             name="Runtime"
-            description="Specify the runtime the Triton container can use."
+            description="Specify the runtime the Triton container can use. If the container uses the Nvidia Container Runtime, set it to 'nvidia' and leave the GPUs field empty."
             type="String"
             cardinality="1"
             required="false"

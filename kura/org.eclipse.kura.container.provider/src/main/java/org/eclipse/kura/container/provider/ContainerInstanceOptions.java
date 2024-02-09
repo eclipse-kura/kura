@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2022 Eurotech and/or its affiliates and others
+  * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
   *
   * This program and the accompanying materials are made
   * available under the terms of the Eclipse Public License 2.0
@@ -200,20 +200,20 @@ public class ContainerInstanceOptions {
             String stringValue = value.get().trim();
             long result = 0;
             switch (stringValue.charAt(stringValue.length() - 1)) {
-                case 'b':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
-                    break;
-                case 'k':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
-                    break;
-                case 'm':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
-                    break;
-                case 'g':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
-                    break;
-                default:
-                    result = Long.parseLong(stringValue);
+            case 'b':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                break;
+            case 'k':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                break;
+            case 'm':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                break;
+            case 'g':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                break;
+            default:
+                result = Long.parseLong(stringValue);
             }
             return Optional.of(result);
         } else {
@@ -387,15 +387,15 @@ public class ContainerInstanceOptions {
             for (String portToken : ports.trim().replace(" ", "").split(",")) {
                 if (portToken.split(":").length > 1) {
                     switch (portToken.split(":")[1].toUpperCase().trim()) {
-                        case "UDP":
-                            tempArray.add(PortInternetProtocol.UDP);
-                            break;
-                        case "SCTP":
-                            tempArray.add(PortInternetProtocol.SCTP);
-                            break;
-                        default:
-                            tempArray.add(PortInternetProtocol.TCP);
-                            break;
+                    case "UDP":
+                        tempArray.add(PortInternetProtocol.UDP);
+                        break;
+                    case "SCTP":
+                        tempArray.add(PortInternetProtocol.SCTP);
+                        break;
+                    default:
+                        tempArray.add(PortInternetProtocol.TCP);
+                        break;
                     }
                 } else {
                     // if setting is not used add TCP by default.

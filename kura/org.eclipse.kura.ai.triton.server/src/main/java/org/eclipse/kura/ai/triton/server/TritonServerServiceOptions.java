@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.triton.server;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -265,20 +265,20 @@ public class TritonServerServiceOptions {
             String stringValue = value.get().trim();
             long result = 0;
             switch (stringValue.charAt(stringValue.length() - 1)) {
-                case 'b':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
-                    break;
-                case 'k':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
-                    break;
-                case 'm':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
-                    break;
-                case 'g':
-                    result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
-                    break;
-                default:
-                    result = Long.parseLong(stringValue);
+            case 'b':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                break;
+            case 'k':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                break;
+            case 'm':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                break;
+            case 'g':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                break;
+            default:
+                result = Long.parseLong(stringValue);
             }
             return Optional.of(result);
         } else {

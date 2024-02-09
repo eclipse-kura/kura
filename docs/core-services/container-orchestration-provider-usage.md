@@ -66,11 +66,13 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **CPUs (optional)** - This value specifies how many CPUs a container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource.
 
-- **GPUs (optional)** - This field configures how many Nvidia GPUs a container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave it empty. The Nvidia Container Toolkit must be installed on the system to correctly configure the service, otherwise the container will not start.
+- **GPUs (optional)** - This field configures how many Nvidia GPUs a container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave it empty. The Nvidia Container Toolkit must be installed on the system to correctly configure the service, otherwise the container will not start. If the Nvidia Container Runtime is used, leave the field empty.
 
 - **Volume Mount (optional)** - This field accepts a comma-separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
   
 - **Peripheral Device (optional)** - This field accepts a comma-separated list of device paths. This parameter allows devices to be passed through from the host to the container.
+
+- **Runtime (optional)**: The runtime used by the container. If the container uses the Nvidia Container Runtime, set it to _nvidia_ and leave the **GPUs** field empty.
 
 - **Networking Mode (optional)** - Use this field to specify what networking mode the container will use. Possible Drivers include: bridge, none, container:{container id}, host. Please note that this field is case-sensitive. This field can also be used to connect to any of the networks listed by the cli command ```docker network ls```.
 

@@ -79,7 +79,7 @@
             cardinality="0"
             required="false"
             default=""
-            description="Specify the path on the filesystem where the backends are stored.">
+            description="Specify the filesystem path where the backends are stored.">
          </AD>
        
         <AD id="local.backends.config"

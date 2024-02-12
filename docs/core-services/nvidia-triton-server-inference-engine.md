@@ -120,7 +120,7 @@ The parameters used to configure the Triton Service are the following:
 - **CPUs**: Specify how many CPUs the Triton container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource.
 - **GPUs**: Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty. If the Nvidia Container Runtime is used, leave the field empty.
 - **Runtime**: The runtime used by the Triton server container. If the container uses the Nvidia Container Runtime, set it to _nvidia_ and leave the **GPUs** field empty.
-- **Devices**: A comma-separated list of device paths passed to the Triton server container (i.e. /dev/video0).
+- **Devices**: A comma-separated list of device paths passed to the Triton server container (e.g. `/dev/video0`).
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 

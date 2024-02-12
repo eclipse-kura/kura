@@ -125,7 +125,7 @@
             
         <AD id="container.runtime"
             name="Runtime"
-            description="Specify the runtime the container can use."
+            description="Specifies the fully qualified name of an alternate OCI-compatible runtime, which is used to run commands specified by the 'run' instruction. Example: 'nvidia' corresponds to '--runtime=nvidia'."
             type="String"
             cardinality="1"
             required="false"

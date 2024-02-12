@@ -79,7 +79,7 @@
             cardinality="0"
             required="false"
             default=""
-            description="Specify the filesystem path where the backends are stored.">
+            description="Specify the host filesystem path where the backends are stored. If left blank, the backends provided by the Triton container will be used.">
          </AD>
        
         <AD id="local.backends.config"

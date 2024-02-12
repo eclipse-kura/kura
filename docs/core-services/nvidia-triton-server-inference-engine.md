@@ -110,14 +110,17 @@ The parameters used to configure the Triton Service are the following:
 
 - **Container Image**: The image the container will be created with.
 - **Container Image Tag**: Describes which image version that should be used for creating the container.
-- **Nvidia Triton Server ports**: the ports used to connect to the server for HTTP, GRPC, and Metrics services.
+- **Nvidia Triton Server ports**: The ports used to connect to the server for HTTP, GRPC, and Metrics services.
 - **Local model repository path**: Specify the path on the filesystem where the models are stored.
 - **Local model decryption password**: Specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.
-- **Inference Models**: a comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.
+- **Inference Models**: A comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.
+- **Local Backends Path**: Specifies the host filesystem path where the backends are stored. This folder will be mounted as a volume inside the Triton container and will override the existing backends. If left blank, the backends provided by the Triton container will be used.
 - **Optional configuration for the local backends**: A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
 - **Memory**: The maximum amount of memory the container can use in bytes. Set it as a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. The minimum allowed value is platform dependent (i.e. 6m). If left empty, the memory assigned to the container will be set to a default value by the native container orchestrator.
 - **CPUs**: Specify how many CPUs the Triton container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource.
-- **GPUs**: Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty.
+- **GPUs**: Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty. If the Nvidia Container Runtime is used, leave the field empty.
+- **Runtime**: Specifies the fully qualified name of an alternate OCI-compatible runtime, which is used to run commands specified by the 'run' instruction for the Triton container. Example: `nvidia` corresponds to `--runtime=nvidia`. Note:  when using the Nvidia Container Runtime, leave the **GPUs** field empty. The GPUs available on the system will be accessible from the container by default.
+- **Devices**: A comma-separated list of device paths passed to the Triton server container (e.g. `/dev/video0`).
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 

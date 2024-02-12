@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -476,6 +476,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerGpusConfigurationHandler(containerDescription, configuration);
 
+            configuration = containerRuntimeConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
@@ -594,6 +596,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         gpus.ifPresent(gpu -> configuration.withDeviceRequests(ImmutableList
                 .of(new DeviceRequest().withDriver("nvidia").withCount(gpu.equals("all") ? -1 : Integer.parseInt(gpu))
                         .withCapabilities(ImmutableList.of(ImmutableList.of("gpu"))))));
+
+        return configuration;
+    }
+
+    private HostConfig containerRuntimeConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        Optional<String> runtime = containerDescription.getRuntime();
+        runtime.ifPresent(runtimeOption -> configuration.withRuntime(runtimeOption));
 
         return configuration;
     }

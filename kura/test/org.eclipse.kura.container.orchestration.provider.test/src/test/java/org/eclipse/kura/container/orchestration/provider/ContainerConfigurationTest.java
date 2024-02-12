@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,7 @@ public class ContainerConfigurationTest {
     private static final Long MEMORY = 1000L;
     private static final Float CPUS = 1.3F;
     private static final String GPUS = "all";
+    private static final String RUNTIME = "coolRuntime";
     private ContainerConfiguration firstContainerConfig;
     private ContainerConfiguration secondContainerConfig;
     private ContainerConfigurationBuilder containerConfigurationBuilder;
@@ -140,7 +141,8 @@ public class ContainerConfigurationTest {
                 .setContainerNetowrkConfiguration(
                         new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
                                 .setNetworkMode(Optional.of("bridge")).build())
-                .setMemory(Optional.of(MEMORY)).setCpus(Optional.of(CPUS)).setGpus(Optional.of(GPUS));
+                .setMemory(Optional.of(MEMORY)).setCpus(Optional.of(CPUS)).setGpus(Optional.of(GPUS))
+                .setRuntime(Optional.of(RUNTIME));
     }
 
     private void givenContainerOne() {

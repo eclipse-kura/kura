@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -47,6 +49,8 @@ public class TritonServerContainerManagerTest {
     private static final String TRITON_CONTAINER_NAME = "tritonserver-kura";
     private static final String TRITON_CONTAINER_ID = "tritonserver-kura-ID";
     private static final String TRITON_REPOSITORY_PATH = "/path/to/repository";
+    private static final String TRITON_INTERNAL_BACKENDS_FOLDER = "/backends";
+    private static final String TRITON_BACKENDS_PATH = "/path/to/backends";
 
     private Map<String, Object> properties = new HashMap<>();
     private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
@@ -232,6 +236,8 @@ public class TritonServerContainerManagerTest {
         thenContainerConfigurationMemoryIsPresent(false);
         thenContainerConfigurationCpusIsPresent(false);
         thenContainerConfigurationGpusIsPresent(false);
+        thenContainerConfigurationRuntimeIsPresent(false);
+        thenContainerConfigurationDevicesIsFilled(false);
     }
 
     @Test
@@ -282,6 +288,8 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.memory", "7g");
         givenPropertyWith("container.cpus", 1.5F);
         givenPropertyWith("container.gpus", "all");
+        givenPropertyWith("container.runtime", "myCoolRuntime");
+        givenPropertyWith("devices", "/dev/tty0,/dev/video1");
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -301,6 +309,12 @@ public class TritonServerContainerManagerTest {
 
         thenContainerConfigurationGpusIsPresent(true);
         thenContainerConfigurationGpusEquals("all");
+
+        thenContainerConfigurationRuntimeIsPresent(true);
+        thenContainerConfigurationRuntimeEquals("myCoolRuntime");
+
+        thenContainerConfigurationDevicesIsFilled(true);
+        thenContainerConfigurationDevicesEquals(Arrays.asList("/dev/tty0", "/dev/video1"));
     }
 
     @Test
@@ -324,6 +338,63 @@ public class TritonServerContainerManagerTest {
         thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationEntrypointOverrideContains("--backend-config=testConfiguration");
+    }
+
+    @Test
+    public void startMethodShouldWorkWithTritonModelsOnly() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonImageIsAvailable();
+        givenTritonContainerIsNotRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenContainerOrchestrationStartContainerWasCalled();
+        thenContainerConfigurationIsFrameworkManaged(true);
+        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
+        thenContainerConfigurationImageTagEquals(TRITON_IMAGE_TAG);
+        thenContainerConfigurationNameEquals(TRITON_CONTAINER_NAME);
+        thenContainerConfigurationVolumesEquals(
+                Collections.singletonMap(TRITON_REPOSITORY_PATH, TRITON_INTERNAL_MODEL_REPO));
+        thenContainerConfigurationEntrypointOverrideContains("--model-control-mode=explicit");
+    }
+
+    @Test
+    public void startMethodShouldWorkWithTritonModelsAndBackends() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
+        givenPropertyWith("local.backends.path", TRITON_BACKENDS_PATH);
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonImageIsAvailable();
+        givenTritonContainerIsNotRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenContainerOrchestrationStartContainerWasCalled();
+        thenContainerConfigurationIsFrameworkManaged(true);
+        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
+        thenContainerConfigurationImageTagEquals(TRITON_IMAGE_TAG);
+        thenContainerConfigurationNameEquals(TRITON_CONTAINER_NAME);
+        thenContainerConfigurationVolumesEquals(Stream.of(new String[][] {
+                { TRITON_REPOSITORY_PATH, TRITON_INTERNAL_MODEL_REPO },
+                { TRITON_BACKENDS_PATH, TRITON_INTERNAL_BACKENDS_FOLDER },
+        }).collect(Collectors.collectingAndThen(
+                Collectors.toMap(data -> data[0], data -> data[1]),
+                Collections::<String, String>unmodifiableMap)));
+        thenContainerConfigurationEntrypointOverrideContains("--model-control-mode=explicit");
     }
 
     /*
@@ -522,4 +593,21 @@ public class TritonServerContainerManagerTest {
     private void thenContainerConfigurationEntrypointOverrideContains(String expectedString) {
         assertTrue(this.capturedContainerConfig.getEntryPoint().contains(expectedString));
     }
+
+    private void thenContainerConfigurationRuntimeIsPresent(boolean expectedResult) {
+        assertEquals(expectedResult, this.capturedContainerConfig.getRuntime().isPresent());
+    }
+
+    private void thenContainerConfigurationRuntimeEquals(String expectedRuntime) {
+        assertEquals(expectedRuntime, this.capturedContainerConfig.getRuntime().get());
+    }
+
+    private void thenContainerConfigurationDevicesIsFilled(boolean expectedResult) {
+        assertEquals(expectedResult, !this.capturedContainerConfig.getContainerDevices().isEmpty());
+    }
+
+    private void thenContainerConfigurationDevicesEquals(List<String> expectedDevices) {
+        assertEquals(expectedDevices, this.capturedContainerConfig.getContainerDevices());
+    }
+
 }

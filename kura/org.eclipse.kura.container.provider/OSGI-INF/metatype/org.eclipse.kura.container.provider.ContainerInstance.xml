@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-     Copyright (c) 2022 Eurotech and/or its affiliates and others
+     Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
    
      This program and the accompanying materials are made
      available under the terms of the Eclipse Public License 2.0
@@ -122,6 +122,15 @@
             description="Used to pass physical devices to a container. Example: /dev/gpiomem, /dev/ttyUSB0. (Generally Requires privileged mode to be enabled)" 
             type="String" cardinality="1"
             required="false" default="" />
+            
+        <AD id="container.runtime"
+            name="Runtime"
+            description="Specifies the fully qualified name of an alternate OCI-compatible runtime, which is used to run commands specified by the 'run' instruction. Example: 'nvidia' corresponds to '--runtime=nvidia'."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
             
         <AD id="container.networkMode" 
             name="Networking Mode"

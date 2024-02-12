@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.triton.server;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class TritonServerServiceOptions {
     private static final String CONTAINER_MEMORY = "container.memory";
     private static final String CONTAINER_CPUS = "container.cpus";
     private static final String CONTAINER_GPUS = "container.gpus";
+    private static final String CONTAINER_RUNTIME = "container.runtime";
     private static final String PROPERTY_ADDRESS = "server.address";
     private static final String PROPERTY_PORTS = "server.ports";
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PATH = "local.model.repository.path";
@@ -43,6 +45,7 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
     private static final String PROPERTY_MAX_GRPC_MESSAGE_SIZE = "grpc.max.size";
+    private static final String PROPERTY_DEVICES = "devices";
     private final Map<String, Object> properties;
 
     private static final int RETRY_INTERVAL = 500; // ms
@@ -58,6 +61,8 @@ public class TritonServerServiceOptions {
     private final Optional<Long> containerMemory;
     private final Optional<Float> containerCpus;
     private final Optional<String> containerGpus;
+    private final Optional<String> containerRuntime;
+    private final List<String> devices;
 
     public TritonServerServiceOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -122,9 +127,23 @@ public class TritonServerServiceOptions {
 
         final Object propertyContainerGpus = properties.get(CONTAINER_GPUS);
         if (propertyContainerGpus instanceof String) {
-            this.containerGpus = parseGpusString(Optional.of((String) propertyContainerGpus));
+            this.containerGpus = parseOptionalString(Optional.of((String) propertyContainerGpus));
         } else {
             this.containerGpus = Optional.empty();
+        }
+
+        final Object propertyContainerRuntime = properties.get(CONTAINER_RUNTIME);
+        if (propertyContainerRuntime instanceof String) {
+            this.containerRuntime = parseOptionalString(Optional.of((String) propertyContainerRuntime));
+        } else {
+            this.containerRuntime = Optional.empty();
+        }
+
+        final Object propertyDevices = properties.get(PROPERTY_DEVICES);
+        if (propertyDevices instanceof String) {
+            this.devices = parseDevices((String) propertyDevices);
+        } else {
+            this.devices = new ArrayList<>();
         }
 
     }
@@ -224,6 +243,14 @@ public class TritonServerServiceOptions {
         return this.containerGpus;
     }
 
+    public Optional<String> getContainerRuntime() {
+        return this.containerRuntime;
+    }
+
+    public List<String> getDevices() {
+        return this.devices;
+    }
+
     private String getStringProperty(String propertyName) {
         String stringProperty = "";
         final Object stringPropertyObj = this.properties.get(propertyName);
@@ -259,11 +286,19 @@ public class TritonServerServiceOptions {
         }
     }
 
-    private Optional<String> parseGpusString(Optional<String> gpus) {
-        if (gpus.isPresent() && gpus.get().isEmpty()) {
+    private Optional<String> parseOptionalString(Optional<String> optionalString) {
+        if (optionalString.isPresent() && optionalString.get().isEmpty()) {
             return Optional.empty();
         } else {
-            return gpus;
+            return optionalString;
+        }
+    }
+
+    private List<String> parseDevices(String devicesString) {
+        if (isNull(devicesString) || devicesString.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return Arrays.asList(devicesString.trim().split(","));
         }
     }
 

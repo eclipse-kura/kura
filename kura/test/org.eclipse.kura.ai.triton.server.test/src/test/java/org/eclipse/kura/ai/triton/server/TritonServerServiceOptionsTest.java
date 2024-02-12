@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,9 @@ package org.eclipse.kura.ai.triton.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -336,6 +338,50 @@ public class TritonServerServiceOptionsTest {
         thenContainerMemoryIsEqualTo(7516192768L);
     }
 
+    @Test
+    public void containerRuntimePropertyShouldWork() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.runtime", "myCoolRuntime");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerRuntimeIsPresent(true);
+        thenContainerRuntimeIsEqualTo("myCoolRuntime");
+    }
+
+    @Test
+    public void containerRuntimePropertyShouldNotBePresent() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerRuntimeIsPresent(false);
+    }
+
+    @Test
+    public void containerDevicesPropertyShouldWork() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("devices", "/dev/tty1,/dev/video0");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenDeviceListIsFilled(true);
+        thenDeviceListContains(Arrays.asList(new String[] { "/dev/tty1", "/dev/video0" }));
+    }
+
+    @Test
+    public void containerDevicesPropertyShouldBeEmpty() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenServiceOptionsBuiltWith(properties);
+
+        thenDeviceListIsFilled(false);
+    }
+
     /*
      * Given
      */
@@ -435,6 +481,22 @@ public class TritonServerServiceOptionsTest {
 
     private void thenContainerGpusIsEqualTo(String expectedResult) {
         assertEquals(expectedResult, this.options.getContainerGpus().get());
+    }
+
+    private void thenContainerRuntimeIsPresent(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerRuntime().isPresent());
+    }
+
+    private void thenContainerRuntimeIsEqualTo(String expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerRuntime().get());
+    }
+
+    private void thenDeviceListIsFilled(boolean expectedResult) {
+        assertEquals(expectedResult, !this.options.getDevices().isEmpty());
+    }
+
+    private void thenDeviceListContains(List<String> expectedResult) {
+        assertEquals(expectedResult, this.options.getDevices());
     }
 
 }

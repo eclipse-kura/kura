@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,15 @@
             description="A comma separated list of inference model names that the server will load.">
         </AD>
 
+        <AD id="local.backends.path"
+            name="Local backends path"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Specify the host filesystem path where the backends are stored. If left blank, the backends provided by the Triton container will be used.">
+         </AD>
+       
         <AD id="local.backends.config"
             name="Optional configuration for the local backends"
             type="String"
@@ -103,13 +112,31 @@
 
         <AD id="container.gpus"
             name="GPUs"
-            description="Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty."
+            description="Specify how many Nvidia GPUs the Triton container can use. Allowed values are 'all' or an integer number. If there's no Nvidia GPU installed, leave the field empty. If the Nvidia Container Runtime is used, leave the field empty."
             type="String"
             cardinality="1"
             required="false"
             default="">
         </AD>
 
+        <AD id="container.runtime"
+            name="Runtime"
+            description="Specify the runtime the Triton container can use. If the container uses the Nvidia Container Runtime, set it to 'nvidia' and leave the GPUs field empty."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
+        
+        <AD id="devices"
+            name="Devices"
+            description="Specifies, as a comma separated list of device paths, the host devices that the Triton container can access."
+            type="String"
+            cardinality="1"
+            required="false"
+            default="">
+        </AD>
+        
         <AD id="timeout"
             name="Timeout (in seconds) for time consuming tasks"
             type="Integer"

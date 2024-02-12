@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,9 @@ import static java.util.Objects.nonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,6 +47,7 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
     private static final String TRITON_CONTAINER_NAME = "tritonserver-kura";
     private static final String TRITON_LOGGING_TYPE = "DEFAULT";
     private static final String TRITON_INTERNAL_MODEL_REPO = "/models";
+    private static final String TRITON_INTERNAL_BACKENDS_FOLDER = "/backends";
     private static final boolean TRITON_FRAMEWORK_MANAGED = true;
     private static final List<Integer> TRITON_INTERNAL_PORTS = Arrays.asList(8000, 8001, 8002);
 
@@ -237,18 +240,27 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         builder.setMemory(this.options.getContainerMemory());
         builder.setCpus(this.options.getContainerCpus());
         builder.setGpus(this.options.getContainerGpus());
+        builder.setRuntime(this.options.getContainerRuntime());
+        builder.setDeviceList(this.options.getDevices());
 
+        Map<String, String> volumes = new HashMap<>();
         if (this.options.isModelEncryptionPasswordSet()) {
-            builder.setVolumes(Collections.singletonMap(this.decryptionFolderPath, TRITON_INTERNAL_MODEL_REPO));
+            volumes.put(this.decryptionFolderPath, TRITON_INTERNAL_MODEL_REPO);
         } else {
-            builder.setVolumes(
-                    Collections.singletonMap(this.options.getModelRepositoryPath(), TRITON_INTERNAL_MODEL_REPO));
+            volumes.put(this.options.getModelRepositoryPath(), TRITON_INTERNAL_MODEL_REPO);
         }
+        if (!this.options.getBackendsPath().isEmpty()) {
+            volumes.put(this.options.getBackendsPath(), TRITON_INTERNAL_BACKENDS_FOLDER);
+        }
+        builder.setVolumes(Collections.unmodifiableMap(volumes));
 
         List<String> entrypointOverride = new ArrayList<>();
         entrypointOverride.add("tritonserver");
         entrypointOverride.add("--model-repository=" + TRITON_INTERNAL_MODEL_REPO);
         entrypointOverride.add("--model-control-mode=explicit");
+        if (!this.options.getBackendsPath().isEmpty()) {
+            entrypointOverride.add("--backend-directory=" + TRITON_INTERNAL_BACKENDS_FOLDER);
+        }
         if (!this.options.getBackendsConfigs().isEmpty()) {
             this.options.getBackendsConfigs().forEach(config -> entrypointOverride.add("--backend-config=" + config));
         }

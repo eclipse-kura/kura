@@ -130,7 +130,7 @@
         
         <AD id="devices"
             name="Devices"
-            description="Specifies, as a comma separated list of device paths, the devices that the Triton container can use."
+            description="Specifies, as a comma separated list of device paths, the host devices that the Triton container can access."
             type="String"
             cardinality="1"
             required="false"

@@ -50,7 +50,7 @@ following steps:
         sudo apt-get update
         ```
         ```bash
-        sudo apt-get install temurin-8-jdk
+        sudo apt-get install temurin-17-jdk
         ```
 
 3. Download the Kura package with:

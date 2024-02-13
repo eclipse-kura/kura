@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.container.signature;
 
-import java.util.Optional;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.osgi.annotation.versioning.ProviderType;

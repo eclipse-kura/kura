@@ -71,7 +71,8 @@ public interface ContainerSignatureValidationService {
      * @warning For improved security, it is recommended to use the verify method that takes the image digest as input.
      *
      * @param imageName
-     *            The image name of the container image to verify
+     *            The image name of the container image to verify. The value will need to be expressed in the form of
+     *            registryURL/imagename in case of a custom registry.
      * @param imageTag
      *            The image tag of the container image to verify
      * @param trustAnchor

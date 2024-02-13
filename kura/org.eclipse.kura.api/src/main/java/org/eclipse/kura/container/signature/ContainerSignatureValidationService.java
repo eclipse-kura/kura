@@ -28,7 +28,7 @@ public interface ContainerSignatureValidationService {
 
     /**
      * Verifies the signature of a container image using the provided trust anchor. The trust anchor format depends on
-     * the signature format. For example, if the signature was generated with Cosing, the trust anchor is a ECDSA public
+     * the signature format. For example, if the signature was generated with Cosign, the trust anchor is a ECDSA public
      * key in PEM format. Other signature formats may require different trust anchors.
      *
      * If the signature is not included in a transparency log, the verification will fail unless the

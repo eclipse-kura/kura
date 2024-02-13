@@ -11,6 +11,6 @@
  *  Eurotech
  ******************************************************************************/
 /**
- * Provides interfaces for container orchestration.
+ * Provides interfaces for container signature verification.
  */
 package org.eclipse.kura.container.signature;

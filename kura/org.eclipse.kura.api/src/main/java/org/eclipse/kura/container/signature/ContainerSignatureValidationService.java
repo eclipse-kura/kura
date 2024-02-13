@@ -42,7 +42,7 @@ public interface ContainerSignatureValidationService {
      * @param trustAnchor
      *            The trust anchor to use for verification (e.g. a public key or a x509 certificate) typically in PEM
      *            format. The trust anchor is used to verify the signature of the container image.
-     * @param werifyInTransparencyLog
+     * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @param registryUsername
@@ -77,7 +77,7 @@ public interface ContainerSignatureValidationService {
      * @param trustAnchor
      *            The trust anchor to use for verification (e.g. a public key or a x509 certificate) typically in PEM
      *            format. The trust anchor is used to verify the signature of the container image.
-     * @param werifyInTransparencyLog
+     * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @param registryUsername

@@ -7,7 +7,7 @@ Depends: hostapd, isc-dhcp-server, iw,
  ethtool, telnet, ifupdown, 
  net-tools, iptables, chrony, 
  dmidecode, ntpdate,
- openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temurin-17-jdk, 
+ openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | temurin-8-jdk, 
  cron
 Architecture: all
 Maintainer: support@eurotech.com

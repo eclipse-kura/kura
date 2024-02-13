@@ -4,7 +4,7 @@ Section: misc
 Priority: low
 Depends: dos2unix, unzip, telnet, 
  bluez-hcidump, chrony, ntpdate, 
- openjdk-8-jre-headless | temurin-8-jdk | openjdk-17-jre-headless | temurin-17-jdk,
+ openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | temurin-8-jdk,
  cron
 Architecture: all
 Maintainer: support@eurotech.com

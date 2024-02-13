@@ -1,3 +1,11 @@
-#!/usr/bin/env jjs
+#!/bin/bash
 
-print(new java.util.jar.JarFile(arguments[0]).manifest.mainAttributes.getValue("DeploymentPackage-SymbolicName"));
+jar_file="$1"
+property_name="DeploymentPackage-SymbolicName"
+
+jar xf "$jar_file" META-INF/MANIFEST.MF
+property_value=$(grep -oP "(?<=^$property_name: ).*" META-INF/MANIFEST.MF)
+
+rm META-INF/MANIFEST.MF
+
+echo "$property_value";

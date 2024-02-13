@@ -17,7 +17,7 @@ import org.eclipse.kura.configuration.Password;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Interface representing a service for validating the signature of a container
+ * Interface representing a service for validating the signature of a container image
  *
  * @since 2.3
  * @noimplement This interface is not intended to be implemented by clients.

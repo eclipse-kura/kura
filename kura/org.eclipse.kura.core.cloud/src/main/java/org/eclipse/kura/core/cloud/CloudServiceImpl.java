@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.cloud;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -85,6 +88,11 @@ import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.eclipse.kura.net.status.NetworkStatusService;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
+import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
@@ -138,6 +146,7 @@ public class CloudServiceImpl
     private CertificatesService certificatesService;
     private Unmarshaller jsonUnmarshaller;
     private Marshaller jsonMarshaller;
+    private Optional<NetworkStatusService> networkStatusService = Optional.empty();
 
     // use a synchronized implementation for the list
     private final List<CloudClientImpl> cloudClients;
@@ -284,6 +293,10 @@ public class CloudServiceImpl
         synchronized (this.tamperDetectionServices) {
             this.tamperDetectionServices.remove(tamperDetectionService);
         }
+    }
+
+    public void setNetworkStatusService(NetworkStatusService networkStatusService) {
+        this.networkStatusService = Optional.of(networkStatusService);
     }
 
     // ----------------------------------------------------------------
@@ -821,6 +834,7 @@ public class CloudServiceImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
+        readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
         if (isNewConnection) {
@@ -1180,5 +1194,64 @@ public class CloudServiceImpl
             logger.warn("unexpected exception while checking if framework is shutting down", e);
             return false;
         }
+    }
+
+    private void readModemProfile() {
+        this.networkStatusService.ifPresent(statusService -> {
+            List<ModemInterfaceStatus> modemStatuses = getModemsStatuses(statusService);
+            if (nonNull(modemStatuses) && !modemStatuses.isEmpty()) {
+                readModemInfos(modemStatuses);
+            } else {
+                this.imei = null;
+                this.iccid = null;
+                this.imsi = null;
+                this.rssi = null;
+                this.modemFwVer = null;
+            }
+        });
+    }
+
+    private List<ModemInterfaceStatus> getModemsStatuses(NetworkStatusService networkStatusService) {
+        List<ModemInterfaceStatus> modemStatuses = new ArrayList<>();
+        try {
+            List<String> interfaceIds = networkStatusService.getInterfaceIds();
+            for (String interfaceId : interfaceIds) {
+                Optional<NetworkInterfaceStatus> networkInterfaceStatus = networkStatusService
+                        .getNetworkStatus(interfaceId);
+                networkInterfaceStatus.ifPresent(state -> {
+                    NetworkInterfaceType type = state.getType();
+                    if (NetworkInterfaceType.MODEM.equals(type)) {
+                        modemStatuses.add((ModemInterfaceStatus) state);
+                    }
+                });
+            }
+        } catch (KuraException e) {
+            logger.error("Error reading modem profile", e);
+        }
+        return modemStatuses;
+    }
+
+    private void readModemInfos(List<ModemInterfaceStatus> modemStatuses) {
+        Collections.sort(modemStatuses, Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
+        ModemInterfaceStatus modemStatus = modemStatuses.get(modemStatuses.size() - 1);
+        Optional<Sim> activeSim = Optional.empty();
+
+        List<Sim> availableSims = modemStatus.getAvailableSims();
+        for (Sim sim : availableSims) {
+            if (sim.isActive() && sim.isPrimary()) {
+                activeSim = Optional.of(sim);
+            }
+        }
+
+        this.iccid = "NA";
+        this.imsi = "NA";
+        activeSim.ifPresent(sim -> {
+            this.iccid = sim.getIccid();
+            this.imsi = sim.getImsi();
+        });
+        this.imei = modemStatus.getSerialNumber();
+        this.rssi = String.valueOf(modemStatus.getSignalStrength());
+        this.modemFwVer = modemStatus.getFirmwareVersion();
+
     }
 }

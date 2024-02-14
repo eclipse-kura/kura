@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.container.signature;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.osgi.annotation.versioning.ProviderType;
@@ -35,7 +36,8 @@ public interface ContainerSignatureValidationService {
      *
      * If the image is signed with a different protocol the verification will fail.
      *
-     * If the device running the verification has no internet access, the verification will fail.
+     * If the device running the verification has no internet access and the signature verification process has no offline
+     * support, the verification will fail. Implementers can choose to throw an exception in this case.
      *
      * @param imageName
      *            The image name of the container image to verify. The value will need to be expressed in the form of
@@ -51,7 +53,7 @@ public interface ContainerSignatureValidationService {
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @return
      */
-    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog);
+    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry credentials.
@@ -65,6 +67,10 @@ public interface ContainerSignatureValidationService {
      *
      * If the device running the verification has no internet access or the registry credentials are wrong,
      * the verification will fail.
+     *
+     * If the device running the verification has no internet access and the signature verification process has no offline
+     * support, the verification will fail. Likewise if the registry credentials are wrong, the verification will fail.
+     * Implementers can choose to throw an exception in both these cases.
      *
      * @param imageName
      *            The image name of the container image to verify. The value will need to be expressed in the form of
@@ -87,7 +93,7 @@ public interface ContainerSignatureValidationService {
      * @return
      */
     public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword);
+            String registryUsername, Password registryPassword) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor. The trust anchor format depends on
@@ -99,7 +105,8 @@ public interface ContainerSignatureValidationService {
      *
      * If the image is signed with a different protocol the verification will fail.
      *
-     * If the device running the verification has no internet access, the verification will fail.
+     * If the device running the verification has no internet access and the signature verification process has no offline
+     * support, the verification will fail. Implementers can choose to throw an exception in this case.
      *
      * @param imageDescriptor
      *            The image descriptor of the container image to verify (see {@link ImageInstanceDescriptor})
@@ -111,7 +118,7 @@ public interface ContainerSignatureValidationService {
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
      * @return
      */
-    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog);
+    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry credentials.
@@ -123,8 +130,9 @@ public interface ContainerSignatureValidationService {
      *
      * If the image is signed with a different protocol the verification will fail.
      *
-     * If the device running the verification has no internet access or the registry credentials are wrong,
-     * the verification will fail.
+     * If the device running the verification has no internet access and the signature verification process has no offline
+     * support, the verification will fail. Likewise if the registry credentials are wrong, the verification will fail.
+     * Implementers can choose to throw an exception in both these cases.
      *
      * @param imageDescriptor
      *            The image descriptor of the container image to verify (see {@link ImageInstanceDescriptor})
@@ -143,5 +151,5 @@ public interface ContainerSignatureValidationService {
      * @return
      */
     public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword);
+            String registryUsername, Password registryPassword) throws KuraException;
 }

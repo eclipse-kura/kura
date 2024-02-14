@@ -25,7 +25,7 @@ public class DummyContainerSignatureValidationService
         logger.info("Update DummyContainerSignatureValidationService...");
 
         // WIP
-        this.validationResult = (boolean) properties.get("dummy.validation");
+        this.validationResult = (boolean) properties.get("manual.setValidationOutcome");
     }
 
     protected void deactivate() {

@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
+import static java.util.Objects.nonNull;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.KURA_PROTOBUF;
 import static org.eclipse.kura.cloud.CloudPayloadEncoding.SIMPLE_JSON;
 import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.MessageConstants.FULL_TOPIC;
@@ -21,13 +22,17 @@ import static org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -68,6 +73,11 @@ import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
+import org.eclipse.kura.net.status.NetworkInterfaceStatus;
+import org.eclipse.kura.net.status.NetworkInterfaceType;
+import org.eclipse.kura.net.status.NetworkStatusService;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
+import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
@@ -112,6 +122,7 @@ public class CloudConnectionManagerImpl
     private CertificatesService certificatesService;
     private Unmarshaller jsonUnmarshaller;
     private Marshaller jsonMarshaller;
+    private Optional<NetworkStatusService> networkStatusService = Optional.empty();
 
     // package visibility for LifeCyclePayloadBuilder
     String imei;
@@ -233,6 +244,10 @@ public class CloudConnectionManagerImpl
         this.jsonMarshaller = null;
     }
 
+    public void setNetworkStatusService(NetworkStatusService networkStatusService) {
+        this.networkStatusService = Optional.of(networkStatusService);
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -333,7 +348,7 @@ public class CloudConnectionManagerImpl
             tryPublishBirthCertificate(false);
         }
     }
-    
+
     private void handlePositionLockedEvent() {
         // if we get a position locked event,
         // republish the birth certificate only if we are configured to
@@ -614,6 +629,7 @@ public class CloudConnectionManagerImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
+        readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
         if (isNewConnection) {
@@ -634,7 +650,7 @@ public class CloudConnectionManagerImpl
         }
 
         logger.debug("CloudConnectionManagerImpl: BIRTH message cached for 30s.");
-        
+
         this.scheduledBirthPublisherFuture = this.scheduledBirthPublisher.schedule(() -> {
             try {
                 logger.debug("CloudConnectionManagerImpl: publishing cached BIRTH message.");
@@ -801,7 +817,8 @@ public class CloudConnectionManagerImpl
     }
 
     public String getNotificationPublisherPid() {
-        // TODO: Specify a notification publisher when Hono will define apis to support long running jobs with
+        // TODO: Specify a notification publisher when Hono will define apis to support
+        // long running jobs with
         // notifications
         // return NOTIFICATION_PUBLISHER_PID;
         throw new UnsupportedOperationException();
@@ -821,5 +838,64 @@ public class CloudConnectionManagerImpl
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
+    }
+
+    private void readModemProfile() {
+        this.networkStatusService.ifPresent(statusService -> {
+            List<ModemInterfaceStatus> modemStatuses = getModemsStatuses(statusService);
+            if (nonNull(modemStatuses) && !modemStatuses.isEmpty()) {
+                readModemInfos(modemStatuses);
+            } else {
+                this.imei = null;
+                this.iccid = null;
+                this.imsi = null;
+                this.rssi = null;
+                this.modemFwVer = null;
+            }
+        });
+    }
+
+    private List<ModemInterfaceStatus> getModemsStatuses(NetworkStatusService networkStatusService) {
+        List<ModemInterfaceStatus> modemStatuses = new ArrayList<>();
+        try {
+            List<String> interfaceIds = networkStatusService.getInterfaceIds();
+            for (String interfaceId : interfaceIds) {
+                Optional<NetworkInterfaceStatus> networkInterfaceStatus = networkStatusService
+                        .getNetworkStatus(interfaceId);
+                networkInterfaceStatus.ifPresent(state -> {
+                    NetworkInterfaceType type = state.getType();
+                    if (NetworkInterfaceType.MODEM.equals(type)) {
+                        modemStatuses.add((ModemInterfaceStatus) state);
+                    }
+                });
+            }
+        } catch (KuraException e) {
+            logger.error("Error reading modem profile", e);
+        }
+        return modemStatuses;
+    }
+
+    private void readModemInfos(List<ModemInterfaceStatus> modemStatuses) {
+        Collections.sort(modemStatuses, Comparator.comparing(ModemInterfaceStatus::getConnectionStatus));
+        ModemInterfaceStatus modemStatus = modemStatuses.get(modemStatuses.size() - 1);
+        Optional<Sim> activeSim = Optional.empty();
+
+        List<Sim> availableSims = modemStatus.getAvailableSims();
+        for (Sim sim : availableSims) {
+            if (sim.isActive() && sim.isPrimary()) {
+                activeSim = Optional.of(sim);
+            }
+        }
+
+        this.iccid = "NA";
+        this.imsi = "NA";
+        activeSim.ifPresent(sim -> {
+            this.iccid = sim.getIccid();
+            this.imsi = sim.getImsi();
+        });
+        this.imei = modemStatus.getSerialNumber();
+        this.rssi = String.valueOf(modemStatus.getSignalStrength());
+        this.modemFwVer = modemStatus.getFirmwareVersion();
+
     }
 }

@@ -65,9 +65,6 @@ public interface ContainerSignatureValidationService {
      *
      * If the image is signed with a different protocol the verification will fail.
      *
-     * If the device running the verification has no internet access or the registry credentials are wrong,
-     * the verification will fail.
-     *
      * If the device running the verification has no internet access and the signature verification process has no offline
      * support, the verification will fail. Likewise if the registry credentials are wrong, the verification will fail.
      * Implementers can choose to throw an exception in both these cases.

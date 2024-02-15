@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.junit.Test;
 
 public class DummyContainerSignatureValidationServiceTest {
@@ -21,6 +22,7 @@ public class DummyContainerSignatureValidationServiceTest {
 
     private boolean validationResult = false;
     private Exception occurredException;
+    private ImageInstanceDescriptor imageDescriptor;
 
     @Test
     public void verifyReturnsFailureWithEmptyConfiguration() {
@@ -76,6 +78,30 @@ public class DummyContainerSignatureValidationServiceTest {
         thenVerificationResultIs(true);
     }
 
+    @Test
+    public void verifyWithImageReturnsFailureWithFalseConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", false);
+        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, "trustAnchor", false);
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(false);
+    }
+
+    @Test
+    public void verifyWithImageReturnsFailureWithTrueConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", true);
+        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, "trustAnchor", false);
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(true);
+    }
+
     /*
      * GIVEN
      */
@@ -85,6 +111,11 @@ public class DummyContainerSignatureValidationServiceTest {
 
     private void givenPropertyWith(String propertyName, Object value) {
         this.properties.put(propertyName, value);
+    }
+
+    private void givenImageInstanceDescriptorWith(String imageName, String imageTag, String imageId) {
+        this.imageDescriptor = ImageInstanceDescriptor.builder().setImageName(imageName).setImageTag(imageTag)
+                .setImageId(imageId).setImageLabels(new HashMap<>()).build();
     }
 
     /*
@@ -104,6 +135,15 @@ public class DummyContainerSignatureValidationServiceTest {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
                     isVerify, user, new Password(pass));
+        } catch (KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenVerifyImageInstanceDescriptorIsCalledWith(ImageInstanceDescriptor descriptor, String trustAnchor,
+            boolean isVerify) {
+        try {
+            this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify);
         } catch (KuraException e) {
             this.occurredException = e;
         }

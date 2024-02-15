@@ -86,23 +86,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         try {
-            // Verify signature
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-            // Get image digest to perform the signature verification and later populate the digest entry in the
-            // snapshot
-
-            if (Objects.nonNull(this.availableContainerSignatureValidationService)
-                    && !this.availableContainerSignatureValidationService.isEmpty()) {
-                for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
-                    validationService.verify(newProps.getContainerImage(), newProps.getContainerImageTag(),
-                            "trustAnchor", false);
-                }
-            } else {
-                logger.warn("No container signature validation service available. Skipping signature validation.");
-            }
-
-            // Verify signature
+            boolean containerSignatureValidated = validateContainerImageSignature(newProps);
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);
@@ -117,6 +103,38 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             updateState(State::onDisabled);
         }
 
+    }
+
+    private boolean validateContainerImageSignature(ContainerInstanceOptions configuration) throws KuraException {
+
+        if (Objects.isNull(this.availableContainerSignatureValidationService)
+                || this.availableContainerSignatureValidationService.isEmpty()) {
+            logger.warn("No container signature validation service available. Skipping signature validation.");
+            return false;
+        }
+
+        if (!configuration.getSignatureTrustAnchor().isPresent()
+                || configuration.getSignatureTrustAnchor().get().isEmpty()) {
+            logger.warn("No signature trust anchor available. Skipping signature validation.");
+            return false;
+        }
+
+        // Get image digest to perform the signature verification and later populate the digest entry in the
+        // snapshot
+        // this.containerOrchestrationService.getImageDigestBy(newProps.getContainerImage(),
+        // newProps.getContainerImageTag());
+
+        String trustAnchor = configuration.getSignatureTrustAnchor().get();
+        boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
+
+        for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
+            if (validationService.verify(configuration.getContainerImage(), configuration.getContainerImageTag(),
+                    trustAnchor, verifyInTransparencyLog)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void deactivate() {

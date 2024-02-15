@@ -3102,7 +3102,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="how-to-use-watchdog">How to use watchdog</h1>
 <h2 id="overview">Overview</h2>
-<p>When enabled, the watchdog is a peripheral monitor that will reboot the system if it is not refreshed during a certain time interval. In ESF, the WatchdogService can be used by critical applications. If the specified application is alive, the service notifies the watchdog; if the application is down, the service stops notifying the watchdog and a hardware reset occurs.</p>
+<p>When enabled, the watchdog is a peripheral monitor that will reboot the system if it is not refreshed during a certain time interval. In Kura, the WatchdogService can be used by critical applications. If the specified application is alive, the service notifies the watchdog; if the application is down, the service stops notifying the watchdog and a hardware reset occurs.</p>
 <p>The WatchdogService notifies the kernel watchdog driver using the /dev/watchdog device file. You can verify that the watchdog driver is installed using the following command:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ls<span class="w"> </span>–l<span class="w"> </span>/dev/watchdog
 </code></pre></div>

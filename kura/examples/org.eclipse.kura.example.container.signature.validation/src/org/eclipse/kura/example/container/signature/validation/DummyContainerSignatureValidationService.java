@@ -44,7 +44,7 @@ public class DummyContainerSignatureValidationService
             this.validationResult = Objects.nonNull(property) && (boolean) property;
         }
 
-        logger.info("Setting signature outcome to: {}", this.validationResult);
+        logger.info("Setting signature outcome to: \"{}\"", outcome(this.validationResult));
     }
 
     protected void deactivate() {
@@ -54,30 +54,36 @@ public class DummyContainerSignatureValidationService
     @Override
     public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog)
             throws KuraException {
-        logger.info("Validating signature for {}:{}", imageName, imageReference);
+        logger.info("Validating signature for {}:{} - {}", imageName, imageReference, outcome(this.validationResult));
         return this.validationResult;
     }
 
     @Override
     public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog,
             String registryUsername, Password registryPassword) throws KuraException {
-        logger.info("Validating signature for {}:{} using authenticated registry", imageName, imageReference);
+        logger.info("Validating signature for {}:{} using authenticated registry - {}", imageName, imageReference,
+                outcome(this.validationResult));
         return this.validationResult;
     }
 
     @Override
     public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog)
             throws KuraException {
-        logger.info("Validating signature for {}:{}", imageDescriptor.getImageName(), imageDescriptor.getImageId());
+        logger.info("Validating signature for {}:{} - {}", imageDescriptor.getImageName(), imageDescriptor.getImageId(),
+                outcome(this.validationResult));
         return this.validationResult;
     }
 
     @Override
     public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog,
             String registryUsername, Password registryPassword) throws KuraException {
-        logger.info("Validating signature for {}:{} using authenticated registry", imageDescriptor.getImageName(),
-                imageDescriptor.getImageId());
+        logger.info("Validating signature for {}:{} using authenticated registry - {}", imageDescriptor.getImageName(),
+                imageDescriptor.getImageId(), outcome(this.validationResult));
         return this.validationResult;
+    }
+
+    private String outcome(boolean verifyResult) {
+        return verifyResult ? "success" : "failure";
     }
 
 }

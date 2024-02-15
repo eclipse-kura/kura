@@ -16,6 +16,7 @@ package org.eclipse.kura.container.provider;
 import static java.util.Objects.isNull;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private ContainerOrchestrationService containerOrchestrationService;
-    private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService;
+    private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
 
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 

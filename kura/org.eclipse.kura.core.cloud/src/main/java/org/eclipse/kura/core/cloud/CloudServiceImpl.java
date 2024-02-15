@@ -299,6 +299,9 @@ public class CloudServiceImpl
         this.networkStatusService = Optional.of(networkStatusService);
     }
 
+    public void unsetNetworkStatusService(NetworkStatusService networkStatusService) {
+        this.networkStatusService = Optional.empty();
+    }
     // ----------------------------------------------------------------
     //
     // Activation APIs

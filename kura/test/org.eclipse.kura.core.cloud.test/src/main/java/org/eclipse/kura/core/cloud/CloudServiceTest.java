@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
@@ -45,6 +45,11 @@ import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
+import org.eclipse.kura.net.status.NetworkStatusService;
+import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
+import org.eclipse.kura.net.status.modem.Sim;
+import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
@@ -67,30 +72,34 @@ import com.eclipsesource.json.JsonObject;
 
 public class CloudServiceTest {
 
+    private static final String MODEM_RSSI = "modem_rssi";
+    private static final String MODEM_ICCID = "modem_iccid";
+    private static final String MODEM_IMSI = "modem_imsi";
+    private static final String MODEM_IMEI = "modem_imei";
+    private static final String TAMPER_STATUS = "tamper_status";
+    private static final String MODEM_FIRMWARE_VERSION = "modem_firmware_version";
+    private static final String FOO_FW_VER = "fooFwVer";
+    private static final String FOO_ICCID = "fooIccid";
+    private static final String FOO_IMSI = "fooImsi";
+    private static final String FOO_IMEI = "fooImei";
+    private static final String FOO_FW_VER1 = "fooFwVer1";
+    private static final String FOO_ICCID1 = "fooIccid1";
+    private static final String FOO_IMSI1 = "fooImsi1";
+    private static final String FOO_IMEI1 = "fooImei1";
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static final String SIMPLE_ARTEMIS_BROKER_SERVICE_PID = "org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance";
-
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
 
     private static CountDownLatch dependencyLatch = new CountDownLatch(6);
-
     private static ConfigurationService cfgSvc;
-
     private static CloudConnectionFactory cloudConnectionFactory;
-
     private static DataTransportService mqttDataTransport;
     private static DataTransportInspector underTestInspector;
-
     private static CryptoService cryptoService;
-
     private static CloudServiceImpl cloudServiceImpl;
-
-    private static DataTransportService observer;
     private static DataTransportInspector observerInspector;
-
     private static EventAdmin eventAdmin;
 
     @BeforeClass
@@ -120,7 +129,7 @@ public class CloudServiceTest {
         updateComponentConfiguration(cfgSvc, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties).get(30,
                 TimeUnit.SECONDS);
 
-        observer = createFactoryConfiguration(cfgSvc, DataTransportService.class, "observer",
+        DataTransportService observer = createFactoryConfiguration(cfgSvc, DataTransportService.class, "observer",
                 MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer")).get(30, TimeUnit.SECONDS);
         observerInspector = new DataTransportInspector(observer);
 
@@ -145,8 +154,8 @@ public class CloudServiceTest {
 
     public void bindCloudFactory(CloudConnectionFactory cloudConnectionFactory) throws KuraException {
         CloudServiceTest.cloudConnectionFactory = cloudConnectionFactory;
-        if ("org.eclipse.kura.cloud.CloudService".equals(cloudConnectionFactory.getFactoryPid())) {
-            cloudConnectionFactory.createConfiguration("org.eclipse.kura.cloud.CloudService");
+        if (DEFAULT_CLOUD_SERVICE_PID.equals(cloudConnectionFactory.getFactoryPid())) {
+            cloudConnectionFactory.createConfiguration(DEFAULT_CLOUD_SERVICE_PID);
             dependencyLatch.countDown();
         }
     }
@@ -206,7 +215,7 @@ public class CloudServiceTest {
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void testDisconnect() throws KuraException {
+    public void testDisconnect() {
         cloudServiceImpl.disconnect();
     }
 
@@ -234,13 +243,14 @@ public class CloudServiceTest {
     public void shouldSupportAdditionalBirthProperties()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
+        clearMockNetworkStatusService();
         final Map<String, Object> properties = new HashMap<>();
 
-        properties.put(ModemReadyEvent.IMEI, "fooImei");
-        properties.put(ModemReadyEvent.IMSI, "fooImsi");
-        properties.put(ModemReadyEvent.ICCID, "fooIccid");
+        properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
+        properties.put(ModemReadyEvent.IMSI, FOO_IMSI);
+        properties.put(ModemReadyEvent.ICCID, FOO_ICCID);
         properties.put(ModemReadyEvent.RSSI, "0");
-        properties.put(ModemReadyEvent.FW_VERSION, "fooFwVer");
+        properties.put(ModemReadyEvent.FW_VERSION, FOO_FW_VER);
 
         final ModemReadyEvent modemReadyEvent = new ModemReadyEvent(properties);
 
@@ -249,7 +259,7 @@ public class CloudServiceTest {
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertEquals("getCpuVersion", metrics.get(KuraDeviceProfile.CPU_VERSION_KEY).asString());
-        assertEquals("fooFwVer", metrics.get("modem_firmware_version").asString());
+        assertEquals(FOO_FW_VER, metrics.get(MODEM_FIRMWARE_VERSION).asString());
 
     }
 
@@ -306,7 +316,7 @@ public class CloudServiceTest {
 
         final JsonObject metrics = publishBirthAndGetMetrics();
 
-        assertNull(metrics.get("tamper_status"));
+        assertNull(metrics.get(TAMPER_STATUS));
     }
 
     @Test
@@ -323,14 +333,14 @@ public class CloudServiceTest {
         try {
             JsonObject metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get("tamper_status").asString());
+            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
 
             Mockito.when(tamperDetectionService.getTamperStatus())
                     .thenReturn(new TamperStatus(false, Collections.emptyMap()));
 
             metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get("tamper_status").asString());
+            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
         } finally {
             reg.unregister();
         }
@@ -350,7 +360,7 @@ public class CloudServiceTest {
         try {
             JsonObject metrics = publishBirthAndGetMetrics();
 
-            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get("tamper_status").asString());
+            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
 
             final TamperStatus tamperStatus = new TamperStatus(false, Collections.emptyMap());
 
@@ -361,14 +371,70 @@ public class CloudServiceTest {
 
             metrics = getMetrics(message.get(35, TimeUnit.SECONDS));
 
-            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get("tamper_status").asString());
+            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get(TAMPER_STATUS).asString());
         } finally {
             reg.unregister();
         }
     }
 
+    @Test
+    public void shouldPublishBirthMessageWithModemInfoWhenEventReceived()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        clearMockNetworkStatusService();
+        final Map<String, Object> properties = new HashMap<>();
+
+        properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
+        properties.put(ModemReadyEvent.IMSI, FOO_IMSI);
+        properties.put(ModemReadyEvent.ICCID, FOO_ICCID);
+        properties.put(ModemReadyEvent.RSSI, "0");
+        properties.put(ModemReadyEvent.FW_VERSION, FOO_FW_VER);
+
+        final ModemReadyEvent modemReadyEvent = new ModemReadyEvent(properties);
+
+        eventAdmin.sendEvent(modemReadyEvent);
+        final JsonObject metrics = publishBirthAndGetMetrics();
+
+        assertEquals(FOO_IMEI, metrics.get(MODEM_IMEI).asString());
+        assertEquals(FOO_IMSI, metrics.get(MODEM_IMSI).asString());
+        assertEquals(FOO_ICCID, metrics.get(MODEM_ICCID).asString());
+        assertEquals("0", metrics.get(MODEM_RSSI).asString());
+        assertEquals(FOO_FW_VER, metrics.get(MODEM_FIRMWARE_VERSION).asString());
+
+    }
+
+    @Test
+    public void shouldPublishBirthMessageWithModemInfoWhenNetworkStatusServiceIsPresent()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        createMockNetworkStatusService();
+        final JsonObject metrics = publishBirthAndGetMetrics();
+
+        assertEquals(FOO_IMEI1, metrics.get(MODEM_IMEI).asString());
+        assertEquals(FOO_IMSI1, metrics.get(MODEM_IMSI).asString());
+        assertEquals(FOO_ICCID1, metrics.get(MODEM_ICCID).asString());
+        assertEquals("1", metrics.get(MODEM_RSSI).asString());
+        assertEquals(FOO_FW_VER1, metrics.get(MODEM_FIRMWARE_VERSION).asString());
+
+    }
+
+    @Test
+    public void shouldPublishBirthMessageWithConnectedModemInfoWhenMultipleModems()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        createMockNetworkStatusServiceMultipleModems();
+        final JsonObject metrics = publishBirthAndGetMetrics();
+
+        assertEquals("fooImei2", metrics.get(MODEM_IMEI).asString());
+        assertEquals("fooImsi2", metrics.get(MODEM_IMSI).asString());
+        assertEquals("fooIccid2", metrics.get(MODEM_ICCID).asString());
+        assertEquals("2", metrics.get(MODEM_RSSI).asString());
+        assertEquals("fooFwVer2", metrics.get(MODEM_FIRMWARE_VERSION).asString());
+
+    }
+
     private JsonObject publishBirthAndGetMetrics() throws InterruptedException, ExecutionException, TimeoutException,
-            KuraException, InvalidSyntaxException, KuraConnectException {
+            KuraException, InvalidSyntaxException {
         final CompletableFuture<Void> disconnected = underTestInspector.disconnected();
 
         cloudServiceImpl.disconnect();
@@ -388,8 +454,9 @@ public class CloudServiceTest {
 
                 connected.get(30, TimeUnit.SECONDS);
                 break;
-            } catch (final Exception e) {
+            } catch (final InterruptedException e) {
                 logger.warn("connection failed", e);
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -564,4 +631,41 @@ public class CloudServiceTest {
         }
     }
 
+    private void createMockNetworkStatusService() throws KuraException {
+        NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
+        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8" }));
+        ModemInterfaceStatusBuilder modemStatusBuilder = ModemInterfaceStatus.builder();
+        modemStatusBuilder.withConnectionStatus(ModemConnectionStatus.CONNECTED).withSerialNumber(FOO_IMEI1)
+                .withFirmwareVersion(FOO_FW_VER1).withSignalStrength(1);
+        Sim sim = Sim.builder().withIccid(FOO_ICCID1).withImsi(FOO_IMSI1).withActive(true).withPrimary(true).build();
+        modemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim }));
+        when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(modemStatusBuilder.build()));
+
+        cloudServiceImpl.setNetworkStatusService(networkStatusService);
+    }
+
+    private void createMockNetworkStatusServiceMultipleModems() throws KuraException {
+        NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
+        when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8", "1-6" }));
+
+        ModemInterfaceStatusBuilder firstModemStatusBuilder = ModemInterfaceStatus.builder();
+        firstModemStatusBuilder.withConnectionStatus(ModemConnectionStatus.FAILED).withSerialNumber(FOO_IMEI1)
+                .withFirmwareVersion(FOO_FW_VER1).withSignalStrength(1);
+        Sim sim1 = Sim.builder().withIccid(FOO_ICCID1).withImsi(FOO_IMSI1).withActive(true).withPrimary(true).build();
+        firstModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim1 }));
+        when(networkStatusService.getNetworkStatus("1-8")).thenReturn(Optional.of(firstModemStatusBuilder.build()));
+
+        ModemInterfaceStatusBuilder secondModemStatusBuilder = ModemInterfaceStatus.builder();
+        secondModemStatusBuilder.withConnectionStatus(ModemConnectionStatus.CONNECTED).withSerialNumber("fooImei2")
+                .withFirmwareVersion("fooFwVer2").withSignalStrength(2);
+        Sim sim2 = Sim.builder().withIccid("fooIccid2").withImsi("fooImsi2").withActive(true).withPrimary(true).build();
+        secondModemStatusBuilder.withAvailableSims(Arrays.asList(new Sim[] { sim2 }));
+        when(networkStatusService.getNetworkStatus("1-6")).thenReturn(Optional.of(secondModemStatusBuilder.build()));
+
+        cloudServiceImpl.setNetworkStatusService(networkStatusService);
+    }
+
+    private void clearMockNetworkStatusService() {
+        cloudServiceImpl.unsetNetworkStatusService(null);
+    }
 }

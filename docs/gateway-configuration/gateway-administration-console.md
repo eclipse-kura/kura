@@ -41,6 +41,6 @@ Fixing this might require to configure the browser to trust the certificate prov
 
 ## System Use Notification Banner
 
-For security reasons, it may be needed to display to the user a banner that describes the intended system use before authenticating. The system use notification message is customisable by authorised personnel in the **Security** section of the ESF Wen UI, in the **Web Console** tab.
+For security reasons, it may be needed to display to the user a banner that describes the intended system use before authenticating. The system use notification message is customisable by authorised personnel in the **Security** section of the Kura Web UI, in the **Web Console** tab.
 
 ![AccessBanner](./images/access-banner.png)

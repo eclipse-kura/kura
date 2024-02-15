@@ -17,7 +17,9 @@ import static java.util.Objects.isNull;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,6 +32,7 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +43,25 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private ContainerOrchestrationService containerOrchestrationService;
+    private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService;
 
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
+    }
+
+    public void setContainerSignatureValidationService(
+            final ContainerSignatureValidationService containerSignatureValidationService) {
+
+        logger.info("Container signature validation service added...");
+        this.availableContainerSignatureValidationService.add(containerSignatureValidationService);
+    }
+
+    public void unsetContainerSignatureValidationService(
+            final ContainerSignatureValidationService containerSignatureValidationService) {
+        logger.info("Container signature validation service removed...");
+        this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
     }
 
     // ----------------------------------------------------------------
@@ -67,7 +84,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         try {
+            // Verify signature
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
+
+            if (Objects.nonNull(this.availableContainerSignatureValidationService)) {
+                for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
+                    validationService.verify(newProps.getContainerImage(), newProps.getContainerImageTag(),
+                            "trustAnchor", false);
+                }
+            } else {
+                logger.warn("No container signature validation service available. Skipping signature validation.");
+            }
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);
@@ -77,8 +104,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             updateState(s -> s.onConfigurationUpdated(newProps));
         } catch (Exception e) {
-            logger.error("Failed to create container instance. Please check configuration of container: {}.",
-                    properties.get(ConfigurationService.KURA_SERVICE_PID));
+            logger.error("Failed to create container instance. Please check configuration of container: {}. Caused by:",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID), e);
             updateState(State::onDisabled);
         }
 

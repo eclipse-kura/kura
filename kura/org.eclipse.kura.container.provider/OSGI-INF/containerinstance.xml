@@ -17,5 +17,6 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.container.provider.ContainerInstance"/>
    <reference bind="setContainerOrchestrationService" cardinality="1..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="static"/>
+   <reference bind="setContainerSignatureValidationService" cardinality="0..n" interface="org.eclipse.kura.container.signature.ContainerSignatureValidationService" name="ContainerSignatureValidationService" policy="dynamic" unbind="unsetContainerSignatureValidationService"/>
    
 </scr:component>

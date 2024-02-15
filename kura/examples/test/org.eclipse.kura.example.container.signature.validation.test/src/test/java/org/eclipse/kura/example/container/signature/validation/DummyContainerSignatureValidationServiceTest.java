@@ -1,7 +1,6 @@
 package org.eclipse.kura.example.container.signature.validation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.PrintWriter;
@@ -20,6 +19,14 @@ public class DummyContainerSignatureValidationServiceTest {
     private DummyContainerSignatureValidationService containerSignatureValidationService = new DummyContainerSignatureValidationService();
     private Map<String, Object> properties = new HashMap<>();
 
+    private static final String PROPERTY_NAME = "manual.setValidationOutcome";
+    private static final String IMAGE_NAME = "imageName";
+    private static final String IMAGE_TAG = "imageTag";
+    private static final String IMAGE_ID = "imageId";
+    private static final String TRUST_ANCHOR = "trustAnchor";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+
     private boolean validationResult = false;
     private Exception occurredException;
     private ImageInstanceDescriptor imageDescriptor;
@@ -28,7 +35,7 @@ public class DummyContainerSignatureValidationServiceTest {
     public void verifyReturnsFailureWithEmptyConfiguration() {
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith("image", "tag", "trustAnchor", false);
+        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
@@ -36,10 +43,10 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", false);
+        givenPropertyWith(PROPERTY_NAME, false);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith("image", "tag", "trustAnchor", false);
+        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
@@ -47,10 +54,10 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyReturnsSuccessWithTrueConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", true);
+        givenPropertyWith(PROPERTY_NAME, true);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith("image", "tag", "trustAnchor", false);
+        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);
@@ -58,10 +65,10 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithAuthReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", false);
+        givenPropertyWith(PROPERTY_NAME, false);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith("image", "tag", "trustAnchor", false, "username", "password");
+        whenVerifyWithAuthIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
@@ -69,10 +76,10 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithAuthReturnsSuccessWithTrueConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", true);
+        givenPropertyWith(PROPERTY_NAME, true);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith("image", "tag", "trustAnchor", false, "username", "password");
+        whenVerifyWithAuthIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);
@@ -80,11 +87,11 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithImageReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", false);
-        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenPropertyWith(PROPERTY_NAME, false);
+        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, "trustAnchor", false);
+        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
@@ -92,11 +99,11 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithImageReturnsFailureWithTrueConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", true);
-        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenPropertyWith(PROPERTY_NAME, true);
+        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, "trustAnchor", false);
+        whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);
@@ -104,12 +111,12 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithImageWithAuthReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", false);
-        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenPropertyWith(PROPERTY_NAME, false);
+        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, "trustAnchor", false, "username",
-                "password");
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,
+                PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
@@ -117,12 +124,12 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void verifyWithImageReturnsWithAuthFailureWithTrueConfiguration() {
-        givenPropertyWith("manual.setValidationOutcome", true);
-        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenPropertyWith(PROPERTY_NAME, true);
+        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, "trustAnchor", false, "username",
-                "password");
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,
+                PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);

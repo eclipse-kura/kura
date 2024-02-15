@@ -7,14 +7,14 @@
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
 
-	SPDX-License-Identifier: EPL-2.0
+       SPDX-License-Identifier: EPL-2.0
 
-	Contributors:
-	 Eurotech
+       Contributors:
+        Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.dummy.container.signature.validation.service.DummyContainerSignatureValidationService"
+    <OCD id="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService"
          name="Dummy Container Signature Validation Service"
          description="This is a dummy implementation of a Container Signature Validation Service">
 
@@ -28,7 +28,7 @@
 
     </OCD>
 
-    <Designate pid="org.eclipse.kura.dummy.container.signature.validation.service.DummyContainerSignatureValidationService">
-        <Object ocdref="org.eclipse.kura.dummy.container.signature.validation.service.DummyContainerSignatureValidationService"/>
+    <Designate pid="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService">
+        <Object ocdref="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService"/>
     </Designate>
 </MetaData>

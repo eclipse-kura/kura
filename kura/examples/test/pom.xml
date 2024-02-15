@@ -282,6 +282,7 @@
         <module>org.eclipse.kura.example.testutil</module>
         <module>org.eclipse.kura.example.wire.logic.multiport.provider.test</module>
         <module>org.eclipse.kura.example.wire.math.trig.test</module>
+        <module>org.eclipse.kura.example.container.signature.validation.test</module>
     </modules>
 
     <repositories>

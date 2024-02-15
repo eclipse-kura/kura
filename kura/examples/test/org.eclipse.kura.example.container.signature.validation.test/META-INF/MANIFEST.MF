@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.example.container.signature.validation.test
+Bundle-SymbolicName: org.eclipse.kura.example.container.signature.validation.test;singleton:=true
+Bundle-Version: 5.5.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Bundle-ActivationPolicy: lazy
+Import-Package: org.junit;version="[4.12.0,5.0.0)",
+ org.junit.runners;version="[4.12.0,5.0.0)",
+ org.mockito;version="[4.0.0,5.0.0)",
+ org.mockito.invocation;version="[4.0.0,5.0.0)",
+ org.mockito.stubbing;version="[4.0.0,5.0.0)",
+ org.slf4j;version="1.6.4"
+Fragment-Host: org.eclipse.kura.example.container.signature.validation

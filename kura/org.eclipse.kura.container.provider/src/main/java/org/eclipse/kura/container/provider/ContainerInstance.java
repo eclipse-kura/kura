@@ -52,16 +52,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.containerOrchestrationService = containerOrchestrationService;
     }
 
-    public void setContainerSignatureValidationService(
+    public synchronized void setContainerSignatureValidationService(
             final ContainerSignatureValidationService containerSignatureValidationService) {
 
-        logger.info("Container signature validation service added...");
+        logger.info("Container signature validation service {} added.", containerSignatureValidationService.getClass());
         this.availableContainerSignatureValidationService.add(containerSignatureValidationService);
     }
 
-    public void unsetContainerSignatureValidationService(
+    public synchronized void unsetContainerSignatureValidationService(
             final ContainerSignatureValidationService containerSignatureValidationService) {
-        logger.info("Container signature validation service removed...");
+        logger.info("Container signature validation service {} removed.",
+                containerSignatureValidationService.getClass());
         this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
     }
 
@@ -88,7 +89,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             // Verify signature
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-            if (Objects.nonNull(this.availableContainerSignatureValidationService)) {
+            if (Objects.nonNull(this.availableContainerSignatureValidationService)
+                    && !this.availableContainerSignatureValidationService.isEmpty()) {
                 for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
                     validationService.verify(newProps.getContainerImage(), newProps.getContainerImageTag(),
                             "trustAnchor", false);

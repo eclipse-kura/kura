@@ -102,6 +102,32 @@ public class DummyContainerSignatureValidationServiceTest {
         thenVerificationResultIs(true);
     }
 
+    @Test
+    public void verifyWithImageWithAuthReturnsFailureWithFalseConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", false);
+        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, "trustAnchor", false, "username",
+                "password");
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(false);
+    }
+
+    @Test
+    public void verifyWithImageReturnsWithAuthFailureWithTrueConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", true);
+        givenImageInstanceDescriptorWith("image", "tag", "id");
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, "trustAnchor", false, "username",
+                "password");
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(true);
+    }
+
     /*
      * GIVEN
      */
@@ -144,6 +170,16 @@ public class DummyContainerSignatureValidationServiceTest {
             boolean isVerify) {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify);
+        } catch (KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(ImageInstanceDescriptor descriptor,
+            String trustAnchor, boolean isVerify, String user, String pass) {
+        try {
+            this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify,
+                    user, new Password(pass));
         } catch (KuraException e) {
             this.occurredException = e;
         }

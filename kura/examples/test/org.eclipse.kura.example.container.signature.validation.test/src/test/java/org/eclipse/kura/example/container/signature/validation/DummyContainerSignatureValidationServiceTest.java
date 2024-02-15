@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.junit.Test;
 
 public class DummyContainerSignatureValidationServiceTest {
@@ -53,6 +54,28 @@ public class DummyContainerSignatureValidationServiceTest {
         thenVerificationResultIs(true);
     }
 
+    @Test
+    public void verifyWithAuthReturnsFailureWithFalseConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", false);
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyWithAuthIsCalledWith("image", "tag", "trustAnchor", false, "username", "password");
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(false);
+    }
+
+    @Test
+    public void verifyWithAuthReturnsSuccessWithTrueConfiguration() {
+        givenPropertyWith("manual.setValidationOutcome", true);
+        givenContainerSignatureValidationServiceWith(this.properties);
+
+        whenVerifyWithAuthIsCalledWith("image", "tag", "trustAnchor", false, "username", "password");
+
+        thenNoExceptionOccurred();
+        thenVerificationResultIs(true);
+    }
+
     /*
      * GIVEN
      */
@@ -67,9 +90,20 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * WHEN
      */
-    private void whenVerifyIsCalledWith(String string, String string2, String string3, boolean isVerify) {
+    private void whenVerifyIsCalledWith(String imageName, String imageTag, String trustAnchor, boolean isVerify) {
         try {
-            this.validationResult = this.containerSignatureValidationService.verify(string, string2, string3, isVerify);
+            this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
+                    isVerify);
+        } catch (KuraException e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenVerifyWithAuthIsCalledWith(String imageName, String imageTag, String trustAnchor, boolean isVerify,
+            String user, String pass) {
+        try {
+            this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
+                    isVerify, user, new Password(pass));
         } catch (KuraException e) {
             this.occurredException = e;
         }

@@ -89,6 +89,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             // Verify signature
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
+            // Get image digest to perform the signature verification and later populate the digest entry in the
+            // snapshot
+
             if (Objects.nonNull(this.availableContainerSignatureValidationService)
                     && !this.availableContainerSignatureValidationService.isEmpty()) {
                 for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
@@ -98,6 +101,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } else {
                 logger.warn("No container signature validation service available. Skipping signature validation.");
             }
+
+            // Verify signature
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);

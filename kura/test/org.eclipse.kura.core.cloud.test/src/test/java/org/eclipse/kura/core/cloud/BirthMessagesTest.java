@@ -49,7 +49,6 @@ import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.osgi.framework.BundleContext;

@@ -19,12 +19,12 @@
          description="This is an example implementation of a service implementing a Container Signature Validation Service. The main purpose of this service is testing and serving as reference for future implementations.">
 
         <AD id="manual.setValidationOutcome"
-            name="manual.setValidationOutcome"
+            name="Set signature validation outcome"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Set the outcome of all container signature validations performed by this service."/>
+            description="Set the outcome for all container signature validations performed by this service."/>
 
     </OCD>
 

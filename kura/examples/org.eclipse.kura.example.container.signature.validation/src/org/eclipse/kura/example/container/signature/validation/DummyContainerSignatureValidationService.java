@@ -26,22 +26,23 @@ public class DummyContainerSignatureValidationService
         implements ContainerSignatureValidationService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(DummyContainerSignatureValidationService.class);
+    private static final String SERVICE_NAME = "DummyContainerSignatureValidationService";
     private boolean validationResult = false;
 
     protected void activate(Map<String, Object> properties) {
-        logger.info("Activate DummyContainerSignatureValidationService...");
+        logger.info("Activate {}...", SERVICE_NAME);
         updated(properties);
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Update DummyContainerSignatureValidationService...");
+        logger.info("Update {}...", SERVICE_NAME);
 
         // WIP
         this.validationResult = (boolean) properties.get("manual.setValidationOutcome");
     }
 
     protected void deactivate() {
-        logger.info("Deactivate DummyContainerSignatureValidationService...");
+        logger.info("Deactivate {}...", SERVICE_NAME);
     }
 
     @Override

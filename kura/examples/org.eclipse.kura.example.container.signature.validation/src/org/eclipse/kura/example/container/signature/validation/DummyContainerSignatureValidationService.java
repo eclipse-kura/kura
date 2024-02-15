@@ -44,7 +44,7 @@ public class DummyContainerSignatureValidationService
             this.validationResult = Objects.nonNull(property) && (boolean) property;
         }
 
-        logger.info("Setting signature outcome to: \"{}\"", outcome(this.validationResult));
+        logger.info("Setting signature validation outcome to: \"{}\"", outcome(this.validationResult));
     }
 
     protected void deactivate() {

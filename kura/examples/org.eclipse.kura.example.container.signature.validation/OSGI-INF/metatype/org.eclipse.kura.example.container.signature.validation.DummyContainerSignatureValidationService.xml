@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService"
          name="Dummy Container Signature Validation Service"
-         description="This is a dummy implementation of a Container Signature Validation Service">
+         description="This is an example implementation of a service implementing a Container Signature Validation Service. The main purpose of this service is testing and serving as reference for future implementations.">
 
         <AD id="manual.setValidationOutcome"
             name="manual.setValidationOutcome"
@@ -24,7 +24,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Set the outcome of all signature validations performed by this service."/>
+            description="Set the outcome of all container signature validations performed by this service."/>
 
     </OCD>
 

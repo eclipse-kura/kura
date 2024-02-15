@@ -2,7 +2,7 @@
 
 ## Overview
 
-When enabled, the watchdog is a peripheral monitor that will reboot the system if it is not refreshed during a certain time interval. In ESF, the WatchdogService can be used by critical applications. If the specified application is alive, the service notifies the watchdog; if the application is down, the service stops notifying the watchdog and a hardware reset occurs.
+When enabled, the watchdog is a peripheral monitor that will reboot the system if it is not refreshed during a certain time interval. In Kura, the WatchdogService can be used by critical applications. If the specified application is alive, the service notifies the watchdog; if the application is down, the service stops notifying the watchdog and a hardware reset occurs.
 
 The WatchdogService notifies the kernel watchdog driver using the /dev/watchdog device file. You can verify that the watchdog driver is installed using the following command:
 

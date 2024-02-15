@@ -13,6 +13,7 @@
 package org.eclipse.kura.example.container.signature.validation;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -27,6 +28,7 @@ public class DummyContainerSignatureValidationService
 
     private static final Logger logger = LoggerFactory.getLogger(DummyContainerSignatureValidationService.class);
     private static final String SERVICE_NAME = "DummyContainerSignatureValidationService";
+    private static final String PROPERTY_NAME = "manual.setValidationOutcome";
     private boolean validationResult = false;
 
     protected void activate(Map<String, Object> properties) {
@@ -37,8 +39,12 @@ public class DummyContainerSignatureValidationService
     public void updated(Map<String, Object> properties) {
         logger.info("Update {}...", SERVICE_NAME);
 
-        // WIP
-        this.validationResult = (boolean) properties.get("manual.setValidationOutcome");
+        if (Objects.nonNull(properties) && !properties.isEmpty()) {
+            Object property = properties.get(PROPERTY_NAME);
+            this.validationResult = Objects.nonNull(property) && (boolean) property;
+        }
+
+        logger.info("Setting signature outcome to: {}", this.validationResult);
     }
 
     protected void deactivate() {

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -123,6 +124,28 @@ public interface ContainerOrchestrationService {
      *         Otherwise and {@link Optional#empty()}
      */
     public Optional<String> getImageIdByName(String imageName, String imageTag);
+
+    /**
+     * Returns the id (i.e. the image digest) of the container image corresponding to the specified name and tag. If no
+     * corresponding image can be found an {@link Optional#empty(} result is returned.
+     *
+     * @param imageName
+     *            the string representing the image name. The value will need to be expressed in the form
+     *            registryURL/imagename in case of a custom registry. Must not be null. Example of supported values:
+     *            "nginx", "nvcr.io/nvidia/deepstream"
+     * @param imageTag
+     *            the string representing the image tag. Must not be null. Example of supported values:
+     *            "latest", "linux/amd64"
+     * @param username
+     *            username used for registry authentication. Required for retrieving remote manifest images for
+     *            authenticated registries
+     * @param password
+     *            password used for registry authentication. Required for retrieving remote manifest images for
+     *            authenticated registries
+     * @return an {@link Optional} value that will contain the image ID (i.e. image digest), if the image exists.
+     *         Otherwise and {@link Optional#empty()}
+     */
+    public Optional<String> getImageIdByName(String imageName, String imageTag, String username, Password password);
 
     /**
      * Starts a container identified by the values provided in a not null

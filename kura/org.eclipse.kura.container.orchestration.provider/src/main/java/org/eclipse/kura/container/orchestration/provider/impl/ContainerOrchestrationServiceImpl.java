@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -47,6 +48,7 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
@@ -268,6 +270,48 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 }
             }
         }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getImageIdByName(String imageName, String imageTag) {
+        if (!testConnection()) {
+            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+        }
+        if (Objects.isNull(imageName) || imageName.isEmpty() || Objects.isNull(imageTag) || imageTag.isEmpty()) {
+            throw new IllegalArgumentException(PARAMETER_CANNOT_BE_NULL);
+        }
+
+        try {
+            return Optional.of(this.dockerClient.inspectImageCmd(imageName + ":" + imageTag).getImageId());
+        } catch (NotFoundException e) {
+            logger.debug("Image {}:{} not found on disk.", imageName, imageTag);
+        }
+
+        // What do we do here?
+        // ...? TODO
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getImageIdByName(String imageName, String imageTag, String username, Password password) {
+        if (!testConnection()) {
+            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+        }
+        if (Objects.isNull(imageName) || imageName.isEmpty() || Objects.isNull(imageTag) || imageTag.isEmpty()) {
+            throw new IllegalArgumentException(PARAMETER_CANNOT_BE_NULL);
+        }
+
+        try {
+            return Optional.of(this.dockerClient.inspectImageCmd(imageName + ":" + imageTag).getImageId());
+        } catch (NotFoundException e) {
+            logger.debug("Image {}:{} not found on disk.", imageName, imageTag);
+        }
+
+        // What do we do here?
+        // ...? TODO
 
         return Optional.empty();
     }

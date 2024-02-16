@@ -115,17 +115,15 @@ public class CloudServiceImpl
         implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
-    private static final String ERROR = "ERROR";
-
-    private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
-
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
 
     private static final String TOPIC_BA_APP = "BA";
     private static final String TOPIC_MQTT_APP = "MQTT";
-
     private static final String CONNECTION_EVENT_PID_PROPERTY_KEY = "cloud.service.pid";
-
+    private static final String SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE = "Cannot setup cloud service connection";
+    private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
+    private static final String ERROR = "ERROR";
+    private static final String KURA_PAYLOAD = "KuraPayload";
     static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL = "org/osgi/service/deployment/INSTALL";
     static final String EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL = "org/osgi/service/deployment/UNINSTALL";
 
@@ -204,7 +202,9 @@ public class CloudServiceImpl
     }
 
     public void unsetDataService(DataService dataService) {
-        this.dataService = null;
+        if (this.dataService.equals(dataService)) {
+            this.dataService = null;
+        }
     }
 
     public DataService getDataService() {
@@ -216,7 +216,9 @@ public class CloudServiceImpl
     }
 
     public void unsetSystemAdminService(SystemAdminService systemAdminService) {
-        this.systemAdminService = null;
+        if (this.systemAdminService.equals(systemAdminService)) {
+            this.systemAdminService = null;
+        }
     }
 
     public SystemAdminService getSystemAdminService() {
@@ -228,7 +230,9 @@ public class CloudServiceImpl
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+        if (this.systemService.equals(systemService)) {
+            this.systemService = null;
+        }
     }
 
     public SystemService getSystemService() {
@@ -240,7 +244,9 @@ public class CloudServiceImpl
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
+        if (this.networkService.equals(networkService)) {
+            this.networkService = null;
+        }
     }
 
     public NetworkService getNetworkService() {
@@ -252,7 +258,9 @@ public class CloudServiceImpl
     }
 
     public void unsetPositionService(PositionService positionService) {
-        this.positionService = null;
+        if (this.positionService.equals(positionService)) {
+            this.positionService = null;
+        }
     }
 
     public PositionService getPositionService() {
@@ -264,7 +272,9 @@ public class CloudServiceImpl
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (this.eventAdmin.equals(eventAdmin)) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
@@ -272,7 +282,9 @@ public class CloudServiceImpl
     }
 
     public void unsetJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
-        this.jsonUnmarshaller = null;
+        if (this.jsonUnmarshaller.equals(jsonUnmarshaller)) {
+            this.jsonUnmarshaller = null;
+        }
     }
 
     public void setJsonMarshaller(Marshaller jsonMarshaller) {
@@ -280,7 +292,9 @@ public class CloudServiceImpl
     }
 
     public void unsetJsonMarshaller(Marshaller jsonMarshaller) {
-        this.jsonMarshaller = null;
+        if (this.jsonMarshaller.equals(jsonMarshaller)) {
+            this.jsonMarshaller = null;
+        }
     }
 
     public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
@@ -300,7 +314,9 @@ public class CloudServiceImpl
     }
 
     public void unsetNetworkStatusService(NetworkStatusService networkStatusService) {
-        this.networkStatusService = Optional.empty();
+        if (this.networkStatusService.isPresent() && this.networkStatusService.get().equals(networkStatusService)) {
+            this.networkStatusService = Optional.empty();
+        }
     }
 
     // ----------------------------------------------------------------
@@ -346,7 +362,7 @@ public class CloudServiceImpl
             try {
                 setupCloudConnection(true);
             } catch (KuraException e) {
-                logger.warn("Cannot setup cloud service connection", e);
+                logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE, e);
             }
         }
     }
@@ -360,7 +376,7 @@ public class CloudServiceImpl
             try {
                 setupCloudConnection(false);
             } catch (KuraException e) {
-                logger.warn("Cannot setup cloud service connection");
+                logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE);
             }
         }
     }
@@ -537,7 +553,7 @@ public class CloudServiceImpl
         } else if (preferencesEncoding == SIMPLE_JSON) {
             bytes = encodeJsonPayload(payload);
         } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
         }
         return bytes;
     }
@@ -553,7 +569,7 @@ public class CloudServiceImpl
         try {
             setupCloudConnection(true);
         } catch (KuraException e) {
-            logger.warn("Cannot setup cloud service connection");
+            logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE);
         }
 
         this.registeredSubscribers.keySet().forEach(this::subscribe);
@@ -785,7 +801,7 @@ public class CloudServiceImpl
             bytes = encoder.getBytes();
             return bytes;
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD, e);
         }
     }
 
@@ -804,7 +820,7 @@ public class CloudServiceImpl
             kuraPayload = encoder.buildFromByteArray();
             return kuraPayload;
         } catch (KuraInvalidMessageException | IOException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, KURA_PAYLOAD, e);
         }
     }
 
@@ -927,7 +943,7 @@ public class CloudServiceImpl
         try {
             bytes = encoder.getBytes();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD, e);
         }
         return bytes;
     }

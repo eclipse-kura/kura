@@ -96,6 +96,10 @@ public class CloudConnectionManagerImpl
         implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
+    private static final String KURA_PAYLOAD = "KuraPayload";
+
+    private static final String SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE = "Cannot setup cloud service connection";
+
     private static final String ERROR = "ERROR";
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerImpl.class);
@@ -165,7 +169,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetDataService(DataService dataService) {
-        this.dataService = null;
+        if (this.dataService.equals(dataService)) {
+            this.dataService = null;
+        }
     }
 
     public DataService getDataService() {
@@ -177,7 +183,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetSystemAdminService(SystemAdminService systemAdminService) {
-        this.systemAdminService = null;
+        if (this.systemAdminService.equals(systemAdminService)) {
+            this.systemAdminService = null;
+        }
     }
 
     public SystemAdminService getSystemAdminService() {
@@ -189,7 +197,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+        if (this.systemService.equals(systemService)) {
+            this.systemService = null;
+        }
     }
 
     public SystemService getSystemService() {
@@ -201,7 +211,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
+        if (this.networkService.equals(networkService)) {
+            this.networkService = null;
+        }
     }
 
     public NetworkService getNetworkService() {
@@ -213,7 +225,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetPositionService(PositionService positionService) {
-        this.positionService = null;
+        if (this.positionService.equals(positionService)) {
+            this.positionService = null;
+        }
     }
 
     public PositionService getPositionService() {
@@ -225,7 +239,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (this.eventAdmin.equals(eventAdmin)) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
@@ -233,7 +249,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
-        this.jsonUnmarshaller = null;
+        if (this.jsonUnmarshaller.equals(jsonUnmarshaller)) {
+            this.jsonUnmarshaller = null;
+        }
     }
 
     public void setJsonMarshaller(Marshaller jsonMarshaller) {
@@ -241,7 +259,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetJsonMarshaller(Marshaller jsonMarshaller) {
-        this.jsonMarshaller = null;
+        if (this.jsonMarshaller.equals(jsonMarshaller)) {
+            this.jsonMarshaller = null;
+        }
     }
 
     public void setNetworkStatusService(NetworkStatusService networkStatusService) {
@@ -249,7 +269,9 @@ public class CloudConnectionManagerImpl
     }
 
     public void unsetNetworkStatusService(NetworkStatusService networkStatusService) {
-        this.networkStatusService = Optional.empty();
+        if (this.networkStatusService.isPresent() && this.networkStatusService.get().equals(networkStatusService)) {
+            this.networkStatusService = Optional.empty();
+        }
     }
 
     // ----------------------------------------------------------------
@@ -290,7 +312,7 @@ public class CloudConnectionManagerImpl
             try {
                 setupCloudConnection(false);
             } catch (KuraException e) {
-                logger.warn("Cannot setup cloud service connection", e);
+                logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE, e);
             }
         }
     }
@@ -304,7 +326,7 @@ public class CloudConnectionManagerImpl
             try {
                 setupCloudConnection(false);
             } catch (KuraException e) {
-                logger.warn("Cannot setup cloud service connection");
+                logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE);
             }
         }
     }
@@ -429,7 +451,7 @@ public class CloudConnectionManagerImpl
         } else if (preferencesEncoding == SIMPLE_JSON) {
             bytes = encodeJsonPayload(payload);
         } else {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD);
         }
         return bytes;
     }
@@ -445,7 +467,7 @@ public class CloudConnectionManagerImpl
         try {
             setupCloudConnection(true);
         } catch (KuraException e) {
-            logger.warn("Cannot setup cloud service connection");
+            logger.warn(SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE);
         }
 
         postConnectionStateChangeEvent(true);
@@ -588,7 +610,7 @@ public class CloudConnectionManagerImpl
             bytes = encoder.getBytes();
             return bytes;
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD, e);
         }
     }
 
@@ -607,7 +629,7 @@ public class CloudConnectionManagerImpl
             kuraPayload = encoder.buildFromByteArray();
             return kuraPayload;
         } catch (KuraInvalidMessageException | IOException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, KURA_PAYLOAD, e);
         }
     }
 
@@ -701,7 +723,7 @@ public class CloudConnectionManagerImpl
         try {
             bytes = encoder.getBytes();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "KuraPayload", e);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, KURA_PAYLOAD, e);
         }
         return bytes;
     }
@@ -821,15 +843,10 @@ public class CloudConnectionManagerImpl
     }
 
     public String getNotificationPublisherPid() {
-        // TODO: Specify a notification publisher when Hono will define apis to support
-        // long running jobs with
-        // notifications
-        // return NOTIFICATION_PUBLISHER_PID;
         throw new UnsupportedOperationException();
     }
 
     public CloudNotificationPublisher getNotificationPublisher() {
-        // return this.notificationPublisher;
         throw new UnsupportedOperationException();
     }
 

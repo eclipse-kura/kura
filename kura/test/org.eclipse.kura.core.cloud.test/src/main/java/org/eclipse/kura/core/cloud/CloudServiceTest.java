@@ -101,6 +101,7 @@ public class CloudServiceTest {
     private static CloudServiceImpl cloudServiceImpl;
     private static DataTransportInspector observerInspector;
     private static EventAdmin eventAdmin;
+    private static NetworkStatusService networkStatusService;
 
     @BeforeClass
     public static void setup()
@@ -243,7 +244,7 @@ public class CloudServiceTest {
     public void shouldSupportAdditionalBirthProperties()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        clearMockNetworkStatusService();
+        clearNetworkStatusServiceMock();
         final Map<String, Object> properties = new HashMap<>();
 
         properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
@@ -381,7 +382,7 @@ public class CloudServiceTest {
     public void shouldPublishBirthMessageWithModemInfoWhenEventReceived()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        clearMockNetworkStatusService();
+        clearNetworkStatusServiceMock();
         final Map<String, Object> properties = new HashMap<>();
 
         properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
@@ -407,7 +408,7 @@ public class CloudServiceTest {
     public void shouldPublishBirthMessageWithModemInfoWhenNetworkStatusServiceIsPresent()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        createMockNetworkStatusService();
+        createNetworkStatusServiceMock();
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertEquals(FOO_IMEI1, metrics.get(MODEM_IMEI).asString());
@@ -422,7 +423,7 @@ public class CloudServiceTest {
     public void shouldPublishBirthMessageWithConnectedModemInfoWhenMultipleModems()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        createMockNetworkStatusServiceMultipleModems();
+        createNetworkStatusServiceMockWithMultipleModems();
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertEquals("fooImei2", metrics.get(MODEM_IMEI).asString());
@@ -631,8 +632,8 @@ public class CloudServiceTest {
         }
     }
 
-    private void createMockNetworkStatusService() throws KuraException {
-        NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
+    private void createNetworkStatusServiceMock() throws KuraException {
+        networkStatusService = Mockito.mock(NetworkStatusService.class);
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8" }));
         ModemInterfaceStatusBuilder modemStatusBuilder = ModemInterfaceStatus.builder();
         modemStatusBuilder.withConnectionStatus(ModemConnectionStatus.CONNECTED).withSerialNumber(FOO_IMEI1)
@@ -644,8 +645,8 @@ public class CloudServiceTest {
         cloudServiceImpl.setNetworkStatusService(networkStatusService);
     }
 
-    private void createMockNetworkStatusServiceMultipleModems() throws KuraException {
-        NetworkStatusService networkStatusService = Mockito.mock(NetworkStatusService.class);
+    private void createNetworkStatusServiceMockWithMultipleModems() throws KuraException {
+        networkStatusService = Mockito.mock(NetworkStatusService.class);
         when(networkStatusService.getInterfaceIds()).thenReturn(Arrays.asList(new String[] { "1-8", "1-6" }));
 
         ModemInterfaceStatusBuilder firstModemStatusBuilder = ModemInterfaceStatus.builder();
@@ -665,7 +666,9 @@ public class CloudServiceTest {
         cloudServiceImpl.setNetworkStatusService(networkStatusService);
     }
 
-    private void clearMockNetworkStatusService() {
-        cloudServiceImpl.unsetNetworkStatusService(null);
+    private void clearNetworkStatusServiceMock() {
+        if (networkStatusService != null) {
+            cloudServiceImpl.unsetNetworkStatusService(networkStatusService);
+        }
     }
 }

@@ -73,7 +73,12 @@
               policy="static"
               target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
               unbind="unsetJsonMarshaller"/>
-   <reference bind="setNetworkStatusService" cardinality="0..1" interface="org.eclipse.kura.net.status.NetworkStatusService" name="NetworkStatusService" policy="dynamic" unbind="unsetNetworkStatusService"/>
+   <reference bind="setNetworkStatusService" 
+              cardinality="0..1" 
+              interface="org.eclipse.kura.net.status.NetworkStatusService" 
+              name="NetworkStatusService" 
+              policy="dynamic" 
+              unbind="unsetNetworkStatusService"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <property name="kura.ui.factory.hide" type="String" value="true"/>
 </scr:component>

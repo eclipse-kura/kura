@@ -1263,8 +1263,8 @@ public class CloudServiceImpl
             }
         }
 
-        this.iccid = "NA";
-        this.imsi = "NA";
+        this.iccid = null;
+        this.imsi = null;
         activeSim.ifPresent(sim -> {
             this.iccid = sim.getIccid();
             this.imsi = sim.getImsi();

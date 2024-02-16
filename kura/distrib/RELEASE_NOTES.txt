@@ -198,7 +198,7 @@ Target Platform Updates:
   * c3a3bfe624 - Updated org.xerial:sqlite-jdbc to 3.42.0.0 (#4721) (nicolatimeus)
 
 Known Issues:
-  * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not available for devices that use NetworkManager.
+  * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not supported for devices that use NetworkManager. The property value is ignored.
   * When dnsmasq is used as DHCP server, only one file is used to store the leases.
   * When dnsmasq is used as DHCP server, the DHCP List field in the DHCP and NAT tab shows the leases for all the interfaces.
   * The system reboot command cannot be issued even with a privileged user in Debian Bookworm due to an OS issue related to the CAP_SYS_BOOT capability.

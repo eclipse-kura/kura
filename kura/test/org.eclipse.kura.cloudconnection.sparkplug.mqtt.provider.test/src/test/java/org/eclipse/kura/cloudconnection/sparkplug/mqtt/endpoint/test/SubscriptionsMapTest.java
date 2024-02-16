@@ -29,9 +29,9 @@ public class SubscriptionsMapTest {
     private SubscriptionsMap subscriptionsMap = new SubscriptionsMap();
     private List<String> returnedTopicsToUnsubscribe = new LinkedList<>();
     private List<CloudSubscriberListener> returnedMatchingListeners = new LinkedList<>();
-    private CloudSubscriberListener l1 = mock(CloudSubscriberListener.class);
-    private CloudSubscriberListener l2 = mock(CloudSubscriberListener.class);
-    private CloudSubscriberListener l3 = mock(CloudSubscriberListener.class);
+    private CloudSubscriberListener subListener1 = mock(CloudSubscriberListener.class);
+    private CloudSubscriberListener subListener2 = mock(CloudSubscriberListener.class);
+    private CloudSubscriberListener subListener3 = mock(CloudSubscriberListener.class);
 
     /*
      * Scenarios
@@ -39,88 +39,87 @@ public class SubscriptionsMapTest {
 
     @Test
     public void removeSomeShouldNotReturnTopicsToUnsubscribe() {
-        givenAdd("t1", 0, this.l1);
-        givenAdd("t1", 0, this.l2);
+        givenSubscriptionMapWith("t1", 0, this.subListener1);
+        givenSubscriptionMapWith("t1", 0, this.subListener2);
         
-        whenRemove(this.l1);
+        whenRemoveIsCalledFor(this.subListener1);
 
         thenSubscriptionRecordsContains(new SubscriptionRecord("t1", 0));
-        thenMatchingListenersContains("t1", 0, this.l2);
+        thenMatchingListenersContains("t1", 0, this.subListener2);
         thenReturnedTopicsToUnsubscribeIsEmpty();
     }
 
     @Test
     public void removeAllShouldReturnTopicsToUnsubscribe() {
-        givenAdd("t1", 0, this.l1);
-        givenAdd("t1", 0, this.l2);
-        givenRemove(this.l1);
+        givenSubscriptionMapWith("t1", 0, this.subListener1);
+        givenSubscriptionMapWith("t1", 0, this.subListener2);
 
-        whenRemove(this.l2);
+        whenRemoveIsCalledFor(this.subListener1, this.subListener2);
 
         thenSubscriptionRecordsNotContains(new SubscriptionRecord("t1", 0));
-        thenMatchingListenersNotContains("t1", 0, this.l2);
+        thenMatchingListenersNotContains("t1", 0, this.subListener2);
         thenReturnedTopicsToUnsubscribeContains("t1");
     }
 
     @Test
     public void shouldMatchSingleLevelWildCard1() {
-        givenAdd("A/B", 0, this.l1);
-        givenAdd("A/+/C", 0, this.l2);
-        givenAdd("A/B/C", 0, this.l3);
+        givenSubscriptionMapWith("A/B", 0, this.subListener1);
+        givenSubscriptionMapWith("A/+/C", 0, this.subListener2);
+        givenSubscriptionMapWith("A/B/C", 0, this.subListener3);
 
         whenGetListenersMatching("A/B/C", 0);
 
-        thenReturnedMatchingListenersNotContains(this.l1);
-        thenReturnedMatchingListenersContains(this.l2);
-        thenReturnedMatchingListenersContains(this.l3);
+        thenReturnedMatchingListenersNotContains(this.subListener1);
+        thenReturnedMatchingListenersContains(this.subListener2);
+        thenReturnedMatchingListenersContains(this.subListener3);
     }
 
     @Test
     public void shouldMatchSingleLevelWildCard2() {
-        givenAdd("A/B", 0, this.l1);
-        givenAdd("A/+", 0, this.l2);
-        givenAdd("A/B/C", 0, this.l3);
+        givenSubscriptionMapWith("A/B", 0, this.subListener1);
+        givenSubscriptionMapWith("A/+", 0, this.subListener2);
+        givenSubscriptionMapWith("A/B/C", 0, this.subListener3);
 
         whenGetListenersMatching("A/B", 0);
 
-        thenReturnedMatchingListenersContains(this.l1);
-        thenReturnedMatchingListenersContains(this.l2);
-        thenReturnedMatchingListenersNotContains(this.l3);
+        thenReturnedMatchingListenersContains(this.subListener1);
+        thenReturnedMatchingListenersContains(this.subListener2);
+        thenReturnedMatchingListenersNotContains(this.subListener3);
     }
 
     @Test
     public void shouldMatchMultiLevelWildCard() {
-        givenAdd("A/B", 0, this.l1);
-        givenAdd("A/#", 0, this.l2);
-        givenAdd("A/B/C", 0, this.l3);
+        givenSubscriptionMapWith("A/B", 0, this.subListener1);
+        givenSubscriptionMapWith("A/#", 0, this.subListener2);
+        givenSubscriptionMapWith("A/B/C", 0, this.subListener3);
 
         whenGetListenersMatching("A/B/C", 0);
 
-        thenReturnedMatchingListenersNotContains(this.l1);
-        thenReturnedMatchingListenersContains(this.l2);
-        thenReturnedMatchingListenersContains(this.l3);
+        thenReturnedMatchingListenersNotContains(this.subListener1);
+        thenReturnedMatchingListenersContains(this.subListener2);
+        thenReturnedMatchingListenersContains(this.subListener3);
     }
 
     @Test
     public void shouldMatchWithCorrectQos() {
-        givenAdd("A/B", 1, this.l1);
-        givenAdd("A/#", 0, this.l2);
-        givenAdd("A/B/C", 1, this.l3);
+        givenSubscriptionMapWith("A/B", 1, this.subListener1);
+        givenSubscriptionMapWith("A/#", 0, this.subListener2);
+        givenSubscriptionMapWith("A/B/C", 1, this.subListener3);
 
         whenGetListenersMatching("A/B/C", 0);
 
-        thenReturnedMatchingListenersNotContains(this.l1);
-        thenReturnedMatchingListenersContains(this.l2);
-        thenReturnedMatchingListenersNotContains(this.l3);
+        thenReturnedMatchingListenersNotContains(this.subListener1);
+        thenReturnedMatchingListenersContains(this.subListener2);
+        thenReturnedMatchingListenersNotContains(this.subListener3);
     }
 
     @Test
     public void shouldMatchWithMaximumSubscribedQos() {
-        givenAdd("A/B/C", 0, this.l1);
+        givenSubscriptionMapWith("A/B/C", 0, this.subListener1);
 
         whenGetListenersMatching("A/B/C", 1);
 
-        thenReturnedMatchingListenersContains(this.l1);
+        thenReturnedMatchingListenersContains(this.subListener1);
     }
 
     /*
@@ -131,20 +130,18 @@ public class SubscriptionsMapTest {
      * Given
      */
 
-    private void givenAdd(String topicFilter, int qos, CloudSubscriberListener listener) {
+    private void givenSubscriptionMapWith(String topicFilter, int qos, CloudSubscriberListener listener) {
         this.subscriptionsMap.add(topicFilter, qos, listener);
-    }
-
-    private void givenRemove(CloudSubscriberListener listener) {
-        this.returnedTopicsToUnsubscribe.addAll(this.subscriptionsMap.remove(listener));
     }
 
     /*
      * When
      */
 
-    private void whenRemove(CloudSubscriberListener listener) {
-        givenRemove(listener);
+    private void whenRemoveIsCalledFor(CloudSubscriberListener... listeners) {
+        for (CloudSubscriberListener listener : listeners) {
+            this.returnedTopicsToUnsubscribe.addAll(this.subscriptionsMap.remove(listener));
+        }
     }
 
     private void whenGetListenersMatching(String topic, int qos) {

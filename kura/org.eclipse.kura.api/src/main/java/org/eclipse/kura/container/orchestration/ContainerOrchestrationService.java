@@ -101,11 +101,28 @@ public interface ContainerOrchestrationService {
      * Returns the id of the container corresponding to the specified name. If no
      * container can be found an {@link Optional#empty(} result is returned.
      *
-     * @param name the string representing the container name. Must not be null
+     * @param name
+     *            the string representing the container name. Must not be null
      * @return an {@link Optional} value that will contain the container ID, if the
      *         container exists. Otherwise and {@link Optional#empty()}
      */
     public Optional<String> getContainerIdByName(String name);
+
+    /**
+     * Returns the id (i.e. the image digest) of the container image corresponding to the specified name and tag. If no
+     * corresponding image can be found an {@link Optional#empty(} result is returned.
+     *
+     * @param imageName
+     *            the string representing the image name. The value will need to be expressed in the form
+     *            registryURL/imagename in case of a custom registry. Must not be null. Example of supported values:
+     *            "nginx", "nvcr.io/nvidia/deepstream"
+     * @param imageTag
+     *            the string representing the image tag. Must not be null. Example of supported values:
+     *            "latest", "linux/amd64"
+     * @return an {@link Optional} value that will contain the image ID (i.e. image digest), if the image exists.
+     *         Otherwise and {@link Optional#empty()}
+     */
+    public Optional<String> getImageIdByName(String imageName, String imageTag);
 
     /**
      * Starts a container identified by the values provided in a not null

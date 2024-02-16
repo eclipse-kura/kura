@@ -28,7 +28,7 @@ The **CloudService** provides the following configuration parameters:
 
 - **republish.mqtt.birth.cert.on.gps.lock**: when set to true, forces a republish of the MQTT Birth Certificate when a GPS correct position lock is received. The device is then registered with its real coordinates. (Required field).
 
-- **republish.mqtt.birth.cert.on.modem.detect**: when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. (Required field).
+- **republish.mqtt.birth.cert.on.modem.detect**: when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. For devices configured to use [NetworkManager](https://networkmanager.dev), this property is not available. (Required field).
 
 - **enable.default.subscriptions**: manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable.
 

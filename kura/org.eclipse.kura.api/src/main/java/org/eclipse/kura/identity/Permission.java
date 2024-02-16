@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.identity;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Objects;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -33,7 +35,11 @@ public class Permission {
      * @param name the identity name.
      */
     public Permission(String name) {
-        this.name = name;
+        this.name = requireNonNull(name, "name cannot be null");
+
+        if (this.name.trim().isEmpty()) {
+            throw new IllegalArgumentException("name cannot be empty");
+        }
     }
 
     /**

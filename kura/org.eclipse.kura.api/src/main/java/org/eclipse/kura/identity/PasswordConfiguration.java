@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.identity;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,7 +47,7 @@ public class PasswordConfiguration implements IdentityConfigurationComponent {
             Optional<PasswordHash> passwordHash) {
         this.passwordChangeNeeded = passwordChangeNeeded;
         this.passwordAuthEnabled = passwordAuthEnabled;
-        this.passwordHash = passwordHash;
+        this.passwordHash = requireNonNull(passwordHash, "password hash cannot be null");
     }
 
     /**

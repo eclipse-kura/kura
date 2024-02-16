@@ -44,7 +44,7 @@ public class IdentityConfiguration {
         this.name = requireNonNull(name, "name cannot be null");
 
         if (this.name.trim().isEmpty()) {
-            throw new IllegalArgumentException("name cannot be null or empty");
+            throw new IllegalArgumentException("name cannot be empty");
         }
 
         this.components = requireNonNull(components, "components cannot be null");

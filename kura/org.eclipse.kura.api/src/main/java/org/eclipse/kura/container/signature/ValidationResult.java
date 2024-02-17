@@ -10,6 +10,7 @@ import java.util.Optional;
  *
  * @since 2.7
  */
+@ProviderType
 public final class ValidationResult {
 
     private boolean isSignatureValid = false;

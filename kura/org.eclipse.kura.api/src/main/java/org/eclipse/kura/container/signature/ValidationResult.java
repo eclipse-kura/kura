@@ -2,6 +2,8 @@ package org.eclipse.kura.container.signature;
 
 import java.util.Optional;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * Class representing the result of the signature validation performed by {@link:ContainerSignatureValidationService}
  * 

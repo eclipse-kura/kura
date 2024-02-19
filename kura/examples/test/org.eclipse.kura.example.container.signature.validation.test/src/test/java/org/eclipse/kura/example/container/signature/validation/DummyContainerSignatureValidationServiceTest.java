@@ -13,7 +13,9 @@
 package org.eclipse.kura.example.container.signature.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -40,6 +42,94 @@ public class DummyContainerSignatureValidationServiceTest {
     private boolean validationResult = false;
     private Exception occurredException;
     private ImageInstanceDescriptor imageDescriptor;
+    private String rawValidationOutcomeStringSetting = "";
+
+    @Test
+    public void updatedWorksWithEmptyConfiguration() {
+        whenUpdatedIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenValidationResultsSizeIs(0);
+    }
+
+    @Test
+    public void updatedWorksWithEmptyStringConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+
+        whenUpdatedIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenValidationResultsSizeIs(0);
+    }
+
+    @Test
+    public void updatedWorksWithSingleStringConfiguration() {
+        givenRawValidationStringWith("alpine:latest@sha256:1234567890");
+        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+
+        whenUpdatedIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenValidationResultsSizeIs(1);
+        thenValidationResultsContains("alpine", "latest", "sha256:1234567890");
+    }
+
+    @Test
+    public void updatedWorksWithMultipleStringConfiguration() {
+        givenRawValidationStringWith("alpine:latest@sha256:1234567890");
+        givenRawValidationStringWith("alpine:develop@sha256:1234567891");
+        givenRawValidationStringWith("ubuntu:latest@sha512:12345678911234567891");
+        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+
+        whenUpdatedIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenValidationResultsSizeIs(3);
+        thenValidationResultsContains("alpine", "latest", "sha256:1234567890");
+        thenValidationResultsContains("alpine", "develop", "sha256:1234567891");
+        thenValidationResultsContains("ubuntu", "latest", "sha512:12345678911234567891");
+    }
+
+    @Test
+    public void updatedThrowsWithWrongFormatString() {
+        givenRawValidationStringWith("alpine:latest:sha256:1234567890");
+        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+
+        whenUpdatedIsCalledWith(this.properties);
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+    }
+
+    private void thenValidationResultsContains(String imageName, String imageTag, String expectedDigest) {
+        String digest = this.containerSignatureValidationService.getValidationResultsFor(imageName, imageTag);
+        assertTrue(Objects.nonNull(digest));
+        assertEquals(expectedDigest, digest);
+    }
+
+    private void givenRawValidationStringWith(String entry) {
+        if (this.rawValidationOutcomeStringSetting.isEmpty()) {
+            this.rawValidationOutcomeStringSetting = entry;
+        } else {
+            this.rawValidationOutcomeStringSetting = String.format("%s\n%s", this.rawValidationOutcomeStringSetting,
+                    entry);
+        }
+    }
+
+    private void whenUpdatedIsCalledWith(Map<String, Object> props) {
+        try {
+            this.containerSignatureValidationService.updated(props);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void thenValidationResultsSizeIs(int expectedSize) {
+        assertEquals(expectedSize, this.containerSignatureValidationService.getValidationResultsSize());
+    }
 
     @Test
     public void verifyReturnsFailureWithEmptyConfiguration() {

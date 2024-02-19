@@ -78,6 +78,14 @@ public class DummyContainerSignatureValidationService
         return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
     }
 
+    public int getValidationResultsSize() {
+        return this.validationResults.size();
+    }
+
+    public String getValidationResultsFor(String imageName, String imageTag) {
+        return this.validationResults.get(String.format("%s:%s", imageName, imageTag));
+    }
+
     private boolean verify(String imageName, String imageTag) {
         String imageKey = String.format("%s:%s", imageName, imageTag);
 
@@ -87,16 +95,24 @@ public class DummyContainerSignatureValidationService
     }
 
     private void populateValidationResults(String raw) {
-        this.validationResults.clear();
+        if (raw.isEmpty()) {
+            this.validationResults = new HashMap<>();
+            return;
+        }
+
+        Map<String, String> newValidationResults = new HashMap<>();
 
         String[] entries = raw.split("\\r?\\n|\\r"); // Split on newlines
+        int count = 0;
         for (String entry : entries) {
+            count++;
             String[] params = entry.split("@");
             if (params.length != 2) {
-                throw new IllegalArgumentException(String.format("Error parsing line: \"%s\"", entry));
+                throw new IllegalArgumentException(String.format("Error parsing line %2d: \"%s\"", count, entry));
             }
-            this.validationResults.put(params[0], params[1]);
+            newValidationResults.put(params[0], params[1]);
         }
-    }
 
+        this.validationResults = newValidationResults;
+    }
 }

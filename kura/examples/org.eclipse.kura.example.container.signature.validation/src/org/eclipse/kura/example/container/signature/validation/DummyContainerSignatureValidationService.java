@@ -21,6 +21,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
+import org.eclipse.kura.container.signature.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,29 +51,29 @@ public class DummyContainerSignatureValidationService
     }
 
     @Override
-    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog)
-            throws KuraException {
+    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
+            boolean verifyInTransparencyLog) throws KuraException {
         logger.info("Validating signature for {}:{}", imageName, imageReference);
         return verify(imageName, imageReference);
     }
 
     @Override
-    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword) throws KuraException {
+    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
+            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException {
         logger.info("Validating signature for {}:{} using authenticated registry", imageName, imageReference);
         return verify(imageName, imageReference);
     }
 
     @Override
-    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog)
-            throws KuraException {
+    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
+            boolean verifyInTransparencyLog) throws KuraException {
         logger.info("Validating signature for {}:{}", imageDescriptor.getImageName(), imageDescriptor.getImageId());
         return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
     }
 
     @Override
-    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword) throws KuraException {
+    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
+            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException {
         logger.info("Validating signature for {}:{} using authenticated registry", imageDescriptor.getImageName(),
                 imageDescriptor.getImageTag());
         return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
@@ -86,12 +87,14 @@ public class DummyContainerSignatureValidationService
         return this.validationResults.get(String.format("%s:%s", imageName, imageTag));
     }
 
-    private boolean verify(String imageName, String imageTag) {
+    private ValidationResult verify(String imageName, String imageTag) {
         String imageKey = String.format("%s:%s", imageName, imageTag);
 
-        // WIP: When PR#5136 gets merged we need to return the image digest too
+        if (!this.validationResults.containsKey(imageKey)) {
+            return new ValidationResult();
+        }
 
-        return validationResults.containsKey(imageKey);
+        return new ValidationResult(true, this.validationResults.get(imageKey));
     }
 
     private void populateValidationResults(String raw) {

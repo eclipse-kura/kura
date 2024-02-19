@@ -54,53 +54,53 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     @Test
-    public void verifyReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, false);
+    public void verifyReturnsFailureWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
+        whenVerifyIsCalledWith("alpine", "develop", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
     }
 
     @Test
-    public void verifyReturnsSuccessWithTrueConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, true);
+    public void verifyReturnsSuccessWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
+        whenVerifyIsCalledWith("alpine", "latest", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);
     }
 
     @Test
-    public void verifyWithAuthReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, false);
+    public void verifyWithAuthReturnsFailureWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false, USERNAME, PASSWORD);
+        whenVerifyWithAuthIsCalledWith("alpine", "develop", TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);
     }
 
     @Test
-    public void verifyWithAuthReturnsSuccessWithTrueConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, true);
+    public void verifyWithAuthReturnsSuccessWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false, USERNAME, PASSWORD);
+        whenVerifyWithAuthIsCalledWith("alpine", "latest", TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(true);
     }
 
     @Test
-    public void verifyWithImageReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, false);
-        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
+    public void verifyWithImageReturnsFailureWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
+        givenImageInstanceDescriptorWith("alpine", "develop", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
         whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
@@ -110,9 +110,9 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     @Test
-    public void verifyWithImageReturnsFailureWithTrueConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, true);
-        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
+    public void verifyWithImageReturnsSuccessWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
+        givenImageInstanceDescriptorWith("alpine", "latest", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
         whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
@@ -122,9 +122,9 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     @Test
-    public void verifyWithImageWithAuthReturnsFailureWithFalseConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, false);
-        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
+    public void verifyWithImageWithAuthReturnsFailureWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
+        givenImageInstanceDescriptorWith("alpine", "develop", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
         whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,
@@ -135,9 +135,9 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     @Test
-    public void verifyWithImageReturnsWithAuthFailureWithTrueConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, true);
-        givenImageInstanceDescriptorWith(IMAGE_NAME, IMAGE_TAG, IMAGE_ID);
+    public void verifyWithImageWithAuthReturnsSuccessWithSingleEntryInConfiguration() {
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
+        givenImageInstanceDescriptorWith("alpine", "latest", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
         whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,

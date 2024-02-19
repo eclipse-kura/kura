@@ -3061,7 +3061,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>republish.mqtt.birth.cert.on.gps.lock</strong>: when set to true, forces a republish of the MQTT Birth Certificate when a GPS correct position lock is received. The device is then registered with its real coordinates. (Required field).</p>
 </li>
 <li>
-<p><strong>republish.mqtt.birth.cert.on.modem.detect</strong>: when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. (Required field).</p>
+<p><strong>republish.mqtt.birth.cert.on.modem.detect</strong>: when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. This functionality is currently not supported on devices configured to use <a href="https://networkmanager.dev">NetworkManager</a>, in this case the property value is ignored. (Required field).</p>
 </li>
 <li>
 <p><strong>enable.default.subscriptions</strong>: manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable.</p>

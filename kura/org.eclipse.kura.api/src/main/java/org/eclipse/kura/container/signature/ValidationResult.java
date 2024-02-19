@@ -10,8 +10,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * 
  * The result of the validation is composed of two main parts: whether or not the container image signature was
  * validated and the container image digest (in the "algorithm:encoded" format, @see
- * <a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests">Opencontainers specs
- * </a>)
+ * <a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests">Opencontainers specs</a>)
  *
  * If the signature is valid, the image digest MUST be provided.
  *

@@ -29,8 +29,11 @@ public class DummyContainerSignatureValidationService
         implements ContainerSignatureValidationService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(DummyContainerSignatureValidationService.class);
+
     private static final String SERVICE_NAME = "DummyContainerSignatureValidationService";
     private static final String PROPERTY_NAME = "manual.setValidationOutcome";
+    private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
+
     private Map<String, String> configuredValidationResults = new HashMap<>();
 
     protected void activate(Map<String, Object> properties) {
@@ -91,7 +94,7 @@ public class DummyContainerSignatureValidationService
         String imageKey = String.format("%s:%s", imageName, imageTag);
 
         if (!this.configuredValidationResults.containsKey(imageKey)) {
-            return new ValidationResult();
+            return FAILED_VALIDATION;
         }
 
         return new ValidationResult(true, this.configuredValidationResults.get(imageKey));

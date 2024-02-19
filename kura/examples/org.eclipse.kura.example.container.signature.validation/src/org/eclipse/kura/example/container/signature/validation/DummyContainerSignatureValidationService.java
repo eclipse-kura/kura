@@ -31,7 +31,7 @@ public class DummyContainerSignatureValidationService
     private static final Logger logger = LoggerFactory.getLogger(DummyContainerSignatureValidationService.class);
     private static final String SERVICE_NAME = "DummyContainerSignatureValidationService";
     private static final String PROPERTY_NAME = "manual.setValidationOutcome";
-    private Map<String, String> validationResults = new HashMap<>();
+    private Map<String, String> configuredValidationResults = new HashMap<>();
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate {}...", SERVICE_NAME);
@@ -80,26 +80,26 @@ public class DummyContainerSignatureValidationService
     }
 
     public int getConfiguredValidationResultsSize() {
-        return this.validationResults.size();
+        return this.configuredValidationResults.size();
     }
 
     public String getConfiguredValidationResultsFor(String imageName, String imageTag) {
-        return this.validationResults.get(String.format("%s:%s", imageName, imageTag));
+        return this.configuredValidationResults.get(String.format("%s:%s", imageName, imageTag));
     }
 
     private ValidationResult verify(String imageName, String imageTag) {
         String imageKey = String.format("%s:%s", imageName, imageTag);
 
-        if (!this.validationResults.containsKey(imageKey)) {
+        if (!this.configuredValidationResults.containsKey(imageKey)) {
             return new ValidationResult();
         }
 
-        return new ValidationResult(true, this.validationResults.get(imageKey));
+        return new ValidationResult(true, this.configuredValidationResults.get(imageKey));
     }
 
     private void populateValidationResults(String raw) {
         if (raw.isEmpty()) {
-            this.validationResults = new HashMap<>();
+            this.configuredValidationResults = new HashMap<>();
             return;
         }
 
@@ -116,6 +116,6 @@ public class DummyContainerSignatureValidationService
             newValidationResults.put(params[0], params[1]);
         }
 
-        this.validationResults = newValidationResults;
+        this.configuredValidationResults = newValidationResults;
     }
 }

@@ -39,12 +39,16 @@ public final class ValidationResult {
     }
 
     public ValidationResult(boolean signatureValid, String digest) {
-        this.imageDigest = Optional.of(Objects.requireNonNull(digest));
-        this.isSignatureValid = Objects.requireNonNull(signatureValid);
+        if (Objects.isNull(signatureValid) || Objects.isNull(digest)) {
+            throw new NullPointerException("Signature results and digest cannot be null.");
+        }
 
-        if (this.isSignatureValid && (!this.imageDigest.isPresent() || this.imageDigest.get().isEmpty())) {
+        if (signatureValid && digest.isEmpty()) {
             throw new IllegalArgumentException("Image digest must be provided when signature is valid.");
         }
+
+        this.imageDigest = Optional.of(digest);
+        this.isSignatureValid = signatureValid;
     }
 
     public boolean isSignatureValid() {

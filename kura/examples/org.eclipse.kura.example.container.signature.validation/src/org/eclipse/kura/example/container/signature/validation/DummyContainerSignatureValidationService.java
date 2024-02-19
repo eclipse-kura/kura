@@ -79,11 +79,11 @@ public class DummyContainerSignatureValidationService
         return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
     }
 
-    public int getValidationResultsSize() {
+    public int getConfiguredValidationResultsSize() {
         return this.validationResults.size();
     }
 
-    public String getValidationResultsFor(String imageName, String imageTag) {
+    public String getConfiguredValidationResultsFor(String imageName, String imageTag) {
         return this.validationResults.get(String.format("%s:%s", imageName, imageTag));
     }
 

@@ -52,7 +52,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenUpdatedIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenValidationResultsSizeIs(0);
+        thenConfiguredValidationResultsSizeIs(0);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenUpdatedIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenValidationResultsSizeIs(0);
+        thenConfiguredValidationResultsSizeIs(0);
     }
 
     @Test
@@ -73,8 +73,8 @@ public class DummyContainerSignatureValidationServiceTest {
         whenUpdatedIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenValidationResultsSizeIs(1);
-        thenValidationResultsContains("alpine", "latest", "sha256:1234567890");
+        thenConfiguredValidationResultsSizeIs(1);
+        thenConfiguredValidationResultsContains("alpine", "latest", "sha256:1234567890");
     }
 
     @Test
@@ -87,10 +87,10 @@ public class DummyContainerSignatureValidationServiceTest {
         whenUpdatedIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenValidationResultsSizeIs(3);
-        thenValidationResultsContains("alpine", "latest", "sha256:1234567890");
-        thenValidationResultsContains("alpine", "develop", "sha256:1234567891");
-        thenValidationResultsContains("ubuntu", "latest", "sha512:12345678911234567891");
+        thenConfiguredValidationResultsSizeIs(3);
+        thenConfiguredValidationResultsContains("alpine", "latest", "sha256:1234567890");
+        thenConfiguredValidationResultsContains("alpine", "develop", "sha256:1234567891");
+        thenConfiguredValidationResultsContains("ubuntu", "latest", "sha512:12345678911234567891");
     }
 
     @Test
@@ -283,14 +283,14 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * THEN
      */
-    private void thenValidationResultsContains(String imageName, String imageTag, String expectedDigest) {
-        String digest = this.containerSignatureValidationService.getValidationResultsFor(imageName, imageTag);
+    private void thenConfiguredValidationResultsContains(String imageName, String imageTag, String expectedDigest) {
+        String digest = this.containerSignatureValidationService.getConfiguredValidationResultsFor(imageName, imageTag);
         assertTrue(Objects.nonNull(digest));
         assertEquals(expectedDigest, digest);
     }
 
-    private void thenValidationResultsSizeIs(int expectedSize) {
-        assertEquals(expectedSize, this.containerSignatureValidationService.getValidationResultsSize());
+    private void thenConfiguredValidationResultsSizeIs(int expectedSize) {
+        assertEquals(expectedSize, this.containerSignatureValidationService.getConfiguredValidationResultsSize());
     }
 
     private void thenVerificationResultIs(ValidationResult expectedResult) {

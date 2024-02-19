@@ -45,7 +45,6 @@ public class DummyContainerSignatureValidationServiceTest {
     private ValidationResult validationResult;
     private Exception occurredException;
     private ImageInstanceDescriptor imageDescriptor;
-    private String rawValidationOutcomeStringSetting = "";
 
     @Test
     public void updatedWorksWithEmptyConfiguration() {
@@ -57,7 +56,7 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void updatedWorksWithEmptyStringConfiguration() {
-        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+        givenPropertyWith(PROPERTY_NAME, "");
 
         whenUpdatedIsCalledWith(this.properties);
 
@@ -67,8 +66,7 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void updatedWorksWithSingleStringConfiguration() {
-        givenRawValidationStringWith("alpine:latest@sha256:1234567890");
-        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
 
         whenUpdatedIsCalledWith(this.properties);
 
@@ -79,10 +77,8 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void updatedWorksWithMultipleStringConfiguration() {
-        givenRawValidationStringWith("alpine:latest@sha256:1234567890");
-        givenRawValidationStringWith("alpine:develop@sha256:1234567891");
-        givenRawValidationStringWith("ubuntu:latest@sha512:12345678911234567891");
-        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890\n" + "alpine:develop@sha256:1234567891\n"
+                + "ubuntu:latest@sha512:12345678911234567891");
 
         whenUpdatedIsCalledWith(this.properties);
 
@@ -95,8 +91,7 @@ public class DummyContainerSignatureValidationServiceTest {
 
     @Test
     public void updatedThrowsWithWrongFormatString() {
-        givenRawValidationStringWith("alpine:latest:sha256:1234567890");
-        givenPropertyWith(PROPERTY_NAME, this.rawValidationOutcomeStringSetting);
+        givenPropertyWith(PROPERTY_NAME, "alpine:latest:sha256:1234567890");
 
         whenUpdatedIsCalledWith(this.properties);
         thenExceptionOccurred(IllegalArgumentException.class);
@@ -209,15 +204,6 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * GIVEN
      */
-    private void givenRawValidationStringWith(String entry) {
-        if (this.rawValidationOutcomeStringSetting.isEmpty()) {
-            this.rawValidationOutcomeStringSetting = entry;
-        } else {
-            this.rawValidationOutcomeStringSetting = String.format("%s\n%s", this.rawValidationOutcomeStringSetting,
-                    entry);
-        }
-    }
-
     private void givenContainerSignatureValidationServiceWith(Map<String, Object> configuration) {
         this.containerSignatureValidationService.activate(configuration);
     }

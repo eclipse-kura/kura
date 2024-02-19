@@ -47,9 +47,10 @@ public class SparkplugPayloads {
         return payloadBuilder.build();
     }
 
-    public static boolean getBooleanMetric(String metricName, byte[] rawPayload)
+    public static boolean getBooleanMetric(String metricName, byte[] rawSparkplugPayload)
             throws InvalidProtocolBufferException, NoSuchFieldException {
-        Payload payload = Payload.parseFrom(rawPayload);
+        Payload payload = Payload.parseFrom(rawSparkplugPayload);
+
         for (Metric metric : payload.getMetricsList()) {
             if (metric.getName().equals(metricName)) {
                 return metric.getBooleanValue();
@@ -94,10 +95,61 @@ public class SparkplugPayloads {
         return payloadBuilder.build();
     }
 
+    public static KuraPayload getKuraPayload(byte[] rawSparkplugPayload) throws InvalidProtocolBufferException {
+        KuraPayload kuraPayload = new KuraPayload();
+        Payload sparkplugPayload = Payload.parseFrom(rawSparkplugPayload);
+        
+        for (Metric metric : sparkplugPayload.getMetricsList()) {
+            kuraPayload.addMetric(metric.getName(), getMetricValue(metric));
+        }
+
+        if (sparkplugPayload.hasBody()) {
+            kuraPayload.setBody(sparkplugPayload.getBody().toByteArray());
+        }
+
+        if (Objects.nonNull(sparkplugPayload.getSeq())) {
+            kuraPayload.addMetric("seq", sparkplugPayload.getSeq());
+        }
+
+        if (Objects.nonNull(sparkplugPayload.getTimestamp())) {
+            kuraPayload.setTimestamp(new Date(sparkplugPayload.getTimestamp()));
+        }
+
+        return kuraPayload;
+    }
+
     private static void addMetricIfNonNull(SparkplugBProtobufPayloadBuilder payloadBuilder, String name, Object value,
             long timestamp) {
         if (Objects.nonNull(value)) {
             payloadBuilder.withMetric(name, value, timestamp);
+        }
+    }
+
+    private static Object getMetricValue(Metric metric) {
+        switch (metric.getValueCase()) {
+        case BOOLEAN_VALUE:
+            return metric.getBooleanValue();
+        case BYTES_VALUE:
+            return metric.getBytesValue().toByteArray();
+        case DATASET_VALUE:
+            return metric.getDatasetValue().toByteArray();
+        case DOUBLE_VALUE:
+            return metric.getDoubleValue();
+        case EXTENSION_VALUE:
+            return metric.getExtensionValue().toByteArray();
+        case FLOAT_VALUE:
+            return metric.getFloatValue();
+        case INT_VALUE:
+            return metric.getIntValue();
+        case LONG_VALUE:
+            return metric.getLongValue();
+        case STRING_VALUE:
+            return metric.getStringValue();
+        case TEMPLATE_VALUE:
+            return metric.getTemplateValue().toByteArray();
+        case VALUE_NOT_SET:
+        default:
+            return null;
         }
     }
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2024 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+      SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+
+    <OCD id="org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber"
+         name="SparkplugSubscriber"
+         description="Component that serves as a CloudSubscriber for this Sparkplug Cloud Connection.">
+
+         <AD id="topic.filter"
+             name="Topic Filter"
+             type="String"
+             cardinality="0"
+             required="true"
+             default="A/B/C"
+             description="The MQTT subscription topic filter. For example foo/bar/baz, foo/+/bar, #, foo/#."/>
+
+         <AD id="qos"
+             name="QoS"
+             type="Integer"
+             cardinality="0"
+             required="true"
+             default="0"
+             description="The maximum desired quality of service for the subscription messages.">
+
+             <Option label="QoS 0 - at most once" value="0" />
+             <Option label="QoS 1 - at least once" value="1" />
+             <Option label="QoS 2 - exactly once" value="2" />
+         </AD>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber"
+               factoryPid="org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber">
+        <Object ocdref="org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber"/>
+    </Designate>
+</MetaData>

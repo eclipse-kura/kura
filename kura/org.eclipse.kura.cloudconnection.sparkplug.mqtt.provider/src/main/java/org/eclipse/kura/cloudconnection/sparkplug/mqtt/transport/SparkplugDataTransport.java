@@ -18,12 +18,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint;
+import org.eclipse.kura.cloudconnection.sparkplug.mqtt.utils.InvocationUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -104,7 +104,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             boolean wasConnected = isConnected();
 
             this.dataTransportListeners
-                    .forEach(listener -> callSafely(listener::onConfigurationUpdating, wasConnected));
+                    .forEach(listener -> InvocationUtils.callSafely(listener::onConfigurationUpdating, wasConnected));
 
             try {
                 applyConfiguration(wasConnected);
@@ -126,7 +126,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
             connect();
         }
 
-        this.dataTransportListeners.forEach(listener -> callSafely(listener::onConfigurationUpdated, wasConnected));
+        this.dataTransportListeners
+                .forEach(listener -> InvocationUtils.callSafely(listener::onConfigurationUpdated, wasConnected));
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
@@ -231,7 +232,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     public void connectionLost(Throwable arg0) {
         logger.info("{} - Connection lost", this.kuraServicePid);
         this.client.handleConnectionLost();
-        this.dataTransportListeners.forEach(listener -> callSafely(listener::onConnectionLost, arg0));
+        this.dataTransportListeners.forEach(listener -> InvocationUtils.callSafely(listener::onConnectionLost, arg0));
     }
 
     @Override
@@ -242,7 +243,8 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
                         this.sessionId);
 
                 this.dataTransportListeners
-                        .forEach(listener -> callSafely(listener::onMessageConfirmed, dataTransportToken));
+                        .forEach(listener -> InvocationUtils.callSafely(listener::onMessageConfirmed,
+                                dataTransportToken));
             }
         } catch (MqttException e) {
             logger.error("{} - Error processing MQTTDeliveryToken", this.kuraServicePid, e);
@@ -265,22 +267,6 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     private void checkConnected() throws KuraNotConnectedException {
         if (!isConnected()) {
             throw new KuraNotConnectedException("MQTT client is not connected");
-        }
-    }
-
-    static void callSafely(Runnable f) {
-        try {
-            f.run();
-        } catch (Exception e) {
-            logger.error("An error occured in listener {}", f.getClass().getName(), e);
-        }
-    }
-
-    static <T> void callSafely(Consumer<T> f, T argument) {
-        try {
-            f.accept(argument);
-        } catch (Exception e) {
-            logger.error("An error occured in listener {}", f.getClass().getName(), e);
         }
     }
 

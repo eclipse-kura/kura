@@ -22,8 +22,12 @@ public final class ValidationResult {
     private boolean isSignatureValid = false;
     private Optional<String> imageDigest = Optional.empty();
 
-    public ValidationResult(boolean signatureValid, Optional<String> digest) {
-        this.imageDigest = Objects.requireNonNull(digest);
+    public ValidationResult() {
+        // Nothing to do
+    }
+
+    public ValidationResult(boolean signatureValid, String digest) {
+        this.imageDigest = Optional.of(Objects.requireNonNull(digest));
         this.isSignatureValid = Objects.requireNonNull(signatureValid);
 
         if (this.isSignatureValid && (!this.imageDigest.isPresent() || this.imageDigest.get().isEmpty())) {

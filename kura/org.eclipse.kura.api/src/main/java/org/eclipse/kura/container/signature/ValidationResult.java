@@ -1,5 +1,6 @@
 package org.eclipse.kura.container.signature;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -10,6 +11,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * The result of the validation is composed of two main parts: whether or not the container image signature was
  * validated and the container image digest (in the "shaXXX:YYY" format).
  *
+ * If the signature is valid, the image digest MUST be provided.
+ *
  * @since 2.7
  */
 @ProviderType
@@ -19,8 +22,12 @@ public final class ValidationResult {
     private Optional<String> imageDigest = Optional.empty();
 
     public ValidationResult(boolean signatureValid, Optional<String> digest) {
-        this.imageDigest = digest;
-        this.isSignatureValid = signatureValid;
+        this.imageDigest = Objects.requireNonNull(digest);
+        this.isSignatureValid = Objects.requireNonNull(signatureValid);
+
+        if (this.isSignatureValid && (!this.imageDigest.isPresent() || this.imageDigest.get().isEmpty())) {
+            throw new IllegalArgumentException("Digest cannot be empty when signature is valid.");
+        }
     }
 
     public boolean isSignatureValid() {

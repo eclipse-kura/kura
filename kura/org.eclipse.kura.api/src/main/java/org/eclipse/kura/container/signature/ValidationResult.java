@@ -76,11 +76,6 @@ public final class ValidationResult {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + this.imageDigest.hashCode();
-        result = prime * result + Boolean.hashCode(isSignatureValid);
-        return result;
+        return Objects.hash(this.isSignatureValid, this.imageDigest);
     }
-
 }

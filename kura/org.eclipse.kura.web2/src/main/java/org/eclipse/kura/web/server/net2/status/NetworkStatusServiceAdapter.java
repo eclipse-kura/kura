@@ -337,6 +337,12 @@ public class NetworkStatusServiceAdapter {
             } else if (wifiInterfaceInfo.getMode() == WifiMode.INFRA) {
                 setWifiInfraStateProperties(gwtWifiNetInterfaceConfig, wifiInterfaceInfo);
             }
+
+            if (logger.isDebugEnabled()) {
+                Optional<WifiAccessPoint> activeAP = wifiInterfaceInfo.getActiveWifiAccessPoint();
+                activeAP.ifPresent(accessPoint -> logger.debug("Wifi Interface Info: {}",
+                        wifiInterfaceInfo.getActiveWifiAccessPoint().get().getChannel().getChannel()));
+            }
         }
     }
 
@@ -381,9 +387,14 @@ public class NetworkStatusServiceAdapter {
         }
 
         ChannelsBuilder channelsBuilder = new ChannelsBuilder();
-        List<Integer> activeChannel = gwtConfig.getChannels();
-        if (activeChannel != null && activeChannel.size() == 1) {
-            channelsBuilder.setActiveChannel(activeChannel.get(0));
+        Optional<WifiAccessPoint> activeAP = wifiInterfaceInfo.getActiveWifiAccessPoint();
+        if (activeAP.isPresent()) {
+            channelsBuilder.setActiveChannel(activeAP.get().getChannel().getChannel());
+        } else {
+            List<Integer> activeChannel = gwtConfig.getChannels();
+            if (activeChannel != null && activeChannel.size() == 1) {
+                channelsBuilder.setActiveChannel(activeChannel.get(0));
+            }
         }
         channelsBuilder.addChannels(wifiInterfaceInfo.getChannels());
 

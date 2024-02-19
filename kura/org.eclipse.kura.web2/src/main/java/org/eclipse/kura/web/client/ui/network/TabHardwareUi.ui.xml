@@ -112,6 +112,12 @@
                                 <b:FormControlStatic
                                     b:id="state" ui:field="rssi" />
                             </b:FormGroup>
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelChannel" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="channel" />
+                            </b:FormGroup>
                         </b:FieldSet>
                     </b:Form>
                 </b:Row>

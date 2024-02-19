@@ -32,8 +32,6 @@ public class DummyContainerSignatureValidationServiceTest {
     private Map<String, Object> properties = new HashMap<>();
 
     private static final String PROPERTY_NAME = "manual.setValidationOutcome";
-    private static final String IMAGE_NAME = "imageName";
-    private static final String IMAGE_TAG = "imageTag";
     private static final String IMAGE_ID = "imageId";
     private static final String TRUST_ANCHOR = "trustAnchor";
     private static final String USERNAME = "username";
@@ -47,7 +45,7 @@ public class DummyContainerSignatureValidationServiceTest {
     public void verifyReturnsFailureWithEmptyConfiguration() {
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyIsCalledWith(IMAGE_NAME, IMAGE_TAG, TRUST_ANCHOR, false);
+        whenVerifyIsCalledWith("alpine", "latest", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(false);

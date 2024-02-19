@@ -54,9 +54,14 @@ public interface IdentityService {
      * Returns the configuration of all existing identities.
      * 
      * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be
-     *                           returned.
-     * @return the
+     *                           types to be returned. If the set is empty a
+     *                           {@link IdentityConfiguration} will be returned for
+     *                           each defined identity with an empty component list.
+     *                           This can be used to get the name for all defined
+     *                           identities.
+     * 
+     * @return the list of {@link IdentityConfiguration}s. An empty list will be
+     *         returned if no identities are defined.
      * @throws KuraException if a failure occurs in retrieving identity
      *                       configurations.
      */
@@ -69,8 +74,7 @@ public interface IdentityService {
      * 
      * @param identityName       the identity name.
      * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be
-     *                           returned.
+     *                           types to be returned.
      * @return the configuration of the requested identity or an empty optional if
      *         the identity does not exist.
      * @throws KuraException if a failure occurs in retrieving identity
@@ -88,14 +92,12 @@ public interface IdentityService {
      * method for an identity that has just been created with the
      * {@link IdentityService#createIdentity(String)} method.
      * 
-     * This
-     * method can be useful for example to allow a user interface to show the
+     * This method can be useful for example to allow a user interface to show the
      * initial identity configuration to the user before creating it.
      *
      * @param identityName       the identity name.
      * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be
-     *                           returned.
+     *                           types to be returned.
      * @return the default configuration for the requested identity
      * @throws KuraException if a failure occurs in retrieving identity
      *                       configuration.

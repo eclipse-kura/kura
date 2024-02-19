@@ -20,11 +20,11 @@
 
         <AD id="manual.setValidationOutcome"
             name="Set signature validation outcome"
-            type="Boolean"
+            type="String"
             cardinality="0"
             required="true"
-            default="false"
-            description="Set the outcome for all container signature validations performed by this service."/>
+            default=""
+            description="Set the outcome for container signature validations performed by this service. Supported format: imageName:imageTag@digest. Example: hello-world:latest@sha256:e2fc4e...|TextArea"/>
 
     </OCD>
 

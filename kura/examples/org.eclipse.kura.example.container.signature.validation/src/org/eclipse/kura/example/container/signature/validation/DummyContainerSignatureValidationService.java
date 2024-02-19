@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.example.container.signature.validation;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,7 +30,7 @@ public class DummyContainerSignatureValidationService
     private static final Logger logger = LoggerFactory.getLogger(DummyContainerSignatureValidationService.class);
     private static final String SERVICE_NAME = "DummyContainerSignatureValidationService";
     private static final String PROPERTY_NAME = "manual.setValidationOutcome";
-    private boolean validationResult = false;
+    private Map<String, String> validationResults = new HashMap<>();
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate {}...", SERVICE_NAME);
@@ -39,12 +40,9 @@ public class DummyContainerSignatureValidationService
     public void updated(Map<String, Object> properties) {
         logger.info("Update {}...", SERVICE_NAME);
 
-        if (Objects.nonNull(properties) && !properties.isEmpty()) {
-            Object property = properties.get(PROPERTY_NAME);
-            this.validationResult = Objects.nonNull(property) && (boolean) property;
+        if (Objects.nonNull(properties) && !properties.isEmpty() && properties.containsKey(PROPERTY_NAME)) {
+            populateValidationResults((String) properties.get(PROPERTY_NAME));
         }
-
-        logger.info("Setting signature validation outcome to: \"{}\"", outcome(this.validationResult));
     }
 
     protected void deactivate() {
@@ -54,36 +52,51 @@ public class DummyContainerSignatureValidationService
     @Override
     public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog)
             throws KuraException {
-        logger.info("Validating signature for {}:{} - {}", imageName, imageReference, outcome(this.validationResult));
-        return this.validationResult;
+        logger.info("Validating signature for {}:{}", imageName, imageReference);
+        return verify(imageName, imageReference);
     }
 
     @Override
     public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog,
             String registryUsername, Password registryPassword) throws KuraException {
-        logger.info("Validating signature for {}:{} using authenticated registry - {}", imageName, imageReference,
-                outcome(this.validationResult));
-        return this.validationResult;
+        logger.info("Validating signature for {}:{} using authenticated registry", imageName, imageReference);
+        return verify(imageName, imageReference);
     }
 
     @Override
     public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog)
             throws KuraException {
-        logger.info("Validating signature for {}:{} - {}", imageDescriptor.getImageName(), imageDescriptor.getImageId(),
-                outcome(this.validationResult));
-        return this.validationResult;
+        logger.info("Validating signature for {}:{}", imageDescriptor.getImageName(), imageDescriptor.getImageId());
+        return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
     }
 
     @Override
     public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog,
             String registryUsername, Password registryPassword) throws KuraException {
-        logger.info("Validating signature for {}:{} using authenticated registry - {}", imageDescriptor.getImageName(),
-                imageDescriptor.getImageId(), outcome(this.validationResult));
-        return this.validationResult;
+        logger.info("Validating signature for {}:{} using authenticated registry", imageDescriptor.getImageName(),
+                imageDescriptor.getImageTag());
+        return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());
     }
 
-    private String outcome(boolean verifyResult) {
-        return verifyResult ? "success" : "failure";
+    private boolean verify(String imageName, String imageTag) {
+        String imageKey = String.format("%s:%s", imageName, imageTag);
+
+        // WIP: When PR#5136 gets merged we need to return the image digest too
+
+        return validationResults.containsKey(imageKey);
+    }
+
+    private void populateValidationResults(String raw) {
+        this.validationResults.clear();
+
+        String[] entries = raw.split("\\r?\\n|\\r"); // Split on newlines
+        for (String entry : entries) {
+            String[] params = entry.split("@");
+            if (params.length != 2) {
+                throw new IllegalArgumentException(String.format("Error parsing line: \"%s\"", entry));
+            }
+            this.validationResults.put(params[0], params[1]);
+        }
     }
 
 }

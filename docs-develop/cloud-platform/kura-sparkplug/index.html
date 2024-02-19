@@ -1606,6 +1606,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sparkplug-subscriber" class="md-nav__link">
+    Sparkplug Subscriber
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3266,6 +3273,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sparkplug-subscriber" class="md-nav__link">
+    Sparkplug Subscriber
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3326,6 +3340,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="eclipse-sparkplug-cloud-connector">Eclipse Sparkplug&reg; Cloud Connector</h1>
 <p>The <code>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</code> package provides a Eclipse Kura Cloud Connection that implements the <a href="https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf">Eclipse Sparkplug&reg; v3.0.0 specification</a>.</p>
+<div class="admonition info">
+<p class="admonition-title">Minimum requirements</p>
+<p>This addon is compatible with Kura 5.2+.</p>
+</div>
 <h2 id="introduction-to-eclipse-sparkplug">Introduction to Eclipse Sparkplug</h2>
 <div class="admonition quote">
 <p class="admonition-title">from <a href="https://sparkplug.eclipse.org/about/faq/">Eclipse Sparkplug</a></p>
@@ -3417,7 +3435,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_5_Operational_Behavior.adoc#device-session-establishment"><code>tck-id-message-flow-device-dcmd-subscribe</code></a>: writing to outputs, hence it will not subscribe to device command messages (<code>DCMD</code> message type)</li>
 </ul>
 <h5 id="sparkplug-device-payload">Sparkplug Device Payload</h5>
-<p>The payload of the sent <code>DDATA</code> message will be encoded using the <a href="https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto">Sparkplug Protobuf definition</a> converting the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java"><code>KuraPayload</code></a> into <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug payload</a> as follows:</p>
+<p>The payload of <code>DDATA</code> message will be encoded using the <a href="https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto">Sparkplug B Protobuf definition</a> converting the <a href="https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java"><code>KuraPayload</code></a> into <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug payload</a> as follows:</p>
 <ul>
 <li>
 <p>Metrics from <a href="https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L116"><code>KuraPayload.metric()</code></a> become <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric">Sparkplug metrics</a>. Only the <strong>name</strong>, <strong>timestamp</strong>, <strong>datatype</strong> and <strong>value</strong> components are added. The timestamp is set to the publishing instant. The datatype is inferred from the Java type as follows:</p>
@@ -3425,7 +3443,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <thead>
 <tr>
 <th>Java Type</th>
-<th>Sparkplug Type</th>
+<th>Sparkplug DataType</th>
 </tr>
 </thead>
 <tbody>
@@ -3496,6 +3514,73 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 <li>
 <p><a href="https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76"><code>KuraPayload.getTimestamp()</code></a>, if not null, it will be used as the timestamp metric of the Sparkplug payload</p>
+</li>
+</ul>
+<h4 id="sparkplug-subscriber">Sparkplug Subscriber</h4>
+<p>This cloud connections allows creating a Cloud Subscriber that will subscribe to a generic set of topics. The configuration is shown in the picture below.</p>
+<p><img alt="" src="../images/sparkplugSubscriber.png" /></p>
+<p>It is assumed that the payloads received by this Cloud Connection are encoded using the <a href="https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto">Sparkplug B Protobuf definition</a>. Users of this Cloud Subscriber should expect to receive <code>KuraMessage</code>s containing a <code>KuraPayload</code> such that:</p>
+<ul>
+<li>If non null, the <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug body</a> is used to set <a href="https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L124"><code>KuraPayload.setBody()</code></a></li>
+<li>If non null, the <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug seq Metric</a> is converted into a <a href="https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L96">Kura metric</a> with name <code>seq</code></li>
+<li>If non null, the <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug timestamp</a> is used as Eclipse Kura's payload <a href="https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L80">timestamp</a></li>
+<li>
+<p>All <a href="https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload">Sparkplug Metrics</a> are converted into <a href="https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L96">Kura metrics</a> with the same name and the following conversion rules:</p>
+<table>
+<thead>
+<tr>
+<th>Sparkplug ValueCase</th>
+<th>Java Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Boolean</code></td>
+<td><code>boolean</code></td>
+</tr>
+<tr>
+<td><code>Bytes</code></td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td><code>Dataset</code></td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td><code>Double</code></td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td><code>Extension</code></td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td><code>Float</code></td>
+<td><code>float</code></td>
+</tr>
+<tr>
+<td><code>Integer</code></td>
+<td><code>int</code></td>
+</tr>
+<tr>
+<td><code>Long</code></td>
+<td><code>long</code></td>
+</tr>
+<tr>
+<td><code>String</code></td>
+<td><code>String</code></td>
+</tr>
+<tr>
+<td><code>Template</code></td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td>default</td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p>The metric timestamp is not supported in Eclipse Kura, therefore this information is lost at conversion.</p>
 </li>
 </ul>
 <h3 id="data-service-layer-configuration">Data Service Layer Configuration</h3>

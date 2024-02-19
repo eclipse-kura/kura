@@ -2,6 +2,9 @@
 
 The `org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider` package provides a Eclipse Kura Cloud Connection that implements the [Eclipse Sparkplug&reg; v3.0.0 specification](https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf).
 
+!!! info "Minimum requirements"
+    This addon is compatible with Kura 5.2+.
+
 
 
 ## Introduction to Eclipse Sparkplug

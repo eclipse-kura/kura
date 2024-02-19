@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -74,6 +74,17 @@
               policy="static"
               target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
               unbind="unsetJsonMarshaller"/>
+   <reference bind="setTamperDetectionService" 
+              cardinality="0..n" 
+              interface="org.eclipse.kura.security.tamper.detection.TamperDetectionService" 
+              name="TamperDetectionService" 
+              policy="dynamic" 
+              unbind="unsetTamperDetectionService"/>
+   <reference bind="setNetworkStatusService" 
+              cardinality="0..1" 
+              interface="org.eclipse.kura.net.status.NetworkStatusService" 
+              name="NetworkStatusService" 
+              policy="dynamic" 
+              unbind="unsetNetworkStatusService"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <reference bind="setTamperDetectionService" cardinality="0..n" interface="org.eclipse.kura.security.tamper.detection.TamperDetectionService" name="TamperDetectionService" policy="dynamic" unbind="unsetTamperDetectionService"/>
 </scr:component>
